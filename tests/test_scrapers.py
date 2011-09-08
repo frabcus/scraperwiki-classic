@@ -30,10 +30,11 @@ class TestScrapers(SeleniumTest):
     def test_python_create(self):
         self._language_create("python")
 
-    def test_common_features(self):
-        self._common_create()
+    def test_common_features_scraper(self):
+        self._common_create('scraper')
 
-
+    def test_common_features_view(self):
+        self._common_create('view')
         
     
     
@@ -49,7 +50,7 @@ class TestScrapers(SeleniumTest):
         return code
 
     
-    def _add_comment(self, name):
+    def _add_comment(self, code_name, code_type):
         s = self.selenium
               
         s.click('link=Discussion (0)')    
@@ -63,7 +64,7 @@ class TestScrapers(SeleniumTest):
         self.failUnless(s.is_text_present(comment))
         self.failUnless(s.is_text_present("Discussion (1)"))        
 
-        s.open('/scrapers/%s/' % name)        
+        s.open('/%ss/%s/' % (code_type, code_name))        
         self.wait_for_page('view the scraper page')        
         
         
@@ -81,10 +82,10 @@ class TestScrapers(SeleniumTest):
         self.failUnless( count == scraper_count, msg='There are %s items instead of %s' % (scraper_count,count,) )
         
 
-    def _check_clear_data(self, name):
+    def _check_clear_data(self, scraper_name):
         s = self.selenium     
                 
-        s.open('/scrapers/%s/' % name)        
+        s.open('/scrapers/%s/' % scraper_name)        
         self.wait_for_page('view the scraper page to check we cleared the data')        
         s.click('btnClearDatastore')
         s.get_confirmation()
@@ -98,36 +99,22 @@ class TestScrapers(SeleniumTest):
                         msg='The data does not appear to have been deleted')
 
 
-    def _check_delete_scraper(self, name):
+    def _check_delete_code(self, code_name, code_type):
         s = self.selenium     
-                
-        s.open('/scrapers/%s/' % name)
-        self.wait_for_page('view the scraper page so we can delete it')                
+        
+        s.open('/%ss/%s/' % (code_type, code_name))
+        self.wait_for_page('view the %s page so we can delete it' % code_type)                
         s.click('btnDeleteScraper')
         s.get_confirmation()        
-        self.wait_for_page('delete the scraper')
+        self.wait_for_page('delete the %s' % code_type)
         
         if s.is_text_present('Exception Location'):
             print s.get_body_text()
             self.fail('An error occurred deleting data')
+        elif s.is_text_present(code_name):
+            self.fail('%s was not deleted successfully' % code_type)
         
-        self.assertEqual('/dashboard/', urlparse(s.get_location()).path, 'Did not redirect to dashboardafter deleting scraper')
-
-
-    def _check_delete_view(self, name):
-        s = self.selenium     
-                
-        s.open('/views/%s/' % name)
-        self.wait_for_page('view the page to delete the view')                
-        s.click('btnDeleteScraper')
-        s.get_confirmation()        
-        self.wait_for_page()
-        
-        if s.is_text_present('Exception Location'):
-            print s.get_body_text()
-            self.fail('An error occurred deleting data')
-        
-        self.assertEqual('/dashboard/', urlparse(s.get_location()).path, 'Did not redirect to dashboard after deleting view')
+        self.assertEqual('/dashboard/', urlparse(s.get_location()).path, 'Did not redirect to dashboard after deleting %s' % code_type)
 
 
     def _wait_for_run(self):
@@ -191,8 +178,8 @@ class TestScrapers(SeleniumTest):
     
     def _activate_users(self, userlist):
         """ 
-        Set all usernames in userlist to be activated. Requires Django admin account to be specified, 
-        all the usernames to be on the first page of users and for alert types to have been set up.
+        Set all usernames in userlist to be activated. Requires Django admin account to be specified 
+        and for alert types to have been set up.
         """
         s = self.selenium
         self._user_login(SeleniumTest._adminuser['username'],SeleniumTest._adminuser['password'])
@@ -207,15 +194,15 @@ class TestScrapers(SeleniumTest):
             self.wait_for_page()
             
             
-    def _add_scraper_editor(self, username, expected_msg):
+    def _add_code_editor(self, username, expected_msg):
         """ 
-        Set the specified username as an editor on the currently open scraper summary page.
-        Assumes the current user has permissions to do so and that the scraper is private/public.
+        Set the specified username as an editor on the currently open scraper/view summary page.
+        Assumes the current user has permissions to do so and that the scraper/view is private/public.
         """
         error_showing = "selenium.browserbot.getCurrentWindow().document.getElementById('contributorserror').style.display != 'none'"
         finished_loading = "selenium.browserbot.getCurrentWindow().document.getElementById('contributors_loading').style.display == 'none'"
         add_editor_visible = "selenium.browserbot.getCurrentWindow().document.getElementById('addneweditor').children[1].style.display != 'none'"
-
+        
         s = self.selenium
         s.click("link=Add a new editor")
         s.type("//div[@id='addneweditor']/span/input[@role='textbox']", username)
@@ -224,25 +211,25 @@ class TestScrapers(SeleniumTest):
         self.failUnless(s.is_text_present(expected_msg))
 
 
-    def _editor_demote_self(self, scrapername, owner, editor):
+    def _editor_demote_self(self, code_name, code_type, owner, editor):
         """ 
         Get the 'editor' account to demote themselves from 
-        being an editor of 'scrapername', then login as 'owner'
+        being an editor of 'code_name', then login as 'owner'
         """
         s = self.selenium
         self._user_login(editor['username'], editor['password'])
-        s.open("/scrapers/%s/" % scrapername)
+        s.open("/%ss/%s/" % (code_type, code_name))
         self.wait_for_page()
         s.click("xpath=//input[@class='detachbutton']")
         self.failIf(s.is_text_present(editor['username'] + " (editor)"))
         self._user_login(owner['username'], owner['password'])
-        s.open("/scrapers/%s/" % scrapername)
+        s.open("/%ss/%s/" % (code_type, code_name))
         self.wait_for_page()
 
 
-    def _check_editor_permissions(self, scrapername, owner, editor, privacy, on_editor_list):
+    def _check_editor_permissions(self, code_name, code_type, owner, editor, privacy, on_editor_list):
         """
-        Check that the account 'editor' has the expected permissions for 'scrapername', given
+        Check that the account 'editor' has the expected permissions for 'code_name', given
         the privacy setting of the scraper ('privacy') and whether they are on the editors list
         ('on_editor_list'), then log in as 'owner'.
         """
@@ -250,32 +237,32 @@ class TestScrapers(SeleniumTest):
         self._user_login(editor['username'], editor['password'])
         s.open("/dashboard")
         if on_editor_list:
-            self.failUnless(s.is_text_present(scrapername))
-            s.open("/scrapers/%s/edit/" % scrapername)
+            self.failUnless(s.is_text_present(code_name))
+            s.open("/%ss/%s/edit/" % (code_type, code_name))
             self.wait_for_page()
             s.wait_for_condition("selenium.browserbot.getCurrentWindow().document.getElementById('protected_warning').style.display == 'none'", 10000)
             self.failIf(s.get_attribute('btnCommitPopup@style') == "display:none;")
         else:
-            self.failIf(s.is_text_present(scrapername))
-            s.open("/scrapers/%s/edit/" % scrapername)
+            self.failIf(s.is_text_present(code_name))
+            s.open("/%ss/%s/edit/" % (code_type, code_name))
             self.wait_for_page()
             if privacy == 'private':
-                self.failUnless(s.is_text_present("Sorry, this scraper is private"))
+                self.failUnless(s.is_text_present("Sorry, this %s is private" % code_type))
             elif privacy == 'protected':
                 s.wait_for_condition("selenium.browserbot.getCurrentWindow().document.getElementById('btnCommitPopup').style.display == 'none'", 10000)
                 # TODO: Check direct 'post'ing of data
             else:
                 self.fail()
         self._user_login(owner['username'], owner['password'])
-        s.open("/scrapers/%s/" % scrapername)
+        s.open("/%ss/%s/" % (code_type, code_name))
         self.wait_for_page()
         
     
-    def _set_scraper_privacy(self, privacy, scraper_name='', owner = {}):
+    def _set_code_privacy(self, privacy, code_type, code_name = '', owner = {}):
         """ 
-        Set the currently open scraper to be the specified privacy. Assumes a
+        Set the currently open scraper/view to be the specified privacy. Assumes a
         Django admin account has been specified if setting as private. Needs
-        scraper_name and the owner account if setting as private.
+        code_name and the owner account if setting as private.
         """
         privacy_set = "selenium.browserbot.getCurrentWindow().document.getElementById('privacy_status').children[0].style.display != 'none'"
         s = self.selenium
@@ -283,75 +270,76 @@ class TestScrapers(SeleniumTest):
             s.click('show_privacy_choices')
             s.click('privacy_' + privacy)
             s.wait_for_condition(privacy_set, 10000)
-            self.failUnless(s.is_text_present("This scraper is " + privacy))
+            self.failUnless(s.is_text_present("This %s is " % code_type + privacy))
         elif privacy == 'private':
+            
             self._user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
-            s.open("/admin/codewiki/scraper/?q=" + scraper_name)
+            s.open("/admin/codewiki/%s/?q=" % code_type + code_name)
             self.wait_for_page()
-            s.click('link=' + scraper_name)
+            s.click('link=' + code_name)
             self.wait_for_page()
             s.select("id_privacy_status", "label=Private")
             s.click("//div[@class='submit-row']/input[@value='Save']")
             self.wait_for_page()
             self._user_login(owner['username'], owner['password'])
-            s.open("/scrapers/" + scraper_name)
+            s.open("/%ss/" % code_type + code_name)
             self.wait_for_page()
-            self.failUnless(s.is_text_present("This scraper is private"))
+            self.failUnless(s.is_text_present("This %s is private" % code_type))
         else:
             self.fail()
 
 
-    def _check_editors_list_changes(self, scraper_name, owner, editor, privacy):
+    def _check_editors_list_changes(self, code_name, code_type, owner, editor, privacy):
         """
         Perform possible combinations of actions with adding/removing editors and check
         that an editor user has the appropriate permissions at each stage.
         """
         s = self.selenium
-        self._check_editor_permissions(scraper_name, owner, editor, privacy, False)
+        self._check_editor_permissions(code_name, code_type, owner, editor, privacy, False)
         # Add existing user as editor
-        self._add_scraper_editor(editor['username'], "test scraper_editor (editor)")
-        self._check_editor_permissions(scraper_name, owner, editor, privacy, True)
+        self._add_code_editor(editor['username'], "test %s_editor (editor)" % code_type)
+        self._check_editor_permissions(code_name, code_type, owner, editor, privacy, True)
         # Try to add existing editor again
-        self._add_scraper_editor(editor['username'], "test scraper_editor (editor)")
+        self._add_code_editor(editor['username'], "test %s_editor (editor)" % code_type)
         self.failUnless("int(s.get_xpath_count('//ul[@id=\'contributorslist\']/li')) == 2")
-        self._check_editor_permissions(scraper_name, owner, editor, privacy, True)
+        self._check_editor_permissions(code_name, code_type, owner, editor, privacy, True)
         # Try to add owner as editor
-        self._add_scraper_editor(owner['username'], "Failed: user is already owner")
+        self._add_code_editor(owner['username'], "Failed: user is already owner")
         s.click("xpath=//div[@id='addneweditor']/span/input[@class='cancelbutton']")
         # Try to add non-existent user as editor
-        self._add_scraper_editor("se_nonexistent_user", "Failed: username 'se_nonexistent_user' not found")
+        self._add_code_editor("se_nonexistent_user", "Failed: username 'se_nonexistent_user' not found")
         s.click("xpath=//div[@id='addneweditor']/span/input[@class='cancelbutton']")
         # Demote existing editor        
         self.failUnless("int(s.get_xpath_count('//input[@class=\"demotebutton\"]')) == 1")
         s.click("xpath=//input[@class='demotebutton']")
         self.failIf(s.is_text_present(editor['username'] + " (editor)"))
-        self._check_editor_permissions(scraper_name, owner, editor, privacy, False)
+        self._check_editor_permissions(code_name, code_type, owner, editor, privacy, False)
         # Check editor demoting self from scraper
-        self._add_scraper_editor(editor['username'], "test scraper_editor (editor)")
-        self._check_editor_permissions(scraper_name, owner, editor, privacy, True)
-        self._editor_demote_self(scraper_name, owner, editor)
-        self._check_editor_permissions(scraper_name, owner, editor, privacy, False)
+        self._add_code_editor(editor['username'], "test %s_editor (editor)" % code_type)
+        self._check_editor_permissions(code_name, code_type, owner, editor, privacy, True)
+        self._editor_demote_self(code_name, code_type, owner, editor)
+        self._check_editor_permissions(code_name, code_type, owner, editor, privacy, False)
 
 
-    def _check_scraper_privacy(self, scraper_name, owner, editor):
+    def _check_code_privacy(self, code_name, code_type, owner, editor):
         """ Make sure different scraper privacy settings work as expected """
         s = self.selenium
-        s.open("/scrapers/" + scraper_name)
+        s.open("/%ss/" % code_type + code_name)
         self.wait_for_page()
         self.failUnless(s.is_text_present("test user (owner)"))
         # Set scraper protected and check editor permission changing
-        self._set_scraper_privacy('protected')
-        self._check_editors_list_changes(scraper_name, owner, editor, 'protected')
+        self._set_code_privacy('protected', code_type)
+        self._check_editors_list_changes(code_name, code_type, owner, editor, 'protected')
         
         # Do the same for private scraper
         if SeleniumTest._adminuser:
-            self._set_scraper_privacy('private', scraper_name, owner)
-            self._check_editors_list_changes(scraper_name, owner, editor, 'private')
+            self._set_code_privacy('private', code_type, code_name, owner)
+            self._check_editors_list_changes(code_name, code_type, owner, editor, 'private')
         
         # Check added user stays as follower when setting scraper public
-        self._add_scraper_editor(editor['username'], "test scraper_editor (editor)")
-        self._set_scraper_privacy('public')
-        self.failUnless('s.is_text_present("test scraper_editor (editor)")')
+        self._add_code_editor(editor['username'], "test %s_editor (editor)" % code_type)
+        self._set_code_privacy('public', code_type)
+        self.failUnless('s.is_text_present("test %s_editor (editor)")' % code_type)
         self.failUnless("int(s.get_xpath_count('//input[@class=\"demotebutton\"]')) == 0")
         
         
@@ -362,7 +350,7 @@ class TestScrapers(SeleniumTest):
         self._create_user()
         
         # Scraper creation and tests
-        scraper_name = self._create_scraper(language)
+        scraper_name = self._create_code(language, 'scraper')
         self._wait_for_run()
         s.click('link=Scraper')
         self.wait_for_page()
@@ -371,29 +359,29 @@ class TestScrapers(SeleniumTest):
         self._check_dashboard_count()
 
         # View creation
-        view_name = self._create_view(language, scraper_name)
+        view_name = self._create_code(language, 'view', scraper_name)
         # Clear up the evidence of testing
-        self._check_delete_scraper( scraper_name )
-        self._check_delete_view( view_name )        
+        self._check_delete_code( scraper_name, 'scraper' )
+        self._check_delete_code( view_name, 'view' )        
         # Only e-mail scraper should be left
         self._check_dashboard_count(count=1)
 
 
-    def _common_create(self):
+    def _common_create(self, code_type):
         """ Perform a language-agnostic set of tests on a scraper """
         if not SeleniumTest._adminuser:
-            print "Cannot perform some tests without a Django admin account specified"
+            print "Cannot perform some tests (including privacy tests) without a Django admin account specified"
         s = self.selenium
         owner = {'username':'', 'password':''}
         editor = {'username':'', 'password':''}
         owner['password'] = str( uuid.uuid4() )[:18].replace('-', '_')
         editor['password'] = str( uuid.uuid4() )[:18].replace('-', '_')
         s.open("/logout")
-        editor['username'] = self._create_user(name="test scraper_editor", password=editor['password'])
+        editor['username'] = self._create_user(name="test %s_editor" % code_type, password=editor['password'])
         s.open("/logout")
         owner['username'] = self._create_user(password=owner['password'])
-        scraper_name = self._create_scraper("python")
-        s.click('link=Scraper')
+        code_name = self._create_code("python", code_type, '')
+        s.click('link=' + code_type.capitalize())
         self.wait_for_page()
 
         # edit description
@@ -411,14 +399,15 @@ class TestScrapers(SeleniumTest):
         self.failUnless(s.is_text_present("rabbit"))
 
         # comments
-        self._add_comment(scraper_name)
+        self._add_comment(code_name, code_type)
 
         # privacy
         if SeleniumTest._adminuser:
             self._activate_users([owner['username'], editor['username']])
-        self._user_login(owner['username'], owner['password'])
-        self._check_scraper_privacy(scraper_name, owner, editor)
+            self._user_login(owner['username'], owner['password'])
+            self._check_code_privacy(code_name, code_type, owner, editor)
                      
+
 
     def _create_user(self, name="test user", password = str( uuid.uuid4() )[:18].replace('-', '_') ):
         s = self.selenium
@@ -444,8 +433,8 @@ class TestScrapers(SeleniumTest):
         return username
 
 
-    def _create_scraper(self, language):
-        scraper_name = 'se_test_%s' % str( uuid.uuid4() )[:18].replace('-', '_')
+    def _create_code(self, language, code_type, view_attach_scraper_name = ''):
+        code_name = 'se_test_%s' % str( uuid.uuid4() )[:18].replace('-', '_')
         
         s = self.selenium
         # Unfortunately we were dependant on specifying an 
@@ -453,11 +442,14 @@ class TestScrapers(SeleniumTest):
         # that we created earlier. So for now, we'll create a new 
         # user for each scraper/view pair
         
-        link_name = '%s scraper' % langlinkname[language]
+        link_name = '%s %s' % (langlinkname[language], code_type)
         
-        s.answer_on_next_prompt( scraper_name )        
-        s.click('link=%s' % self.new_scraper_link)        
-        time.sleep(1)
+        s.open('/dashboard/')
+        self.wait_for_page()
+        
+        s.answer_on_next_prompt( code_name )        
+        s.click('//a[@class="editor_%s"]' % code_type)        
+        time.sleep(1)        
         s.click( 'link=%s' % link_name )
         self.wait_for_page()
 
@@ -465,47 +457,16 @@ class TestScrapers(SeleniumTest):
         s.type_keys('//body[@class="editbox"]', "\16")
         s.wait_for_condition("selenium.browserbot.getCurrentWindow().document.getElementById('btnCommitPopup').disabled == false", 10000)
         
-        # Load the scraper code and insert directly into page source
-        code = self._load_data(language, 'scraper')
+        # Load the scraper/view code and insert directly into page source, inserting the attachment scraper name if a view
+        code = self._load_data(language, code_type)
+        if code_type == 'view':
+            code = code.replace('{{sourcescraper}}', code_name)
         s.type('//body[@class="editbox"]', "%s" % code)
 
         s.click('btnCommitPopup')
         self.wait_for_page()
         time.sleep(1)
         
-        return scraper_name
-        
-        
-    def _create_view(self, language, shortname):
-        """ Must be on the scraper homepage """
-        s = self.selenium
-        view_name = 'se_test_%s' % str( uuid.uuid4() )[:18].replace('-', '_')
-        
-        link_name = '%s view' % langlinkname[language]
-
-        s.open('/scrapers/%s' % shortname)
-        s.wait_for_page_to_load("30000")      
-                
-        s.answer_on_next_prompt( view_name )        
-        s.click('//a[@class="editor_view"]')        
-        time.sleep(1)        
-        s.click( 'link=%s' % link_name )
-
-        self.wait_for_page()
-
-        # Prompt save button to activate
-        self.selenium.type_keys('//body[@class="editbox"]',"                       ")
-        time.sleep(1)
-
-        code = self._load_data(language, 'view')
-        code = code.replace('{{sourcescraper}}', view_name)
-        
-        s.type('//body[@class="editbox"]', "%s" % code)        
-        s.click('btnCommitPopup')
-        self.wait_for_page()
-        time.sleep(1)
-
-        return view_name
+        return code_name
 
 
-        
