@@ -132,7 +132,7 @@ blankstartupcode = { 'scraper' : { 'python': "import scraperwiki\n\n# Blank Pyth
                                     'javascript': '// Blank Javascript scraper\n'
                                  }, 
                      'view'    : { 'python': "# Blank Python\nsourcescraper = ''\n", 
-                                   'php':    "<?php\n# Blank PHP\n$sourcescraper = ''\n?>\n", 
+                                   'php':    "<?php\n# Blank PHP\n$sourcescraper = '';\n?>\n", 
                                    'ruby':   "# Blank Ruby\nsourcescraper = ''\n",
                                    'html':   "<p>Blank HTML page</p>\n",
                                    'javascript':"// Blank javascript\n",
@@ -213,7 +213,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
             context['revuserrealname'] = revuser.get_profile().name
         except frontend.models.UserProfile.DoesNotExist:
             context['revuserrealname'] = revuser.username
-        except AttributeError:
+        except AttributeError:  # happens with AnonymousUser which has no get_profile function!
             context['revuserrealname'] = revuser.username
                 
     # create a temporary scraper object

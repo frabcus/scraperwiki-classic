@@ -84,6 +84,10 @@ OptionParser.new do|opts|
    opts.on( '--scrapername=[SCRAPERNAME]') do|scrapername|
      options[:scrapername] = scrapername
    end
+   opts.on( '--qs=[QSTRING]') do|qstring|
+     ENV['QUERY_STRING'] = qstring
+     ENV['URLQUERY'] = qstring
+   end   
    opts.on( '--runid=[RUNID]') do|runid|
      options[:runid] = runid
    end
@@ -99,7 +103,7 @@ rescue Exception => e
     est = getExceptionTraceback(e, code)
     # for debugging:
     # File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(est)) }
-    $logfd.write(JSON.generate(est) + "\n")
+    ScraperWiki.dumpMessage(est)
 end
 
 $stdout.flush

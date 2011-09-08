@@ -151,8 +151,12 @@ function handleIdent(req,res) {
 	for ( var v in urlObj.query )
 		s = v.substring( 0, v.indexOf(':'))
 	
-	script = exec.get_details( { ip: s } );
+	var script = exec.get_details( { ip: s } );
+	util.log.debug(script)
 	if ( script ){
+		util.log.debug(script.run_id);
+		util.log.debug(script.scraper_name);		
+		
 		res.write( 'scraperid=' + script.scraper_guid + "\n");
 		res.write( 'runid=' + script.run_id  + "\n");		
 		res.write( 'scrapername=' + script.scraper_name + "\n");
@@ -168,6 +172,7 @@ function handleIdent(req,res) {
 		res.end('\n')
 	}
 	else {
+		util.log.debug("Unable to find script for IP " + s + " we have " + exec.known_ips());
 		write_error( res, "Unable to find script for IP " + s + " we have " + exec.known_ips());
 	}
 }

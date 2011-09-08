@@ -12,27 +12,116 @@ _ = require('underscore');
 * lived socket that connected to us.
 ******************************************************************************/
 exports.write_to_caller = function(http_res, output) {
+	if ( ! http_res.jsonbuffer )
+		http_res.jsonbuffer = [];
+		
 	var msg = output.toString();
+	var parts = msg.split("\n");		
+    http_res.jsonbuffer.push(parts.shift());
+
+	logger.debug("WTC:1:" +  msg );
+	logger.debug("WTC:2:Buffer items count:" + http_res.jsonbuffer.length  );
+	
+	while (parts.length > 0) {
+	    var element = http_res.jsonbuffer.join(""); 
+
+		logger.debug("WTC:3:" +  element );
+	
+		var rp = element.match(/^JSONRECORD\((\d+)\)/);
+		if ( rp != null ) {
+			logger.debug("WTC:5:" + rp  );			
+			// rp is [ matched text, captured data, ... ]
+			var size = rp[1];
+			logger.debug("WTC:5:SIZE:" + rp[1]  );		
+			logger.debug("WTC:5:TAG:" + rp[0]  );	
+			logger.debug("C: " + element.slice(rp[0].length + 1).length + " " + size);
+
+			// if the text after JSONRECORD(x): is the length we expect, then write it
+			if ( element.slice(rp[0].length + 1).length == size ) {
+				// we have valid data to write to the client
+				logger.debug('ABOUT TO WRITE:' + element.slice(rp[0].length + 1) + ":");
+				http_res.write( element.slice(rp[0].length + 1) + "\n");
+				http_res.jsonbuffer = [parts.shift()];			
+			} else {
+				http_res.jsonbuffer.push( parts.shift() );		
+			} 
+		} else {
+			logger.debug("WTC:4:No match we think this is not JSON");			
+
+			var m = element.toString().match(/^JSONRECORD\(\d+\)/);
+			if ( m == null ) {
+				var partial = JSON.stringify( {'message_type': 'console', 'content': element.toString()} ) + "\n";
+				http_res.write( partial );
+				http_res.jsonbuffer = [parts.shift()]; // reset the buffer
+			} else {
+				http_res.jsonbuffer.push( parts.shift() );		
+			}
+		}
+
+		logger.debug("WTC:4:Buffer is now " + http_res.jsonbuffer);					
+	}
+
+	
+}
+
+/*	var msg = output.toString();
 	var parts = msg.split("\n");	
+
+	if ( ! http_res.jsonbuffer ) {
+		http_res.jsonbuffer = [];
+	}
+	
+    http_res.jsonbuffer.push(parts.shift());
+
+	while (parts.length > 0) {
+	   var element = http_res.jsonbuffer.join(""); 
+		
+		var rp = element.match(/^JSONRECORD\((s)\)/);
+		if ( rp != null ) {
+			// rp is [ matched text, captured data, ... ]
+			var size = rp[1];
+			// if the text after JSONRECORD(x): is the length we expect, then write it
+			if ( element.slice(0, rp[0].length + 1).length ) {
+				// we have valid data to write to the client
+			}
+		}
+		
+	   http_res.jsonbuffer = [ parts.shift() ];
+	}
+
+
 
 	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
+			if ( parts[i].indexOf("JSONRECORD(") == 0) { // If we start with JSON RECORD
+				// Check the size (+tag) and if all there then write it, otherwise store in 
+				// buffer.
+				
+			} else {
+				// If we have a buffer then prepend the buffer 
+				
+				
+				// or if we have no buffer and no tag, then wrap it in a 'console message'
+			}
+			
+		}
+		*/
+/*		if ( parts[i].length > 0 ) {
 			try {
 				s = JSON.parse(parts[i]);
 				if ( s && typeof(s) == 'object' ) {
 					logger.debug('We have been given JSON and so will feed it back' + parts[i] );
 					http_res.write( parts[i] + "\n");
-				       //continue;
 				} else {
-					logger.debug('Not JSON? ' + parts[i] );
+					logger.debug('Not an object' + parts[i] );
 				}
 			}catch(err) {
-				logger.debug('Failed to parse ' + err );	
+				logger.debug('Not JSON, so encoding in wrapper and returning - ' + parts[i])
+				http_res.write( JSON.stringify( {'message_type': 'console', 'content': parts[i] }) + "\n");											
 			}
-			
 		}
 	};
-}
+}*/
 
 
 var streamLogger = require('streamlogger');

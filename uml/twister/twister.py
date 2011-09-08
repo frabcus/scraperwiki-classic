@@ -405,8 +405,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         scrapername = parsed_data.get('scrapername', '')
         urlquery = parsed_data.get('urlquery', '')
         username = parsed_data.get('username', '')
-        user = parsed_data.get('user', None)
-        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, user=user)
+        beta_user = parsed_data.get('beta_user', None)
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, beta_user)
         self.factory.notifyMonitoringClients(self)
         
         
@@ -617,7 +617,8 @@ class RunnerFactory(protocol.ServerFactory):
             self.clientConnectionRegistered(sclient)  
 
             logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
-            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, logger)
+            beta_user = False  # means that all scheduled runs are not done through lxc
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, logger, beta_user)
             self.notifyMonitoringClients(sclient)
 
 

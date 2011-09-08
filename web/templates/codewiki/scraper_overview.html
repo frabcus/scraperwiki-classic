@@ -17,6 +17,9 @@
         <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}#sqlite">Explore with ScraperWiki API</a></li>
         <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
         <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
+        {% for rssuserfeed in rssuserfeeds %}
+            <li class="rss staff"><a href="{{rssuserfeed}}">RSSfeed_{{forloop.counter}}</a></li>
+        {% endfor %}
     </ul>
 </div>
 
@@ -35,21 +38,21 @@
     {% endif %}
 
     <div class="data_viewer">
-
         {% if sqlitedata %}
           <div class="data_options">
             <a href="#" class="csv" id="downloadcsvtable" rel="nofollow">Download spreadsheet (CSV)</a>
           </div>
 
-    	   <ul class="data_tabs">
-             {% for sqltablename, sqltabledata in sqlitedata.items %}
-                <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
-                    <span class="tablename">{{sqltablename}}</span> ({{sqltabledata.count}}  rows)
-                </li>
-             {% endfor %}
-				<li class="clear"></li>
-           </ul>
-          {% for sqltablename, sqltabledata in sqlitedata.items %}
+          <ul class="data_tabs">
+            {% for sqltabledata in sqlitedata %}
+              <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
+                <span class="tablename">{{sqltabledata.tablename}}</span> ({{sqltabledata.count}}  rows)
+              </li>
+            {% endfor %}
+            <li class="clear"></li>
+          </ul>
+
+          {% for sqltabledata in sqlitedata %}
             <div id="data_content_{{forloop.counter}}" class="data_content">
             <table class="data">
               <thead>
@@ -69,7 +72,7 @@
               </p>
           </div>
           <ul id="sqlite_schema" style="display: none">
-            {% for sqltablename, sqltabledata in sqlitedata.items %}
+            {% for sqltabledata in sqlitedata %}
               <li>{{sqltabledata.sql}}</li>
             {% endfor %}
            </ul>

@@ -5,7 +5,10 @@
 foreach (split(':', getenv('PHPPATH')) as $dir)
     ini_set('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
-$logfd = STDERR; // fopen("php://fd/3", "w") ;
+$logfd = STDOUT; // fopen("php://fd/3", "w") ;
+fclose(STDERR);
+$STDERR = fopen('php://stdout', 'w');
+
 
 require_once 'scraperwiki.php';
 require_once 'scraperwiki/datastore.php';
@@ -20,6 +23,15 @@ $runid = null;
 for ($idx = 1; $idx < count($argv); $idx += 1)
 {
    $arg  = $argv[$idx] ;
+
+   if (substr($arg, 0, 5) == '--qs=')
+   {
+      $qs = substr($arg,  5);
+	  if ( strlen($qs) > 0 ) {
+		putenv("QUERY_STRING", $qs);
+		putenv("URLQUERY", $qs);
+	  }
+   }
 
    if (substr ($arg, 0,  9) == '--script=')
       $script = substr ($arg, 9);

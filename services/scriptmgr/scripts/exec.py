@@ -42,6 +42,7 @@ class ConsoleStream:
             self.m_fd.flush()
             
     def close(self):
+
         self.m_fd.close()
 
     def fileno(self):
@@ -63,6 +64,7 @@ parser.add_option("--gid")    # nogroup
 parser.add_option("--uid")    # nobody
 parser.add_option("--scrapername")
 parser.add_option("--runid")
+parser.add_option("--qs")
 parser.add_option("--path")
 options, args = parser.parse_args()
 
@@ -72,6 +74,9 @@ if options.uid:
     os.setreuid(int(options.uid), int(options.uid))
 if options.path:
     sys.path.append( options.path )
+if options.qs:
+    os.environ['QUERY_STRING'] = options.qs
+    os.environ['URLQUERY'] = options.qs    
 
 
 host, port = string.split(options.ds, ':')
@@ -91,11 +96,20 @@ try:
     import imp
     mod = imp.new_module('scraper')
     exec code.rstrip() + "\n" in mod.__dict__
-
 except Exception, e:
     etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
     assert etb.get('message_type') == 'exception'
     scraperwiki.dumpMessage(etb)
+except SystemExit, se:
+    sys.stdout.flush()
+    sys.stderr.flush()
+
+    # If we do not temporarily yield a slice of the CPU here then the launching 
+    # process will not be able to read from stderr before we exit.
+    import time 
+    time.sleep(0)
+
+    raise se
 
 sys.stdout.flush()
 sys.stderr.flush()

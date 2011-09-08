@@ -90,7 +90,6 @@ exports.known_ips = function() {
 * them in the old format of runID=&scrapername=
 ******************************************************************************/
 exports.get_status = function(response) {
-	util.log.debug("+ Get status data for " + _.size(scripts));	
     for(var runID in scripts) {
 		var script = scripts[runID];
 		response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
@@ -127,7 +126,7 @@ exports.get_details = function(details) {
 		util.log.debug('Looking for ip ' + details.ip + ' in ' + scripts_ip);
 		return scripts_ip[details.ip];
 	} else if ( details.runid ) {
-		util.log.debug('Looking for ip ' + details.runid + ' in ' + scripts);		
+		util.log.debug('Looking for runid ' + details.runid + ' in ' + scripts);		
 		return scripts[details.runid];
 	}
 	
@@ -229,7 +228,11 @@ function execute(http_req, http_res, raw_request_data) {
 				exe = './scripts/exec.' + util.extension_for_language(script.language);
 
 				var startTime = new Date();
-				var environ = util.env_for_language(script.language, extra_path) 
+				var environ = util.env_for_language(script.language, extra_path);
+				
+				if (scraper.query)
+					environ['QUERY_STRING'] = scraper.query;
+				
 				if (httpproxy) {
 					environ['http_proxy'] = 'http://' + httpproxy;
 				};
@@ -253,6 +256,10 @@ function execute(http_req, http_res, raw_request_data) {
 			
 				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
+				e.stdout.on('data', function (data) {
+					util.write_to_caller( http_res, data);			
+				});				
+
 				e.stderr.on('data', function (data) {
 					util.write_to_caller( http_res, data);			
 				});				
@@ -272,9 +279,35 @@ function execute(http_req, http_res, raw_request_data) {
 					var endTime = new Date();
 					elapsed = (endTime - startTime) / 1000;
 
-					// 'CPU_seconds': 1, Temporarily removed
-        			res =  { 'message_type':'executionstatus', 'content':'runcompleted',  'elapsed_seconds' : elapsed, 'exit_status': 0 };
-					http_res.end( JSON.stringify( res ) + "\n" );
+				// If we have something left in the buffer we really should flush it about
+				// now. Suspect this will only be PHP
+				if ( local_script.response.jsonbuffer && local_script.response.jsonbuffer.length > 0 ) {
+					util.log.debug('We still have something left in the buffer');
+					util.log.debug( local_script.response.jsonbuffer );
+				
+					var left = local_script.response.jsonbuffer.join("");
+					if ( left && left.length > 0 ) {
+						// reset the buffer for the final run
+						local_script.response.jsonbuffer = [];
+						var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
+						if ( m == null ) {
+							util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
+							var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
+							partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";					
+							util.write_to_caller( resp, partial );
+						} else {
+							util.log.debug( "Looks like the remaining data is JSON soe sending as is");						
+							util.write_to_caller( resp, left.toString() );
+						}					
+					}						
+				}
+
+				// 'CPU_seconds': 1, Temporarily removed
+	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
+	               'elapsed_seconds' : elapsed };
+            	result.exit_status = code;
+
+					http_res.end( JSON.stringify( result ) + "\n" );
 										
 					util.log.debug('Finished writing responses');
 				});
@@ -311,12 +344,21 @@ function execute(http_req, http_res, raw_request_data) {
 			r = script.run_id.replace(/\|/g, "\\|");
 
 			util.log.debug('Setting runid to ' + r );
-			args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, r ]
+			args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh", dataproxy, r];
+						
 			if ( script.scraper_name && script.scraper_name.length > 0 ) {
 				args.push( script.scraper_name);
+			} else {
+				args.push( ' ' );
 			}
-	 		e = spawn('/usr/bin/lxc-execute', args );
 			
+			util.log.debug( 'QUERYSTRING is ' + script.query);
+			if (script.query) {
+				args.push( script.query.replace(/&/g, "\\&") );
+			}  
+			util.log.debug(args)
+			
+	 		e = spawn('/usr/bin/lxc-execute', args );
 			
 			// json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
 			
@@ -335,9 +377,7 @@ function execute(http_req, http_res, raw_request_data) {
 			var resp = http_res;
 			
 			e.stdout.on('data', function (data) {
-				//Everything we receive here is from PHP or from launched apps so we 
-				// should wrap whatever we have and send it 
-				util.write_to_caller( resp, JSON.stringify( {'message_type': 'console', 'content': data } ) + "\n");
+				util.write_to_caller( resp, data.toString() + "\n");
 			});				
 			
 			
@@ -356,9 +396,34 @@ function execute(http_req, http_res, raw_request_data) {
 				elapsed = (endTime - startTime) / 1000;
 				util.log.debug('Elapsed' + elapsed );
 
+				// If we have something left in the buffer we really should flush it about
+				// now. Suspect this will only be PHP
+				if ( local_script.response.jsonbuffer && local_script.response.jsonbuffer.length > 0 ) {
+					util.log.debug('We still have something left in the buffer');
+					util.log.debug( local_script.response.jsonbuffer );
+				
+					var left = local_script.response.jsonbuffer.join("");
+					if ( left && left.length > 0 ) {
+						// reset the buffer for the final run
+						local_script.response.jsonbuffer = [];
+						var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
+						if ( m == null ) {
+							util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
+							var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
+							partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";					
+							util.write_to_caller( resp, partial );
+						} else {
+							util.log.debug( "Looks like the remaining data is JSON soe sending as is");						
+							util.write_to_caller( resp, left.toString() );
+						}					
+					}						
+				}
+
 				// 'CPU_seconds': 1, Temporarily removed
 	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
-	               'elapsed_seconds' : elapsed, 'exit_status': 0 };
+	               'elapsed_seconds' : elapsed };
+            	result.exit_status = code;
+
 				if ( local_script&& local_script.response ) {
 					local_script.response.end( JSON.stringify( result ) + "\n" );
 					util.log.debug('Have just written end message to the vm ' + local_script.vm );
