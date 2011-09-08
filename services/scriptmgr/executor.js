@@ -385,7 +385,7 @@ function execute(http_req, http_res, raw_request_data) {
 					util.log.debug( local_script.response.jsonbuffer );
 				
 					var left = local_script.response.jsonbuffer.join("");
-					if ( left.length > 0 ) {
+					if ( left && left.length > 0 ) {
 						// reset the buffer for the final run
 						local_script.response.jsonbuffer = [];
 						var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
