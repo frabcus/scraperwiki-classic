@@ -42,7 +42,6 @@ class ConsoleStream:
             self.m_fd.flush()
             
     def close(self):
-        self.flush()
         self.m_fd.close()
 
     def fileno(self):
@@ -96,7 +95,8 @@ try:
     import imp
     mod = imp.new_module('scraper')
     exec code.rstrip() + "\n" in mod.__dict__
-
+    sys.stdout.flush()
+    sys.stderr.flush()
 except Exception, e:
     etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
     assert etb.get('message_type') == 'exception'
