@@ -20,7 +20,7 @@ import urllib2
 import base64
 import datetime
 import socket
-
+import urlparse
 
 
 try:                import json
@@ -163,8 +163,8 @@ def code_overview(request, wiki_type, short_name):
     context["license_choices"] = models.LICENSE_CHOICES
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
-    previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__.*?\n(.*?)\n__ENDPREVIEWSQL__", scraper.description)
-    previewrssfeeds = re.findall("(?s)__BEGINPREVIEWRSS__.*?\n(.*?)\n__ENDPREVIEWRSS__", scraper.description)
+    previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__\s*.*?\s*?\n(.+?)\n__ENDPREVIEWSQL__", scraper.description)
+    previewrssfeeds = re.findall("(?s)__BEGINPREVIEWRSS__.*?\n(.+?)\s*?\n__ENDPREVIEWRSS__", scraper.description)
     
         # there's a good case for having this load through the api by ajax
         # instead of inlining it and slowing down the page load considerably
@@ -207,6 +207,15 @@ def code_overview(request, wiki_type, short_name):
                     lsqlitedata = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery":previewsqltable, "data":[]})
                     if "keys" in lsqlitedata:   # otherwise 'error' is in the result
                         context['sqlitedata'].insert(0, {"tablename":"user_defined_%d"%(utabnum+1), "keys":lsqlitedata["keys"], "rows":lsqlitedata["data"], "sql":previewsqltable})
+
+            # make rssuserfeeds
+            if beta_user and previewrssfeeds:
+                apiurl = urlparse.urljoin(settings.API_URL, reverse('api:method_sqlite'))
+                context["rssuserfeeds"] = [ ]
+                for previewrssfeed in previewrssfeeds:
+                    apqs = { "format":"rss2", "name":scraper.short_name, "query":previewrssfeed }
+                    context["rssuserfeeds"].append("%s?%s" % (apiurl, urllib.urlencode(apqs)))
+                print context["rssuserfeeds"]
 
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'

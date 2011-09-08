@@ -17,6 +17,9 @@
         <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}#sqlite">Explore with ScraperWiki API</a></li>
         <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
         <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
+        {% for rssuserfeed in rssuserfeeds %}
+            <li class="rss staff"><a href="{{rssuserfeed}}">RSSfeed_{{forloop.counter}}</a></li>
+        {% endfor %}
     </ul>
 </div>
 
