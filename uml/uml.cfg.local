@@ -3,9 +3,7 @@ host	= 127.0.0.1
 port	= 9000
 umllist	= lxc001
 confurl	= allwhite
-use_queue = False
-queue_name= test_run_queue
-return_queue_name= test_queue_return
+;path    = /scraperwiki/live/scrapers,/scraperwiki/live/scraperlibs
 
 [twister]
 port      = 9010
@@ -16,19 +14,11 @@ apiurl = http://localhost:8010
 [webproxy]
 host	= 127.0.0.1
 port	= 9002
-dbhost  = localhost
-user    = scraperwiki
-passwd  = scraperwiki
-db      = scraperwiki_cache
-cache   = 127.0.0.1:11211
 
 [httpproxy]
 host	= 127.0.0.1
 port	= 9005 
 dbhost  = localhost
-user    = scraperwiki
-passwd  = scraperwiki
-db      = scraperwiki_cache
 cache   = 127.0.0.1:11211
 lxc_server = 127.0.0.1
 
@@ -188,7 +178,7 @@ args=(sys.stdout,)
 class=handlers.RotatingFileHandler
 level=WARNING
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/allwarnings.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/allwarnings.log', "a", 10485760, 5)
 
 [handler_logfileHandlerEmail]
 class=handlers.SMTPHandler
@@ -201,37 +191,37 @@ args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/controller.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/controller.log', "a", 10485760, 5)
 
 [handler_logfileHandlerDataproxyDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/dataproxy.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/dataproxy.log', "a", 10485760, 5)
 
 [handler_logfileHandlerDispatcherDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/dispatcher.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/dispatcher.log', "a", 10485760, 5)
 
 [handler_logfileHandlerRunnerDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/runner.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/runner.log', "a", 10485760, 5)
 
 [handler_logfileHandlerTwisterDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/twister.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/twister.log', "a", 10485760, 5)
 
 [handler_logfileHandlerProxyDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/proxy.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/proxy.log', "a", 10485760, 5)
 
 [formatter_simpleFormatter]
 format=%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s
