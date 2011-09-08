@@ -68,7 +68,7 @@ def getscraperor404(request, short_name, action):
         raise PermissionDenied
         
     # extra post conditions to make spoofing these calls a bit of a hassle
-    if action in ["changeadmin", "settags", "set_privacy_status"]:
+    if action in ["changeadmin", "settags", "set_privacy_status", "change_attachables"]:
         if not (request.method == 'POST' and request.is_ajax()):
             raise SuspiciousOperation
     
@@ -165,7 +165,6 @@ def code_overview(request, wiki_type, short_name):
 
     previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWSQL__", scraper.description)
     previewrssfeeds = re.findall("(?s)__BEGINPREVIEWRSS__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWRSS__", scraper.description)
-    print previewsqltables
     
         # there's a good case for having this load through the api by ajax
         # instead of inlining it and slowing down the page load considerably
@@ -264,9 +263,47 @@ def scraper_admin_privacystatus(request, short_name):
     scraper.save()
     return HttpResponse(dict(PRIVACY_STATUSES_UI)[scraper.privacy_status])
 
+
+def scraper_admin_controlattachables(request, short_name):
+    scraper = getscraperor404(request, short_name, "change_attachables")
+
+    attachablescraper_name = request.POST.get('attachable', '')
+    if not attachablescraper_name:
+        return HttpResponse("Failed: No attachable scraper included")
+        
+    try:
+        attachablescraper = models.Code.objects.get(short_name=attachablescraper_name)
+    except models.Code.DoesNotExist:
+        return HttpResponse("Failed: attachable scraper does not exist")
+
+    action = request.POST.get('action', '')
+    if action == "remove":
+            # have to allow this case in case there is an attachability to a scraper that has been deleted 
+            # (scraper delete should make sure these are cleaned up; or better yet prevent deletion where there is a 
+            # dependency, unless the deleted data gets forwarded to the successor scraper)
+        #if attachablescraper.privacy_status == "deleted":
+        #    return HttpResponse("Failed: attachable already deleted")
+        if models.CodePermission.objects.filter(code=scraper, permitted_object=attachablescraper).count() == 0:
+            return HttpResponse("Failed: scraper wasn't attachable anyway")
+        models.CodePermission.objects.filter(code=scraper, permitted_object=attachablescraper).delete()
+        return HttpResponse("Success: attachable scraper removed")
+
+    if action != "add":
+        return HttpResponse("Failed: action not recognized")
+
+    if not attachablescraper.actionauthorized(request.user, "attachable_add"):
+        return HttpResponse("Failed: only editors are allowed to add access to that scraper's datastore")
+    
+    if models.CodePermission.objects.filter(code=scraper, permitted_object=attachablescraper).count() != 0:
+        return HttpResponse("Failed: attachable scraper already attached")
+
+    models.CodePermission(code=scraper, permitted_object=attachablescraper).save()
+    return HttpResponse("Success: attachable scraper added")
+    
+
 def scraper_admin_controleditors(request, short_name):
-    username  = request.GET.get('roleuser', '')
-    newrole   = request.GET.get('newrole', '')    
+    username = request.GET.get('roleuser', '')
+    newrole = request.GET.get('newrole', '')    
     processed = False
 
     if not username:

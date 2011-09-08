@@ -2547,7 +2547,7 @@ div.tab_tools form {
 
 
 
-#addneweditor {
+#addneweditor, #addnewattachable {
 	background-image: none;
 	padding: 5px 10px;
 	background: #f6f6f6;
@@ -2562,7 +2562,7 @@ border: 1px solid #ddd;
 border-top: navajowhite;
 }
 
-#addneweditor a {
+#addneweditor a, #addnewattachable a {
 	text-decoration: none;
 	color: #3d7b35;
 	font-size: 14px;
@@ -2572,27 +2572,33 @@ border-top: navajowhite;
 	text-shadow: 0 1px 0 #fff;
 }
 
-#addneweditor a:hover {
+#addneweditor a:hover, #addnewattachable a:hover {
 	color: #23461e;
 }
 
-#addneweditor a img {
+#addneweditor a img, #addnewattachable a img {
 	margin-right: 3px;
 	vertical-align: -2px;
 }
 
-#addneweditor span {
+#addneweditor span, #addnewattachable span {
 	font-size: 14px;
 	color: #333;
 }
 
 #addneweditor input.text {
 	padding: 2px 4px;
-	width: 140px;
+	width: 110px;
 	margin-left: 4px;
 }
 
-#contributorserror {
+#addnewattachable input.text {
+    padding: 2px 4px;
+    width: 100px;
+    margin-left: 4px;
+}
+
+#contributorserror, #attachableserror {
 	background-image: none;
 	padding: 5px 10px;
 	background: #ffaaaa;
@@ -2607,7 +2613,9 @@ border-top: navajowhite;
 }
 
 
-#addneweditor .addbutton, #addneweditor .cancelbutton {
+#addneweditor .addbutton, #addneweditor .cancelbutton, 
+#addnewattachable .addbutton, #addnewattachable .cancelbutton 
+{
 	float: right;
 	margin-left: 10px;
 	margin-top: 3px;

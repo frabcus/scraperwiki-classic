@@ -133,6 +133,36 @@ function reload_scraper_contributors(redirect)
     //    document.location.reload(true);
 }
 
+
+function reload_scraper_attachables(short_name, redirect)
+{
+    $('#attachables_loading').show();
+    $.ajax(
+        {
+            url:document.location,
+            cache: false,
+            type: 'GET', 
+            success:function(htmlpage){
+                $("#scraper_attachables").html($(htmlpage).find("#scraper_attachables").html())
+                $("#header_inner").html($(htmlpage).find("#header_inner").html())
+                setupChangeAttachables(short_name); 
+                $('#attachables_loading').hide();
+            },
+            error: function(jq, textStatus, errorThrown){
+                if ( redirect ) {
+                    window.location.href = redirect;
+                    return false;
+                }
+
+                alert( textStatus );
+                alert( errorThrown );
+            }
+        });
+
+    // original action: 
+    //    document.location.reload(true);
+}
+
 function setupCodeOverview(short_name)
 {
     //about
@@ -359,4 +389,94 @@ function setupChangeEditorStatus()
 	$('#privacy_status :radio').change(function(){
 		$('#saveprivacy').trigger('click');
 	});
+}   
+    
+function setupChangeAttachables(short_name)
+{
+    // adding and removing attachables
+    $('#addnewattachable a').click(function()
+    {
+        $('#addnewattachable a').hide()
+        $('#addnewattachable span').show(); 
+        $('attachableserror').hide();
+    }); 
+    $('#addnewattachable input.cancelbutton').click(function()
+    {
+        $('#addnewattachable span').hide(); 
+        $('#addnewattachable a').show()
+        $('attachableserror').hide();
+    }); 
+    $('#addnewattachable input.addbutton').click(function()
+    {
+        $('#attachablesserror').hide();
+        var sdata = { attachable:$('#addnewattachable input:text').val(), action:'add' }; 
+        $.ajax({url:$("#admincontrolattachables").val(), type: 'POST', data:sdata, success:function(result)
+        {
+           
+            if (result.substring(0, 6) == "Failed") {
+                $('#attachableserror').text(result).show(300);
+            } else {
+                reload_scraper_attachables(); 
+                $('#addnewattachable span').hide(); 
+                $('#addnewattachable a').show(); 
+            }
+        },
+        error:function(jq, textStatus, errorThrown)
+        {
+            $('#attachableserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300); 
+        }}); 
+    }); 
+
+    $('#databaseattachablelist .removebutton').click(function() 
+    {
+        $('#attachableserror').hide();
+        var sdata = { attachable:$(this).parents("li:first").find("span").text(), action:'remove' }; 
+        $.ajax({url:$("#admincontrolattachables").val(), type: 'POST', data:sdata, success:function(result)
+        {
+           
+            if (result.substring(0, 6) == "Failed") {
+                $('#attachableserror').text(result).show(300);
+            } else {
+                reload_scraper_attachables(); 
+                $('#addnewattachable span').hide(); 
+                $('#addnewattachable a').show(); 
+            }
+        },
+        error:function(jq, textStatus, errorThrown)
+        {
+            $('#attachableserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300); 
+        }}); 
+    }); 
+    
+    if ($('#addnewattachable input:text').length)
+        $('#addnewattachable input:text').autocomplete(
+    {
+        minLength: 2,
+        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
+        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }, 
+        //select: function(event, ui) { rewriteapiurl(); },
+        source: function(request, response) 
+        {
+            var nolist = [ short_name ]; 
+            $("ul#databaseattachablelist li span").each(function(i, el) { nolist.push($(el).text()); }); 
+            $.ajax(
+            {
+                url: $('#id_api_base').val()+"scraper/search",
+                dataType: "jsonp",
+                data: { format:"jsondict", maxrows: 12, searchquery: request.term, quietfields:'description', nolist:nolist.join(" ") },
+                success: function(data) 
+                {
+                    response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
+                }
+            })
+        },
+        focus: function(event, ui)  { $( "#detail #id_name" ).val(ui.item.label);  return false; }
+    }) 
+    .data( "autocomplete" )._renderItem = function(ul, item) 
+    {
+        return $( "<li></li>" )
+        .data( "item.autocomplete", item )
+        .append( '<a><strong>' + item.desc + '</strong><br/><span>' + item.label + '</span></a>' )
+        .appendTo(ul);
+    };
 }
