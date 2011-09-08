@@ -592,13 +592,14 @@ class RunnerFactory(protocol.ServerFactory):
                 continue
             
                     # avoids scheduling cases where someone is editing
-            if scrapername in self.guidclientmap:
+            guid = scraperoverdue.get('guid', '')
+            if guid in self.guidclientmap:
                 continue
 
                 # fabricate a new client (not actually connected to a socket or made by the factory)
             sclient = RunnerProtocol()
             sclient.factory = self
-            sclient.guid = scraperoverdue.get('guid', '')
+            sclient.guid = guid
             sclient.username = '*SCHEDULED*'
             sclient.userrealname = sclient.username
             sclient.scrapername = scrapername
