@@ -1,11 +1,11 @@
-
-from scraperwiki.apiwrapper import getKeys, getData, getDataByDate, getDataByLocation
+import scraperwiki
 
 sourcescraper = '{{sourcescraper}}'
 limit = 20
 offset = 0
 
-keys = getKeys(sourcescraper)
+scraperwiki.sqlite.attach(sourcescraper)
+keys = scraperwiki.sqlite.execute('select * from `%s`.swdata limit 0' % sourcescraper)['keys']
 keys.sort()  # alphabetically
 
 print '<h2>Some data from scraper: %s  (%d columns)</h2>' % (sourcescraper, len(keys))
@@ -18,7 +18,7 @@ for key in keys:
 print "</tr>"
 
 # rows
-for row in getData(sourcescraper, limit, offset):
+for row in scraperwiki.sqlite.select('* from `%s`.swdata limit ? offset ?' % sourcescraper, [limit, offset]):
     print "<tr>",
     for key in keys:
         print "<td>%s</td>" % row.get(key),
