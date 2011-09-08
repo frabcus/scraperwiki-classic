@@ -80,7 +80,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         
         self.logger.debug("INCOMING:" + rem[0])                
         
-        if host and rem[0].startswith(add):
+        if host and (rem[0].startswith(add) or rem[0].startswith('10.0.1')):
             lident = urllib.urlopen ('http://%s/Ident?%s:%s' % (host, rem[0], loc[1])).read()               
         else:
             via    = config.get(uml, 'via' )
