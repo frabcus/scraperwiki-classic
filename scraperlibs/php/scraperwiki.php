@@ -13,7 +13,9 @@ class scraperwiki
       if ($logfd) {
 		 $val = json_encode($dict);
        $data = "JSONRECORD(" .  strval(strlen($val)) . "):" . $val;
+       flush();
        fwrite ($logfd, $data . "\n");
+       flush();
 	  }
    }
 

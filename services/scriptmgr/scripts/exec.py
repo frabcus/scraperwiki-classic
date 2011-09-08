@@ -42,6 +42,7 @@ class ConsoleStream:
             self.m_fd.flush()
             
     def close(self):
+
         self.m_fd.close()
 
     def fileno(self):
@@ -95,11 +96,20 @@ try:
     import imp
     mod = imp.new_module('scraper')
     exec code.rstrip() + "\n" in mod.__dict__
-
 except Exception, e:
     etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
     assert etb.get('message_type') == 'exception'
     scraperwiki.dumpMessage(etb)
+except SystemExit, se:
+    sys.stdout.flush()
+    sys.stderr.flush()
+
+    # If we do not temporarily yield a slice of the CPU here then the launching 
+    # process will not be able to read from stderr before we exit.
+    import time 
+    time.sleep(0)
+
+    raise se
 
 sys.stdout.flush()
 sys.stderr.flush()

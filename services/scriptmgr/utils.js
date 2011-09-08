@@ -34,7 +34,6 @@ exports.write_to_caller = function(http_res, output) {
 			var size = rp[1];
 			logger.debug("WTC:5:SIZE:" + rp[1]  );		
 			logger.debug("WTC:5:TAG:" + rp[0]  );	
-			
 			logger.debug("C: " + element.slice(rp[0].length + 1).length + " " + size);
 
 			// if the text after JSONRECORD(x): is the length we expect, then write it
@@ -45,12 +44,21 @@ exports.write_to_caller = function(http_res, output) {
 				http_res.jsonbuffer = [parts.shift()];			
 			} else {
 				http_res.jsonbuffer.push( parts.shift() );		
-			}
+			} 
 		} else {
-			logger.debug("WTC:4:No match");			
-			http_res.jsonbuffer.push( parts.shift() );		
-			logger.debug("WTC:4:Buffer is now " + http_res.jsonbuffer);					
+			logger.debug("WTC:4:No match we think this is not JSON");			
+
+			var m = element.toString().match(/^JSONRECORD\(\d+\)/);
+			if ( m == null ) {
+				var partial = JSON.stringify( {'message_type': 'console', 'content': element.toString()} ) + "\n";
+				http_res.write( partial );
+				http_res.jsonbuffer = [parts.shift()]; // reset the buffer
+			} else {
+				http_res.jsonbuffer.push( parts.shift() );		
+			}
 		}
+
+		logger.debug("WTC:4:Buffer is now " + http_res.jsonbuffer);					
 	}
 
 	

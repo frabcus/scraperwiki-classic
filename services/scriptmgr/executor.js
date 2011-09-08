@@ -351,18 +351,7 @@ function execute(http_req, http_res, raw_request_data) {
 			var resp = http_res;
 			
 			e.stdout.on('data', function (data) {
-				//Everything we receive here is from PHP or from launched apps so we 
-				util.log.debug("STDOUT:" + data.toString() );
-				var m = data.toString().match(/^JSONRECORD\(\d+\)/);
-				if ( m == null ) {
-					var partial = JSON.stringify( {'message_type': 'console', 'content': data.toString()} );
-					partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";					
-					util.log.debug("PARTIAL: " + partial);										
-					util.write_to_caller( resp, partial );
-				} else {
-					util.log.debug("JSONPARTIAL: " + data.toString());															
-					util.write_to_caller( resp, data.toString() );
-				}
+				util.write_to_caller( resp, data.toString() + "\n");
 			});				
 			
 			
@@ -406,7 +395,9 @@ function execute(http_req, http_res, raw_request_data) {
 
 				// 'CPU_seconds': 1, Temporarily removed
 	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
-	               'elapsed_seconds' : elapsed, 'exit_status': 0 };
+	               'elapsed_seconds' : elapsed };
+            	result.exit_status = code;
+
 				if ( local_script&& local_script.response ) {
 					local_script.response.end( JSON.stringify( result ) + "\n" );
 					util.log.debug('Have just written end message to the vm ' + local_script.vm );
