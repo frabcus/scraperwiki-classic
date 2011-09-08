@@ -73,6 +73,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             host = None
 
         self.logger.debug(str({"uml":uml, "uml_host":uml_host, "host":host}))
+        self.logger.debug("INCOMING:" + rem[0])        
         self.attachauthurl = config.get("dataproxy", 'attachauthurl')
 
         rem       = self.connection.getpeername()
