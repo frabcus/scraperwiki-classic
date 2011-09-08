@@ -378,6 +378,13 @@ function execute(http_req, http_res, raw_request_data) {
 				elapsed = (endTime - startTime) / 1000;
 				util.log.debug('Elapsed' + elapsed );
 
+				// If we have something left in the buffer which doesn't looks like JSON
+				// then send it and encode it....
+				if ( local_script.response.jsonbuffer.length > 0 ) {
+					util.log.debug('We still have something left in the buffer');
+					util.log.debug( local_script.response.jsonbuffer );
+				}
+
 				// 'CPU_seconds': 1, Temporarily removed
 	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
 	               'elapsed_seconds' : elapsed, 'exit_status': 0 };

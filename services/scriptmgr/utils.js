@@ -45,6 +45,8 @@ exports.write_to_caller = function(http_res, output) {
 			http_res.jsonbuffer.push( parts.shift() );		
 		}
 	}
+
+	
 }
 
 /*	var msg = output.toString();
