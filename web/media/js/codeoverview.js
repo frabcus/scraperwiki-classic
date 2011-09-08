@@ -239,7 +239,7 @@ function changeRoles(sdata, redirect_to_on_fail) {
 	); 	
 }
 
-function setupChangeEditorStatus()
+function setupChangeEditorStatus(short_name)
 {
     // changing editor status
     $('#addneweditor a').click(function()
@@ -359,4 +359,75 @@ function setupChangeEditorStatus()
 	$('#privacy_status :radio').change(function(){
 		$('#saveprivacy').trigger('click');
 	});
+    
+    
+    
+    // adding and removing attachables
+    $('#addnewattachable a').click(function()
+    {
+        $('#addnewattachable a').hide()
+        $('#addnewattachable span').show(); 
+        $('attachableserror').hide();
+    }); 
+    $('#addnewattachable input.cancelbutton').click(function()
+    {
+        $('#addnewattachable span').hide(); 
+        $('#addnewattachable a').show()
+        $('attachableserror').hide();
+    }); 
+    $('#addnewattachable input.addbutton').click(function()
+    {
+        $('#attachablesserror').hide();
+        var thisli = $(this).parents("li:first"); 
+/*        var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+            {
+           
+                if (result.substring(0, 6) == "Failed") {
+                    $('#contributorserror').text(result).show(300);
+                } else {
+                    reload_scraper_contributors(); 
+                    $('#addneweditor span').hide(); 
+                    $('#addneweditor a').show(); 
+                }
+            },
+            error:function(jq, textStatus, errorThrown)
+            {
+                $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
+            }
+        }); 
+*/
+    }); 
+    
+    if ($('#addnewattachable input:text').length)
+        $('#addnewattachable input:text').autocomplete(
+    {
+        minLength: 2,
+        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
+        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }, 
+        //select: function(event, ui) { rewriteapiurl(); },
+        source: function(request, response) 
+        {
+            var nolist = [ short_name ]; 
+            $("ul#databaseattachablelist li span").each(function(i, el) { nolist.push($(el).text()); }); 
+            $.ajax(
+            {
+                url: $('#id_api_base').val()+"scraper/search",
+                dataType: "jsonp",
+                data: { format:"jsondict", maxrows: 12, searchquery: request.term, quietfields:'description', nolist:nolist.join(" ") },
+                success: function(data) 
+                {
+                    response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
+                }
+            })
+        },
+        focus: function(event, ui)  { $( "#detail #id_name" ).val(ui.item.label);  return false; }
+    }) 
+    .data( "autocomplete" )._renderItem = function(ul, item) 
+    {
+        return $( "<li></li>" )
+        .data( "item.autocomplete", item )
+        .append( '<a><strong>' + item.desc + '</strong><br/><span>' + item.label + '</span></a>' )
+        .appendTo(ul);
+    };
 }

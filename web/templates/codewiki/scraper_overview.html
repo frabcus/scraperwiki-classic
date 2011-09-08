@@ -225,7 +225,7 @@ $(document).ready(function()
 {
     setupCodeOverview('{{scraper.short_name}}');
     setupScraperOverview('{{scraper.short_name}}');
-    setupChangeEditorStatus();
+    setupChangeEditorStatus('{{scraper.short_name}}');
 {% if user.is_authenticated %}
     setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");

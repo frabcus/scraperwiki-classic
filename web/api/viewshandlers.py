@@ -275,8 +275,13 @@ def scraper_search_handler(request):
         scrapers = scrapers_overdue()  
     else:
         scrapers = scraper_search_query(user=None, query=query)
-        
-    for scraper in scrapers[:maxrows]:
+
+    # scrapers we don't want to be returned in the search
+    nolist = request.GET.get("nolist", "").split()
+    quietfields = request.GET.get('quietfields', "").split("|")
+    for scraper in scrapers[:(maxrows+len(nolist))]:
+        if scraper.short_name in nolist:
+            continue
         res = {'short_name':scraper.short_name }
         res['title'] = scraper.title
         owners = scraper.userrolemap()["owner"]
@@ -293,7 +298,8 @@ def scraper_search_handler(request):
                 ownername = owner.username
             if ownername:
                 res['title'] = "%s / %s" % (ownername, scraper.title)
-        res['description'] = scraper.description
+        if 'description' not in quietfields:
+            res['description'] = scraper.description
         res['created'] = scraper.created_at.isoformat()
         res['privacy_status'] = scraper.privacy_status
         res['language'] = scraper.language
@@ -315,7 +321,10 @@ def scraper_search_handler(request):
             res['permissions'] = permissions
             
         result.append(res)
-    
+        if len(result) > maxrows:
+            break
+
+
     if request.GET.get("format") == "csv":
         fout = StringIO()
         writer = csv.writer(fout, dialect='excel')
@@ -393,8 +402,6 @@ def userinfo_handler(request):
     response = HttpResponse(res, mimetype='application/json; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename=userinfo.json'
     return response
-
-
 
 
 def runevent_handler(request):

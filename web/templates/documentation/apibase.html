@@ -161,7 +161,7 @@ $(function()
             {
                 url: $('#id_api_base').val()+"scraper/search",
                 dataType: "jsonp",
-                data: { format:"jsondict", maxrows: 12, searchquery: request.term },
+                data: { format:"jsondict", maxrows: 12, quietfields:"description", searchquery: request.term },
                 success: function(data) 
                 {
                     response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
