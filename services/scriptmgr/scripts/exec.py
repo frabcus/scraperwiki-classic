@@ -100,8 +100,9 @@ except Exception, e:
     etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
     assert etb.get('message_type') == 'exception'
     scraperwiki.dumpMessage(etb)
-except SystemExit:
+except SystemExit, se:
     sys.stderr.flush()
+    raise se
 
 sys.stdout.flush()
 sys.stderr.flush()
