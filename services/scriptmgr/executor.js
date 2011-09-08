@@ -283,7 +283,7 @@ function execute(http_req, http_res, raw_request_data) {
 				// now. Suspect this will only be PHP
 				if ( script.response.jsonbuffer && script.response.jsonbuffer.length > 0 ) {
 					util.log.debug('We still have something left in the buffer');
-					util.log.debug( local_script.response.jsonbuffer );
+					util.log.debug( script.response.jsonbuffer );
 				
 					var left = script.response.jsonbuffer.join("");
 					if ( left && left.length > 0 ) {
