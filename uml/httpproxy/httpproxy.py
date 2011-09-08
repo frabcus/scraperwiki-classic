@@ -364,7 +364,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if   mode == 'H' : 
             if not self.path.startswith('http://'):
-                self.path = 'http://%s%s'  % (self.headers['host'], self.path)
+                try:
+                    self.path = 'http://%s%s'  % (self.headers['host'], self.path)
+                except:
+                    print self.headers
                 
         elif mode == 'S' : self.path = 'https://%s%s' % (self.headers['host'], self.path)
 
