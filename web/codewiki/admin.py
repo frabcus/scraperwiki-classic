@@ -1,4 +1,4 @@
-from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent
+from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent, CodePermission
 from django.contrib import admin
 from django.db import models
 
@@ -37,3 +37,4 @@ class ViewAdmin(CodeAdmin):
 admin.site.register(Scraper, ScraperAdmin)
 admin.site.register(View, ViewAdmin)
 admin.site.register(ScraperRunEvent)
+admin.site.register(CodePermission)

@@ -215,7 +215,6 @@ def code_overview(request, wiki_type, short_name):
                 for previewrssfeed in previewrssfeeds:
                     apqs = { "format":"rss2", "name":scraper.short_name, "query":previewrssfeed }
                     context["rssuserfeeds"].append("%s?%s" % (apiurl, urllib.urlencode(apqs)))
-                print context["rssuserfeeds"]
 
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
@@ -532,6 +531,18 @@ def export_sqlite(request, short_name):
     response["Content-Length"] = initsqlitedata["filesize"]
     return response
 
+
+# called back from the datastore for an scraper to ask whether it is allowed to attach to 
+# the datastore for another scraper. 
+# also automatically adds to the attachables list (encoded in CodePermission objects).
+# this is close to how the user should experience it, but will need more security to 
+# be assured that a user setting is there.  
+# A user setting will only be there when it is running from the editor, in which case we will 
+# grant access to scrapers which that user has access to, and send back a structured record 
+# to the editor stating what has happened. 
+# scheduled scrapers can't add new scrapers to this list, but will make a good enough error to explain it.
+# the list of attachables should be passed through the controller when a scraper is run; 
+# it will need including in the overdue scrapers list, as well as the stimulate_run record
 def attachauth(request):
     # aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
     scrapername = request.GET.get("scrapername")
@@ -542,19 +553,31 @@ def attachauth(request):
     except models.Code.DoesNotExist:
         return HttpResponse("DoesNotExist")
 
+    # dereference scraper (if not draft) so we can look for the attach list
+    if scrapername: 
+        try:
+            scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
+        except models.Code.DoesNotExist:
+            return HttpResponse("Scraper does not exist: %s" % str([scrapername]))
+
+        # check against the attachto list
+        if models.CodePermission.objects.filter(code=scraper, permitted_object=attachtoscraper).count() != 0:
+            return HttpResponse("Yes")
+
+    else:
+        scraper = None
+        
+
     if attachtoscraper.privacy_status != "private":
+        if scraper:
+            models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
         return HttpResponse("Yes")
         
     if not scrapername:
         return HttpResponse("Draft scraper can't connect to private scraper: %s" % str([attachtoname]))
 
-    try:
-        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
-    except models.Code.DoesNotExist:
-        return HttpResponse("Scraper does not exist: %s" % str([scrapername]))
-
     if scraper.privacy_status == 'public':
-        return HttpResponse("No: because scraper connecting from is public")
+        return HttpResponse("No: because scraper connecting from is public cannot connect to private")
         
 
     # we're going to use the set of editors of a private/protected scraper be the gateway for access to the 
@@ -567,5 +590,6 @@ def attachauth(request):
     if not commonusers:
         return HttpResponse("No: because no common owners or editors between the two scrapers")
         
+    models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
     return HttpResponse("Yes")
     
