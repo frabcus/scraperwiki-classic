@@ -361,7 +361,7 @@ function execute(http_req, http_res, raw_request_data) {
 					util.write_to_caller( resp, partial );
 				} else {
 					util.log.debug("JSONPARTIAL: " + data.toString());															
-					util.write_to_caller( resp, data.toString() );
+					util.write_to_caller( resp, data.toString() + "\n");
 				}
 			});				
 			
