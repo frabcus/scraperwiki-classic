@@ -42,6 +42,7 @@ class ConsoleStream:
             self.m_fd.flush()
             
     def close(self):
+        self.flush()
         self.m_fd.close()
 
     def fileno(self):
