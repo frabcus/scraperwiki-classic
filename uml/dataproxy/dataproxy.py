@@ -67,7 +67,6 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         host = None
         try:
             host      = config.get("dataproxy", 'lxc_server')
-            uml_host = None
         except:
             host = None
         self.logger.debug(str({"uml":uml, "uml_host":uml_host, "host":host}))
