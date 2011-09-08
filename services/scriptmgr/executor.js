@@ -353,7 +353,6 @@ function execute(http_req, http_res, raw_request_data) {
 			e.stdout.on('data', function (data) {
 				//Everything we receive here is from PHP or from launched apps so we 
 				var m = data.toString().match(/^JSONRECORD\((\d+)\)/);
-				util.log.debug("MATCH: " + m);
 				if ( m == null ) {
 					var partial = JSON.stringify( {'message_type': 'console', 'content': data.toString()} );
 					partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";					
