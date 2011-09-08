@@ -387,11 +387,11 @@ function execute(http_req, http_res, raw_request_data) {
 					var left = local_script.response.jsonbuffer.join("");
 					var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
 					if ( m == null ) {
-						var partial = JSON.stringify( {'message_type': 'console', 'content': data.toString()} );
+						var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
 						partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";					
 						util.write_to_caller( resp, partial );
 					} else {
-						util.write_to_caller( resp, data.toString() );
+						util.write_to_caller( resp, left.toString() );
 					}					
 				}
 
