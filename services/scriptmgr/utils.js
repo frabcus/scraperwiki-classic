@@ -32,6 +32,8 @@ exports.write_to_caller = function(http_res, output) {
 			logger.debug("WTC:5:" + rp  );			
 			// rp is [ matched text, captured data, ... ]
 			var size = rp[1];
+			logger.debug("WTC:5:SIZE:" + rp[1]  );		
+			logger.debug("WTC:5:TAG:" + rp[0]  );		
 			// if the text after JSONRECORD(x): is the length we expect, then write it
 			if ( element.slice(rp[0].length + 1).length == size ) {
 				// we have valid data to write to the client
