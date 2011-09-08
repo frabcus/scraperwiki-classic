@@ -407,9 +407,8 @@ function execute(http_req, http_res, raw_request_data) {
 				// 'CPU_seconds': 1, Temporarily removed
 	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
 	               'elapsed_seconds' : elapsed };
-	            if ( code != 0 ) {
-	            	result.exit_status = code;
-	            }
+            	result.exit_status = code;
+
 				if ( local_script&& local_script.response ) {
 					local_script.response.end( JSON.stringify( result ) + "\n" );
 					util.log.debug('Have just written end message to the vm ' + local_script.vm );
