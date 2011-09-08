@@ -231,7 +231,7 @@ LOGGING = {
         # Log to a text file that can be rotated by logrotate
         'logfile': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/scraperwiki/django.log',
+            'filename': '/var/log/scraperwiki/django-www.log',
             'mode': 'a',
             'maxBytes': 100000,
             'backupCount': 5,
