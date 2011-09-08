@@ -7,8 +7,8 @@ foreach (split(':', getenv('PHPPATH')) as $dir)
 
 $logfd = STDOUT; // fopen("php://fd/3", "w") ;
 
-fclose(STDERR);
-$STDERR = fopen('php://stdout', 'w');
+#fclose(STDERR);
+#$STDERR = fopen('php://stdout', 'w');
 
 
 require_once 'scraperwiki.php';
