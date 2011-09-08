@@ -22,7 +22,7 @@ from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.utils import simplejson
 
 
-from codewiki.models import Scraper, Code, ScraperRunEvent, scraper_search_query, scrapers_overdue
+from codewiki.models import Scraper, Code, ScraperRunEvent, CodePermission, scraper_search_query, scrapers_overdue
 from codewiki.managers.datastore import DataStore
 import frontend
 from cStringIO import StringIO
@@ -291,7 +291,7 @@ def scraper_search_handler(request):
                 profile = owner.get_profile()
                 ownername = profile.name
                 if boverduescraperrequest:
-                    res['user'] = { "beta_user": profile.beta_user, "id": owner.id }   # to enable certain scrapers to go through the lxc process
+                    res['beta_user'] = profile.beta_user   # to enable certain scrapers to go through the lxc process
             except frontend.models.UserProfile.DoesNotExist:
                 ownername = owner.username
             if not ownername:
@@ -309,16 +309,7 @@ def scraper_search_handler(request):
             res['overdue_proportion'] = float(scraper.overdue_proportion)
             res['code'] = scraper.get_vcs_status(-1)["code"]
             res['guid'] = scraper.guid
-            
-            # Fetch the permissions
-            # poss these requests should be done through another avenue that is useful via runs from the editor
-            permissions = []
-            for perm in scraper.permissions.all():
-                permissions.append({'source':   perm.code, 
-                                    'target':   perm.permitted_object,
-                                    'can_read': perm.can_read, 
-                                    'can_write':perm.can_write})
-            res['permissions'] = permissions
+            res["attachables"] = [ cp.permitted_object.short_name  for cp in CodePermission.objects.filter(code=scraper).all() ]
             
         result.append(res)
         if len(result) > maxrows:
