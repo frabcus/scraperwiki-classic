@@ -387,10 +387,12 @@ function execute(http_req, http_res, raw_request_data) {
 					var left = local_script.response.jsonbuffer.join("");
 					var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
 					if ( m == null ) {
+						util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
 						var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
 						partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";					
 						util.write_to_caller( resp, partial );
 					} else {
+						util.log.debug( "Looks like the remaining data is JSON soe sending as is");						
 						util.write_to_caller( resp, left.toString() );
 					}					
 				}
