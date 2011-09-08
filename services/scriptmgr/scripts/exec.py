@@ -101,7 +101,12 @@ except Exception, e:
     assert etb.get('message_type') == 'exception'
     scraperwiki.dumpMessage(etb)
 except SystemExit, se:
+    sys.stdout.flush()
     sys.stderr.flush()
+
+    import time 
+    time.sleep(2)
+    
     raise se
 
 sys.stdout.flush()
