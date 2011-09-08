@@ -34,6 +34,7 @@ class SW_DataStoreClass
             socket_getsockname ($this->m_socket, $addr, $port) ;
             $getmsg = sprintf  ("GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n", trim(`/bin/hostname`), $port, urlencode($this->m_scrapername), urlencode($this->m_runid)) ;
             socket_send        ($this->m_socket, $getmsg, strlen($getmsg), MSG_EOR) ;
+
             socket_recv        ($this->m_socket, $buffer, 0xffff, 0) ;
             $result = json_decode($buffer, true);
             if ($result["status"] != "good")

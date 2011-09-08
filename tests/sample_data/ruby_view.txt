@@ -3,7 +3,8 @@ sourcescraper = '{{sourcescraper}}'
 limit = 20
 offset = 0
 
-keys = ScraperWiki.getKeys(sourcescraper)
+ScraperWiki.attach(sourcescraper)
+keys = ScraperWiki.sqliteexecute('select * from `%s`.swdata limit 0' % sourcescraper)['keys']
 keys.sort()  # alphabetically
 
 puts "<h2>Some data from scraper: #{sourcescraper}  (#{keys.length} columns)</h2>"
@@ -17,7 +18,7 @@ end
 puts "</tr>"
 
 # rows
-ScraperWiki.getData(sourcescraper, limit, offset).each do |row|
+ScraperWiki.select('* from `%s`.swdata limit ? offset ?' % sourcescraper, [limit, offset]).each do |row|
     puts "<tr>"
     keys.each do |key|
       print "<td>#{row[key]}</td>"

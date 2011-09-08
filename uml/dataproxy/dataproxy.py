@@ -65,17 +65,22 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             uml_host = None            
         
         host = None
+        add = None
         try:
-            host      = config.get("dataproxy", 'lxc_server')
-            uml_host = None
+            host = config.get("dataproxy", 'lxc_server')
+            add  = host[0:host.find(':')]
         except:
             host = None
+
         self.logger.debug(str({"uml":uml, "uml_host":uml_host, "host":host}))
         self.attachauthurl = config.get("dataproxy", 'attachauthurl')
 
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        if host and rem[0].startswith("10.0"):
+        
+        self.logger.debug("INCOMING:" + rem[0])                
+        
+        if host and (rem[0].startswith(add) or rem[0].startswith('10.0.1')):
             lident = urllib.urlopen ('http://%s/Ident?%s:%s' % (host, rem[0], loc[1])).read()               
         else:
             via    = config.get(uml, 'via' )

@@ -230,8 +230,8 @@ function execute(http_req, http_res, raw_request_data) {
 				var startTime = new Date();
 				var environ = util.env_for_language(script.language, extra_path);
 				
-				if (scraper.query)
-					environ['QUERY_STRING'] = scraper.query;
+				if (script.query)
+					environ['QUERY_STRING'] = script.query;
 				
 				if (httpproxy) {
 					environ['http_proxy'] = 'http://' + httpproxy;
@@ -281,14 +281,14 @@ function execute(http_req, http_res, raw_request_data) {
 
 				// If we have something left in the buffer we really should flush it about
 				// now. Suspect this will only be PHP
-				if ( local_script.response.jsonbuffer && local_script.response.jsonbuffer.length > 0 ) {
+				if ( script.response.jsonbuffer && script.response.jsonbuffer.length > 0 ) {
 					util.log.debug('We still have something left in the buffer');
-					util.log.debug( local_script.response.jsonbuffer );
+					util.log.debug( script.response.jsonbuffer );
 				
-					var left = local_script.response.jsonbuffer.join("");
+					var left = script.response.jsonbuffer.join("");
 					if ( left && left.length > 0 ) {
 						// reset the buffer for the final run
-						local_script.response.jsonbuffer = [];
+						script.response.jsonbuffer = [];
 						var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
 						if ( m == null ) {
 							util.log.debug( "Looks like the remaining data is not JSON so need to wrap");

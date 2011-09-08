@@ -91,6 +91,14 @@ $(function()
         $('#detail').css('minHeight', $('#functions').height());
     }
 
+    $('#id_format').change(function() { 
+        if ($("#id_format option[value='rss2']").attr("selected")) {
+            $("#rss2_help").show(500);
+        } else {
+            $("#rss2_help").hide(500);
+        }
+    } );
+
     if (window.location.hash)
         setTimeout(function() { $('#functions a[href='+window.location.hash+']').click(); }, 200); 
     if ($('#detail #id_name').val())
@@ -153,7 +161,7 @@ $(function()
             {
                 url: $('#id_api_base').val()+"scraper/search",
                 dataType: "jsonp",
-                data: { format:"jsondict", maxrows: 12, searchquery: request.term },
+                data: { format:"jsondict", maxrows: 12, quietfields:"description", searchquery: request.term },
                 success: function(data) 
                 {
                     response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
@@ -312,15 +320,24 @@ $(function()
             <input class="hide" type="text" name="category" id="id_category">
             <input class="hide" type="text" name="function" id="id_category_title">
         	<li class="format">
-                <label for="id_format">format</label>
+                <label for="id_format">format
+                    <span class="desc"> 
+                        <span id="rss2_help" style="display:none"> 
+                            to make an RSS feed you need to use SQL's "as" 
+                            keyword (e.g. "select name as description")
+                            to make columns called <strong>title</strong>, 
+                            <strong>link</strong>, <strong>description</strong>,
+                            <strong>guid</strong> (optional, uses link if not available) and
+                            <strong>pubDate</strong> or <strong>date</strong>
+                        </span> 
+                    </span> 
+                </label>
                 <select type="text" name="format" id="id_format">
                     <option value="jsondict" selected>jsondict</option>
                     <option value="jsonlist">jsonlist</option>
                     <option value="csv">csv</option>
                     <option value="htmltable">htmltable</option>
-                    {% if user.is_staff %}                
-                        <option class="staff" value="rss2">rss2</option>
-                    {% endif %}
+                    <option value="rss2">rss2</option>
                 </select>
         	</li> 
         	<li class="name">

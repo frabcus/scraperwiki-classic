@@ -2447,6 +2447,7 @@ div.tab_tools form {
 #divScraperTags h2,
 #scraper_views h2,
 #scraper_contributors h3,
+#scraper_attachables h3,
 #scraper_schedule h3 {
 	margin-bottom: 8px;
 	padding-bottom: 3px;
@@ -2502,7 +2503,51 @@ div.tab_tools form {
 	vertical-align: top;
 }
 
-#addneweditor {
+#scraper_attachables {
+    width: 55%;
+    padding-right: 5%;
+}
+
+#scraper_attachables ul {
+    padding: 0;
+    border: 1px solid #ddd;
+    margin-bottom: 0;
+}
+
+#scraper_attachables li {
+    padding: 10px;
+    line-height: 24px;
+}
+
+#scraper_attachables li:nth-child(2n) {
+    background-color: #F4F8FB;
+}
+
+#scraper_attachables li a {
+    text-decoration: none;
+}
+
+#scraper_attachables li.status.private {
+    background-image: url(../images/icons/shield-private.png);
+    background-repeat: no-repeat;
+    background-position: right center;
+    color: #4e118e;
+}
+
+#scraper_attachables li.status.protected  {
+    background-image: url(../images/icons/shield-protected.png);
+    background-repeat: no-repeat;
+    background-position: right center;
+    color: #8f6316;
+}
+
+#scraper_attachables li a:hover {
+    color: #13537d;
+}
+
+
+
+#addneweditor, #addnewattachable {
 	background-image: none;
 	padding: 5px 10px;
 	background: #f6f6f6;
@@ -2517,7 +2562,7 @@ border: 1px solid #ddd;
 border-top: navajowhite;
 }
 
-#addneweditor a {
+#addneweditor a, #addnewattachable a {
 	text-decoration: none;
 	color: #3d7b35;
 	font-size: 14px;
@@ -2527,27 +2572,33 @@ border-top: navajowhite;
 	text-shadow: 0 1px 0 #fff;
 }
 
-#addneweditor a:hover {
+#addneweditor a:hover, #addnewattachable a:hover {
 	color: #23461e;
 }
 
-#addneweditor a img {
+#addneweditor a img, #addnewattachable a img {
 	margin-right: 3px;
 	vertical-align: -2px;
 }
 
-#addneweditor span {
+#addneweditor span, #addnewattachable span {
 	font-size: 14px;
 	color: #333;
 }
 
 #addneweditor input.text {
 	padding: 2px 4px;
-	width: 140px;
+	width: 110px;
 	margin-left: 4px;
 }
 
-#contributorserror {
+#addnewattachable input.text {
+    padding: 2px 4px;
+    width: 100px;
+    margin-left: 4px;
+}
+
+#contributorserror, #attachableserror {
 	background-image: none;
 	padding: 5px 10px;
 	background: #ffaaaa;
@@ -2562,7 +2613,9 @@ border-top: navajowhite;
 }
 
 
-#addneweditor .addbutton, #addneweditor .cancelbutton {
+#addneweditor .addbutton, #addneweditor .cancelbutton, 
+#addnewattachable .addbutton, #addnewattachable .cancelbutton 
+{
 	float: right;
 	margin-left: 10px;
 	margin-top: 3px;

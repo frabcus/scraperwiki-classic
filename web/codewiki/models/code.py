@@ -50,9 +50,9 @@ PRIVACY_STATUSES = (
 
 STAFF_ACTIONS = set(["run_scraper"])
 CREATOR_ACTIONS = set(["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ])
-EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor"])
+EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor", "change_attachables", "attachable_add"])
 STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let staff also do anything a creator / editor can, except save code is a bit rude (for now!)
-VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription"])
+VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ])
 
 
 def scraper_search_query(user, query):
@@ -181,6 +181,13 @@ class Code(models.Model):
         if self.pk:
             requesters = self.users.filter(usercoderole__role='requester')
         return requesters        
+
+    def attachable_scraperdatabases(self):
+        return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all() ]
+
+    def attachfrom_scrapers(self):
+        return [ cp.code  for cp in CodePermission.objects.filter(permitted_object=self).all() ]
+        
 
     def add_user_role(self, user, role='owner'):
         """
@@ -334,7 +341,7 @@ class Code(models.Model):
             return {'heading': 'Not authorized', 'body': "Only owner can do action %s" % action}
         if action in EDITOR_ACTIONS:
             if self.privacy_status != "public":
-                return {'heading': 'Not authorized', 'body': "this %s can only be edited by its owner and designated editors" % self.wiki_type}
+                return {'heading': 'Not authorized', 'body': "This %s can only be edited by its owner and designated editors" % self.wiki_type}
             if not user.is_authenticated():
                 return {'heading': 'Not authorized', 'body': "Only logged in users can edit things"}
         if action in VISIBLE_ACTIONS:
@@ -362,6 +369,9 @@ class Code(models.Model):
         return self.short_name[-8:] == '.emailer'
 
 
+# I think this is another of those things that could be saved into the mercurial docs field 
+# (as a query_string itself) so we can use the history and editing permissions all there.
+# would considerably simplify the situation
 class CodeSetting(models.Model):
     """
     A single key=value setting for a scraper/view that is editable for that
@@ -398,76 +408,14 @@ class CodePermission(models.Model):
     A uni-directional permission to read/write to a particular scraper/view
     for another scraper/view.
     """
-    code  = models.ForeignKey(Code, related_name='permissions')    
-    can_read  = models.BooleanField( default=False )
-    can_write = models.BooleanField( default=False )    
-    permitted_object  = models.ForeignKey(Code, related_name='permitted')    
-    
-    @staticmethod
-    def can_object_write( obj, tgt ):
-        """
-        Can the object obj write to the object tgt
-        """
-        if obj == tgt:
-            return True        
-        return CodePermission.objects.filter(code=obj,
-                                             permitted_object=tgt,
-                                             can_write=True).count() > 0
-                                             
-    @staticmethod
-    def can_object_read( obj, tgt ):
-        """
-        Can the object obj read from the object tgt
-        """
-        if obj == tgt:
-            return True
-        return CodePermission.objects.filter(code=obj,
-                                             permitted_object=tgt,
-                                             can_read=True).count() > 0                                             
-    
-    @staticmethod 
-    def grant_read( from_obj, to_obj ):
-        """
-        Give 'from_obj' permission to read from 'to_obj'
-        """
-        if from_obj == to_obj:
-            return
-            
-        granted = False
-        try:
-            obj = CodePermission.objects.get(code=from_obj,
-                                             permitted_object=to_obj)
-            obj.can_read = True
-            obj.save()
-        except CodePermission.DoesNotExist:
-            c = CodePermission(code=from_obj,permitted_object=to_obj, can_read=True)
-            c.save()
-
-    @staticmethod 
-    def grant_write( from_obj, to_obj ):
-        """
-        Give 'from_obj' permission to write to 'to_obj'
-        """
-        if from_obj == to_obj:
-            return
-        
-        granted = False
-        try:
-            obj = CodePermission.objects.get(code=from_obj,
-                                             permitted_object=to_obj)
-            obj.can_write = True
-            obj.save()
-        except CodePermission.DoesNotExist:
-            c = CodePermission(code=from_obj,permitted_object=to_obj, can_write=True)
-            c.save()
-        
+    code = models.ForeignKey(Code, related_name='permissions')    
+    can_read  = models.BooleanField( default=False )   # delete this field
+    can_write = models.BooleanField( default=False )   # delete this field
+    permitted_object = models.ForeignKey(Code, related_name='permitted')    # should call this permitted_code so we don't assume is untyped
     
     def __unicode__(self):
-        return u'%s can read(%s) write(%s) %s' % (self.code.short_name, 
-                                                  self.can_read, 
-                                                  self.can_write,
-                                                  self.permitted_object.short_name,)
-        
+        return u'%s CANATTACHTO %s' % (self.code.short_name, self.permitted_object.short_name,)
+
     class Meta:
         app_label = 'codewiki'
     
