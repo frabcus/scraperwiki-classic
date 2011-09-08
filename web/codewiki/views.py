@@ -155,14 +155,19 @@ def code_overview(request, wiki_type, short_name):
         return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
 
     #
-    # else section
+    # (else) scraper type section
     #
     assert wiki_type == 'scraper'
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["license_choices"] = models.LICENSE_CHOICES
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
-   
+
+    previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__.*?\n(.*?)\n__ENDPREVIEWSQL__", scraper.description)
+    previewrssfeeds = re.findall("(?s)__BEGINPREVIEWRSS__.*?\n(.*?)\n__ENDPREVIEWRSS__", scraper.description)
+    
+        # there's a good case for having this load through the api by ajax
+        # instead of inlining it and slowing down the page load considerably
     dataproxy = None
     try:
         dataproxy = DataStore(scraper.short_name)
@@ -179,9 +184,30 @@ def code_overview(request, wiki_type, short_name):
                     context['sqliteconnectionerror'] = sqlitedata['status']
             else:
                 context['sqliteconnectionerror'] = 'Response with unexpected format'
-        else:
+
             # success, have good data
-            context['sqlitedata'] = sqlitedata['tables']
+        else:
+            context['sqlitedata'] = [ ]
+            for sqltablename, sqltabledata in sqlitedata['tables'].items():
+                sqltabledata["tablename"] = sqltablename
+                context['sqlitedata'].append(sqltabledata)
+
+            try:
+                beta_user = request.user.get_profile().beta_user
+            except frontend.models.UserProfile.DoesNotExist:
+                beta_user = False
+            except AttributeError:  # happens with AnonymousUser which has no get_profile function!
+                beta_user = False
+                
+            # add in the user defined sql tables.  
+            # the hazard is if you put in a very large request then it will time out before 
+            # your page gets generated, so we must protect against this type of thing
+            if beta_user:
+                for utabnum, previewsqltable in reversed(list(enumerate(previewsqltables))):
+                    lsqlitedata = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery":previewsqltable, "data":[]})
+                    if "keys" in lsqlitedata:   # otherwise 'error' is in the result
+                        context['sqlitedata'].insert(0, {"tablename":"user_defined_%d"%(utabnum+1), "keys":lsqlitedata["keys"], "rows":lsqlitedata["data"], "sql":previewsqltable})
+
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
 

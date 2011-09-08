@@ -35,21 +35,21 @@
     {% endif %}
 
     <div class="data_viewer">
-
         {% if sqlitedata %}
           <div class="data_options">
             <a href="#" class="csv" id="downloadcsvtable" rel="nofollow">Download spreadsheet (CSV)</a>
           </div>
 
-    	   <ul class="data_tabs">
-             {% for sqltablename, sqltabledata in sqlitedata.items %}
-                <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
-                    <span class="tablename">{{sqltablename}}</span> ({{sqltabledata.count}}  rows)
-                </li>
-             {% endfor %}
-				<li class="clear"></li>
-           </ul>
-          {% for sqltablename, sqltabledata in sqlitedata.items %}
+          <ul class="data_tabs">
+            {% for sqltabledata in sqlitedata %}
+              <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
+                <span class="tablename">{{sqltabledata.tablename}}</span> ({{sqltabledata.count}}  rows)
+              </li>
+            {% endfor %}
+            <li class="clear"></li>
+          </ul>
+
+          {% for sqltabledata in sqlitedata %}
             <div id="data_content_{{forloop.counter}}" class="data_content">
             <table class="data">
               <thead>
@@ -69,7 +69,7 @@
               </p>
           </div>
           <ul id="sqlite_schema" style="display: none">
-            {% for sqltablename, sqltabledata in sqlitedata.items %}
+            {% for sqltabledata in sqlitedata %}
               <li>{{sqltabledata.sql}}</li>
             {% endfor %}
            </ul>
