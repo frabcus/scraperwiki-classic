@@ -230,8 +230,8 @@ function execute(http_req, http_res, raw_request_data) {
 				var startTime = new Date();
 				var environ = util.env_for_language(script.language, extra_path);
 				
-				if (scraper.query)
-					environ['QUERY_STRING'] = scraper.query;
+				if (script.query)
+					environ['QUERY_STRING'] = script.query;
 				
 				if (httpproxy) {
 					environ['http_proxy'] = 'http://' + httpproxy;
