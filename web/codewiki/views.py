@@ -163,8 +163,9 @@ def code_overview(request, wiki_type, short_name):
     context["license_choices"] = models.LICENSE_CHOICES
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
-    previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__\s*.*?\s*?\n(.+?)\n__ENDPREVIEWSQL__", scraper.description)
-    previewrssfeeds = re.findall("(?s)__BEGINPREVIEWRSS__.*?\n(.+?)\s*?\n__ENDPREVIEWRSS__", scraper.description)
+    previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWSQL__", scraper.description)
+    previewrssfeeds = re.findall("(?s)__BEGINPREVIEWRSS__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWRSS__", scraper.description)
+    print previewsqltables
     
         # there's a good case for having this load through the api by ajax
         # instead of inlining it and slowing down the page load considerably

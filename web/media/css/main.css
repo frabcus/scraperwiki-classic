@@ -2527,6 +2527,20 @@ div.tab_tools form {
     text-decoration: none;
 }
 
+#scraper_attachables li.status.private {
+    background-image: url(../images/icons/shield-private.png);
+    background-repeat: no-repeat;
+    background-position: right center;
+    color: #4e118e;
+}
+
+#scraper_attachables li.status.protected  {
+    background-image: url(../images/icons/shield-protected.png);
+    background-repeat: no-repeat;
+    background-position: right center;
+    color: #8f6316;
+}
+
 #scraper_attachables li a:hover {
     color: #13537d;
 }
