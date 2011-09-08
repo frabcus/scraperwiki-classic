@@ -105,8 +105,8 @@ except SystemExit, se:
     sys.stderr.flush()
 
     import time 
-    time.sleep(2)
-    
+    time.sleep(0)
+
     raise se
 
 sys.stdout.flush()
