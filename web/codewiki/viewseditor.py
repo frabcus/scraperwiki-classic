@@ -213,7 +213,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
             context['revuserrealname'] = revuser.get_profile().name
         except frontend.models.UserProfile.DoesNotExist:
             context['revuserrealname'] = revuser.username
-        except AttributeError:
+        except AttributeError:  # happens with AnonymousUser which has no get_profile function!
             context['revuserrealname'] = revuser.username
                 
     # create a temporary scraper object
