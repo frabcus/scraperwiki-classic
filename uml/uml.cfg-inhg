@@ -1,86 +1,121 @@
 [dispatcher]
-host    = 89.16.177.212
-port    = 9000
-umllist = uml001,uml002,uml003,uml004
-confurl = http://localhost:8080/whitelist/config
-path    = /scraperwiki/live/scrapers,/scraperwiki/live/scraperlibs
+host	= 127.0.0.1
+port	= 9000
+umllist	= lxc001
+confurl	= allwhite
+;path    = /scraperwiki/live/scrapers,/scraperwiki/live/scraperlibs
 
 [twister]
-statusurl = http://localhost:8080/scrapers/twister/status
 port      = 9010
 djangokey = jshdowpabzsdofosiw976gbjksjdbfslkaoapwebnvdjflg
+djangourl = http://localhost:8000
+apiurl = http://localhost:8010
 
 [webproxy]
-host    = 46.43.55.84
-port    = 9002
+host	= 127.0.0.1
+port	= 9002
 
 [httpproxy]
-host    = 46.43.55.84
-port    = 9005
+host	= 127.0.0.1
+port	= 9005 
+dbhost  = localhost
 cache   = 127.0.0.1:11211
+lxc_server = 127.0.0.1
 
 [httpsproxy]
-host    = 46.43.55.84
-port    = 9006
+host	= 127.0.0.1
+port	= 9006
+dbhost  = localhost 
+user    = scraperwiki
+passwd  = scraperwiki
+db      = scraperwiki_cache
 cache   = 127.0.0.1:11211
 
 [ftpproxy]
-host    = 46.43.55.84
-port    = 9004
+host	= 127.0.0.1
+port	= 9004
 
 [dataproxy]
-dbtype  = mysql
-host    = 46.43.55.84
-port    = 9003
-user    = datastore
-passwd  = 
-db      = datastore_live
-secure  = 89.16.177.212
-resourcedir = /var/www/scraperwiki/resourcedir
+dbtype	= sqlite3
+host	= 127.0.0.1
+port	= 9003
+user	= scraperwiki
+passwd	= scraperwiki
+db	= scraperwiki_datastore
+resourcedir = ../resourcedir
 max_api_distance = 10
+secure	= 127.0.0.1
+lxc_server = 127.0.0.1:9001
+attachauthurl = http://localhost:8000/attachauth
 
+; Ross' machine
+[ross-work.local]
+host    = 127.0.0.1
+tap = 127.0.0.1
+eth = 127.0.0.1
+port    = 9001
+via = 9001
+mem = 128M
+count   = 25
+
+
+; Francis's machine
+[bat]
+host	= 127.0.0.1
+tap	= 127.0.0.1
+eth	= 127.0.0.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 25
+
+[ubuntu1]
+host	= 127.0.0.1
+tap	= 127.0.0.1
+eth	= 127.0.0.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 25
+
+[A-2]
+host	= 127.0.0.1
+tap	= 127.0.0.1
+eth	= 127.0.0.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 25
+
+[lxc001]
+host = 127.0.0.1
+port = 9001
+mem = 256M
+count = 25
+via = 9001
+count = 50
+beta_only = 1
 
 [uml001]
-host    = 46.43.55.84
-tap = 192.168.254.101
-eth = 192.168.254.1
-port    = 9001
-via = 9101
-mem = 1024M
-count   = 25
-
-
+host	= 127.0.0.1
+tap	= 192.168.254.101
+eth	= 192.168.254.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 25
+beta_only = 0
 
 [uml002]
-host    = 46.43.55.84
-tap = 192.168.254.102
-eth = 192.168.254.2
-port    = 9001
-via = 9102
-mem = 1024M
-count   = 25
+host	= 127.0.0.1
+tap	= 192.168.254.101
+eth	= 192.168.254.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 2
+beta_only = 0
 
-
-
-[uml003]
-host    = 46.43.55.84
-tap = 192.168.254.103
-eth = 192.168.254.3
-port    = 9001
-via = 9103
-mem = 1024M
-count   = 25
-
-
-
-[uml004]
-host    = 46.43.55.84
-tap = 192.168.254.104
-eth = 192.168.254.4
-port    = 9001
-via = 9104
-mem = 1024M
-count   = 25
 
 
 [loggers]
@@ -140,10 +175,10 @@ formatter=simpleFormatter
 args=(sys.stdout,)
 
 [handler_logfileHandlerWarnings]
-class=handlers.ConcurrentRotatingFileHandler
+class=handlers.RotatingFileHandler
 level=WARNING
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/allwarnings.log', "a", 1000000000, 5)
+args=('/var/log/scraperwiki/allwarnings.log', "a", 10485760, 5)
 
 [handler_logfileHandlerEmail]
 class=handlers.SMTPHandler
@@ -153,42 +188,41 @@ args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 
 
 
 [handler_logfileHandlerControllerDebug]
-class=handlers.ConcurrentRotatingFileHandler
+class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/controller.log', "a", 1000000000, 5)
+args=('/var/log/scraperwiki/controller.log', "a", 10485760, 5)
 
 [handler_logfileHandlerDataproxyDebug]
-class=handlers.ConcurrentRotatingFileHandler
+class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/dataproxy.log', "a", 1000000000, 5)
+args=('/var/log/scraperwiki/dataproxy.log', "a", 10485760, 5)
 
 [handler_logfileHandlerDispatcherDebug]
-class=handlers.ConcurrentRotatingFileHandler
+class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/dispatcher.log', "a", 1000000000, 5)
+args=('/var/log/scraperwiki/dispatcher.log', "a", 10485760, 5)
 
 [handler_logfileHandlerRunnerDebug]
-class=handlers.ConcurrentRotatingFileHandler
+class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/runner.log', "a", 1000000000, 5)
+args=('/var/log/scraperwiki/runner.log', "a", 10485760, 5)
 
 [handler_logfileHandlerTwisterDebug]
-class=handlers.ConcurrentRotatingFileHandler
+class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/twister.log', "a", 1000000000, 5)
+args=('/var/log/scraperwiki/twister.log', "a", 10485760, 5)
 
 [handler_logfileHandlerProxyDebug]
-class=handlers.ConcurrentRotatingFileHandler
+class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/proxy.log', "a", 1000000000, 5)
+args=('/var/log/scraperwiki/proxy.log', "a", 10485760, 5)
 
 [formatter_simpleFormatter]
 format=%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s
-
 

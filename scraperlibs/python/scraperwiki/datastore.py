@@ -63,7 +63,7 @@ def ensure_connected():
     if not m_socket:
         m_socket = socket.socket()
         m_socket.connect((m_host, m_port))
-        data = {"uml":socket.gethostname(), "port":m_socket.getsockname()[1]}
+        data = {"uml": 'lxc', "port":m_socket.getsockname()[1]}
         data["vscrapername"] = m_scrapername
         data["vrunid"] = m_runid
         data["attachables"] = " ".join(attachables)
