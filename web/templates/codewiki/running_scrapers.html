@@ -302,7 +302,11 @@ $(document).ready(function()
                         if (isstaff)
                             lil.push('<a class="killrunning" title="Kill running scraper">X</a>'); 
                         lil.push(getScraperfromScrapername(scrapername), ' <ul class="scraperusers"></ul></li>'); 
-                        $("#monitoroutput ul#scraperentries").append(lil.join("")); 
+                        if ((scraperusers.length != 0) && (scraperusers[0].chatname.substring(0, 11) == "*SCHEDULED*"))
+                            $("#monitoroutput ul#scraperentries").append(lil.join("")); 
+                        else
+                            $("#monitoroutput ul#scraperentries").prepend(lil.join("")); 
+
                         $("#monitoroutput ul#scraperentries a.killrunning").click(function() 
                         {
                             var scrapername = $(this).parent().find("a.scrapername").text(); 
