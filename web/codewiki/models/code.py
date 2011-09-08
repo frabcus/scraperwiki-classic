@@ -184,6 +184,9 @@ class Code(models.Model):
 
     def attachable_scraperdatabases(self):
         return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all() ]
+
+    def attachfrom_scrapers(self):
+        return [ cp.code  for cp in CodePermission.objects.filter(permitted_object=self).all() ]
         
 
     def add_user_role(self, user, role='owner'):

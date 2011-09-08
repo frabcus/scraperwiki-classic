@@ -3,7 +3,15 @@
 <ul id="databaseattachablelist">
   {% for attachablescraper in scraper.attachable_scraperdatabases %}
     <li class="{% ifequal attachablescraper.privacy_status 'visible' %}status protected{% endifequal %}{% ifequal attachablescraper.privacy_status 'private' %}status private{% endifequal %}">
-      <a href="{% url code_overview attachablescraper.wiki_type attachablescraper.short_name %}">{{attachablescraper.title}}</a>
+      [Attaches to] <a href="{% url code_overview attachablescraper.wiki_type attachablescraper.short_name %}">{{attachablescraper.title}}</a>
+    </li>
+  {% endfor %}
+</ul>
+
+<ul id="databaseattachfromlist">
+  {% for attachfromscraper in scraper.attachfrom_scrapers %}
+    <li class="{% ifequal attachfromscraper.privacy_status 'visible' %}status protected{% endifequal %}{% ifequal attachfromscraper.privacy_status 'private' %}status private{% endifequal %}">
+      <a href="{% url code_overview attachfromscraper.wiki_type attachfromscraper.short_name %}">{{attachfromscraper.title}}</a> [Attaches to here] 
     </li>
   {% endfor %}
 </ul>
