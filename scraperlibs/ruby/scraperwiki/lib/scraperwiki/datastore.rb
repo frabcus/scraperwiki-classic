@@ -47,11 +47,6 @@ class SW_DataStore
             getmsg = "GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n" % [Socket.gethostname(), port, sname, rid]
             @m_socket.send(getmsg, 0)
             @m_socket.flush()
-
-            hostheader = "Host: %s\n\n" % [Socket.gethostname()]
-            @m_socket.send(hostheader, 0)
-            @m_socket.flush()
-            
             
             buffer = @m_socket.recv(1024)
             result = JSON.parse(buffer)
