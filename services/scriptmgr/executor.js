@@ -279,9 +279,35 @@ function execute(http_req, http_res, raw_request_data) {
 					var endTime = new Date();
 					elapsed = (endTime - startTime) / 1000;
 
-					// 'CPU_seconds': 1, Temporarily removed
-        			res =  { 'message_type':'executionstatus', 'content':'runcompleted',  'elapsed_seconds' : elapsed, 'exit_status': 0 };
-					http_res.end( JSON.stringify( res ) + "\n" );
+				// If we have something left in the buffer we really should flush it about
+				// now. Suspect this will only be PHP
+				if ( local_script.response.jsonbuffer && local_script.response.jsonbuffer.length > 0 ) {
+					util.log.debug('We still have something left in the buffer');
+					util.log.debug( local_script.response.jsonbuffer );
+				
+					var left = local_script.response.jsonbuffer.join("");
+					if ( left && left.length > 0 ) {
+						// reset the buffer for the final run
+						local_script.response.jsonbuffer = [];
+						var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
+						if ( m == null ) {
+							util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
+							var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
+							partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";					
+							util.write_to_caller( resp, partial );
+						} else {
+							util.log.debug( "Looks like the remaining data is JSON soe sending as is");						
+							util.write_to_caller( resp, left.toString() );
+						}					
+					}						
+				}
+
+				// 'CPU_seconds': 1, Temporarily removed
+	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
+	               'elapsed_seconds' : elapsed };
+            	result.exit_status = code;
+
+					http_res.end( JSON.stringify( result ) + "\n" );
 										
 					util.log.debug('Finished writing responses');
 				});
