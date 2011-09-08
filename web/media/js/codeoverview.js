@@ -133,6 +133,36 @@ function reload_scraper_contributors(redirect)
     //    document.location.reload(true);
 }
 
+
+function reload_scraper_attachables(short_name, redirect)
+{
+    $('#attachables_loading').show();
+    $.ajax(
+        {
+            url:document.location,
+            cache: false,
+            type: 'GET', 
+            success:function(htmlpage){
+                $("#scraper_attachables").html($(htmlpage).find("#scraper_attachables").html())
+                $("#header_inner").html($(htmlpage).find("#header_inner").html())
+                setupChangeAttachables(short_name); 
+                $('#attachables_loading').hide();
+            },
+            error: function(jq, textStatus, errorThrown){
+                if ( redirect ) {
+                    window.location.href = redirect;
+                    return false;
+                }
+
+                alert( textStatus );
+                alert( errorThrown );
+            }
+        });
+
+    // original action: 
+    //    document.location.reload(true);
+}
+
 function setupCodeOverview(short_name)
 {
     //about
@@ -239,7 +269,7 @@ function changeRoles(sdata, redirect_to_on_fail) {
 	); 	
 }
 
-function setupChangeEditorStatus(short_name)
+function setupChangeEditorStatus()
 {
     // changing editor status
     $('#addneweditor a').click(function()
@@ -359,9 +389,10 @@ function setupChangeEditorStatus(short_name)
 	$('#privacy_status :radio').change(function(){
 		$('#saveprivacy').trigger('click');
 	});
+}   
     
-    
-    
+function setupChangeAttachables(short_name)
+{
     // adding and removing attachables
     $('#addnewattachable a').click(function()
     {
@@ -378,25 +409,43 @@ function setupChangeEditorStatus(short_name)
     $('#addnewattachable input.addbutton').click(function()
     {
         $('#attachablesserror').hide();
-        var thisli = $(this).parents("li:first"); 
-/*        var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
-        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
-            {
+        var sdata = { attachable:$('#addnewattachable input:text').val(), action:'add' }; 
+        $.ajax({url:$("#admincontrolattachables").val(), type: 'POST', data:sdata, success:function(result)
+        {
            
-                if (result.substring(0, 6) == "Failed") {
-                    $('#contributorserror').text(result).show(300);
-                } else {
-                    reload_scraper_contributors(); 
-                    $('#addneweditor span').hide(); 
-                    $('#addneweditor a').show(); 
-                }
-            },
-            error:function(jq, textStatus, errorThrown)
-            {
-                $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
+            if (result.substring(0, 6) == "Failed") {
+                $('#attachableserror').text(result).show(300);
+            } else {
+                reload_scraper_attachables(); 
+                $('#addnewattachable span').hide(); 
+                $('#addnewattachable a').show(); 
             }
-        }); 
-*/
+        },
+        error:function(jq, textStatus, errorThrown)
+        {
+            $('#attachableserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300); 
+        }}); 
+    }); 
+
+    $('#databaseattachablelist .removebutton').click(function() 
+    {
+        $('#attachableserror').hide();
+        var sdata = { attachable:$(this).parents("li:first").find("span").text(), action:'remove' }; 
+        $.ajax({url:$("#admincontrolattachables").val(), type: 'POST', data:sdata, success:function(result)
+        {
+           
+            if (result.substring(0, 6) == "Failed") {
+                $('#attachableserror').text(result).show(300);
+            } else {
+                reload_scraper_attachables(); 
+                $('#addnewattachable span').hide(); 
+                $('#addnewattachable a').show(); 
+            }
+        },
+        error:function(jq, textStatus, errorThrown)
+        {
+            $('#attachableserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300); 
+        }}); 
     }); 
     
     if ($('#addnewattachable input:text').length)

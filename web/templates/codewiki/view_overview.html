@@ -90,7 +90,8 @@
 $(document).ready(function() 
 {
     setupCodeOverview('{{scraper.short_name}}');
-    setupChangeEditorStatus('{{scraper.short_name}}');
+    setupChangeEditorStatus();
+    setupChangeAttachables('{{scraper.short_name}}'); 
     {% if user.is_authenticated %}
         setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this view.");
     {% endif %}

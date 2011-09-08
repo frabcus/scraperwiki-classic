@@ -1,10 +1,13 @@
-{#<input type="hidden" id="admincontroleditors" value="{% url scraper_admin_controleditors scraper.short_name %}"/>#}
+<input type="hidden" id="admincontrolattachables" value="{% url scraper_admin_controlattachables scraper.short_name %}"/>
 
 <ul id="databaseattachablelist">
   {% for attachablescraper in scraper.attachable_scraperdatabases %}
     <li class="{% ifequal attachablescraper.privacy_status 'visible' %}status protected{% endifequal %}{% ifequal attachablescraper.privacy_status 'private' %}status private{% endifequal %}">
       [Attaches to] <a href="{% url code_overview attachablescraper.wiki_type attachablescraper.short_name %}">{{attachablescraper.title}}</a>
       <span class="hide">{{attachablescraper.short_name}}</span>
+      {% if user_edits_it %}
+        <input type="button" value="remove" class="removebutton"/>
+      {% endif %}        
     </li>
   {% endfor %}
 </ul>
