@@ -104,6 +104,8 @@ except SystemExit, se:
     sys.stdout.flush()
     sys.stderr.flush()
 
+    # If we do not temporarily yield a slice of the CPU here then the launching 
+    # process will not be able to read from stderr before we exit.
     import time 
     time.sleep(0)
 
