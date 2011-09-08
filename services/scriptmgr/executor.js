@@ -385,6 +385,9 @@ function execute(http_req, http_res, raw_request_data) {
 					util.log.debug( local_script.response.jsonbuffer );
 				
 					var left = local_script.response.jsonbuffer.join("");
+
+					// reset the buffer for the final run
+					local_script.response.jsonbuffer = [];
 					var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
 					if ( m == null ) {
 						util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
