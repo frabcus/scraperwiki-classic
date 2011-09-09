@@ -3,7 +3,6 @@ SHELL=/bin/bash
 # m h  dom mon dow   command
 
 # Main scheduler that runs overdue scrapers
-#*/15 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py run_scrapers -m 20
 
 # Remove dummy users, scrapers etc. that the Selenium test script can make
 0 0 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py clear_selenium_byproducts
