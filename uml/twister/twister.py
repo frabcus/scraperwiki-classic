@@ -406,7 +406,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         urlquery = parsed_data.get('urlquery', '')
         username = parsed_data.get('username', '')
         beta_user = parsed_data.get('beta_user', False)
-        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, beta_user)
+        attachables = parsed_data.get('attachables', [])
+        rev = parsed_data.get('rev', '')
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, beta_user, attachables, rev)
         self.factory.notifyMonitoringClients(self)
         
         
@@ -619,7 +621,8 @@ class RunnerFactory(protocol.ServerFactory):
 
             logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
             beta_user = scraperoverdue.get("beta_user", False)
-            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, logger, beta_user)
+            attachables = scraperoverdue.get('attachables', [])
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, logger, beta_user, attachables, sclient.originalrev)
             self.notifyMonitoringClients(sclient)
 
 

@@ -307,7 +307,9 @@ def scraper_search_handler(request):
         # extra data added to the overdue request kind for direct use
         if boverduescraperrequest:
             res['overdue_proportion'] = float(scraper.overdue_proportion)
-            res['code'] = scraper.get_vcs_status(-1)["code"]
+            vcsstatus = scraper.get_vcs_status(-1)
+            res['code'] = vcsstatus["code"]
+            res["rev"] = vcsstatus.get("prevcommit", {}).get("rev", -1)
             res['guid'] = scraper.guid
             res["attachables"] = [ cp.permitted_object.short_name  for cp in CodePermission.objects.filter(code=scraper).all() ]
             

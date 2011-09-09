@@ -168,12 +168,13 @@ class MercurialInterface:
         
         # fetch code from reversion or the file
         # (beware, this is only of the changed files, so will confound when docs are included)
+        # however getcommitlog filters to the revs that only include the requested file
         if "currcommit" in status:
             reversion = self.getreversion(status["currcommit"]["rev"])
             for filename in validfilenames:
                 if filename in reversion["text"]:
                     status[filename] = reversion["text"].get(filename)
-        
+            
         # get information about the saved file (which we will if there's no current revision selected -- eg when rev in [-1, None]
         else:
             for filename in validfilenames:
