@@ -80,7 +80,8 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
             if re.search(allow, path) :
                 return True
 
-        return False
+        # Temporarily allow all FTP domains
+        return True
 
     def ident (self) :
 
@@ -172,6 +173,8 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                 line, text = text.split ('\n', 1)
                 line       = line.rstrip()
                 args       = line.split (' ',  2)
+
+                print line,args
 
                 if args[0] == 'QUIT' :
                     self.request.send ("221 Toodle-pip.\n")
