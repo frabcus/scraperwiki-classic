@@ -81,7 +81,7 @@ def virtualenv(command):
     return run(temp + env.activate + '&&' + command)
 
 def buildout():
-    virtualenv('buildout -N')
+    virtualenv('buildout -N -q')
 
 def write_changeset():
     try:
