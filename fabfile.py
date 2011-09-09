@@ -140,11 +140,6 @@ def deploy():
     then restart the webserver
     """
 
-    print "***************** DEPLOY *****************"
-    if env.email_deploy:
-        print "(Optional, hit return if it's just routine) Enter your deploy comment: \r"
-        message = raw_input()
-
     env.name = getpass.getuser()
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
@@ -165,22 +160,17 @@ def deploy():
     write_changeset()
     install_cron()
     if env.email_deploy:
-        email(message, old_revision, new_revision)
+        email(old_revision, new_revision)
 
     print "Deploy successful"
     print "Old revision = %s" % old_revision
     print "New revision = %s" % new_revision
 
-def email(message_body=None, old_revision=None, new_revision=None):
-    if not message_body:
-        message_body = "(no deploy comment)"
-    
+def email(old_revision=None, new_revision=None):
     message = """From: ScraperWiki <developers@scraperwiki.com>
 Subject: New Scraperwiki Deployment to %(cron_version)s (deployed by %(user)s)
 
-%(user)s deployed changeset %(changeset)s, with the following comment:
-
-%(message_body)s
+%(user)s deployed changeset %(changeset)s
 
 Old revision: %(old_revision)s
 New revision: %(new_revision)s
@@ -189,7 +179,6 @@ New revision: %(new_revision)s
         'cron_version' : env.cron_version,
         'user' : env.name,
         'changeset' : env.changeset,
-        'message_body' : message_body,
         'old_revision': old_revision,
         'new_revision': new_revision,
         }
