@@ -115,13 +115,6 @@ def run_puppet():
 def buildout():
     run_in_virtualenv('buildout -N -q')
 
-def write_changeset():
-    try:
-        env.changeset = run_in_virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
-        run_in_virtualenv("echo %(changeset)s > web/changeset.txt" % env)
-    except:
-        env.changeset = ""
-
 def update_revision():
     """
     Put the current HG revision in a file so that Django can use it to avoid caching JS files
@@ -155,7 +148,6 @@ def deploy():
         update_revision()
         restart_webserver()   
 
-    write_changeset()
     install_cron()
     if env.email_deploy:
         email(old_revision, new_revision)
