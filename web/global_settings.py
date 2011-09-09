@@ -20,7 +20,7 @@ sys.path.append('web')
 
 # Django settings for scraperwiki project.
 
-DEBUG = False
+DEBUG = True
 
 TIME_ZONE = 'Europe/London'
 LANGUAGE_CODE = 'en-uk'
@@ -211,6 +211,9 @@ SESSION_COOKIE_SECURE = False
 
 # Enable logging of errors to text file, taken from:
 # http://stackoverflow.com/questions/238081/how-do-you-log-server-errors-on-django-sites
+import logging
+from middleware import exception_logging
+logging.custom_handlers = exception_logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -230,7 +233,7 @@ LOGGING = {
         },
         # Log to a text file that can be rotated by logrotate
         'logfile': {
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.custom_handlers.WorldWriteRotatingFileHandler',
             'filename': '/var/log/scraperwiki/django-www.log',
             'mode': 'a',
             'maxBytes': 100000,
