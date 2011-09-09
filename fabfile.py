@@ -143,11 +143,10 @@ def deploy():
     env.name = getpass.getuser()
     import time
 
-    old_revision = run("cd %(path)s; hg identify" % env)
-
-    run("cd %(path)s; hg pull; hg update -C %(branch)s" % env)
-
-    new_revision = run("cd %(path)s; hg identify" % env)
+    with cd(env.path):
+        old_revision = run("hg identify")
+        run("hg pull; hg update -C %(branch)s" % env)
+        new_revision = run("hg identify" % env)
     
     if env.webserver:
         buildout()
