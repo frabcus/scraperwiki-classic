@@ -86,7 +86,24 @@ def run_in_virtualenv(command):
     temp = 'cd %s; source ' % env.path
     return run(temp + env.activate + '&&' + command)
 
-###########################################################################
+def email(old_revision=None, new_revision=None):
+    message = """From: ScraperWiki <developers@scraperwiki.com>
+Subject: New Scraperwiki Deployment to %(cron_version)s (deployed by %(user)s)
+
+%(user)s deployed changeset %(changeset)s
+
+Old revision: %(old_revision)s
+New revision: %(new_revision)s
+
+""" % {
+        'cron_version' : env.cron_version,
+        'user' : env.name,
+        'changeset' : env.changeset,
+        'old_revision': old_revision,
+        'new_revision': new_revision,
+        }
+    sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
+ ###########################################################################
 # Tasks
 
 @task
@@ -144,11 +161,11 @@ def deploy():
     if env.webserver:
         buildout()
         migrate()
-        create_tarball()
         update_revision()
         restart_webserver()   
 
     install_cron()
+
     if env.email_deploy:
         email(old_revision, new_revision)
 
@@ -156,24 +173,7 @@ def deploy():
     print "Old revision = %s" % old_revision
     print "New revision = %s" % new_revision
 
-def email(old_revision=None, new_revision=None):
-    message = """From: ScraperWiki <developers@scraperwiki.com>
-Subject: New Scraperwiki Deployment to %(cron_version)s (deployed by %(user)s)
-
-%(user)s deployed changeset %(changeset)s
-
-Old revision: %(old_revision)s
-New revision: %(new_revision)s
-
-""" % {
-        'cron_version' : env.cron_version,
-        'user' : env.name,
-        'changeset' : env.changeset,
-        'old_revision': old_revision,
-        'new_revision': new_revision,
-        }
-    sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
-    
+   
 def migrate():
     run_in_virtualenv('cd web; python manage.py syncdb')
     run_in_virtualenv('cd web; python manage.py migrate')
@@ -181,9 +181,6 @@ def migrate():
 def restart_webserver():
     "Restart the web server"
     sudo('apache2ctl graceful')
-
-def create_tarball():
-    run_in_virtualenv("mkdir -p ./web/media/src/; hg archive -t tgz ./web/media/src/scraperwiki.tar.gz")
 
 @task
 def test():
