@@ -165,7 +165,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         if command == 'connection_open':
             self.lconnectionopen(parsed_data)
 
-                # finds the appriate client and presses the run button on it
+                # finds the corresponding client and presses the run button on it
         elif command == 'stimulate_run':
             scrapername = parsed_data["scrapername"]
             guid = parsed_data["guid"]

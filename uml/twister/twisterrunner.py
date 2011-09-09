@@ -154,6 +154,7 @@ def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, clie
     jdata["code"] = code.replace('\r', '')
     jdata["cpulimit"] = 80
     jdata["draft"] = (not username)
+    jdata["username"] = username   # comes through when done with stimulate_run, and we can use this for the dataproxy permissions (whether it can add to the attachables list)
     jdata["language"] = language
     jdata["scraperid"] = guid
     jdata["urlquery"] = urlquery
