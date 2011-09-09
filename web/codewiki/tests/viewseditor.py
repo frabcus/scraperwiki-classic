@@ -15,7 +15,6 @@ class ScraperViewsEditorTests(TestCase):
         self.assertEqual(response.status_code, 200)
         
     def test_run_event_json(self):
-        import pdb; pdb.set_trace()
         response = self.client.get(reverse('run_event_json', kwargs={'run_id':2}))
         self.assertEqual(response.status_code, 200)
   
