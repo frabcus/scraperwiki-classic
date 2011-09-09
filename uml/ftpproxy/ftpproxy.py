@@ -95,7 +95,29 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
 
         rem       = self.request.getpeername()
         loc       = self.request.getsockname()
-        ident     = urllib.urlopen ('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], loc[1])).read()
+        
+        lxc_server = None
+        try:
+            lxc_server = config.get("ftpproxy", 'lxc_server')
+        except:
+            pass
+                
+        ident = ""    
+        for attempt in range(5):
+            try:
+                # If the connection comes form the lxc_server (that we know about from config)
+                # then use it.
+                if lxc_server and '10.0' in rem[0]:
+                    print 'using LXC at ', lxc_server
+                    ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
+                else:
+                    print 'Attempting old-style ident'
+                    ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
+                if ident.strip() != "":
+                    break
+            except:
+                pass
+                    
         for line in string.split (ident, '\n') :
             if line == '' :
                 continue

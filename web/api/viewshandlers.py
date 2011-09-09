@@ -327,13 +327,7 @@ def scraper_search_handler(request):
         response['Content-Disposition'] = 'attachment; filename=search.csv'
         return response
     
-    try:
-        res = json.dumps(result, indent=4)
-    except Exception,e:
-        import logging
-        logging.error("Error: " + e)
-        logging.error( result )
-        
+    res = json.dumps(result, indent=4)
     callback = request.GET.get("callback")
     if callback:
         res = "%s(%s)" % (callback, res)
