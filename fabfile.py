@@ -1,5 +1,9 @@
 import getpass
 
+# TODO:
+# Use "local" to run Django tests automatically
+# Use "local" to run Selenium tests.
+
 from fabric.api import *
 
 # globals
@@ -61,11 +65,11 @@ def setup():
     a full deployment
     """
 
-    sudo('hg clone file:///home/scraperwiki/scraperwiki %s' % env.path)        
-    sudo('chown -R %s %s' % (env.fab_user, env.path))
-    sudo('cd %s; easy_install virtualenv' % env.path)
-    run('hg clone %s %s', fail='ignore' % (env.web_path, env.path))
-    run('cd %s; virtualenv --no-site-packages .' % env.path)
+    sudo('hg clone file:///home/scraperwiki/scraperwiki %(path)s' % env)        
+    sudo('chown -R %(fab_user)s %(path)s' % env)
+    sudo('cd %(path)s; easy_install virtualenv' % env)
+    run('hg clone %(web_path)s %(path)s' % env, fail='ignore')
+    run('cd %(path)s; virtualenv --no-site-packages .' % env)
     virtualenv('easy_install pip')
 
     deploy()
@@ -86,7 +90,7 @@ def buildout():
 def write_changeset():
     try:
         env.changeset = virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
-        virtualenv("echo %s > web/changeset.txt" % env.changeset)
+        virtualenv("echo %(changeset)s > web/changeset.txt" % env)
     except:
         env.changeset = ""
 
@@ -97,8 +101,8 @@ def update_revision():
     virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def install_cron():
-    run('crontab %s/cron/crontab.%s' % (env.path, env.cron_version))
-    sudo('crontab %s/cron/crontab-root.%s' % (env.path, env.cron_version))
+    run('crontab %(path)s/cron/crontab.%(cron_version)s' % env)
+    sudo('crontab %(path)s/cron/crontab-root.%(cron_version)s' % env)
 
 def deploy():
     """
@@ -116,11 +120,11 @@ def deploy():
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
 
-    old_revision = run("cd %s; hg identify" % env.path)
+    old_revision = run("cd %(path)s; hg identify" % env)
 
-    run("cd %s; hg pull; hg update -C %s" % (env.path, env.branch))
+    run("cd %(path)s; hg pull; hg update -C %(branch)s" % env)
 
-    new_revision = run("cd %s; hg identify" % env.path)
+    new_revision = run("cd %(path)s; hg identify" % env)
     
     if env.webserver:
         buildout()
