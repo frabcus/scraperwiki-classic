@@ -68,9 +68,6 @@ scraperwiki.datastore.create(host, port, options.scrapername, options.runid)
 sys.stdout = ConsoleStream(scraperwiki.logfd)
 sys.stderr = ConsoleStream(scraperwiki.logfd)
 
-# in the future can divert to webproxy
-#scraperwiki.utils.urllibSetup(http_proxy='http://127.0.0.1:9002')
-
 #  Set up a CPU time limit handler which simply throws a python so it can be handled cleanly before the hard limit is reached
 def sigXCPU(signum, frame) :
     raise Exception("ScraperWiki CPU time exceeded")

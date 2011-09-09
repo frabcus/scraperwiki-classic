@@ -25,6 +25,7 @@ import optparse, grp, pwd
 import urllib, urlparse
 import logging, logging.config
 
+from proxycallbacks import ClientUpdater
 
 try:
     import cloghandler
@@ -60,6 +61,9 @@ from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed, Deferred
 from twisted.internet.error import ProcessDone
+from twisted.web.server import Site
+from twisted.web.resource import Resource
+
 
 from twisterscheduledruns import ScheduledRunMessageLoopHandler
 from twisterrunner import MakeRunner, jstime, SetControllerHost
@@ -405,7 +409,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         scrapername = parsed_data.get('scrapername', '')
         urlquery = parsed_data.get('urlquery', '')
         username = parsed_data.get('username', '')
-        beta_user = parsed_data.get('beta_user', None)
+        beta_user = parsed_data.get('beta_user', False)
         self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, beta_user)
         self.factory.notifyMonitoringClients(self)
         
@@ -618,7 +622,7 @@ class RunnerFactory(protocol.ServerFactory):
             self.clientConnectionRegistered(sclient)  
 
             logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
-            beta_user = False  # means that all scheduled runs are not done through lxc
+            beta_user = scraperoverdue.get("beta_user", False)
             sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, logger, beta_user)
             self.notifyMonitoringClients(sclient)
 
@@ -891,6 +895,19 @@ if __name__ == "__main__":
         sys.stdout.flush()
 
         os.wait()
+
+
+    # This will make the update function available on either port 9090
+    # or whatever updateport is set to. We can call it like ...
+    # http://localhost:9090/update?runid=1234&message={'sources':'somejson}
+    rootResource = Resource()
+    rootResource.putChild("update", ClientUpdater())
+    updatesFactory = Site(rootResource)
+    try:
+        updatesPort = config.getint('twister', 'updateport')
+    except:
+        updatesPort = 9090
+    reactor.listenTCP(updatesPort, updatesFactory)
 
     runnerfactory = RunnerFactory()
     port = config.getint('twister', 'port')

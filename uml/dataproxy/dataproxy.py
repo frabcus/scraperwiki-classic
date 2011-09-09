@@ -52,7 +52,10 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     server_version = "DataProxy/ScraperWiki_0.0.1"
     rbufsize       = 0
 
-    def ident(self, uml, port):
+    def ident(self, params):
+        uml = params.get('uml')
+        port = params.get('port')
+        
         runID      = None
         short_name = ''
 
@@ -76,12 +79,13 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.attachauthurl = config.get("dataproxy", 'attachauthurl')
 
         rem       = self.connection.getpeername()
-        loc       = self.connection.getsockname()
-        
-        self.logger.debug("INCOMING:" + rem[0])                
+        loc       = self.connection.getsockname()               
         
         if host and (rem[0].startswith(add) or rem[0].startswith('10.0.1')):
-            lident = urllib.urlopen ('http://%s/Ident?%s:%s' % (host, rem[0], loc[1])).read()               
+            # No need to do the ident, we will return a non-existent runID,short_name for now
+            self.logger.debug('We are using LXC so use parameters for ident')
+            self.logger.debug( "%s -> %s" % (params.get('vrunid'), params.get("vscrapername",''),) )
+            return params.get('vrunid'), params.get("vscrapername", '')            
         else:
             via    = config.get(uml, 'via' )
             lident = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (uml_host, via, port, loc[1])).read()   
@@ -127,15 +131,15 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     
             firstmessage = {"status":"good"}
             if 'short_name' in params:
-                if self.connection.getpeername()[0] != config.get('dataproxy', 'secure'):
+                secure_ips = config.get('dataproxy', 'secure')
+                if not self.connection.getpeername()[0] in secure_ips:
                     firstmessage = {"error":"short_name only accepted from secure hosts"}
                 else:
                     short_name = params.get('short_name', '')
                     runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 
                     dataauth = "fromfrontend"
-            
             else:
-                runID, short_name = self.ident(params['uml'], params['port'])
+                runID, short_name = self.ident(params)
                 if not runID:
                     firstmessage = {"error":"ident failed no runID"}
                 elif runID[:8] == "draft|||" and short_name:

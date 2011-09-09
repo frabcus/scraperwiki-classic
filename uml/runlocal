@@ -8,9 +8,9 @@
 	exit	1
 	}
 
-cmp -s uml.cfg uml.cfg.local || {
-	echo	"runlocal: warning uml.cfg different to uml.cfg.local"
-    diff -u uml.cfg uml.cfg.local
+cmp -s uml.cfg uml.cfg-inhg || {
+	echo	"runlocal: warning uml.cfg different to uml.cfg-inhg"
+    diff -u uml.cfg uml.cfg-inhg
 	}
 
 # XXX I think we have to have a copy of uml.cfg here (not a symlink) as it runs
@@ -36,6 +36,5 @@ mkdir 	-p 	./var/run
 ./etc/local.d/ftpproxy		restart
 ./etc/local.d/httpproxy		restart
 ./etc/local.d/httpsproxy	restart
-./etc/local.d/webproxy		restart
 ./etc/local.d/twister		restart
 ./etc/local.d/orbited		restart

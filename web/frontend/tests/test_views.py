@@ -97,7 +97,7 @@ class FrontEndViewsSearchTests(TestCase):
         scrapers = Code.objects.filter(title__icontains="test")
         response = self.client.get(reverse('search', kwargs={'q':'test'}))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['scrapers_num_results'], 1)
+        self.assertEqual(response.context['scrapers_num_results'], 2)
     
 #    def test_user_search(self):
 #        scrapers = Code.objects.filter(title__icontains="test")
