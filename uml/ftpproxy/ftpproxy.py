@@ -102,6 +102,7 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
         except:
             pass
                 
+        port = loc[1]
         ident = ""    
         for attempt in range(5):
             try:
