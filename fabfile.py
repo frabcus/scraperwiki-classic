@@ -39,6 +39,7 @@ def dev():
     env.cron_version = "dev"
     env.webserver = True
     env.email_deploy = False
+    env.email_deploy = "deploy@scraperwiki.com"
 
 @task
 def dev_services():
@@ -51,7 +52,7 @@ def dev_services():
     env.user = 'scraperdeploy'
     env.cron_version = "umls"
     env.webserver = False
-    env.email_deploy = "deploy@scraperwiki.com"
+    env.email_deploy = False
 
 @task
 def live():
@@ -87,11 +88,11 @@ def run_in_virtualenv(command):
     return run(temp + env.activate + '&&' + command)
 
 def buildout():
-    run_in_virtualenv('buildout -N -q')
+    run_in_virtualenv('buildout -N -qq')
 
 def django_db_migrate():
-    run_in_virtualenv('cd web; python manage.py syncdb')
-    run_in_virtualenv('cd web; python manage.py migrate')
+    run_in_virtualenv('cd web; python manage.py syncdb --verbosity=0')
+    run_in_virtualenv('cd web; python manage.py migrate --verbosity=0')
 
 def update_js_cache_revision():
     """
@@ -111,7 +112,7 @@ def email(old_revision=None, new_revision=None):
     message = """From: ScraperWiki <developers@scraperwiki.com>
 Subject: New Scraperwiki Deployment to %(cron_version)s (deployed by %(user)s)
 
-%(user)s deployed changeset %(changeset)s
+%(user)s deployed
 
 Old revision: %(old_revision)s
 New revision: %(new_revision)s
@@ -165,7 +166,7 @@ def deploy():
     with cd(env.path):
         old_revision = run("hg identify")
         run("hg pull; hg update -C %(branch)s" % env)
-        new_revision = run("hg identify" % env)
+        new_revision = run("hg identify")
     
     if env.webserver:
         buildout()
