@@ -202,11 +202,13 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                     continue
 
                 if args[0] == 'PASV' :
+                    print 'Setting up server to listen for response'
                     listen = socket.socket()
                     listen.setsockopt (socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                     listen.bind  ((self.request.getsockname()[0], 0))
                     sockip, sockport   = listen.getsockname()
                     listen.listen(1)
+                    print 'Sending 227'                    
                     self.request.send ("227 Entering Passive Mode (%s,%d,%d)\n" % (sockip.replace('.', ','), sockport/256, sockport%256))
                     self.m_pasv = listen.accept()[0]
                     listen.close ()
