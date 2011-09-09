@@ -167,7 +167,7 @@
 </div>
 
 <div class="content col left staff" id="scraper_attachables">
-    <h3>Databases this scraper can attach to</h3>
+    <h3>Attachable databases</h3>
     {% include 'codewiki/includes/database_attachables.html' %}
 </div>
 
@@ -226,6 +226,7 @@ $(document).ready(function()
     setupCodeOverview('{{scraper.short_name}}');
     setupScraperOverview('{{scraper.short_name}}');
     setupChangeEditorStatus();
+    setupChangeAttachables('{{scraper.short_name}}'); 
 {% if user.is_authenticated %}
     setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");

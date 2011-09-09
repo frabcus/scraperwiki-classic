@@ -63,12 +63,11 @@ def ensure_connected():
     if not m_socket:
         m_socket = socket.socket()
         m_socket.connect((m_host, m_port))
-        data = {"uml":socket.gethostname(), "port":m_socket.getsockname()[1]}
+        data = {"uml": 'lxc', "port":m_socket.getsockname()[1]}
         data["vscrapername"] = m_scrapername
         data["vrunid"] = m_runid
         data["attachables"] = " ".join(attachables)
         m_socket.sendall('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
-        m_socket.sendall('Host: %s\n\n' % (m_host,))
         line = receiveoneline(m_socket)  # comes back with True, "Ok"
         res = json.loads(line)
         assert res.get("status") == "good", res

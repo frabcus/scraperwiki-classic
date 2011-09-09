@@ -32,10 +32,8 @@ class SW_DataStoreClass
             $this->m_socket    = socket_create (AF_INET, SOCK_STREAM, SOL_TCP) ;
             socket_connect     ($this->m_socket, $this->m_host, $this->m_port) ;
             socket_getsockname ($this->m_socket, $addr, $port) ;
-            $getmsg = sprintf  ("GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n", trim(`/bin/hostname`), $port, urlencode($this->m_scrapername), urlencode($this->m_runid)) ;
+            $getmsg = sprintf  ("GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n", 'lxc', $port, urlencode($this->m_scrapername), urlencode($this->m_runid)) ;
             socket_send        ($this->m_socket, $getmsg, strlen($getmsg), MSG_EOR) ;
-            $hostheader = sprintf  ("Host: %s\n\n", trim(`/bin/hostname`)) ;
-            socket_send        ($this->m_socket, $hostheader, strlen($hostheader), MSG_EOR) ;
 
             socket_recv        ($this->m_socket, $buffer, 0xffff, 0) ;
             $result = json_decode($buffer, true);

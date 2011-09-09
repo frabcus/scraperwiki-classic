@@ -61,6 +61,11 @@
     {% include 'codewiki/includes/contributors.html' %}
 </div>
 
+<div class="content col left staff" id="scraper_attachables">
+    <h3>Attachable databases</h3>
+    {% include 'codewiki/includes/database_attachables.html' %}
+</div>
+
 <div class="content col right" id="scraper_schedule">
     {% include 'codewiki/includes/admin_controls.html' %}
 </div>
@@ -86,6 +91,7 @@ $(document).ready(function()
 {
     setupCodeOverview('{{scraper.short_name}}');
     setupChangeEditorStatus();
+    setupChangeAttachables('{{scraper.short_name}}'); 
     {% if user.is_authenticated %}
         setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this view.");
     {% endif %}

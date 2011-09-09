@@ -26,7 +26,10 @@ urlpatterns = patterns('',
                                                           views.scraper_admin_privacystatus,name='scraper_admin_privacystatus'),
     url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/controleditors$', 
                                                           views.scraper_admin_controleditors,name='scraper_admin_controleditors'),
-    
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/controlattachables$', 
+                                                          views.scraper_admin_controlattachables,name='scraper_admin_controlattachables'),
+
+
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-\.]+)/$',   views.follow,               name='scraper_follow'),

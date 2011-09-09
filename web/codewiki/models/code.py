@@ -50,9 +50,9 @@ PRIVACY_STATUSES = (
 
 STAFF_ACTIONS = set(["run_scraper"])
 CREATOR_ACTIONS = set(["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ])
-EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor"])
+EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor", "change_attachables", "attachable_add"])
 STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let staff also do anything a creator / editor can, except save code is a bit rude (for now!)
-VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription"])
+VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ])
 
 
 def scraper_search_query(user, query):
@@ -184,6 +184,9 @@ class Code(models.Model):
 
     def attachable_scraperdatabases(self):
         return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all() ]
+
+    def attachfrom_scrapers(self):
+        return [ cp.code  for cp in CodePermission.objects.filter(permitted_object=self).all() ]
         
 
     def add_user_role(self, user, role='owner'):
@@ -338,7 +341,7 @@ class Code(models.Model):
             return {'heading': 'Not authorized', 'body': "Only owner can do action %s" % action}
         if action in EDITOR_ACTIONS:
             if self.privacy_status != "public":
-                return {'heading': 'Not authorized', 'body': "this %s can only be edited by its owner and designated editors" % self.wiki_type}
+                return {'heading': 'Not authorized', 'body': "This %s can only be edited by its owner and designated editors" % self.wiki_type}
             if not user.is_authenticated():
                 return {'heading': 'Not authorized', 'body': "Only logged in users can edit things"}
         if action in VISIBLE_ACTIONS:
