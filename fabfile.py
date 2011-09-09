@@ -9,6 +9,18 @@ from fabric.api import *
 # globals
 PROJECT_NAME = 'ScraperWiki'
 
+# These are taken from and named after our puppet classes.
+# We should move to using them for fab deployment.
+# env.roledefs = {
+#    'vm': ['horsell', 'kippax'],
+#    'datastore': ['burbage', 'kippax']
+#    'refine': ['burbage', '']
+#    'sandbox': ['burbage', '']
+#    'webserver': ['rush', 'yelland']
+#    'muninserver': ['rush', '']
+#    'backup': ['kippax', '']
+#}
+
 # If git+git fails then sudo easy_install pip==0.8.2
 # environments
 def dev():
