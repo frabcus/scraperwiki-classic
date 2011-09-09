@@ -11,10 +11,6 @@ djangokey = jshdowpabzsdofosiw976gbjksjdbfslkaoapwebnvdjflg
 djangourl = http://localhost:8000
 apiurl = http://localhost:8010
 
-[webproxy]
-host	= 127.0.0.1
-port	= 9002
-
 [httpproxy]
 host	= 127.0.0.1
 port	= 9005 

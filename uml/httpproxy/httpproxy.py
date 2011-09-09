@@ -31,16 +31,16 @@ except : import simplejson as json
 global config
 global cache_client
 
-USAGE       = " [--uid=#] [--gid=#] [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file] [--useCache] [--mode=H|S|P]"
+USAGE       = " [--uid=#] [--gid=#] [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file] [--useCache] [--mode=H|S]"
 child       = None
 config      = None
 varDir      = '/var'
-varName     = 'webproxy'
+varName     = None
 useCache    = False
 uid         = None
 gid         = None
 allowAll    = False
-mode        = 'P'
+mode        = None
 statusLock  = None
 statusInfo  = {}
 cache_client = None
@@ -237,7 +237,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #
         if   mode == 'H' : port = 80
         elif mode == 'S' : port = 443
-        else             : port = loc[1]
         
         lxc_server = None
         try:
@@ -782,7 +781,7 @@ if __name__ == '__main__' :
         sys.exit (1)
 
 
-    if mode not in [ 'H', 'S', 'P' ] :
+    if mode not in [ 'H', 'S' ] :
         print "usage: " + sys.argv[0] + USAGE
         sys.exit (1)
 
