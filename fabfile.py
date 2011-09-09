@@ -12,17 +12,22 @@ PROJECT_NAME = 'ScraperWiki'
 # These are taken from and named after our puppet classes.
 # We should move to using them for fab deployment.
 # env.roledefs = {
-#    'vm': ['horsell', 'kippax'],
+#    'webserver': ['rush', 'yelland']
 #    'datastore': ['burbage', 'kippax']
+#    'vm': ['horsell', 'kippax'],
+
 #    'refine': ['burbage', '']
 #    'sandbox': ['burbage', '']
-#    'webserver': ['rush', 'yelland']
 #    'muninserver': ['rush', '']
 #    'backup': ['kippax', '']
 #}
 
+###########################################################################
+# Server configurations
+
 # If git+git fails then sudo easy_install pip==0.8.2
 # environments
+@task
 def dev():
     "On the scraperwiki server, accessible from http://dev.scraperwiki.com"
     env.hosts = ['dev.scraperwiki.com']
@@ -35,6 +40,7 @@ def dev():
     env.webserver = True
     env.email_deploy = False
 
+@task
 def dev_services():
     "The UML and datastore server (burbage)"
     env.hosts = ['kippax.scraperwiki.com']
@@ -47,6 +53,7 @@ def dev_services():
     env.webserver = False
     env.email_deploy = "deploy@scraperwiki.com"
 
+@task
 def live():
     "The main www server"
     env.hosts = ['scraperwiki.com:7822']
@@ -59,6 +66,7 @@ def live():
     env.webserver = True
     env.email_deploy = "deploy@scraperwiki.com"
 
+@task
 def live_services():
     "The UML and datastore server (burbage)"
     env.hosts = ['burbage.scraperwiki.com:7822']
@@ -71,6 +79,17 @@ def live_services():
     env.webserver = False
     env.email_deploy = "deploy@scraperwiki.com"
 
+###########################################################################
+# Helpers
+
+def run_in_virtualenv(command):
+    temp = 'cd %s; source ' % env.path
+    return run(temp + env.activate + '&&' + command)
+
+###########################################################################
+# Tasks
+
+@task
 def setup():
     """
     Setup a fresh virtualenv as well as a few useful directories, then run
@@ -82,27 +101,24 @@ def setup():
     sudo('cd %(path)s; easy_install virtualenv' % env)
     run('hg clone %(web_path)s %(path)s' % env, fail='ignore')
     run('cd %(path)s; virtualenv --no-site-packages .' % env)
-    virtualenv('easy_install pip')
+    run_in_virtualenv('easy_install pip')
 
     deploy()
 
-def runpuppet():
+@task
+def run_puppet():
     """
     Runs the puppetd on the specific machine
     """
     sudo("puppetd --no-daemonize --onetime --debug")        
     
-def virtualenv(command):
-    temp = 'cd %s; source ' % env.path
-    return run(temp + env.activate + '&&' + command)
-
 def buildout():
-    virtualenv('buildout -N -q')
+    run_in_virtualenv('buildout -N -q')
 
 def write_changeset():
     try:
-        env.changeset = virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
-        virtualenv("echo %(changeset)s > web/changeset.txt" % env)
+        env.changeset = run_in_virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
+        run_in_virtualenv("echo %(changeset)s > web/changeset.txt" % env)
     except:
         env.changeset = ""
 
@@ -110,12 +126,13 @@ def update_revision():
     """
     Put the current HG revision in a file so that Django can use it to avoid caching JS files
     """
-    virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
+    run_in_virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def install_cron():
     run('crontab %(path)s/cron/crontab.%(cron_version)s' % env)
     sudo('crontab %(path)s/cron/crontab-root.%(cron_version)s' % env)
 
+@task
 def deploy():
     """
     Deploy the latest version of the site to the servers, install any
@@ -179,20 +196,21 @@ New revision: %(new_revision)s
     sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
     
 def migrate():
-    virtualenv('cd web; python manage.py syncdb')
-    virtualenv('cd web; python manage.py migrate')
+    run_in_virtualenv('cd web; python manage.py syncdb')
+    run_in_virtualenv('cd web; python manage.py migrate')
 
 def restart_webserver():
     "Restart the web server"
     sudo('apache2ctl graceful')
 
 def create_tarball():
-    virtualenv("mkdir -p ./web/media/src/; hg archive -t tgz ./web/media/src/scraperwiki.tar.gz")
+    run_in_virtualenv("mkdir -p ./web/media/src/; hg archive -t tgz ./web/media/src/scraperwiki.tar.gz")
 
+@task
 def test():
     if env.host != "dev.scraperwiki.com":
         print "Testing can only be done on the dev machine"
     else:
-        virtualenv('cd web; python manage.py test')
+        run_in_virtualenv('cd web; python manage.py test')
 
 
