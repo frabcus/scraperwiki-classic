@@ -86,6 +86,27 @@ def run_in_virtualenv(command):
     temp = 'cd %s; source ' % env.path
     return run(temp + env.activate + '&&' + command)
 
+def buildout():
+    run_in_virtualenv('buildout -N -q')
+
+def django_db_migrate():
+    run_in_virtualenv('cd web; python manage.py syncdb')
+    run_in_virtualenv('cd web; python manage.py migrate')
+
+def update_js_cache_revision():
+    """
+    Put the current HG revision in a file so that Django can use it to avoid caching JS files
+    """
+    run_in_virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
+
+def install_cron():
+    run('crontab %(path)s/cron/crontab.%(cron_version)s' % env)
+    sudo('crontab %(path)s/cron/crontab-root.%(cron_version)s' % env)
+
+def restart_webserver():
+    "Restart the web server"
+    sudo('apache2ctl graceful')
+
 def email(old_revision=None, new_revision=None):
     message = """From: ScraperWiki <developers@scraperwiki.com>
 Subject: New Scraperwiki Deployment to %(cron_version)s (deployed by %(user)s)
@@ -103,7 +124,8 @@ New revision: %(new_revision)s
         'new_revision': new_revision,
         }
     sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
- ###########################################################################
+
+###########################################################################
 # Tasks
 
 @task
@@ -129,19 +151,6 @@ def run_puppet():
     """
     sudo("puppetd --no-daemonize --onetime --debug")        
     
-def buildout():
-    run_in_virtualenv('buildout -N -q')
-
-def update_js_cache_revision():
-    """
-    Put the current HG revision in a file so that Django can use it to avoid caching JS files
-    """
-    run_in_virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
-
-def install_cron():
-    run('crontab %(path)s/cron/crontab.%(cron_version)s' % env)
-    sudo('crontab %(path)s/cron/crontab-root.%(cron_version)s' % env)
-
 @task
 def deploy():
     """
@@ -160,7 +169,7 @@ def deploy():
     
     if env.webserver:
         buildout()
-        migrate()
+        django_db_migrate()
         update_js_cache_revision()
         restart_webserver()   
 
@@ -172,15 +181,6 @@ def deploy():
     print "Deploy successful"
     print "Old revision = %s" % old_revision
     print "New revision = %s" % new_revision
-
-   
-def migrate():
-    run_in_virtualenv('cd web; python manage.py syncdb')
-    run_in_virtualenv('cd web; python manage.py migrate')
-
-def restart_webserver():
-    "Restart the web server"
-    sudo('apache2ctl graceful')
 
 @task
 def test():
