@@ -84,7 +84,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if host and (rem[0].startswith(add) or rem[0].startswith('10.0.1')):
             # No need to do the ident, we will return a non-existent runID,short_name for now
             self.logger.debug('We are using LXC so use parameters for ident')
-            self.logger.debug( params.get('vrunid'), params.get("vscrapername") )
+            self.logger.debug( "%s -> %s" % (params.get('vrunid'), params.get("vscrapername"),) )
             return params.get('vrunid'), params.get("vscrapername")            
         else:
             via    = config.get(uml, 'via' )
