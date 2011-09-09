@@ -15,7 +15,7 @@ def dev():
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
     env.activate = env.path + '/bin/activate'
     env.user = 'scraperdeploy'
-    env.deploy_version = "dev"
+    env.cron_version = "dev"
     env.webserver = True
     env.email_deploy = False
 
@@ -27,7 +27,7 @@ def dev_services():
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
     env.activate = env.path + '/bin/activate'
     env.user = 'scraperdeploy'
-    env.deploy_version = "umls"
+    env.cron_version = "umls"
     env.webserver = False
     env.email_deploy = "deploy@scraperwiki.com"
 
@@ -39,7 +39,7 @@ def live():
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
     env.activate = env.path + '/bin/activate'
     env.user = 'scraperdeploy'
-    env.deploy_version = "www"
+    env.cron_version = "www"
     env.webserver = True
     env.email_deploy = "deploy@scraperwiki.com"
 
@@ -51,7 +51,7 @@ def live_services():
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
     env.activate = env.path + '/bin/activate'
     env.user = 'scraperdeploy'
-    env.deploy_version = "umls"
+    env.cron_version = "umls"
     env.webserver = False
     env.email_deploy = "deploy@scraperwiki.com"
 
@@ -81,7 +81,7 @@ def virtualenv(command):
     return run(temp + env.activate + '&&' + command)
 
 def buildout():
-    virtualenv('buildout -N')
+    virtualenv('buildout -N -q')
 
 def write_changeset():
     try:
@@ -97,8 +97,8 @@ def update_revision():
     virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def install_cron():
-    run('crontab %s/cron/crontab.%s' % (env.path, env.deploy_version))
-    sudo('crontab %s/cron/crontab-root.%s' % (env.path, env.deploy_version))
+    run('crontab %s/cron/crontab.%s' % (env.path, env.cron_version))
+    sudo('crontab %s/cron/crontab-root.%s' % (env.path, env.cron_version))
 
 def deploy():
     """
@@ -143,7 +143,7 @@ def email(message_body=None, old_revision=None, new_revision=None):
         message_body = "(no deploy comment)"
     
     message = """From: ScraperWiki <developers@scraperwiki.com>
-Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
+Subject: New Scraperwiki Deployment to %(cron_version)s (deployed by %(user)s)
 
 %(user)s deployed changeset %(changeset)s, with the following comment:
 
@@ -153,7 +153,7 @@ Old revision: %(old_revision)s
 New revision: %(new_revision)s
 
 """ % {
-        'version' : env.deploy_version,
+        'cron_version' : env.cron_version,
         'user' : env.name,
         'changeset' : env.changeset,
         'message_body' : message_body,
@@ -174,7 +174,9 @@ def create_tarball():
     virtualenv("mkdir -p ./web/media/src/; hg archive -t tgz ./web/media/src/scraperwiki.tar.gz")
 
 def test():
-    if env.deploy_version != "dev":
+    if env.hosts != "dev.scraperwiki.com":
         print "Testing can only be done on the dev machine"
     else:
         virtualenv('cd web; python manage.py test')
+
+

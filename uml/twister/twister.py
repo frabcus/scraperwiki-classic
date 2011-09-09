@@ -601,12 +601,21 @@ class RunnerFactory(protocol.ServerFactory):
         
         self.guidclientmap = { }  # maps from short_name to EditorsOnOneScraper objects
 
-        self.maxscheduledscrapers = 5
+        # Get these settings from config 
+        try:
+            max_count      = config.getint("twister", "max_scheduled")            
+            schedule_check = config.getint("twister", "schedule_check_seconds")                        
+        except:
+            max_count      = 10
+            schedule_check = 30
+
+
+        self.maxscheduledscrapers = max_count
         self.notifiedmaxscheduledscrapers = self.maxscheduledscrapers
 
         # set the visible heartbeat going which is used to call back and look up the schedulers
         self.lc = task.LoopingCall(self.requestoverduescrapers)
-        self.lc.start(30)
+        self.lc.start(schedule_check)
         
     #
     # system of functions for fetching the overdue scrapers and knocking them out
