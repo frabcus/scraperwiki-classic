@@ -908,7 +908,6 @@ if __name__ == "__main__":
     except:
         updatesPort = 9090
     reactor.listenTCP(updatesPort, updatesFactory)
-    reactor.run()
 
     runnerfactory = RunnerFactory()
     port = config.getint('twister', 'port')
