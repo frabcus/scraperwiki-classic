@@ -118,6 +118,7 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
             except:
                 pass
                     
+        print "IDENT" + ident
         for line in string.split (ident, '\n') :
             if line == '' :
                 continue
