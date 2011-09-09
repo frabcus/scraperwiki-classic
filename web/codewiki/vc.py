@@ -108,12 +108,12 @@ class MercurialInterface:
         return result
         
 	            
-    def getcommitlog(self):
+    def getcommitlog(self, filename):
         result = [ ]
         try:
             for rev in self.repo:
                 ctx = self.repo[rev]
-                if "code" in ctx.files():   # could get both validfilenames for changes in description
+                if filename in ctx.files():   # could get both validfilenames for changes in description
                     result.append(self.getctxrevisionsummary(ctx))
         except mercurial.revlog.RevlogError, e:
             logger.error("RevlogError: %s %s" %  (self.repopath, str(e)))
@@ -148,7 +148,7 @@ class MercurialInterface:
         
         # adjacent commit informations
         if rev != None:
-            commitlog = self.getcommitlog()
+            commitlog = self.getcommitlog("code")
             if commitlog:
                 irev = len(commitlog)
                 if rev < 0:

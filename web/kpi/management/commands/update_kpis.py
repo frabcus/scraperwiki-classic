@@ -42,7 +42,7 @@ class Command(BaseCommand):
             # don't count editing own emailer for now
             if code.is_emailer():
                 continue
-            for commitentry in code.get_commit_log():
+            for commitentry in code.get_commit_log("code"):
                 # some early scrapers have a servername as user for the first revision, and get no user entry
                 if 'user' not in commitentry:
                     continue

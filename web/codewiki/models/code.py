@@ -138,8 +138,8 @@ class Code(models.Model):
         rev = self.vcs.commit(message="save docs", user=user)
 
 
-    def get_commit_log(self):
-        return self.vcs.getcommitlog()
+    def get_commit_log(self, filename):
+        return self.vcs.getcommitlog(filename)
 
     def get_file_status(self):
         return self.vcs.getfilestatus("code")

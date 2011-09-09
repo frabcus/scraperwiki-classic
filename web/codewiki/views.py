@@ -92,7 +92,7 @@ def scraper_history(request, wiki_type, short_name):
     context = { 'selected_tab': 'history', 'scraper': scraper, "user":request.user }
     
     itemlog = [ ]
-    for commitentry in scraper.get_commit_log():
+    for commitentry in scraper.get_commit_log("code"):
         item = { "type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"] }
         if "user" in commitentry:
             item["user"] = commitentry["user"]
