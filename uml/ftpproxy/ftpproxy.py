@@ -136,10 +136,20 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
 
         return scraperID, runID
 
-    def notify (self, host, **query) :
-
+    def notify (self, sending_host, **query) :
+        try:
+            lxc_server = config.get(varName, 'lxc_server')
+        except:
+            lxc_server = None
+        
+        if lxc_server and '10.0' in sending_host:
+            host = lxc_server
+        else:
+            host = sending_host
+        
         query['message_type'] = 'sources'
-        urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+        try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+        except : pass
 
     def handle (self) :
 
