@@ -80,7 +80,8 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
             if re.search(allow, path) :
                 return True
 
-        return False
+        # Temporarily allow all FTP domains
+        return True
 
     def ident (self) :
 
@@ -95,7 +96,34 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
 
         rem       = self.request.getpeername()
         loc       = self.request.getsockname()
-        ident     = urllib.urlopen ('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], loc[1])).read()
+        
+        lxc_server = None
+        try:
+            lxc_server = config.get("ftpproxy", 'lxc_server')
+        except:
+            pass
+                
+        port = loc[1]
+        ident = ""    
+        for attempt in range(5):
+            try:
+                # If the connection comes form the lxc_server (that we know about from config)
+                # then use it.
+                if lxc_server and '10.0' in rem[0]:
+                    print 'using LXC at ', lxc_server
+                    ident_url = 'http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)
+                    print "Using URL:" + ident_url
+                    ident = urllib2.urlopen(ident_url).read()
+                    print "Received: _" + ident + "_"
+                else:
+                    print 'Attempting old-style ident'
+                    ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
+                if ident.strip() != "":
+                    break
+            except:
+                pass
+                    
+        print "IDENT-" + ident + "-"
         for line in string.split (ident, '\n') :
             if line == '' :
                 continue
@@ -106,19 +134,23 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
             if key == 'scraperid' :
                 scraperID = value
                 continue
-            if key == 'allow' :
-                self.m_allowed.append (value)
-                continue
-            if key == 'block' :
-                self.m_blocked.append (value)
-                continue
 
         return scraperID, runID
 
-    def notify (self, host, **query) :
-
+    def notify (self, sending_host, **query) :
+        try:
+            lxc_server = config.get(varName, 'lxc_server')
+        except:
+            lxc_server = None
+        
+        if lxc_server and '10.0' in sending_host:
+            host = lxc_server
+        else:
+            host = sending_host
+        
         query['message_type'] = 'sources'
-        urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+        try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+        except : pass
 
     def handle (self) :
 
@@ -141,6 +173,8 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                 line, text = text.split ('\n', 1)
                 line       = line.rstrip()
                 args       = line.split (' ',  2)
+
+                print line,args
 
                 if args[0] == 'QUIT' :
                     self.request.send ("221 Toodle-pip.\n")
@@ -168,11 +202,13 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                     continue
 
                 if args[0] == 'PASV' :
+                    print 'Setting up server to listen for response'
                     listen = socket.socket()
                     listen.setsockopt (socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                     listen.bind  ((self.request.getsockname()[0], 0))
                     sockip, sockport   = listen.getsockname()
                     listen.listen(1)
+                    print 'Sending 227'                    
                     self.request.send ("227 Entering Passive Mode (%s,%d,%d)\n" % (sockip.replace('.', ','), sockport/256, sockport%256))
                     self.m_pasv = listen.accept()[0]
                     listen.close ()

@@ -25,6 +25,7 @@ import optparse, grp, pwd
 import urllib, urlparse
 import logging, logging.config
 
+from proxycallbacks import ClientUpdater
 
 try:
     import cloghandler
@@ -60,6 +61,9 @@ from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed, Deferred
 from twisted.internet.error import ProcessDone
+from twisted.web.server import Site
+from twisted.web.resource import Resource
+
 
 from twisterscheduledruns import ScheduledRunMessageLoopHandler
 from twisterrunner import MakeRunner, jstime, SetControllerHost
@@ -894,6 +898,20 @@ if __name__ == "__main__":
         sys.stdout.flush()
 
         os.wait()
+
+
+    # This will make the update function available on either port 9090
+    # or whatever updateport is set to. We can call it like ...
+    # http://localhost:9090/update?runid=1234&message={'sources':'somejson}
+    rootResource = Resource()
+    rootResource.putChild("update", ClientUpdater())
+    updatesFactory = Site(rootResource)
+    try:
+        updatesPort = config.getint('twister', 'updateport')
+    except:
+        updatesPort = 9090
+    reactor.listenTCP(updatesPort, updatesFactory)
+    reactor.run()
 
     runnerfactory = RunnerFactory()
     port = config.getint('twister', 'port')
