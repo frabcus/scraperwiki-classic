@@ -109,7 +109,10 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                 # then use it.
                 if lxc_server and '10.0' in rem[0]:
                     print 'using LXC at ', lxc_server
-                    ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
+                    ident_url = 'http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)
+                    print "Using URL:" + ident_url
+                    ident = urllib2.urlopen(ident_url).read()
+                    print "Received: _" + ident + "_"
                 else:
                     print 'Attempting old-style ident'
                     ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
@@ -118,7 +121,7 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
             except:
                 pass
                     
-        print "IDENT" + ident
+        print "IDENT-" + ident + "-"
         for line in string.split (ident, '\n') :
             if line == '' :
                 continue
@@ -128,12 +131,6 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                 continue
             if key == 'scraperid' :
                 scraperID = value
-                continue
-            if key == 'allow' :
-                self.m_allowed.append (value)
-                continue
-            if key == 'block' :
-                self.m_blocked.append (value)
                 continue
 
         return scraperID, runID
