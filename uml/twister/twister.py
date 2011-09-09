@@ -61,8 +61,6 @@ from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed, Deferred
 from twisted.internet.error import ProcessDone
-from twisted.web.server import Site
-from twisted.web.resource import Resource
 
 
 from twisterscheduledruns import ScheduledRunMessageLoopHandler
@@ -91,8 +89,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # autosave, autoload, or draft when guid is not set
-        self.clienttype = None # 'editing', 'umlmonitoring', 'rpcrunning', or 'scheduledrun'
 
+        self.clienttype = None # 'editing', 'umlmonitoring', 'rpcrunning', 'scheduledrun', 'stimulate_run', 'httpget'
+        
 
     def connectionMade(self):
         logger.info("connection client# %d" % self.factory.clientcount)
@@ -133,20 +132,52 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             logger.info("connection lost: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
         self.factory.clientConnectionLost(self)
 
-        
+
+    # this will generalize to making status and other outputs from here
+    def handlehttpgetcase(self, line):
+        if line:
+            self.httpheaders = line.split(" ", (self.httpheaders and 2 or 1))   # GET query 1.1
+            return
+
+        self.transport.write('HTTP/1.0 200 OK\n')  
+        self.transport.write('Connection: Close\n')  
+        self.transport.write('Pragma: no-cache\n')  
+        self.transport.write('Cache-Control: no-cache\n')  
+        self.transport.write('Content-Type: text/text\n')  
+        self.transport.write('\n')
+        self.transport.write('hi there')
+        self.transport.write(str(self.httpheaders)+'\n')
+        self.transport.loseConnection()
+
+
+
     # messages from the client
     def dataReceived(self, data):
         # chunking has recently become necessary because records (particularly from typing) can get concatenated
         # probably shows we should be using LineReceiver
         for lline in data.split("\r\n"):
             line = lline.strip()
-            if line:
+            
+            # handle case where we have an http connection rather than plain socket connection
+            if not self.clienttype and line[:4] == 'GET ':
+                self.clienttype = "httpget"
+                self.factory.clientConnectionRegistered(self)
+                self.httpheaders = [ ]
+                self.handlehttpgetcase(line)
+                
+            if self.clienttype == "httpget":
+                self.handlehttpgetcase(line)
+            
+            elif line:
                 try:
                     parsed_data = json.loads(line)
                 except ValueError:
+                    logger.warning("Nonparsable command ")
+                    logger.info("Bad json parsing: client# %d %s" % (self.clientnumber, str([line[:1000]])))
                     self.writejson({'content':"Command not json parsable:  %s " % line, 'message_type':'console'})
                     continue
                 if type(parsed_data) != dict or 'command' not in parsed_data:
+                    logger.info("Bad json parsing not dict: client# %d %s" % (self.clientnumber, str([line[:1000]])))
                     self.writejson({'content':"Command not json dict with command:  %s " % line, 'message_type':'console'})
                     continue
                 command = parsed_data.get('command')
@@ -170,7 +201,11 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.lconnectionopen(parsed_data)
 
                 # finds the corresponding client and presses the run button on it
+                # receives a single record through the pipeline
         elif command == 'stimulate_run':
+            self.clienttype = "stimulate_run"
+            self.factory.clientConnectionRegistered(self)  
+
             scrapername = parsed_data["scrapername"]
             guid = parsed_data["guid"]
             username = parsed_data["username"]
@@ -559,6 +594,9 @@ class RunnerFactory(protocol.ServerFactory):
         self.umlmonitoringclients = [ ]
         self.draftscraperclients = [ ]
         self.rpcrunningclients = [ ]
+        self.stimulate_runclients = [ ]
+        self.httpgetclients = [ ]
+
         self.scheduledrunners = { } # maps from short_name to client objects (that are also put into guidclientmap)
         
         self.guidclientmap = { }  # maps from short_name to EditorsOnOneScraper objects
@@ -632,7 +670,7 @@ class RunnerFactory(protocol.ServerFactory):
 
     def scheduledruncomplete(self, sclient, processsucceeded):
         logger.debug("scheduledruncomplete %d" % sclient.clientnumber)
-        self.clientConnectionLost(sclient)
+        self.clientConnectionLost(sclient)  # not called from connectionList because there is no socket actually associated with this object
         del self.scheduledrunners[sclient.scrapername]
             # do some post-back to a run object connection
 # need to then do something special when the process running is complete
@@ -771,12 +809,16 @@ class RunnerFactory(protocol.ServerFactory):
             client.chatname = "Anonymous"
         client.cchatname = "%s|%s" % (client.username, client.chatname)
 
-        assert client.clienttype in ["umlmonitoring", "editing", "rpcrunning"]
+        assert client.clienttype in ["umlmonitoring", "editing", "rpcrunning", "stimulate_run", "httpget"]
         
         if client.clienttype == "umlmonitoring":
             self.umlmonitoringclients.append(client)
         elif client.clienttype == 'rpcrunning':
             self.rpcrunningclients.append(client)
+        elif client.clienttype == 'httpget':
+            self.httpgetclients.append(client)
+        elif client.clienttype == 'stimulate_run':
+            self.stimulate_runclients.append(client)
         elif client.guid:
             if client.guid not in self.guidclientmap:
                 self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid, client.scrapername, client.scraperlanguage, client.originalrev)
@@ -800,36 +842,49 @@ class RunnerFactory(protocol.ServerFactory):
             client.writejson(editorstatusdata); 
             self.draftscraperclients.append(client)
         
-        self.notifyMonitoringClients(client)
+        if client.clienttype in ["umlmonitoring", "editing", "rpcrunning"]:
+            self.notifyMonitoringClients(client)
             
     
     def clientConnectionLost(self, client):
         self.clients.remove(client)  # main list
+        logger.debug("removing %s client# %d" % (client.clienttype, client.clientnumber))
         
             # connection open but nothing else happened
         if client.clienttype == None:
             self.connectedclients.remove(client)
         
+        elif client.clienttype == "stimulate_run":
+            if client in self.stimulate_runclients:
+                self.stimulate_runclients.remove(client)
+            else:
+                logger.error("No place to remove stimulate_run client# %d" % client.clientnumber)
+
+        elif client.clienttype == "httpget":
+            if client in self.httpgetclients:
+                self.httpgetclients.remove(client)
+            else:
+                logger.error("No place to remove httpget client# %d" % client.clientnumber)
+
         elif client.clienttype == "umlmonitoring":
             if client in self.umlmonitoringclients:
                 self.umlmonitoringclients.remove(client)
             else:
-                logger.error("No place to remove client %d" % client.clientnumber)
+                logger.error("No place to remove umlmonitoring client# %d" % client.clientnumber)
 
         elif client.clienttype == "rpcrunning":
             if client in self.rpcrunningclients:
                 self.rpcrunningclients.remove(client)
             else:
-                logger.error("No place to remove client %d" % client.clientnumber)
+                logger.error("No place to remove rpcrunning client %d" % client.clientnumber)
 
         elif not client.guid:
             if client in self.draftscraperclients:
                 self.draftscraperclients.remove(client)
             else:
-                logger.error("No place to remove client %d" % client.clientnumber)
+                logger.error("No place to remove draftscraper client %d" % client.clientnumber)
             
         elif (client.guid in self.guidclientmap):   
-            logger.debug("removing client %d" % client.clientnumber)
             if not self.guidclientmap[client.guid].RemoveClient(client):
                 del self.guidclientmap[client.guid]
             else:
@@ -900,18 +955,7 @@ if __name__ == "__main__":
         os.wait()
 
 
-    # This will make the update function available on either port 9090
-    # or whatever updateport is set to. We can call it like ...
-    # http://localhost:9090/update?runid=1234&message={'sources':'somejson}
-    rootResource = Resource()
-    rootResource.putChild("update", ClientUpdater())
-    updatesFactory = Site(rootResource)
-    try:
-        updatesPort = config.getint('twister', 'updateport')
-    except:
-        updatesPort = 9090
-    reactor.listenTCP(updatesPort, updatesFactory)
-
+    # http://localhost:9010/update?runid=1234&message={'sources':'somejson}
     runnerfactory = RunnerFactory()
     port = config.getint('twister', 'port')
     reactor.listenTCP(port, runnerfactory)
