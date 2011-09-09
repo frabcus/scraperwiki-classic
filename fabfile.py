@@ -142,7 +142,6 @@ def deploy():
 
     env.name = getpass.getuser()
     import time
-    env.release = time.strftime('%Y%m%d%H%M%S')
 
     old_revision = run("cd %(path)s; hg identify" % env)
 
