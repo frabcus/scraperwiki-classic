@@ -1,5 +1,5 @@
 <?php
-    $sourcescraper = 'php_test';
+    $sourcescraper = '{{sourcescraper}}';
     $limit = 20;
     $offset = 0;
 
