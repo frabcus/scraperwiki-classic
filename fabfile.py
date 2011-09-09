@@ -132,7 +132,7 @@ def run_puppet():
 def buildout():
     run_in_virtualenv('buildout -N -q')
 
-def update_revision():
+def update_js_cache_revision():
     """
     Put the current HG revision in a file so that Django can use it to avoid caching JS files
     """
@@ -161,7 +161,7 @@ def deploy():
     if env.webserver:
         buildout()
         migrate()
-        update_revision()
+        update_js_cache_revision()
         restart_webserver()   
 
     install_cron()
