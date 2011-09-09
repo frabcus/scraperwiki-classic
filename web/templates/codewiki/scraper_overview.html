@@ -193,18 +193,6 @@
        {% include 'codewiki/includes/run_interval.html' %}
     </div>
 
-    {% if user.is_staff %}
-    <div class="staff">
-      {% ifequal scraper.wiki_type 'scraper' %}
-        <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
-          {% csrf_token %}
-          <input type="hidden" name="run_scraper" value="1" />
-          <input type="submit" id="btnRunScraper" class="" value="Run now (as if scheduled)" />
-        </form>
-      {% endifequal %}
-    </div>
-    {% endif %}
-
     {% include 'codewiki/includes/admin_controls.html' %}
 
 </div>

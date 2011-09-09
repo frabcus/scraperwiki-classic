@@ -3,7 +3,6 @@ from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
-from django.core.management import call_command
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.contrib.auth.models import User
 from django.views.decorators.http import condition
@@ -425,13 +424,6 @@ def scraper_schedule_scraper(request, short_name):
         scraper.scraper.save()
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
-def scraper_run_scraper(request, short_name):
-    scraper = getscraperor404(request, short_name, "run_scraper")
-    if scraper.wiki_type == "scraper":
-        scraper.scraper.last_run = None
-        scraper.scraper.save()
-        call_command('run_scrapers', short_name=short_name)
-    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 def scraper_delete_scraper(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")

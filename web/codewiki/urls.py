@@ -43,8 +43,6 @@ urlpatterns = patterns('',
                                                           views.scraper_schedule_scraper,name='scraper_schedule_scraper'),
     url(r'^(?P<wiki_type>scraper|view)s/delete-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_delete_scraper, name='scraper_delete_scraper'),
-    url(r'^scrapers/run-scraper/(?P<short_name>[\w_\-\.]+)/$', 
-                                                          views.scraper_run_scraper,    name='scraper_run_scraper'),
         
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
