@@ -72,6 +72,7 @@ function errorHandler($errno, $errstr, $errfile, $errline)
 
 set_error_handler("errorHandler", E_ALL & ~E_NOTICE);  // this is for errors, not exceptions (eg 1/0)
 
+date_default_timezone_set('Europe/London');
 
 // should parse and populate $_GET from getenv("QUERY_STRING") here
 
