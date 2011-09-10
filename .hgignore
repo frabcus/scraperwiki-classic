@@ -47,3 +47,5 @@ syntax: regexp
 ^error.log$
 ^info.log$
 ^splitscrapers$
+^selenium/webdriver/ie/win32/IEDriver.dll$
+^selenium/webdriver/ie/x64/IEDriver.dll$
