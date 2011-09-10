@@ -20,12 +20,12 @@ book = xlrd.open_workbook(file_contents=xlbin)
 sheet = book.sheet_by_name('LAUDERDALE AVE')
 </code>
 
-<p>If you're not sure what sheets there are, print them out.</p>
+<p>If you're not sure what sheets there are, this prints them out.</p>
 <code>for n, s in enumerate(book.sheets()):
     print "Sheet %d is called %s and has %d columns and %d rows" % (n, s.name, s.ncols, s.nrows)
 </code>
 
-<h2>Reding values</h2>
+<h2>Reading values</h2>
 
 <p>Read the values of a row in one go.</p>
 
@@ -57,6 +57,7 @@ def cellval(cell, datemode):
 
 <code>print cellval(sheet.cell(0,0))</code>
 
+
 <h2>Saving to the datastore</h2>
 
 <p>Work out sensible heading names. In this case we remove the "." from "FLEET NO.".</p>
@@ -69,17 +70,24 @@ print keys
 <p>Make dictionaries from the rows and save them.</p>
 
 <code>for rownumber in range(4, sheet.nrows):
+    # create dictionary of the row values
     values = [ cellval(c, book.datemode) for c in sheet.row(rownumber) ]
     data = dict(zip(keys, values))
     data['rownumber'] = rownumber
+
+    # remove the empty column (which has a blank heading)
     del data['']
+
+    # only save if it is a full row (rather than a blank line or a note)
     if data['DATE'] != None and data['FLEET NO'] != None:
         scraperwiki.sqlite.save(unique_keys=['rownumber'], data=data)
 </code>
 
+<h2>Bad dates</h2>
 
-<!--
-<p>There are cases with bad dates.</p>
+<p>In some cases there are bad dates. Improve the cellval function to
+catch exceptions.</p>
+
 <code>try:
     datetuple = xlrd.xldate_as_tuple(cell.value, datemode)
 except Exception, e:
@@ -94,6 +102,5 @@ except ValueError, e:
     return str(cell)
 </code>
 
--->
 
 
