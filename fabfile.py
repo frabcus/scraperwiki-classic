@@ -120,7 +120,6 @@ New revision: %(new_revision)s
 """ % {
         'cron_version' : env.cron_version,
         'user' : env.name,
-        'changeset' : env.changeset,
         'old_revision': old_revision,
         'new_revision': new_revision,
         }
