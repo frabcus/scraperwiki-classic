@@ -62,7 +62,7 @@
     {% endif %}
 
     {% if useruserrolemap.has_on_team %}
-        <h2 class="teams">On {{ profile.display_name }}'s team ({{ useruserrolemap.has_on_team|length }})</h2>
+        <h2 class="teams">Team members ({{ useruserrolemap.has_on_team|length }})</h2>
         <ul id="has_on_team">
             {% with 'has_on_team' as role %}
               {% for other in useruserrolemap.has_on_team %}  
