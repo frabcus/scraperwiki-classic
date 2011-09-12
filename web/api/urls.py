@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 
-from api import viewshandlers, v2views
+from api import viewshandlers
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 
