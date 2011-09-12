@@ -40,6 +40,8 @@ $(function(){
   $("#new_graph").width(monthly_ticks.length * 50);
   $("#active_graph").width(monthly_ticks.length * 50);
 
+  function numberWithCommas(x) { return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ","); }
+
   $.plot($("#totals_graph"), [
         {
             data: total_scrapers, 
@@ -60,9 +62,8 @@ $(function(){
             points: { show: true }
         }],
         {
-          xaxis: {
-              ticks: monthly_ticks
-          }
+          xaxis: { ticks: monthly_ticks },
+          yaxis: { tickFormatter: numberWithCommas }
         });
 
   $.plot($("#new_graph"), [
@@ -85,9 +86,8 @@ $(function(){
             points: { show: true }
         }],
         {
-          xaxis: {
-              ticks: monthly_ticks
-          }
+          xaxis: { ticks: monthly_ticks },
+          yaxis: { tickFormatter: numberWithCommas }
         });
 
   $.plot($("#active_graph"), [
@@ -105,9 +105,8 @@ $(function(){
         },
         ],
         {
-          xaxis: {
-              ticks: monthly_ticks
-          }
+          xaxis: { ticks: monthly_ticks },
+          yaxis: { tickFormatter: numberWithCommas }
         });
 
   $.plot($("#datastore_graph"), [
@@ -119,9 +118,8 @@ $(function(){
         },
         ],
         {
-          xaxis: {
-              ticks: monthly_ticks
-          }
+          xaxis: { ticks: monthly_ticks },
+          yaxis: { tickFormatter: numberWithCommas }
         });
 
   $('.legend').css('left', '30px');
