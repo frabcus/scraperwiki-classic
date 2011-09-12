@@ -289,8 +289,9 @@ def search(request, q=""):
         tags = Tag.objects.filter(name__icontains=q)
         scrapers = scraper_search_query(request.user, q)
         
-        # TODO: This means private scrapers NEVER turn up in search, even if they are ours....
-        scrapers = scrapers.exclude(usercoderole__role='email') # .exclude(privacy_status='private')  # so we can search for "email" without getting all the emailers -- would be a type search if we needed it
+        # The following line used to exclude private scrapers, but these were already excluded in 
+        # the call to scraper_search_query above.
+        scrapers = scrapers.exclude(usercoderole__role='email') 
         scrapers_num_results = tags.count() + scrapers.count()
         return render_to_response('frontend/search_results.html',
             {
