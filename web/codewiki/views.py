@@ -129,9 +129,17 @@ def scraper_history(request, wiki_type, short_name):
 # scraper, we will handle the incoming request only if the fields match what
 # the owner told us about the scraper/git connection.
 ###############################################################################
-def gitpush(request):
-    if request.method == 'POST':
-        print 'Raw Data: %s' % request.raw_post_data  
+def gitpush(request, wiki_type, short_name):
+    if not request.method == 'POST':
+        return HttpResponse("Error - not a post request")                    
+        
+    try:
+        data = json.loads( request.raw_post_data )
+    except:
+        # We need to notify the user that the push request was not handled
+        return HttpResponse("Error - no JSON found")            
+
+    
         
     return HttpResponse("OK")
 
