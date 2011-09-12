@@ -1,20 +1,42 @@
-<p>Use <a href="https://secure.simplistix.co.uk/svn/xlrd/trunk/xlrd/doc/xlrd.html">XLRD</a> 
-to read from Excel spreadsheet files.</p>
+<p>Microsoft Excel spreadsheet files can contain lots of data in cells, formulae,
+notes and so on.</p>
 
+<p>For more details, read the  <a href="https://secure.simplistix.co.uk/svn/xlrd/trunk/xlrd/doc/xlrd.html">xlrd documentation</a>.</p>
 
-<p>Open the file</p>
-<code>surl = "https://spreadsheets.google.com/ccc?key=0AqwaVIkgSiFYdGxjSGZOUlZFcGJ4cVFoZGZJTXl1ZlE&mp;hl=en#gid=4"
-book = xlrd.open_workbook(file_contents=urllib.urlopen(surl).read())
+<h2>Opening the file</h2>
+
+<p>Download the Excel file, and load it into the xlrd ("Excel reader"). This example
+is taken from an <a href="http://www.whatdotheyknow.com/request/accident_statistics_2#incoming-208592">FOI request
+for tram accidents</a>.
+
+<code>import scraperwiki
+import xlrd
+xlbin = scraperwiki.scrape("http://www.whatdotheyknow.com/request/82804/response/208592/attach/2/ACCIDENTS%20TRAMS%20Laurderdale.xls")
+book = xlrd.open_workbook(file_contents=xlbin)
 </code>
 
-<p>Count and select the sheets</p>
-<code>for n, sheet in enumerate(book.sheets()):
-    print "Sheet %d has %d columns and %d rows" % (n, sheet.ncols, sheet.nrows)
+<p>Directly select the worksheet you want by number or name.</p>
+<code>sheet = book.sheet_by_index(0)
+sheet = book.sheet_by_name('LAUDERDALE AVE')
 </code>
 
-<p>Standard function for handling date objects</p>
+<p>If you're not sure what sheets there are, this prints them out.</p>
+<code>for n, s in enumerate(book.sheets()):
+    print "Sheet %d is called %s and has %d columns and %d rows" % (n, s.name, s.ncols, s.nrows)
+</code>
+
+<h2>Reading values</h2>
+
+<p>Read the values of a row in one go.</p>
+
+<code>print sheet.row_values(4)
+</code>
+
+<p>Dates will come out as floating point numbers by default (e.g. 36649.0), 
+unless you specially convert them. This cellval function does the hard
+work for you.</p>
+
 <code>import datetime
-
 def cellval(cell, datemode):
     if cell.ctype == xlrd.XL_CELL_DATE:
         datetuple = xlrd.xldate_as_tuple(cell.value, datemode)
@@ -26,16 +48,46 @@ def cellval(cell, datemode):
     return cell.value
 </code>
 
-<p>Make dicts from the rows and save it</p>
-<code>keys = sheet.row_values(0)
-for rownumber in range(1, sheet.nrows):
-    values = [ cellval(sheet.cell(rownumber, j), book.datemode)  for j in range(sheet.ncols) ]
-    data = dict(zip(keys, values))
-    data["rownumber"] = rownumber
-    scraperwiki.sqlite.save(unique_keys=["rownumber"], data=data)
+<p>Read a whole row, with dates properly converted.</p>
+
+<code>print [ cellval(c, book.datemode) for c in sheet.row(4) ]
 </code>
 
-<p>There are cases with bad dates.</p>
+<p>Read individual cells like this.</p>
+
+<code>print cellval(sheet.cell(0,0))</code>
+
+
+<h2>Saving to the datastore</h2>
+
+<p>Work out sensible heading names. In this case we remove the "." from "FLEET NO.".</p>
+
+<code>keys = sheet.row_values(2)
+keys[1] = keys[1].replace('.', '')
+print keys
+</code>
+
+<p>Make dictionaries from the rows and save them.</p>
+
+<code>for rownumber in range(4, sheet.nrows):
+    # create dictionary of the row values
+    values = [ cellval(c, book.datemode) for c in sheet.row(rownumber) ]
+    data = dict(zip(keys, values))
+    data['rownumber'] = rownumber
+
+    # remove the empty column (which has a blank heading)
+    del data['']
+
+    # only save if it is a full row (rather than a blank line or a note)
+    if data['DATE'] != None and data['FLEET NO'] != None:
+        scraperwiki.sqlite.save(unique_keys=['rownumber'], data=data)
+</code>
+
+<h2>Bad dates</h2>
+
+<p>In some cases there are bad dates. Improve the cellval function to
+catch exceptions.</p>
+
 <code>try:
     datetuple = xlrd.xldate_as_tuple(cell.value, datemode)
 except Exception, e:
@@ -49,4 +101,6 @@ except ValueError, e:
     print "BAD value", datetuple, cell, e
     return str(cell)
 </code>
+
+
 

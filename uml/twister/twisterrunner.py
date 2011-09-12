@@ -147,24 +147,28 @@ clientcreator = protocol.ClientCreator(reactor, ControllerConnectionProtocol)
 
 # this is the new way that totally bypasses the dispatcher.  
 # we reuse the spawnRunner class only for its user defined functions, not its processprotocol functions!
-def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user):
+def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev):
     srunner = spawnRunner(client, code, logger)  # reuse this class and its functions
 
     jdata = { }
     jdata["code"] = code.replace('\r', '')
     jdata["cpulimit"] = 80
     jdata["draft"] = (not username)
+    jdata["username"] = username   # comes through when done with stimulate_run, and we can use this for the dataproxy permissions (whether it can add to the attachables list)
     jdata["language"] = language
     jdata["scraperid"] = guid
     jdata["urlquery"] = urlquery
     jdata["scrapername"] = scrapername
     jdata["beta_user"] = beta_user
+    jdata["attachables"] = attachables
+    jdata["rev"] = rev
 
     # invent the runid (should actually
     jdata["runid"] = '%.6f_%s' % (time.time(), uuid.uuid4())
     if jdata.get("draft"):
        jdata["runid"] = "draft|||%s" % jdata["runid"]
-
+    #logger.info(str(jdata))
+    
     srunner.jdata = jdata
     srunner.style = "NewSpawnRunner"
     srunner.pid = "NewSpawnRunner"  # for the kill_run function
@@ -175,9 +179,9 @@ def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, clie
     return srunner
     
 
-def MakeRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user):
+def MakeRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev):
     if beta_user:
-        return MakeSocketRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user)
+        return MakeSocketRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev)
 
     # alternatively run the dispatcher the old way 
     # (this can also contain a beta flag to say whether it should be using the lxc)

@@ -968,29 +968,6 @@ body.frontpage #page_inner .tags li a {
 	font-weight: bold;
 }
 
-/*
-
-body.profiles .profilebio {
-	padding: 10px 20px;
-	min-width: 200px;
-}
-
-body.profiles .profilebio p {
-	margin: 0;
-}
-
-body.profiles .profilesettings {
-	background-color: #f6f6f6;
-	padding: 10px 20px 0 20px;
-}
-
-body.profiles .profilesettings ul {
-	padding: 0;
-	margin: 0;
-}
-
-*/
-
 body.profiles div.first,
 body.profiles #divContent form {
 	position: relative;
@@ -1133,6 +1110,12 @@ body.profiles .profilesettings .cancel a {
 
 body.profiles .profilesettings .cancel a:hover {
 	color: #a66;
+}
+
+body.profiles h2.teams {
+	margin-top: 20px;
+	border-top: 1px solid #ccc;
+	padding-top: 15px;
 }
 
 body.profiles h2.scrapersandviews {

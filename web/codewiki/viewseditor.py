@@ -292,19 +292,21 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourc
             if lsourcescraper:
                 code_object.relations.add(lsourcescraper[0])
 
-    # Add user roles
+    # Add user roles (including special case for first time
     if code_object.owner():
         if code_object.owner().pk != user.pk:
             code_object.add_user_role(user, 'editor')
     else:
         code_object.add_user_role(user, 'owner')
 
-    revdate = None
+    # get the rev number even when no change
+    status = code_object.get_vcs_status(-1)
+    assert 'currcommit' not in status
     if rev != None:
-        status = code_object.get_vcs_status(-1)
-        assert 'currcommit' not in status
         assert rev == status.get('prevcommit',{}).get("rev")
-        revdate = status.get('prevcommit',{}).get("date")
+    else:  # case of no commit because files were the same
+        rev = status.get('prevcommit',{}).get("rev")
+    revdate = status.get('prevcommit',{}).get("date")
     
     return (rev, revdate) # None if no change
 
@@ -350,12 +352,23 @@ def handle_editor_save(request):
             except models.Code.DoesNotExist:
                 pass
 
+    earliesteditor = request.POST.get('earliesteditor', "")
+    sourcescraper = request.POST.get('sourcescraper', "")
+    commitmessage = request.POST.get('commit_message', "")
+
+    # quick sneak in and advance save to get rev number
+    if request.user.is_authenticated() and scraper.actionauthorized(request.user, "savecode"):
+        advancesave = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
+    else:
+        advancesave = None
+    
     if stimulaterun in ["editorstimulaterun", "editorstimulaterun_nosave"]:
         clientnumber = int(request.POST.get('clientnumber', '-1'))
         urlquery = request.POST.get('urlquery', '')
         if request.user.is_authenticated() and scraper.actionauthorized(request.user, "stimulate_run"):
             runnerstream = runsockettotwister.RunnerSocket()
-            stimulaterunmessage = runnerstream.stimulate_run_from_editor(scraper, request.user, clientnumber, language, code, urlquery)
+            rev = (advancesave and advancesave[0])
+            stimulaterunmessage = runnerstream.stimulate_run_from_editor(scraper, request.user, clientnumber, language, code, rev, urlquery)
         else:
             stimulaterunmessage = {"message":"not authorised to run"}
 
@@ -363,16 +376,18 @@ def handle_editor_save(request):
         stimulaterunmessage['status'] = 'notsaved'
         return HttpResponse(json.dumps(stimulaterunmessage))
     
-    sourcescraper = request.POST.get('sourcescraper', "")
-    commitmessage = request.POST.get('commit_message', "")
-    
-    # User is signed in, we can save the scraper
+    # User is signed in, we can save the scraper 
+    # (some of the operation was moved to advancesave so we have the 
+    # rev number to pass to the runner in advance.  All this needs refactoring)
     if request.user.is_authenticated():
-        earliesteditor = request.POST.get('earliesteditor', "")
         if not scraper.actionauthorized(request.user, "savecode"):
             return HttpResponse(json.dumps({'status':'Failed', 'message':"Not allowed to save this scraper"}))
         
-        (rev, revdate) = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
+        if not advancesave:
+            (rev, revdate) = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
+        else:
+            (rev, revdate) = advancesave
+
         response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
         return HttpResponse(json.dumps({'redirect':'true', 'url':response_url, 'rev':rev, 'revdateepoch':_datetime_to_epoch(revdate) }))
 

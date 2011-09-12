@@ -23,4 +23,11 @@ class MonthlyCounts(models.Model):
     active_coders = models.IntegerField()
     delta_active_coders = models.IntegerField()
 
+    longtime_active_coders = models.IntegerField()
+    delta_longtime_active_coders = models.IntegerField()
+
+    # these two are a cache - update_kpis fills them in from calculation on DatastoreRecordCount above
+    datastore_record_count = models.IntegerField()
+    delta_datastore_record_count = models.IntegerField()
+
 

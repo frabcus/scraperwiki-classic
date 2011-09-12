@@ -18,7 +18,7 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
 from tagging.models import Tag, TaggedItem
 
-from codewiki.models import Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
+from codewiki.models import UserUserRole, Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from registration.backends import get_backend
@@ -92,6 +92,7 @@ def profile_detail(request, username):
     owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
     extra_context['owned_code_objects'] = owned_code_objects
     extra_context['emailer_code_objects'] = owned_code_objects.filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
+    extra_context['useruserrolemap'] = UserUserRole.useruserrolemap(profiled_user)
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
 

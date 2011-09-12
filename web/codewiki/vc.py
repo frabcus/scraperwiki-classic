@@ -108,12 +108,12 @@ class MercurialInterface:
         return result
         
 	            
-    def getcommitlog(self):
+    def getcommitlog(self, filename):
         result = [ ]
         try:
             for rev in self.repo:
                 ctx = self.repo[rev]
-                if "code" in ctx.files():   # could get both validfilenames for changes in description
+                if filename in ctx.files():   # could get both validfilenames for changes in description
                     result.append(self.getctxrevisionsummary(ctx))
         except mercurial.revlog.RevlogError, e:
             logger.error("RevlogError: %s %s" %  (self.repopath, str(e)))
@@ -148,7 +148,7 @@ class MercurialInterface:
         
         # adjacent commit informations
         if rev != None:
-            commitlog = self.getcommitlog()
+            commitlog = self.getcommitlog("code")
             if commitlog:
                 irev = len(commitlog)
                 if rev < 0:
@@ -168,12 +168,13 @@ class MercurialInterface:
         
         # fetch code from reversion or the file
         # (beware, this is only of the changed files, so will confound when docs are included)
+        # however getcommitlog filters to the revs that only include the requested file
         if "currcommit" in status:
             reversion = self.getreversion(status["currcommit"]["rev"])
             for filename in validfilenames:
                 if filename in reversion["text"]:
                     status[filename] = reversion["text"].get(filename)
-        
+            
         # get information about the saved file (which we will if there's no current revision selected -- eg when rev in [-1, None]
         else:
             for filename in validfilenames:

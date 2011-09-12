@@ -138,12 +138,13 @@ class Code(models.Model):
         rev = self.vcs.commit(message="save docs", user=user)
 
 
-    def get_commit_log(self):
-        return self.vcs.getcommitlog()
+    def get_commit_log(self, filename):
+        return self.vcs.getcommitlog(filename)
 
     def get_file_status(self):
         return self.vcs.getfilestatus("code")
 
+    # this is hardcoded to get revision list for "code"
     def get_vcs_status(self, revision = None):
         return self.vcs.getstatus(revision)
 
@@ -445,6 +446,27 @@ class UserUserRole(models.Model):
     def remove_from_team(user, organisation):
         UserUserRole.objects.filter(user=user, other=organisation, role="on_team_of").delete()
 
+    # uses lists of users rather than useruserroles so that you can test containment easily
+    @staticmethod
+    def useruserrolemap(user):
+        result = { "on_team_of":[], "has_on_team":[] }
+        for useruserrole in user.useruserrole_set.all():
+            role = useruserrole.role
+            if role not in result:
+                result[role] = [ ]
+            result[role].append(useruserrole.other)
+        for useruserrole in user.rev_useruserrole_set.all():
+            role = useruserrole.role
+            # reverse direction of names
+            if role == "on_team_of":
+                role = "has_on_team";
+            else:
+                assert(False)
+            if role not in result:
+                result[role] = [ ]
+            result[role].append(useruserrole.user)
+        return result
+ 
     def __unicode__(self):
         return "User: %s -> Other: %s (%s)" % (self.user, self.user, self.role)
 

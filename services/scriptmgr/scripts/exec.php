@@ -87,6 +87,8 @@ function errorHandler($errno, $errstr, $errfile, $errline)
 set_error_handler("errorHandler", E_ALL & ~E_NOTICE);  // this is for errors, not exceptions (eg 1/0)
 set_time_limit(80); 
 
+date_default_timezone_set('Europe/London');
+
 try
 {
     // works also as include or eval.  However no way to trap syntax errors

@@ -15,7 +15,6 @@ var util  = require( path.join(__dirname,'utils.js') );
 // All of our virtual machines
 var vms = [ ]; // vm name -> objects
 
-
 var vms_by_ip    = [ ]; // maps of ip -> vm name
 var vms_by_runid = [ ]; // maps of runid -> vm name
 
@@ -31,8 +30,6 @@ var fstab_tpl  = '';
 ******************************************************************************/
 exports.init = function(count, lxc_root_folder) {
 	root_folder = lxc_root_folder;
-	
-	
 	
 	config_tpl = fs.readFileSync( path.join(__dirname,'templates/config.tpl'), "utf-8");
 	fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");
@@ -126,10 +123,10 @@ function create_vm ( name ) {
 			return;
 		}
 
-		// Mount a specific code folder
+		// Mount the code folder
 		var cfolder = get_code_folder(name);
 		path.exists(cfolder, function (exists) {
-	  		if ( ! exists ) fs.mkdirSync( cfolder, "0777" );
+	  		if ( ! exists ) fs.mkdirSync( cfolder, "0757" );
 		});
 
 		var tgt = path.join( folder, 'config')

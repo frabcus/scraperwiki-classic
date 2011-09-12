@@ -517,7 +517,7 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
 
     if 'history' not in quietfields:
         history = [ ]
-        commitentries = scraper.get_commit_log()
+        commitentries = scraper.get_commit_log("code")
         for commitentry in commitentries:
             if history_start_date and commitentry['date'] < history_start_date:
                 continue
