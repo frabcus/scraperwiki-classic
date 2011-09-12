@@ -1,5 +1,5 @@
 from frontend.models import *
-from codewiki.models import UserUserRole
+from codewiki.models import UserUserRole, Vault
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -22,34 +22,26 @@ class UserUserRoleInlines(admin.TabularInline):
     fk_name = 'user'
     extra = 0
 
+class VaultInlines(admin.StackedInline):
+    model = Vault
+    extra = 0
  
+class UserProfileInlines(admin.StackedInline):
+    model = UserProfile
+    extra = 0
+    can_delete = False
+
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'last_login')
+    list_display = ('username', 'email', 'profile_name', 'vault_plan', 'is_active', 'is_staff', 'date_joined', 'last_login')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
 
-    inlines = [UserProfileStack, UserUserRoleInlines]
+    def vault_plan(self, obj):
+        return obj.vault.plan
+    def profile_name(self, obj):
+        return obj.get_profile().name
 
-class UserProfileAdmin(admin.ModelAdmin):
-    """  
-    Should quite possibly be inline in the user object.
-    """
-    list_display = ('username','fullname', 'active', 'staff_status')
-    list_filter = ('beta_user',)
-    
-    def username(self, obj):
-      return obj.user.username
-      
-    def active(self, obj):
-      return obj.user.is_active      
-      
-    def staff_status(self, obj):
-      return obj.user.is_staff            
-      
-    def fullname(self, obj):
-      return obj.user.get_full_name()      
-      
-      
-admin.site.register(UserProfile, UserProfileAdmin)
+    inlines = [UserProfileStack, UserUserRoleInlines, VaultInlines]
+
 admin.site.register(Message, MessageAdmin)
 admin.site.register(DataEnquiry, DataEnquiryAdmin)
 

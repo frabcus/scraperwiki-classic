@@ -271,6 +271,8 @@ def scraper_search_handler(request):
         if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"]:
             boverduescraperrequest = True
 
+    # TODO: If the user has specified an API key then we should pass them into
+    # the search query and refine the resultset  to show only valid scrapers
     if boverduescraperrequest:
         scrapers = scrapers_overdue()  
     else:
@@ -339,6 +341,7 @@ def scraper_search_handler(request):
 
 
 def usersearch_handler(request):
+    # TODO: Should users be able to choose whether they turn up in search results or not?
     query = request.GET.get('searchquery') 
     try:   
         maxrows = int(request.GET.get('maxrows', ""))
@@ -374,6 +377,7 @@ def usersearch_handler(request):
 
 
 def userinfo_handler(request):
+    # TODO: Should users has the ability to set their profiles to private?
     username = request.GET.get('username', "") 
     users = User.objects.filter(username=username)
     result = [ ]
@@ -406,7 +410,10 @@ def runevent_handler(request):
             result = "%s(%s)" % (request.GET.get("callback"), result)
         return HttpResponse(result)
     
-    
+    # TODO: Check accessibility if this scraper is private
+    if scraper.privacy_status == 'private':
+        pass
+        
     runid = request.GET.get('runid', '-1')
     runevent = None
     if scraper.wiki_type != "view":
@@ -503,6 +510,10 @@ def scraperinfo_handler(request):
 
     for short_name in request.GET.get('name', "").split():
         scraper = getscraperorresponse(short_name, "apiscraperinfo", request.user)
+        # TODO: Check accessibility if this scraper is private
+        if scraper.privacy_status == 'private':
+            pass
+            
         if type(scraper) in [str, unicode]:
             result.append({'error':scraper, "short_name":short_name})
         else:
