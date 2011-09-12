@@ -27,8 +27,13 @@ class VaultInlines(admin.StackedInline):
     extra = 0
  
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'last_login', 'vault')
+    list_display = ('username', 'email', 'profile_name', 'vault_plan', 'is_active', 'is_staff', 'date_joined', 'last_login')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
+
+    def vault_plan(self, obj):
+        return obj.vault.plan
+    def profile_name(self, obj):
+        return obj.get_profile().name
 
     inlines = [UserProfileStack, UserUserRoleInlines, VaultInlines]
 
