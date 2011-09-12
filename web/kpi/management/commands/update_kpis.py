@@ -25,7 +25,6 @@ class Command(BaseCommand):
                 month_data = {}
                 this_month = datetime.date(year, month, 1)
                 next_month = one_month_in_the_future(month, year) 
-                print this_month, next_month
 
                 month_data['total_scrapers'] = Scraper.objects.filter(first_published_at__lte=next_month).exclude(privacy_status="deleted").count()
                 month_data['this_months_scrapers'] = Scraper.objects.filter(first_published_at__year=year, first_published_at__month=month).exclude(privacy_status="deleted").count()
