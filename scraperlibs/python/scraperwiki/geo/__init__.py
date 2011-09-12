@@ -30,7 +30,7 @@ def os_easting_northing_to_latlng(easting, northing, grid='GB'):
 def gb_postcode_to_latlng(postcode):
     if not postcode:
          return None
-    url = "http://scraperwikiviews.com/run/uk_postcode_lookup/?postcode="+urllib2.quote(postcode)
+    url = "https://views.scraperwiki.com/run/uk_postcode_lookup/?postcode="+urllib2.quote(postcode)
     sres = urllib2.urlopen(url).read()
     jres = json.loads(sres)
     if "lat" in jres and "lng" in jres:

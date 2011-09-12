@@ -50,7 +50,7 @@
     <div class="content">
 
     {% if useruserrolemap.on_team_of %}
-        <h2 class="teams">Teams ({{ useruserrolemap.on_team_of|length }})</h2>
+        <h2 class="teams">Team memberships ({{ useruserrolemap.on_team_of|length }})</h2>
         <ul id="on_team_of">
             {% with 'on_team_of' as role %}
               {% for other in useruserrolemap.on_team_of %}  
@@ -58,11 +58,11 @@
               {% endfor %}
             {% endwith %}
         </ul>
-        </ul>
+        <p>{{profile.display_name}} can create scrapers in these vaults.</p>
     {% endif %}
 
     {% if useruserrolemap.has_on_team %}
-        <h2 class="teams">{{profile.display_name}}&rsquo;s team ({{ useruserrolemap.has_on_team|length }})</h2>
+        <h2 class="teams">Team members ({{ useruserrolemap.has_on_team|length }})</h2>
         <ul id="has_on_team">
             {% with 'has_on_team' as role %}
               {% for other in useruserrolemap.has_on_team %}  
