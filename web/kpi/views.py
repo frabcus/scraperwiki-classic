@@ -30,13 +30,14 @@ def index(request):
         months_list = []
         for month in range(1, 13):
             when = datetime.datetime(year, month, 1) # first of month
+            next_month = one_month_in_the_future(month, year)
+
             mc = MonthlyCounts.objects.get(date=when)
             month_data = model_to_dict(mc)
             month_data['month'] = calendar.month_abbr[month]
 
             months_list.append(month_data)
 
-            next_month = one_month_in_the_future(month, year)
             if next_month > datetime.date.today():
                 break
         years_list.append({'year': year, 'months': months_list, 'offset': i * 12})

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from django.db.models import Sum
+from django.db.models import Sum, Max
 
 from kpi.models import DatastoreRecordCount, MonthlyCounts
 from codewiki.models import Scraper, Code, View, User
@@ -23,13 +23,24 @@ class Command(BaseCommand):
             months_list = []
             for month in range(1, 13):
                 month_data = {}
+                this_month = datetime.date(year, month, 1)
                 next_month = one_month_in_the_future(month, year) 
+                print this_month, next_month
+
                 month_data['total_scrapers'] = Scraper.objects.filter(first_published_at__lte=next_month).exclude(privacy_status="deleted").count()
                 month_data['this_months_scrapers'] = Scraper.objects.filter(first_published_at__year=year, first_published_at__month=month).exclude(privacy_status="deleted").count()
                 month_data['total_views'] = View.objects.filter(first_published_at__lte=next_month).exclude(privacy_status="deleted").count()
                 month_data['this_months_views'] = View.objects.filter(first_published_at__year=year, first_published_at__month=month).exclude(privacy_status="deleted").count()
                 month_data['total_users'] = User.objects.filter(date_joined__lte=next_month).count()
                 month_data['this_months_users'] = User.objects.filter(date_joined__year=year, date_joined__month=month).count()
+
+                last_in_month_with_record = DatastoreRecordCount.objects.filter(date__lt=next_month, date__gte=this_month).aggregate(Max('date'))['date__max']
+                if last_in_month_with_record:
+                    drc = DatastoreRecordCount.objects.get(date=last_in_month_with_record)
+                    month_data['datastore_record_count'] = drc.record_count
+                else:
+                    month_data['datastore_record_count'] = 0
+
                 months_list.append(month_data)
 
                 if next_month > datetime.date.today():
@@ -70,6 +81,7 @@ class Command(BaseCommand):
         # ... and count how many entries there are
         last_active_coders = 0
         last_longtime_active_coders = 0
+        last_datastore_record_count = 0
         for i, year in enumerate(range(START_YEAR, datetime.date.today().year + 1)):
             for month in range(1, 13):
                 month_data = years_list[i][month - 1]
@@ -81,6 +93,9 @@ class Command(BaseCommand):
                 month_data['longtime_active_coders'] = len(month_data.get('longtime_active_coders', []))
                 month_data['delta_longtime_active_coders'] = month_data['longtime_active_coders'] - last_longtime_active_coders
                 last_longtime_active_coders = month_data['longtime_active_coders']
+
+                month_data['delta_datastore_record_count'] = month_data['datastore_record_count'] - last_datastore_record_count
+                last_datastore_record_count = month_data['datastore_record_count']
                 
                 next_month = one_month_in_the_future(month, year) 
                 if next_month > datetime.date.today():

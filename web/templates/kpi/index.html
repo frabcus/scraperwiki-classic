@@ -10,7 +10,7 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.js"></script>
 <script>
 $(function(){
-  var ticks = new Array();
+  var monthly_ticks = new Array();
   var total_scrapers = new Array();
   var total_views = new Array();
   var total_users = new Array();
@@ -19,10 +19,11 @@ $(function(){
   var months_users = new Array();
   var active_coders = new Array();
   var longtime_active_coders = new Array();
+  var datastore_record_count = new Array();
 
   {% for year in data %}
     {% for month in year.months %}
-      ticks.push([{{forloop.counter0|add:year.offset}}, '{{month.month}} {{year.year}}']);
+      monthly_ticks.push([{{forloop.counter0|add:year.offset}}, '{{month.month}} {{year.year}}']);
       total_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.total_scrapers}}]);
       total_views.push([{{forloop.counter0|add:year.offset}}, {{month.total_views}}]);
       total_users.push([{{forloop.counter0|add:year.offset}}, {{month.total_users}}]);
@@ -31,12 +32,13 @@ $(function(){
       months_users.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_users}}]);
       active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.active_coders}}]);
       longtime_active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.longtime_active_coders}}]);
+      datastore_record_count.push([{{forloop.counter0|add:year.offset}}, {{month.datastore_record_count}}]);
     {% endfor %}
   {% endfor %}
 
-  $("#totals_graph").width(ticks.length * 50);
-  $("#new_graph").width(ticks.length * 50);
-  $("#active_graph").width(ticks.length * 50);
+  $("#totals_graph").width(monthly_ticks.length * 50);
+  $("#new_graph").width(monthly_ticks.length * 50);
+  $("#active_graph").width(monthly_ticks.length * 50);
 
   $.plot($("#totals_graph"), [
         {
@@ -59,7 +61,7 @@ $(function(){
         }],
         {
           xaxis: {
-              ticks: ticks
+              ticks: monthly_ticks
           }
         });
 
@@ -84,7 +86,7 @@ $(function(){
         }],
         {
           xaxis: {
-              ticks: ticks
+              ticks: monthly_ticks
           }
         });
 
@@ -104,7 +106,21 @@ $(function(){
         ],
         {
           xaxis: {
-              ticks: ticks
+              ticks: monthly_ticks
+          }
+        });
+
+  $.plot($("#datastore_graph"), [
+        {
+            data: datastore_record_count,
+            label: 'Datastore Record Count',
+            lines: { show: true },
+            points: { show: true }
+        },
+        ],
+        {
+          xaxis: {
+              ticks: monthly_ticks
           }
         });
 
@@ -123,9 +139,10 @@ $(function(){
     <div id="page_outer">
                 <div id="page_inner">
 
-<p id="totals_graph" style="width:200px;height:200px"></p>
-<p id="new_graph" style="width:200px;height:200px"></p>
-<p id="active_graph" style="width:200px;height:200px"></p>
+<p id="totals_graph" style="height:200px"></p>
+<p id="new_graph" style="height:200px"></p>
+<p id="active_graph" style="height:200px"></p>
+<p id="datastore_graph" style="height:200px"></p>
 
 <table class="data">
     <th>
@@ -134,6 +151,7 @@ $(function(){
        <th>Users</th>
        <th>Active Coders</th>
        <th>Longtime<br>Active Coders</th>
+       <th>Datastore<br>Record Count</th>
     </th>
 
     {% for year in data reversed %}
@@ -150,6 +168,7 @@ $(function(){
                <td> {{month.total_users|intcomma}} ({{ month.this_months_users|plusminus_int|intcomma }}) </td>
                <td> {{month.active_coders|intcomma}} ({{ month.delta_active_coders|plusminus_int|intcomma }}) </td>
                <td> {{month.longtime_active_coders|intcomma}} ({{ month.delta_longtime_active_coders|plusminus_int|intcomma }}) </td>
+               <td> {{month.datastore_record_count|intcomma}} ({{ month.delta_datastore_record_count|plusminus_int|intcomma }}) </td>
            </tr>
         {% endfor %}
     {% endfor %}
