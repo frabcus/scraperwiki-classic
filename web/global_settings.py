@@ -161,6 +161,11 @@ SCRAPERS_PER_PAGE = 60
 MAX_API_ITEMS = 500
 DEFAULT_API_ITEMS = 100
 
+# Make "view on site" work for user models
+# https://docs.djangoproject.com/en/dev/ref/settings/?#absolute-url-overrides
+ABSOLUTE_URL_OVERRIDES = {
+    'auth.user': lambda o: o.get_profile().get_absolute_url()
+}
 
 # Requited for the template_settings context processor. Each varible listed
 # here will be made availible in all templates that are passed the
