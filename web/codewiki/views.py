@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.contrib.auth.models import User
 from django.views.decorators.http import condition
+from django.shortcuts import get_object_or_404
 import textile
 from django.conf import settings
 
@@ -139,7 +140,15 @@ def gitpush(request, wiki_type, short_name):
         # We need to notify the user that the push request was not handled
         return HttpResponse("Error - no JSON found")            
 
+    # TODO: Check the username,repo and filename in the scraper properties 
+    # against the properties set in the scraper. If they match then go 
+    # fetch the updated file and use it.
     
+    scraper = get_object_or_404( Scraper, short_name=short_name)
+    if scraper.privacy_status == 'deleted':
+        raise Http404
+    
+    # Check the scraper properties.
         
     return HttpResponse("OK")
 
