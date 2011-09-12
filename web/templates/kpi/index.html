@@ -23,16 +23,18 @@ $(function(){
 
   {% for year in data %}
     {% for month in year.months %}
-      monthly_ticks.push([{{forloop.counter0|add:year.offset}}, '{{month.month}} {{year.year}}']);
-      total_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.total_scrapers}}]);
-      total_views.push([{{forloop.counter0|add:year.offset}}, {{month.total_views}}]);
-      total_users.push([{{forloop.counter0|add:year.offset}}, {{month.total_users}}]);
-      months_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_scrapers}}]);
-      months_views.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_views}}]);
-      months_users.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_users}}]);
-      active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.active_coders}}]);
-      longtime_active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.longtime_active_coders}}]);
-      datastore_record_count.push([{{forloop.counter0|add:year.offset}}, {{month.datastore_record_count}}]);
+      {% if not month.current_month %}
+          monthly_ticks.push([{{forloop.counter0|add:year.offset}}, '{{month.month}} {{year.year}}']);
+          total_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.total_scrapers}}]);
+          total_views.push([{{forloop.counter0|add:year.offset}}, {{month.total_views}}]);
+          total_users.push([{{forloop.counter0|add:year.offset}}, {{month.total_users}}]);
+          months_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_scrapers}}]);
+          months_views.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_views}}]);
+          months_users.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_users}}]);
+          active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.active_coders}}]);
+          longtime_active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.longtime_active_coders}}]);
+          datastore_record_count.push([{{forloop.counter0|add:year.offset}}, {{month.datastore_record_count}}]);
+      {% endif %}
     {% endfor %}
   {% endfor %}
 
