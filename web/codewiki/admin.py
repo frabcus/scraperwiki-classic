@@ -23,7 +23,6 @@ class CodeAdmin(admin.ModelAdmin):
     readonly_fields = ('wiki_type','guid')
 
 class ScraperAdmin(CodeAdmin):
-    inlines = (UserCodeRoleInlines,)
     list_display = ('title', 'short_name', 'last_run', 'status', 'privacy_status')
     list_filter = ('status', 'last_run', 'privacy_status', 'featured',)
     search_fields = ('title', 'short_name')
