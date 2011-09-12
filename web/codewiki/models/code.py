@@ -446,6 +446,27 @@ class UserUserRole(models.Model):
     def remove_from_team(user, organisation):
         UserUserRole.objects.filter(user=user, other=organisation, role="on_team_of").delete()
 
+    # uses lists of users rather than useruserroles so that you can test containment easily
+    @staticmethod
+    def useruserrolemap(user):
+        result = { "on_team_of":[], "has_on_team":[] }
+        for useruserrole in user.useruserrole_set.all():
+            role = useruserrole.role
+            if role not in result:
+                result[role] = [ ]
+            result[role].append(useruserrole.other)
+        for useruserrole in user.rev_useruserrole_set.all():
+            role = useruserrole.role
+            # reverse direction of names
+            if role == "on_team_of":
+                role = "has_on_team";
+            else:
+                assert(False)
+            if role not in result:
+                result[role] = [ ]
+            result[role].append(useruserrole.user)
+        return result
+ 
     def __unicode__(self):
         return "User: %s -> Other: %s (%s)" % (self.user, self.user, self.role)
 

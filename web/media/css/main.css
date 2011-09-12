@@ -1112,6 +1112,12 @@ body.profiles .profilesettings .cancel a:hover {
 	color: #a66;
 }
 
+body.profiles h2.teams {
+	margin-top: 20px;
+	border-top: 1px solid #ccc;
+	padding-top: 15px;
+}
+
 body.profiles h2.scrapersandviews {
 	margin-top: 20px;
 	border-top: 1px solid #ccc;

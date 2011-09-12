@@ -2,11 +2,11 @@
 {% load pagination_tags %}
 {% load gravatar %}
 {% block css %}{% endblock %}
-{% block title %}Profile Details: {% if profile.name %}{{profile.name}}{% else %}{{profile.user.username}}{% endif %}
+{% block title %}Profile Details: {{profile.display_name}}
 {% endblock %}
 
 {% block header %}
-	<h2>{% if profile.name %}{{profile.name}}{% else %}{{profile.user.username}}{% endif %}&rsquo;s profile</h2>
+	<h2>{{profile.display_name}}&rsquo;s profile</h2>
 	<p>{{profile.user.username}}{% ifequal profile.user.username user.username %} {% if owned_code_objects %}
 	    {% autopaginate owned_code_objects %}
 	    &bull;
@@ -19,21 +19,6 @@
 
     <div class="content first">
     
-    <!--    <table cellspacing="0" cellpadding="0">
-            <tr>
-                <td class="profilepic">{% show_gravatar profile.user 'large' %}</td>
-                <td class="profilebio"><h4>{% if profile.name %}{{profile.name}}{% else %}{{profile.user.username}}{% endif %}</h4><p>{{ profile.bio }}</p></td>
-                {% ifequal profile.user.username user.username %}<td class="profilesettings">
-                    <ul>
-                        <li>Registered&nbsp;email&nbsp;address:<br/> {{user.email}}</li>
-                        <li><a href="{% url profiles_edit_profile %}">Edit&nbsp;your&nbsp;profile</a></li>
-                        <li><a href="{% url auth_password_change %}">Change&nbsp;your&nbsp;password</a></li>
-                    </ul>
-                </td>{% endifequal %}
-            </tr>
-        </table>    -->
-        
-        
         {% ifequal profile.user user %}
         <div class="profilesettings">
             <p class="email"><span class="label">Registered email: </span> {{user.email}}</p>
@@ -45,7 +30,7 @@
         <div class="profilepic">{% show_gravatar profile.user 'large' %}</div>
         
         <div class="profilebio">
-            <h3>{% if profile.name %}{{profile.name}}{% else %}{{profile.user.username}}{% endif %}</h3>
+            <h3>{{profile.display_name}}</h3>
             <p>{{ profile.bio }}</p>
             {% if emailer_code_objects %}
               <p class="emailers">Emailers: 
@@ -57,12 +42,39 @@
               </p>
             {% endif %}
         </div>
-             
+
+            
         <br class="clear" />
 	</div>
 
     <div class="content">
-    {% if owned_code_objects %}
+
+    {% if useruserrolemap.on_team_of %}
+        <h2 class="teams">Teams ({{ useruserrolemap.on_team_of|length }})</h2>
+        <ul id="on_team_of">
+            {% with 'on_team_of' as role %}
+              {% for other in useruserrolemap.on_team_of %}  
+                {% include 'codewiki/includes/team.html' %}
+              {% endfor %}
+            {% endwith %}
+        </ul>
+        </ul>
+    {% endif %}
+
+    {% if useruserrolemap.has_on_team %}
+        <h2 class="teams">{{profile.display_name}}&rsquo;s team ({{ useruserrolemap.has_on_team|length }})</h2>
+        <ul id="has_on_team">
+            {% with 'has_on_team' as role %}
+              {% for other in useruserrolemap.has_on_team %}  
+                {% include 'codewiki/includes/team.html' %}
+              {% endfor %}
+            {% endwith %}
+        </ul>
+        <p>These users can create scrapers in {{profile.display_name}}'s vault.</p>
+    {% endif %}
+
+
+     {% if owned_code_objects %}
 	  {% autopaginate owned_code_objects %}	
       <h2 class="scrapersandviews">Scrapers and views ({{ paginator.count }})</h2>    	
       <ul class="scraper_list">

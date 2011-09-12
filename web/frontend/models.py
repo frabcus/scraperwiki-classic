@@ -41,7 +41,11 @@ class UserProfile(models.Model):
         
         #do the parent save
         super(UserProfile, self).save()
-        
+
+    def display_name(self):
+        if self.name and self.name != '':
+            return self.name
+        return self.user.username
     
     def __unicode__(self):
         return unicode(self.user)
