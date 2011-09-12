@@ -61,19 +61,26 @@ class Command(BaseCommand):
                     month_data = years_list[year][month]
                     if 'active_coders' not in month_data.keys():
                         month_data['active_coders'] = {}
+                    if 'longtime_active_coders' not in month_data.keys():
+                        month_data['longtime_active_coders'] = {}
                     month_data['active_coders'][username] = 1
+                    # if they joined in a previous month
+                    if user.date_joined.date() < datetime.date(when.year, when.month, 1):
+                        month_data['longtime_active_coders'][username] = 1
         # ... and count how many entries there are
         last_active_coders = 0
+        last_longtime_active_coders = 0
         for i, year in enumerate(range(START_YEAR, datetime.date.today().year + 1)):
             for month in range(1, 13):
                 month_data = years_list[i][month - 1]
-                if 'active_coders' not in month_data.keys():
-                    month_data['active_coders'] = 0
-                else:
-                    month_data['active_coders'] = len(month_data['active_coders'])
 
+                month_data['active_coders'] = len(month_data.get('active_coders', []))
                 month_data['delta_active_coders'] = month_data['active_coders'] - last_active_coders
                 last_active_coders = month_data['active_coders']
+
+                month_data['longtime_active_coders'] = len(month_data.get('longtime_active_coders', []))
+                month_data['delta_longtime_active_coders'] = month_data['longtime_active_coders'] - last_longtime_active_coders
+                last_longtime_active_coders = month_data['longtime_active_coders']
                 
                 next_month = one_month_in_the_future(month, year) 
                 if next_month > datetime.date.today():

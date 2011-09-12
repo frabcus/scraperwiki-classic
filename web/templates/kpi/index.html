@@ -18,6 +18,7 @@ $(function(){
   var months_views = new Array();
   var months_users = new Array();
   var active_coders = new Array();
+  var longtime_active_coders = new Array();
 
   {% for year in data %}
     {% for month in year.months %}
@@ -29,6 +30,7 @@ $(function(){
       months_views.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_views}}]);
       months_users.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_users}}]);
       active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.active_coders}}]);
+      longtime_active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.longtime_active_coders}}]);
     {% endfor %}
   {% endfor %}
 
@@ -100,6 +102,20 @@ $(function(){
           }
         });
 
+  $.plot($("#longtime_active_graph"), [
+        {
+            data: longtime_active_coders,
+            label: 'Longtime active coders (active coders that joined in an earlier month)',
+            lines: { show: true },
+            points: { show: true }
+        },
+        ],
+        {
+          xaxis: {
+              ticks: ticks
+          }
+        });
+
   $('.legend').css('left', '30px');
 
 });
@@ -125,6 +141,7 @@ $(function(){
        <th>Views</th>
        <th>Users</th>
        <th>Active Coders</th>
+       <th>Longtime<br>Active Coders</th>
     </th>
 
     {% for year in data reversed %}
@@ -140,6 +157,7 @@ $(function(){
                <td> {{month.total_views|intcomma}} ({{ month.this_months_views|plusminus_int|intcomma }}) </td>
                <td> {{month.total_users|intcomma}} ({{ month.this_months_users|plusminus_int|intcomma }}) </td>
                <td> {{month.active_coders|intcomma}} ({{ month.delta_active_coders|plusminus_int|intcomma }}) </td>
+               <td> {{month.longtime_active_coders|intcomma}} ({{ month.delta_longtime_active_coders|plusminus_int|intcomma }}) </td>
            </tr>
         {% endfor %}
     {% endfor %}

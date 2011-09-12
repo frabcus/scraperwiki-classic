@@ -23,4 +23,7 @@ class MonthlyCounts(models.Model):
     active_coders = models.IntegerField()
     delta_active_coders = models.IntegerField()
 
+    longtime_active_coders = models.IntegerField()
+    delta_longtime_active_coders = models.IntegerField()
+
 
