@@ -63,7 +63,8 @@ $(function(){
         }],
         {
           xaxis: { ticks: monthly_ticks },
-          yaxis: { tickFormatter: numberWithCommas }
+          yaxis: { tickFormatter: numberWithCommas },
+          legend: { position: "nw" }
         });
 
   $.plot($("#new_graph"), [
@@ -87,7 +88,8 @@ $(function(){
         }],
         {
           xaxis: { ticks: monthly_ticks },
-          yaxis: { tickFormatter: numberWithCommas }
+          yaxis: { tickFormatter: numberWithCommas },
+          legend: { position: "nw" }
         });
 
   $.plot($("#active_graph"), [
@@ -106,7 +108,8 @@ $(function(){
         ],
         {
           xaxis: { ticks: monthly_ticks },
-          yaxis: { tickFormatter: numberWithCommas }
+          yaxis: { tickFormatter: numberWithCommas },
+          legend: { position: "nw" }
         });
 
   $.plot($("#datastore_graph"), [
@@ -119,7 +122,8 @@ $(function(){
         ],
         {
           xaxis: { ticks: monthly_ticks },
-          yaxis: { tickFormatter: numberWithCommas }
+          yaxis: { tickFormatter: numberWithCommas },
+          legend: { position: "nw" }
         });
 
   $('.legend').css('left', '30px');
