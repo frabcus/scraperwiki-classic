@@ -1,4 +1,4 @@
-from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent, CodePermission
+from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent, CodePermission, Vault
 from django.contrib import admin
 from django.db import models
 
@@ -9,6 +9,7 @@ class UserCodeRoleInlines(admin.TabularInline):
 class ScraperRunEventInlines(admin.TabularInline):
     model = ScraperRunEvent
     extra = 0
+
 
 def mark_featured(modeladmin, request, queryset):
     queryset.update(featured=True)

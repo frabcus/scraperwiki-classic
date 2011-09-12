@@ -1,5 +1,5 @@
 from frontend.models import *
-from codewiki.models import UserUserRole
+from codewiki.models import UserUserRole, Vault
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -22,12 +22,15 @@ class UserUserRoleInlines(admin.TabularInline):
     fk_name = 'user'
     extra = 0
 
+class VaultInlines(admin.StackedInline):
+    model = Vault
+    extra = 0
  
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'last_login')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'last_login', 'vault')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
 
-    inlines = [UserProfileStack, UserUserRoleInlines]
+    inlines = [UserProfileStack, UserUserRoleInlines, VaultInlines]
 
 class UserProfileAdmin(admin.ModelAdmin):
     """  
