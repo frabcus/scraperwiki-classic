@@ -39,7 +39,7 @@ module ScraperWiki
     end
 
     def ScraperWiki.gb_postcode_to_latlng(postcode)
-        uri = URI.parse("http://scraperwikiviews.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
+        uri = URI.parse("http://views.scraperwiki.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
         sres = Net::HTTP.get(uri)
         jres = JSON.parse(sres)
         if jres["lat"] and jres["lng"]
