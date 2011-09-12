@@ -81,7 +81,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()               
         
-        if host and (rem[0].startswith(add) or rem[0].startswith('10.0.1')):
+        if host and (rem[0].startswith(add) or rem[0].startswith('10.0.1') or uml == 'lxc'):
             # No need to do the ident, we will return a non-existent runID,short_name for now
             self.logger.debug('We are using LXC so use parameters for ident')
             self.logger.debug( "%s -> %s" % (params.get('vrunid'), params.get("vscrapername",''),) )
