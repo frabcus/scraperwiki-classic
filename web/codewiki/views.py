@@ -124,6 +124,17 @@ def scraper_history(request, wiki_type, short_name):
     
     return render_to_response('codewiki/history.html', context, context_instance=RequestContext(request))
 
+###############################################################################
+# Called as a result of a GIT PUSH when the callback is pointed at a specific 
+# scraper, we will handle the incoming request only if the fields match what
+# the owner told us about the scraper/git connection.
+###############################################################################
+def gitpush(request):
+    if request.method == 'POST':
+        print 'Raw Data: %s' % request.raw_post_data  
+        
+    return HttpResponse("OK")
+
 
 def code_overview(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
