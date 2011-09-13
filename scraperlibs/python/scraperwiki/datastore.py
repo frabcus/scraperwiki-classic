@@ -166,13 +166,13 @@ def webstorerequest(req):
         table_name = req.get("swdatatblname")
         tableurl = "%s/%s" % (databaseurl, table_name)
         rqs = urllib.urlencode([ ("unique", key)  for key in req.get("unique_keys") ])
-        auth = base64.encodestring("%s:%s" % (username, password)).strip()
+#        auth = base64.encodestring("%s:%s" % (username, password)).strip()
         ldata = req.get("data")
         if type(ldata) == dict:
             ldata = [ldata]
         for data in ldata:
             request = urllib2.Request("%s?%s" % (tableurl, rqs))
-            request.add_header("Authorization", "Basic %s" % auth)
+#            request.add_header("Authorization", "Basic %s" % auth)
             request.add_header("Content-Type", "application/json")
             request.add_header("Accept", "application/json")
             request.add_data(json.dumps(data))
@@ -187,7 +187,7 @@ def webstorerequest(req):
         request.add_header("Content-Type", "application/json")
         request.add_header("Accept", "application/json")
         record = {"query":req.get("sqlquery"), "params":req.get("data"), "attach":[]}
-        request.add_header("X-SCRAPERNAME", m_scrapername)        
+        request.add_header("X-Scrapername", m_scrapername)        
         request.add_header("X-SCRAPERWIKI-DBSIG", "%s %s %s" % (m_scrapername, username, "something"))
         for name, asattach in req.get("attachlist"):
             record["attach"].append({"user":username, "database":name, "alias":asattach, "securitycheck":"somthing"})
