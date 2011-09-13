@@ -248,7 +248,7 @@ def code_overview(request, wiki_type, short_name):
 
         
     # unfinished CKAN integration
-    if False and dataproxy and request.user.is_staff:
+    if dataproxy and request.user.is_staff:
         try:
             dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":"ckan_datastore", "asname":"src"})
             ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
@@ -664,6 +664,12 @@ def webstore_attach_auth(request):
     except models.Code.DoesNotExist:
         return HttpResponse("{'attach':'Fail'}", mimetype=mime)
 
+
+    if attachtoscraper.privacy_status != "private":
+        return HttpResponse("{'attach':'Ok'}", mimetype=mime)        
+#        if scraper:
+#            models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
+        
     # dereference scraper (if not draft) so we can look for the attach list
     if scrapername: 
         try:
@@ -676,12 +682,7 @@ def webstore_attach_auth(request):
             return HttpResponse("{'attach':'Ok'}", mimetype=mime)
     else:
         scraper = None
-        
-
-    if attachtoscraper.privacy_status != "private":
-        if scraper:
-            models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
-        return HttpResponse("{'attach':'Ok'}", mimetype=mime)
+    
         
     if not scrapername:
         return HttpResponse("{'attach':'Fail'}", mimetype=mime)
@@ -701,3 +702,7 @@ def webstore_attach_auth(request):
         
     models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
     return HttpResponse("{'attach':'Ok'}", mimetype=mime)
+
+# Move the code from previous two methods to here
+def internal_attach_auth( request ):
+    pass
