@@ -14,7 +14,7 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 WEBSTORE_SETTINGS=/var/www/scraperwiki/services/webstore-settings.py
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="WebProxy"
+DESC="Webstore"
 NAME=webstore
 DAEMON=/usr/bin/python
 VARDIR=/var
