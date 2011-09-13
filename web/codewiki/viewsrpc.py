@@ -316,6 +316,7 @@ def Dtwistermakesrunevent(request):
             domainscrape.pages_scraped = vals["pages_scraped"]
             domainscrape.bytes_scraped = vals["bytes_scraped"]
             domainscrape.save()
+        event.scraper.update_meta()
 
     event.save()
 
