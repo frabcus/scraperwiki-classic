@@ -158,7 +158,7 @@ def search(name, filterdict, limit=-1, offset=0):
 
 def webstorerequest(req):
     print req
-    webstoreurl = "http://ewloe.scraperwiki.com:2112"
+    webstoreurl = "http://ewloe.scraperwiki.com"
     username = "scraperwiki"
     password = "banana"
     databaseurl = "%s/%s/%s" % (webstoreurl, username, m_scrapername or "DRAFT")
