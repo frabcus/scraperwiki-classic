@@ -215,7 +215,8 @@ def webstorerequest(req):
                 return None
             elif req.get("command") == "commit":
                 raise TypeError("Not implemented")
-        return None   
+            else:
+                return None   
     else:
         return {"error":'Unknown maincommand: %s' % req.get("maincommand")}
 
