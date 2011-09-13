@@ -3,6 +3,7 @@
 import string
 import socket
 import urllib
+import urllib2
 import cgi
 import datetime
 import types
