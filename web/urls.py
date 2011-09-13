@@ -43,6 +43,8 @@ urlpatterns = patterns('',
     url(r'^captcha/', include('captcha.urls')),
     url(r'^attachauth', codewiki.views.attachauth), 
     
+    url(r'^webstoreauth', codewiki.views.webstore_attach_auth),     
+    
     # allows direct viewing of the django tables
     url(r'^admin/', include(admin.site.urls)),
 

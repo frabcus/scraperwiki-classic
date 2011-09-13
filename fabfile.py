@@ -38,12 +38,13 @@ def dev():
     env.user = 'scraperdeploy'
     env.cron_version = "dev"
     env.webserver = True
+    env.buildout = True
     env.email_deploy = False
     env.email_deploy = "deploy@scraperwiki.com"
 
 @task
 def dev_services():
-    "The UML and datastore server (burbage)"
+    "The UML and datastore server (kippax)"
     env.hosts = ['kippax.scraperwiki.com']
     env.path = '/var/www/scraperwiki'
     env.branch = 'default'
@@ -52,7 +53,22 @@ def dev_services():
     env.user = 'scraperdeploy'
     env.cron_version = "umls"
     env.webserver = False
+    env.buildout = False
     env.email_deploy = False
+    
+@task
+def dev_webstore():
+    "The UML and datastore server (kippax)"
+    env.hosts = ['ewloe.scraperwiki.com']
+    env.path = '/var/www/scraperwiki'
+    env.branch = 'default'
+    env.web_path = 'file:///home/scraperwiki/scraperwiki'
+    env.activate = env.path + '/bin/activate'
+    env.user = 'scraperdeploy'
+    env.cron_version = "umls"
+    env.webserver = False
+    env.buildout = True
+    env.email_deploy = False    
 
 @task
 def live():
@@ -65,6 +81,7 @@ def live():
     env.user = 'scraperdeploy'
     env.cron_version = "www"
     env.webserver = True
+    env.buildout = True
     env.email_deploy = "deploy@scraperwiki.com"
 
 @task
@@ -78,6 +95,7 @@ def live_services():
     env.user = 'scraperdeploy'
     env.cron_version = "umls"
     env.webserver = False
+    env.buildout = False
     env.email_deploy = "deploy@scraperwiki.com"
 
 ###########################################################################
@@ -167,8 +185,10 @@ def deploy():
         run("hg pull; hg update -C %(branch)s" % env)
         new_revision = run("hg identify")
     
-    if env.webserver:
+    if env.buildout:
         buildout()
+                
+    if env.webserver:
         django_db_migrate()
         update_js_cache_revision()
         restart_webserver()   

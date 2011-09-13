@@ -651,3 +651,51 @@ def attachauth(request):
     models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
     return HttpResponse("Yes")
     
+    
+def webstore_attach_auth(request):
+    # aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
+    scrapername = request.GET.get("scrapername")
+    attachtoname = request.GET.get("attachtoname")
+
+    try:
+        attachtoscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
+    except models.Code.DoesNotExist:
+        return HttpResponse("{'attach':'Fail'}")
+
+    # dereference scraper (if not draft) so we can look for the attach list
+    if scrapername: 
+        try:
+            scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
+        except models.Code.DoesNotExist:
+            return HttpResponse("{'attach':'Fail'}")
+
+        # check against the attachto list
+        if models.CodePermission.objects.filter(code=scraper, permitted_object=attachtoscraper).count() != 0:
+            return HttpResponse("{'attach':'Ok'}")
+    else:
+        scraper = None
+        
+
+    if attachtoscraper.privacy_status != "private":
+        if scraper:
+            models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
+        return HttpResponse("{'attach':'Ok'}")
+        
+    if not scrapername:
+        return HttpResponse("{'attach':'Fail'}")
+
+    if scraper.privacy_status == 'public':
+        return HttpResponse("{'attach':'Fail'}")
+        
+    # we're going to use the set of editors of a private/protected scraper be the gateway for access to the 
+    # private attach to scraper (success if there is an overlap in the sets)
+    scraperuserroles = models.UserCodeRole.objects.filter(code=scraper)
+    attachtouserroles = models.UserCodeRole.objects.filter(code=attachtoscraper)
+    usersofattach = [ usercoderole.user  for usercoderole in attachtouserroles  if usercoderole.role in ['owner', 'editor'] ]
+    usersofscraper = [ usercoderole.user  for usercoderole in scraperuserroles  if usercoderole.role in ['owner', 'editor'] ]
+    commonusers = set(usersofattach).intersection(set(usersofscraper))
+    if not commonusers:
+        return HttpResponse("{'attach':'Fail'}")
+        
+    models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
+    return HttpResponse("{'attach':'Ok'}")
