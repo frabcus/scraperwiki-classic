@@ -205,15 +205,15 @@ def webstorerequest(req):
     elif req.get("maincommand") == "sqlitecommand":
             # should check and throw an error if we cannot attach
             # even though it only actually happens when we run an execute
-            if req.get{"command"} == "downloadsqlitefile":
+            if req.get("command") == "downloadsqlitefile":
                 #res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
                 raise TypeError("Not implemented")
-            elif req.get{"command"} == "datasummary":
+            elif req.get("command") == "datasummary":
                 #res = self.datasummary(request.get("limit", 10))
                 raise TypeError("Not implemented")                
-            elif req.get{"command"} == "attach":
+            elif req.get("command") == "attach":
                 return None
-            elif req.get{"command"} == "commit":
+            elif req.get("command") == "commit":
                 raise TypeError("Not implemented")
         return None   
     else:
