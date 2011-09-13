@@ -212,7 +212,7 @@ def webstorerequest(req):
                 #res = self.datasummary(request.get("limit", 10))
                 raise TypeError("Not implemented")                
             elif req.get("command") == "attach":
-                return None
+                return "{'status': 'ok'}"
             elif req.get("command") == "commit":
                 raise TypeError("Not implemented")
             else:

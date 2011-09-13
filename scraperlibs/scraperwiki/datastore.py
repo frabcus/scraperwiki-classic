@@ -58,13 +58,15 @@ def webstorerequest(req):
         table_name = req.get("swdatatblname")
         tableurl = "%s/%s" % (databaseurl, table_name)
         rqs = urllib.urlencode([ ("unique", key)  for key in req.get("unique_keys") ])
-        auth = base64.encodestring("%s:%s" % (username, password)).strip()
+#        auth = base64.encodestring("%s:%s" % (username, password)).strip()
         ldata = req.get("data")
         if type(ldata) == dict:
             ldata = [ldata]
         for data in ldata:
-            request = urllib2.Request("%s?%s" % (tableurl, rqs))
-            request.add_header("Authorization", "Basic %s" % auth)
+            target = "%s?%s" % (tableurl, rqs)
+            print target
+            request = urllib2.Request(target)
+#            request.add_header("Authorization", "Basic %s" % auth)
             request.add_header("Content-Type", "application/json")
             request.add_header("Accept", "application/json")
             request.add_data(json.dumps(data))
@@ -77,7 +79,7 @@ def webstorerequest(req):
                 return "PUT"
         request = PutRequest(databaseurl)
         request.add_header("Content-Type", "application/json")
-        request.add_header("Accept", "application/json")
+        request.add_header("Accept", "application/json+tuples")
         record = {"query":req.get("sqlquery"), "params":req.get("data"), "attach":[]}
         request.add_header("X-SCRAPERWIKI-DBSIG", "%s %s %s" % (m_scrapername, username, "something"))
         for name, asattach in req.get("attachlist"):
@@ -90,9 +92,22 @@ def webstorerequest(req):
     elif req.get("maincommand") == "commit":
         return None
     elif req.get("maincommand") == "attach":
+        return None   
+    elif req.get("maincommand") == "sqlitecommand":
             # should check and throw an error if we cannot attach
             # even though it only actually happens when we run an execute
-        return None   
+            if req.get("command") == "downloadsqlitefile":
+                #res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
+                raise TypeError("Not implemented")
+            elif req.get("command") == "datasummary":
+                #res = self.datasummary(request.get("limit", 10))
+                raise TypeError("Not implemented")                
+            elif req.get("command") == "attach":
+                return "{'status': 'ok'}"
+            elif req.get("command") == "commit":
+                raise TypeError("Not implemented")
+            else:
+                return None   
     else:
         return {"error":'Unknown maincommand: %s' % req.get("maincommand")}
 
@@ -100,13 +115,14 @@ def webstorerequest(req):
     response = '{"state":"nothing"}'
     try:
         for request in requests:
-            request.add_header("X-Scrapername", m_scrapername)                
-            result = urllib2.urlopen(request).read()
+            request.add_header("X-Scrapername", m_scrapername)                    
+            url = urllib2.urlopen(request)
+            result = url.read()
+            url.close()
     except urllib2.HTTPError, e:
         result = e.read()  # the error
     print result
     return json.loads(result)
-# can we get this back in a key/data list instead of a dictlist?    
 
 
         # a \n delimits the end of the record.  you cannot read beyond it or it will hang
