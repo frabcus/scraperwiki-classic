@@ -100,6 +100,7 @@ def webstorerequest(req):
     response = '{"state":"nothing"}'
     try:
         for request in requests:
+            request.add_header("X-Scrapername", m_scrapername)                
             result = urllib2.urlopen(request).read()
     except urllib2.HTTPError, e:
         result = e.read()  # the error

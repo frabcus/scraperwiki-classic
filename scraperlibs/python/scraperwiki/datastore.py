@@ -188,7 +188,7 @@ def webstorerequest(req):
                 return "PUT"
         request = PutRequest(databaseurl)
         request.add_header("Content-Type", "application/json")
-        request.add_header("Accept", "application/json")
+        request.add_header("Accept", "application/json+tuples")
         record = {"query":req.get("sqlquery"), "params":req.get("data"), "attach":[]}
         request.add_header("X-SCRAPERWIKI-DBSIG", "%s %s %s" % (m_scrapername, username, "something"))
         for name, asattach in req.get("attachlist"):
