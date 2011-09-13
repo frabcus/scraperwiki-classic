@@ -1,5 +1,7 @@
 import os, sys
 
+os.environ['WEBSTORE_SETTINGS'] = sys.argv[1]
+
 # Activate the virtual env
 instance_dir = '/var/www/scraperwiki/'
 pyenv_bin_dir = os.path.join(instance_dir, 'bin')

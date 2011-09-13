@@ -21,7 +21,7 @@ VARDIR=/var
 export PYTHONPATH=/var/www/scraperwiki/
 LOGFILE=$VARDIR/log/$NAME.log
 PIDFILE=$VARDIR/run/$NAME.pid
-DAEMON_ARGS="/var/www/scraperwiki/services/webstore/run_store.py"
+DAEMON_ARGS="/var/www/scraperwiki/services/webstore/run_store.py  $WEBSTORE_SETTINGS"
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
