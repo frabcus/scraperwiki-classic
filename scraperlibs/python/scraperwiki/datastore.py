@@ -172,7 +172,9 @@ def webstorerequest(req):
         if type(ldata) == dict:
             ldata = [ldata]
         for data in ldata:
-            request = urllib2.Request("%s?%s" % (tableurl, rqs))
+            target = "%s?%s" % (tableurl, rqs)
+            print target
+            request = urllib2.Request(target)
 #            request.add_header("Authorization", "Basic %s" % auth)
             request.add_header("Content-Type", "application/json")
             request.add_header("Accept", "application/json")
@@ -188,7 +190,6 @@ def webstorerequest(req):
         request.add_header("Content-Type", "application/json")
         request.add_header("Accept", "application/json")
         record = {"query":req.get("sqlquery"), "params":req.get("data"), "attach":[]}
-        request.add_header("X-Scrapername", m_scrapername)        
         request.add_header("X-SCRAPERWIKI-DBSIG", "%s %s %s" % (m_scrapername, username, "something"))
         for name, asattach in req.get("attachlist"):
             record["attach"].append({"user":username, "database":name, "alias":asattach, "securitycheck":"somthing"})
@@ -210,6 +211,7 @@ def webstorerequest(req):
     response = '{"state":"nothing"}'
     try:
         for request in requests:
+            request.add_header("X-Scrapername", m_scrapername)                    
             result = urllib2.urlopen(request).read()
     except urllib2.HTTPError, e:
         result = e.read()  # the error
