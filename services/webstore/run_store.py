@@ -8,4 +8,4 @@ execfile(activate_this, dict(__file__=activate_this))
 
 from webstore.web import app as application
 application.debug = False 
-application.run( '0.0.0.0', 2112 )
+application.run( '0.0.0.0', 80 )
