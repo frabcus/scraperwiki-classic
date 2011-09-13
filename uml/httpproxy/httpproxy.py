@@ -377,7 +377,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #          can subsume isSW
         #
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        isSW = netloc.startswith('127.0.0.1') or netloc.endswith('scraperwiki.com')
+        isSW = netloc.startswith('127.0.0.1') or netloc.startswith('10.0.1') or netloc.endswith('scraperwiki.com')
 
         #  Path /Status returns status information.
         #
@@ -497,6 +497,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     if isSW :
                         soc.send ("%s: %s\r\n" % ('x-scraperid', scraperID and scraperID or ''))
                         soc.send ("%s: %s\r\n" % ('x-runid',     runID     and runID     or ''))
+                        soc.send ("%s: %s\r\n" % ('x-scrapername',     runID     and runID     or ''))                        
                     soc.send ("\r\n")
                     if content :
                         soc.send (content)
