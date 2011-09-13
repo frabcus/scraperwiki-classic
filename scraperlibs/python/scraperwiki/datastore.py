@@ -212,7 +212,9 @@ def webstorerequest(req):
     try:
         for request in requests:
             request.add_header("X-Scrapername", m_scrapername)                    
-            result = urllib2.urlopen(request).read()
+            url = urllib2.urlopen(request)
+            result = url.read()
+            url.close()
     except urllib2.HTTPError, e:
         result = e.read()  # the error
     print result
