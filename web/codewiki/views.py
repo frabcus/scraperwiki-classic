@@ -656,22 +656,24 @@ def webstore_attach_auth(request):
     # aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
     scrapername = request.GET.get("scrapername")
     attachtoname = request.GET.get("attachtoname")
-
+    
+    mime = 'application/json'
+    
     try:
         attachtoscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
     except models.Code.DoesNotExist:
-        return HttpResponse("{'attach':'Fail'}")
+        return HttpResponse("{'attach':'Fail'}", mimetype=mime)
 
     # dereference scraper (if not draft) so we can look for the attach list
     if scrapername: 
         try:
             scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
         except models.Code.DoesNotExist:
-            return HttpResponse("{'attach':'Fail'}")
+            return HttpResponse("{'attach':'Fail'}", mimetype=mime)
 
         # check against the attachto list
         if models.CodePermission.objects.filter(code=scraper, permitted_object=attachtoscraper).count() != 0:
-            return HttpResponse("{'attach':'Ok'}")
+            return HttpResponse("{'attach':'Ok'}", mimetype=mime)
     else:
         scraper = None
         
@@ -679,13 +681,13 @@ def webstore_attach_auth(request):
     if attachtoscraper.privacy_status != "private":
         if scraper:
             models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
-        return HttpResponse("{'attach':'Ok'}")
+        return HttpResponse("{'attach':'Ok'}", mimetype=mime)
         
     if not scrapername:
-        return HttpResponse("{'attach':'Fail'}")
+        return HttpResponse("{'attach':'Fail'}", mimetype=mime)
 
     if scraper.privacy_status == 'public':
-        return HttpResponse("{'attach':'Fail'}")
+        return HttpResponse("{'attach':'Fail'}", mimetype=mime)
         
     # we're going to use the set of editors of a private/protected scraper be the gateway for access to the 
     # private attach to scraper (success if there is an overlap in the sets)
@@ -695,7 +697,7 @@ def webstore_attach_auth(request):
     usersofscraper = [ usercoderole.user  for usercoderole in scraperuserroles  if usercoderole.role in ['owner', 'editor'] ]
     commonusers = set(usersofattach).intersection(set(usersofscraper))
     if not commonusers:
-        return HttpResponse("{'attach':'Fail'}")
+        return HttpResponse("{'attach':'Fail'}", mimetype=mime)
         
     models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
-    return HttpResponse("{'attach':'Ok'}")
+    return HttpResponse("{'attach':'Ok'}", mimetype=mime)
