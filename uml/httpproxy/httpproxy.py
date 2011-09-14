@@ -379,9 +379,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
         isSW = netloc.startswith('127.0.0.1') or netloc.endswith('scraperwiki.com')
-        isLocal = netloc.startswith('10.0.1')
         
-        print 'IsLocal: %s (%s)' % (str(isLocal), netloc,)
+        remote = self.connection.getpeername()
+        isLocal = remote[0].startswith('10.0.1')
         
         #  Path /Status returns status information.
         #
