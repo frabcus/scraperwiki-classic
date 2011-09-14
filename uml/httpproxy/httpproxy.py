@@ -424,7 +424,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             if 'X-Scrapername' in self.headers:
                 secret = config.get(varName, 'webstore_secret')
                 secret_key = '%s%s' % (self.headers['X-Scrapername'], secret,)
-                self.headers['X-Scraper-Verified'] =  hashlib.sha224(secret_key).hexdigest()
+                self.headers['X-Scraper-Verified'] =  hashlib.sha256(secret_key).hexdigest()
                 print 'Incoming headers contain X-Scrapername'                
             else:
                 print 'No X-Scrapername in incoming headers'
