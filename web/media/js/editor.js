@@ -236,6 +236,7 @@ $(document).ready(function() {
             codemirroriframe = null;  // this only gets set once again when we know the editor has been initialized
         }
 
+        // just a normal textarea
         if (texteditor == "plain")
         {
             $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
@@ -246,6 +247,7 @@ $(document).ready(function() {
             return;
         }
 
+        // codemirror
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
