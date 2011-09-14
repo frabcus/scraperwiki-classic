@@ -251,7 +251,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
 
     #if a source scraper has been set, then pass it to the page
     if scraper.wiki_type == 'view' and request.GET.get('sourcescraper'):
-        context['source_scraper'] = request.GET.get('sourcescraper')
+        context['sourcescraper'] = request.GET.get('sourcescraper')
 
     context['scraper'] = scraper
     context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
