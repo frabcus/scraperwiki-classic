@@ -5,10 +5,7 @@
 foreach (split(':', getenv('PHPPATH')) as $dir)
     ini_set('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
-$logfd = STDOUT; // fopen("php://fd/3", "w") ;
-fclose(STDERR);
-$STDERR = fopen('php://stdout', 'w');
-
+$logfd = STDOUT; 
 
 require_once 'scraperwiki.php';
 require_once 'scraperwiki/datastore.php';
@@ -71,7 +68,7 @@ function shutdown(){
     }
                                              }
     if ($isError){
-		$etb = errorParser($error['type'], $error['message'], $error['file'], $error['line'], '/home/scriptrunner/script.php'); 
+		$etb = errorParserNoStack($error['type'], $error['message'], $error['file'], $error['line']); 
     	scraperwiki::sw_dumpMessage($etb); 	
     }
 }
@@ -103,7 +100,7 @@ SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid) ;
 function errorHandler($errno, $errstr, $errfile, $errline)
 {
     global $script; 
-    $etb = errorParser($errno, $errstr, $errfile, $errline, $script); 
+    $etb = errorParserStack($errno, $errstr, $script); 
     scraperwiki::sw_dumpMessage($etb); 
     return true; 
 }
@@ -121,7 +118,6 @@ try
 catch(Exception $e)
 {
     $etb = exceptionHandler($e, $script);
-    print_r($etb); 
     scraperwiki::sw_dumpMessage($etb); 
 }
 ?>

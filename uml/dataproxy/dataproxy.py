@@ -131,6 +131,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     
             firstmessage = {"status":"good"}
             if 'short_name' in params:
+                self.attachauthurl = config.get("dataproxy", 'attachauthurl')                
                 secure_ips = config.get('dataproxy', 'secure')
                 if not self.connection.getpeername()[0] in secure_ips:
                     firstmessage = {"error":"short_name only accepted from secure hosts"}

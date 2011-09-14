@@ -43,33 +43,51 @@ function exceptionHandler($exception, $script)
     return array('message_type' => 'exception', 'exceptiondescription' => $exception->getMessage(), "stackdump" => $stackdump); 
 }
 
+$php_error_codes = Array(
+    1 => "E_ERROR",
+    2 => "E_WARNING",
+    4 => "E_PARSE",
+    8 => "E_NOTICE",
+    16 => "E_CORE_ERROR",
+    32 => "E_CORE_WARNING",
+    64 => "E_COMPILE_ERROR",
+    128 => "E_COMPILE_WARNING",
+    256 => "E_USER_ERROR",
+    512 => "E_USER_WARNING",
+    1024 => "E_USER_NOTICE",
+    2048 => "E_STRICT",
+    4096 => "E_RECOVERABLE_ERROR",
+    8192 => "E_DEPRECATED",
+    16384 => "E_USER_DEPRECATED",
+);
 
-function errorParser($errno, $errstr, $errfile, $errline, $script)
+
+function errorParserNoStack($errno, $errstr, $errfile, $errline)
 {
-    $codes = Array(
-        1 => "E_ERROR",
-        2 => "E_WARNING",
-        4 => "E_PARSE",
-        8 => "E_NOTICE",
-        16 => "E_CORE_ERROR",
-        32 => "E_CORE_WARNING",
-        64 => "E_COMPILE_ERROR",
-        128 => "E_COMPILE_WARNING",
-        256 => "E_USER_ERROR",
-        512 => "E_USER_WARNING",
-        1024 => "E_USER_NOTICE",
-        2048 => "E_STRICT",
-        4096 => "E_RECOVERABLE_ERROR",
-        8192 => "E_DEPRECATED",
-        16384 => "E_USER_DEPRECATED",
-    );
+    $scriptlines = explode("\n", file_get_contents($errfile)); 
 
-    $stackdump = array(); 
+    $linenumber = $errline; 
+    $errorentry = array("linenumber" => $linenumber, "duplicates" => 1); 
+    $errorentry["file"] = "<string>";
+    if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
+        $errorentry["linetext"] = $scriptlines[$linenumber - 1]; 
+    global $php_error_codes;
+    $errcode = $php_error_codes[$errno]; 
+
+    $stackdump = array();
+    $stackdump[] = $errorentry; 
+    return array('message_type' => 'exception', 'exceptiondescription' => $errcode."  ".$errstr, "stackdump" => $stackdump); 
+}
+
+function errorParserStack($errno, $errstr, $script)
+{
     $scriptlines = explode("\n", file_get_contents($script)); 
 
     $trace = debug_backtrace();
     $stackdump = traceToSWStackDump($trace, $script, $scriptlines, 1, 2);
 
+    global $php_error_codes;
+    $errcode = $php_error_codes[$errno]; 
     return array('message_type' => 'exception', 'exceptiondescription' => $errcode."  ".$errstr, "stackdump" => $stackdump); 
 }
 
