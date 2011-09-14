@@ -153,6 +153,8 @@ def setup():
     a full deployment
     """
 
+    # this really ought to make sure it checks out default vs. stable
+    raise Exception("not implemented")
     sudo('hg clone file:///home/scraperwiki/scraperwiki %(path)s' % env)        
     sudo('chown -R %(fab_user)s %(path)s' % env)
     sudo('cd %(path)s; easy_install virtualenv' % env)
