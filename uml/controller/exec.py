@@ -53,6 +53,8 @@ parser.add_option("--gid")    # nogroup
 parser.add_option("--uid")    # nobody
 parser.add_option("--scrapername")
 parser.add_option("--runid")
+parser.add_option("--attachables", default="")
+parser.add_option("--webstore_port", default="0")
 options, args = parser.parse_args()
 
 if options.gid:
@@ -63,7 +65,7 @@ if options.uid:
 scraperwiki.logfd = os.fdopen(3, 'w', 0)
 
 host, port = string.split(options.ds, ':')
-scraperwiki.datastore.create(host, port, options.scrapername, options.runid)
+scraperwiki.datastore.create(host, port, options.scrapername, options.runid, options.attachables.split(), options.webstore_port)
 
 sys.stdout = ConsoleStream(scraperwiki.logfd)
 sys.stderr = ConsoleStream(scraperwiki.logfd)
