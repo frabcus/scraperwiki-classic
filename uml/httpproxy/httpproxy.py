@@ -23,6 +23,7 @@ import hashlib
 import OpenSSL
 import re
 import memcache
+import hashlib
 from threading import Thread
 try    : import json
 except : import simplejson as json
@@ -377,8 +378,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #          can subsume isSW
         #
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        isSW = netloc.startswith('127.0.0.1') or netloc.startswith('10.0.1') or netloc.endswith('scraperwiki.com')
-
+        isSW = netloc.startswith('127.0.0.1') or netloc.endswith('scraperwiki.com')
+        isLocal = netloc.startswith('10.0.1')
+        
         #  Path /Status returns status information.
         #
         if path == '/Status'  :
@@ -415,6 +417,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         cached   = None
         fetched  = None
         ddiffers = False
+        
+        if isLocal and 'X-Scrapername' in self.headers:
+            secret = config.get(varName, 'webstore_secret')
+            secret_key = '%s%s' % (self.headers['X-Scrapername'], secret,)
+            self.headers['X-Scraper-Verified'] =  hashlib.sha224(secret_key).hexdigest()
 
         #  Generate a hash on the request ...
         #  "cbits" will be set to a 3-element list comprising the path (including
