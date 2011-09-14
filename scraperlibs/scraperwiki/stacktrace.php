@@ -1,11 +1,12 @@
 <?php
 
-function traceToSWStackDump($trace, $script, $scriptlines)
+function traceToSWStackDump($trace, $script, $scriptlines, $skipa = 1, $skipb = 0)
 {
     $stackdump = array(); 
-    for ($i = count($trace) - 2; $i >= 0; $i--)
+    for ($i = count($trace) - 1 - $skipa; $i >= $skipb; $i--)
     {
         $stackPoint = $trace[$i]; 
+        
         $linenumber = $stackPoint["line"]; 
         $stackentry = array("linenumber" => $linenumber, "duplicates" => 1); 
         $stackentry["file"] = (realpath($stackPoint["file"]) == realpath($script) ? "<string>" : $stackPoint["file"]); 
@@ -29,8 +30,7 @@ function exceptionHandler($exception, $script)
 {
     $scriptlines = explode("\n", file_get_contents($script)); 
     $trace = $exception->getTrace(); 
-
-    $stackdump = traceToSWStackDump($trace, $script, $scriptlines);
+    $stackdump = traceToSWStackDump($trace, $script, $scriptlines, 1, 0);
 
     $linenumber = $exception->getLine(); 
     $finalentry = array("linenumber" => $linenumber, "duplicates" => 1); 
@@ -63,19 +63,13 @@ function errorParser($errno, $errstr, $errfile, $errline, $script)
         8192 => "E_DEPRECATED",
         16384 => "E_USER_DEPRECATED",
     );
-    print_r(debug_backtrace());
 
-        // this function could use debug_backtrace() to obtain the whole stack for this error
     $stackdump = array(); 
     $scriptlines = explode("\n", file_get_contents($script)); 
-    $linenumber = $errline; 
-    $errorentry = array("linenumber" => $linenumber, "duplicates" => 1); 
-    $errorentry["file"] = ($errfile == $script ? "<string>" : $errfile); 
-    if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
-        $errorentry["linetext"] = $scriptlines[$linenumber - 1]; 
-    $errcode = $codes[$errno]; 
 
-    $stackdump[] = $errorentry; 
+    $trace = debug_backtrace();
+    $stackdump = traceToSWStackDump($trace, $script, $scriptlines, 1, 2);
+
     return array('message_type' => 'exception', 'exceptiondescription' => $errcode."  ".$errstr, "stackdump" => $stackdump); 
 }
 
