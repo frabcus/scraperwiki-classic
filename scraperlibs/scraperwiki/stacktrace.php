@@ -1,19 +1,17 @@
 <?php
 
-function exceptionHandler($exception, $script) 
+function traceToSWStackDump($trace, $script, $scriptlines)
 {
     $stackdump = array(); 
-    $scriptlines = explode("\n", file_get_contents($script)); 
-    $trace = $exception->getTrace(); 
     for ($i = count($trace) - 2; $i >= 0; $i--)
     {
         $stackPoint = $trace[$i]; 
         $linenumber = $stackPoint["line"]; 
         $stackentry = array("linenumber" => $linenumber, "duplicates" => 1); 
-        $stackentry["file"] = ($stackPoint["file"] == $script ? "<string>" : $stackPoint["file"]); 
+        $stackentry["file"] = (realpath($stackPoint["file"]) == realpath($script) ? "<string>" : $stackPoint["file"]); 
 
         if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
-            $stackentry["linetext"] = $scriptlines[$linenumber]; 
+            $stackentry["linetext"] = $scriptlines[$linenumber - 1];
 
         if (array_key_exists("args", $stackPoint) and count($stackPoint["args"]) != 0)
         {
@@ -24,13 +22,22 @@ function exceptionHandler($exception, $script)
         }
         $stackdump[] = $stackentry; 
     }
-    
+    return $stackdump;
+}
+
+function exceptionHandler($exception, $script) 
+{
+    $scriptlines = explode("\n", file_get_contents($script)); 
+    $trace = $exception->getTrace(); 
+
+    $stackdump = traceToSWStackDump($trace, $script, $scriptlines);
+
     $linenumber = $exception->getLine(); 
     $finalentry = array("linenumber" => $linenumber, "duplicates" => 1); 
-    $finalentry["file"] = ($exception->getFile() == $script ? "<string>" : $exception->getFile()); 
+    $finalentry["file"] = (realpath($exception->getFile()) == realpath($script) ? "<string>" : $exception->getFile()); 
     if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
-        $finalentry["linetext"] = $scriptlines[$linenumber]; 
-    $finalentry["furtherlinetext"] = $exception->getMessage().count($scriptlines); 
+        $finalentry["linetext"] = $scriptlines[$linenumber - 1]; 
+    $finalentry["furtherlinetext"] = $exception->getMessage(); 
     $stackdump[] = $finalentry; 
     
     return array('message_type' => 'exception', 'exceptiondescription' => $exception->getMessage(), "stackdump" => $stackdump); 
@@ -56,6 +63,8 @@ function errorParser($errno, $errstr, $errfile, $errline, $script)
         8192 => "E_DEPRECATED",
         16384 => "E_USER_DEPRECATED",
     );
+    print_r(debug_backtrace());
+
         // this function could use debug_backtrace() to obtain the whole stack for this error
     $stackdump = array(); 
     $scriptlines = explode("\n", file_get_contents($script)); 
@@ -63,7 +72,7 @@ function errorParser($errno, $errstr, $errfile, $errline, $script)
     $errorentry = array("linenumber" => $linenumber, "duplicates" => 1); 
     $errorentry["file"] = ($errfile == $script ? "<string>" : $errfile); 
     if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
-        $errorentry["linetext"] = $scriptlines[$linenumber]; 
+        $errorentry["linetext"] = $scriptlines[$linenumber - 1]; 
     $errcode = $codes[$errno]; 
 
     $stackdump[] = $errorentry; 
