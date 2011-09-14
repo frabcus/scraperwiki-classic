@@ -496,14 +496,6 @@ def choose_template(request, wiki_type):
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
-    
-def delete_draft(request):
-    if request.session.get('ScraperDraft', False):
-        del request.session['ScraperDraft']
-    request.notifications.used = True   # Remove any pending notifications, i.e. the "don't worry, your scraper is safe" one
-    return HttpResponseRedirect(reverse('frontpage'))
-
-
 def convtounicode(text):
     try:   return unicode(text)
     except UnicodeDecodeError:  pass

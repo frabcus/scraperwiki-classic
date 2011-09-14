@@ -421,7 +421,11 @@ def handle_session_draft(request):
     return HttpResponseRedirect(response_url)
 
 
-
+def delete_draft(request):
+    if request.session.get('ScraperDraft', False):
+        del request.session['ScraperDraft']
+    request.notifications.used = True   # Remove any pending notifications, i.e. the "don't worry, your scraper is safe" one
+    return HttpResponseRedirect(reverse('frontpage'))
 def quickhelp(request):
     query = dict([(k, request.GET.get(k, "").encode('utf-8'))  for k in ["language", "short_name", "username", "wiki_type", "line", "character", "word"]])
     if re.match("http://", query["word"]):
