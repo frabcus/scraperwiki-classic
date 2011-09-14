@@ -71,7 +71,7 @@ function shutdown(){
     }
                                              }
     if ($isError){
-		$etb = errorParser($error['type'], $error['message'], $error['file'], $error['line'], '/home/scriptrunner/script.php'); 
+		$etb = errorParserNoStack($error['type'], $error['message'], $error['file'], $error['line']); 
     	scraperwiki::sw_dumpMessage($etb); 	
     }
 }
@@ -103,7 +103,7 @@ SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid) ;
 function errorHandler($errno, $errstr, $errfile, $errline)
 {
     global $script; 
-    $etb = errorParser($errno, $errstr, $errfile, $errline, $script); 
+    $etb = errorParserStack($errno, $errstr, $script); 
     scraperwiki::sw_dumpMessage($etb); 
     return true; 
 }
