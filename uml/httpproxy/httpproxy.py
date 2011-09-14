@@ -418,10 +418,16 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         fetched  = None
         ddiffers = False
         
-        if isLocal and 'X-Scrapername' in self.headers:
-            secret = config.get(varName, 'webstore_secret')
-            secret_key = '%s%s' % (self.headers['X-Scrapername'], secret,)
-            self.headers['X-Scraper-Verified'] =  hashlib.sha224(secret_key).hexdigest()
+        if isLocal:
+            print 'Local'
+            print self.headers
+            if 'X-Scrapername' in self.headers:
+                print 'Running as if local'
+                secret = config.get(varName, 'webstore_secret')
+                print 'Secret is ', secret
+                secret_key = '%s%s' % (self.headers['X-Scrapername'], secret,)
+                self.headers['X-Scraper-Verified'] =  hashlib.sha224(secret_key).hexdigest()
+                print 'Secret key set'            
 
         #  Generate a hash on the request ...
         #  "cbits" will be set to a 3-element list comprising the path (including
