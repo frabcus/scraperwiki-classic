@@ -71,9 +71,8 @@ function shutdown(){
     }
                                              }
     if ($isError){
-		$etb = errorParser($error['type'], $error['message'], $error['line'], $error['file'], $script); 
+		$etb = errorParser($error['type'], $error['message'], 'Line ' . $error['line'], $error['filename'], $script); 
     	scraperwiki::sw_dumpMessage($etb); 	
-//        print 'Error: ' . $error['message'] . ' in script on line ' . $error['line'];
     }
 }
 register_shutdown_function('shutdown');
