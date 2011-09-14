@@ -165,9 +165,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context['revdate'] = 'draft'
         context['revdateepoch'] = None
 
-# Clear the session once we have loaded the data?
-#        del request.session['ScraperDraft'] 
-                
     # Load an existing scraper preference
     elif short_name != "__new__":
         try:
@@ -235,6 +232,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
                     startupcode = templatescraper.saved_code()
                     if 'fork' in request.GET:
                         scraper.title = templatescraper.title
+                        context['fork'] = request.GET.get('fork') # record as a fork
             except models.Code.DoesNotExist:
                 startupcode = startupcode.replace("Blank", "Missing template for")
 
@@ -254,10 +252,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     #if a source scraper has been set, then pass it to the page
     if scraper.wiki_type == 'view' and request.GET.get('sourcescraper'):
         context['source_scraper'] = request.GET.get('sourcescraper')
-
-    #if a fork scraper has been set, then pass it to the page
-    if request.GET.get('fork'):
-        context['fork'] = request.GET.get('fork')
 
     context['scraper'] = scraper
     context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
@@ -427,7 +421,11 @@ def handle_session_draft(request):
     return HttpResponseRedirect(response_url)
 
 
-
+def delete_draft(request):
+    if request.session.get('ScraperDraft', False):
+        del request.session['ScraperDraft']
+    request.notifications.used = True   # Remove any pending notifications, i.e. the "don't worry, your scraper is safe" one
+    return HttpResponseRedirect(reverse('frontpage'))
 def quickhelp(request):
     query = dict([(k, request.GET.get(k, "").encode('utf-8'))  for k in ["language", "short_name", "username", "wiki_type", "line", "character", "word"]])
     if re.match("http://", query["word"]):

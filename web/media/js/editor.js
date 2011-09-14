@@ -236,6 +236,10 @@ $(document).ready(function() {
             codemirroriframe = null;  // this only gets set once again when we know the editor has been initialized
         }
 
+        // set other things readonly or not
+        $('#id_title').attr("readonly", (codeeditorreadonly ? "yes" : ""));
+
+        // just a normal textarea
         if (texteditor == "plain")
         {
             $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
@@ -246,6 +250,7 @@ $(document).ready(function() {
             return;
         }
 
+        // codemirror
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
@@ -338,7 +343,7 @@ $(document).ready(function() {
             } 
         };
 
-            // now puts it in a state of building where codeeditor!=null and codemirroriframe==null
+        // now puts it in a state of building where codeeditor!=null and codemirroriframe==null
         codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
     }
 
