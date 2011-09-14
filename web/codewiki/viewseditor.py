@@ -305,7 +305,7 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourc
     return (rev, revdate) # None if no change
 
 
-    # called from the editor
+# called from the editor
 def handle_editor_save(request):
     guid = request.POST.get('guid', '')
     title = request.POST.get('title', '')
