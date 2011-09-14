@@ -1,3 +1,5 @@
+{% load doc_links %}
+
 <p class="language_chooser">
     {% if not docindex %}
     <a href="{% url docs language %}" class="back" title="Back to documentation homepage">
@@ -5,16 +7,16 @@
         Back to contents</a>
     {% endif %}
     {% if lang_shared %}
-    <a href="#" onclick="switch_language('shared');return false;" class="shared" title="Switch to shared documentation">Shared</a>
+    <a href="{% doc_change_lang request language 'shared' %}" class="shared" title="Switch to shared documentation">Shared</a>
     {% endif %}
     {% if lang_php %}
-    <a href="#" onclick="switch_language('php');return false;" class="php" title="Switch to PHP documentation"><img src="{{ MEDIA_URL }}/images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
+    <a href="{% doc_change_lang request language 'php' %}" class="php" title="Switch to PHP documentation"><img src="{{ MEDIA_URL }}/images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
     {% endif %}
     {% if lang_python %}
-    <a href="#" onclick="switch_language('python');return false;" class="python" title="Switch to Python documentation"><img src="{{ MEDIA_URL }}/images/icons/python.png" width="16" height="16" alt="" /> Python</a>
+    <a href="{% doc_change_lang request language 'python' %}" class="python" title="Switch to Python documentation"><img src="{{ MEDIA_URL }}/images/icons/python.png" width="16" height="16" alt="" /> Python</a>
     {% endif %}
     {% if lang_ruby %}
-    <a href="#" onclick="switch_language('ruby');return false;" class="ruby" title="Switch to Ruby documentation"><img src="{{ MEDIA_URL }}/images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
+    <a href="{% doc_change_lang request language 'ruby' %}" class="ruby" title="Switch to Ruby documentation"><img src="{{ MEDIA_URL }}/images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
     {% endif %}
     <strong>Choose a language:</strong>
    <br class="clear"/>

@@ -11,5 +11,10 @@ def doc_link_full(template_name, language):
     title = page_titles[template_name][0]
     return '''<a href="/docs/%s/%s">%s</a>''' % (language, template_name, title)
 
+@register.simple_tag
+def doc_change_lang(request, from_lang, to_lang):
+    return request.path.replace(from_lang, to_lang)
+
+
 
 
