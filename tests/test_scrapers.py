@@ -3,8 +3,6 @@ from selenium import selenium
 from selenium_test import SeleniumTest
 from urlparse import urlparse
 
-langlinkname = { "python":"Python", "ruby":"Ruby", "php":"PHP" }
-
 class TestScrapers(SeleniumTest):
     """
     Creates and runs some scrapers in the three main supported languages. 
@@ -16,9 +14,9 @@ class TestScrapers(SeleniumTest):
     Also checks some language-independant features including privacy and
     comments.
     """
-    login_text = "Log in"
-    logged_in_text = "Logged in"
-    new_scraper_link = "Create new scraper"
+    #login_text = "Log in"
+    #logged_in_text = "Logged in"
+    #new_scraper_link = "Create new scraper"
 
 
     def test_ruby_create(self):
@@ -347,10 +345,10 @@ class TestScrapers(SeleniumTest):
         # Language specific tests
         s = self.selenium
         s.open("/logout")
-        self._create_user()
+        self.create_user()
         
         # Scraper creation and tests
-        scraper_name = self._create_code(language, 'scraper')
+        scraper_name = self.create_code(language, 'scraper', self._load_data(language, 'scraper'))
         self._wait_for_run()
         s.click('link=Scraper')
         self.wait_for_page()
@@ -359,7 +357,7 @@ class TestScrapers(SeleniumTest):
         self._check_dashboard_count()
 
         # View creation
-        view_name = self._create_code(language, 'view', scraper_name)
+        view_name = self.create_code(language, 'view', self._load_data(language, 'view'), scraper_name)
         # Clear up the evidence of testing
         self._check_delete_code( scraper_name, 'scraper' )
         self._check_delete_code( view_name, 'view' )        
@@ -377,10 +375,10 @@ class TestScrapers(SeleniumTest):
         owner['password'] = str( uuid.uuid4() )[:18].replace('-', '_')
         editor['password'] = str( uuid.uuid4() )[:18].replace('-', '_')
         s.open("/logout")
-        editor['username'] = self._create_user(name="test %s_editor" % code_type, password=editor['password'])
+        editor['username'] = self.create_user(name="test %s_editor" % code_type, password=editor['password'])
         s.open("/logout")
-        owner['username'] = self._create_user(password=owner['password'])
-        code_name = self._create_code("python", code_type, '')
+        owner['username'] = self.create_user(password=owner['password'])
+        code_name = self.create_code("python", code_type, self._load_data("python", code_type), '')
         s.click('link=' + code_type.capitalize())
         self.wait_for_page()
 
@@ -409,64 +407,64 @@ class TestScrapers(SeleniumTest):
                      
 
 
-    def _create_user(self, name="test user", password = str( uuid.uuid4() )[:18].replace('-', '_') ):
-        s = self.selenium
-        s.click("link=%s" % self.login_text)
-        self.wait_for_page()
+    #def _create_user(self, name="test user", password = str( uuid.uuid4() )[:18].replace('-', '_') ):
+    #    s = self.selenium
+    #    s.click("link=%s" % self.login_text)
+    #    self.wait_for_page()
+    #
+    #    username = "se_test_%s" % str( uuid.uuid4() )[:18].replace('-', '_')
+    #
+    #    d = {}
+    #    d["id_name"] = name
+    #    d["id_username"] = username
+    #    d["id_email"] = "%s@scraperwiki.com" % username
+    #    d["id_password1"]  = password
+    #    d["id_password2"]  = password
+    #    
+    #    self.type_dictionary( d )
+    #    s.click( 'id_tos' )
+    #    s.click('register')
+    #    self.wait_for_page()
+    #
+    #    self.failUnless(s.is_text_present(self.logged_in_text), msg='User is not signed in and should be')
+    #
+    #    return username
 
-        username = "se_test_%s" % str( uuid.uuid4() )[:18].replace('-', '_')
 
-        d = {}
-        d["id_name"] = name
-        d["id_username"] = username
-        d["id_email"] = "%s@scraperwiki.com" % username
-        d["id_password1"]  = password
-        d["id_password2"]  = password
-        
-        self.type_dictionary( d )
-        s.click( 'id_tos' )
-        s.click('register')
-        self.wait_for_page()
-        
-        self.failUnless(s.is_text_present(self.logged_in_text), msg='User is not signed in and should be')
-
-        return username
-
-
-    def _create_code(self, language, code_type, view_attach_scraper_name = ''):
-        code_name = 'se_test_%s' % str( uuid.uuid4() )[:18].replace('-', '_')
-        
-        s = self.selenium
-        # Unfortunately we were dependant on specifying an 
-        # existing user as we haven't yet activated the new account 
-        # that we created earlier. So for now, we'll create a new 
-        # user for each scraper/view pair
-        
-        link_name = '%s %s' % (langlinkname[language], code_type)
-        
-        s.open('/dashboard/')
-        self.wait_for_page()
-        
-        s.answer_on_next_prompt( code_name )        
-        s.click('//a[@class="editor_%s"]' % code_type)        
-        time.sleep(1)        
-        s.click( 'link=%s' % link_name )
-        self.wait_for_page()
-
-        # Prompt and wait for save button to activate
-        s.type_keys('//body[@class="editbox"]', "\16")
-        s.wait_for_condition("selenium.browserbot.getCurrentWindow().document.getElementById('btnCommitPopup').disabled == false", 10000)
-        
-        # Load the scraper/view code and insert directly into page source, inserting the attachment scraper name if a view
-        code = self._load_data(language, code_type)
-        if code_type == 'view':
-            code = code.replace('{{sourcescraper}}', code_name)
-        s.type('//body[@class="editbox"]', "%s" % code)
-
-        s.click('btnCommitPopup')
-        self.wait_for_page()
-        time.sleep(1)
-        
-        return code_name
+    #def _create_code(self, language, code_type, view_attach_scraper_name = ''):
+    #    code_name = 'se_test_%s' % str( uuid.uuid4() )[:18].replace('-', '_')
+    #    
+    #    s = self.selenium
+    #    # Unfortunately we were dependant on specifying an 
+    #    # existing user as we haven't yet activated the new account 
+    #    # that we created earlier. So for now, we'll create a new 
+    #    # user for each scraper/view pair
+    #    
+    #    link_name = '%s %s' % (langlinkname[language], code_type)
+    #    
+    #    s.open('/dashboard/')
+    #    self.wait_for_page()
+    #    
+    #    s.answer_on_next_prompt( code_name )        
+    #    s.click('//a[@class="editor_%s"]' % code_type)        
+    #    time.sleep(1)        
+    #    s.click( 'link=%s' % link_name )
+    #    self.wait_for_page()
+    #
+    #    # Prompt and wait for save button to activate
+    #    s.type_keys('//body[@class="editbox"]', "\16")
+    #    s.wait_for_condition("selenium.browserbot.getCurrentWindow().document.getElementById('btnCommitPopup').disabled == false", 10000)
+    #    
+    #    # Load the scraper/view code and insert directly into page source, inserting the attachment scraper name if a view
+    #    code = self._load_data(language, code_type)
+    #    if code_type == 'view':
+    #        code = code.replace('{{sourcescraper}}', code_name)
+    #    s.type('//body[@class="editbox"]', "%s" % code)
+    #
+    #    s.click('btnCommitPopup')
+    #    self.wait_for_page()
+    #    time.sleep(1)
+    #    
+    #    return code_name
 
 

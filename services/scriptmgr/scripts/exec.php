@@ -5,10 +5,7 @@
 foreach (split(':', getenv('PHPPATH')) as $dir)
     ini_set('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
-$logfd = STDOUT; // fopen("php://fd/3", "w") ;
-fclose(STDERR);
-$STDERR = fopen('php://stdout', 'w');
-
+$logfd = STDOUT; 
 
 require_once 'scraperwiki.php';
 require_once 'scraperwiki/datastore.php';
@@ -55,6 +52,30 @@ for ($idx = 1; $idx < count($argv); $idx += 1)
    }
 }
 
+
+function shutdown(){
+    $isError = false;
+
+    if ($error = error_get_last()){
+        switch($error['type']){
+			case E_ERROR:
+            case E_CORE_ERROR:
+            case E_COMPILE_ERROR:
+            case E_USER_ERROR:	
+            case E_PARSE:
+                $isError = true;
+                break;
+    }
+                                             }
+    if ($isError){
+		$etb = errorParserNoStack($error['type'], $error['message'], $error['file'], $error['line']); 
+    	scraperwiki::sw_dumpMessage($etb); 	
+    }
+}
+register_shutdown_function('shutdown');
+
+
+
 // make the $_GET array
 $QUERY_STRING = getenv("QUERY_STRING");
 $QUERY_STRING_a = explode('&', $QUERY_STRING);
@@ -79,7 +100,7 @@ SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid) ;
 function errorHandler($errno, $errstr, $errfile, $errline)
 {
     global $script; 
-    $etb = errorParser($errno, $errstr, $errfile, $errline, $script); 
+    $etb = errorParserStack($errno, $errstr, $script); 
     scraperwiki::sw_dumpMessage($etb); 
     return true; 
 }
@@ -92,12 +113,11 @@ date_default_timezone_set('Europe/London');
 try
 {
     // works also as include or eval.  However no way to trap syntax errors
-    require  $script  ;
+    require  $script;
 }
 catch(Exception $e)
 {
     $etb = exceptionHandler($e, $script);
-    //print_r($etb); 
     scraperwiki::sw_dumpMessage($etb); 
 }
 ?>

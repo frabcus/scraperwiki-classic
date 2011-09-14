@@ -307,7 +307,7 @@ def Dtwistermakesrunevent(request):
         
         event.scraper.status = request.POST.get("exitstatus") == "exceptionmessage" and "sick" or "ok"
         event.scraper.last_run = datetime.datetime.now()
-        # event.scraper.update_meta() # enable if views ever have metadata that needs updating each refresh
+        event.scraper.update_meta() # enable if views ever have metadata that needs updating each refresh
         event.scraper.save()
 
         domainscrapes = json.loads(request.POST.get("domainscrapes"))

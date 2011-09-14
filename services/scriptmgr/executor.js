@@ -377,18 +377,17 @@ function execute(http_req, http_res, raw_request_data) {
 			var resp = http_res;
 			
 			e.stdout.on('data', function (data) {
-				util.write_to_caller( resp, data.toString() + "\n");
+				util.write_to_caller( resp, data.toString());
 			});				
 			
-			
 			e.stderr.on('data', function (data) {
-				util.write_to_caller( resp, data);
+				util.write_to_caller( resp, data.toString());
 			});				
 		
 			var local_script = script;	
 			e.on('exit', function (code, signal) {
 				if ( code == null )
-				    util.log.debug('child process exited badly, we may have killed it');
+				    util.log.debug('child process exited badly, ScraperWiki killed it');
 				else 
 				    util.log.debug('child process exited with code ' + code);					
 

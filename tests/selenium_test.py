@@ -1,7 +1,7 @@
 import unittest
 import atexit
 from selenium import selenium
-
+import uuid, time
 
 # XXX make this a static member
 def SeleniumTest_atexit():
@@ -67,17 +67,17 @@ class SeleniumTest(unittest.TestCase):
             print "  waiting_for_page done, now at", self.selenium.get_location()
 
 
-    def login(self, username, password):
-        s = self.selenium
-        s.open("/")
-        s.click("link=Sign in or create an account")
-        s.wait_for_page_to_load("30000")
-
-        s.type( 'id_user_or_email', username)
-        s.type( 'id_password', password)        
-        
-        s.click('login')
-        s.wait_for_page_to_load("30000")                      
+    #def login(self, username, password):
+    #    s = self.selenium
+    #    s.open("/")
+    #    s.click("link=Sign in or create an account")
+    #    s.wait_for_page_to_load("30000")
+    #
+    #    s.type( 'id_user_or_email', username)
+    #    s.type( 'id_password', password)        
+    #    
+    #    s.click('login')
+    #    s.wait_for_page_to_load("30000")                      
         
     def type_dictionary(self, d):
         for k,v in d.iteritems():
@@ -85,5 +85,63 @@ class SeleniumTest(unittest.TestCase):
         
     def tearDown(self):
         self.assertEqual([], self.verificationErrors)
+
+
+
+
+
+    def create_user(self, name="test user", password = str( uuid.uuid4() )[:18].replace('-', '_') ):
+        s = self.selenium
+        s.click( "link=Log in" )
+        self.wait_for_page()
+    
+        username = "se_test_%s" % str( uuid.uuid4() )[:18].replace('-', '_')
+    
+        d = {}
+        d["id_name"] = name
+        d["id_username"] = username
+        d["id_email"] = "%s@scraperwiki.com" % username
+        d["id_password1"]  = password
+        d["id_password2"]  = password
+        
+        self.type_dictionary( d )
+        s.click( 'id_tos' )
+        s.click('register')
+        self.wait_for_page()
+    
+        self.failUnless(s.is_text_present("Logged in"), msg='User is not signed in and should be')
+    
+        return username
+
+
+    def create_code(self, language, code_type, code_source, view_attach_scraper_name = ''):
+        code_name = 'se_test_%s' % str( uuid.uuid4() )[:18].replace('-', '_')
+        
+        s = self.selenium
+        
+        s.open('/dashboard/')
+        self.wait_for_page()
+        
+        s.answer_on_next_prompt( code_name )        
+        s.click('//a[@class="editor_%s"]' % code_type)        
+        time.sleep(1)
+        link_name = '%s %s' % ({ "python":"Python", "ruby":"Ruby", "php":"PHP" }[language], code_type)
+        s.click( 'link=%s' % link_name )
+        self.wait_for_page()
+    
+        # Prompt and wait for save button to activate
+        s.type_keys('//body[@class="editbox"]', "\16")
+        s.wait_for_condition("selenium.browserbot.getCurrentWindow().document.getElementById('btnCommitPopup').disabled == false", 10000)
+        
+        # Load the scraper/view code and insert directly into page source, inserting the attachment scraper name if a view
+        if code_type == 'view':
+            code_source = code_source.replace('{{sourcescraper}}', code_name)
+        s.type('//body[@class="editbox"]', "%s" % code_source)
+    
+        s.click('btnCommitPopup')
+        self.wait_for_page()
+        time.sleep(1)
+        
+        return code_name
 
 

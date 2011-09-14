@@ -48,13 +48,15 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/comments/$', views.comments,         name='scraper_comments'),
     
+
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/gitpush/$', views.gitpush,         name='scraper_gitpush'),
     
     url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.\|]+)/$',                      viewsuml.run_event,     name='run_event'),  
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',                 views.choose_template,  name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
     
-    url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
+    url(r'^editor/draft/delete/$',                        viewseditor.delete_draft, name="delete_draft"),
     
     # editor call-backs from ajax for reloading and diff
     url(r'^editor/raw/(?P<short_name>[\-\w\.]+)$',        viewseditor.raw,    name="raw"),      # raw code not wrapped in javascript
