@@ -55,6 +55,29 @@ for ($idx = 1; $idx < count($argv); $idx += 1)
    }
 }
 
+
+function shutdown(){
+    $isError = false;
+
+    if ($error = error_get_last()){
+        switch($error['type']){
+			case E_ERROR:
+            case E_CORE_ERROR:
+            case E_COMPILE_ERROR:
+            case E_USER_ERROR:	
+            case E_PARSE:
+                $isError = true;
+                break;
+    }
+                                             }
+    if ($isError){
+        print 'Error: ' . $error['message'] . ' in script on line ' . $error['line'];
+    }
+}
+register_shutdown_function('shutdown');
+
+
+
 // make the $_GET array
 $QUERY_STRING = getenv("QUERY_STRING");
 $QUERY_STRING_a = explode('&', $QUERY_STRING);
