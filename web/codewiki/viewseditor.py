@@ -165,9 +165,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context['revdate'] = 'draft'
         context['revdateepoch'] = None
 
-# Clear the session once we have loaded the data?
-#        del request.session['ScraperDraft'] 
-                
     # Load an existing scraper preference
     elif short_name != "__new__":
         try:
