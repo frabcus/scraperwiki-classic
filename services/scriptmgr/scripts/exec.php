@@ -96,6 +96,7 @@ SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid) ;
 //$errors = array(); 
 //parsekit_compile_file($script, $errors); 
 
+// intercept errors for stack dump
 // refer to http://php.net/manual/en/function.set-error-handler.php
 function errorHandler($errno, $errstr, $errfile, $errline)
 {
@@ -106,6 +107,8 @@ function errorHandler($errno, $errstr, $errfile, $errline)
 }
 
 set_error_handler("errorHandler", E_ALL & ~E_NOTICE);  // this is for errors, not exceptions (eg 1/0)
+error_reporting(E_NOTICE); // don't display default error messages for ones we are sending via errorHandler, avoiding duplicates
+
 set_time_limit(80); 
 
 date_default_timezone_set('Europe/London');
