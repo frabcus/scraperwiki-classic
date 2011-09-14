@@ -117,6 +117,7 @@
 <div class="content full" id="scraper_about">
     <h2>About this scraper 
         {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}
+{%comment%}
         {% if user.is_staff %}
           <span class="staff">
           {% if ckanresource %}
@@ -127,6 +128,7 @@
           {% endif %}
           </span>
         {% endif %}
+{%endcomment%}
     </h2>
     <div class="text_wiki">
         <div id="divAboutScraper">
