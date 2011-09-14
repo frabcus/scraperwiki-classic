@@ -248,7 +248,7 @@ def code_overview(request, wiki_type, short_name):
 
         
     # unfinished CKAN integration
-    if dataproxy and request.user.is_staff:
+    if False and dataproxy and request.user.is_staff:
         try:
             dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":"ckan_datastore", "asname":"src"})
             ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
