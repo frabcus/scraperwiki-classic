@@ -92,12 +92,12 @@ date_default_timezone_set('Europe/London');
 try
 {
     // works also as include or eval.  However no way to trap syntax errors
-    require  $script  ;
+    require  $script;
 }
 catch(Exception $e)
 {
     $etb = exceptionHandler($e, $script);
-    //print_r($etb); 
+    print_r($etb); 
     scraperwiki::sw_dumpMessage($etb); 
 }
 ?>
