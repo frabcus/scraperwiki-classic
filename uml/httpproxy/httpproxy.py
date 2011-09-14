@@ -425,7 +425,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 secret = config.get(varName, 'webstore_secret')
                 secret_key = '%s%s' % (self.headers['X-Scrapername'], secret,)
                 self.headers['X-Scraper-Verified'] =  hashlib.sha224(secret_key).hexdigest()
-
+                print self.headers
+            else:
+                print 'No X-Scrapername in headers'
+                
         #  Generate a hash on the request ...
         #  "cbits" will be set to a 3-element list comprising the path (including
         #  query bits), the url-encoded content if any, and the cookie string, if any.
