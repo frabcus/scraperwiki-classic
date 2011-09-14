@@ -236,6 +236,9 @@ $(document).ready(function() {
             codemirroriframe = null;  // this only gets set once again when we know the editor has been initialized
         }
 
+        // set other things readonly or not
+        $('#id_title').attr("readonly", (codeeditorreadonly ? "yes" : ""));
+
         // just a normal textarea
         if (texteditor == "plain")
         {
@@ -340,7 +343,7 @@ $(document).ready(function() {
             } 
         };
 
-            // now puts it in a state of building where codeeditor!=null and codemirroriframe==null
+        // now puts it in a state of building where codeeditor!=null and codemirroriframe==null
         codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
     }
 
