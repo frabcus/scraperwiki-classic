@@ -425,9 +425,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 secret = config.get(varName, 'webstore_secret')
                 secret_key = '%s%s' % (self.headers['X-Scrapername'], secret,)
                 self.headers['X-Scraper-Verified'] =  hashlib.sha224(secret_key).hexdigest()
-                print self.headers
+                print 'Incoming headers contain X-Scrapername'                
             else:
-                print 'No X-Scrapername in headers'
+                print 'No X-Scrapername in incoming headers'
                 
         #  Generate a hash on the request ...
         #  "cbits" will be set to a 3-element list comprising the path (including
@@ -510,7 +510,14 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     if isSW :
                         soc.send ("%s: %s\r\n" % ('x-scraperid', scraperID and scraperID or ''))
                         soc.send ("%s: %s\r\n" % ('x-runid',     runID     and runID     or ''))
-                        soc.send ("%s: %s\r\n" % ('x-scrapername',     runID     and runID     or ''))                        
+                        soc.send ("%s: %s\r\n" % ('x-scrapername',     runID     and runID     or ''))   
+                    if isLocal:
+                        if 'X-Scrapername' in self.headers:
+                            print 'Writing X-Scrapername and X-Scraper-Verified'
+                            print self.headers['X-Scrapername']
+                            print self.headers['X-Scraper-Verified']
+                            soc.send ("%s: %s\r\n" % ('X-Scrapername', self.headers['X-Scrapername']))
+                            soc.send ("%s: %s\r\n" % ('X-Scraper-Verified', self.headers['X-Scraper-Verified']))                                             
                     soc.send ("\r\n")
                     if content :
                         soc.send (content)
