@@ -71,7 +71,7 @@ function shutdown(){
     }
                                              }
     if ($isError){
-		$etb = errorParser($error['type'], $error['message'], $error['file'],$error['line'], $script); 
+		$etb = errorParser($error['type'], $error['message'], $error['file'], $error['line'], '/home/scriptrunner/script.php'); 
     	scraperwiki::sw_dumpMessage($etb); 	
     }
 }
