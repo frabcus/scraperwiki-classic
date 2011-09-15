@@ -162,11 +162,12 @@ exports.extension_for_language = function( lang ) {
 * Works out what environment variables we want to pass to the script
 ******************************************************************************/
 exports.env_for_language = function( lang, extra_path ) {
-	var ep = path.join(extra_path, lang)
-	
+	var ep = path.join(__dirname, extra_path);
+	ep = path.join(ep, lang);
 	if ( lang == 'python' ) {
 		return {PYTHONPATH: ep, PYTHONUNBUFFERED: 'true'};
 	} else if ( lang == 'ruby') {
+		ep = path.join(ep, "scraperwiki/lib");
 		return { RUBYLIB: ep + ":" + process.env.RUBYLIB };		
 	} else if ( lang == 'php') {
 		return { PHPPATH: ep};		
