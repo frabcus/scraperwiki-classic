@@ -14,10 +14,6 @@ class TestScrapers(SeleniumTest):
     Also checks some language-independant features including privacy and
     comments.
     """
-    #login_text = "Log in"
-    #logged_in_text = "Logged in"
-    #new_scraper_link = "Create new scraper"
-
 
     def test_ruby_create(self):
         self._language_create("ruby")
@@ -255,37 +251,6 @@ class TestScrapers(SeleniumTest):
         s.open("/%ss/%s/" % (code_type, code_name))
         self.wait_for_page()
         
-    
-    def _set_code_privacy(self, privacy, code_type, code_name = '', owner = {}):
-        """ 
-        Set the currently open scraper/view to be the specified privacy. Assumes a
-        Django admin account has been specified if setting as private. Needs
-        code_name and the owner account if setting as private.
-        """
-        privacy_set = "selenium.browserbot.getCurrentWindow().document.getElementById('privacy_status').children[0].style.display != 'none'"
-        s = self.selenium
-        if privacy == 'public' or privacy == 'protected':
-            s.click('show_privacy_choices')
-            s.click('privacy_' + privacy)
-            s.wait_for_condition(privacy_set, 10000)
-            self.failUnless(s.is_text_present("This %s is " % code_type + privacy))
-        elif privacy == 'private':
-            
-            self._user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
-            s.open("/admin/codewiki/%s/?q=" % code_type + code_name)
-            self.wait_for_page()
-            s.click('link=' + code_name)
-            self.wait_for_page()
-            s.select("id_privacy_status", "label=Private")
-            s.click("//div[@class='submit-row']/input[@value='Save']")
-            self.wait_for_page()
-            self._user_login(owner['username'], owner['password'])
-            s.open("/%ss/" % code_type + code_name)
-            self.wait_for_page()
-            self.failUnless(s.is_text_present("This %s is private" % code_type))
-        else:
-            self.fail()
-
 
     def _check_editors_list_changes(self, code_name, code_type, owner, editor, privacy):
         """
@@ -326,17 +291,17 @@ class TestScrapers(SeleniumTest):
         self.wait_for_page()
         self.failUnless(s.is_text_present("test user (owner)"))
         # Set scraper protected and check editor permission changing
-        self._set_code_privacy('protected', code_type)
+        self.set_code_privacy('protected', code_type)
         self._check_editors_list_changes(code_name, code_type, owner, editor, 'protected')
         
         # Do the same for private scraper
         if SeleniumTest._adminuser:
-            self._set_code_privacy('private', code_type, code_name, owner)
+            self.set_code_privacy('private', code_type, code_name, owner)
             self._check_editors_list_changes(code_name, code_type, owner, editor, 'private')
         
         # Check added user stays as follower when setting scraper public
         self._add_code_editor(editor['username'], "test %s_editor (editor)" % code_type)
-        self._set_code_privacy('public', code_type)
+        self.set_code_privacy('public', code_type)
         self.failUnless('s.is_text_present("test %s_editor (editor)")' % code_type)
         self.failUnless("int(s.get_xpath_count('//input[@class=\"demotebutton\"]')) == 0")
         
@@ -405,66 +370,3 @@ class TestScrapers(SeleniumTest):
             self._user_login(owner['username'], owner['password'])
             self._check_code_privacy(code_name, code_type, owner, editor)
                      
-
-
-    #def _create_user(self, name="test user", password = str( uuid.uuid4() )[:18].replace('-', '_') ):
-    #    s = self.selenium
-    #    s.click("link=%s" % self.login_text)
-    #    self.wait_for_page()
-    #
-    #    username = "se_test_%s" % str( uuid.uuid4() )[:18].replace('-', '_')
-    #
-    #    d = {}
-    #    d["id_name"] = name
-    #    d["id_username"] = username
-    #    d["id_email"] = "%s@scraperwiki.com" % username
-    #    d["id_password1"]  = password
-    #    d["id_password2"]  = password
-    #    
-    #    self.type_dictionary( d )
-    #    s.click( 'id_tos' )
-    #    s.click('register')
-    #    self.wait_for_page()
-    #
-    #    self.failUnless(s.is_text_present(self.logged_in_text), msg='User is not signed in and should be')
-    #
-    #    return username
-
-
-    #def _create_code(self, language, code_type, view_attach_scraper_name = ''):
-    #    code_name = 'se_test_%s' % str( uuid.uuid4() )[:18].replace('-', '_')
-    #    
-    #    s = self.selenium
-    #    # Unfortunately we were dependant on specifying an 
-    #    # existing user as we haven't yet activated the new account 
-    #    # that we created earlier. So for now, we'll create a new 
-    #    # user for each scraper/view pair
-    #    
-    #    link_name = '%s %s' % (langlinkname[language], code_type)
-    #    
-    #    s.open('/dashboard/')
-    #    self.wait_for_page()
-    #    
-    #    s.answer_on_next_prompt( code_name )        
-    #    s.click('//a[@class="editor_%s"]' % code_type)        
-    #    time.sleep(1)        
-    #    s.click( 'link=%s' % link_name )
-    #    self.wait_for_page()
-    #
-    #    # Prompt and wait for save button to activate
-    #    s.type_keys('//body[@class="editbox"]', "\16")
-    #    s.wait_for_condition("selenium.browserbot.getCurrentWindow().document.getElementById('btnCommitPopup').disabled == false", 10000)
-    #    
-    #    # Load the scraper/view code and insert directly into page source, inserting the attachment scraper name if a view
-    #    code = self._load_data(language, code_type)
-    #    if code_type == 'view':
-    #        code = code.replace('{{sourcescraper}}', code_name)
-    #    s.type('//body[@class="editbox"]', "%s" % code)
-    #
-    #    s.click('btnCommitPopup')
-    #    self.wait_for_page()
-    #    time.sleep(1)
-    #    
-    #    return code_name
-
-
