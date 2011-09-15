@@ -50,6 +50,7 @@ secure	= 127.0.0.1
 lxc_server = 127.0.0.1:9001
 twister_update_url = http://127.0.0.1:9090/update?
 attachauthurl = http://localhost:8010/attachauth
+webstore_port = 5000
 
 ; Ross' machine
 [ross-work.local]
