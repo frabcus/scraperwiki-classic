@@ -255,6 +255,7 @@ function execute(http_req, http_res, raw_request_data) {
 			
 				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
+				var resp = http_res;
 				e.stdout.on('data', function (data) {
 					util.write_to_caller( http_res, data);			
 				});				
