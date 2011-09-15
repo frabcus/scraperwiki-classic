@@ -82,7 +82,7 @@ if options.qs:
 host, port = string.split(options.ds, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
-scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid, [], 5000)
+scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid, [])
 
 
 
