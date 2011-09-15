@@ -50,3 +50,4 @@ syntax: regexp
 ^splitscrapers$
 ^selenium/webdriver/ie/win32/IEDriver.dll$
 ^selenium/webdriver/ie/x64/IEDriver.dll$
+^services/scriptmgr/appsettings.scriptmgr.js$
