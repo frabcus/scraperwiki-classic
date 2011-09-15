@@ -257,11 +257,11 @@ function execute(http_req, http_res, raw_request_data) {
 
 				var resp = http_res;
 				e.stdout.on('data', function (data) {
-					util.write_to_caller( http_res, data);			
+					util.write_to_caller( http_res, data.toString());			
 				});				
 
 				e.stderr.on('data', function (data) {
-					util.write_to_caller( http_res, data);			
+					util.write_to_caller( http_res, data.toString());			
 				});				
 				
 				e.on('exit', function (code, signal) {
