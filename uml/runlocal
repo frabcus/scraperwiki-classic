@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Run the dispatcher, proxy, firebox and controller servers locally, .ie.,
+#  Run the dispatcher, proxy, firebox and scriptmgr servers locally, .ie.,
 #  without using a real UML
 #
 [ -f uml.cfg ] || {
@@ -13,24 +13,16 @@ cmp -s uml.cfg uml.cfg-inhg || {
     diff -u uml.cfg uml.cfg-inhg
 	}
 
-# XXX I think we have to have a copy of uml.cfg here (not a symlink) as it runs
-# inside the UML, and is mounted somehow. Please clarify :)
-[ -f controller/uml.cfg ] || {
-	echo	"runlocal: controller/uml.cfg not found"
-	exit	1
-	}
-
-[ -h controller/uml.cfg ] && {
-	echo	"runlocal: controller/uml.cfg must not be a symbolic link"
-	exit	1
-	}
-
 rm	-rf	./var/log
 rm	-rf	./var/run
 mkdir 	-p 	./var/log
 mkdir 	-p 	./var/run
 
-./etc/local.d/controller	restart
+#./etc/local.d/controller	restart
+export NODE_PATH=`readlink -f ../lib/node_modules`
+cd ../services/scriptmgr
+node ./scriptmgr.js &
+cd -
 ./etc/local.d/dataproxy		restart
 ./etc/local.d/dispatcher	restart
 ./etc/local.d/ftpproxy		restart
