@@ -75,8 +75,6 @@ def ensure_connected():
         data["attachables"] = " ".join(m_attachables)
         m_socket.sendall('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         line = receiveoneline(m_socket)  # comes back with True, "Ok"
-        print urllib.urlencode(data)
-        print line
         res = json.loads(line)
         assert res.get("status") == "good", res
         
