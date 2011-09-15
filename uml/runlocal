@@ -19,7 +19,7 @@ mkdir 	-p 	./var/log
 mkdir 	-p 	./var/run
 
 #./etc/local.d/controller	restart
-export NODE_PATH=./lib/node_modules
+export NODE_PATH=`cd ./lib/node_modules;pwd`
 cd ../services/scriptmgr
 node ./scriptmgr.js &
 cd -
