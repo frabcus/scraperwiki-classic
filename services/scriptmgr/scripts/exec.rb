@@ -100,7 +100,7 @@ code = File.new(options[:script], 'r').read()
 begin
     eval code
 rescue Exception => e
-    est = getExceptionTraceback(e, code)
+    est = getExceptionTraceback(e, code, options[:script])
     # for debugging:
     # File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(est)) }
     ScraperWiki.dumpMessage(est)

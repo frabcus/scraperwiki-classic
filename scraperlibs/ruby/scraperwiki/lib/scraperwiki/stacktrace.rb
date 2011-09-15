@@ -1,5 +1,5 @@
 
-def getExceptionTraceback(e, code)
+def getExceptionTraceback(e, code, code_filename)
     lbacktrace = e.backtrace.reverse
     #File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(lbacktrace)) }
     lbacktrace.pop
@@ -24,22 +24,27 @@ def getExceptionTraceback(e, code)
     stackdump = []
     for l in lbacktrace
         (filename, linenumber, funcname) = l.split(":")
-        if filename == "(eval)"
-           filename = "<string>"
-        end
 
         nlinenumber = linenumber.to_i
         stackentry = {"file" => filename, "linenumber" => nlinenumber, "duplicates" => 1}
-        #stackentry["furtherlinetext"] = l
-        codelines = code.split("\n")
-        if (nlinenumber >= 1) && (nlinenumber <= codelines.size)
-            stackentry["linetext"] = codelines[nlinenumber-1]
-        elsif (nlinenumber == codelines.size + 1)
-            stackentry["linetext"] = "<end of file>"
+
+        if filename == "(eval)"
+            codelines = code.split("\n")
+            if (nlinenumber >= 1) && (nlinenumber <= codelines.size)
+                stackentry["linetext"] = codelines[nlinenumber-1]
+            elsif (nlinenumber == codelines.size + 1)
+                stackentry["linetext"] = "<end of file>"
+            else
+                stackentry["linetext"] = "getExceptionTraceback: ScraperWiki internal error, line %d out of range in file %s" % [nlinenumber, code_filename]
+            end
+            stackentry["file"] = "<string>"
         else
-            stackentry["linetext"] = "ScraperWiki internal error, line number out of range in getExceptionTraceback"
+            # XXX bit of a hack to show the line number in third party libraries
+            stackentry["file"] += ":" + linenumber
         end
-        stackentry["furtherlinetext"] = funcname
+        if funcname
+            stackentry["furtherlinetext"] = funcname
+        end
         stackdump.push(stackentry)
     end
 

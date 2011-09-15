@@ -31,7 +31,10 @@ def getExceptionTraceback(code):
         
         if file == "<string>" and 0 <= linenumber - 1 < len(codelines):
             stackentry["linetext"] = codelines[linenumber - 1]  # have to do this as context=1 doesn't work (it doesn't give me anything in lines)
-        
+        else:
+            # XXX bit of a hack to show the line number in third party libraries
+            stackentry["file"] += ":" + str(linenumber)
+ 
         if stackdump and stackdump[-1] == stackentry:
             duplicates += 1
         else:
