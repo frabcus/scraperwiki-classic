@@ -20,6 +20,9 @@ mkdir 	-p 	./var/run
 
 #./etc/local.d/controller	restart
 export NODE_PATH=`cd ../lib/node_modules;pwd`
+echo -n 'Set NODE_PATH to '
+echo $NODE_PATH
+
 cd ../services/scriptmgr
 node ./scriptmgr.js &
 cd -
