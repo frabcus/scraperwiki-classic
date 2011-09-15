@@ -49,7 +49,7 @@ class scraperwiki
       $result = $ds->request(array('maincommand'=>'sqliteexecute', 'sqlquery'=>$sqlquery, 'data'=>$data));
       if (property_exists($result, 'error'))
          throw new Exception ($result->error);
-      if ($verbose != 0)
+      if ($verbose == 2)
          scraperwiki::sw_dumpMessage(array('message_type'=>'sqlitecall', 'command'=>"execute", 'val1'=>$sqlquery, 'val2'=>$data));
       return $result; 
    }
