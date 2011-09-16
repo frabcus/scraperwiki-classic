@@ -30,7 +30,7 @@ scrapers, or extract it through the API.
 <dl>
 <dt>ScraperWiki.<strong>save_sqlite</strong>(unique_keys, data[, table_name="swdata", verbose=2])</dt>
     <dd>Saves a data record into the datastore into the table given by table_name.  </dd>
-    <dd>data is a hash with string field names as keys, unique_keys is an array
+    <dd>data is a hash with string or symbol field names as keys, unique_keys is an array
         that is a subset of data.keys which determines when a record is to be
         over-written.
     <dd>For large numbers of records data can be a list of hashes.

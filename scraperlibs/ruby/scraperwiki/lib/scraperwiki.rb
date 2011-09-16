@@ -106,14 +106,17 @@ module ScraperWiki
 
 
             # this ought to be a local function
-    def ScraperWiki.convdata(unique_keys, scraper_data)
+    def ScraperWiki._convdata(unique_keys, scraper_data)
         if unique_keys
             for key in unique_keys
-                if !scraper_data.include?(key)
+                if !key.kind_of?(String) and !key.kind_of?(Symbol)
+                    return { "error" => 'unique_keys must each be a string or a symbol', "bad_key" => key }
+                end
+                if !scraper_data.include?(key) and !scraper_data.include?(key.to_sym)
                     return { "error" => 'unique_keys must be a subset of data', "bad_key" => key }
                 end
-                if scraper_data[key] == nil
-                    return { "error" => 'unique_key value should not be None', "bad_key" => key }
+                if scraper_data[key] == nil and scraper_data[key.to_sym] == nil
+                    return { "error" => 'unique_key value should not be nil', "bad_key" => key }
                 end
             end
         end
@@ -122,6 +125,9 @@ module ScraperWiki
         scraper_data.each_pair do |key, value|
             if not key
                 return { "error" => 'key must not be blank', "bad_key" => key }
+            end
+            if key.kind_of?(Symbol)
+                key = key.to_s
             end
             if key.class != String
                 return { "error" => 'key must be string type', "bad_key" => key }
@@ -146,15 +152,18 @@ module ScraperWiki
             return
         end
 
+        # convert :symbols to "strings"
+        unique_keys = unique_keys.map { |x| x.kind_of?(Symbol) ? x.to_s : x }
+
         if data.class == Hash
-            rjdata = convdata(unique_keys, data)
+            rjdata = _convdata(unique_keys, data)
             if rjdata.include?("error")
                 raise SqliteException.new(rjdata["error"])
             end
         else
             rjdata = [ ]
             for ldata in data
-                ljdata = convdata(unique_keys, ldata)
+                ljdata = _convdata(unique_keys, ldata)
                 if ljdata.include?("error")
                     raise SqliteException.new(ljdata["error"])
                 end

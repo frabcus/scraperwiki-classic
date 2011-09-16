@@ -7,6 +7,10 @@ which it can store data to. You can also read data from other scrapers.</p>
 <code>ScraperWiki.save_sqlite(unique_keys=["a"], data={"a"=>1, "bbb"=>"Hi there"})
 </code>
 
+<p>You can use symbols for keys if you prefer (new LXC sandbox only).</p>
+<code>ScraperWiki.save_sqlite(unique_keys=[:a], data={:a=>1, :bbb=>"Hi there"})
+</code>
+
 <p>If the values for the unique_keys matches a record already there, it will over-write.</p>
 <code>ScraperWiki.save_sqlite(unique_keys=["a"], data={"a"=>1, "bbb"=>"Bye there"})
 </code>
