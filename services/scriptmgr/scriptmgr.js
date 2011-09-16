@@ -159,16 +159,7 @@ function handleIdent(req,res) {
 		
 		res.write( 'scraperid=' + script.scraper_guid + "\n");
 		res.write( 'runid=' + script.run_id  + "\n");		
-		res.write( 'scrapername=' + script.scraper_name + "\n");
-		res.write( 'urlquery=' + script.query + "\n");		
-		if ( script.white ) {
-			res.write( 'allow=' + script.white + "\n");		
-		} else {
-			res.write( "allow=.*\n");		
-		}
-		if ( script.black ) {
-			res.write( 'block=' + script.black + "\n");				
-		}	
+		res.write( 'scrapername=' + script.scraper_name + "\n");	
 		res.end('\n')
 	}
 	else {
