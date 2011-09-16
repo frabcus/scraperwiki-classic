@@ -273,7 +273,7 @@ def scraper_search_handler(request):
             boverduescraperrequest = True
     else:
         u = None
-        if request.user.is_authenticated:
+        if request.user.is_authenticated():
             u = request.user
         APIMetric.record( "scrapersearch", key_data=query,  user=u, code_object=None )
         
@@ -360,7 +360,7 @@ def usersearch_handler(request):
         maxrows = 5
     
     u = None
-    if request.user.is_authenticated:
+    if request.user.is_authenticated():
         u = request.user
     APIMetric.record( "usersearch", key_data=query, user=u, code_object=None )
         
@@ -410,7 +410,7 @@ def userinfo_handler(request):
         result.append(info)
     
     u = None
-    if request.user.is_authenticated:
+    if request.user.is_authenticated():
         u = request.user
     APIMetric.record( "getuserinfo", key_data=username,  user=u, code_object=None )
 
@@ -542,7 +542,7 @@ def scraperinfo_handler(request):
             result.append(scraperinfo(scraper, history_start_date, quietfields, rev))
 
     u = None
-    if request.user.is_authenticated:
+    if request.user.is_authenticated():
         u = request.user
     APIMetric.record( "getinfo", key_data=request.GET.get('name', ""),  user=u, code_object=None )
 
