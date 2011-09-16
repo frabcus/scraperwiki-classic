@@ -5,7 +5,7 @@
 <p class="intro">ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
 scheduled to scrape and refine data. 
 <!-- Edit and debug the scripts entirely in your browser, no setup required. A built
-in SQL API gets the data out as JSON or CSV files.  -->
+in SQL API gets the data out as JSON, CSV or RSS files.  -->
 </p>
 
 <h3>First steps (anyone)</h3>
@@ -46,7 +46,7 @@ in SQL API gets the data out as JSON or CSV files.  -->
     <h3>Scraping guides</h3>
     <ul>
      <li class="doclink">{% doc_link_full 'LANG_csv_guide' language %} <span> Get data from comma-separated value spreadsheet files </span> </li>
-     <li class="doclink">{% doc_link_full 'LANG_excel_guide' language %} <span> Read data from Excel spreadsheet files </span> </li>
+     <li class="doclink">{% doc_link_full 'LANG_excel_guide' language %} <span> Get data from Excel spreadsheet files </span> </li>
      {% if user.is_staff %} 
         <div class="staff">
             {% ifequal language 'python' %}

@@ -215,14 +215,12 @@ function execute(http_req, http_res, raw_request_data) {
 					if ( script.scraper_name ) {
 						args.push('--scrapername=' + script.scraper_name )
 					}
-					util.log.debug( args );
 				} else {
 					args = ['--script',tmpfile,'--ds', dataproxy, '--runid', script.run_id]
 					if ( script.scraper_name ) {
 						args.push('--scrapername')
 						args.push( script.scraper_name )
 					}
-					util.log.debug( args );
 				}
 				
 				exe = './scripts/exec.' + util.extension_for_language(script.language);
@@ -237,6 +235,7 @@ function execute(http_req, http_res, raw_request_data) {
 					environ['http_proxy'] = 'http://' + httpproxy;
 				};
 				
+                util.log.debug( 'spawning ' + exe + ' args'  + args);
 				e = spawn(exe, args, { env: environ });
 				script.pid = e.pid;
 				script.ip = '127.0.0.1';
@@ -256,12 +255,13 @@ function execute(http_req, http_res, raw_request_data) {
 			
 				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
+				var resp = http_res;
 				e.stdout.on('data', function (data) {
-					util.write_to_caller( http_res, data);			
+					util.write_to_caller( http_res, data.toString());			
 				});				
 
 				e.stderr.on('data', function (data) {
-					util.write_to_caller( http_res, data);			
+					util.write_to_caller( http_res, data.toString());			
 				});				
 				
 				e.on('exit', function (code, signal) {

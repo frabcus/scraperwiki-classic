@@ -31,6 +31,7 @@ syntax: regexp
 ^web/pip-log.txt$
 ^web/media/src/scraperwiki.tar.gz
 ^share/doc/urlgrabber-3.1.0/
+^services/scriptmgr/test/
 ^downloads$
 ^francis-laptop.wsgi$
 ^resourcedir/
@@ -49,3 +50,4 @@ syntax: regexp
 ^splitscrapers$
 ^selenium/webdriver/ie/win32/IEDriver.dll$
 ^selenium/webdriver/ie/x64/IEDriver.dll$
+^services/scriptmgr/appsettings.scriptmgr.js$

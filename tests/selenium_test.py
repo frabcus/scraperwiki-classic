@@ -64,20 +64,7 @@ class SeleniumTest(unittest.TestCase):
                 self.fail(msg=msg)
 
         if self._verbosity > 1:
-            print "  waiting_for_page done, now at", self.selenium.get_location()
-
-
-    #def login(self, username, password):
-    #    s = self.selenium
-    #    s.open("/")
-    #    s.click("link=Sign in or create an account")
-    #    s.wait_for_page_to_load("30000")
-    #
-    #    s.type( 'id_user_or_email', username)
-    #    s.type( 'id_password', password)        
-    #    
-    #    s.click('login')
-    #    s.wait_for_page_to_load("30000")                      
+            print "  waiting_for_page done, now at", self.selenium.get_location()                  
         
     def type_dictionary(self, d):
         for k,v in d.iteritems():
@@ -144,4 +131,31 @@ class SeleniumTest(unittest.TestCase):
         
         return code_name
 
-
+    def set_code_privacy(self, privacy, code_type, code_name = '', owner = {}):
+        """ 
+        Set the currently open scraper/view to be the specified privacy. Assumes a
+        Django admin account has been specified if setting as private. Needs
+        code_name and the owner account if setting as private.
+        """
+        privacy_set = "selenium.browserbot.getCurrentWindow().document.getElementById('privacy_status').children[0].style.display != 'none'"
+        s = self.selenium
+        if privacy == 'public' or privacy == 'protected':
+            s.click('show_privacy_choices')
+            s.click('privacy_' + privacy)
+            s.wait_for_condition(privacy_set, 10000)
+            self.failUnless(s.is_text_present("This %s is " % code_type + privacy))
+        elif privacy == 'private':
+            self._user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
+            s.open("/admin/codewiki/%s/?q=" % code_type + code_name)
+            self.wait_for_page()
+            s.click('link=' + code_name)
+            self.wait_for_page()
+            s.select("id_privacy_status", "label=Private")
+            s.click("//div[@class='submit-row']/input[@value='Save']")
+            self.wait_for_page()
+            self._user_login(owner['username'], owner['password'])
+            s.open("/%ss/" % code_type + code_name)
+            self.wait_for_page()
+            self.failUnless(s.is_text_present("This %s is private" % code_type))
+        else:
+            self.fail()

@@ -5,13 +5,21 @@
 # Necessary when killlocal might have hit errors during execution
 
 import os
-for t in ['twister', 'www/scraperwiki/uml']:
-    for s in os.popen('ps -Af | grep %s' % t).readlines():
-        try:
-            print "killing", s
-            os.kill(int(s.split()[1]), 9)
-        except:
-            print "    missing"
-        
+
+killed_count = 1
+while killed_count > 0:
+    print "checking none left ..."
+    killed_count = 0
+    for t in ['twister', 'www/scraperwiki/uml', 'scriptmgr.js']:
+        for s in os.popen('ps -Af | grep %s | grep -v "grep "' % t).readlines():
+            try:
+                print "killing", s.strip()
+                os.kill(int(s.split()[1]), 9)
+                killed_count += 1
+            except OSError, ose:
+                pass
+                #print "    missing"
+
+print "... all killed"
 
 

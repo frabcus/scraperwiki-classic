@@ -98,9 +98,10 @@ SW_DataStore.create(host, port, options[:scrapername], options[:runid])
 
 code = File.new(options[:script], 'r').read()
 begin
-    eval code
+    #eval code # this doesn't give you line number of top level errors, instead we use require_relative:
+    require_relative options[:script]
 rescue Exception => e
-    est = getExceptionTraceback(e, code)
+    est = getExceptionTraceback(e, code, options[:script])
     # for debugging:
     # File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(est)) }
     ScraperWiki.dumpMessage(est)

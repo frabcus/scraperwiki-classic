@@ -3,6 +3,7 @@
 import string
 import socket
 import urllib
+import urllib2
 import cgi
 import datetime
 import types
@@ -10,8 +11,6 @@ import socket
 import re
 import os
 import scraperwiki
-import urllib2
-import base64
 
 try   : import json
 except: import simplejson as json
@@ -23,107 +22,23 @@ m_host = None
 m_port = None
 m_scrapername = None
 m_runid = None
-
-# this should be set by create(), or have a way to 
-# set it at the top of a script
-# eg scraperlibs.datastore.m_usewebstore = True
-m_usewebstore = False
-
-# list of scrapers we have an automatic right to attach to (to demonstrate the interface)
-# may come in through the ident call or as some hashencoding
-# if it is not declared in this list, then a call to django to interrogate the access permissions between 
-# this scraper and/or user (esp in case of draft scrapers) and the attaching scraper
-attachables = [ "outer_space_objects_parsecollector" ]
+m_webstore_port = None   # if not null then will connect to new webstore
+m_attachables = [ ]
 
         # make everything global to the module for simplicity as opposed to half in and half out of a single class
-def create(host, port, scrapername, runid):
+def create(host, port, scrapername, runid, attachables, webstore_port):
     global m_host
     global m_port
     global m_scrapername
     global m_runid
+    global m_attachables
+    global m_webstore_port
     m_host = host
     m_port = int(port)
     m_scrapername = scrapername
     m_runid = runid
-
-
-def webstorerequest(req):
-    print req
-    webstoreurl = "http://ewloe.scraperwiki.com"
-    username = "scraperwiki"
-    password = "banana"
-    databaseurl = "%s/%s/%s" % (webstoreurl, username, m_scrapername or "DRAFT")
-    requests = [ ]
-    if req.get("maincommand") == "save_sqlite":
-        table_name = req.get("swdatatblname")
-        tableurl = "%s/%s" % (databaseurl, table_name)
-        rqs = urllib.urlencode([ ("unique", key)  for key in req.get("unique_keys") ])
-#        auth = base64.encodestring("%s:%s" % (username, password)).strip()
-        ldata = req.get("data")
-        if type(ldata) == dict:
-            ldata = [ldata]
-        for data in ldata:
-            target = "%s?%s" % (tableurl, rqs)
-            print target
-            request = urllib2.Request(target)
-#            request.add_header("Authorization", "Basic %s" % auth)
-            request.add_header("Content-Type", "application/json")
-            request.add_header("Accept", "application/json")
-            request.add_data(json.dumps(data))
-            requests.append(request)
-            
-        
-    elif req.get("maincommand") == "sqliteexecute":
-        class PutRequest(urllib2.Request):
-            def get_method(self):
-                return "PUT"
-        request = PutRequest(databaseurl)
-        request.add_header("Content-Type", "application/json")
-        request.add_header("Accept", "application/json+tuples")
-        record = {"query":req.get("sqlquery"), "params":req.get("data"), "attach":[]}
-        request.add_header("X-SCRAPERWIKI-DBSIG", "%s %s %s" % (m_scrapername, username, "something"))
-        for name, asattach in req.get("attachlist"):
-            record["attach"].append({"user":username, "database":name, "alias":asattach, "securitycheck":"somthing"})
-            request.add_header("X-SCRAPERWIKI-DBSIG", "%s %s %s" % (name, username, "something"))
-            
-        request.add_data(json.dumps(record))
-        requests.append(request)
-
-    elif req.get("maincommand") == "commit":
-        return None
-    elif req.get("maincommand") == "attach":
-        return None   
-    elif req.get("maincommand") == "sqlitecommand":
-            # should check and throw an error if we cannot attach
-            # even though it only actually happens when we run an execute
-            if req.get("command") == "downloadsqlitefile":
-                #res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
-                raise TypeError("Not implemented")
-            elif req.get("command") == "datasummary":
-                #res = self.datasummary(request.get("limit", 10))
-                raise TypeError("Not implemented")                
-            elif req.get("command") == "attach":
-                return "{'status': 'ok'}"
-            elif req.get("command") == "commit":
-                raise TypeError("Not implemented")
-            else:
-                return None   
-    else:
-        return {"error":'Unknown maincommand: %s' % req.get("maincommand")}
-
-
-    response = '{"state":"nothing"}'
-    try:
-        for request in requests:
-            request.add_header("X-Scrapername", m_scrapername)                    
-            url = urllib2.urlopen(request)
-            result = url.read()
-            url.close()
-    except urllib2.HTTPError, e:
-        result = e.read()  # the error
-    print result
-    return json.loads(result)
-
+    m_attachables = m_attachables
+    m_webstore_port = int(webstore_port)
 
         # a \n delimits the end of the record.  you cannot read beyond it or it will hang
 def receiveoneline(socket):
@@ -150,18 +65,25 @@ def ensure_connected():
         m_socket = socket.socket()
         m_socket.connect((m_host, m_port))
         data = {"uml": 'lxc', "port":m_socket.getsockname()[1]}
+
+            # needed to make it work locally.  how has this ever worked?
+        data["uml"] = "uml001"
+        
         data["vscrapername"] = m_scrapername
         data["vrunid"] = m_runid
-        data["attachables"] = " ".join(attachables)
+        data["attachables"] = " ".join(m_attachables)
         m_socket.sendall('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         line = receiveoneline(m_socket)  # comes back with True, "Ok"
+        print urllib.urlencode(data)
+        print line
         res = json.loads(line)
         assert res.get("status") == "good", res
         
 
 def request(req):
-    if m_usewebstore:
+    if m_webstore_port:
         return webstorerequest(req)
+    
     ensure_connected()
     m_socket.sendall(json.dumps(req)+'\n')
     line = receiveoneline(m_socket)
@@ -235,3 +157,64 @@ def getDataByLocation(name, lat, lng, limit=-1, offset=0):
 def search(name, filterdict, limit=-1, offset=0):
     raise scraperwiki.sqlite.SqliteError("apiwrapper.search has been deprecated")
 
+def webstorerequest(req):
+    print req
+    if req.get("maincommand") == "sqlitecommand":
+        if req.get("command") == "attach":
+            return "{'status': 'ok'}"    # done at the higher level
+        elif req.get("command") == "commit":
+            return "{'status': 'ok'}"    # no operation
+        else:
+            return {"error":'Unknown sqlitecommand: %s' % req.get("command")}
+        return {"error":'Unknown maincommand: %s' % req.get("maincommand")}
+
+    webstoreurl = "http://%s:%s" % (m_host, m_webstore_port)
+    username = "resourcedir"  # gets it into the right subdirectory automatically!!!
+    dirscrapername = m_scrapername
+    if not m_scrapername:
+        dirscrapername = "DRAFT__%s" % re.sub("[\.\-]", "_", m_runid)
+    databaseurl = "%s/%s/%s" % (webstoreurl, username, dirscrapername)
+    print databaseurl
+    
+    if req.get("maincommand") == "save_sqlite":
+        table_name = req.get("swdatatblname")
+        tableurl = "%s/%s" % (databaseurl, table_name)
+        rqs = urllib.urlencode([ ("unique", key)  for key in req.get("unique_keys") ])
+        ldata = req.get("data")
+        if type(ldata) == dict:
+            ldata = [ldata]
+        target = "%s?%s" % (tableurl, rqs)
+        request = urllib2.Request(target)
+        request.add_header("Accept", "application/json")
+        request.add_data(json.dumps(ldata))
+            
+        
+    elif req.get("maincommand") == "sqliteexecute":
+        class PutRequest(urllib2.Request):
+            def get_method(self):
+                return "PUT"
+        request = PutRequest(databaseurl)
+        request.add_header("Accept", "application/json+tuples")
+
+        record = {"query":req.get("sqlquery"), "params":req.get("data"), "attach":[]}
+        for name, asattach in req.get("attachlist"):
+            record["attach"].append({"user":username, "database":name, "alias":asattach, "securityhash":"somthing"})
+            
+        request.add_data(json.dumps(record))
+
+
+    request.add_header("Content-Type", "application/json")
+    request.add_header("X-Scrapername", m_scrapername)
+    request.add_header("X-Runid", m_runid)
+    try:
+        url = urllib2.urlopen(request)
+        result = url.read()
+        url.close()
+    except urllib2.HTTPError, e:
+        result = e.read()  # the error
+    print result
+    jres = json.loads(result)
+    if jres.get("state") == "error":
+        jres["error"] = jres.get("message", "error")
+    return jres
+    

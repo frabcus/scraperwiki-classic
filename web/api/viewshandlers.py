@@ -313,7 +313,12 @@ def scraper_search_handler(request):
             res['code'] = vcsstatus["code"]
             res["rev"] = vcsstatus.get("prevcommit", {}).get("rev", -1)
             res['guid'] = scraper.guid
-            res["attachables"] = [ cp.permitted_object.short_name  for cp in CodePermission.objects.filter(code=scraper).all() ]
+
+            attachables = [ ]
+            for cp in CodePermission.objects.filter(code=scraper).all():
+                if cp.permitted_object.privacy_status != "deleted":
+                    attachables.append(cp.permitted_object.short_name)
+            res["attachables"] = attachables
             
         result.append(res)
         if len(result) > maxrows:
@@ -539,6 +544,20 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
     info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
     info['wiki_type']   = scraper.wiki_type
     info['privacy_status'] = scraper.privacy_status
+
+    attachables = [ ]
+    for cp in CodePermission.objects.filter(code=scraper).all():
+        if cp.permitted_object.privacy_status != "deleted":
+            attachables.append(cp.permitted_object.short_name)
+    info["attachables"] = attachables
+            
+    # these ones have to be filtering out the incoming private scraper names
+    # (the outgoing attach to list doesn't because they're refered in the code as well)
+    info["attachable_here"] = [ ]
+    for cp in CodePermission.objects.filter(permitted_object=scraper).all():
+        if cp.code.privacy_status not in ["deleted", "private"]:
+            info["attachable_here"].append(cp.code.short_name)
+
     if scraper.wiki_type == 'scraper':
         info['license']     = scraper.scraper.license
         info['records']     = scraper.scraper.record_count  # old style datastore
