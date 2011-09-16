@@ -33,6 +33,7 @@ var scripts_ip = [ ];
 var max_runs = 100;
 var dataproxy = '';
 var httpproxy;
+var webstore_port = 0; 
 
 /******************************************************************************
 * Called to configure the executor, allowing it to determine whether we are
@@ -53,6 +54,7 @@ exports.init = function( settings ) {
 	dataproxy = settings.dataproxy;
 	extra_path = settings.extra_path;
 	max_runs = settings.vm_count;
+    webstore_port = settings.webstore_port; 
 }
 
 
@@ -196,8 +198,11 @@ function execute(http_req, http_res, raw_request_data) {
 				language: request_data.language || 'python',
 				ip: '',
 				response: http_res,
-				black: request_data.black || '',
-				white: request_data.white || '',
+				black: request_data.black || '',   // not used
+				white: request_data.white || '',   // not used
+                attachables: request_data.attachables || [],
+                beta_user: request_data.beta_user || false,
+                scheduled_run: request_data.scheduled_run || false,
 				permissions: request_data.permissions || []  };
 	
 	
@@ -221,6 +226,12 @@ function execute(http_req, http_res, raw_request_data) {
 						args.push('--scrapername')
 						args.push( script.scraper_name )
 					}
+					
+                        // extra parameters used in the exec.py.  these will need to be added into the block above for ruby and php, as well as into the proper lxc fields
+					if ( script.beta_user && webstore_port ) 
+                        args.push('--webstore_port', webstore_port);
+                    if ( script.attachables )
+                        args.push('--attachables="'+script.attachables.join(" ")+'"'); 
 				}
 				
 				exe = './scripts/exec.' + util.extension_for_language(script.language);

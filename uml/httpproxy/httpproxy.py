@@ -818,7 +818,9 @@ if __name__ == '__main__' :
         if os.fork() == 0 :
             os .setsid()
             sys.stdin  = open ('/dev/null')
-            sys.stdout = open ('%s/log/scraperwiki/%s' % (varDir, varName), 'w', 0)
+                # hard-code it because var settings don't allow this to work properly (never got refactored like dataproxy)
+            #sys.stdout = open ('%s/log/scraperwiki/%s' % (varDir, varName), 'w', 0)
+            sys.stdout = open ('/var/log/scraperwiki/httpproxy-stdout', 'w', 0)
             sys.stderr = sys.stdout
             if os.fork() == 0 :
                 ppid = os.getppid()

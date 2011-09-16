@@ -66,6 +66,8 @@ parser.add_option("--scrapername")
 parser.add_option("--runid")
 parser.add_option("--qs")
 parser.add_option("--path")
+parser.add_option("--attachables", default="")
+parser.add_option("--webstore_port", default="0")
 options, args = parser.parse_args()
 
 if options.gid:
@@ -82,7 +84,7 @@ if options.qs:
 host, port = string.split(options.ds, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
-scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid, [])
+scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid, options.attachables.split(), options.webstore_port)
 
 
 

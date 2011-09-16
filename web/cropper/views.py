@@ -221,7 +221,7 @@ def cropimg(request, format, srcdoc, page, cropping):
                 imgout = jpgimgout
                 imgmimetype = 'image/jpeg'
         except IOError, e:
-            assert e.args[0] == 'encoder jpeg not available'
+            assert e.args[0] == 'encoder jpeg not available', e.args
 
     imgout.reset()
     return HttpResponse(imgout.read(), mimetype=imgmimetype)
