@@ -30,14 +30,23 @@ class UserProfile(models.Model):
     bio              = models.TextField(blank=True, null=True)
     created_at       = models.DateTimeField(auto_now_add=True)
     beta_user        = models.BooleanField( default=False )
+    apikey           = models.CharField(max_length=64, null=True, blank=True)
     
     objects = models.Manager()
     
+    def regenerate_apikey(self):
+        import uuid
+        self.apikey = str( uuid.uuid4() )
+    
 
     def save(self):
+        #this seems pretty pointless
         new = False
         if not self.pk:
             new = True
+        
+        if not self.apikey:
+            self.regenerate_apikey()
         
         #do the parent save
         super(UserProfile, self).save()

@@ -12,6 +12,7 @@ from settings import MAX_API_ITEMS, API_URL
 from django.views.decorators.http import condition
 from tagging.models import Tag
 
+from models import APIMetric
 import csv
 import datetime
 import re
@@ -270,7 +271,12 @@ def scraper_search_handler(request):
             boverduescraperrequest = True
         if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"]:
             boverduescraperrequest = True
-
+    else:
+        u = None
+        if request.user.is_authenticated:
+            u = request.user
+        APIMetric.record( "scrapersearch", key_data=query,  user=u, code_object=None )
+        
     # TODO: If the user has specified an API key then we should pass them into
     # the search query and refine the resultset  to show only valid scrapers
     if boverduescraperrequest:
@@ -353,6 +359,11 @@ def usersearch_handler(request):
     except ValueError: 
         maxrows = 5
     
+    u = None
+    if request.user.is_authenticated:
+        u = request.user
+    APIMetric.record( "usersearch", key_data=query, user=u, code_object=None )
+        
         # usernames we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
     
@@ -376,6 +387,7 @@ def usersearch_handler(request):
     callback = request.GET.get("callback")
     if callback:
         res = "%s(%s)" % (callback, res)
+    
     response = HttpResponse(res, mimetype='application/json; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename=search.json'
     return response
@@ -397,6 +409,11 @@ def userinfo_handler(request):
 
         result.append(info)
     
+    u = None
+    if request.user.is_authenticated:
+        u = request.user
+    APIMetric.record( "getuserinfo", key_data=username,  user=u, code_object=None )
+
     res = json.dumps(result, indent=4)
     callback = request.GET.get("callback")
     if callback:
@@ -523,6 +540,11 @@ def scraperinfo_handler(request):
             result.append({'error':scraper, "short_name":short_name})
         else:
             result.append(scraperinfo(scraper, history_start_date, quietfields, rev))
+
+    u = None
+    if request.user.is_authenticated:
+        u = request.user
+    APIMetric.record( "getinfo", key_data=request.GET.get('name', ""),  user=u, code_object=None )
 
     res = json.dumps(result, indent=4)
     callback = request.GET.get("callback")

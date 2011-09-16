@@ -75,6 +75,13 @@ class Scraper (code.Code):
     record_count = models.IntegerField(default=0)        
     run_interval = models.IntegerField(default=-1)  # in seconds, we are defaulting to disabled
 
+    # For private scrapers this can be provided to API calls as proof that the caller has access
+    # to the scraper, it is really a shared secret between us and the caller. For the datastore 
+    # API call it will only be used to verify access to the main DB, not the attached as that is 
+    # done through the existing code permissions model.  
+    # This should be regeneratable on demand by any editor/owner of the scraper (if it is private)
+    access_apikey = models.CharField(max_length=64, blank=True, null=True)
+
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)
         self.wiki_type = 'scraper'
@@ -89,8 +96,8 @@ class Scraper (code.Code):
                 raise ValidationError('Invalid run interval')
 
 
-            # It would be good to kill this function off and move its functionality into being properties of the database
-            # for now it represents some kind of caching of the size of the datastore
+    # It would be good to kill this function off and move its functionality into being properties of the database
+    # for now it represents some kind of caching of the size of the datastore
     def update_meta(self):
         dataproxy = DataStore(self.short_name)
         try:
@@ -109,9 +116,20 @@ class Scraper (code.Code):
             except:
                 pass
 
+    # Without checking the privacy status, this method will regenerate
+    # the api key for this scrapers access key and might be called via 
+    # the front-end
+    def regenerate_access_key(self):
+        import uuid
+        self.access_apikey = str( uuid.uuid4() )
 
     def save(self, *args, **kwargs):
         self.wiki_type = 'scraper'
+
+        # Check type and apikey and generate one if necessary
+        if self.privacy_status == "private" and not self.access_apikey:
+            self.regenerate_access_key()
+       
         super(Scraper, self).save(*args, **kwargs)
 
     def content_type(self):

@@ -263,7 +263,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         for line in string.split (ident, '\n'):
             if line == '' :
                 continue
-            key, value = string.split (line, '=')
+            key, eq, value = line.partition('=')
             if key == 'runid' :
                 runID     = value
                 continue
