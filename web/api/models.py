@@ -29,12 +29,3 @@ class APIMetric(models.Model):
     def record( apicall, key_data=None, user=None, code_object=None ):
         m = APIMetric( apicall=apicall, key_data=key_data, user=user, code_object=code_object )
         m.save()
-            
-###
-#     url(r'^1\.0/datastore/sqlite$',     viewshandlers.sqlite_handler,         name="method_sqlite"),
-#    url(r'^1\.0/datastore/getdata$',    viewshandlers.data_handler,           name="method_getdata"),
-#    url(r'^1\.0/scraper/search$',       viewshandlers.scraper_search_handler, name="method_search"),
-#    url(r'^1\.0/scraper/getruninfo$',   viewshandlers.runevent_handler,       name="method_getruninfo"),
-###
-
-            

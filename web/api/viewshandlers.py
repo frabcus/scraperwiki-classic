@@ -95,6 +95,12 @@ def stream_rows(dataproxy, format):
 def data_handler(request):
     tablename = request.GET.get('tablename', "swdata")
     squery = ["select * from `%s`" % tablename]
+    
+    u = None
+    if request.user.is_authenticated():
+        u = request.user
+    APIMetric.record( "getdata", key_data=tablename,  user=u, code_object=None )
+    
     if "limit" in request.GET:
         squery.append('limit %s' % request.GET.get('limit'))
     if "offset" in request.GET:
@@ -219,6 +225,15 @@ def sqlite_handler(request):
         if request.GET.get("callback"):
             result = "%s(%s)" % (request.GET.get("callback"), result)
         return HttpResponse(result)
+    
+    u,s,kd = None, None, ""
+    if request.user.is_authenticated():
+        u = request.user
+    if scraper.privacy_status != "private":
+        s = scraper
+        kd = short_name
+    APIMetric.record( "sqlite", key_data=kd,  user=u, code_object=s )
+    
     
     dataproxy = DataStore(request.GET.get('name'))
     lattachlist = request.GET.get('attach', '').split(";")
@@ -431,10 +446,20 @@ def runevent_handler(request):
         if request.GET.get("callback"):
             result = "%s(%s)" % (request.GET.get("callback"), result)
         return HttpResponse(result)
+
+    kd = scraper.short_name
+    s = scraper
     
     # TODO: Check accessibility if this scraper is private
     if scraper.privacy_status == 'private':
-        pass
+        kd = ''
+        s = None
+
+    u = None
+    if request.user.is_authenticated():
+        u = request.user
+    APIMetric.record( "runeventinfo", key_data=kd,  user=u, code_object=s )
+
         
     runid = request.GET.get('runid', '-1')
     runevent = None
