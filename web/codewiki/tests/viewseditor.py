@@ -7,6 +7,21 @@ from django.test import TestCase
 
 import codewiki
 
+import datetime
+import json
+
+test_new_scraper_params = {
+        'title':'Saved directly from test suite',
+        'commit_message':'cccommit',
+        'sourcescraper':'',
+        'fork':'',
+        'wiki_type':'scraper',
+        'guid':'',
+        'language':'ruby',
+        'code':'puts "this was made va ScraperViewsEditorTests.test_save_new"\n',
+        'earliesteditor':'dummyearliesteditortimestring' # XXX should be some kind of date/time of editor session, but not sure of format
+}
+
 class ScraperViewsEditorTests(TestCase):
     fixtures = ['test_data.json']
     
@@ -17,4 +32,19 @@ class ScraperViewsEditorTests(TestCase):
     def test_run_event_json(self):
         response = self.client.get(reverse('run_event_json', kwargs={'run_id':2}))
         self.assertEqual(response.status_code, 200)
+
+    def test_save_new_draft(self):
+        response = self.client.post(reverse('handle_editor_save'), test_new_scraper_params)
+        resp = json.loads(response.content)
+        self.assertEqual(resp, {"status": "OK", "url": "/scrapers/new/ruby", "draft": "True"})
+
+    def test_save_new_logged_in(self):
+        self.client.login(username='test_user', password='123456')
+        response = self.client.post(reverse('handle_editor_save'), test_new_scraper_params)
+        resp = json.loads(response.content)
+        self.assertEqual(resp["redirect"], "true"), 
+        self.assertEqual(resp["url"], u"/scrapers/saved_directly_from_test_suite/edit/")
+        self.assertEqual(resp["rev"], 0)
+        # XXX revdateepoch is here and should be checked is sane
+
   
