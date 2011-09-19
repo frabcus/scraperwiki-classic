@@ -318,10 +318,6 @@ class ScraperController(BaseController):
                     '--ds=%s:%s' % (config.get('dataproxy', 'host'), config.get('dataproxy', 'port')),
                     '--script=%s' % tmpscriptfile, '--scrapername=%s' % scrapername, '--runid=%s' % runid
                ]
-               
-        # *and* beta_user
-        if config.get('dataproxy', 'webstore_port'):
-            args.append("--webstore_port=%s" % config.get('dataproxy', 'webstore_port'))
 
         if poptions.setuid:
             args.append('--gid=%d' % grp.getgrnam("nogroup").gr_gid)
