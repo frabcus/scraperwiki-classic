@@ -65,7 +65,6 @@ class ScheduledRunMessageLoopHandler:
         self.discarded_characters = 0
 
         self.output = ""
-        self.exception_message = ""
         self.run_ended = None
 
         self.upost = {"django_key":djangokey}
@@ -160,8 +159,8 @@ class ScheduledRunMessageLoopHandler:
                 self.upost["records_produced"] += 1
         
         elif message_type == "exception":   # only one of these ever
-            self.exception_message = data.get('exceptiondescription')
-            
+            self.upost["exception_message"] = data.get('exceptiondescription')
+
             # TODO/TOCONSIDER
             # If this is a specific type of message (such as Python NameError/SyntaxError)
             # we should probably hit a flag to say it should not be scheduled (without changing the 

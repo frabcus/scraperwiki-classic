@@ -168,11 +168,12 @@
     <p>  </p>
 </div>
 
+{% if user.is_staff %}
 <div class="content col left staff" id="scraper_attachables">
     <h3>Attachable databases</h3>
     {% include 'codewiki/includes/database_attachables.html' %}
 </div>
-
+{% endif %}
 
 <div class="content col right" id="scraper_schedule">
     <h3>Schedule {% if user.is_authenticated %}<a href="#" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
