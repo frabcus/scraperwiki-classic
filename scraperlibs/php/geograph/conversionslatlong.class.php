@@ -34,6 +34,8 @@
 * @author Barry Hunter <geo@barryhunter.co.uk>
 * @version $Revision: 5937 $
 */
+
+require 'geograph/conversions.class.php';
 	
 class ConversionsLatLong extends Conversions
 {		
