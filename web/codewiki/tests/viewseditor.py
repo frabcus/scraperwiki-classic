@@ -40,6 +40,7 @@ class ScraperViewsEditorTests(TestCase):
         resp = json.loads(response.content)
         self.assertEqual(resp, {"status": "OK", "url": "/scrapers/new/ruby", "draft": "True"})
 
+    '''
     def test_save_new_logged_in(self):
         # when logged in ...
         self.client.login(username='test_user', password='123456')
@@ -53,6 +54,27 @@ class ScraperViewsEditorTests(TestCase):
         # XXX revdateepoch is here and should be checked is sane
 
         # check we can get the scraper out
-        Scraper.objects.get(short_name = 'saved_directly_from_test_suite')
+        new_s = Scraper.objects.get(short_name = 'saved_directly_from_test_suite')
+'''
 
-  
+    def test_fork_scraper(self):
+        self.client.login(username='test_user', password='123456')
+        s = Scraper.objects.get(short_name='test_scraper')
+
+        # fork from a scraper with each permission to check it gets copied
+        for privacy_status in ('public', 'visible', 'private'):
+            s.privacy_status = privacy_status
+            s.save()
+
+            params = test_new_scraper_params.copy()
+            params['fork'] = 'test_scraper'
+            response = self.client.post(reverse('handle_editor_save'), params)
+            self.assertEqual(response.status_code, 200)
+
+            new_s = Scraper.objects.get(short_name = 'saved_directly_from_test_suite')
+            self.assertEqual(s.forked_from, s)
+
+ 
+
+
+
