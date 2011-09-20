@@ -58,7 +58,7 @@ VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview",
 # TODO Intepret apikey when supplied as this will the users details if known
 def scraper_search_query(user, query, apikey=None):
     if query:
-        scrapers = Code.objects.filter(title__icontains=query)
+        scrapers = Code.objects.filter(title__icontains=query, short_name__icontains=query)
         scrapers_description = Code.objects.filter(description__icontains=query)
         scrapers_all = scrapers | scrapers_description
     else:
