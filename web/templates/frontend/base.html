@@ -63,9 +63,8 @@
 				<li class="blog"><a href="http://blog.scraperwiki.com">Blog</a></li>
 				{% if user.is_authenticated %}
 				<li class="user loggedin">
-					<a href="{% url profiles_profile_detail user.username %}"><span>Logged in</span></a>
+					<a href="{% url profiles_profile_detail user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
 					<ul>
-						<li class="hi">Hi {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}!</li>
 						<li class="dashboard"><a href="{% url dashboard %}">Your dashboard</a></li>
 						<li class="profile"><a href="{% url profiles_profile_detail user.username %}">Your profile</a></li>
 						<li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>

@@ -24,6 +24,7 @@ syntax: regexp
 ^pip-log.txt$
 ^.hgignore$
 ^scraperlibs/scraperwiki/datastore/config.cfg$
+^node_modules
 ^web/localsettings.py$
 ^web/settings.py$
 ^web/editor/code_runner.py$
