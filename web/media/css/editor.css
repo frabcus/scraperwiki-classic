@@ -148,8 +148,13 @@ div.page_tabs a.othertypingalert {
 	background-image: url(../images/icons/control_play.png)
 }
 
+.editor_controls #run .running {
+	background-image: url(../images/icons/control_stop.png);
+	background-color: #E8BABA;
+}
+
 .editor_controls #run.running {
-	color: red;
+	color: #740000;
 }
 
 .editor_controls input:disabled {
