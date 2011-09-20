@@ -96,6 +96,9 @@ def data_handler(request):
     tablename = request.GET.get('tablename', "swdata")
     squery = ["select * from `%s`" % tablename]
     
+    # TODO: Permissions will need to be checked so we will be checking access to the 
+    # primary scraper
+    
     u = None
     if request.user.is_authenticated():
         u = request.user
@@ -219,6 +222,8 @@ def out_rss2(dataproxy, scraper):
 @condition(etag_func=None)
 def sqlite_handler(request):
     short_name = request.GET.get('name')
+    apikey = request.GET.get('apikey', None)
+    
     scraper = getscraperorresponse(short_name, "apidataread", request.user)
     if type(scraper) in [str, unicode]:
         result = json.dumps({'error':scraper, "short_name":short_name})
@@ -229,11 +234,15 @@ def sqlite_handler(request):
     u,s,kd = None, None, ""
     if request.user.is_authenticated():
         u = request.user
+        
     if scraper.privacy_status != "private":
         s = scraper
         kd = short_name
-    APIMetric.record( "sqlite", key_data=kd,  user=u, code_object=s )
+    else:
+        # TODO: Check apikey matches the key of the scraper        
+        pass
     
+    APIMetric.record( "sqlite", key_data=kd,  user=u, code_object=s )
     
     dataproxy = DataStore(request.GET.get('name'))
     lattachlist = request.GET.get('attach', '').split(";")
@@ -271,6 +280,8 @@ def sqlite_handler(request):
 
 
 def scraper_search_handler(request):
+    apikey = request.GET.get('apikey', None)
+    
     query = request.GET.get('query') 
     if not query:
         query = request.GET.get('searchquery') 
@@ -282,6 +293,9 @@ def scraper_search_handler(request):
 
     boverduescraperrequest = False
     if query == "*OVERDUE*":
+        # We should check apikey against our shared secret. If it matches then it should
+        # be allowed to continue.
+        
         if request.META.get("HTTP_X_REAL_IP", "Not specified") in settings.INTERNAL_IPS:
             boverduescraperrequest = True
         if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"]:
@@ -297,7 +311,7 @@ def scraper_search_handler(request):
     if boverduescraperrequest:
         scrapers = scrapers_overdue()  
     else:
-        scrapers = scraper_search_query(user=None, query=query)
+        scrapers = scraper_search_query(user=None, query=query, apikey=key)
 
     # scrapers we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
@@ -367,7 +381,6 @@ def scraper_search_handler(request):
 
 
 def usersearch_handler(request):
-    # TODO: Should users be able to choose whether they turn up in search results or not?
     query = request.GET.get('searchquery') 
     try:   
         maxrows = int(request.GET.get('maxrows', ""))
@@ -409,7 +422,6 @@ def usersearch_handler(request):
 
 
 def userinfo_handler(request):
-    # TODO: Should users has the ability to set their profiles to private?
     username = request.GET.get('username', "") 
     users = User.objects.filter(username=username)
     result = [ ]
@@ -439,6 +451,8 @@ def userinfo_handler(request):
 
 
 def runevent_handler(request):
+    apikey = request.GET.get('apikey', None)
+    
     short_name = request.GET.get('name')
     scraper = getscraperorresponse(short_name, "apiscraperruninfo", request.user)
     if type(scraper) in [str, unicode]:
@@ -450,7 +464,8 @@ def runevent_handler(request):
     kd = scraper.short_name
     s = scraper
     
-    # TODO: Check accessibility if this scraper is private
+    # TODO: Check accessibility if this scraper is private using 
+    # apikey
     if scraper.privacy_status == 'private':
         kd = ''
         s = None
@@ -546,6 +561,8 @@ def convert_date(date_str):
 def scraperinfo_handler(request):
     result = [ ]
     
+    apikey =request.GET.get('apikey', None)
+    
     quietfields = request.GET.get('quietfields', "").split("|")
     history_start_date = convert_date(request.GET.get('history_start_date', None))
     
@@ -557,7 +574,8 @@ def scraperinfo_handler(request):
 
     for short_name in request.GET.get('name', "").split():
         scraper = getscraperorresponse(short_name, "apiscraperinfo", request.user)
-        # TODO: Check accessibility if this scraper is private
+        # TODO: Check accessibility if this scraper is private using 
+        # apikey
         if scraper.privacy_status == 'private':
             pass
             

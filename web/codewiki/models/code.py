@@ -55,7 +55,8 @@ STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let
 VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ])
 
 
-def scraper_search_query(user, query):
+# TODO Intepret apikey when supplied as this will the users details if known
+def scraper_search_query(user, query, apikey=None):
     if query:
         scrapers = Code.objects.filter(title__icontains=query)
         scrapers_description = Code.objects.filter(description__icontains=query)
