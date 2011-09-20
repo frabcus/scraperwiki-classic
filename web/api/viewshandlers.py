@@ -92,28 +92,6 @@ def stream_rows(dataproxy, format):
         
 
 
-def data_handler(request):
-    tablename = request.GET.get('tablename', "swdata")
-    squery = ["select * from `%s`" % tablename]
-    
-    # TODO: Permissions will need to be checked so we will be checking access to the 
-    # primary scraper
-    
-    u = None
-    if request.user.is_authenticated():
-        u = request.user
-    APIMetric.record( "getdata", key_data=tablename,  user=u, code_object=None )
-    
-    if "limit" in request.GET:
-        squery.append('limit %s' % request.GET.get('limit'))
-    if "offset" in request.GET:
-        squery.append('offset %s' % request.GET.get('offset'))
-    qsdata = { "name": request.GET.get("name", "").encode('utf-8'), "query": " ".join(squery).encode('utf-8') }
-    if "format" in request.GET:
-        qsdata["format"] = request.GET.get("format").encode('utf-8')
-    if "callback" in request.GET:
-        qsdata["callback"] = request.GET.get("callback").encode('utf-8')
-    return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
 
 
 # formats that should be easy to stream because they are line based
@@ -239,8 +217,13 @@ def sqlite_handler(request):
         s = scraper
         kd = short_name
     else:
-        # TODO: Check apikey matches the key of the scraper        
-        pass
+        # When private we MUST have an apikey and it should match
+        if not all(scraper.access_apikey, apikey) or (scraper.access_apikey != apikey):
+            result = json.dumps({'error':"Invalid API Key", "short_name":short_name})
+            if request.GET.get("callback"):
+                result = "%s(%s)" % (request.GET.get("callback"), result)
+            return HttpResponse(result)
+            
     
     APIMetric.record( "sqlite", key_data=kd,  user=u, code_object=s )
     
@@ -311,7 +294,7 @@ def scraper_search_handler(request):
     if boverduescraperrequest:
         scrapers = scrapers_overdue()  
     else:
-        scrapers = scraper_search_query(user=None, query=query, apikey=key)
+        scrapers = scraper_search_query(user=None, query=query, apikey=apikey)
 
     # scrapers we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
@@ -678,3 +661,26 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
         
 
 
+
+#
+# DEPRECATED: To be deleted
+#
+def data_handler(request):
+    tablename = request.GET.get('tablename', "swdata")
+    squery = ["select * from `%s`" % tablename]
+    
+    u = None
+    if request.user.is_authenticated():
+        u = request.user
+    APIMetric.record( "getdata", key_data=tablename,  user=u, code_object=None )
+    
+    if "limit" in request.GET:
+        squery.append('limit %s' % request.GET.get('limit'))
+    if "offset" in request.GET:
+        squery.append('offset %s' % request.GET.get('offset'))
+    qsdata = { "name": request.GET.get("name", "").encode('utf-8'), "query": " ".join(squery).encode('utf-8') }
+    if "format" in request.GET:
+        qsdata["format"] = request.GET.get("format").encode('utf-8')
+    if "callback" in request.GET:
+        qsdata["callback"] = request.GET.get("callback").encode('utf-8')
+    return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))

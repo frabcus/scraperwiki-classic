@@ -243,6 +243,10 @@ def code_overview(request, wiki_type, short_name):
                     apqs = { "format":"rss2", "name":scraper.short_name, "query":previewrssfeed }
                     context["rssuserfeeds"].append("%s?%s" % (apiurl, urllib.urlencode(apqs)))
 
+        # which domains have been scraped
+        context["domainscrapes"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:10]
+
+
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
 

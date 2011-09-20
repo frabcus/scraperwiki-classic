@@ -49,8 +49,7 @@ def frontpage(request, public_profile_field=None):
     for tag in tags_sorted:
         tags.append(tag[0])
     
-    data = {#'featured_views': featured_views, 
-            #'featured_scrapers': featured_scrapers,
+    data = {
 			'featured_both': featured_both,
             'tags': tags, 
             'language': 'python'}

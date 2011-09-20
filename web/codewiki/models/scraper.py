@@ -225,5 +225,8 @@ class DomainScrape(models.Model):
     bytes_scraped     = models.IntegerField(default=0)
     pages_scraped     = models.IntegerField(default=0)
 
+    def __unicode__(self):
+        return u'domain: %s (pages %d, bytes %d) for %s' % (self.domain, self.pages_scraped, self.bytes_scraped, scraper_run_event.scraper.short_name)
+
     class Meta:
         app_label = 'codewiki'

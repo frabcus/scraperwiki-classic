@@ -175,6 +175,18 @@
 </div>
 {% endif %}
 
+{% if user.is_staff and domainscrapes %}
+<div class="content col left staff" id="scraper_domains">
+    <h3>Domains scraped</h3>
+    <ul id="databaseattachfromlist">
+      {% for domainscrape in domainscrapes %}
+        <li><a href="{{domainscrape.domain}}">{{domainscrape.domain}}</a> {{domainscrape.pages_scraped}} pages, {{domainscrape.bytes_scraped}} bytes</li>
+      {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+
 <div class="content col right" id="scraper_schedule">
     <h3>Schedule {% if user.is_authenticated %}<a href="#" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
     <p>
