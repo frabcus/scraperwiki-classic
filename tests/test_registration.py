@@ -12,7 +12,7 @@ class TestRegistration(SeleniumTest):
     """
     login_text = "Log in"
     login_fail = "Sorry, but we could not find that user, or the password was wrong"
-    logged_in_text = "Logged in"
+    logged_in_text = "Your dashboard"
     sign_out_text = "Sign out"
     profile_text = "Your profile"
     default_values = {

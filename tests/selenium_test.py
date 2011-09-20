@@ -79,6 +79,8 @@ class SeleniumTest(unittest.TestCase):
 
     def create_user(self, name="test user", password = str( uuid.uuid4() )[:18].replace('-', '_') ):
         s = self.selenium
+        s.open("/logout")
+        self.wait_for_page()
         s.click( "link=Log in" )
         self.wait_for_page()
     
@@ -95,8 +97,8 @@ class SeleniumTest(unittest.TestCase):
         s.click( 'id_tos' )
         s.click('register')
         self.wait_for_page()
-    
-        self.failUnless(s.is_text_present("Logged in"), msg='User is not signed in and should be')
+        
+        self.failUnless(s.is_text_present("Your dashboard"), msg='User is not signed in and should be')
     
         return username
 
@@ -145,7 +147,7 @@ class SeleniumTest(unittest.TestCase):
             s.wait_for_condition(privacy_set, 10000)
             self.failUnless(s.is_text_present("This %s is " % code_type + privacy))
         elif privacy == 'private':
-            self._user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
+            self.user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
             s.open("/admin/codewiki/%s/?q=" % code_type + code_name)
             self.wait_for_page()
             s.click('link=' + code_name)
@@ -153,9 +155,56 @@ class SeleniumTest(unittest.TestCase):
             s.select("id_privacy_status", "label=Private")
             s.click("//div[@class='submit-row']/input[@value='Save']")
             self.wait_for_page()
-            self._user_login(owner['username'], owner['password'])
+            self.user_login(owner['username'], owner['password'])
             s.open("/%ss/" % code_type + code_name)
             self.wait_for_page()
             self.failUnless(s.is_text_present("This %s is private" % code_type))
         else:
             self.fail()
+
+    def add_code_editor(self, username, expected_msg):
+        """ 
+        Set the specified username as an editor on the currently open scraper/view summary page.
+        Assumes the current user has permissions to do so and that the scraper/view is private/public.
+        """
+        error_showing = "selenium.browserbot.getCurrentWindow().document.getElementById('contributorserror').style.display != 'none'"
+        finished_loading = "selenium.browserbot.getCurrentWindow().document.getElementById('contributors_loading').style.display == 'none'"
+        add_editor_visible = "selenium.browserbot.getCurrentWindow().document.getElementById('addneweditor').children[1].style.display != 'none'"
+        
+        s = self.selenium
+        s.click("link=Add a new editor")
+        s.type("//div[@id='addneweditor']/span/input[@role='textbox']", username)
+        s.click("xpath=//div[@id='addneweditor']/span/input[@class='addbutton']")
+        s.wait_for_condition(error_showing + " || (" + finished_loading + " && " + add_editor_visible + ")", 10000)
+        self.failUnless(s.is_text_present(expected_msg))
+        
+    def user_login(self, username, password):
+        """ Logout if already logged in and log back in as specified user """
+        s = self.selenium
+        # Pause here to force sync and bypass intermittent issues such 
+        # as blank JS alerts interrupting selenium and logout failure
+        time.sleep(1)
+        s.open("/logout")
+        self.wait_for_page()
+        time.sleep(1) # likewise
+        s.type('id_nav_user_or_email', username)
+        s.type('id_nav_password', password)
+        s.click('nav_login_submit')
+        self.wait_for_page()
+    
+    def activate_users(self, userlist):
+        """ 
+        Set all usernames in userlist to be activated. Requires Django admin account to be specified 
+        and for alert types to have been set up.
+        """
+        s = self.selenium
+        self.user_login(SeleniumTest._adminuser['username'],SeleniumTest._adminuser['password'])
+        
+        for username in userlist:
+            s.open("/admin/auth/user/?q=" + username)
+            self.wait_for_page()
+            s.click("link=" + username)
+            self.wait_for_page()
+            s.click("id_is_active")
+            s.click("//div[@class='submit-row']/input[@value='Save']")
+            self.wait_for_page()
