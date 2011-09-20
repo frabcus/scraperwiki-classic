@@ -12,6 +12,7 @@ import hashlib
 
 from codewiki import vc
 from codewiki import util
+from frontend.models import UserProfile
 
 try:
     import json
@@ -55,7 +56,6 @@ STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let
 VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ])
 
 
-# TODO Intepret apikey when supplied as this will the users details if known
 def scraper_search_query(user, query, apikey=None):
     if query:
         scrapers = Code.objects.filter(title__icontains=query)
@@ -65,8 +65,18 @@ def scraper_search_query(user, query, apikey=None):
     else:
         scrapers_all = Code.objects
     scrapers_all = scrapers_all.exclude(privacy_status="deleted")
-    if user and not user.is_anonymous():
-        scrapers_all = scrapers_all.exclude(Q(privacy_status="private") & ~(Q(usercoderole__user=user) & Q(usercoderole__role='owner')) & ~(Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
+    
+    u = user
+    if apikey:
+        # If we have an API key then we should look up the userprofile and 
+        # use that user instead of the one supplied
+        try:
+            u = UserProfile.objects.get(apikey=apikey).user
+        except UserProfile.DoesNotExist:
+            u = None
+    
+    if u and not u.is_anonymous():
+        scrapers_all = scrapers_all.exclude(Q(privacy_status="private") & ~(Q(usercoderole__user=u) & Q(usercoderole__role='owner')) & ~(Q(usercoderole__user=u) & Q(usercoderole__role='editor')))
     else:
         scrapers_all = scrapers_all.exclude(privacy_status="private")
     scrapers_all = scrapers_all.order_by('-created_at')
