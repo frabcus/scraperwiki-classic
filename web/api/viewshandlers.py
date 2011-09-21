@@ -563,7 +563,7 @@ def scraperinfo_handler(request):
         scraper = getscraperorresponse(short_name, "apiscraperinfo", request.user)
         # Check accessibility if this scraper is private using 
         # apikey
-        if scraper.privacy_status == 'private':            
+        if hasattr(scraper, "privacy_status") and scraper.privacy_status == 'private':            
             if not all([scraper.access_apikey, apikey, scraper.access_apikey == apikey]):
                 scraper = u'Failed to access scraper'
             
