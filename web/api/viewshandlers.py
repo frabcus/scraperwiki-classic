@@ -218,7 +218,7 @@ def sqlite_handler(request):
         kd = short_name
     else:
         # When private we MUST have an apikey and it should match
-        if not all(scraper.access_apikey, apikey, scraper.access_apikey == apikey):
+        if not all([ scraper.access_apikey, apikey, scraper.access_apikey == apikey] ):
             result = json.dumps({'error':"Invalid API Key", "short_name":short_name})
             if request.GET.get("callback"):
                 result = "%s(%s)" % (request.GET.get("callback"), result)
@@ -451,7 +451,7 @@ def runevent_handler(request):
     # apikey
     if scraper.privacy_status == 'private':
         kd,s = '', None
-        if not all(scraper.access_apikey, apikey, scraper.access_apikey == apikey):
+        if not all([ scraper.access_apikey, apikey, scraper.access_apikey == apikey ]):
             result = json.dumps({'error':"Invalid API Key", "short_name":short_name})
             if request.GET.get("callback"):
                 result = "%s(%s)" % (request.GET.get("callback"), result)
@@ -564,7 +564,7 @@ def scraperinfo_handler(request):
         # Check accessibility if this scraper is private using 
         # apikey
         if scraper.privacy_status == 'private':            
-            if not all(scraper.access_apikey, apikey, scraper.access_apikey == apikey):
+            if not all([scraper.access_apikey, apikey, scraper.access_apikey == apikey]):
                 scraper = u'Failed to access scraper'
             
         if type(scraper) in [str, unicode]:
