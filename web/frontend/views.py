@@ -494,12 +494,12 @@ def vault_users(request, username, action):
         return HttpResponse('{"error":"Failed to add %s"}' % (username,), mimetype=mime)            
 
     if action =='add' and not user in vault.members.all():
-        vault.members.add(user)        
+        vault.members.add(user)    
     if action =='remove' and user in vault.members.all():
-        vault.members.add(user)
-        
-    vault.save()    
-                
+        vault.members.remove(user)
+    
+    vault.save()        
+                    
     return HttpResponse('{"status":"ok"}', mimetype=mime)
 
 
