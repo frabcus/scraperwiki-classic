@@ -31,7 +31,7 @@ URL_ROOT            = '/'           # prefix for URLs to run not at top level of
 # Ways of speeding up tests.
 # See: http://stackoverflow.com/questions/3096148/how-to-run-djangos-test-database-only-in-memory
 if 'test' in sys.argv:
-    DATABASES['default']['TEST_NAME'] = 'test_scraperwiki'
+    DATABASES['default']['TEST_NAME'] = ':memory:'
     DATABASES['default']['ENGINE'] = 'sqlite3'
     SOUTH_TESTS_MIGRATE = False
     OVERDUE_SQL = "julianday(strftime(?,last_run) + run_interval,'unixepoch') < julianday('now', 'localtime') or last_run is null"
@@ -90,8 +90,7 @@ if DEBUG:
     ]
     SQL_DEBUG = False
 
-HIGHRISE_ENABLED = False
-
+# enable Django toolbar logging tab.
 if DEBUG:
     MIDDLEWARE_CLASSES += ['debug_toolbar.middleware.DebugToolbarMiddleware']
     INTERNAL_IPS = ('127.0.0.1',)
@@ -106,3 +105,6 @@ if DEBUG:
         'debug_toolbar.panels.signals.SignalDebugPanel',
         'debug_toolbar.panels.logger.LoggingPanel',
     )
+    DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS' : False }
+
+HIGHRISE_ENABLED = False
