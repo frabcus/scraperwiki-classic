@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
@@ -7,6 +8,7 @@ from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.contrib.auth.models import User
 from django.views.decorators.http import condition
 from django.shortcuts import get_object_or_404
+
 import textile
 from django.conf import settings
 
@@ -706,3 +708,5 @@ def internal_attach_auth( request ):
         
     models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
     return True
+
+

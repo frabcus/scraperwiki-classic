@@ -111,6 +111,13 @@ class Code(models.Model):
     forked_from        = models.ForeignKey('self', null=True, blank=True)
     privacy_status     = models.CharField(max_length=32, choices=PRIVACY_STATUSES, default='public')
     
+    # For private scrapers this can be provided to API calls as proof that the caller has access
+    # to the scraper, it is really a shared secret between us and the caller. For the datastore 
+    # API call it will only be used to verify access to the main DB, not the attached as that is 
+    # done through the existing code permissions model.  
+    # This should be regeneratable on demand by any editor/owner of the scraper (if it is private)
+    access_apikey = models.CharField(max_length=64, blank=True, null=True)
+    
 
     def __init__(self, *args, **kwargs):
         super(Code, self).__init__(*args, **kwargs)

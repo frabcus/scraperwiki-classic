@@ -19,7 +19,7 @@ class Vault(models.Model):
     plan = models.CharField(max_length=32, choices=PLAN_TYPES)    
 
     # A list of the members who can access this vault.  This is 
-    # distinct from the own (self.user) of the vault.
+    # distinct from the owner (self.user) of the vault.
     members = models.ManyToManyField(User, related_name='vaults')
 
     @staticmethod

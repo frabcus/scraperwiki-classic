@@ -451,3 +451,58 @@ def test_error(request):
     raise Exception('failed in test_error')
 
 
+
+###############################################################################
+# Vault specific views
+###############################################################################
+
+@login_required
+def view_vault(request):
+    """
+    View the details of the vault for the specific user. If they have no vault
+    then we will redirect to their dashboard as they shouldn't have been able
+    to get here.
+    """
+    from codewiki.models import Vault    
+    context = {}
+    
+    vault = Vault.for_user( request.user )
+    if not vault:
+        return HttpResponseRedirect( reverse("dashboard") )
+    
+    context['vault'] = vault
+    context['members'] = vault.members.all().order_by('username')
+    
+    return render_to_response('frontend/vault/view.html', context, 
+                               context_instance=RequestContext(request))
+
+@login_required
+def vault_users(request, username, action):
+    """
+    View which allows a user to add/remove users from their vault.
+    """
+    from codewiki.models import Vault
+    mime = 'application/json'
+     
+    vault = Vault.for_user( request.user )
+    if not vault:
+        return HttpResponse('{"error":"User has no vault"}', mimetype=mime)    
+        
+    try:
+        user = User.objects.get( username=username )    
+    except User.DoesNotExist:
+        return HttpResponse('{"error":"Failed to add %s"}' % (username,), mimetype=mime)            
+
+    if action =='add' and not user in vault.members.all():
+        vault.members.add(user)        
+    if action =='remove' and user in vault.members.all():
+        vault.members.add(user)
+        
+    vault.save()    
+                
+    return HttpResponse('{"status":"ok"}', mimetype=mime)
+
+
+
+
+
