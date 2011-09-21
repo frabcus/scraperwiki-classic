@@ -664,28 +664,3 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
 
     return info
         
-
-
-
-#
-# DEPRECATED: To be deleted
-#
-def data_handler(request):
-    tablename = request.GET.get('tablename', "swdata")
-    squery = ["select * from `%s`" % tablename]
-    
-    u = None
-    if request.user.is_authenticated():
-        u = request.user
-    APIMetric.record( "getdata", key_data=tablename,  user=u, code_object=None )
-    
-    if "limit" in request.GET:
-        squery.append('limit %s' % request.GET.get('limit'))
-    if "offset" in request.GET:
-        squery.append('offset %s' % request.GET.get('offset'))
-    qsdata = { "name": request.GET.get("name", "").encode('utf-8'), "query": " ".join(squery).encode('utf-8') }
-    if "format" in request.GET:
-        qsdata["format"] = request.GET.get("format").encode('utf-8')
-    if "callback" in request.GET:
-        qsdata["callback"] = request.GET.get("callback").encode('utf-8')
-    return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
