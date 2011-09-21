@@ -457,7 +457,7 @@ def test_error(request):
 ###############################################################################
 
 @login_required
-def view_vault(request):
+def view_vault(request, username=None):
     """
     View the details of the vault for the specific user. If they have no vault
     then we will redirect to their dashboard as they shouldn't have been able
@@ -466,10 +466,24 @@ def view_vault(request):
     from codewiki.models import Vault    
     context = {}
     
-    vault = Vault.for_user( request.user )
-    if not vault:
-        return HttpResponseRedirect( reverse("dashboard") )
-    
+    if username is None:
+        # Viewing vault for current user.
+        vault = Vault.for_user( request.user )
+        if not vault:
+            return HttpResponseRedirect( reverse("dashboard") )
+    else:
+        # Viewing another users vault, if we are a member we can 
+        # see it (for now), otherwise not.
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return HttpResponseRedirect( reverse("dashboard") )            
+            
+        vault = Vault.for_user( user )
+        if not vault or not vault.is_member( request.user ):
+            return HttpResponseRedirect( reverse("dashboard") )                        
+        
+        
     context['vault'] = vault
     context['members'] = vault.members.all().order_by('username')
     

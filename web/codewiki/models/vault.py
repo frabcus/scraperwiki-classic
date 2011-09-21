@@ -29,6 +29,9 @@ class Vault(models.Model):
         except Vault.DoesNotExist:
             return None
 
+    def is_member( self, user ):
+        return user in self.members.all()
+
     def __unicode__(self):
         return "%s vault created on %s" % (self.plan, self.created_at)
 

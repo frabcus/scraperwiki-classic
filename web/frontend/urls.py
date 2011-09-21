@@ -39,8 +39,9 @@ urlpatterns = patterns('',
     url(r'^contact/sent/$', direct_to_template, {'template': 'contact_form/contact_form_sent.html'}, name='contact_form_sent'),
     
     # user's scrapers
-    url(r'^dashboard/vault/$', frontend_views.view_vault, name='vault'),    
-    url(r'^dashboard/vault/edit/(?P<username>.*)/(?P<action>.*)/$', frontend_views.vault_users, name='vault_user'),        
+    url(r'^vault/$', frontend_views.view_vault, name='vault'),    
+    url(r'^vault/(?P<username>.*)/$', frontend_views.view_vault, name='vault'),        
+    url(r'^vault/edit/(?P<username>.*)/(?P<action>.*)/$', frontend_views.vault_users, name='vault_user'),        
     
     url(r'^dashboard/(?P<page_number>\d+)?$', frontend_views.dashboard, name='dashboard'),
     url(r'^stats/$',                  frontend_views.stats, name='stats'),    
