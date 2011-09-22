@@ -4,7 +4,8 @@ from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.views.decorators.cache import cache_page
 
-from codewiki.models import Code
+from codewiki.models import Code, LANGUAGES_DICT
+
 import os
 import re
 import codewiki
@@ -59,7 +60,9 @@ def tutorials(request,language=None):
     tutorial_dict[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
         
     viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
+
     context = {'language': language, 'tutorials': tutorial_dict, 'viewtutorials': viewtutorials}
+    context['display_language'] = LANGUAGES_DICT[language]
 
     # Which languages is this available for?
     context["lang_ruby"] = True
