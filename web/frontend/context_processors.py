@@ -33,7 +33,7 @@ def vault_info(request):
         
     # Accessing the request.user.vaults should be done in the specific template
     # where it is used rather than in every request
-    return { 'uservault': v }
+    return { 'uservaults': v }
     
 
 # Taken from http://www.djangosnippets.org/snippets/1197/
