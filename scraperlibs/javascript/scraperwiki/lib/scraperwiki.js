@@ -6,7 +6,7 @@ exports.version = '1.0.0';
 exports.sqlite = new DataProxyClient();
 
 exports.dumpMessage = dumpMessage = function(msg) {
-	console.log( "JSONRECORD(" + msg.length.toString() + "):" + msg + "\n" );
+	console.log( "JSONRECORD(" + msg.length.toString() + "):" + msg.toString() + "\n" );
 }
 
 exports.parseError = parseError = function(err) {

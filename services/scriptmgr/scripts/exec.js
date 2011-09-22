@@ -18,8 +18,6 @@ var sw = require('scraperwiki');
 var parts = opts.get('ds').split(':');
 sw.sqlite.init(parts[0], parts[1], opts.get("scrapername") || "", opts.get("runid") || "");
 
-
-
 process.on('SIGXCPU', function () {
 	throw 'ScraperWiki CPU time exceeded';
 });

@@ -25,10 +25,15 @@ def vault_info(request):
     # TODO: Cache vault info for user
     if not request.user.is_authenticated():
         return {}
-    
+        
+    try:
+        v = request.user.vault
+    except Vault.DoesNotExist:
+        return {}
+        
     # Accessing the request.user.vaults should be done in the specific template
     # where it is used rather than in every request
-    return { 'uservault': request.user.vault }
+    return { 'uservault': v }
     
 
 # Taken from http://www.djangosnippets.org/snippets/1197/
