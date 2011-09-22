@@ -32,11 +32,16 @@ class UserProfileInlines(admin.StackedInline):
     can_delete = False
 
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'profile_name', 'vault_plan', 'is_active', 'is_staff', 'date_joined', 'last_login')
+    list_display = ('username', 'email', 'profile_name', 'vault_count', 'is_active', 'is_staff','is_beta_user', 'date_joined', 'last_login')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
 
-    def vault_plan(self, obj):
-        return obj.vault.plan
+
+    def is_beta_user(self, obj):
+        return obj.get_profile().beta_user
+
+    def vault_count(self, obj):
+        return obj.vaults.count()
+        
     def profile_name(self, obj):
         return obj.get_profile().name
 
