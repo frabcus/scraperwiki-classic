@@ -469,34 +469,29 @@ def view_vault(request, username=None):
     
     if username is None:
         # Viewing vault for current user.
-        vault = request.user.vault
+        vaults = request.user.vaults
         # This might be none if we are just a member of other vaults
-    else:
+#    else:
         # Viewing another users vault, if we are a member we can 
         # see it (for now), otherwise not.
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            logging.debug('Failed to find user with username %s ' % (username,) )
-            return HttpResponseRedirect( reverse("dashboard") )            
+#        try:
+#            user = User.objects.get(username=username)
+#        except User.DoesNotExist:
+#            logging.debug('Failed to find user with username %s ' % (username,) )
+#            return HttpResponseRedirect( reverse("dashboard") )            
         
-        vault = user.vault
-        if not vault or not vault in request.user.vaults.all():
-            logging.debug('This vault does not belong to this user and they are not a member' )            
-            return HttpResponseRedirect( reverse("dashboard") )                        
+#        vaults = user.vaults
+#        if not vaults or not request.user in vaults
+#            logging.debug('This vault does not belong to this user and they are not a member' )            
+#            return HttpResponseRedirect( reverse("dashboard") )                        
         
         
-    context['vault'] = vault
-    if vault:
-        context['members'] = vault.members.all().order_by('username')
-    else:
-        context['members'] = None
-        
+    context['vaults'] = vaults
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))
 
 @login_required
-def vault_users(request, username, action):
+def vault_users(request, vaultid, username, action):
     """
     View which allows a user to add/remove users from their vault. Will
     only work on the current user's vault so if they don't have one then
@@ -505,8 +500,9 @@ def vault_users(request, username, action):
     from codewiki.models import Vault
     mime = 'application/json'
      
-    if not request.user.vault:
-        return HttpResponse('{"error":"User has no vault"}', mimetype=mime)    
+    vault = get_object_or_404( Vault, id=vaultid)
+    if vault.user.id != request.user.id:
+        return HttpResponse('{"error":"Not your vault"}' % (username,), mimetype=mime)                    
         
     try:
         user = User.objects.get( username=username )    

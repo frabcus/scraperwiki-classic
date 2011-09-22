@@ -27,7 +27,7 @@ def vault_info(request):
         return {}
         
     try:
-        v = request.user.vault
+        v = request.user.vaults
     except Vault.DoesNotExist:
         return {}
         

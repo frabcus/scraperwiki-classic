@@ -5,6 +5,7 @@
 
 {% block header %}
 	<h2>Your vaults</h2>
+
 	<p>Information about your vaults and who can access them</p>
 {% endblock %}
 
@@ -13,6 +14,7 @@
 
 <div class="content">
 
+{% for vault in vaults.all %}
 {% if vault %}
  <h2>{{ vault.user.username }}&rsquo;s {{ vault.plan|title }} Plan</h2>
 
@@ -30,11 +32,11 @@
 	{% ifequal vault.user request.user %}
 		 <h3>Members</h3>
 		 <ul>
-			{% for m in members %}
+			{% for m in vault.members.all %}
 				<li>			
 					{% show_gravatar m 'medium' %}
 					<a href="{% url profiles_profile_detail m.username %}">{{ m.get_profile.name }} ({{m.username}})</a>
-					<a href="{% url vault_user m.username,'remove' %}">remove</a>
+					<a href="{% url vault_user vault.id, m.username,'remove' %}">remove</a>
 				</li>
 			{% endfor %}
 		 </ul>
@@ -56,7 +58,8 @@
 		{% endifequal %}
 </div>
 
-{% endif %}
+<hr/>
+{% endfor %}
 
 {% if request.user.vaults.count %}
 <div id="shared_vaults">	
@@ -69,6 +72,6 @@
 	{% endfor %}
 	</ul>
 </div>
-{% endif %}
+{% endfor %}
 
 {% endblock %}

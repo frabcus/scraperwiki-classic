@@ -250,7 +250,7 @@ function execute(http_req, http_res, raw_request_data) {
 					environ['http_proxy'] = 'http://' + httpproxy;
 				};
 				
-                util.log.debug( 'spawning ' + exe + ' args'  + args);
+                util.log.debug( 'spawning ' + exe + ' args '  + args);
 				e = spawn(exe, args, { env: environ });
 				script.pid = e.pid;
 				script.ip = '127.0.0.1';
