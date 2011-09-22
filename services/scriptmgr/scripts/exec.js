@@ -54,4 +54,5 @@ try {
 "linenumber": parseInt(linenum),
 				   "stackdump": stack };	
 	sw.dumpMessage( JSON.stringify(result) );    
+	process.exit(1);
 }
