@@ -30,11 +30,11 @@
 	{% ifequal vault.user request.user %}
 		 <h3>Members</h3>
 		 <ul>
-			{% for m in members %}
+			{% for m in vault.members.all %}
 				<li>			
 					{% show_gravatar m 'medium' %}
 					<a href="{% url profiles_profile_detail m.username %}">{{ m.get_profile.name }} ({{m.username}})</a>
-					<a href="{% url vault_user m.username,'remove' %}">remove</a>
+					<a href="{% url vault_user vault.id, m.username,'remove' %}">remove</a>
 				</li>
 			{% endfor %}
 		 </ul>
@@ -56,7 +56,7 @@
 		{% endifequal %}
 </div>
 
-
+<hr/>
 {% endfor %}
 
 {% endblock %}

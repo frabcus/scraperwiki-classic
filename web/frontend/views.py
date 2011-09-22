@@ -491,7 +491,7 @@ def view_vault(request, username=None):
                                context_instance=RequestContext(request))
 
 @login_required
-def vault_users(request, username, action):
+def vault_users(request, vaultid, username, action):
     """
     View which allows a user to add/remove users from their vault. Will
     only work on the current user's vault so if they don't have one then
@@ -500,8 +500,9 @@ def vault_users(request, username, action):
     from codewiki.models import Vault
     mime = 'application/json'
      
-    if not request.user.vault:
-        return HttpResponse('{"error":"User has no vault"}', mimetype=mime)    
+    vault = get_object_or_404( Vault, id=vaultid)
+    if vault.user.id != request.user.id:
+        return HttpResponse('{"error":"Not your vault"}' % (username,), mimetype=mime)                    
         
     try:
         user = User.objects.get( username=username )    
