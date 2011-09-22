@@ -61,6 +61,11 @@ def tutorials(request,language=None):
     viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
     context = {'language': language, 'tutorials': tutorial_dict, 'viewtutorials': viewtutorials}
 
+    # Which languages is this available for?
+    context["lang_ruby"] = True
+    context["lang_python"] = True
+    context["lang_php"] = True
+
     context["title"] = "Live tutorials"
     context["para"] = "Screen scraping tutorials entirely within a code editor in your browser"
 
