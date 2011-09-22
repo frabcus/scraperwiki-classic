@@ -5,9 +5,34 @@ exports.version = '1.0.0';
 
 exports.sqlite = new DataProxyClient();
 
-exports.dumpMessage = function(msg) {
+exports.dumpMessage = dumpMessage = function(msg) {
 	console.log( "JSONRECORD(" + msg.length.toString() + "):" + msg + "\n" );
 }
+
+exports.parseError = parseError = function(err) {
+	// parse err.stack for nice clean presentation. We still need line 
+	// numbers adding here.
+	var stack = [];
+	var lines = err.stack.split('\n');
+
+	// Get line number from lines[1] which looks a bit like
+	// at Object.<anonymous> (/private/tmp/script.js:3:9)
+	var linenum = lines[1].match(/\d+/)[0];
+
+	stack.push( {"duplicates": 0, "linetext": lines[0].trim(), "file": "<string>", "linenumber": parseInt(linenum)} )
+	
+	for ( var p = 1; p < lines.length; p++ ) {
+		var m = lines[p].trim();
+		if ( m.length > 0 )
+			stack.push( { "file": m, "linetext" : m, "linenumber": parseInt(linenum)}  );
+	}
+	
+	var result = { "message_type": "exception",  
+				   "linenumber": parseInt(linenum),
+				   "stackdump": stack };	
+	dumpMessage( JSON.stringify(result) );    
+}
+
 
 exports.scrape = function( url, callback ) {
 	request(url, function (error, response, body) {
@@ -15,6 +40,6 @@ exports.scrape = function( url, callback ) {
 	    callback( body );
 	  } else {
 		// Parse the stack and throw it with our new throw
-		throw(error);
+		parseError(error);
 	}
 })};
