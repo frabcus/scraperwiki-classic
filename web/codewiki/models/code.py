@@ -1,6 +1,8 @@
 import datetime
 import time
 import os
+import re
+import urllib
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -14,7 +16,7 @@ from codewiki import vc
 from codewiki import util
 from codewiki.models.vault import Vault
 from frontend.models import UserProfile
-import textile
+import textile   # yuk
 
 try:
     import json
@@ -320,9 +322,43 @@ class Code(models.Model):
     class Meta:
         app_label = 'codewiki'
 
-    # the only reference to textile
+    # the only remaining reference to textile
     def description_ashtml(self):
-        return textile.textile(self.description)
+        if re.search("__BEGIN", self.description):
+            cdesc = re.sub('(?s)__BEGIN_QSENVVARS__.*?__END_QSENVVARS__', '', self.description)
+            cdesc = re.sub('(?s)__BEGIN_ENVVARS__.*?__END_ENVVARS__', '', cdesc)
+            envvars = self.get_environment_variables()
+            nqsenvvars = len(re.findall("=", envvars.get("QUERY_STRING", "")))
+            if nqsenvvars:
+                cdesc = "%s\n\n_Has %d secret query-string environment variable%s._" % (cdesc, nqsenvvars, (nqsenvvars>1 and "s" or ""))
+        else:
+            cdesc = self.description
+        return textile.textile(cdesc)
+
+    # You can encode the query string as individual elements, or as one block.  
+    # If controller/node can drop in environment variables directly, then we can consider a general purpose adding of 
+    # such environment variables not through the QUERY_STRING interface which requires decoding in the scraper.
+    # Would be more traditional to obtain the values as os.getenv("TWITTER_API_KEY") than dict(cgi.parse_qsl(os.getenv("QUERY_STRING")))["TWITTER_API_KEY"]
+    def get_environment_variables(self):
+        qsenvvars = { }
+        for lines in re.findall('(?s)__BEGIN_QSENVVARS__(.*?)__END_QSENVVARS__', self.description):
+            for line in lines.split("\n"):
+                sline = line.strip()
+                if sline:
+                    psline = sline.partition("=")
+                    qsenvvars[psline[0].strip()] = psline[2].strip()
+        envvars = { }
+        if qsenvvars:
+            envvars["QUERY_STRING"] = urllib.urlencode(qsenvvars)
+        for lines in re.findall('(?s)__BEGIN_ENVVARS__(.*?)__END_ENVVARS__', self.description):
+            for line in lines.split("\n"):
+                sline = line.strip()
+                if sline:
+                    psline = sline.partition("=")
+                    envvars[psline[0].strip()] = line[2].strip()
+        return envvars
+
+
 
 
     # all authorization to go through here
