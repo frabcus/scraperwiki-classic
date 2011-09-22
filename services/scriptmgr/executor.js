@@ -228,10 +228,14 @@ function execute(http_req, http_res, raw_request_data) {
 					}
 					
                         // extra parameters used in the exec.py.  these will need to be added into the block above for ruby and php, as well as into the proper lxc fields
-					if ( script.beta_user && webstore_port ) 
-                        args.push('--webstore_port', webstore_port);
-                    if ( script.attachables )
-                        args.push('--attachables="'+script.attachables.join(" ")+'"'); 
+					if ( script.beta_user && webstore_port )  {
+                        args.push('--webstore_port');
+						args.push( webstore_port);
+					}
+                    if ( script.attachables ) {
+                        args.push('--attachables');
+						args.push(script.attachables.join(" ")+'"'); 
+					}
 				}
 				
 				exe = './scripts/exec.' + util.extension_for_language(script.language);

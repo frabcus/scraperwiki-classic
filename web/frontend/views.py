@@ -463,12 +463,13 @@ def view_vault(request, username=None):
     then we will redirect to their dashboard as they shouldn't have been able
     to get here.
     """
+    import logging
     from codewiki.models import Vault    
     context = {}
     
     if username is None:
         # Viewing vault for current user.
-        vault = Vault.for_user( request.user )
+        vault = request.user.vault
         # This might be none if we are just a member of other vaults
     else:
         # Viewing another users vault, if we are a member we can 
@@ -476,10 +477,12 @@ def view_vault(request, username=None):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
+            logging.debug('Failed to find user with username %s ' % (username,) )
             return HttpResponseRedirect( reverse("dashboard") )            
-            
-        vault = Vault.for_user( user )
-        if not vault or not vault.is_member( request.user ):
+        
+        vault = user.vault
+        if not vault or not vault in request.user.vaults.all():
+            logging.debug('This vault does not belong to this user and they are not a member' )            
             return HttpResponseRedirect( reverse("dashboard") )                        
         
         
@@ -495,13 +498,14 @@ def view_vault(request, username=None):
 @login_required
 def vault_users(request, username, action):
     """
-    View which allows a user to add/remove users from their vault.
+    View which allows a user to add/remove users from their vault. Will
+    only work on the current user's vault so if they don't have one then
+    it won't work.
     """
     from codewiki.models import Vault
     mime = 'application/json'
      
-    vault = Vault.for_user( request.user )
-    if not vault:
+    if not request.user.vault:
         return HttpResponse('{"error":"User has no vault"}', mimetype=mime)    
         
     try:

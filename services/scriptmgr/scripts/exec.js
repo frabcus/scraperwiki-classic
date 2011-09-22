@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/local/bin/node
 
 var opts = require('opts');
 var options = [
@@ -7,6 +7,7 @@ var options = [
   {  long        : 'gid', value : true  },
   {  long        : 'uid', value : true  },
   {  long        : 'scrapername', value : true  },
+  {  long        : 'attachables', value : true  },
   {  long        : 'qs', value : true  },
   {  long        : 'runid', value : true  },
   {  long        : 'path', value : true  }
@@ -17,12 +18,15 @@ var sw = require('scraperwiki');
 var parts = opts.get('ds').split(':');
 sw.sqlite.init(parts[0], parts[1], opts.get("scrapername") || "", opts.get("runid") || "");
 
-/*
-scraperwiki.logfd = sys.stderr
-*/
+
 
 process.on('SIGXCPU', function () {
 	throw 'ScraperWiki CPU time exceeded';
+});
+
+
+process.on('uncaughtException', function (err) {
+	sw.dumpMessage( err );
 });
 
 try {
@@ -30,6 +34,7 @@ try {
 	require( opts.get('script') );
 } catch( err ) {
 	console.log( err );
+
 	/*
 		Need to better handle the stacktrace
 	    etb = scraperwiki.stacktrace.getExceptionTraceback(code)  

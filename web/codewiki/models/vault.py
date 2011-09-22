@@ -7,11 +7,7 @@ PLAN_TYPES = (
 )
 
 # One instance per user that has a premium account. 
-# If we now use userinstance.vault we are likely to get
-# an error so we'll need to  wrap each call in a 
-# Vault.DoesNotExist exception check instead. Have
-# implemented a static check here to do that and save a 
-# couple of lines
+# TODO: Constrain this so each user can only have one.
 class Vault(models.Model):
     user = models.OneToOneField(User)
 
@@ -21,16 +17,6 @@ class Vault(models.Model):
     # A list of the members who can access this vault.  This is 
     # distinct from the owner (self.user) of the vault.
     members = models.ManyToManyField(User, related_name='vaults')
-
-    @staticmethod
-    def for_user( user ):
-        try:
-            return user.vault
-        except Vault.DoesNotExist:
-            return None
-
-    def is_member( self, user ):
-        return user in self.members.all()
 
     def __unicode__(self):
         return "%s' %s vault created on %s" % (self.user.username, self.plan, self.created_at)

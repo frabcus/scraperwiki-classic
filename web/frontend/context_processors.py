@@ -28,7 +28,7 @@ def vault_info(request):
     
     # Accessing the request.user.vaults should be done in the specific template
     # where it is used rather than in every request
-    return { 'uservault': Vault.for_user(request.user) }
+    return { 'uservault': request.user.vault }
     
 
 # Taken from http://www.djangosnippets.org/snippets/1197/
