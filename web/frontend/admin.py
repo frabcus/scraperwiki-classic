@@ -31,10 +31,26 @@ class UserProfileInlines(admin.StackedInline):
     extra = 0
     can_delete = False
 
+
+def make_beta(modeladmin, request, queryset):
+    for x in queryset.all():
+        p = x.get_profile()
+        p.beta_user = True
+        p.save()
+make_beta.short_description = 'Mark user as a beta user'
+
+def remove_beta(modeladmin, request, queryset):
+    for x in queryset.all():
+        p = x.get_profile()
+        p.beta_user = False
+        p.save()
+remove_beta.short_description = 'Mark user as NOT beta user'
+
+
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'profile_name', 'vault_count', 'is_active', 'is_staff','is_beta_user', 'date_joined', 'last_login')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
-
+    actions = [make_beta, remove_beta]
 
     def is_beta_user(self, obj):
         return obj.get_profile().beta_user
