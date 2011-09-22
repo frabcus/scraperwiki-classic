@@ -13,7 +13,7 @@ PLAN_TYPES = (
 # implemented a static check here to do that and save a 
 # couple of lines
 class Vault(models.Model):
-    user = models.OneToOneField(User, primary_key=True)
+    user = models.OneToOneField(User)
 
     created_at = models.DateTimeField(auto_now_add=True)
     plan = models.CharField(max_length=32, choices=PLAN_TYPES)    
