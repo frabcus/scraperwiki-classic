@@ -416,6 +416,10 @@ body.frontpage #nav_inner li.frontpage {
 	background-image: url(../images/header_icon_oops.gif);
 }
 
+.vault #header_inner {
+	background-image: url(../images/header_icon_vault.gif);
+}
+
 #header_inner h2 {
 	font-size: 30px;
 	line-height: 36px;

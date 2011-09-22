@@ -5,7 +5,8 @@
 
 {% block header %}
 	<h2>Your vaults</h2>
-	<p>Information about your vaults and users who can access them</p>
+
+	<p>Information about your vaults and who can access them</p>
 {% endblock %}
 
 
@@ -14,7 +15,8 @@
 <div class="content">
 
 {% for vault in vaults.all %}
- <h2>{{ vault.user.username }}'s {{ vault.plan|title }} ( {{vault.name}} )</h2>
+{% if vault %}
+ <h2>{{ vault.user.username }}&rsquo;s {{ vault.plan|title }} Plan</h2>
 
 	{% if vault.code_objects %}
 	 <h3>Scripts</h3>
@@ -57,6 +59,19 @@
 </div>
 
 <hr/>
+{% endfor %}
+
+{% if request.user.vaults.count %}
+<div id="shared_vaults">	
+    <h2>Shared vaults you can access</h2>
+	<ul>
+	{% for v in request.user.vaults.all %}
+		<li>
+			<a href="{% url vault v.user.username %}">{{ v.user.username }}'s vault</a>
+		</li>
+	{% endfor %}
+	</ul>
+</div>
 {% endfor %}
 
 {% endblock %}
