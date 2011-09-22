@@ -24,21 +24,34 @@ process.on('SIGXCPU', function () {
 	throw 'ScraperWiki CPU time exceeded';
 });
 
-
 process.on('uncaughtException', function (err) {
 	sw.dumpMessage( err );
 });
 
+var scriptfile = opts.get('script');
 try {
 	// Load and run the script provided to us
-	require( opts.get('script') );
+	require( scriptfile );
 } catch( err ) {
-	console.log( err );
+	// parse err.stack for nice clean presentation. We still need line 
+	// numbers adding here.
+	var stack = [];
+	var lines = err.stack.split('\n');
 
-	/*
-		Need to better handle the stacktrace
-	    etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
-	    assert etb.get('message_type') == 'exception'
-	    scraperwiki.dumpMessage(etb)
-	*/
+	// Get line number from lines[1] which looks a bit like
+	// at Object.<anonymous> (/private/tmp/script.js:3:9)
+	var linenum = lines[1].match(/\d+/)[0];
+
+	stack.push( {"duplicates": 0, "linetext": lines[0].trim(), "file": "<string>", "linenumber": parseInt(linenum)} )
+	
+	for ( var p = 1; p < lines.length; p++ ) {
+		var m = lines[p].trim();
+		if ( m.length > 0 )
+			stack.push( { "file": m, "linetext" : m, "linenumber": parseInt(linenum)}  );
+	}
+	
+	var result = { "message_type": "exception", 
+"linenumber": parseInt(linenum),
+				   "stackdump": stack };	
+	sw.dumpMessage( JSON.stringify(result) );    
 }
