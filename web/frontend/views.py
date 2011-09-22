@@ -469,8 +469,7 @@ def view_vault(request, username=None):
     if username is None:
         # Viewing vault for current user.
         vault = Vault.for_user( request.user )
-        if not vault:
-            return HttpResponseRedirect( reverse("dashboard") )
+        # This might be none if we are just a member of other vaults
     else:
         # Viewing another users vault, if we are a member we can 
         # see it (for now), otherwise not.
@@ -485,8 +484,11 @@ def view_vault(request, username=None):
         
         
     context['vault'] = vault
-    context['members'] = vault.members.all().order_by('username')
-
+    if vault:
+        context['members'] = vault.members.all().order_by('username')
+    else:
+        context['members'] = None
+        
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))
 

@@ -12,48 +12,61 @@
 {% block content %}
 
 <div class="content">
+ {% if request.user.vaults.count %}		
+ <h2>Vaults you are a member of</h2>
+	<ul>
+	{% for v in request.user.vaults.all %}
+		<li>
+			<a href="{% url vault v.user.username %}">{{ v.user.username }}'s vault</a>
+		</li>
+	{% endfor %}
+	</ul>	
+ {% endif %}
+
+
+{% if vault %}
+ <h2>{{ vault.user.username }}'s {{ vault.plan|title }} Plan</h2>
+
+	{% if vault.code_objects %}
+	 <h3>Scripts</h3>
+	 <ul>
+		{% for s in vault.code_objects.all %}
+			<li>			
+				<a href="{% url code_overview s.wiki_type,s.short_name %}">{{ s.short_name }} </a>
+			</li>
+		{% endfor %}
+	 </ul>
+	{% endif %}
+
+	{% ifequal vault.user request.user %}
+		 <h3>Members</h3>
+		 <ul>
+			{% for m in members %}
+				<li>			
+					{% show_gravatar m 'medium' %}
+					<a href="{% url profiles_profile_detail m.username %}">{{ m.get_profile.name }} ({{m.username}})</a>
+					<a href="{% url vault_user m.username,'remove' %}">remove</a>
+				</li>
+			{% endfor %}
+		 </ul>
 	
- <h2>{{ vault.plan|title }} Plan</h2>
-
-{% if vault.code_objects %}
- <h3>Scripts</h3>
- <ul>
-	{% for s in vault.code_objects.all %}
-		<li>			
-			<a href="{% url code_overview s.wiki_type,s.short_name %}">{{ s.short_name }} </a>
-		</li>
-	{% endfor %}
- </ul>
-{% endif %}
-
-
- <h3>Members</h3>
- <ul>
-	{% for m in members %}
-		<li>			
-			{% show_gravatar m 'medium' %}
-			<a href="{% url profiles_profile_detail m.username %}">{{ m.get_profile.name }} ({{m.username}})</a>
-			<a href="{% url vault_user m.username,'remove' %}">remove</a>
-		</li>
-	{% endfor %}
- </ul>
-
-
-    <div id="addneweditor">
-      <span class="hide">
-        Editor username:
-        <input type="text" class="text">
-        <input type="button" value="Cancel" class="cancelbutton">
-        <input type="button" value="Add" class="addbutton">
-      </span>
-      <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new member
-        <img id="contributors_loading" src="{{ MEDIA_URL }}images/load.gif" style="display: none">
-      </a>
-    </div> 
-    <div id="contributorserror" style="display: none">
-        None
-    </div>
-
+		    <div id="addneweditor">
+	      <span class="hide">
+	        Editor username:
+	        <input type="text" class="text">
+	        <input type="button" value="Cancel" class="cancelbutton">
+	        <input type="button" value="Add" class="addbutton">
+	      </span>
+	      <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new member
+	        <img id="contributors_loading" src="{{ MEDIA_URL }}images/load.gif" style="display: none">
+	      </a>
+	    </div> 
+	    <div id="contributorserror" style="display: none">
+	        None
+	    </div>
+		{% endifequal %}
 </div>
+
+{% endif %}
 
 {% endblock %}

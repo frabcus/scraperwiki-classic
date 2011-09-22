@@ -34,7 +34,18 @@ class ViewAdmin(CodeAdmin):
     search_fields = ('title', 'short_name')
     actions = [mark_featured, mark_unfeatured]
 
+class VaultAdmin(admin.ModelAdmin):
+    """
+    Administration for a vault object, not sure yet whether we should hide
+    the membership list so that we (scraperwiki) can't see it.
+    """
+    list_display = ('user', 'plan', 'created_at')
+    list_filter = ('plan',)
+    search_fields = ('user',)
+
+
 admin.site.register(Scraper, ScraperAdmin)
 admin.site.register(View, ViewAdmin)
+admin.site.register(Vault, VaultAdmin)
 admin.site.register(ScraperRunEvent)
 admin.site.register(CodePermission)

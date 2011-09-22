@@ -121,7 +121,7 @@ class Code(models.Model):
     
     # Each code object can be contained in a vault, and a reference to that vault is maintained
     # here
-    vault = models.ForeignKey( Vault, related_name='code_objects', null=True, blank=True )
+    vault = models.ForeignKey( Vault, related_name='code_objects', null=True, blank=True, on_delete=models.SET_NULL )
 
     def __init__(self, *args, **kwargs):
         super(Code, self).__init__(*args, **kwargs)

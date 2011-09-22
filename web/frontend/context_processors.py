@@ -24,7 +24,7 @@ def vault_info(request):
     
     # TODO: Cache vault info for user
     if not request.user.is_authenticated():
-        return None
+        return {}
     
     # Accessing the request.user.vaults should be done in the specific template
     # where it is used rather than in every request
