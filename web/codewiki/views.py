@@ -9,7 +9,6 @@ from django.contrib.auth.models import User
 from django.views.decorators.http import condition
 from django.shortcuts import get_object_or_404
 
-import textile
 from django.conf import settings
 
 from managers.datastore import DataStore
@@ -396,7 +395,7 @@ def view_admin(request, short_name):
     element_id = request.POST.get('id', None)
     if element_id == 'divAboutScraper':
         view.set_docs(request.POST.get('value', None), request.user)
-        response_text = textile.textile(view.description)
+        response_text = view.description_ashtml()
 
     if element_id == 'hCodeTitle':
         view.title = request.POST.get('value', None)
@@ -416,7 +415,7 @@ def scraper_admin(request, short_name):
     element_id = request.POST.get('id', None)
     if element_id == 'divAboutScraper':
         scraper.set_docs(request.POST.get('value', None), request.user)
-        response_text = textile.textile(scraper.description)
+        response_text = scraper.description_ashtml()
         
     if element_id == 'hCodeTitle':
         scraper.title = request.POST.get('value', None)
@@ -470,8 +469,11 @@ def scraper_delete_scraper(request, wiki_type, short_name):
 
 
 
+    # this is for the purpose of editing the description, so must be controlled as it has secret password environment settings
 def raw_about_markup(request, wiki_type, short_name):
-    scraper = getscraperor404(request, short_name, "getdescription")
+    scraper = getscraperorresponse(request, wiki_type, short_name, None, "getrawdescription")
+    if isinstance(scraper, HttpResponse):  
+        return HttpResponse("sorry, you do not have permission to edit the description of this scraper", mimetype='text/plain')
     return HttpResponse(scraper.description, mimetype='text/x-web-textile')
 
 def follow(request, short_name):

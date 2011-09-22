@@ -116,7 +116,8 @@
 
 <div class="content full" id="scraper_about">
     <h2>About this scraper 
-        {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}
+        {% if user.is_authenticated %}
+          <a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}
 {%comment%}
         {% if user.is_staff %}
           <span class="staff">
@@ -133,7 +134,7 @@
     <div class="text_wiki">
         <div id="divAboutScraper">
         {% if scraper.description %}
-            {{ scraper.description|textile }}
+            {{ scraper.description_ashtml|safe }}
         {% else %}
             <p>This scraper has no description. {% if user.is_authenticated %}<a href="#" id="aEditAboutScraperNew">Would you like to add one?</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>{% endif %}</p>
         {% endif %}</div>

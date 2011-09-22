@@ -21,7 +21,7 @@ file that you edit, learn and run entirely from your browser. </p>
         <a class="staff" href="{% url editor_edit scraper.wiki_type scraper.short_name %}">edit</a>
       {% endif %}
     </dt>
-    <dd>{{scraper.description}}</dd>
+    <dd>{{scraper.description_ashtml|safe}}</dd>
     {% endfor %}
   </dl>
   {% endfor %}

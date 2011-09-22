@@ -14,6 +14,7 @@ from codewiki import vc
 from codewiki import util
 from codewiki.models.vault import Vault
 from frontend.models import UserProfile
+import textile
 
 try:
     import json
@@ -52,9 +53,9 @@ PRIVACY_STATUSES = (
 
 STAFF_ACTIONS = set(["run_scraper"])
 CREATOR_ACTIONS = set(["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ])
-EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor", "change_attachables", "attachable_add"])
+EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor", "change_attachables", "attachable_add", "getrawdescription"])
 STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let staff also do anything a creator / editor can, except save code is a bit rude (for now!)
-VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ])
+VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo" ])
 
 
 def scraper_search_query(user, query, apikey=None):
@@ -189,6 +190,9 @@ class Code(models.Model):
                 return True
         return False
 
+    def clean_description(self):
+        self.description
+
     def set_guid(self):
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
@@ -315,6 +319,10 @@ class Code(models.Model):
 
     class Meta:
         app_label = 'codewiki'
+
+    # the only reference to textile
+    def description_ashtml(self):
+        return textile.textile(self.description)
 
 
     # all authorization to go through here

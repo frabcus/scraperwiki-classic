@@ -80,7 +80,7 @@
         {% endif %}
     </p>
     
-    <p class="description">{{ code.description|textile|striptags|truncatewords:75 }}</p>
+    <p class="description">{{ code.description_ashtml|striptags|truncatewords:75 }}</p>
     
 </li>
 
