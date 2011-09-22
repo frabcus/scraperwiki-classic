@@ -469,29 +469,24 @@ def view_vault(request, username=None):
     
     if username is None:
         # Viewing vault for current user.
-        vault = request.user.vault
+        vaults = request.user.vaults
         # This might be none if we are just a member of other vaults
-    else:
+#    else:
         # Viewing another users vault, if we are a member we can 
         # see it (for now), otherwise not.
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            logging.debug('Failed to find user with username %s ' % (username,) )
-            return HttpResponseRedirect( reverse("dashboard") )            
+#        try:
+#            user = User.objects.get(username=username)
+#        except User.DoesNotExist:
+#            logging.debug('Failed to find user with username %s ' % (username,) )
+#            return HttpResponseRedirect( reverse("dashboard") )            
         
-        vault = user.vault
-        if not vault or not vault in request.user.vaults.all():
-            logging.debug('This vault does not belong to this user and they are not a member' )            
-            return HttpResponseRedirect( reverse("dashboard") )                        
+#        vaults = user.vaults
+#        if not vaults or not request.user in vaults
+#            logging.debug('This vault does not belong to this user and they are not a member' )            
+#            return HttpResponseRedirect( reverse("dashboard") )                        
         
         
-    context['vault'] = vault
-    if vault:
-        context['members'] = vault.members.all().order_by('username')
-    else:
-        context['members'] = None
-        
+    context['vaults'] = vaults
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))
 
