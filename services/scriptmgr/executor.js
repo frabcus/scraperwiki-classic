@@ -251,7 +251,6 @@ function execute(http_req, http_res, raw_request_data) {
 				};
 				
                 util.log.debug( 'spawning ' + exe + ' args '  + args);
-                util.log.debug({env:environ})
 				e = spawn(exe, args, { env: environ });
 				script.pid = e.pid;
 				script.ip = '127.0.0.1';
