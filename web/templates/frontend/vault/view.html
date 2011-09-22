@@ -15,6 +15,18 @@
 	
  <h2>{{ vault.plan|title }} Plan</h2>
 
+{% if vault.code_objects %}
+ <h3>Scripts</h3>
+ <ul>
+	{% for s in vault.code_objects.all %}
+		<li>			
+			<a href="{% url code_overview s.wiki_type,s.short_name %}">{{ s.short_name }} </a>
+		</li>
+	{% endfor %}
+ </ul>
+{% endif %}
+
+
  <h3>Members</h3>
  <ul>
 	{% for m in members %}

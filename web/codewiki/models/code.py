@@ -12,6 +12,7 @@ import hashlib
 
 from codewiki import vc
 from codewiki import util
+from codewiki.models.vault import Vault
 from frontend.models import UserProfile
 
 try:
@@ -118,6 +119,9 @@ class Code(models.Model):
     # This should be regeneratable on demand by any editor/owner of the scraper (if it is private)
     access_apikey = models.CharField(max_length=64, blank=True, null=True)
     
+    # Each code object can be contained in a vault, and a reference to that vault is maintained
+    # here
+    vault = models.ForeignKey( Vault, related_name='code_objects', null=True, blank=True )
 
     def __init__(self, *args, **kwargs):
         super(Code, self).__init__(*args, **kwargs)

@@ -33,7 +33,7 @@ class Vault(models.Model):
         return user in self.members.all()
 
     def __unicode__(self):
-        return "%s vault created on %s" % (self.plan, self.created_at)
+        return "%s' %s vault created on %s" % (self.user.username, self.plan, self.created_at)
 
     class Meta:
         app_label = 'codewiki'

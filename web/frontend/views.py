@@ -486,7 +486,7 @@ def view_vault(request, username=None):
         
     context['vault'] = vault
     context['members'] = vault.members.all().order_by('username')
-    
+
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))
 

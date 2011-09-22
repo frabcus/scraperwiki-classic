@@ -66,6 +66,10 @@
 					<a href="{% url profiles_profile_detail user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
 					<ul>
 						<li class="dashboard"><a href="{% url dashboard %}">Your dashboard</a></li>
+						{% if uservault %}
+						<li class="vault"><a href="{% url vault %}">Your vault</a></li>
+						{% endif %}
+						
 						<li class="profile"><a href="{% url profiles_profile_detail user.username %}">Your profile</a></li>
 						<li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
 						<li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>

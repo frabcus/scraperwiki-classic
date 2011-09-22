@@ -15,6 +15,21 @@ enable_linebreaks_regex = re.compile(",(?! )")
 def enable_linebreaks(str):
     return enable_linebreaks_regex.sub(",<wbr>", str)
 
+def vault_info(request):
+    """
+    Sets vault info for the current user if it exists, ideally we could cache
+    this somewhere.
+    """
+    from codewiki.models import Vault
+    
+    # TODO: Cache vault info for user
+    if not request.user.is_authenticated():
+        return None
+    
+    # Accessing the request.user.vaults should be done in the specific template
+    # where it is used rather than in every request
+    return { 'uservault': Vault.for_user(request.user) }
+    
 
 # Taken from http://www.djangosnippets.org/snippets/1197/
 def site(request):
