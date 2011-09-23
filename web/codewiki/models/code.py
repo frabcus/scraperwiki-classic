@@ -207,16 +207,18 @@ class Code(models.Model):
                 return owner[0]
         return None
 
+        # this function to be deleted
     def requesters(self):
         if self.pk:
             requesters = self.users.filter(usercoderole__role='requester')
         return requesters        
 
     def attachable_scraperdatabases(self):
-        return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all() ]
+        return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all()  if cp.permitted_object.privacy_status != "deleted" ]
 
+    # could filter for the private scrapers which this user is allowed to see!
     def attachfrom_scrapers(self):
-        return [ cp.code  for cp in CodePermission.objects.filter(permitted_object=self).all() ]
+        return [ cp.code  for cp in CodePermission.objects.filter(permitted_object=self).all()  if cp.permitted_object.privacy_status not in ["deleted", "private"] ]
         
 
     def add_user_role(self, user, role='owner'):
@@ -324,22 +326,25 @@ class Code(models.Model):
 
     # the only remaining reference to textile
     def description_ashtml(self):
+        cdesc = self.description_safepart()
         if re.search("__BEGIN", self.description):
-            cdesc = re.sub('(?s)__BEGIN_QSENVVARS__.*?__END_QSENVVARS__', '', self.description)
-            cdesc = re.sub('(?s)__BEGIN_ENVVARS__.*?__END_ENVVARS__', '', cdesc)
-            envvars = self.get_environment_variables()
+            envvars = self.description_envvars()
             nqsenvvars = len(re.findall("=", envvars.get("QUERY_STRING", "")))
             if nqsenvvars:
                 cdesc = "%s\n\n_Has %d secret query-string environment variable%s._" % (cdesc, nqsenvvars, (nqsenvvars>1 and "s" or ""))
-        else:
-            cdesc = self.description
-        return textile.textile(cdesc)
 
+        return textile.textile(cdesc)   # wikicreole at the very least here!!!
+
+    def description_safepart(self):   # used in the api output
+        cdesc = re.sub('(?s)__BEGIN_QSENVVARS__.*?__END_QSENVVARS__', '', self.description)
+        cdesc = re.sub('(?s)__BEGIN_ENVVARS__.*?__END_ENVVARS__', '', cdesc)
+        return cdesc 
+        
     # You can encode the query string as individual elements, or as one block.  
     # If controller/node can drop in environment variables directly, then we can consider a general purpose adding of 
     # such environment variables not through the QUERY_STRING interface which requires decoding in the scraper.
     # Would be more traditional to obtain the values as os.getenv("TWITTER_API_KEY") than dict(cgi.parse_qsl(os.getenv("QUERY_STRING")))["TWITTER_API_KEY"]
-    def get_environment_variables(self):
+    def description_envvars(self):
         qsenvvars = { }
         for lines in re.findall('(?s)__BEGIN_QSENVVARS__(.*?)__END_QSENVVARS__', self.description):
             for line in lines.split("\n"):
