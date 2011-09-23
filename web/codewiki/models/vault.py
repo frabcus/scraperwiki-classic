@@ -21,7 +21,7 @@ class Vault(models.Model):
     members = models.ManyToManyField(User, related_name='vault_membership')
 
     def __unicode__(self):
-        return "%s' %s vault created on %s" % (self.user.username, self.plan, self.created_at)
+        return "%s' %s vault (created on %s)" % (self.user.username, self.plan, self.name)
 
     class Meta:
         app_label = 'codewiki'

@@ -1,7 +1,7 @@
 {% extends "frontend/base.html" %}
 {% load gravatar %}
 
-{% block title %}Your vault{% endblock %}
+{% block title %}Your vaults{% endblock %}
 
 {% block header %}
 	<h2>Your vaults</h2>
@@ -14,12 +14,15 @@
 
 <div class="content">
 
+{% if vaults.count %}
+<div id="my_vaults">
+    <h2>You own {{ vaults.count }} vault{{ request.user.vault_membership.count|pluralize }}:</h2>
 {% for vault in vaults.all %}
-{% if vault %}
- <h2>{{ vault.user.username }}&rsquo;s {{ vault.plan|title }} Plan</h2>
+    <div class="vault">
+ <h3>{{ vault.name }} ({{ vault.plan|lower }} plan)</h3>
 
 	{% if vault.code_objects %}
-	 <h3>Scripts</h3>
+	 <h4>This vault contains {{ vault.code_objects.count }} item{{ vault.code_objects.count|pluralize }}</h4>
 	 <ul>
 		{% for s in vault.code_objects.all %}
 			<li>			
@@ -30,7 +33,7 @@
 	{% endif %}
 
 	{% ifequal vault.user request.user %}
-		 <h3>Members</h3>
+		 <h4>{{ vault.members.count }} other {{ vault.members.count|pluralize:"person,people" }} can access this vault</h4>
 		 <ul>
 			{% for m in vault.members.all %}
 				<li>			
@@ -41,7 +44,7 @@
 			{% endfor %}
 		 </ul>
 	
-		    <div id="addneweditor">
+	     <div id="addneweditor">
 	      <span class="hide">
 	        Editor username:
 	        <input type="text" class="text">
@@ -57,21 +60,35 @@
 	    </div>
 		{% endifequal %}
 </div>
-
 <hr/>
 {% endfor %}
-
-{% if request.user.vaults.count %}
-<div id="shared_vaults">	
-    <h2>Shared vaults you can access</h2>
-	<ul>
-	{% for v in request.user.vaults.all %}
-		<li>
-			<a href="{% url vault v.user.username %}">{{ v.user.username }}'s vault</a>
-		</li>
-	{% endfor %}
-	</ul>
 </div>
-{% endfor %}
+{% endif %}
+
+{% if request.user.vault_membership.count %}
+<div id="shared_vaults">	
+    <h2>You can access {{ request.user.vault_membership.count }} shared vault{{ request.user.vault_membership.count|pluralize }}:</h2>
+	
+	{% for v in request.user.vault_membership.all %}
+	<div class="vault">
+	<h3>{{ v.name }} ({{ v.user.username }}&rsquo;s vault)</h3>
+
+    	{% if v.code_objects %}
+    	 <h4>This vault contains {{ v.code_objects.count }} item{{ v.code_objects.count|pluralize }}</h4>
+    	 <ul>
+    		{% for s in v.code_objects.all %}
+    			<li>			
+    				<a href="{% url code_overview s.wiki_type,s.short_name %}">{{ s.short_name }} </a>
+    			</li>
+    		{% endfor %}
+    	 </ul>
+    	 {% endif %}
+	</div>
+	{% endfor %}
+</div>
+{% endif%}
+
+</div>
+
 
 {% endblock %}
