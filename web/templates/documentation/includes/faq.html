@@ -25,6 +25,7 @@
            <li><a href="#editor">Is there an editor other than the CodeMirror one?</a></li>
            <li><a href="#rollback">How do I revert to an earlier version of my code?</a></li>
            <li><a href="#viewsbanner">When do views show a "powered by ScraperWiki" banner?</a></li>
+           <li><a href="#files">Can I save files, and if so where?</a></li>
      </ul>
      <h2>Licensing questions</h2>
      <ul>
@@ -243,6 +244,21 @@ print urllib.urlopen(url).read()
                 </p>
                 <p>If you are finding the banners annoying in a particular set of cases, please get in 
                 touch. At some point we'll add ways to vary the banner for different circumstances.</p>
+           </dd>
+
+
+           <dt id="files">Can I save files, and if so where?</dt>
+           <dd>
+               <p>Yes, but all files are temporary. You can save them either in
+               /tmp, or in the user's home directory (/home/scriptrunner). The
+               current directory starts out as the home directory.</p>
+               <p>This only works for temporary downloads, as the scripts run
+               in a clean environment each time so data can't leak between
+               scripts. You must save any permanent data in the datastore, or
+               elsewhere on the web.</p>
+               <p>Feel free to spawn external commands and download arbitary extra
+               binaries or code applications. It'll be slow, so if there is
+               something you use a lot ask us to install it permanently.</p>
            </dd>
 
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
