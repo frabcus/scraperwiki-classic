@@ -116,7 +116,13 @@
 
 <div class="content full" id="scraper_about">
     <h2>About this scraper 
-        {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}
+        {% if user.is_authenticated %}
+            {% if user_edits_it %}
+                <a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>
+            {% endif %}
+        {% else %}
+            <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>
+        {% endif %}
 {%comment%}
         {% if user.is_staff %}
           <span class="staff">
@@ -135,7 +141,13 @@
         {% if scraper.description %}
             {{ scraper.description|textile }}
         {% else %}
-            <p>This scraper has no description. {% if user.is_authenticated %}<a href="#" id="aEditAboutScraperNew">Would you like to add one?</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>{% endif %}</p>
+            <p>This scraper has no description. {% if user.is_authenticated %}
+                {% if user_edits_it %}
+                    <a href="#" id="aEditAboutScraperNew">Would you like to add one?</a>
+                {% endif %}
+            {% else %}
+                <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>
+            {% endif %}</p>
         {% endif %}</div>
     </div>
 </div>
@@ -163,32 +175,15 @@
     <h3>Contributors</h3>
     {% include 'codewiki/includes/contributors.html' %}
 
-    <h3>License {% if user.is_authenticated %}<a href="#" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
+    <h3>License {% if user.is_authenticated and user_edits_it %}<a href="#" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
     This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.scraper.license}}</span>
     <p>  </p>
 </div>
 
-{% if user.is_staff %}
-<div class="content col left staff" id="scraper_attachables">
-    <h3>Attachable databases</h3>
-    {% include 'codewiki/includes/database_attachables.html' %}
-</div>
-{% endif %}
-
-{% if user.is_staff and domainscrapes %}
-<div class="content col left staff" id="scraper_domains">
-    <h3>Domains scraped</h3>
-    <ul id="databaseattachfromlist">
-      {% for domainscrape in domainscrapes %}
-        <li><a href="{{domainscrape.domain}}">{{domainscrape.domain}}</a> {{domainscrape.pages_scraped}} pages, {{domainscrape.bytes_scraped}} bytes</li>
-      {% endfor %}
-    </ul>
-</div>
-{% endif %}
-
-
 <div class="content col right" id="scraper_schedule">
-    <h3>Schedule {% if user.is_authenticated %}<a href="#" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
+    <h3>Schedule {% if user.is_authenticated and user_edits_it %}
+        <a href="#" id="aEditSchedule" class="edit">[edit schedule]</a>
+    {% endif %}</h3>
     <p>
         This scraper 
         {% if scraper.last_runevent %}
@@ -211,6 +206,24 @@
     {% include 'codewiki/includes/admin_controls.html' %}
 
 </div>
+
+{% if user.is_staff %}
+<div class="content col left staff" id="scraper_attachables">
+    <h3>Attachable databases</h3>
+    {% include 'codewiki/includes/database_attachables.html' %}
+</div>
+{% endif %}
+
+{% if user.is_staff and domainscrapes %}
+<div class="content col left staff" id="scraper_domains">
+    <h3>Domains scraped</h3>
+    <ul id="databaseattachfromlist">
+      {% for domainscrape in domainscrapes %}
+        <li><a href="{{domainscrape.domain}}">{{domainscrape.domain}}</a> {{domainscrape.pages_scraped}} pages, {{domainscrape.bytes_scraped}} bytes</li>
+      {% endfor %}
+    </ul>
+</div>
+{% endif %}
 
 <br class="clear"/>
 

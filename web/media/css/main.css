@@ -2317,7 +2317,11 @@ div.tab_tools form {
 
 #scraper_about h2 .edit,
 #divScraperTags h2 .edit,
-#scraper_views h2 .edit {
+#scraper_views h2 .edit,
+#scraper_contributors h3 .edit,
+#scraper_attachables h3 .edit,
+#scraper_domains h3 .edit,
+#scraper_schedule h3 .edit {
 	float: right;
 	margin-top: 5px;
 	font-weight: normal !important;
@@ -4728,9 +4732,8 @@ body.fullscreen #embedinstructions textarea {
 /* edit links */
 
 a.edit {
-	font-variant: normal!important;
+	font-variant: normal !important;
 	font-size: 0.8em;
-	font-weight: bold!important;
 }
 
 h2 a.edit {
