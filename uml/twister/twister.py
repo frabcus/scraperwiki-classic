@@ -661,7 +661,7 @@ class RunnerFactory(protocol.ServerFactory):
             sclient.savecode_authorized = False
             sclient.scraperlanguage = scraperoverdue.get('language', '')
             code = scraperoverdue.get('code', '')
-            urlquery = ""
+            urlquery = scraperoverdue.get('envvars', {}).get("QUERY_STRING", "")
 
             self.clientConnectionMade(sclient)  # allocates the client number
             self.scheduledrunners[scrapername] = sclient

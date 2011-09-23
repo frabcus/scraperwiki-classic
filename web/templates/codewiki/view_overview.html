@@ -46,7 +46,7 @@
     <div class="text_wiki">
         <div id="divAboutScraper">
         {% if scraper.description %}
-            {{ scraper.description|textile }}
+            {{ scraper.description_ashtml|safe }}
         {% else %}
             <p>This view has no description. {% if user.is_authenticated %}
                 {% if user_edits_it %}

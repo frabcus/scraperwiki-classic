@@ -176,7 +176,7 @@ def out_rss2(dataproxy, scraper):
         items.append(rssitem)
 
     link = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
-    rss = PyRSS2Gen.RSS2(title=scraper.title, link=link, description=scraper.description, lastBuildDate=datetime.datetime.now(), items=items)
+    rss = PyRSS2Gen.RSS2(title=scraper.title, link=link, description=scraper.description_safepart(), lastBuildDate=datetime.datetime.now(), items=items)
 
     fout = StringIO()
     rss.write_xml(fout)
@@ -319,24 +319,21 @@ def scraper_search_handler(request):
             if ownername:
                 res['title'] = "%s / %s" % (ownername, scraper.title)
         if 'description' not in quietfields:
-            res['description'] = scraper.description
+            res['description'] = scraper.description_safepart()
         res['created'] = scraper.created_at.isoformat()
         res['privacy_status'] = scraper.privacy_status
         res['language'] = scraper.language
         
-        # extra data added to the overdue request kind for direct use
+        # extra data added to the overdue request kind so that twister has everything it needs to get on with it
+        # and doesn't need to call back for further information
         if boverduescraperrequest:
             res['overdue_proportion'] = float(scraper.overdue_proportion)
             vcsstatus = scraper.get_vcs_status(-1)
             res['code'] = vcsstatus["code"]
             res["rev"] = vcsstatus.get("prevcommit", {}).get("rev", -1)
             res['guid'] = scraper.guid
-
-            attachables = [ ]
-            for cp in CodePermission.objects.filter(code=scraper).all():
-                if cp.permitted_object.privacy_status != "deleted":
-                    attachables.append(cp.permitted_object.short_name)
-            res["attachables"] = attachables
+            res["attachables"] = [ ascraper.short_name  for ascraper in scraper.attachable_scraperdatabases() ]
+            res["envvars"] = scraper.description_envvars()
             
         result.append(res)
         if len(result) > maxrows:
@@ -594,7 +591,7 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
     info['created']     = scraper.created_at.isoformat()
     
     info['title']       = scraper.title
-    info['description'] = scraper.description
+    info['description'] = scraper.description_safepart()
     info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
     info['wiki_type']   = scraper.wiki_type
     info['privacy_status'] = scraper.privacy_status

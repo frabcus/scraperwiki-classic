@@ -1,6 +1,8 @@
 import datetime
 import time
 import os
+import re
+import urllib
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -14,6 +16,7 @@ from codewiki import vc
 from codewiki import util
 from codewiki.models.vault import Vault
 from frontend.models import UserProfile
+import textile   # yuk
 
 try:
     import json
@@ -52,9 +55,9 @@ PRIVACY_STATUSES = (
 
 STAFF_ACTIONS = set(["run_scraper"])
 CREATOR_ACTIONS = set(["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ])
-EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor", "change_attachables", "attachable_add"])
+EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor", "change_attachables", "attachable_add", "getrawdescription"])
 STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let staff also do anything a creator / editor can, except save code is a bit rude (for now!)
-VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ])
+VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo" ])
 
 
 def scraper_search_query(user, query, apikey=None):
@@ -189,6 +192,9 @@ class Code(models.Model):
                 return True
         return False
 
+    def clean_description(self):
+        self.description
+
     def set_guid(self):
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
@@ -201,16 +207,18 @@ class Code(models.Model):
                 return owner[0]
         return None
 
+        # this function to be deleted
     def requesters(self):
         if self.pk:
             requesters = self.users.filter(usercoderole__role='requester')
         return requesters        
 
     def attachable_scraperdatabases(self):
-        return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all() ]
+        return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all()  if cp.permitted_object.privacy_status != "deleted" ]
 
+    # could filter for the private scrapers which this user is allowed to see!
     def attachfrom_scrapers(self):
-        return [ cp.code  for cp in CodePermission.objects.filter(permitted_object=self).all() ]
+        return [ cp.code  for cp in CodePermission.objects.filter(permitted_object=self).all()  if cp.permitted_object.privacy_status not in ["deleted", "private"] ]
         
 
     def add_user_role(self, user, role='owner'):
@@ -315,6 +323,47 @@ class Code(models.Model):
 
     class Meta:
         app_label = 'codewiki'
+
+    # the only remaining reference to textile
+    def description_ashtml(self):
+        cdesc = self.description_safepart()
+        if re.search("__BEGIN", self.description):
+            envvars = self.description_envvars()
+            nqsenvvars = len(re.findall("=", envvars.get("QUERY_STRING", "")))
+            if nqsenvvars:
+                cdesc = "%s\n\n_Has %d secret query-string environment variable%s._" % (cdesc, nqsenvvars, (nqsenvvars>1 and "s" or ""))
+
+        return textile.textile(cdesc)   # wikicreole at the very least here!!!
+
+    def description_safepart(self):   # used in the api output
+        cdesc = re.sub('(?s)__BEGIN_QSENVVARS__.*?__END_QSENVVARS__', '', self.description)
+        cdesc = re.sub('(?s)__BEGIN_ENVVARS__.*?__END_ENVVARS__', '', cdesc)
+        return cdesc 
+        
+    # You can encode the query string as individual elements, or as one block.  
+    # If controller/node can drop in environment variables directly, then we can consider a general purpose adding of 
+    # such environment variables not through the QUERY_STRING interface which requires decoding in the scraper.
+    # Would be more traditional to obtain the values as os.getenv("TWITTER_API_KEY") than dict(cgi.parse_qsl(os.getenv("QUERY_STRING")))["TWITTER_API_KEY"]
+    def description_envvars(self):
+        qsenvvars = { }
+        for lines in re.findall('(?s)__BEGIN_QSENVVARS__(.*?)__END_QSENVVARS__', self.description):
+            for line in lines.split("\n"):
+                sline = line.strip()
+                if sline:
+                    psline = sline.partition("=")
+                    qsenvvars[psline[0].strip()] = psline[2].strip()
+        envvars = { }
+        if qsenvvars:
+            envvars["QUERY_STRING"] = urllib.urlencode(qsenvvars)
+        for lines in re.findall('(?s)__BEGIN_ENVVARS__(.*?)__END_ENVVARS__', self.description):
+            for line in lines.split("\n"):
+                sline = line.strip()
+                if sline:
+                    psline = sline.partition("=")
+                    envvars[psline[0].strip()] = line[2].strip()
+        return envvars
+
+
 
 
     # all authorization to go through here
