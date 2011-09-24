@@ -1,68 +1,44 @@
-<p>Use <a href="http://lxml.de/lxmlhtml.html">lxml</a> when extracting data from HTML or XML files.</p>
+<p>The easiest and most familiar way to extract data from HTML web pages is to use
+"CSS selectors". These are part of the same rules which in web stylesheets are
+used to describe the spacing, colour and layout of web pages.</p>
+
+<p>For more details, read the <a href="http://lxml.de/lxmlhtml.html">lxml documentation</a>.</p>
 
 <h2>Getting started</h2>
 
-<p>Open the file and get the root node of the document &lt;html&gt;.</p>
-<code>import lxml.html
-root = lxml.html.parse("http://scraperwiki.com").getroot()
+<p>Grab the HTML web page, and parse the HTML using lxml.</p>
+
+<code>import scraperwiki
+import lxml.html
+html = scraperwiki.scrape("https://scraperwiki.com/")
+root = lxml.html.fromstring(html)
 </code>
 
-<p>Select all <b>&lt;a></b> elements that are inside <b>&lt;div class="featured"></b>.</p>
+<p>Select all <b>&lt;a></b> elements that are inside <b>&lt;div class="featured"></b>.
+This works the same way as CSS stylesheets or jQuery.</p>
 <code>for el in root.cssselect("div.featured a"):
     print el
 </code>
 
-<p>Convert an lxml element el to a string (root is itself an element).</p>
-<code>    print lxml.html.tostring(el)
-</code>
+<p>Print out all of a tag and its contents as HTML.</p>
+<code>    print lxml.html.tostring(el)</code>
 
-<h2>Parsing from a string</h2>
+<p>Read attributes, such as the target of the <b>&lt;a&gt;</b> tags.</p>
+<code>    print el.attrib['href']</code>
 
-<p>Alternatively you can build the node from a string.</p>
-<code>import urllib
-html = urllib.urlopen("http://scraperwiki.com").read()
-root = lxml.html.fromstring(html)
-</code>
-
-<p>This can be useful if you are getting a headache with the encoding situation where lxml needs to be forced to use Unicode.</p>
-
-<code>html = urllib2.urlopen("http://www.meclis.gov.az/?/az/deputat/229").read()
-root = lxml.html.fromstring(html.decode("utf8"))
-</code>
-
-<h2></h2>
-
-<h2>Finding data</h2>
-
-<p>The powerful cssselect command works in the same way as in CSS stylesheets or jQuery.</p>
-<code>eg = lxml.html.fromstring('&lt;h2>A thing &lt;b>goes boom&lt;/b> up &lt;i class="t">on &lt;em id="s">the tree&lt;/em>&lt;/i>&lt;/h2>')
-print eg.cssselect("i.t em#s")  # [ &lt;element em > ]
-</code>
-
-<p>Iterate down through the elements in the document and see the tags and attributes on each element.</p>
-<code>for el in root:
-    print el.tag
-    for el2 in el:
-        print "--", el2.tag, el2.attrib
-</code>
-
-<p>Navigate around the document</p>
-<code>eg = lxml.html.fromstring('&lt;h2>A thing &lt;b>goes boom&lt;/b> up &lt;i>on &lt;em>the tree&lt;/em>&lt;/i>&lt;/h2>')
-print eg[1].tag                # i
-print eg[1].getparent().tag    # h2
-print eg[1].getprevious().tag  # b
-print eg[1].getnext()          # None
-print eg[1].getchildren()      # [ &lt;element em > ]
+<p>Select the first <b>&lt;strong></b> element inside <b>&lt;div id="footer_inner"></b>.</p>
+<code>el = root.cssselect("div#footer_inner strong")[0]
+print el
 </code>
 
 <h2>Extracting text</h2>
 
-<p>The text contents of an element is both between the tags, and on the tail of the tag: "&lt;tag>text&lt;/tag>tail"</p>
+<p>The text contents of an element is both between the tags, and on the tail of the tag: <b>&lt;tag>text&lt;/tag>tail</b>.</p>
 <code>eg = lxml.html.fromstring('&lt;h2>A thing &lt;b>goes boom&lt;/b> up &lt;i>on &lt;em>the tree&lt;/em>&lt;/i>&lt;/h2>')
 print eg.text       # 'A thing '
 print eg[0].text    # 'goes boom'
 print eg[0].tail    # ' up '
-print eg.text_content # 'A thing goes boom up on the tree'
+print eg.text_content() # 'A thing goes boom up on the tree'
 </code>
 
 <p>Sometimes you have nearly pure text elements that still have &lt;i> and &lt;b> elements which you want to retain.  
@@ -79,6 +55,25 @@ Such an element can be extracted using a recursive function</p>
         if sel.tail:
             result.append(sel.tail)
     return "".join(result)
+print ctext(eg)
+</code>
+
+<h2>Finding data</h2>
+
+<p>Iterate down through the elements in the document and see the tags and attributes on each element.</p>
+<code>for el in root:
+    print el.tag
+    for el2 in el:
+        print "--", el2.tag, el2.attrib
+</code>
+
+<p>Navigate around the document</p>
+<code>eg = lxml.html.fromstring('&lt;h2>A thing &lt;b>goes boom&lt;/b> up &lt;i>on &lt;em>the tree&lt;/em>&lt;/i>&lt;/h2>')
+print eg[1].tag                # i
+print eg[1].getparent().tag    # h2
+print eg[1].getprevious().tag  # b
+print eg[1].getnext()          # None
+print eg[1].getchildren()      # [ &lt;element em > ]
 </code>
 
 

@@ -48,6 +48,7 @@ in SQL API gets the data out as JSON, CSV or RSS files.  -->
      <li class="doclink">{% doc_link_full 'LANG_csv_guide' language %} <span> Get data from comma-separated value spreadsheet files </span> </li>
      <li class="doclink">{% doc_link_full 'LANG_excel_guide' language %} <span> Get data from Excel spreadsheet files </span> </li>
      {% if user.is_staff %} 
+        <li class="doclink">{% doc_link_full 'LANG_css_guide' language %} <span> Extract data from HTML using CSS selectors </span> </li>
         <div class="staff">
             {% ifequal language 'python' %}
              <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">lxml copy &amp; paste guide</a></li> 
