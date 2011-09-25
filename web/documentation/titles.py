@@ -26,6 +26,7 @@ page_titles = {
     "python_csv_guide" : ("CSV reading guide","Getting data from comma-separated value files in Python"),
     "python_excel_guide" : ("Excel reading guide","Getting data from Excel files in Python"),
     "python_css_guide" : ("HTML parsing guide","Extract data from HTML using CSS selectors in Python"),
+    "python_time_place_guide" : ("Dates, times and places", "and geocoding from Python"),
     
     "php_intro_tutorial" : ("First scraper tutorial","How to use ScraperWiki for people who can already write PHP"),
     "php_datastore_guide" : ("Datastore copy & paste guide","A guide to the ScraperWiki SQL datastore for PHP programmers"),
