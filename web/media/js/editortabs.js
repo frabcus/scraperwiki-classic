@@ -376,14 +376,7 @@ function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blocked
         }
     }
 
-    if (blockedurl) 
-    {
-        sMessage = "The link " + blockedurl.substring(0,50) + " has been blocked. "; 
-        sMessage += "Click <a href=\"/whitelist/?url=" + blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
-        writeToConsole(sMessage, 'exceptionnoesc'); 
-    } 
-    else 
-        writeToConsole(exceptiondescription, 'exceptiondump'); 
+    writeToConsole(exceptiondescription, 'exceptiondump'); 
 }
 
 
