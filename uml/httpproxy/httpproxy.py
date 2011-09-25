@@ -66,12 +66,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         the base class constructor.
         """
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
-        
-        self.server.lock.acquire()
-        self.m_allowed = self.server.allowed[:]
-        self.m_blocked = self.server.blocked[:]
-        self.server.lock.release()
-        
+                
 
     def log_message (self, format, *args) :
 
@@ -87,41 +82,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
         sys.stderr.flush ()
 
-    def hostAllowed (self, path, scraperID) :
-
-        """
-        See if access to a specified host is allowed. These are specified as a list
-        of regular expressions stored in a file; the expressions will be anchored at
-        both start and finish so they must match the entire host. The file is named
-        from the IP address of the caller.
-
-        @type   path     : String
-        @param  path     : Hostname
-        @type   scraperID: String
-        @param  scraperID: Scraper identifier or None
-        @return          : True if access is allowed
-        """
-
-        import re
-        
-        if allowAll :
-            return True
-
-        allowed = False
-        if re.match("http://127.0.0.1[/:]", path):
-            allowed = True
-        
-        # first if it is the white-list
-        for allow in self.m_allowed :
-            if re.match(allow, path) :
-                allowed = True
-        
-        # but not if it is in the black-list
-        for block in self.m_blocked :
-            if re.match(block, path) :
-                allowed = False
-        
-        return allowed
 
     def _connect_to (self, scheme, netloc) :
 
@@ -294,10 +254,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         scraperID, runID, cache = self.ident ()
 
 
-        if not self.hostAllowed (self.path, scraperID) :
-            self.send_error (403, self.blockmessage(self.path))
-            return
-
         try:
             soc = self._connect_to(scheme, netloc)
             if soc is not None :
@@ -402,9 +358,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if scheme not in [ 'http', 'https' ] or fragment or not netloc :
             self.send_error (400, "Malformed URL %s" % self.path)
-            return
-        if not self.hostAllowed (self.path, scraperID) :
-            self.send_error (403, self.blockmessage(self.path))
             return
 
         if runID is not None :
@@ -662,48 +615,10 @@ class HTTPProxyServer \
         self.allowed = []
         self.blocked = []
         self.lock = threading.Lock()
-        
-        url = config.get (varName, 'whitelist_url')
-        self.current = WhitelistThread(url,self)
-        self.current.start()    
-        
+                
         BaseHTTPServer.HTTPServer.__init__(self,server_address,HandlerClass)
 
    
-class WhitelistThread(Thread):
-    
-    def __init__ (self,url, server):
-        Thread.__init__(self)
-        self.url = url
-        self.server = server
-
-    def run(self):
-        while 1:
-            print 'Attempting lookup '
-            data = None
-            try:
-                data = urllib2.urlopen(self.url).read()
-            except:
-                print 'Failed to fetch whitelist from server', self.url          
-            
-            encoded = None
-            
-            if data:
-                print 'Whitelist data is ', data
-                try:
-                    encoded = json.loads(data)
-                except Exception,e:
-                    print e
-                    
-            if encoded:
-                self.server.lock.acquire()
-                self.server.allowed = encoded['white'][:]
-                self.server.blocked = encoded['black'][:]
-                self.server.lock.release()          
-                
-            # Sleep for 5 more minutes
-            time.sleep(300)
-    
 
 class HTTPSProxyServer (HTTPProxyServer) :
 
