@@ -39,7 +39,7 @@ print $el . "\n";
 <code>print $el-&gt;innertext . "\n";</code>
 
 <p>Get all text recursively, throwing away any child tags.</p>
-<code>$eg = str_get_html('&lt;h2>A thing &lt;b>goes boom&lt;/b> up &lt;i>on &lt;em>the tree&lt;/em>&lt;/i>&lt;/h2>');
+<code>$eg = str_get_html('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;&lt;/i&gt;&lt;/h2&gt;');
 print $eg-&gt;plaintext . "\n"; // 'A thing goes boom up on the tree'
 </code>
 
@@ -47,19 +47,24 @@ print $eg-&gt;plaintext . "\n"; // 'A thing goes boom up on the tree'
 <h2>Finding data manually</h2>
 
 <p>Iterate down through the elements in the document and see the tags and attributes on each element.</p>
-<code>for el in root:
-    print el.tag
-    for el2 in el:
-        print "--", el2.tag, el2.attrib
+<code>$html_el = $html-&gt;find("html", 0);
+foreach ($html_el-&gt;children() as $child1) {
+    print $child1-&gt;tag . "\n";
+    foreach ($child1-&gt;children() as $child2) {
+        print "-- " . $child2-&gt;tag . " ";
+        print json_encode($child2-&gt;attr) . "\n";
+    }
+}
 </code>
 
 <p>Navigate around the document.</p>
-<code>eg = lxml.html.fromstring('&lt;h2>A thing &lt;b>goes boom&lt;/b> up &lt;i>on &lt;em>the tree&lt;/em>&lt;/i>&lt;/h2>')
-print eg[1].tag                # i
-print eg[1].getparent().tag    # h2
-print eg[1].getprevious().tag  # b
-print eg[1].getnext()          # None
-print eg[1].getchildren()      # [ &lt;element em > ]
+<code>$eg = str_get_html('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;&lt;/i&gt;&lt;/h2&gt;');
+print $eg-&gt;root-&gt;first_child()-&gt;tag . "\n";                               # h2
+print $eg-&gt;root-&gt;first_child()-&gt;children(0)-&gt;tag . "\n";                  # b
+print $eg-&gt;root-&gt;first_child()-&gt;children(0)-&gt;next_sibling()-&gt;tag . "\n";  # i
+print $eg-&gt;root-&gt;first_child()-&gt;children(1)-&gt;tag . "\n";                  # i
+print $eg-&gt;root-&gt;first_child()-&gt;children(1)-&gt;parent()-&gt;tag . "\n";        # h2
+
 </code>
 
 
