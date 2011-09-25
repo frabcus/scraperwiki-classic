@@ -28,7 +28,7 @@ CSS selectors, and are quite powerful.
 <code>    print $el-&gt;href . "\n";</code>
 
 
-<h2>Simple text extraction</h2>
+<h2>Text extraction</h2>
 
 <p>Select the first <b>&lt;strong></b> element inside <b>&lt;div id="footer_inner"></b>.</p>
 <code>$el = $html-&gt;find("div#footer_inner strong",0);
@@ -38,32 +38,11 @@ print $el . "\n";
 <p>Extract the text from inside the tag.</p>
 <code>print $el-&gt;innertext . "\n";</code>
 
-
-<h2>Deep text extraction</h2>
-
 <p>Get all text recursively, throwing away any child tags.</p>
 <code>$eg = str_get_html('&lt;h2>A thing &lt;b>goes boom&lt;/b> up &lt;i>on &lt;em>the tree&lt;/em>&lt;/i>&lt;/h2>');
 print $eg-&gt;plaintext . "\n"; // 'A thing goes boom up on the tree'
 </code>
 
-<p>Sometimes you have nearly pure text elements that still have &lt;i> and &lt;b> elements which you want to retain.  
-Such an element can be extracted using a recursive function.</p>
-<code>def ctext(el):
-    result = [ ]
-    if el.text:
-        result.append(el.text)
-    for sel in el:
-        assert sel.tag in ["b", "i"]
-        result.append("&lt;"+sel.tag+">")
-        result.append(ctext(sel))
-        result.append("&lt;/"+sel.tag+">")
-        if sel.tail:
-            result.append(sel.tail)
-    return "".join(result)
-</code>
-
-<p>This gives an error if there are other unexpected elements, such as &lt;em&gt;.</p>
-    <code>print ctext(eg)</code>
 
 <h2>Finding data manually</h2>
 
