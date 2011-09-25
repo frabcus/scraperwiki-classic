@@ -46,45 +46,55 @@ puts el
 <h2>Deep text extraction</h2>
 
 <p>Get all text recursively, throwing away any child tags.</p>
-<code>eg = Nokogiri::HTML('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;&lt;/i&gt;&lt;/h2&gt;');
+<code>eg = Nokogiri::HTML.fragment('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;&lt;/i&gt;&lt;/h2&gt;');
 puts eg.content() # 'A thing goes boom up on the tree'
 </code>
 
 <p>Sometimes you have nearly pure text elements that still have &lt;i&gt; and &lt;b&gt; elements which you want to retain.  
 Such an element can be extracted using a recursive function.</p>
-<code>def ctext(el):
-    result = [ ]
-    if el.text:
-        result.append(el.text)
-    for sel in el:
-        assert sel.tag in ["b", "i"]
-        result.append("&lt;"+sel.tag+"&gt;")
-        result.append(ctext(sel))
-        result.append("&lt;/"+sel.tag+"&gt;")
-        if sel.tail:
-            result.append(sel.tail)
-    return "".join(result)
+<code>def ctext(el)
+  if el.text? 
+    return el.text
+  end
+  result = [ ]
+  for sel in el.children
+    if (!["b", "i"].include?(sel.name))
+      raise "disallowed tag: " + sel.name
+    end
+    if sel.element? 
+      result.push("&lt;"+sel.name+"&gt;")
+    end
+    result.push(ctext(sel))
+    if sel.element? 
+      result.push("&lt;/"+sel.name+"&gt;")
+    end
+  end
+  return result.join
+end
 </code>
 
 <p>This gives an error if there are other unexpected elements, such as &lt;em&gt;.</p>
-    <code>puts ctext(eg)</code>
+<code>puts ctext(eg)</code>
 
 <h2>Finding data manually</h2>
 
 <p>Iterate down through the elements in the document and see the tags and attributes on each element.</p>
-<code>for el in root:
-    puts el.tag
-    for el2 in el:
-        puts "--", el2.tag, el2.attrib
+<code>for el in doc.children
+    puts el.name
+    for el2 in el.children
+        puts "--", el2.name, el2.attributes
+    end
+end
 </code>
 
 <p>Navigate around the document.</p>
-<code>eg = lxml.html.fromstring('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;lt;/i&gt;lt;/h2&gt;
-puts eg[1].tag                # i
-puts eg[1].getparent().tag    # h2
-puts eg[1].getprevious().tag  # b
-puts eg[1].getnext()          # None
-puts eg[1].getchildren()      # [ &lt;element em &gt; ]
+<code>eg = Nokogiri::HTML.fragment('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;&lt;/i&gt;&lt;/h2&gt;')
+goes_boom = eg.children()[0].children()[1]
+puts goes_boom                  # &lt;b&gt;goes boom&lt;b&gt;
+puts goes_boom.parent.name      # h2
+puts goes_boom.next             #  up 
+puts goes_boom.next.next.name   # i
+puts goes_boom.parent.children.map {|x| x.name}.join(",") # text,b,text,i
 </code>
 
 
