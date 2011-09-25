@@ -49,11 +49,11 @@ print el
 <h2>Deep text extraction</h2>
 
 <p>Get all text recursively, throwing away any child tags.</p>
-<code>eg = lxml.html.fromstring('&lt;h2>A thing &lt;b>goes boom&lt;/b> up &lt;i>on &lt;em>the tree&lt;/em>&lt;/i>&lt;/h2>')
+<code>eg = lxml.html.fromstring('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;lt;/i&gt;lt;/h2&gt;
 print eg.text_content() # 'A thing goes boom up on the tree'
 </code>
 
-<p>Sometimes you have nearly pure text elements that still have &lt;i> and &lt;b> elements which you want to retain.  
+<p>Sometimes you have nearly pure text elements that still have &lt;i&gt; and &lt;b&gt; elements which you want to retain.  
 Such an element can be extracted using a recursive function.</p>
 <code>def ctext(el):
     result = [ ]
@@ -61,9 +61,9 @@ Such an element can be extracted using a recursive function.</p>
         result.append(el.text)
     for sel in el:
         assert sel.tag in ["b", "i"]
-        result.append("&lt;"+sel.tag+">")
+        result.append("&lt;"+sel.tag+"&gt;")
         result.append(ctext(sel))
-        result.append("&lt;/"+sel.tag+">")
+        result.append("&lt;/"+sel.tag+"&gt;")
         if sel.tail:
             result.append(sel.tail)
     return "".join(result)
@@ -82,12 +82,12 @@ Such an element can be extracted using a recursive function.</p>
 </code>
 
 <p>Navigate around the document.</p>
-<code>eg = lxml.html.fromstring('&lt;h2>A thing &lt;b>goes boom&lt;/b> up &lt;i>on &lt;em>the tree&lt;/em>&lt;/i>&lt;/h2>')
+<code>eg = lxml.html.fromstring('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;lt;/i&gt;lt;/h2&gt;
 print eg[1].tag                # i
 print eg[1].getparent().tag    # h2
 print eg[1].getprevious().tag  # b
 print eg[1].getnext()          # None
-print eg[1].getchildren()      # [ &lt;element em > ]
+print eg[1].getchildren()      # [ &lt;element em &gt; ]
 </code>
 
 

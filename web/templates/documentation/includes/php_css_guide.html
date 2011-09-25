@@ -7,7 +7,7 @@ or the <a href="http://www.w3.org/TR/CSS2/selector.html">CSS selector specificat
 
 <h2>Getting started</h2>
 
-<p>Grab the HTML web page, and parse the HTML using lxml.</p>
+<p>Grab the HTML web page, and parse the HTML using Simple HTML DOM.</p>
 
 <code>require 'scraperwiki/simple_html_dom.php';
 $html_content = scraperwiki::scrape("https://scraperwiki.com/");
@@ -24,7 +24,7 @@ CSS selectors, and are quite powerful.
 }
 </code>
 
-<p>Read attributes, such as the target of the <b>&lt;a&gt;</b> tags.</p>
+<p>Read attributes, such as the target of the <b>&lt;a&gt;</b> tags (put this inside the "foreach" loop, before the "}").</p>
 <code>    print $el-&gt;href . "\n";</code>
 
 
