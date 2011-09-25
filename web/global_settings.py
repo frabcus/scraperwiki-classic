@@ -104,7 +104,6 @@ SCRAPERWIKI_APPS = [
     'frontend',
     'codewiki',
     'api',
-    'whitelist',
     'cropper',
     'kpi',
     'documentation',
