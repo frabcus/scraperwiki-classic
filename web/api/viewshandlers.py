@@ -32,13 +32,13 @@ try:     import json
 except:  import simplejson as json
 
 
-def getscraperorresponse(short_name, action, user):
+def getscraperorresponse(short_name):
     try:
         scraper = Code.objects.get(short_name=short_name)
     except Code.DoesNotExist:
         return "Sorry, this scraper does not exist"
-    if not scraper.actionauthorized(user, "apidataread"):
-        return scraper.authorizationfailedmessage(user, "apidataread").get("body")
+#    if not scraper.actionauthorized(user, "apidataread"):
+#        return scraper.authorizationfailedmessage(user, "apidataread").get("body")
     return scraper
     
 
@@ -202,7 +202,7 @@ def sqlite_handler(request):
     short_name = request.GET.get('name')
     apikey = request.GET.get('apikey', None)
     
-    scraper = getscraperorresponse(short_name, "apidataread", request.user)
+    scraper = getscraperorresponse(short_name)
     if type(scraper) in [str, unicode]:
         result = json.dumps({'error':scraper, "short_name":short_name})
         if request.GET.get("callback"):
@@ -434,7 +434,7 @@ def runevent_handler(request):
     apikey = request.GET.get('apikey', None)
     
     short_name = request.GET.get('name')
-    scraper = getscraperorresponse(short_name, "apiscraperruninfo", request.user)
+    scraper = getscraperorresponse(short_name)
     if type(scraper) in [str, unicode]:
         result = json.dumps({'error':scraper, "short_name":short_name})
         if request.GET.get("callback"):
@@ -557,7 +557,7 @@ def scraperinfo_handler(request):
         rev = None
 
     for short_name in request.GET.get('name', "").split():
-        scraper = getscraperorresponse(short_name, "apiscraperinfo", request.user)
+        scraper = getscraperorresponse(short_name)
 
         # Check accessibility if this scraper is private using 
         # apikey
