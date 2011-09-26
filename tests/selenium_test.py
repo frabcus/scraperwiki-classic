@@ -160,7 +160,7 @@ class SeleniumTest(unittest.TestCase):
             self.failUnless(s.is_text_present("This %s is " % code_type + privacy))
         elif privacy == 'private':
             self.user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
-            s.open("/admin/codewiki/%s/?q=" % code_type + code_name)
+            s.open(("/admin/codewiki/%s/?q=" % code_type) + code_name)
             self.wait_for_page()
             s.click('link=' + code_name)
             self.wait_for_page()
