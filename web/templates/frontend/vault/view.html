@@ -30,11 +30,7 @@
     		    <h4>{{ vault.members.count }} {{ vault.members.count|pluralize:"person,people" }} can access this vault:</h4>
     		    <ul>
     			{% for m in vault.members.all %}
-    				<li>			
-    					{% show_gravatar m 'medium' %}
-    					<a href="{% url profiles_profile_detail m.username %}">{{ m.get_profile.name }} ({{m.username}})</a>
-    					<a href="{% url vault_user vault.id, m.username,'remove' %}" title="Revoke access to this vault" class="user_delete">Remove</a>
-    				</li>
+    	        	{% include 'frontend/includes/vault_member.html' %}
     			{% endfor %}
                 </ul>
                 <a class="add_user" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add another user</a>
