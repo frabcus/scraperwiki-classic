@@ -75,7 +75,7 @@ def tutorials(request,language=None):
     return render_to_response('documentation/tutorials.html', context, context_instance = RequestContext(request))
 
 
-    # should also filter, say, on isstartup=True and on privacy_status=visible to limit what can be injected into here
+    # should also filter, say, on privacy_status=visible to limit what can be injected into here
 def contrib(request, short_name):
     context = { }
     try:
