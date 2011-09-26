@@ -178,12 +178,30 @@ def webstorerequest(req):
     if req.get("maincommand") == "save_sqlite":
         table_name = req.get("swdatatblname")
         tableurl = "%s/%s" % (databaseurl, table_name)
-        rqs = urllib.urlencode([ ("unique", key)  for key in req.get("unique_keys") ])
         ldata = req.get("data")
         if type(ldata) == dict:
             ldata = [ldata]
-        target = "%s?%s" % (tableurl, rqs)
+        qsl = [ ("unique", key)  for key in req.get("unique_keys") ]
+        
+            # quick and dirty provision of column types to the webstore
+        if ldata:
+            jargtypes = { }
+            for k, v in ldata[0].items():
+                if v != None:
+                    if k[-5:] == "_blob":
+                        vt = "blob"  # coerced into affinity none
+                    elif type(v) == int:
+                        vt = "integer"
+                    elif type(v) == float:
+                        vt = "real"
+                    else:
+                        vt = "text"
+                    jargtypes[k] = vt
+        qsl.append(("jargtypes", json.dumps(jargtypes)))
+
+        target = "%s?%s" % (tableurl, urllib.urlencode(qsl))
         request = urllib2.Request(target)
+        
         request.add_header("Accept", "application/json")
         request.add_data(json.dumps(ldata))
             
