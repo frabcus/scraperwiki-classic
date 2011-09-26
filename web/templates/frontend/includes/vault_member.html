@@ -2,5 +2,8 @@
 <li>			
     {% show_gravatar m 'medium' %}
 	<a href="{% url profiles_profile_detail m.username %}">{{ m.get_profile.name }} ({{m.username}})</a>
-	<a href="{% url vault_user vault.id, m.username,'remove' %}" title="Revoke access to this vault" class="user_delete">Remove</a>
+
+	{% if editor or vault.user.id == request.user.id %}
+		<a href="{% url vault_user vault.id, m.username,'remove' %}" title="Revoke access to this vault" class="user_delete">Remove</a>
+	{% endif %}
 </li>

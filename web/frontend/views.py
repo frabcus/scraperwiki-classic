@@ -499,10 +499,12 @@ def vault_users(request, vaultid, username, action):
     except User.DoesNotExist:
         return HttpResponse('{"status": "fail", "error":"Username not found"}', mimetype=mime)            
 
-    result = {"status": "ok", "error":"", "vault": vault}                    
+    result = {"status": "ok", "error":""}                    
+    
+    editor = request.user == vault.user
     
     if action =='add' and not user in vault.members.all():
-        result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user })                 
+        result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 
         vault.members.add(user)   
     if action =='remove' and user in vault.members.all():
         vault.members.remove(user)        
