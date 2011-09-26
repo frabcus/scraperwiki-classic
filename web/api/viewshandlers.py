@@ -563,7 +563,7 @@ def scraperinfo_handler(request):
         # apikey
         if hasattr(scraper, "privacy_status") and scraper.privacy_status == 'private':            
             if not all([scraper.access_apikey, apikey, scraper.access_apikey == apikey]):
-                scraper = u'Failed to access scraper'
+                scraper = u'Invalid API Key'
             
         if type(scraper) in [str, unicode]:
             result.append({'error':scraper, "short_name":short_name})

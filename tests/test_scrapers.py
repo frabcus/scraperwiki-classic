@@ -94,8 +94,7 @@ class TestScrapers(SeleniumTest):
 
 
     def _check_delete_code(self, code_name, code_type):
-        s = self.selenium     
-        
+        s = self.selenium
         s.open('/%ss/%s/' % (code_type, code_name))
         self.wait_for_page('view the %s page so we can delete it' % code_type)                
         s.click('btnDeleteScraper')

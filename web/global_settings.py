@@ -170,7 +170,7 @@ ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda o: o.get_profile().get_absolute_url()
 }
 
-# Requited for the template_settings context processor. Each varible listed
+# Required for the template_settings context processor. Each varible listed
 # here will be made availible in all templates that are passed the
 # RequestContext.  Be careful of listing database and other private settings 
 # here
