@@ -44,16 +44,25 @@ class RunnerSocket:
                 }
         self.soc.send(json.dumps(rdata)+"\r\n") 
 
-
+    # rpc call of a view from the browser
     def runview(self, user, scraper, rev, query_string):
         data = { "command":'rpcrun', "guid":scraper.guid, "username":user.username, 
-                 "language":scraper.language, "scrapername":scraper.short_name, "urlquery":query_string }
+                 "language":scraper.language, "scrapername":scraper.short_name }
         data["django_key"] = config.get('twister', 'djangokey')
-
         status = scraper.get_vcs_status(-1)
         data["code"] = status["code"]
         data["rev"] = status.get("prevcommit", {}).get("rev", -1)
-        data["attachables"] = [ cp.permitted_object.short_name  for cp in models.CodePermission.objects.filter(code=scraper).all() ]
+        data["attachables"] = [ ascraper.short_name  for ascraper in scraper.attachable_scraperdatabases() ]
+
+        # pass in what we get from the request and ignore the description_envvars
+        lqs = scraper.description_envvars().get("QUERY_STRING", "")
+        if lqs and query_string:
+            data["urlquery"] = "%s&%s" % (lqs, query_string)
+        elif lqs:
+            data["urlquery"] = lqs
+        elif query_string:
+            data["urlquery"] = query_string
+        
 
         owners = scraper.userrolemap()["owner"]
         if owners:
@@ -73,11 +82,20 @@ class RunnerSocket:
         self.soc.send(json.dumps(data)+"\r\n") 
 
 
-    def stimulate_run_from_editor(self, scraper, user, clientnumber, language, code, rev, urlquery):
-        data = { "command":'stimulate_run', "language":language, "code":code, "rev":rev, "urlquery":urlquery, 
+    def stimulate_run_from_editor(self, scraper, user, clientnumber, language, code, rev, query_string):
+        data = { "command":'stimulate_run', "language":language, "code":code, "rev":rev, 
                  "username":user.username, "scrapername":scraper.short_name, "clientnumber":clientnumber, "guid":scraper.guid }
-        data["attachables"] = [ cp.permitted_object.short_name  for cp in models.CodePermission.objects.filter(code=scraper).all() ]
+        data["attachables"] = [ ascraper.short_name  for ascraper in scraper.attachable_scraperdatabases() ]
 
+        # pass in what we get from the request and ignore the description_envvars
+        lqs = scraper.description_envvars().get("QUERY_STRING", "")
+        if lqs and query_string:
+            data["urlquery"] = "%s&%s" % (lqs, query_string)
+        elif lqs:
+            data["urlquery"] = lqs
+        elif query_string:
+            data["urlquery"] = query_string
+        
         try:
             profile = user.get_profile()
             data['beta_user'] = profile.beta_user

@@ -149,7 +149,9 @@ div.page_tabs a.othertypingalert {
 }
 
 .editor_controls #run.running {
-	color: red;
+	background-image: url(../images/icons/control_stop.png);
+	background-color: #E8BABA;
+	color: #740000;
 }
 
 .editor_controls input:disabled {

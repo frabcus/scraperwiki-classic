@@ -2,9 +2,9 @@
 
 DESC="HTTPProxy"
 NAME=httpproxy
-CONFIG=/var/www/scraperwiki/uml/uml.cfg.local
+CONFIG=/var/www/scraperwiki/uml/uml.cfg
 DAEMON=/var/www/scraperwiki/uml/httpproxy/httpproxy.py
-DAEMON_ARGS="--daemon --subproc --varDir=/var --config=$CONFIG --mode=H"
+DAEMON_ARGS="--daemon --subproc --varDir=var --config=$CONFIG --mode=H"
 PIDFILE=./var/run/$NAME.pid
 
 do_start()

@@ -33,6 +33,7 @@ var scripts_ip = [ ];
 var max_runs = 100;
 var dataproxy = '';
 var httpproxy;
+var webstore_port = 0; 
 
 /******************************************************************************
 * Called to configure the executor, allowing it to determine whether we are
@@ -53,6 +54,7 @@ exports.init = function( settings ) {
 	dataproxy = settings.dataproxy;
 	extra_path = settings.extra_path;
 	max_runs = settings.vm_count;
+    webstore_port = settings.webstore_port; 
 }
 
 
@@ -196,8 +198,11 @@ function execute(http_req, http_res, raw_request_data) {
 				language: request_data.language || 'python',
 				ip: '',
 				response: http_res,
-				black: request_data.black || '',
-				white: request_data.white || '',
+				black: request_data.black || '',   // not used
+				white: request_data.white || '',   // not used
+                attachables: request_data.attachables || [],
+                beta_user: request_data.beta_user || false,
+                scheduled_run: request_data.scheduled_run || false,
 				permissions: request_data.permissions || []  };
 	
 	
@@ -221,6 +226,16 @@ function execute(http_req, http_res, raw_request_data) {
 						args.push('--scrapername')
 						args.push( script.scraper_name )
 					}
+					
+                        // extra parameters used in the exec.py.  these will need to be added into the block above for ruby and php, as well as into the proper lxc fields
+					if ( script.beta_user && webstore_port )  {
+                        args.push('--webstore_port');
+						args.push( webstore_port);
+					}
+                    if ( script.attachables ) {
+                        args.push('--attachables');
+						args.push(script.attachables.join(" ")+'"'); 
+					}
 				}
 				
 				exe = './scripts/exec.' + util.extension_for_language(script.language);
@@ -235,7 +250,7 @@ function execute(http_req, http_res, raw_request_data) {
 					environ['http_proxy'] = 'http://' + httpproxy;
 				};
 				
-                util.log.debug( 'spawning ' + exe + ' args'  + args);
+                util.log.debug( 'spawning ' + exe + ' args '  + args);
 				e = spawn(exe, args, { env: environ });
 				script.pid = e.pid;
 				script.ip = '127.0.0.1';
@@ -354,9 +369,10 @@ function execute(http_req, http_res, raw_request_data) {
 			
 			util.log.debug( 'QUERYSTRING is ' + script.query);
 			if (script.query) {
-				args.push( script.query.replace(/&/g, "\\&") );
+				var qstring = new Buffer(script.query).toString('base64');
+				args.push( qstring );
 			}  
-			util.log.debug(args)
+			util.log.debug(args);
 			
 	 		e = spawn('/usr/bin/lxc-execute', args );
 			

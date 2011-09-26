@@ -12,7 +12,7 @@ file that you edit, learn and run entirely from your browser. </p>
 
 <div class="content half left">
   {% for key, value in tutorials.items %}
-  <h2 id="{{ key }}_tutorials">{{ key.title }} scrapers</h2>
+  <h2 id="{{ key }}_tutorials">{{ display_language }} scrapers</h2>
   <dl class="tutoriallist">
     {% for scraper in value %}
     <dt style="margin-top:10px">
@@ -21,7 +21,7 @@ file that you edit, learn and run entirely from your browser. </p>
         <a class="staff" href="{% url editor_edit scraper.wiki_type scraper.short_name %}">edit</a>
       {% endif %}
     </dt>
-    <dd>{{scraper.description}}</dd>
+    <dd>{{scraper.description_ashtml|safe}}</dd>
     {% endfor %}
   </dl>
   {% endfor %}
@@ -29,7 +29,7 @@ file that you edit, learn and run entirely from your browser. </p>
 
 <div class="content half right">
   {% for key, value in viewtutorials.items %}
-  <h2 id="{{ key }}_tutorials">{{ key.title }} views</h2>
+  <h2 id="{{ key }}_tutorials">{{ display_language }} views</h2>
   <dl class="tutoriallist">
     {% for scraper in value %}
     <dt>

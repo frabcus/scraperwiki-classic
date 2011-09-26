@@ -13,11 +13,9 @@ urlpatterns = patterns('',
     
     # current api
     url(r'^1\.0/datastore/sqlite$',     viewshandlers.sqlite_handler,         name="method_sqlite"),
-    url(r'^1\.0/datastore/getdata$',    viewshandlers.data_handler,           name="method_getdata"),
     url(r'^1\.0/scraper/search$',       viewshandlers.scraper_search_handler, name="method_search"),
     url(r'^1\.0/scraper/getuserinfo$',  viewshandlers.userinfo_handler,       name="method_getuserinfo"),
     url(r'^1\.0/scraper/usersearch$',   viewshandlers.usersearch_handler,     name="method_usersearch"),
-    
     url(r'^1\.0/scraper/getruninfo$',   viewshandlers.runevent_handler,       name="method_getruninfo"),
     url(r'^1\.0/scraper/getinfo$',      viewshandlers.scraperinfo_handler,    name="method_getinfo"),
 
@@ -27,7 +25,8 @@ urlpatterns = patterns('',
     url(r'^1\.0/datastore/getdatabydate$', lambda request: HttpResponse(json.dumps({ "error":"Sorry, this function has been deprecated.", "message":"use scraperwiki.datastore.sqlite with bounds on your date field" }))),
     url(r'^1\.0/datastore/getdatabylocation$', lambda request: HttpResponse(json.dumps({ "error":"Sorry, this function has been deprecated.", "message":"use scraperwiki.datastore.sqlite bounds on the lat lng values" }))),
     url(r'^1\.0/geo/postcodetolatlng/$', lambda request: HttpResponse(json.dumps({ "error":"Sorry, this function has been deprecated.", "message":"use the scraperwiki postcode view to do it" }))),
-    
+    url(r'^1\.0/datastore/getdata$',    lambda request: HttpResponse(json.dumps({ "error":"Sorry, this function has been deprecated.", "message":"use the scraperwiki sqlite api to do it" }))),
+        
     # explorer redirects
     url(r'^1\.0/explore/scraperwiki.(?:scraper|datastore).(?P<shash>\w+)$', 
                    lambda request, shash: HttpResponseRedirect("%s#%s" % (reverse('docsexternal'), shash))),

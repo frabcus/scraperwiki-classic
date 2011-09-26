@@ -5,7 +5,17 @@
 {% block javascript %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>
 <script type="text/javascript">
-var showinglookup = { 
+{% if settings.SHOW_APIKEY_UI %}
+var showinglookup= { 
+    sqlite:'.format, .name, .apikey_scraper, .attach, .query, .callback', 
+    getinfo:'.format, .name, .apikey_scraper, .version, .history_start_date, .quietfields, .callback',
+    getruninfo:'.format, .name, .apikey_scraper, .runid, .callback',
+    getuserinfo:'.format, .username, .apikey_user, .callback',
+    search:'.format, .searchquery, .apikey_user, .maxrows, .callback',
+    usersearch:'.format, .searchquery, .nolist, .maxrows, .callback'
+}
+{% else %}
+var showinglookup= { 
     sqlite:'.format, .name, .attach, .query, .callback', 
     getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
     getruninfo:'.format, .name, .runid, .callback',
@@ -13,6 +23,7 @@ var showinglookup = {
     search:'.format, .searchquery, .maxrows, .callback',
     usersearch:'.format, .searchquery, .nolist, .maxrows, .callback'
 }
+{% endif %}
 
 $(function()
 {
@@ -343,6 +354,14 @@ $(function()
         	<li class="name">
                 <label for="id_name">name<span class="desc"> of the scraper</span> <span id="overviewreturn">(go to <a href="{% url code_overview 'scraper' 'XXX' %}">scraper</a>)</label>
                 <input type="text" name="name" id="id_name" value="{{scrapername}}">
+        	</li> 
+        	<li class="apikey_scraper">
+                <label for="id_apikey">API Key of the scraper <span class="desc">Only required for private scrapers</span></label>
+                <input type="text" name="apikey" id="id_apikey" value="">
+        	</li> 
+        	<li class="apikey_user">
+                <label for="id_apikey">Your API Key <span class="desc">You can find this on your profile page and will allow you to find private scrapers you have access to</span></label>
+                <input type="text" name="apikey" id="id_apikey" value="">
         	</li> 
         	<li class="username">
                 <label for="id_username">username</label>

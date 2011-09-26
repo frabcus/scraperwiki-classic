@@ -134,7 +134,7 @@ class DataEnquiryForm(forms.ModelForm):
         self.fields['frequency'].initial = 'daily'
 
     urls = forms.CharField(required=False, label='At which URL(s) can we find the data currently?')
-    columns = forms.CharField(required=False, label='What information do you want scraped?')
+    columns = forms.CharField(required=False, widget=forms.Textarea, label='What information do you want scraped?')
     due_date = forms.DateField(required=False, label='When do you need it by?')
     first_name = forms.CharField(label='First name:')
     last_name = forms.CharField(label='Last name:')

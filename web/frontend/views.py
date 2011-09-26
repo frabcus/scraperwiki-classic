@@ -32,6 +32,7 @@ import re
 import datetime
 import urllib
 import itertools
+import json
 
 from utilities import location
 
@@ -49,8 +50,7 @@ def frontpage(request, public_profile_field=None):
     for tag in tags_sorted:
         tags.append(tag[0])
     
-    data = {#'featured_views': featured_views, 
-            #'featured_scrapers': featured_scrapers,
+    data = {
 			'featured_both': featured_both,
             'tags': tags, 
             'language': 'python'}
@@ -450,5 +450,65 @@ def request_data(request):
 
 def test_error(request):
     raise Exception('failed in test_error')
+
+
+
+###############################################################################
+# Vault specific views
+###############################################################################
+
+@login_required
+def view_vault(request, username=None):
+    """
+    View the details of the vault for the specific user. If they have no vault
+    then we will redirect to their dashboard as they shouldn't have been able
+    to get here.
+    """
+    import logging
+    from codewiki.models import Vault    
+    context = {}
+    
+    if username is None:
+        # Viewing vault for current user.
+        vaults = request.user.vaults
+        
+    context['vaults'] = vaults
+    return render_to_response('frontend/vault/view.html', context, 
+                               context_instance=RequestContext(request))
+
+@login_required
+def vault_users(request, vaultid, username, action):
+    """
+    View which allows a user to add/remove users from their vault. Will
+    only work on the current user's vault so if they don't have one then
+    it won't work.
+    """
+    from django.template.loader import render_to_string
+    from codewiki.models import Vault
+    mime = 'application/json'
+     
+    vault = get_object_or_404( Vault, id=vaultid)
+    if vault.user.id != request.user.id:
+        return HttpResponse('{"status": "fail", "error": "Not your vault"}', mimetype=mime)                    
+        
+    try:
+        user = User.objects.get( username=username )    
+    except User.DoesNotExist:
+        return HttpResponse('{"status": "fail", "error":"Username not found"}', mimetype=mime)            
+
+    result = {"status": "ok", "error":""}                    
+    
+    if action =='add' and not user in vault.members.all():
+        result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user })                 
+        vault.members.add(user)   
+    if action =='remove' and user in vault.members.all():
+        vault.members.remove(user)        
+    vault.save()        
+                
+    
+    return HttpResponse( json.dumps(result), mimetype=mime)
+
+
+
 
 

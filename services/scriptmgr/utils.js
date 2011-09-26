@@ -172,7 +172,7 @@ exports.env_for_language = function( lang, extra_path ) {
 	} else if ( lang == 'php') {
 		return { PHPPATH: ep};		
 	} else if ( lang == 'javascript' ) {
-		return { NODE_PATH: process.env.NODE_PATH + ":" + ep };
+		return { NODE_PATH: process.env.NODE_PATH + ":" + ep + ":/usr/local/lib/node_modules" };
 	}	
 };
 

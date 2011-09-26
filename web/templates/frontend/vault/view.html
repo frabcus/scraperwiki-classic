@@ -1,0 +1,117 @@
+{% extends "frontend/base.html" %}
+{% load gravatar %}
+
+{% block title %}Your vaults{% endblock %}
+
+{% block header %}
+	<h2>Your vaults</h2>
+
+	<p>Information about your vaults and who can access them</p>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="content">
+
+{% if vaults.count %}
+<div id="my_vaults">
+    <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: <a id="new_vault">Create another</a></h2>
+    {% for vault in vaults.all %}
+    <div class="vault">
+        
+    	<div class="vault_header">
+    	    <span class="shineyshiney"></span>
+	        <a class="vault_delete"><img src="{{ MEDIA_URL }}images/icons/delete.png" width="16" height="16"> Delete vault</a>
+	        <a class="vault_users"><img src="{{ MEDIA_URL }}images/icons/user_purple.png" width="16" height="16"> {% if vault.members.count > 0 %}{{ vault.members.count }} user{{ vault.members.count|pluralize }}{% else %}No users{% endif %}</a>
+    	    <h3>{{ vault.name }} <span class="plan">({{ vault.plan|lower }} plan)</span></h3>
+	        <div class="vault_users_popover">
+            {% ifequal vault.user request.user %}
+    		    <h4>{{ vault.members.count }} {{ vault.members.count|pluralize:"person,people" }} can access this vault:</h4>
+    		    <ul>
+    			{% for m in vault.members.all %}
+    	        	{% include 'frontend/includes/vault_member.html' %}
+    			{% endfor %}
+                </ul>
+                <a class="add_user" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add another user</a>
+                <span class="arrow"></span>
+
+                <!-- <div id="addneweditor">
+    	      <span class="hide">
+    	        Editor username:
+    	        <input type="text" class="text">
+    	        <input type="button" value="Cancel" class="cancelbutton">
+    	        <input type="button" value="Add" class="addbutton">
+    	      </span>
+    	      <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new member
+    	        <img id="contributors_loading" src="{{ MEDIA_URL }}images/load.gif" style="display: none">
+    	      </a>
+    	    </div> 
+    	    <div id="contributorserror" style="display: none">
+    	        None
+    	    </div> -->
+            {% endifequal %}
+            </div>
+        </div>
+        
+        <div class="vault_contents{% if vault.code_objects.count == 0 %} empty{% endif %}">
+    	{% if vault.code_objects.count > 0 %}
+            <h4>This vault contains {{ vault.code_objects.count }} item{{ vault.code_objects.count|pluralize }}:</h4>
+    	 <!--   <ul>
+    		{% for s in vault.code_objects.all %}
+    			<li>			
+    				<a href="{% url code_overview s.wiki_type,s.short_name %}">{{ s.short_name }} </a>
+    			</li>
+    		{% endfor %}
+    	    </ul>   -->
+    	    <ul class="scraper_list">
+    	    {% for code in vault.code_objects.all %}
+    	        {% include 'frontend/includes/code_object_line.html' %}
+    	    {% endfor %}
+    	    </ul>
+    	{% else %}
+    	    <div class="empty_vault">
+    	        <h4>This vault is empty!</h4>
+    	        <p>Perhaps you&rsquo;d like to read our <a>Vaults FAQ</a>,<br/>or <a>move some scrapers or views</a> here?</p>
+    	    </div>
+    	{% endif %}
+    	</div>
+        
+        <div class="vault_footer">
+            <a class="add_to_vault"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add a new item</a>
+            <a class="move_to_vault"><img src="{{ MEDIA_URL }}images/icons/cog_go.png" width="16" height="16"/> Move an item here</a>
+        </div>
+        
+    </div>
+    
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if request.user.vault_membership.count %}
+<div id="shared_vaults">	
+    <h2>You can access {{ request.user.vault_membership.count }} shared vault{{ request.user.vault_membership.count|pluralize }}:</h2>
+	
+	{% for v in request.user.vault_membership.all %}
+	<div class="vault">
+	<h3>{{ v.name }} ({{ v.user.username }}&rsquo;s vault)</h3>
+
+    	{% if v.code_objects %}
+    	 <h4>This vault contains {{ v.code_objects.count }} item{{ v.code_objects.count|pluralize }}</h4>
+    	 <ul>
+    		{% for s in v.code_objects.all %}
+    			<li>			
+    				<a href="{% url code_overview s.wiki_type,s.short_name %}">{{ s.short_name }} </a>
+    			</li>
+    		{% endfor %}
+    	 </ul>
+    	 {% endif %}
+	</div>
+	{% endfor %}
+</div>
+{% endif%}
+
+</div>
+
+
+{% endblock %}

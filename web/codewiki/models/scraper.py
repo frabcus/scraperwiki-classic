@@ -75,6 +75,7 @@ class Scraper (code.Code):
     record_count = models.IntegerField(default=0)        
     run_interval = models.IntegerField(default=-1)  # in seconds, we are defaulting to disabled
 
+
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)
         self.wiki_type = 'scraper'
@@ -89,8 +90,8 @@ class Scraper (code.Code):
                 raise ValidationError('Invalid run interval')
 
 
-            # It would be good to kill this function off and move its functionality into being properties of the database
-            # for now it represents some kind of caching of the size of the datastore
+    # It would be good to kill this function off and move its functionality into being properties of the database
+    # for now it represents some kind of caching of the size of the datastore
     def update_meta(self):
         dataproxy = DataStore(self.short_name)
         try:
@@ -109,9 +110,20 @@ class Scraper (code.Code):
             except:
                 pass
 
+    # Without checking the privacy status, this method will regenerate
+    # the api key for this scrapers access key and might be called via 
+    # the front-end
+    def regenerate_access_key(self):
+        import uuid
+        self.access_apikey = str( uuid.uuid4() )
 
     def save(self, *args, **kwargs):
         self.wiki_type = 'scraper'
+
+        # Check type and apikey and generate one if necessary
+        if self.privacy_status == "private" and not self.access_apikey:
+            self.regenerate_access_key()
+       
         super(Scraper, self).save(*args, **kwargs)
 
     def content_type(self):
@@ -206,6 +218,9 @@ class DomainScrape(models.Model):
     domain            = models.CharField(max_length=128)
     bytes_scraped     = models.IntegerField(default=0)
     pages_scraped     = models.IntegerField(default=0)
+
+    def __unicode__(self):
+        return u'domain: %s (pages %d, bytes %d) for %s' % (self.domain, self.pages_scraped, self.bytes_scraped, scraper_run_event.scraper.short_name)
 
     class Meta:
         app_label = 'codewiki'

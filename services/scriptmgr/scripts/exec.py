@@ -10,6 +10,7 @@ import  resource
 import  urllib2, urllib
 import  optparse
 import  scraperwiki
+import base64
 
 try    : import json
 except : import simplejson as json
@@ -66,6 +67,8 @@ parser.add_option("--scrapername")
 parser.add_option("--runid")
 parser.add_option("--qs")
 parser.add_option("--path")
+parser.add_option("--attachables", default="")
+parser.add_option("--webstore_port", default="0")
 options, args = parser.parse_args()
 
 if options.gid:
@@ -75,14 +78,15 @@ if options.uid:
 if options.path:
     sys.path.append( options.path )
 if options.qs:
-    os.environ['QUERY_STRING'] = options.qs
-    os.environ['URLQUERY'] = options.qs    
+    qstring = base64.b64decode( options.qs )
+    os.environ['QUERY_STRING'] = qstring
+    os.environ['URLQUERY'] = qstring   
 
 
 host, port = string.split(options.ds, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
-scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid, [])
+scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid, options.attachables.split(), options.webstore_port)
 
 
 

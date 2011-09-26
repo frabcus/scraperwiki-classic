@@ -69,9 +69,6 @@ urlpatterns = patterns('',
     # Key Performance Indicators
     (r'^kpi/', include('kpi.urls')),
     
-    # Black/Whitelist management
-    (r'^whitelist/', include('whitelist.urls')),
-    
     # pdf cropper technology
     (r'^cropper/', include('cropper.urls')),
     

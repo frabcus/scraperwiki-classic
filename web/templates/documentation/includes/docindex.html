@@ -47,12 +47,12 @@ in SQL API gets the data out as JSON, CSV or RSS files.  -->
     <ul>
      <li class="doclink">{% doc_link_full 'LANG_csv_guide' language %} <span> Get data from comma-separated value spreadsheet files </span> </li>
      <li class="doclink">{% doc_link_full 'LANG_excel_guide' language %} <span> Get data from Excel spreadsheet files </span> </li>
+     <li class="doclink">{% doc_link_full 'LANG_css_guide' language %} <span> Get data from web pages using CSS selectors </span> </li>
      {% if user.is_staff %} 
+     <li class="doclink staff">{% doc_link_full 'LANG_time_place_guide' language %} <span> Parse dates, times, locations and save them in the datastore </span> </li>
         <div class="staff">
             {% ifequal language 'python' %}
-             <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">lxml copy &amp; paste guide</a></li> 
              <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
-             <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">Working with CSV files</a></li>
             {% endifequal %}
         </div> 
       {% endif %}

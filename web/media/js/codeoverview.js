@@ -182,8 +182,9 @@ function setupCodeOverview(short_name)
     $('#aEditAboutScraper,#aEditAboutScraperNew').click(
         function(){
              $('#divAboutScraper').dblclick();
-             oHint = $('<div id="divMarkupHint" class="content_footer"><p><strong>You can use Textile markup to style the description:</strong></p><ul><li>*bold* / _italic_ / @code@</li><li>* Bulleted list item / # Numbered list item</li><li>"A link":http://www.data.gov.uk</li><li>h1. Big header / h2. Normal header</li></ul></div>');
-             $('#divAboutScraper form').append(oHint);
+             var oHint = $('<div id="divMarkupHint" class="content_footer"><p><strong>You can use Textile markup to style the description:</strong></p><ul><li>*bold* / _italic_ / @code@</li><li>* Bulleted list item / # Numbered list item</li><li>"A link":http://www.data.gov.uk</li><li>h1. Big header / h2. Normal header</li></ul></div>');
+             if ($('#divAboutScraper #divMarkupHint').length == 0)  // quick hack to avoid multiple copies of this till it's done properly with a hidden div
+                 $('#divAboutScraper form').append(oHint);
              return false;
         }
     );

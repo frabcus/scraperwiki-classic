@@ -12,6 +12,7 @@ from settings import MAX_API_ITEMS, API_URL
 from django.views.decorators.http import condition
 from tagging.models import Tag
 
+from models import APIMetric
 import csv
 import datetime
 import re
@@ -31,13 +32,13 @@ try:     import json
 except:  import simplejson as json
 
 
-def getscraperorresponse(short_name, action, user):
+def getscraperorresponse(short_name):
     try:
         scraper = Code.objects.get(short_name=short_name)
     except Code.DoesNotExist:
         return "Sorry, this scraper does not exist"
-    if not scraper.actionauthorized(user, "apidataread"):
-        return scraper.authorizationfailedmessage(user, "apidataread").get("body")
+#    if not scraper.actionauthorized(user, "apidataread"):
+#        return scraper.authorizationfailedmessage(user, "apidataread").get("body")
     return scraper
     
 
@@ -91,19 +92,6 @@ def stream_rows(dataproxy, format):
         
 
 
-def data_handler(request):
-    tablename = request.GET.get('tablename', "swdata")
-    squery = ["select * from `%s`" % tablename]
-    if "limit" in request.GET:
-        squery.append('limit %s' % request.GET.get('limit'))
-    if "offset" in request.GET:
-        squery.append('offset %s' % request.GET.get('offset'))
-    qsdata = { "name": request.GET.get("name", "").encode('utf-8'), "query": " ".join(squery).encode('utf-8') }
-    if "format" in request.GET:
-        qsdata["format"] = request.GET.get("format").encode('utf-8')
-    if "callback" in request.GET:
-        qsdata["callback"] = request.GET.get("callback").encode('utf-8')
-    return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
 
 
 # formats that should be easy to stream because they are line based
@@ -188,7 +176,7 @@ def out_rss2(dataproxy, scraper):
         items.append(rssitem)
 
     link = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
-    rss = PyRSS2Gen.RSS2(title=scraper.title, link=link, description=scraper.description, lastBuildDate=datetime.datetime.now(), items=items)
+    rss = PyRSS2Gen.RSS2(title=scraper.title, link=link, description=scraper.description_safepart(), lastBuildDate=datetime.datetime.now(), items=items)
 
     fout = StringIO()
     rss.write_xml(fout)
@@ -212,12 +200,32 @@ def out_rss2(dataproxy, scraper):
 @condition(etag_func=None)
 def sqlite_handler(request):
     short_name = request.GET.get('name')
-    scraper = getscraperorresponse(short_name, "apidataread", request.user)
+    apikey = request.GET.get('apikey', None)
+    
+    scraper = getscraperorresponse(short_name)
     if type(scraper) in [str, unicode]:
         result = json.dumps({'error':scraper, "short_name":short_name})
         if request.GET.get("callback"):
             result = "%s(%s)" % (request.GET.get("callback"), result)
         return HttpResponse(result)
+    
+    u,s,kd = None, None, ""
+    if request.user.is_authenticated():
+        u = request.user
+        
+    if scraper.privacy_status != "private":
+        s = scraper
+        kd = short_name
+    else:
+        # When private we MUST have an apikey and it should match
+        if not all([ scraper.access_apikey, apikey, scraper.access_apikey == apikey] ):
+            result = json.dumps({'error':"Invalid API Key", "short_name":short_name})
+            if request.GET.get("callback"):
+                result = "%s(%s)" % (request.GET.get("callback"), result)
+            return HttpResponse(result)
+            
+    
+    APIMetric.record( "sqlite", key_data=kd,  user=u, code_object=s )
     
     dataproxy = DataStore(request.GET.get('name'))
     lattachlist = request.GET.get('attach', '').split(";")
@@ -255,6 +263,8 @@ def sqlite_handler(request):
 
 
 def scraper_search_handler(request):
+    apikey = request.GET.get('apikey', None)
+    
     query = request.GET.get('query') 
     if not query:
         query = request.GET.get('searchquery') 
@@ -266,17 +276,25 @@ def scraper_search_handler(request):
 
     boverduescraperrequest = False
     if query == "*OVERDUE*":
+        # We should check apikey against our shared secret. If it matches then it should
+        # be allowed to continue.
+        
         if request.META.get("HTTP_X_REAL_IP", "Not specified") in settings.INTERNAL_IPS:
             boverduescraperrequest = True
         if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"]:
             boverduescraperrequest = True
-
+    else:
+        u = None
+        if request.user.is_authenticated():
+            u = request.user
+        APIMetric.record( "scrapersearch", key_data=query,  user=u, code_object=None )
+        
     # TODO: If the user has specified an API key then we should pass them into
     # the search query and refine the resultset  to show only valid scrapers
     if boverduescraperrequest:
         scrapers = scrapers_overdue()  
     else:
-        scrapers = scraper_search_query(user=None, query=query)
+        scrapers = scraper_search_query(user=None, query=query, apikey=apikey)
 
     # scrapers we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
@@ -301,24 +319,21 @@ def scraper_search_handler(request):
             if ownername:
                 res['title'] = "%s / %s" % (ownername, scraper.title)
         if 'description' not in quietfields:
-            res['description'] = scraper.description
+            res['description'] = scraper.description_safepart()
         res['created'] = scraper.created_at.isoformat()
         res['privacy_status'] = scraper.privacy_status
         res['language'] = scraper.language
         
-        # extra data added to the overdue request kind for direct use
+        # extra data added to the overdue request kind so that twister has everything it needs to get on with it
+        # and doesn't need to call back for further information
         if boverduescraperrequest:
             res['overdue_proportion'] = float(scraper.overdue_proportion)
             vcsstatus = scraper.get_vcs_status(-1)
             res['code'] = vcsstatus["code"]
             res["rev"] = vcsstatus.get("prevcommit", {}).get("rev", -1)
             res['guid'] = scraper.guid
-
-            attachables = [ ]
-            for cp in CodePermission.objects.filter(code=scraper).all():
-                if cp.permitted_object.privacy_status != "deleted":
-                    attachables.append(cp.permitted_object.short_name)
-            res["attachables"] = attachables
+            res["attachables"] = [ ascraper.short_name  for ascraper in scraper.attachable_scraperdatabases() ]
+            res["envvars"] = scraper.description_envvars()
             
         result.append(res)
         if len(result) > maxrows:
@@ -346,13 +361,17 @@ def scraper_search_handler(request):
 
 
 def usersearch_handler(request):
-    # TODO: Should users be able to choose whether they turn up in search results or not?
     query = request.GET.get('searchquery') 
     try:   
         maxrows = int(request.GET.get('maxrows', ""))
     except ValueError: 
         maxrows = 5
     
+    u = None
+    if request.user.is_authenticated():
+        u = request.user
+    APIMetric.record( "usersearch", key_data=query, user=u, code_object=None )
+        
         # usernames we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
     
@@ -376,13 +395,13 @@ def usersearch_handler(request):
     callback = request.GET.get("callback")
     if callback:
         res = "%s(%s)" % (callback, res)
+    
     response = HttpResponse(res, mimetype='application/json; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename=search.json'
     return response
 
 
 def userinfo_handler(request):
-    # TODO: Should users has the ability to set their profiles to private?
     username = request.GET.get('username', "") 
     users = User.objects.filter(username=username)
     result = [ ]
@@ -397,6 +416,11 @@ def userinfo_handler(request):
 
         result.append(info)
     
+    u = None
+    if request.user.is_authenticated():
+        u = request.user
+    APIMetric.record( "getuserinfo", key_data=username,  user=u, code_object=None )
+
     res = json.dumps(result, indent=4)
     callback = request.GET.get("callback")
     if callback:
@@ -407,17 +431,34 @@ def userinfo_handler(request):
 
 
 def runevent_handler(request):
+    apikey = request.GET.get('apikey', None)
+    
     short_name = request.GET.get('name')
-    scraper = getscraperorresponse(short_name, "apiscraperruninfo", request.user)
+    scraper = getscraperorresponse(short_name)
     if type(scraper) in [str, unicode]:
         result = json.dumps({'error':scraper, "short_name":short_name})
         if request.GET.get("callback"):
             result = "%s(%s)" % (request.GET.get("callback"), result)
         return HttpResponse(result)
+
+    kd = scraper.short_name
+    s = scraper
     
-    # TODO: Check accessibility if this scraper is private
+    # Check accessibility if this scraper is private using 
+    # apikey
     if scraper.privacy_status == 'private':
-        pass
+        kd,s = '', None
+        if not all([ scraper.access_apikey, apikey, scraper.access_apikey == apikey ]):
+            result = json.dumps({'error':"Invalid API Key", "short_name":short_name})
+            if request.GET.get("callback"):
+                result = "%s(%s)" % (request.GET.get("callback"), result)
+            return HttpResponse(result)
+
+    u = None
+    if request.user.is_authenticated():
+        u = request.user
+    APIMetric.record( "runeventinfo", key_data=kd,  user=u, code_object=s )
+
         
     runid = request.GET.get('runid', '-1')
     runevent = None
@@ -504,6 +545,8 @@ def convert_date(date_str):
 def scraperinfo_handler(request):
     result = [ ]
     
+    apikey =request.GET.get('apikey', None)
+    
     quietfields = request.GET.get('quietfields', "").split("|")
     history_start_date = convert_date(request.GET.get('history_start_date', None))
     
@@ -514,15 +557,23 @@ def scraperinfo_handler(request):
         rev = None
 
     for short_name in request.GET.get('name', "").split():
-        scraper = getscraperorresponse(short_name, "apiscraperinfo", request.user)
-        # TODO: Check accessibility if this scraper is private
-        if scraper.privacy_status == 'private':
-            pass
+        scraper = getscraperorresponse(short_name)
+
+        # Check accessibility if this scraper is private using 
+        # apikey
+        if hasattr(scraper, "privacy_status") and scraper.privacy_status == 'private':            
+            if not all([scraper.access_apikey, apikey, scraper.access_apikey == apikey]):
+                scraper = u'Invalid API Key'
             
         if type(scraper) in [str, unicode]:
             result.append({'error':scraper, "short_name":short_name})
         else:
             result.append(scraperinfo(scraper, history_start_date, quietfields, rev))
+
+    u = None
+    if request.user.is_authenticated():
+        u = request.user
+    APIMetric.record( "getinfo", key_data=request.GET.get('name', ""),  user=u, code_object=None )
 
     res = json.dumps(result, indent=4)
     callback = request.GET.get("callback")
@@ -540,7 +591,7 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
     info['created']     = scraper.created_at.isoformat()
     
     info['title']       = scraper.title
-    info['description'] = scraper.description
+    info['description'] = scraper.description_safepart()
     info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
     info['wiki_type']   = scraper.wiki_type
     info['privacy_status'] = scraper.privacy_status
@@ -611,5 +662,3 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
 
     return info
         
-
-

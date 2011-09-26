@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
@@ -7,7 +8,8 @@ from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.contrib.auth.models import User
 from django.views.decorators.http import condition
 from django.shortcuts import get_object_or_404
-import textile
+from django.contrib import messages
+
 from django.conf import settings
 
 from managers.datastore import DataStore
@@ -243,6 +245,10 @@ def code_overview(request, wiki_type, short_name):
                     apqs = { "format":"rss2", "name":scraper.short_name, "query":previewrssfeed }
                     context["rssuserfeeds"].append("%s?%s" % (apiurl, urllib.urlencode(apqs)))
 
+        # which domains have been scraped
+        context["domainscrapes"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:10]
+
+
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
 
@@ -390,7 +396,7 @@ def view_admin(request, short_name):
     element_id = request.POST.get('id', None)
     if element_id == 'divAboutScraper':
         view.set_docs(request.POST.get('value', None), request.user)
-        response_text = textile.textile(view.description)
+        response_text = view.description_ashtml()
 
     if element_id == 'hCodeTitle':
         view.title = request.POST.get('value', None)
@@ -410,7 +416,7 @@ def scraper_admin(request, short_name):
     element_id = request.POST.get('id', None)
     if element_id == 'divAboutScraper':
         scraper.set_docs(request.POST.get('value', None), request.user)
-        response_text = textile.textile(scraper.description)
+        response_text = scraper.description_ashtml()
         
     if element_id == 'hCodeTitle':
         scraper.title = request.POST.get('value', None)
@@ -435,13 +441,18 @@ def scraper_admin(request, short_name):
 def scraper_delete_data(request, short_name):
     scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
     if isinstance(scraper, HttpResponse):  return scraper
-    dataproxy = DataStore(scraper.short_name)
-    dataproxy.request({"maincommand":"clear_datastore"})
-    scraper.scraper.update_meta()
-    scraper.save()
-    request.notifications.add("Your data has been deleted")
     
-    dataproxy.close()
+    try:
+        dataproxy = DataStore(scraper.short_name)
+        dataproxy.request({"maincommand":"clear_datastore"})
+        scraper.scraper.update_meta()
+        scraper.save()
+        dataproxy.close()
+    except:
+        pass
+        
+    messages.add_message(request, messages.INFO, 'You data has been deleted')
+        
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
@@ -464,8 +475,11 @@ def scraper_delete_scraper(request, wiki_type, short_name):
 
 
 
+    # this is for the purpose of editing the description, so must be controlled as it has secret password environment settings
 def raw_about_markup(request, wiki_type, short_name):
-    scraper = getscraperor404(request, short_name, "getdescription")
+    scraper = getscraperorresponse(request, wiki_type, short_name, None, "getrawdescription")
+    if isinstance(scraper, HttpResponse):  
+        return HttpResponse("sorry, you do not have permission to edit the description of this scraper", mimetype='text/plain')
     return HttpResponse(scraper.description, mimetype='text/x-web-textile')
 
 def follow(request, short_name):
@@ -702,3 +716,5 @@ def internal_attach_auth( request ):
         
     models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
     return True
+
+

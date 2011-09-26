@@ -51,6 +51,17 @@
 {% load body_class %}
 <body {%  body_class request %}>
 	
+	{% if messages %}
+	<ul class="messages">
+    	{% for message in messages %}
+    	<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    	{% endfor %}
+	</ul>
+	<script type='text/javascript'>
+		//setTimeout( function(){ $('.messages').slideUp(); }, 3000);
+	</script>
+	{% endif %}
+	
 	{% block nav_outer %}
 	<div id="nav_outer">
 		<div id="nav_inner">
@@ -63,10 +74,13 @@
 				<li class="blog"><a href="http://blog.scraperwiki.com">Blog</a></li>
 				{% if user.is_authenticated %}
 				<li class="user loggedin">
-					<a href="{% url profiles_profile_detail user.username %}"><span>Logged in</span></a>
+					<a href="{% url profiles_profile_detail user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
 					<ul>
-						<li class="hi">Hi {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}!</li>
 						<li class="dashboard"><a href="{% url dashboard %}">Your dashboard</a></li>
+						{% if uservaults or request.user.vault_membership.count %}
+						<li class="vaults"><a href="{% url vault %}">Your vaults</a></li>
+						{% endif %}
+						
 						<li class="profile"><a href="{% url profiles_profile_detail user.username %}">Your profile</a></li>
 						<li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
 						<li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
@@ -222,7 +236,6 @@
 						<li><a href="{% url docsroot %}">Docs &amp; tutorials</a></li>	
 						<li><a href="{% url docs 'faq' %}">FAQ</a></li>							
 						<li><a href="http://groups.google.com/group/scraperwiki">Developers&rsquo; discussion group</a></li>			                   			                 
-						<li><a href="{% url whitelist_user %}">Whitelist</a></li>	
 					</ul>
 				</dd>
 			</dl>

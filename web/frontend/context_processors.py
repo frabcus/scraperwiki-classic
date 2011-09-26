@@ -15,6 +15,26 @@ enable_linebreaks_regex = re.compile(",(?! )")
 def enable_linebreaks(str):
     return enable_linebreaks_regex.sub(",<wbr>", str)
 
+def vault_info(request):
+    """
+    Sets vault info for the current user if it exists, ideally we could cache
+    this somewhere.
+    """
+    from codewiki.models import Vault
+    
+    # TODO: Cache vault info for user
+    if not request.user.is_authenticated():
+        return {}
+        
+    try:
+        v = request.user.vaults
+    except Vault.DoesNotExist:
+        return {}
+        
+    # Accessing the request.user.vaults should be done in the specific template
+    # where it is used rather than in every request
+    return { 'uservaults': v }
+    
 
 # Taken from http://www.djangosnippets.org/snippets/1197/
 def site(request):
@@ -49,6 +69,9 @@ def template_settings(request):
     for setting in availible_settings:
         if setting in settings_dict:
             template_settings[setting] = settings_dict[setting]
+    
+    template_settings['SHOW_APIKEY_UI'] = hasattr(settings, "SHOW_APIKEY_UI" ) and settings.SHOW_APIKEY_UI
+            
     return {'settings' : template_settings}
 
 # not used since design revamp in April 2011, commented out in global_settings.py too
