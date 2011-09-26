@@ -32,6 +32,7 @@ import re
 import datetime
 import urllib
 import itertools
+import json
 
 from utilities import location
 
@@ -482,26 +483,30 @@ def vault_users(request, vaultid, username, action):
     only work on the current user's vault so if they don't have one then
     it won't work.
     """
+    from django.template.loader import render_to_string
     from codewiki.models import Vault
     mime = 'application/json'
      
     vault = get_object_or_404( Vault, id=vaultid)
     if vault.user.id != request.user.id:
-        return HttpResponse('{"error":"Not your vault"}' % (username,), mimetype=mime)                    
+        return HttpResponse('{"status": "fail", "error": "Not your vault"}', mimetype=mime)                    
         
     try:
         user = User.objects.get( username=username )    
     except User.DoesNotExist:
-        return HttpResponse('{"error":"Failed to add %s"}' % (username,), mimetype=mime)            
+        return HttpResponse('{"status": "fail", "error":"Username not found"}', mimetype=mime)            
 
-    if action =='add' and not user in vault.members.all():
-        vault.members.add(user)    
-    if action =='remove' and user in vault.members.all():
-        vault.members.remove(user)
+    result = {"status": "ok", "error":""}                    
     
+    if action =='add' and not user in vault.members.all():
+        result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user })                 
+        vault.members.add(user)   
+    if action =='remove' and user in vault.members.all():
+        vault.members.remove(user)        
     vault.save()        
-                    
-    return HttpResponse('{"status":"ok"}', mimetype=mime)
+                
+    
+    return HttpResponse( json.dumps(result), mimetype=mime)
 
 
 

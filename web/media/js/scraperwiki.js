@@ -201,13 +201,15 @@ $(function()
 				var username = $(this).val();
 				var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
 				console.log('/vaults/edit/' + vault_id + '/' + username + '/add/');
+				var closure = $(this);
 				$.getJSON('/vaults/edit/' + vault_id + '/' + username + '/add/', function(data) {
 					console.log(data);
 					$.each(data, function(key, val) {
-				    	if(key == 'status'){
-							console.log('hooray! user "' + username + '" added!');
-						} else if(key == 'error'){
-							console.log('error: ' + val);
+				    	if(key == 'status' && val == 'fail') {
+							console.log( 'Error: ' + val );
+						} else if ( key == 'fragment') {
+							console.log( closure );
+							closure.parents('ul').append( val );
 						}
 					});
 				});
