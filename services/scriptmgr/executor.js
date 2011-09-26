@@ -369,7 +369,7 @@ function execute(http_req, http_res, raw_request_data) {
 			
 			util.log.debug( 'QUERYSTRING is ' + script.query);
 			if (script.query) {
-				args.push( script.query.replace(/&/g, "\\&") );
+				args.push( "\"" + script.query.replace(/&/g, "\\&").replace(/\(/g, "\\(").replace(/\)/g, "\\)") + "\"" );
 			}  
 			util.log.debug(args)
 			
