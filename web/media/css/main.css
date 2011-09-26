@@ -5423,13 +5423,15 @@ body.vaults .content h2 a {
 	float: right;
 	font-size: 14px;
 	line-height: 26px;
-	padding: 1px 10px 0 30px;
+	padding: 0px 10px 0 30px;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	background: #F4F8FB url(../images/icons/add.png) 8px center no-repeat;
 	cursor: pointer;
 	margin-top: -2px;
+	border: 1px solid #D3E7F5;
+	font-weight: normal;
 }
 
 body.vaults .content h2 a:hover {
@@ -5643,13 +5645,13 @@ body.vaults .vault_footer {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8e8e8', endColorstr='#cccccc',GradientType=0 );
 	background: linear-gradient(top, #e8e8e8 0%,#cccccc 100%);
 	text-align: center;
-	padding: 5px;
+	padding: 7px 5px;
 }
 
 body.vaults .vault_header a {
 	float: right;
 	margin-top: 7px;
-	margin-right: 10px;
+	margin-right: 15px;
 }
 
 body.vaults .vault_header a,
@@ -5682,7 +5684,8 @@ body.vaults .vault_header a.vault_users.hover {
 	color: #7a4ba2;
 }
 
-body.vaults .vault_header a.vault_delete:hover {
+body.vaults .vault_header a.vault_delete:hover,
+body.vaults .vault_header a.vault_leave:hover {
 	color: #a73c23;
 }
 
