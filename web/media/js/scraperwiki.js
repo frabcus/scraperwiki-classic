@@ -46,6 +46,7 @@ function setupButtonConfirmation(sId, sMessage)
             return bReturn
         }    
     );
+	return false;
 }
 
 function setupSearchBoxHint()
@@ -186,6 +187,67 @@ $(function()
 	
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
 	
+	$('body.vaults a.vault_users').bind('mouseenter', function(){
+		$(this).addClass('hover').siblings('div.vault_users_popover').fadeIn(150);
+	}).parent().bind('mouseleave', function(){
+		$(this).children('div.vault_users_popover:visible').fadeOut(400);
+		$(this).children('a.vault_users').removeClass('hover');
+		$(this).find('li.new_user_li').remove();
+	});
+	
+	$('body.vaults a.add_user').bind('click', function(){
+		var input = $('<input>').attr('id','username').attr('type','text').attr('class','text').bind('keydown', function(e){
+			var closure = $(this);
+			if((e.keyCode || e.which) == 13){
+				var username = $(this).val();
+				var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
+				var url = '/vaults/edit/' + vault_id + '/' + username + '/add/';
+				$.getJSON(url, function(data) {
+					$.each(data, function(key, val) {
+				    	if(key == 'status' && val == 'fail') {
+							console.log( 'Error: ' + val );
+						} else if ( key == 'fragment') {
+							closure.updateUserCount(1).parent().before( val ).remove();
+						}
+					});
+				});
+			}
+		});
+		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input);
+		$(this).prev().append(li).children(':last').slideDown(250).find('#username').focus();
+	});
+	
+	$('body.vaults a.user_delete').live('click', function(e){
+		var url = $(this).attr('href');
+		var closure = $(this);
+		$.getJSON(url, function(data) {
+			$.each(data, function(key, val) {
+		    	if(key == 'status' && val == 'fail') {
+					console.log( 'Error: ' + val );
+					closure.parents('ul').append('<li class="error">Error: ' + val + '</li>')
+				} else if(key == 'status' && val == 'ok') {
+					closure.updateUserCount(-1).parent().slideUp(function(){
+						$(this).remove();
+					});
+				}
+			});
+		});
+		e.preventDefault();
+	});
+	
+	jQuery.fn.updateUserCount = function(increment) {
+		//	Must be called from an element within <div class="vault_header"></div>
+		return this.each(function() {
+		    var $el = $(this);
+			var number_of_users = Number($el.parents('.vault_header').find('.vault_users_popover li').not('.new_user_li').length) + increment;
+			if(number_of_users == 1){
+				x_users = '1 user';
+			} else {
+				x_users = number_of_users + ' users';
+			}
+			$el.parents('.vault_header').find('.x_users').text(x_users);
+		});
+	}
 	
 });
 

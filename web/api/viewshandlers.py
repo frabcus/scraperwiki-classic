@@ -22,6 +22,7 @@ from django.utils.encoding import smart_str
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.utils import simplejson
 
+from frontend.models import UserProfile
 
 from codewiki.models import Scraper, Code, ScraperRunEvent, CodePermission, scraper_search_query, scrapers_overdue
 from codewiki.managers.datastore import DataStore
@@ -32,13 +33,13 @@ try:     import json
 except:  import simplejson as json
 
 
-def getscraperorresponse(short_name, action, user):
+def getscraperorresponse(short_name):
     try:
         scraper = Code.objects.get(short_name=short_name)
     except Code.DoesNotExist:
         return "Sorry, this scraper does not exist"
-    if not scraper.actionauthorized(user, "apidataread"):
-        return scraper.authorizationfailedmessage(user, "apidataread").get("body")
+#    if not scraper.actionauthorized(user, "apidataread"):
+#        return scraper.authorizationfailedmessage(user, "apidataread").get("body")
     return scraper
     
 
@@ -202,7 +203,7 @@ def sqlite_handler(request):
     short_name = request.GET.get('name')
     apikey = request.GET.get('apikey', None)
     
-    scraper = getscraperorresponse(short_name, "apidataread", request.user)
+    scraper = getscraperorresponse(short_name)
     if type(scraper) in [str, unicode]:
         result = json.dumps({'error':scraper, "short_name":short_name})
         if request.GET.get("callback"):
@@ -402,17 +403,29 @@ def usersearch_handler(request):
 
 
 def userinfo_handler(request):
-    username = request.GET.get('username', "") 
+    username = request.GET.get('username', "")
+    apikey = request.GET.get('apikey', "")
     users = User.objects.filter(username=username)
     result = [ ]
     for user in users:  # list of users is normally 1
         info = { "username":user.username, "profilename":user.get_profile().name }
         info["datejoined"] = user.date_joined.isoformat()
         info['coderoles'] = { }
-        for ucrole in user.usercoderole_set.exclude(code__privacy_status="deleted").exclude(code__privacy_status="private"):
-            if ucrole.role not in info['coderoles']:
-                info['coderoles'][ucrole.role] = [ ]
-            info['coderoles'][ucrole.role].append(ucrole.code.short_name)
+        for ucrole in user.usercoderole_set.exclude(code__privacy_status="deleted"):
+            if ucrole.code.privacy_status != "private":
+                if ucrole.role not in info['coderoles']:
+                    info['coderoles'][ucrole.role] = [ ]
+                info['coderoles'][ucrole.role].append(ucrole.code.short_name)
+            elif apikey:
+                try:
+                    api_user = UserProfile.objects.get(apikey=apikey).user
+                    if api_user.usercoderole_set.filter(code__short_name=ucrole.code.short_name):
+                        if ucrole.role not in info['coderoles']:
+                            info['coderoles'][ucrole.role] = [ ]
+                        info['coderoles'][ucrole.role].append(ucrole.code.short_name) 
+                except UserProfile.DoesNotExist:
+                    pass
+                
 
         result.append(info)
     
@@ -434,7 +447,7 @@ def runevent_handler(request):
     apikey = request.GET.get('apikey', None)
     
     short_name = request.GET.get('name')
-    scraper = getscraperorresponse(short_name, "apiscraperruninfo", request.user)
+    scraper = getscraperorresponse(short_name)
     if type(scraper) in [str, unicode]:
         result = json.dumps({'error':scraper, "short_name":short_name})
         if request.GET.get("callback"):
@@ -557,13 +570,13 @@ def scraperinfo_handler(request):
         rev = None
 
     for short_name in request.GET.get('name', "").split():
-        scraper = getscraperorresponse(short_name, "apiscraperinfo", request.user)
+        scraper = getscraperorresponse(short_name)
 
         # Check accessibility if this scraper is private using 
         # apikey
         if hasattr(scraper, "privacy_status") and scraper.privacy_status == 'private':            
             if not all([scraper.access_apikey, apikey, scraper.access_apikey == apikey]):
-                scraper = u'Failed to access scraper'
+                scraper = u'Invalid API Key'
             
         if type(scraper) in [str, unicode]:
             result.append({'error':scraper, "short_name":short_name})

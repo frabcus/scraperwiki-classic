@@ -40,7 +40,19 @@ class SeleniumTest(unittest.TestCase):
         # extract a title for the job from name of test.  must be done in the constructor or after start()
         self.selenium.set_context("sauce:job-name=%s" % self._testMethodName)  
         self.selenium.window_maximize()
+        
+        # If we have the dev toolbar, get rid of it to prevent interference.
+        self.hide_dev_toolbar()
 
+    def hide_dev_toolbar(self):
+        s = self.selenium
+        s.open("/")
+        self.wait_for_page()
+        if s.is_element_present("djHideToolBarButton"): 
+            if s.is_visible("djHideToolBarButton"):
+                s.click("djHideToolBarButton")
+        
+        
     def wait_for_page(self, doing=None):
         hit_limit = True
         # DO NOT call anything else (even for debugging, e.g. self.selenium.get_location) at this point as:
@@ -148,7 +160,7 @@ class SeleniumTest(unittest.TestCase):
             self.failUnless(s.is_text_present("This %s is " % code_type + privacy))
         elif privacy == 'private':
             self.user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
-            s.open("/admin/codewiki/%s/?q=" % code_type + code_name)
+            s.open(("/admin/codewiki/%s/?q=" % code_type) + code_name)
             self.wait_for_page()
             s.click('link=' + code_name)
             self.wait_for_page()

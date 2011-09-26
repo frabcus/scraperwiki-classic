@@ -69,6 +69,9 @@ def template_settings(request):
     for setting in availible_settings:
         if setting in settings_dict:
             template_settings[setting] = settings_dict[setting]
+    
+    template_settings['SHOW_APIKEY_UI'] = hasattr(settings, "SHOW_APIKEY_UI" ) and settings.SHOW_APIKEY_UI
+            
     return {'settings' : template_settings}
 
 # not used since design revamp in April 2011, commented out in global_settings.py too

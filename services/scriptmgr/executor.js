@@ -173,6 +173,17 @@ exports.run_script = function( http_request, http_response ) {
 		
 };
 
+function writeLaunchFile( f, ds, runid, scrapername, querystring ) {
+	var launch = {
+		'datastore': ds,
+		'runid': runid,
+		'scrapername': scrapername || '',
+		'querystring': querystring || ''
+	}
+	var data = JSON.stringify( launch );
+	fs.writeFileSync(f, data, encoding='utf8');
+}
+
 /******************************************************************************
 * Actually extracts the code and then checks config to determine whether we 
 * should run this as if on a developer machine or whether to run as if on an
@@ -210,11 +221,19 @@ function execute(http_req, http_res, raw_request_data) {
 		// Execute the code locally using the relevant file (exec.whatever)
 		var tmpfile = path.join( code_folder, "script." + util.extension_for_language(script.language) );
 		fs.writeFile(tmpfile, request_data.code, function(err) {
+			
+			writeLaunchFile( path.join( code_folder, "launch.json"), 
+			 				 dataproxy, 
+							 script.run_id, 
+							 script.scraper_name, 
+							 script.query);
+			
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
 				http_res.end( JSON.stringify(r) );
 				return;				
 	   		} else {
+				var args;
 				if ( script.language == 'ruby' || script.language == 'php' ) {
 					args = ['--script=' + tmpfile,'--ds=' + dataproxy, '--runid=' + script.run_id]
 					if ( script.scraper_name ) {
@@ -349,6 +368,12 @@ function execute(http_req, http_res, raw_request_data) {
 				return;				
 	   		} 
 
+			writeLaunchFile( path.join(lxc.code_folder(res), "launch.json"), 
+			 				 dataproxy, 
+							 script.run_id, 
+							 script.scraper_name, 
+							 script.query);
+			
 			util.log.debug('File written to ' + tmpfile );
 			
 			var startTime = new Date();		
@@ -359,7 +384,7 @@ function execute(http_req, http_res, raw_request_data) {
 			r = script.run_id.replace(/\|/g, "\\|");
 
 			util.log.debug('Setting runid to ' + r );
-			args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh", dataproxy, r];
+			var args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh", dataproxy, r];
 						
 			if ( script.scraper_name && script.scraper_name.length > 0 ) {
 				args.push( script.scraper_name);
@@ -369,9 +394,10 @@ function execute(http_req, http_res, raw_request_data) {
 			
 			util.log.debug( 'QUERYSTRING is ' + script.query);
 			if (script.query) {
-				args.push( script.query.replace(/&/g, "\\&") );
+				var qstring = new Buffer(script.query).toString('base64');
+				args.push( qstring );
 			}  
-			util.log.debug(args)
+			util.log.debug(args);
 			
 	 		e = spawn('/usr/bin/lxc-execute', args );
 			
