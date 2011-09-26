@@ -8,6 +8,7 @@ from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.contrib.auth.models import User
 from django.views.decorators.http import condition
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 
 from django.conf import settings
 
@@ -440,13 +441,18 @@ def scraper_admin(request, short_name):
 def scraper_delete_data(request, short_name):
     scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
     if isinstance(scraper, HttpResponse):  return scraper
-    dataproxy = DataStore(scraper.short_name)
-    dataproxy.request({"maincommand":"clear_datastore"})
-    scraper.scraper.update_meta()
-    scraper.save()
-    request.notifications.add("Your data has been deleted")
     
-    dataproxy.close()
+    try:
+        dataproxy = DataStore(scraper.short_name)
+        dataproxy.request({"maincommand":"clear_datastore"})
+        scraper.scraper.update_meta()
+        scraper.save()
+        dataproxy.close()
+    except:
+        pass
+        
+    messages.add_message(request, messages.INFO, 'You data has been deleted')
+        
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 

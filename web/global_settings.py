@@ -70,6 +70,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
     'pagination.middleware.PaginationMiddleware',    
     'middleware.csrfcookie.CsrfAlwaysSetCookieMiddleware'
@@ -92,6 +93,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
   'django.core.context_processors.i18n',
   'django.core.context_processors.media',
   'django.core.context_processors.request',
+  'django.contrib.messages.context_processors.messages',
   'django_notify.context_processors.notifications',
   'frontend.context_processors.site',
   'frontend.context_processors.template_settings',
@@ -122,6 +124,7 @@ INSTALLED_APPS = [
     'south',
     'profiles',
     'django.contrib.humanize',
+    'django.contrib.messages',
     'django_notify',
     'tagging',
     'contact_form',

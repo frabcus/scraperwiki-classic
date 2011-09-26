@@ -46,6 +46,7 @@ function setupButtonConfirmation(sId, sMessage)
             return bReturn
         }    
     );
+	return false;
 }
 
 function setupSearchBoxHint()

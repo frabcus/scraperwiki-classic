@@ -51,6 +51,17 @@
 {% load body_class %}
 <body {%  body_class request %}>
 	
+	{% if messages %}
+	<ul class="messages">
+    	{% for message in messages %}
+    	<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    	{% endfor %}
+	</ul>
+	<script type='text/javascript'>
+		//setTimeout( function(){ $('.messages').slideUp(); }, 3000);
+	</script>
+	{% endif %}
+	
 	{% block nav_outer %}
 	<div id="nav_outer">
 		<div id="nav_inner">
