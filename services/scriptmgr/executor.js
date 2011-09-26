@@ -369,9 +369,10 @@ function execute(http_req, http_res, raw_request_data) {
 			
 			util.log.debug( 'QUERYSTRING is ' + script.query);
 			if (script.query) {
-				args.push( "\"" + script.query.replace(/&/g, "\\&").replace(/\(/g, "\\(").replace(/\)/g, "\\)") + "\"" );
+				var qstring = new Buffer(script.query).toString('base64');
+				args.push( qstring );
 			}  
-			util.log.debug(args)
+			util.log.debug(args);
 			
 	 		e = spawn('/usr/bin/lxc-execute', args );
 			

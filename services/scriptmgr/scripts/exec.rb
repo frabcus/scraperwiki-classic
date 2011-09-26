@@ -10,6 +10,7 @@ require 'optparse'
 require	'scraperwiki'
 require 'scraperwiki/datastore'
 require 'scraperwiki/stacktrace'
+require "base64"
 
 $logfd  = $stderr
 
@@ -85,8 +86,9 @@ OptionParser.new do|opts|
      options[:scrapername] = scrapername
    end
    opts.on( '--qs=[QSTRING]') do|qstring|
-     ENV['QUERY_STRING'] = qstring
-     ENV['URLQUERY'] = qstring
+     qs = Base64.decode64(qstring)
+     ENV['QUERY_STRING'] = qs
+     ENV['URLQUERY'] = qs
    end   
    opts.on( '--runid=[RUNID]') do|runid|
      options[:runid] = runid

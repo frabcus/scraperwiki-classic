@@ -25,8 +25,9 @@ for ($idx = 1; $idx < count($argv); $idx += 1)
    {
       $qs = substr($arg,  5);
 	  if ( strlen($qs) > 0 ) {
-		putenv("QUERY_STRING", $qs);
-		putenv("URLQUERY", $qs);
+		$decoded = base64_decode($qs);
+		putenv("QUERY_STRING", $decoded);
+		putenv("URLQUERY", $decoded);
 	  }
    }
 

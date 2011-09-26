@@ -10,6 +10,7 @@ import  resource
 import  urllib2, urllib
 import  optparse
 import  scraperwiki
+import base64
 
 try    : import json
 except : import simplejson as json
@@ -77,8 +78,9 @@ if options.uid:
 if options.path:
     sys.path.append( options.path )
 if options.qs:
-    os.environ['QUERY_STRING'] = options.qs
-    os.environ['URLQUERY'] = options.qs    
+    qstring = base64.b64decode( options.qs )
+    os.environ['QUERY_STRING'] = qstring
+    os.environ['URLQUERY'] = qstring   
 
 
 host, port = string.split(options.ds, ':')
