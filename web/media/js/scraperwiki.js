@@ -197,19 +197,17 @@ $(function()
 	
 	$('body.vaults a.add_user').bind('click', function(){
 		var input = $('<input>').attr('id','username').attr('type','text').attr('class','text').bind('keydown', function(e){
+			var closure = $(this);
 			if((e.keyCode || e.which) == 13){
 				var username = $(this).val();
 				var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
-				console.log('/vaults/edit/' + vault_id + '/' + username + '/add/');
-				var closure = $(this);
-				$.getJSON('/vaults/edit/' + vault_id + '/' + username + '/add/', function(data) {
-					console.log(data);
+				var url = '/vaults/edit/' + vault_id + '/' + username + '/add/';
+				$.getJSON(url, function(data) {
 					$.each(data, function(key, val) {
 				    	if(key == 'status' && val == 'fail') {
 							console.log( 'Error: ' + val );
 						} else if ( key == 'fragment') {
-							console.log( closure );
-							closure.parents('ul').append( val );
+							closure.updateUserCount(1).parent().before( val ).remove();
 						}
 					});
 				});
@@ -218,6 +216,38 @@ $(function()
 		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input);
 		$(this).prev().append(li).children(':last').slideDown(250).find('#username').focus();
 	});
+	
+	$('body.vaults a.user_delete').live('click', function(e){
+		var url = $(this).attr('href');
+		var closure = $(this);
+		$.getJSON(url, function(data) {
+			$.each(data, function(key, val) {
+		    	if(key == 'status' && val == 'fail') {
+					console.log( 'Error: ' + val );
+					closure.parents('ul').append('<li class="error">Error: ' + val + '</li>')
+				} else if(key == 'status' && val == 'ok') {
+					closure.updateUserCount(-1).parent().slideUp(function(){
+						$(this).remove();
+					});
+				}
+			});
+		});
+		e.preventDefault();
+	});
+	
+	jQuery.fn.updateUserCount = function(increment) {
+		//	Must be called from an element within <div class="vault_header"></div>
+		return this.each(function() {
+		    var $el = $(this);
+			var number_of_users = Number($el.parents('.vault_header').find('.vault_users_popover li').not('.new_user_li').length) + increment;
+			if(number_of_users == 1){
+				x_users = '1 user';
+			} else {
+				x_users = number_of_users + ' users';
+			}
+			$el.parents('.vault_header').find('.x_users').text(x_users);
+		});
+	}
 	
 });
 

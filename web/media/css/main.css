@@ -5479,7 +5479,7 @@ body.vaults .vault_users_popover {
 	position: absolute;
 	z-index: 100;
 	width: 250px;
-    top: 40px;
+    top: 34px;
     right: 34px;
     padding: 10px;
     -webkit-border-radius: 5px;
@@ -5494,9 +5494,9 @@ body.vaults .vault_users_popover {
 
 body.vaults .vault_users_popover .arrow {
     width: 22px;
-    height: 10px;
+    height: 9px;
     position: absolute;
-    top: -10px;
+    top: -9px;
     left: 50%;
     margin-left: -11px;
     background: transparent url(../images/vault_users_popover_arrow.png) 0 0 no-repeat;
