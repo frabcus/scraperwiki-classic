@@ -187,6 +187,35 @@ $(function()
 	
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
 	
+	$('body.vaults a.vault_users').bind('mouseenter', function(){
+		$(this).addClass('hover').siblings('div.vault_users_popover').fadeIn(150);
+	}).parent().bind('mouseleave', function(){
+		$(this).children('div.vault_users_popover:visible').fadeOut(400);
+		$(this).children('a.vault_users').removeClass('hover');
+		$(this).find('li.new_user_li').remove();
+	});
+	
+	$('body.vaults a.add_user').bind('click', function(){
+		var input = $('<input>').attr('id','username').attr('type','text').attr('class','text').bind('keydown', function(e){
+			if((e.keyCode || e.which) == 13){
+				var username = $(this).val();
+				var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
+				console.log('/vaults/edit/' + vault_id + '/' + username + '/add/');
+				$.getJSON('/vaults/edit/' + vault_id + '/' + username + '/add/', function(data) {
+					console.log(data);
+					$.each(data, function(key, val) {
+				    	if(key == 'status'){
+							console.log('hooray! user "' + username + '" added!');
+						} else if(key == 'error'){
+							console.log('error: ' + val);
+						}
+					});
+				});
+			}
+		});
+		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input);
+		$(this).prev().append(li).children(':last').slideDown(250).find('#username').focus();
+	});
 	
 });
 
