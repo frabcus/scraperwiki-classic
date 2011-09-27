@@ -22,7 +22,7 @@
         
     	<div class="vault_header">
     	    <span class="shineyshiney"></span>
-	        <a class="vault_delete"><img src="{{ MEDIA_URL }}images/icons/delete.png" width="16" height="16"> Delete vault</a>
+	        <!-- <a class="vault_delete"><img src="{{ MEDIA_URL }}images/icons/delete.png" width="16" height="16"> Delete vault</a> -->
 	        <a class="vault_users"><img src="{{ MEDIA_URL }}images/icons/user_purple.png" width="16" height="16"> <span class="x_users">{% if vault.members.count > 0 %}{{ vault.members.count }} user{{ vault.members.count|pluralize }}{% else %}No users{% endif %}</span></a>
     	    <h3>{{ vault.name }} <span class="plan">({{ vault.plan|lower }} plan)</span></h3>
 	        <div class="vault_users_popover">
@@ -75,7 +75,7 @@
         
     	<div class="vault_header">
     	    <span class="shineyshiney"></span>
-	        <a class="vault_leave"><img src="{{ MEDIA_URL }}images/icons/door_exit.png" width="16" height="16"> Leave vault</a>
+	        <!-- <a class="vault_leave"><img src="{{ MEDIA_URL }}images/icons/door_exit.png" width="16" height="16"> Leave vault</a> -->
 	        <a class="vault_users"><img src="{{ MEDIA_URL }}images/icons/user_purple.png" width="16" height="16"> <span class="x_users">{% if vault.members.count > 0 %}{{ vault.members.count }} user{{ vault.members.count|pluralize }}{% else %}No users{% endif %}</span></a>
     	    <h3>{{ vault.name }} <span class="plan">({{ vault.user.username }}&rsquo;s vault)</span></h3>
 	        <div class="vault_users_popover">

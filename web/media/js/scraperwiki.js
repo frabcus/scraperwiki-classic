@@ -187,6 +187,18 @@ $(function()
 	
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
 	
+	
+	
+	
+	
+	$('div.vault_users_popover').each(function(i,el){
+		//	This centres the Users Popover underneath the Users toolbar button
+		var popo = $(this);
+		var link = $(this).prevAll('.vault_users');
+		var anchor = link.position().left + (0.5 * link.outerWidth());
+		popo.css('left', anchor - (popo.outerWidth() / 2) );
+	});
+	
 	$('body.vaults a.vault_users').bind('mouseenter', function(){
 		$(this).addClass('hover').siblings('div.vault_users_popover').fadeIn(150);
 	}).parent().bind('mouseleave', function(){
@@ -210,6 +222,7 @@ $(function()
 				$.getJSON(url, function(data) {
 					if(data.status == 'ok'){
 						closure.updateUserCount(1).parent().before( data.fragment ).remove();
+						console.log(data);
 					} else if(data.status == 'fail'){
 						closure.parents('ul').append('<li class="error">' + data.error + '</li>');
 					}
