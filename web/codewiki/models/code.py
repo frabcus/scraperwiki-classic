@@ -38,7 +38,7 @@ LANGUAGES = [ (k,v) for k,v in LANGUAGES_DICT.iteritems() ]
 # used for new scraper/view dialogs
 # Add "javascript" to enable Javascript
 SCRAPER_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php" ] ]
-SCRAPER_LANGUAGES_V = [ '2.7.1', '1.9.2', '5.1'] 
+SCRAPER_LANGUAGES_V = [ '2.7.1', '1.9.2', '5.3.5'] 
 
 VIEW_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php", "html"] ]
 HELP_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php"] ]
