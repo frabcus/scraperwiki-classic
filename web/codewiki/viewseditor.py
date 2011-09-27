@@ -469,10 +469,10 @@ def add_to_vault(request, wiki_type, language, id):
     uc.role = 'owner'
     uc.save()
 
-    # Current user is just an editor
-    uc = UserCodeRole( code=scraper, user=request.user )
-    uc.role = 'editor'
-    uc.save()    
+    if not request.user == vault.user:
+        uc = UserCodeRole( code=scraper, user=request.user )
+        uc.role = 'editor'
+        uc.save()    
     
     response_url = reverse('editor_edit', kwargs={'wiki_type': wiki_type, 'short_name' : scraper.short_name})
     return HttpResponseRedirect(response_url)
