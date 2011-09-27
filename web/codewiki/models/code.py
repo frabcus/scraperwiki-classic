@@ -108,7 +108,6 @@ class Code(models.Model):
     line_count         = models.IntegerField(default=0)    
     featured           = models.BooleanField(default=False)
     istutorial         = models.BooleanField(default=False)
-    isstartup          = models.BooleanField(default=False)
     language           = models.CharField(max_length=32, choices=LANGUAGES,  default='python')
     wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
     relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
