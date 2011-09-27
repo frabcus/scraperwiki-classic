@@ -190,47 +190,61 @@ $(function()
 	$('body.vaults a.vault_users').bind('mouseenter', function(){
 		$(this).addClass('hover').siblings('div.vault_users_popover').fadeIn(150);
 	}).parent().bind('mouseleave', function(){
-		$(this).children('div.vault_users_popover:visible').fadeOut(400);
-		$(this).children('a.vault_users').removeClass('hover');
-		$(this).find('li.new_user_li').remove();
+	//	if(!$(this).find('#username').is(':focus')){
+			$(this).children('div.vault_users_popover:visible').fadeOut(400, function(){
+				$(this).find('li.new_user_li, li.error').remove();
+				$(this).find('a.add_user').show();
+			});
+			$(this).children('a.vault_users').removeClass('hover');
+	//	}
 	});
 	
 	$('body.vaults a.add_user').bind('click', function(){
 		var input = $('<input>').attr('id','username').attr('type','text').attr('class','text').bind('keydown', function(e){
 			var closure = $(this);
 			if((e.keyCode || e.which) == 13){
+				closure.parents('ul').children('.error').slideUp(150);
 				var username = $(this).val();
 				var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
 				var url = '/vaults/edit/' + vault_id + '/' + username + '/add/';
 				$.getJSON(url, function(data) {
-					$.each(data, function(key, val) {
-				    	if(key == 'status' && val == 'fail') {
-							console.log( 'Error: ' + val );
-						} else if ( key == 'fragment') {
-							closure.updateUserCount(1).parent().before( val ).remove();
-						}
-					});
+					if(data.status == 'ok'){
+						closure.updateUserCount(1).parent().before( data.fragment ).remove();
+					} else if(data.status == 'fail'){
+						closure.parents('ul').append('<li class="error">' + data.error + '</li>');
+					}
 				});
 			}
 		});
-		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input);
-		$(this).prev().append(li).children(':last').slideDown(250).find('#username').focus();
+		var confirm = $('<a>').text('Add!').bind('click', function(){
+			var closure = $(this).prev();
+			closure.parents('ul').children('.error').slideUp(150);
+			var username = $(this).val();
+			var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
+			var url = '/vaults/edit/' + vault_id + '/' + username + '/add/';
+			$.getJSON(url, function(data) {
+				if(data.status == 'ok'){
+					closure.updateUserCount(1).parent().before( data.fragment ).remove();
+				} else if(data.status == 'fail'){
+					closure.parents('ul').append('<li class="error">' + data.error + '</li>');
+				}
+			});
+		});
+		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input).append(confirm);
+		$(this).slideUp(250).prev().append(li).children(':last').slideDown(250).find('#username').focus();
 	});
 	
 	$('body.vaults a.user_delete').live('click', function(e){
 		var url = $(this).attr('href');
 		var closure = $(this);
 		$.getJSON(url, function(data) {
-			$.each(data, function(key, val) {
-		    	if(key == 'status' && val == 'fail') {
-					console.log( 'Error: ' + val );
-					closure.parents('ul').append('<li class="error">Error: ' + val + '</li>')
-				} else if(key == 'status' && val == 'ok') {
-					closure.updateUserCount(-1).parent().slideUp(function(){
-						$(this).remove();
-					});
-				}
-			});
+			if(data.status == 'ok'){
+				closure.updateUserCount(-1).parent().slideUp(function(){
+					$(this).remove();
+				});
+			} else if(data.status == 'fail'){
+				closure.parents('ul').append('<li class="error">Error: ' + data.error + '</li>');
+			}
 		});
 		e.preventDefault();
 	});

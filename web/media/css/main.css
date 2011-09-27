@@ -5587,6 +5587,10 @@ body.vaults .vault_header .vault_users_popover a.add_user:hover {
 	color: #298105;
 }
 
+body.vaults .vault_header .vault_users_popover .new_user_li {
+	cursor: default;
+}
+
 body.vaults .new_user_li label {
 	font-size: 13px;
 	color: #999;
@@ -5594,8 +5598,31 @@ body.vaults .new_user_li label {
 
 body.vaults .new_user_li #username {
 	line-height: 16px;
-	width: 140px;
+	width: 110px;
 	margin-left: 5px;
+}
+
+body.vaults .vault_header .vault_users_popover .new_user_li a {
+	float: right;
+	background-color: #bad9b3;
+	padding: 1px 5px;
+	font-size: 13px;
+	line-height: 18px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	border: 1px solid #5c9e4f;
+	margin-top: 2px;
+	color: #39732d;
+}
+
+body.vaults .vault_header .vault_users_popover li.error {
+	color: #a73c23;
+	background-color: #f9d5d4;
+	font-size: 13px;
+	text-align: center;
+	line-height: 16px;
+	cursor: default;
 }
 
 
@@ -5623,6 +5650,8 @@ body.vaults .vault_contents li.code_object_line {
 
 body.vaults .vault_contents li.code_object_line h3 {
 	font-size: 18px;
+	padding: 5px 0;
+	width: 500px;
 }
 
 body.vaults .vault_footer {
