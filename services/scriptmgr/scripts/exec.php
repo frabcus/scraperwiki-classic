@@ -13,44 +13,29 @@ require_once 'scraperwiki/stacktrace.php';
 
 ob_implicit_flush(true);
 
-$script = null;
-$datastore = null;
-$scrapername = null; 
-$runid = null; 
+$script 	 = null;
+
+// Load launch.json
+$contents 	 = file_get_contents('launch.json');
+$launch 	 = json_decode( $contents, true );
+$datastore   = $launch['datastore'];
+$scrapername = $launch['scrapername'];
+$runid 	     = $launch['runid'];
+$querystring = $launch['querystring'];
+
+if ( strlen($querystring) > 0 ) {
+	putenv("QUERY_STRING=" . $querystring);
+	putenv("URLQUERY=" . $querystring);
+}
+
+
+
 for ($idx = 1; $idx < count($argv); $idx += 1)
 {
    $arg  = $argv[$idx] ;
 
-   if (substr($arg, 0, 5) == '--qs=')
-   {
-      $qs = substr($arg,  5);
-	  if ( strlen($qs) > 0 ) {
-		$decoded = base64_decode($qs);
-		putenv("QUERY_STRING=" . $decoded);
-		putenv("URLQUERY=" . $decoded);
-	  }
-   }
-
    if (substr ($arg, 0,  9) == '--script=')
       $script = substr ($arg, 9);
-   if (substr ($arg, 0, 5) == '--ds=')
-      $datastore = substr($arg, 5);
-   if (substr ($arg, 0, 14) == '--scrapername=')
-      $scrapername = substr($arg, 14);
-   if (substr ($arg, 0, 8) == '--runid=')
-      $runid = substr($arg, 8);
-   if (substr($arg, 0, 6) == '--gid=')
-   {
-      $gid = substr($arg,  6);
-      posix_setgid($gid);
-      posix_setegid($gid);
-   }
-   if (substr ($arg, 0, 6) == '--uid=')
-   {
-      $uid = substr($arg, 6);
-      posix_setuid($uid);
-      posix_seteuid($uid);
-   }
 }
 
 
