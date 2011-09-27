@@ -99,16 +99,12 @@ class Code(models.Model):
     source             = models.CharField(max_length=100, blank=True)
     description        = models.TextField(blank=True)
     created_at         = models.DateTimeField(auto_now_add=True)
-    deleted            = models.BooleanField()     # deprecated
     status             = models.CharField(max_length=10, blank=True, default='ok')   # "sick", "ok"
     users              = models.ManyToManyField(User, through='UserCodeRole')
     guid               = models.CharField(max_length=1000)
-    published          = models.BooleanField(default=True)  # deprecated
-    first_published_at = models.DateTimeField(null=True, blank=True)   # could be replaced with created_at
     line_count         = models.IntegerField(default=0)    
     featured           = models.BooleanField(default=False)
     istutorial         = models.BooleanField(default=False)
-    isstartup          = models.BooleanField(default=False)
     language           = models.CharField(max_length=32, choices=LANGUAGES,  default='python')
     wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
     relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
@@ -132,9 +128,6 @@ class Code(models.Model):
             self.created_at = datetime.datetime.today()  
 
     def save(self, *args, **kwargs):
-        if self.published and self.first_published_at == None:
-            self.first_published_at = datetime.datetime.today()
-
         if not self.short_name:
             self._buildfromfirsttitle()
 
