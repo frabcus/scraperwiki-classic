@@ -586,11 +586,8 @@ def vault_users(request, vaultid, username, action):
     editor = request.user == vault.user
     
     if action =='adduser' and not user in vault.members.all():
-        print 'adding user'
         result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 
-        print result['fragment']
         vault.members.add(user) 
-        print 'added'  
     if action =='removeuser' and user in vault.members.all():
         vault.members.remove(user)        
     vault.save()        

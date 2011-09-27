@@ -437,4 +437,13 @@ def quickhelp(request):
     return render_to_response('documentation/quick_help.html', context, context_instance=RequestContext(request))
 
 
-
+def add_to_vault(request, wiki_type, language, id):
+    name = request.GET.get('name', None)
+    
+    # Create a new scraper with the specific type and language, put it in the vault (if
+    # the current user is allowed and then we're done)
+    scraper = None
+    
+    
+    response_url = reverse('editor_edit', kwargs={'wiki_type': wiki_type, 'short_name' : scraper.short_name})
+    return HttpResponseRedirect(response_url)
