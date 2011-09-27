@@ -499,8 +499,10 @@ def choose_template(request, wiki_type):
     
     vault = request.GET.get('vault', None)
     
-    # TODO: Change this to include language version numbers for beta_users
-    if request.user.is_authenticated() and request.user.vaults.count() > 0 and vault:
+    print "Auth:" + str(request.user.is_authenticated())
+    print "Count:" + str(request.user.vault_membership.count())
+    print 'Vault:' + str(vault)
+    if request.user.is_authenticated() and request.user.vault_membership.count() > 0 and vault:
         from itertools import chain
         template = 'codewiki/includes/add_to_vault.html'
         langs =  []
