@@ -555,6 +555,7 @@ def vault_scrapers_add(request, vaultid, shortname):
     uc.role = 'owner'
     uc.save()
     
+    scraper.privacy_status = 'private'
     scraper.vault = vault
     scraper.save()
                 
