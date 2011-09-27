@@ -41,7 +41,7 @@ def frontpage(request, public_profile_field=None):
     user = request.user
 
     #featured
-    featured_both = Code.objects.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:4]
+    featured_both = Code.objects.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-created_at')[:4]
 	
     #popular tags
     #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
@@ -188,8 +188,8 @@ def help(request, mode=None, language=None):
             for scraper in tutorials[language]:
                 scraper.title = re.sub("^[\d ]+", "", scraper.title)
         else:
-            tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
-        viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
+            tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('created_at')
+        viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('created_at')
         context["include_tag"] = "frontend/help_tutorials.html"
     
     else: 

@@ -57,9 +57,9 @@ def tutorials(request,language=None):
         return HttpResponseRedirect(reverse('tutorials',kwargs={'language': request.session.get('language', 'python')}) )
 
     tutorial_dict, viewtutorials = {}, {}
-    tutorial_dict[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
+    tutorial_dict[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('created_at')
         
-    viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
+    viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('created_at')
 
     context = {'language': language, 'tutorials': tutorial_dict, 'viewtutorials': viewtutorials}
     context['display_language'] = LANGUAGES_DICT[language]

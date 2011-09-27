@@ -102,7 +102,6 @@ class Code(models.Model):
     status             = models.CharField(max_length=10, blank=True, default='ok')   # "sick", "ok"
     users              = models.ManyToManyField(User, through='UserCodeRole')
     guid               = models.CharField(max_length=1000)
-    first_published_at = models.DateTimeField(null=True, blank=True)   # could be replaced with created_at
     line_count         = models.IntegerField(default=0)    
     featured           = models.BooleanField(default=False)
     istutorial         = models.BooleanField(default=False)
@@ -129,9 +128,6 @@ class Code(models.Model):
             self.created_at = datetime.datetime.today()  
 
     def save(self, *args, **kwargs):
-        if self.published and self.first_published_at == None:
-            self.first_published_at = datetime.datetime.today()
-
         if not self.short_name:
             self._buildfromfirsttitle()
 

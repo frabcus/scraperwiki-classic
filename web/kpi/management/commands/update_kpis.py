@@ -26,10 +26,10 @@ class Command(BaseCommand):
                 this_month = datetime.date(year, month, 1)
                 next_month = one_month_in_the_future(month, year) 
 
-                month_data['total_scrapers'] = Scraper.objects.filter(first_published_at__lte=next_month).exclude(privacy_status="deleted").count()
-                month_data['this_months_scrapers'] = Scraper.objects.filter(first_published_at__year=year, first_published_at__month=month).exclude(privacy_status="deleted").count()
-                month_data['total_views'] = View.objects.filter(first_published_at__lte=next_month).exclude(privacy_status="deleted").count()
-                month_data['this_months_views'] = View.objects.filter(first_published_at__year=year, first_published_at__month=month).exclude(privacy_status="deleted").count()
+                month_data['total_scrapers'] = Scraper.objects.filter(created_at__lte=next_month).exclude(privacy_status="deleted").count()
+                month_data['this_months_scrapers'] = Scraper.objects.filter(created_at__year=year, created_at__month=month).exclude(privacy_status="deleted").count()
+                month_data['total_views'] = View.objects.filter(created_at__lte=next_month).exclude(privacy_status="deleted").count()
+                month_data['this_months_views'] = View.objects.filter(created_at__year=year, created_at__month=month).exclude(privacy_status="deleted").count()
                 month_data['total_users'] = User.objects.filter(date_joined__lte=next_month).count()
                 month_data['this_months_users'] = User.objects.filter(date_joined__year=year, date_joined__month=month).count()
 
