@@ -381,24 +381,7 @@ function execute(http_req, http_res, raw_request_data) {
 			// Pass the data proxy and runid to the script that will trigger the exec.py
 			var cfgpath = '/mnt/' + rVM + '/config';
 
-			r = script.run_id.replace(/\|/g, "\\|");
-
-			util.log.debug('Setting runid to ' + r );
-			var args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh", dataproxy, r];
-						
-			if ( script.scraper_name && script.scraper_name.length > 0 ) {
-				args.push( script.scraper_name);
-			} else {
-				args.push( ' ' );
-			}
-			
-			util.log.debug( 'QUERYSTRING is ' + script.query);
-			if (script.query) {
-				var qstring = new Buffer(script.query).toString('base64');
-				args.push( qstring );
-			}  
-			util.log.debug(args);
-			
+			var args = [ '-n', rVM, '-f', cfgpath, "/home/startup/runscript", extension];
 	 		e = spawn('/usr/bin/lxc-execute', args );
 			
 			// json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
