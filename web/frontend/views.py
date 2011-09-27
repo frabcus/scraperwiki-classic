@@ -479,6 +479,11 @@ def view_vault(request, username=None):
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))
 
+
+@login_required
+def vault_scrapers_edit(request, vaultid, action, shortname):
+    return HttpResponseRedirect(reverse('vault'))
+    
 @login_required
 def vault_users(request, vaultid, username, action):
     """
