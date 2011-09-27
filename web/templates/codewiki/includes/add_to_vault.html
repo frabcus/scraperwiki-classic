@@ -1,20 +1,12 @@
 {% load screen_shot %}
-<h1>Choose a language</h1>
-<ul class="views small" id="chooser">
-  {% for language, display_language in languages %}
-  <li>
-    <a href="{% url editor wiki_type language %}?vault={{ vault_id }}" class="screenshot">
-      <br/>
-    <img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/>
-      <br/>
-    {{display_language}} {{wiki_type}}
-    </a>                
-  </li>
-  {% endfor %}
+<h1>Create a new {{wiki_type}}</h1>
+
+<ul id="chooser">
+    {% for language, display_language, version in languages %}
+    <li><a href="/scrapers/new/{{language}}/tovault/{{vault_id}}/"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}} <em>v {{ version }}</em></a></li>
+    {% endfor %}
 </ul>
 
-Need to go to 
-
-/scrapers/new/{{language}}/tovault/{{id}}/?name={{name}}
-
-<input type='text'>
+<div id="chooser_name">
+    <p><label for="chooser_name_box" title="You need to name your {{wiki_type}} before it can be created in the Vault">Save as:</label> <input type="text" id="chooser_name_box" class="text" /></p>
+</div>

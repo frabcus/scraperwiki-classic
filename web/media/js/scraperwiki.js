@@ -102,8 +102,48 @@ function newCodeObject(wiki_type)
         {
             overlayClose: true, 
             autoResize: true, 
-            containerCss:{ borderColor:"#ccc", width:(wiki_type == "scraper" ? 480 : 630)+"px", height:"170px" }, 
+        //    containerCss:{ borderColor:"#ccc", width:(wiki_type == "scraper" ? 480 : 630)+"px", height:"170px" }, 
             overlayCss: { cursor:"auto" }
+        });
+    });
+}
+
+function newVaultCodeObject(id, wiki_type){
+	if(!wiki_type){ wiki_type = 'scraper'; }
+	var url = '/' + wiki_type + 's/new/choose_template/?ajax=1&vault=' + id;
+    $.get(url, function(data){
+        $.modal('<div id="template_popup">' + data + '</div>', {
+            overlayClose: true, 
+            autoResize: true,
+            overlayCss: { cursor:"auto" },
+			onShow: function(dialog){
+				$('li a', dialog.data).bind('click', function(e){
+					e.preventDefault();
+					if($('input', dialog.data).val() == ''){
+						$('span.warning', dialog.data).remove();
+						text = $('label', dialog.data).attr('title');
+						$('p', dialog.data).addClass('error').append('<span class="warning"><span></span>' + text + '</span>');
+						$('input', dialog.data).bind('keyup', function(){
+							$('p', dialog.data).removeClass('error').children('span').remove();
+							$(this).unbind('keyup');
+						})
+					} else {
+						$(this).addClass('active');
+						location.href = $(this).attr('href') + '?name=' + encodeURI( $('input', dialog.data).val() );
+					}
+				});
+			},
+			onOpen: function(dialog) {
+				dialog.data.show();
+				dialog.overlay.fadeIn(200);
+				dialog.container.fadeIn(200);
+			},
+			onClose: function(dialog) {
+				dialog.container.fadeOut(200);
+				dialog.overlay.fadeOut(200, function(){
+					$.modal.close();
+				});
+			}
         });
     });
 }
@@ -114,7 +154,11 @@ $(function()
 	setupNavSearchBoxHint();
 
     $('a.editor_view').click(function()  {  newCodeObject('view');  return false; }); 
-    $('a.editor_scraper').click(function()  {  newCodeObject('scraper');  return false; }); 
+    $('a.editor_scraper').click(function()  {  newCodeObject('scraper');  return false; });
+	$('a.add_to_vault').bind('click', function(e){ 
+		e.preventDefault();
+		newVaultCodeObject( $(this).attr('rel'), 'scraper');
+	});
 	
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
@@ -216,13 +260,13 @@ $(function()
 			var closure = $(this);
 			if((e.keyCode || e.which) == 13){
 				closure.parents('ul').children('.error').slideUp(150);
-				var username = $(this).val();
-				var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
+				var username = closure.val();
+				var vault_id = closure.parents('div').find('a.add_user').attr('rel');
 				var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
 				$.getJSON(url, function(data) {
 					if(data.status == 'ok'){
+						closure.parents('ul').next('a').slideDown(150);
 						closure.updateUserCount(1).parent().before( data.fragment ).remove();
-						console.log(data);
 					} else if(data.status == 'fail'){
 						closure.parents('ul').append('<li class="error">' + data.error + '</li>');
 					}
@@ -232,11 +276,12 @@ $(function()
 		var confirm = $('<a>').text('Add!').bind('click', function(){
 			var closure = $(this).prev();
 			closure.parents('ul').children('.error').slideUp(150);
-			var username = $(this).val();
-			var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
+			var username = closure.val();
+			var vault_id = closure.parents('div').find('a.add_user').attr('rel');
 			var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
 			$.getJSON(url, function(data) {
 				if(data.status == 'ok'){
+					closure.parents('ul').next('a').slideDown(150);
 					closure.updateUserCount(1).parent().before( data.fragment ).remove();
 				} else if(data.status == 'fail'){
 					closure.parents('ul').append('<li class="error">' + data.error + '</li>');

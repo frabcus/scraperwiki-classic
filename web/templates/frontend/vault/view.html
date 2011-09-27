@@ -16,7 +16,7 @@
 
 {% if vaults.count %}
 <div id="my_vaults">
-    <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: <a id="new_vault">Create another</a></h2>
+    <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: <!-- <a id="new_vault">Create another</a> --></h2>
     {% for vault in vaults.all %}
     <div class="vault">
         
@@ -50,14 +50,16 @@
     	{% else %}
     	    <div class="empty_vault">
     	        <h4>This vault is empty!</h4>
-    	        <p>Perhaps you&rsquo;d like to read our <a>Vaults FAQ</a>,<br/>or <a>move some scrapers or views</a> here?</p>
+    	        <!-- <p>Perhaps you&rsquo;d like to read our <a>Vaults FAQ</a>,<br/>or <a>move some scrapers or views</a> here?</p> -->
+    	        <p>Vaults are a great way to keep scrapers secure, <br/>while sharing them with the people that matter.</p>
+    	        <p>You can <a class="add_to_vault" rel="{{ vault.id }}" href="">create a new scraper in this vault</a>, or move an <br/>existing scraper here by selecting this vault from the <br/>dropdown menu on the scraper&rsquo;s overview page.</p>
     	    </div>
     	{% endif %}
     	</div>
         
         <div class="vault_footer">
-            <a class="add_to_vault"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add a new item</a>
-            <a class="move_to_vault"><img src="{{ MEDIA_URL }}images/icons/cog_go.png" width="16" height="16"/> Move an item here</a>
+            <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a new scraper in this vault</a>
+            <!-- <a class="move_to_vault"><img src="{{ MEDIA_URL }}images/icons/cog_go.png" width="16" height="16"/> Move an item here</a> -->
         </div>
         
     </div>
@@ -77,7 +79,7 @@
     	    <span class="shineyshiney"></span>
 	        <!-- <a class="vault_leave"><img src="{{ MEDIA_URL }}images/icons/door_exit.png" width="16" height="16"> Leave vault</a> -->
 	        <a class="vault_users"><img src="{{ MEDIA_URL }}images/icons/user_purple.png" width="16" height="16"> <span class="x_users">{% if vault.members.count > 0 %}{{ vault.members.count }} user{{ vault.members.count|pluralize }}{% else %}No users{% endif %}</span></a>
-    	    <h3>{{ vault.name }} <span class="plan">({{ vault.user.username }}&rsquo;s vault)</span></h3>
+    	    <h3>{{ vault.name }} <span class="plan">({% if vault.user.name %}{{vault.user.name}}{% else %}{{vault.user.username}}{% endif %}&rsquo;s vault)</span></h3>
 	        <div class="vault_users_popover">
     		    <h4><span class="x_users">{{ vault.members.count }} user{{ vault.members.count|pluralize }}</span> can access this vault:</h4>
     		    <ul>
@@ -100,14 +102,15 @@
     	{% else %}
     	    <div class="empty_vault">
     	        <h4>This vault is empty!</h4>
-    	        <p>Perhaps you&rsquo;d like to read our <a>Vaults FAQ</a>,<br/>or <a>move some scrapers or views</a> here?</p>
+    	        <!-- <p>Perhaps you&rsquo;d like to read our <a>Vaults FAQ</a>,<br/>or <a>move some scrapers or views</a> here?</p> -->
+    	        <p>Vaults are a great way to keep scrapers secure, <br/>while sharing them with the people that matter.</p>
     	    </div>
     	{% endif %}
     	</div>
         
         <div class="vault_footer">
-            <a class="add_to_vault"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add a new item</a>
-            <a class="move_to_vault"><img src="{{ MEDIA_URL }}images/icons/cog_go.png" width="16" height="16"/> Move an item here</a>
+            <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a new scraper in this vault</a>
+            <!-- <a class="move_to_vault"><img src="{{ MEDIA_URL }}images/icons/cog_go.png" width="16" height="16"/> Move an item here</a> -->
         </div>
         
     </div>

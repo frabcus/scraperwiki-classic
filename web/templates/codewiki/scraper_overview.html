@@ -174,10 +174,21 @@
 <div class="content col left" id="scraper_contributors">
     <h3>Contributors</h3>
     {% include 'codewiki/includes/contributors.html' %}
+    
+    {% if request.user.vault_membership.all %}
+    <h3>Move this scraper to a vault</h3>
+    <p>As this scraper&rsquo;s owner, you can save it to any of the vaults to which you have access:</p>
+    <p style="text-align: center"><label for="move_to_vault" style="color:#666; font-size: 0.8em">Move to vault:</label> <select id="move_to_vault">
+    {% for vault in request.user.vault_membership.all %}
+        <option val="{{ vault.id }}">{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.username}}&rsquo;s vault{% endif %})</option>
+    {% endfor %}
+    </select> <button>&rarr; Move!</button></p>
+    {% endif %}
+    
 
     <h3>License {% if user.is_authenticated and user_edits_it %}<a href="#" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
     This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.scraper.license}}</span>
-    <p>  </p>
+
 </div>
 
 <div class="content col right" id="scraper_schedule">
