@@ -206,7 +206,7 @@ $(function()
 				closure.parents('ul').children('.error').slideUp(150);
 				var username = $(this).val();
 				var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
-				var url = '/vaults/edit/' + vault_id + '/' + username + '/add/';
+				var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
 				$.getJSON(url, function(data) {
 					if(data.status == 'ok'){
 						closure.updateUserCount(1).parent().before( data.fragment ).remove();
@@ -221,7 +221,7 @@ $(function()
 			closure.parents('ul').children('.error').slideUp(150);
 			var username = $(this).val();
 			var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
-			var url = '/vaults/edit/' + vault_id + '/' + username + '/add/';
+			var url = '/vaults/' + vault_id + '/removeuser/' + username + '/';
 			$.getJSON(url, function(data) {
 				if(data.status == 'ok'){
 					closure.updateUserCount(1).parent().before( data.fragment ).remove();

@@ -4,6 +4,6 @@
 	<a href="{% url profiles_profile_detail m.username %}">{{ m.get_profile.name }} ({{m.username}})</a>
 
 	{% if editor or vault.user.id == request.user.id %}
-		<a href="{% url vault_user vault.id, m.username,'remove' %}" title="Revoke access to this vault" class="user_delete">Remove</a>
+		<a href="{% url vault_user vault.id, 'removeuser', m.username %}" title="Revoke access to this vault" class="user_delete">Remove</a>
 	{% endif %}
 </li>

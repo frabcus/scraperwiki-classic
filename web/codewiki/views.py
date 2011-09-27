@@ -497,15 +497,29 @@ def choose_template(request, wiki_type):
     context = { "wiki_type":wiki_type }
     context["sourcescraper"] = request.GET.get('sourcescraper', '')
     
-    if request.GET.get('ajax'):
-        template = 'codewiki/includes/choose_template.html'
-    else:
-        template = 'codewiki/choose_template.html'
+    # TODO: Change this to include language version numbers for beta_users
+    if request.user.is_authenticated() and request.user.get_profile().beta_user:
+        if request.GET.get('ajax'):
+            template = 'codewiki/includes/choose_new_template.html'
+        else:
+            template = 'codewiki/choose_new_template.html'
     
-    if wiki_type == "scraper":
-        context["languages"] = models.code.SCRAPER_LANGUAGES
+        if wiki_type == "scraper":
+            context["languages"] = models.code.SCRAPER_LANGUAGES
+#            context['versions'] = { 'python': '2.7.1', 'ruby': '1.9.2', 'php': '5.1'}
+        else:
+            context["languages"] = models.code.VIEW_LANGUAGES            
+#            context['versions'] = { 'python': '2.7.1', 'ruby': '1.9.2', 'php': '5.1'}            
     else:
-        context["languages"] = models.code.VIEW_LANGUAGES
+        if request.GET.get('ajax'):
+            template = 'codewiki/includes/choose_template.html'
+        else:
+            template = 'codewiki/choose_template.html'
+    
+        if wiki_type == "scraper":
+            context["languages"] = models.code.SCRAPER_LANGUAGES
+        else:
+            context["languages"] = models.code.VIEW_LANGUAGES
     
     return render_to_response(template, context, context_instance=RequestContext(request))
 
