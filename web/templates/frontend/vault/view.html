@@ -94,7 +94,7 @@
             <h4>This vault contains {{ vault.code_objects.count }} item{{ vault.code_objects.count|pluralize }}:</h4>
     	    <ul class="scraper_list">
     	    {% for code in vault.code_objects.all %}
-    	        {% include 'frontend/includes/code_object_line.html' %}
+    	        {% include 'frontend/includes/vault_scraper_line.html' %}
     	    {% endfor %}
     	    </ul>
     	{% else %}
