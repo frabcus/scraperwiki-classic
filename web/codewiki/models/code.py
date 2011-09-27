@@ -102,7 +102,6 @@ class Code(models.Model):
     status             = models.CharField(max_length=10, blank=True, default='ok')   # "sick", "ok"
     users              = models.ManyToManyField(User, through='UserCodeRole')
     guid               = models.CharField(max_length=1000)
-    published          = models.BooleanField(default=True)  # deprecated
     first_published_at = models.DateTimeField(null=True, blank=True)   # could be replaced with created_at
     line_count         = models.IntegerField(default=0)    
     featured           = models.BooleanField(default=False)
