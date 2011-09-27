@@ -99,7 +99,6 @@ class Code(models.Model):
     source             = models.CharField(max_length=100, blank=True)
     description        = models.TextField(blank=True)
     created_at         = models.DateTimeField(auto_now_add=True)
-    deleted            = models.BooleanField()     # deprecated
     status             = models.CharField(max_length=10, blank=True, default='ok')   # "sick", "ok"
     users              = models.ManyToManyField(User, through='UserCodeRole')
     guid               = models.CharField(max_length=1000)
