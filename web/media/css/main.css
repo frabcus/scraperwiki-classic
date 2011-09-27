@@ -5482,7 +5482,6 @@ body.vaults .vault_users_popover {
 	z-index: 100;
 	width: 250px;
     top: 34px;
-    right: 34px;
     padding: 10px;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
@@ -5679,6 +5678,7 @@ body.vaults .vault_footer {
 
 body.vaults .vault_header a {
 	float: right;
+	position: relative;
 	margin-top: 7px;
 	margin-right: 15px;
 }
