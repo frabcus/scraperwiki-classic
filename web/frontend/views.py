@@ -481,8 +481,85 @@ def view_vault(request, username=None):
 
 
 @login_required
-def vault_scrapers_edit(request, vaultid, action, shortname):
+def vault_scrapers_remove(request, vaultid, shortname):
+    """
+    Removes the scraper identified by shortname from the vault 
+    identified by vaultid.  This can currently only be done by
+    the vault owner, and only if the scraper is actually in the 
+    vault.
+    
+    Will set the vault property of the scraper to None but does
+    not touch the editorship/ownership which must be done elsewhere.
+    """
+    scraper = get_object_or_404( Scraper, short_name=shortname )
+    vault   = get_object_or_404( Vault, pk=vaultid )
+
+    # Must own the vault
+    if vault.user != request.user:
+        return HttpResponseForbidden("You do not own this vault")
+    
+    if scraper.vault != vault:
+        return HttpResponseForbidden("The scraper is not in this vault")
+    
+    # TODO: Decide how we remove the scraper from the vault other than just 
+    # removing the vault propery
+    
+    scraper.vault = None
+    scraper.save()
+        
     return HttpResponseRedirect(reverse('vault'))
+    
+    
+@login_required
+def vault_scrapers_add(request, vaultid, shortname):
+    """
+    Adds a scraper identified by shortname to the vault (vaultid).
+
+    The current user must be the current owner of the script and they
+    must also be a member of the vault they are trying to add the 
+    scraper to.
+    
+    During the transition, where the scraper's vault property is set
+    the original owner is demoted to an editor, and the vault owner
+    is set as owner (or promoted if they were an editor previously).
+    """
+    scraper = get_object_or_404( Scraper, short_name=shortname )
+    vault   = get_object_or_404( Vault, pk=vaultid )
+    
+    # Must own the scraper
+    if scraper.owner != request.user:
+        return HttpResponseForbidden("You do not own this scraper")
+
+    # Must be a member of the vault
+    if not request.user in vault.members.all():
+        return HttpResponseForbidden("You are not a member of this vault")
+            
+    # Old owner is now editor and the new owner should be the vault owner.
+    oldowner = request.user
+    newowner = vault.user
+    
+    # OldOwner -> Editor
+    try:
+        uc = UserCodeRole.objects.get(code=scraper, user=oldowner)
+        uc.role = 'editor'
+        uc.save()
+    except:
+        return HttpResponseForbidden("Failed to change your role")
+        
+    # Vault owner (newowner) from editor -> owner if editor, otherwise
+    # create a new role and assign them.
+    try:
+        uc = UserCodeRole.objects.get(code=scraper, user=newowner)
+    except:
+        uc = UserCodeRole( code=scraper, user=newowner )
+    uc.role = 'owner'
+    uc.save()
+    
+    scraper.vault = vault
+    scraper.save()
+                
+    return HttpResponseRedirect(reverse('vault'))
+    
     
 @login_required
 def vault_users(request, vaultid, username, action):
@@ -508,10 +585,13 @@ def vault_users(request, vaultid, username, action):
     
     editor = request.user == vault.user
     
-    if action =='add' and not user in vault.members.all():
+    if action =='adduser' and not user in vault.members.all():
+        print 'adding user'
         result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 
-        vault.members.add(user)   
-    if action =='remove' and user in vault.members.all():
+        print result['fragment']
+        vault.members.add(user) 
+        print 'added'  
+    if action =='removeuser' and user in vault.members.all():
         vault.members.remove(user)        
     vault.save()        
                 

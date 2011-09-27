@@ -40,7 +40,8 @@ urlpatterns = patterns('',
     
     # user's scrapers
     url(r'^vaults/(?P<vaultid>\d+)/(?P<action>adduser|removeuser)/(?P<username>.*)/$', frontend_views.vault_users, name='vault_user'),        
-    url(r'^vaults/(?P<vaultid>\d+)/(?P<action>addscraper|removescraper)/(?P<shortname>.*)/$', frontend_views.vault_scrapers_edit, name='vault_scrapers_edit'),            
+    url(r'^vaults/(?P<vaultid>\d+)/addscraper/(?P<shortname>.*)/$', frontend_views.vault_scrapers_add, name='vault_scrapers_add'),            
+    url(r'^vaults/(?P<vaultid>\d+)/removescraper/(?P<shortname>.*)/$', frontend_views.vault_scrapers_remove, name='vault_scrapers_remove'),                
     url(r'^vaults/$', frontend_views.view_vault, name='vault'),    
     
     url(r'^dashboard/(?P<page_number>\d+)?$', frontend_views.dashboard, name='dashboard'),
