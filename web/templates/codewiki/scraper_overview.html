@@ -174,30 +174,58 @@
     <h3>Contributors</h3>
     {% include 'codewiki/includes/contributors.html' %}
     
-    {% if request.user.vault_membership.count %}
-        {% if scraper.vault %}
-            <h3>This scraper is in {% if scraper.vault.user.username == user.username %}your vault{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s vault{% endif %}</h3>
-            <p>This scraper is in the vault: <a href="/vaults/" id="current_vault_link">{{ scraper.vault.name }}</a></p>
-            {% if scraper.owner == request.user %}
-                <p>As this scraper&rsquo;s owner, you can save it to any of the vaults to which you have access:</p>
-                <p><label for="move_to_vault" style="color:#666; font-size: 0.8em">Move to:</label> <select id="move_to_vault">
-                {% for vault in request.user.vault_membership.all %}
-                    <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
-                {% endfor %}
-            </select> <input type="button" value="&rarr; Move!"/></p>
-            {% endif %}
-        {% else %}
-            <h3>Move this scraper to a vault</h3>
-            <p>This scraper isn&rsquo;t currently in a vault.</p>
-            <p>You can move it to any of the vaults to which you have access:</p>
+    {% if scraper.vault %}
+        <h3>This scraper is in {% if scraper.vault.user.username == user.username %}your vault{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s vault{% endif %}</h3>
+        <p>This scraper is in the vault: <a href="/vaults/" id="current_vault_link">{{ scraper.vault.name }}</a></p>
+        {% if scraper.owner == request.user and request.user.vault_membership.count %}
+                <p>As this scraper&rsquo;s owner, you can move it to any of the vaults to which you have access:</p>
             <p><label for="move_to_vault" style="color:#666; font-size: 0.8em">Move to:</label> <select id="move_to_vault">
-            <option></option>
+            {% for vault in request.user.vault_membership.all %}
+                <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
+            {% endfor %}
+            </select> <input type="button" value="&rarr; Move!"/></p>
+        {% endif %}
+    {% else %}
+        {% if scraper.owner == request.user and request.user.vault_membership.count %}
+            <h3>Move this scraper to a vault</h3>
+            <p>As this scraper&rsquo;s owner, you can move it to any of the vaults to which you have access:</p>
+            <p><label for="move_to_vault" style="color:#666; font-size: 0.8em">Move to:</label> <select id="move_to_vault">
+                <option></option>
             {% for vault in request.user.vault_membership.all %}
                 <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
             {% endfor %}
             </select> <input type="button" value="&rarr; Move!"/></p>
         {% endif %}
     {% endif %}
+    
+    
+    
+    
+    
+    <!-- {% if request.user.vault_membership.count %}
+            {% if scraper.vault %}
+                <h3>This scraper is in {% if scraper.vault.user.username == user.username %}your vault{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s vault{% endif %}</h3>
+                <p>This scraper is in the vault: <a href="/vaults/" id="current_vault_link">{{ scraper.vault.name }}</a></p>
+                {% if scraper.owner == request.user %}
+                    <p>As this scraper&rsquo;s owner, you can save it to any of the vaults to which you have access:</p>
+                    <p><label for="move_to_vault" style="color:#666; font-size: 0.8em">Move to:</label> <select id="move_to_vault">
+                    {% for vault in request.user.vault_membership.all %}
+                        <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
+                    {% endfor %}
+                </select> <input type="button" value="&rarr; Move!"/></p>
+                {% endif %}
+            {% else %}
+                <h3>Move this scraper to a vault</h3>
+                <p>This scraper isn&rsquo;t currently in a vault.</p>
+                <p>You can move it to any of the vaults to which you have access:</p>
+                <p><label for="move_to_vault" style="color:#666; font-size: 0.8em">Move to:</label> <select id="move_to_vault">
+                <option></option>
+                {% for vault in request.user.vault_membership.all %}
+                    <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
+                {% endfor %}
+                </select> <input type="button" value="&rarr; Move!"/></p>
+            {% endif %}
+        {% endif %} -->
 </div>
 
 
