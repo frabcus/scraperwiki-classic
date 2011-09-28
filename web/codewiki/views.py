@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
@@ -51,7 +51,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
         return HttpResponseRedirect(reverse(rdirect, args=[scraper.wiki_type, short_name]))
         
     if not scraper.actionauthorized(request.user, action):
-        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, action), context_instance=RequestContext(request)))
+        return HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, action), context_instance=RequestContext(request)))
     return scraper
 
 
