@@ -16,7 +16,16 @@ ob_implicit_flush(true);
 $script 	 = null;
 
 // Load launch.json
-$contents 	 = file_get_contents('launch.json');
+
+for ($idx = 1; $idx < count($argv); $idx += 1)
+{
+   $arg  = $argv[$idx] ;
+
+   if (substr ($arg, 0,  9) == '--script=')
+      $script = substr ($arg, 9);
+}
+
+$contents 	 = file_get_contents( dirname($script) . '/launch.json');
 $launch 	 = json_decode( $contents, true );
 $datastore   = $launch['datastore'];
 $scrapername = $launch['scrapername'];
@@ -28,15 +37,6 @@ if ( strlen($querystring) > 0 ) {
 	putenv("URLQUERY=" . $querystring);
 }
 
-
-
-for ($idx = 1; $idx < count($argv); $idx += 1)
-{
-   $arg  = $argv[$idx] ;
-
-   if (substr ($arg, 0,  9) == '--script=')
-      $script = substr ($arg, 9);
-}
 
 
 function shutdown(){

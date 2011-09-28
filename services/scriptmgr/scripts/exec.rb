@@ -68,18 +68,6 @@ Signal.trap("XCPU") do
     raise Exception, "ScraperWiki CPU time exceeded"
 end
 
-datastore = nil
-scrapername = nil
-querystring = nil
-runid = nil
-
-File.open("launch.json","r") do |f|
-  results = JSON.parse( f.read )
-  datastore = results['datastore']
-  runid     = results['runid']
-  querystring = results['querystring']
-  scrapername = results['scrapername']
-end
 
 options = {}
 OptionParser.new do|opts|
@@ -87,6 +75,19 @@ OptionParser.new do|opts|
      options[:script] = script
    end
 end.parse(ARGV)
+
+datastore = nil
+scrapername = nil
+querystring = nil
+runid = nil
+
+File.open( File.dirname(options[:script]) +  "/launch.json","r") do |f|
+  results = JSON.parse( f.read )
+  datastore = results['datastore']
+  runid     = results['runid']
+  querystring = results['querystring']
+  scrapername = results['scrapername']
+end
 
 unless querystring.nil? || querystring == ''
      ENV['QUERY_STRING'] = querystring
