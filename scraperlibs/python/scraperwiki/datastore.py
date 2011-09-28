@@ -157,7 +157,7 @@ def search(name, filterdict, limit=-1, offset=0):
     raise scraperwiki.sqlite.SqliteError("apiwrapper.search has been deprecated")
 
 def webstorerequest(req):
-    print req
+    #print req
     if req.get("maincommand") == "sqlitecommand":
         if req.get("command") == "attach":
             return "{'status': 'ok'}"    # done at the higher level
@@ -173,7 +173,7 @@ def webstorerequest(req):
     if not m_scrapername:
         dirscrapername = "DRAFT__%s" % re.sub("[\.\-]", "_", m_runid)
     databaseurl = "%s/%s/%s" % (webstoreurl, username, dirscrapername)
-    print databaseurl
+    #print databaseurl
     
     if req.get("maincommand") == "save_sqlite":
         table_name = req.get("swdatatblname")
@@ -229,7 +229,7 @@ def webstorerequest(req):
         url.close()
     except urllib2.HTTPError, e:
         result = e.read()  # the error
-    print result
+    #print result
     jres = json.loads(result)
     if jres.get("state") == "error":
         jres["error"] = jres.get("message", "error")
