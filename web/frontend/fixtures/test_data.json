@@ -624,8 +624,6 @@
         "model": "codewiki.scraper", 
         "fields": {
             "last_run": null, 
-            "license": "", 
-            "license_link": null, 
             "record_count": 0, 
             "relations": [], 
             "run_interval": 86400
@@ -662,8 +660,6 @@
         "model": "codewiki.scraper", 
         "fields": {
             "last_run": null, 
-            "license": "", 
-            "license_link": null, 
             "record_count": 0, 
             "relations": [], 
             "run_interval": 86400
