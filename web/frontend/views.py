@@ -539,12 +539,13 @@ def vault_scrapers_add(request, vaultid, shortname):
     newowner = vault.user
     
     # OldOwner -> Editor
-    try:
-        uc = UserCodeRole.objects.get(code=scraper, user=oldowner)
-        uc.role = 'editor'
-        uc.save()
-    except:
-        return HttpResponseForbidden("Failed to change your role")
+    if oldowner != request.user:
+        try:
+            uc = UserCodeRole.objects.get(code=scraper, user=oldowner)
+            uc.role = 'editor'
+            uc.save()
+        except:
+            return HttpResponseForbidden("Failed to change your role")
         
     # Vault owner (newowner) from editor -> owner if editor, otherwise
     # create a new role and assign them.

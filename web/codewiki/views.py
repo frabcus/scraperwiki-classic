@@ -506,7 +506,6 @@ def choose_template(request, wiki_type):
         for i,x in enumerate(models.code.SCRAPER_LANGUAGES):
             langs.append( (x[0], x[1], models.code.SCRAPER_LANGUAGES_V[i]))        
         context["languages"] = langs
-        
         context["vault_id"] = vault;
     else:
         if request.GET.get('ajax'):
