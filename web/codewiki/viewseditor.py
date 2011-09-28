@@ -1,6 +1,7 @@
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound, HttpResponseForbidden
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render_to_response,get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -38,7 +39,7 @@ def getscraperor404(request, short_name, action):
     except models.Code.DoesNotExist:
         raise Http404
     if not scraper.actionauthorized(request.user, action):
-        raise Http404
+        raise PermissionDenied
     return scraper
 
 # this is used by swimport and history diffs
