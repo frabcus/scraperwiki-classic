@@ -513,10 +513,19 @@ def choose_template(request, wiki_type):
         else:
             template = 'codewiki/choose_template.html'
     
-        if wiki_type == "scraper":
-            context["languages"] = models.code.SCRAPER_LANGUAGES
+        vers =  models.code.OLD_SCRAPER_LANGUAGES_V    
+        if request.user.is_authenticated() and request.user.get_profile().beta_user:
+            vers =  models.code.SCRAPER_LANGUAGES_V        
+
+        if wiki_type == "scraper":    
+            src = models.code.SCRAPER_LANGUAGES
         else:
-            context["languages"] = models.code.VIEW_LANGUAGES
+            src = models.code.VIEW_LANGUAGES            
+        langs =  []
+        for i,x in enumerate(src):
+            langs.append( (x[0], x[1], vers[i]))   
+            
+        context["languages"] = langs
     
     return render_to_response(template, context, context_instance=RequestContext(request))
 
