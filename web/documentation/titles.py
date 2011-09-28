@@ -17,6 +17,7 @@ page_titles = {
     "ruby_csv_guide" : ("CSV reading guide","Getting data from comma-separated value files in Ruby"),
     "ruby_excel_guide" : ("Excel reading guide","Getting data from Excel files in Ruby"),
     "ruby_css_guide" : ("HTML parsing guide","Extract data from HTML using CSS selectors in Ruby"),
+    "ruby_time_place_guide" : ("Dates, times and places", "Temporal and geocoding in Ruby"),
    
     "python_intro_tutorial" : ("First scraper tutorial","How to use ScraperWiki for people who can already program in Python"),
     "python_datastore_guide" : ("Datastore copy & paste guide","A guide to the ScraperWiki SQL datastore for Python programmers"),
@@ -36,6 +37,7 @@ page_titles = {
     "php_csv_guide" : ("CSV reading guide","Getting data from comma-separated value files in PHP"),
     "php_excel_guide" : ("Excel reading guide","Getting data from Excel files in PHP"),
     "php_css_guide" : ("HTML parsing guide","Extract data from HTML using CSS selectors in PHP"),
+    "php_time_place_guide" : ("Dates, times and places", "Temporal and geocoding in PHP"),
     
     "shared_libraries" : ("3rd party libraries","Binaries availabile inside ScraperWiki"),
 
