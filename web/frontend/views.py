@@ -491,23 +491,28 @@ def vault_scrapers_remove(request, vaultid, shortname):
     Will set the vault property of the scraper to None but does
     not touch the editorship/ownership which must be done elsewhere.
     """
+    if not request.is_ajax():
+        return HttpResponseForbidden('This page cannot be called directly')
+    
     scraper = get_object_or_404( Scraper, short_name=shortname )
     vault   = get_object_or_404( Vault, pk=vaultid )
-
+    mime = 'application/json'
+    
     # Must own the vault
     if vault.user != request.user:
-        return HttpResponseForbidden("You do not own this vault")
+        return HttpResponse('{"status": "fail", "error":"You do not own this vault"}', mimetype=mime)            
     
     if scraper.vault != vault:
-        return HttpResponseForbidden("The scraper is not in this vault")
+        return HttpResponse('{"status": "fail", "error":"The scraper is not in this vault"}', mimetype=mime)            
     
     # TODO: Decide how we remove the scraper from the vault other than just 
     # removing the vault propery
     
     scraper.vault = None
     scraper.save()
-        
-    return HttpResponseRedirect(reverse('vault'))
+
+    return HttpResponse('{"status": "ok"}', mimetype=mime)                    
+
     
     
 @login_required
@@ -523,12 +528,16 @@ def vault_scrapers_add(request, vaultid, shortname):
     the original owner is demoted to an editor, and the vault owner
     is set as owner (or promoted if they were an editor previously).
     """
+    if not request.is_ajax():
+        return HttpResponseForbidden('This page cannot be called directly')
+    
     scraper = get_object_or_404( Scraper, short_name=shortname )
     vault   = get_object_or_404( Vault, pk=vaultid )
+    mime = 'application/json'
     
     # Must be a member of the vault
     if not request.user in vault.members.all():
-        return HttpResponseForbidden("You are not a member of this vault")
+        return HttpResponse('{"status": "fail", "error":"You are not a member of this vault"}', mimetype=mime)            
             
     # Old owner is now editor and the new owner should be the vault owner.
     oldowner = request.user
@@ -541,7 +550,7 @@ def vault_scrapers_add(request, vaultid, shortname):
             uc.role = 'editor'
             uc.save()
         except:
-            return HttpResponseForbidden("Failed to change your role")
+            return HttpResponse('{"status": "fail", "error":"Failed to change your role"}', mimetype=mime)            
         
     # Vault owner (newowner) from editor -> owner if editor, otherwise
     # create a new role and assign them.
@@ -556,7 +565,7 @@ def vault_scrapers_add(request, vaultid, shortname):
     scraper.vault = vault
     scraper.save()
                 
-    return HttpResponseRedirect(reverse('vault'))
+    return HttpResponse('{"status": "ok" }', mimetype=mime)            
     
     
 @login_required
