@@ -543,24 +543,25 @@ def vault_scrapers_add(request, vaultid, shortname):
     oldowner = request.user
     newowner = vault.user
     
-    # OldOwner -> Editor
-    if oldowner != request.user:
-        try:
-            uc = UserCodeRole.objects.get(code=scraper, user=oldowner)
+    try:    
+        uc = UserCodeRole.objects.get(code=scraper, role='owner')
+        if uc.user != vault.user:
+            # If current owner is not vault owner then set current owner
+            # to editor and then promote vault owner to scraper owner
             uc.role = 'editor'
             uc.save()
-        except:
-            return HttpResponse('{"status": "fail", "error":"Failed to change your role"}', mimetype=mime)            
+            
+            try:
+                uc = UserCodeRole.objects.get(code=scraper, user=vault.user)
+            except:
+                uc = UserCodeRole( code=scraper, user=vault.user )                
+                
+            uc.role = 'owner'
+            uc.save()
+    except UserCodeRole.DoesNotExist:
+        return HttpResponse('{"status": "fail": "Could not find current owner"}', mimetype=mime)                    
         
-    # Vault owner (newowner) from editor -> owner if editor, otherwise
-    # create a new role and assign them.
-    try:
-        uc = UserCodeRole.objects.get(code=scraper, user=newowner)
-    except:
-        uc = UserCodeRole( code=scraper, user=newowner )
-    uc.role = 'owner'
-    uc.save()
-    
+            
     scraper.privacy_status = 'private'
     scraper.vault = vault
     scraper.save()
@@ -592,9 +593,12 @@ def vault_users(request, vaultid, username, action):
     
     editor = request.user == vault.user
     
-    if action =='adduser' and not user in vault.members.all():
-        result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 
-        vault.members.add(user) 
+    if action =='adduser':
+        if not user in vault.members.all():
+            result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 
+            vault.members.add(user) 
+        else:
+            result['status':'fail', 'error':'User is already a member of this vault']
     if action =='removeuser' and user in vault.members.all():
         vault.members.remove(user)        
     vault.save()        
