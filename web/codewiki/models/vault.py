@@ -31,8 +31,11 @@ class Vault(models.Model):
         the scrapers.
         """
         from codewiki.models import UserCodeRole, Scraper        
+        role = 'editor'
+        if user == self.user:
+            role = 'owner'
         for scraper in self.scrapers():
-            pass
+            UserCodeRole(code=scraper, user=user,role='editor').save()
             
         
     def remove_user_rights(self, user ):
@@ -42,7 +45,8 @@ class Vault(models.Model):
         """
         from codewiki.models import UserCodeRole, Scraper                
         for scraper in self.scrapers():
-            pass
+            UserCodeRole.objects.filter(code=scraper, user=user).all().delete()
+        
         
     def update_access_rights(self):
         """
@@ -51,8 +55,18 @@ class Vault(models.Model):
         """
         from codewiki.models import UserCodeRole, Scraper                
         for scraper in self.scrapers():
-            pass
-    
+            UserCodeRole.objects.filter(code=scraper).all().delete()
+            users = list(self.members.all())
+            try:
+                users.remove( self.user )
+            except ValueError:
+                pass
+                
+            UserCodeRole(code=scraper, user=self.user,role='owner').save()
+            for u in users:
+                UserCodeRole(code=scraper, user=u,role='editor').save()
+
+
 
     def __unicode__(self):
         return "%s' %s vault (created on %s)" % (self.user.username, self.plan, self.name)
