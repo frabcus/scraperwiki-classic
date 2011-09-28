@@ -93,17 +93,23 @@ function setupNavSearchBoxHint(){
 function newCodeObject(wiki_type)
 {
     url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
-    //if (scraper_short_name != '')
-    //    url += '&sourcescraper=' + scraper_short_name; 
     
-    $.get(url, function(data) 
-    {
-        $.modal('<div id="template_popup">'+data+'</div>', 
-        {
+    $.get(url, function(data){
+        $.modal('<div id="template_popup">'+data+'</div>', {
             overlayClose: true, 
-            autoResize: true, 
-        //    containerCss:{ borderColor:"#ccc", width:(wiki_type == "scraper" ? 480 : 630)+"px", height:"170px" }, 
-            overlayCss: { cursor:"auto" }
+            autoResize: true,
+            overlayCss: { cursor:"auto" },
+			onOpen: function(dialog) {
+				dialog.data.show();
+				dialog.overlay.fadeIn(200);
+				dialog.container.fadeIn(200);
+			},
+			onClose: function(dialog) {
+				dialog.container.fadeOut(200);
+				dialog.overlay.fadeOut(200, function(){
+					$.modal.close();
+				});
+			}
         });
     });
 }
@@ -129,7 +135,7 @@ function newVaultCodeObject(id, wiki_type){
 						})
 					} else {
 						$(this).addClass('active');
-						location.href = $(this).attr('href') + '?name=' + encodeURI( $('input', dialog.data).val() );
+						location.href = $(this).attr('href').split("new_scraper").join( encodeURI( $('input', dialog.data).val() ) );
 					}
 				});
 			},
@@ -268,7 +274,13 @@ $(function()
 						closure.parents('ul').next('a').slideDown(150);
 						closure.updateUserCount(1).parent().before( data.fragment ).remove();
 					} else if(data.status == 'fail'){
-						closure.parents('ul').append('<li class="error">' + data.error + '</li>');
+						if(data.error == 'User is already a member of this vault'){
+							closure.parents('ul').next('a').slideDown(150);
+							closure.parent().remove();
+						} else {
+							closure.parents('ul').append('<li class="error">' + data.error + '</li>');
+						}
+						
 					}
 				});
 			}
