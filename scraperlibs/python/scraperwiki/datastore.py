@@ -157,7 +157,7 @@ def search(name, filterdict, limit=-1, offset=0):
     raise scraperwiki.sqlite.SqliteError("apiwrapper.search has been deprecated")
 
 def webstorerequest(req):
-    print req
+    #print req
     if req.get("maincommand") == "sqlitecommand":
         if req.get("command") == "attach":
             return "{'status': 'ok'}"    # done at the higher level
@@ -173,17 +173,35 @@ def webstorerequest(req):
     if not m_scrapername:
         dirscrapername = "DRAFT__%s" % re.sub("[\.\-]", "_", m_runid)
     databaseurl = "%s/%s/%s" % (webstoreurl, username, dirscrapername)
-    print databaseurl
+    #print databaseurl
     
     if req.get("maincommand") == "save_sqlite":
         table_name = req.get("swdatatblname")
         tableurl = "%s/%s" % (databaseurl, table_name)
-        rqs = urllib.urlencode([ ("unique", key)  for key in req.get("unique_keys") ])
         ldata = req.get("data")
         if type(ldata) == dict:
             ldata = [ldata]
-        target = "%s?%s" % (tableurl, rqs)
+        qsl = [ ("unique", key)  for key in req.get("unique_keys") ]
+        
+            # quick and dirty provision of column types to the webstore
+        if ldata:
+            jargtypes = { }
+            for k, v in ldata[0].items():
+                if v != None:
+                    if k[-5:] == "_blob":
+                        vt = "blob"  # coerced into affinity none
+                    elif type(v) == int:
+                        vt = "integer"
+                    elif type(v) == float:
+                        vt = "real"
+                    else:
+                        vt = "text"
+                    jargtypes[k] = vt
+        qsl.append(("jargtypes", json.dumps(jargtypes)))
+
+        target = "%s?%s" % (tableurl, urllib.urlencode(qsl))
         request = urllib2.Request(target)
+        
         request.add_header("Accept", "application/json")
         request.add_data(json.dumps(ldata))
             
@@ -211,7 +229,7 @@ def webstorerequest(req):
         url.close()
     except urllib2.HTTPError, e:
         result = e.read()  # the error
-    print result
+    #print result
     jres = json.loads(result)
     if jres.get("state") == "error":
         jres["error"] = jres.get("message", "error")
