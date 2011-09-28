@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 PLAN_TYPES = (
     ('individual', 'Individual'),
     ('corporate', 'Corporate'),    
@@ -19,6 +20,39 @@ class Vault(models.Model):
     # A list of the members who can access this vault.  This is 
     # distinct from the owner (self.user) of the vault.
     members = models.ManyToManyField(User, related_name='vault_membership')
+
+    def scrapers(self):
+        from codewiki.models import UserCodeRole, Scraper                
+        return Scraper.objects.filter(vault=self)
+
+    def add_user_rights(self, user ):
+        """
+        A new user has been added to the vault, make sure they can access all of 
+        the scrapers.
+        """
+        from codewiki.models import UserCodeRole, Scraper        
+        for scraper in self.scrapers():
+            pass
+            
+        
+    def remove_user_rights(self, user ):
+        """
+        A user has been removed from the vault, make sure they can access none of 
+        the scrapers.
+        """
+        from codewiki.models import UserCodeRole, Scraper                
+        for scraper in self.scrapers():
+            pass
+        
+    def update_access_rights(self):
+        """
+        A new scraper has been added to the vault, make sure the UserCodeRoles
+        are correct.
+        """
+        from codewiki.models import UserCodeRole, Scraper                
+        for scraper in self.scrapers():
+            pass
+    
 
     def __unicode__(self):
         return "%s' %s vault (created on %s)" % (self.user.username, self.plan, self.name)
