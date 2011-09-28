@@ -540,31 +540,11 @@ def vault_scrapers_add(request, vaultid, shortname):
         return HttpResponse('{"status": "fail", "error":"You are not a member of this vault"}', mimetype=mime)            
             
     # Old owner is now editor and the new owner should be the vault owner.
-    oldowner = request.user
-    newowner = vault.user
-    
-    try:    
-        uc = UserCodeRole.objects.get(code=scraper, role='owner')
-        if uc.user != vault.user:
-            # If current owner is not vault owner then set current owner
-            # to editor and then promote vault owner to scraper owner
-            uc.role = 'editor'
-            uc.save()
-            
-            try:
-                uc = UserCodeRole.objects.get(code=scraper, user=vault.user)
-            except:
-                uc = UserCodeRole( code=scraper, user=vault.user )                
-                
-            uc.role = 'owner'
-            uc.save()
-    except UserCodeRole.DoesNotExist:
-        return HttpResponse('{"status": "fail": "Could not find current owner"}', mimetype=mime)                    
-        
-            
     scraper.privacy_status = 'private'
     scraper.vault = vault
     scraper.save()
+    
+    vault.update_access_rights()
                 
     return HttpResponse('{"status": "ok" }', mimetype=mime)            
     
@@ -600,11 +580,19 @@ def vault_users(request, vaultid, username, action):
         if not user in vault.members.all():
             result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 
             vault.members.add(user) 
+            vault.add_user_rights(user)
         else:
             result['status'] = 'fail'
             result['error']  = 'User is already a member of this vault'
-    if action =='removeuser' and user in vault.members.all():
-        vault.members.remove(user)        
+            
+    if action =='removeuser':
+        if not user in vault.members.all():
+            vault.members.remove(user)     
+            vault.remove_user_rights(user)           
+        else:
+            result['status'] = 'fail'
+            result['error']  = 'User not in this vault'
+        
     vault.save()        
                 
     

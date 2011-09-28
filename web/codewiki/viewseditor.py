@@ -462,17 +462,10 @@ def add_to_vault(request, wiki_type, language, id):
     scraper.vault = vault
     scraper.save()
     
+    # Make sure we update the access rights
+    vault.update_access_rights()
     scraper.commit_code(blankstartupcode['scraper'][language], "Created", request.user)
     
-    # Vault owner becomes scraper owner
-    uc = UserCodeRole( code=scraper, user=vault.user )
-    uc.role = 'owner'
-    uc.save()
-
-    if not request.user == vault.user:
-        uc = UserCodeRole( code=scraper, user=request.user )
-        uc.role = 'editor'
-        uc.save()    
     
     response_url = reverse('editor_edit', kwargs={'wiki_type': wiki_type, 'short_name' : scraper.short_name})
     return HttpResponseRedirect(response_url)
