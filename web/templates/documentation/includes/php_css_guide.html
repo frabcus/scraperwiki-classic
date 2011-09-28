@@ -67,4 +67,11 @@ print $eg-&gt;root-&gt;first_child()-&gt;children(1)-&gt;parent()-&gt;tag . "\n"
 
 </code>
 
+<h2>Running out of memory</h2>
+
+<p>If your script is running out of memory, you can explicitly tell each
+DOM object you made to clean itself up. See, for example,
+<a href="https://scraperwiki.com/scrapers/wikicfpscrapper/">this scraper</a>.
+
+<code>$html-&gt;__destruct();</code>
 
