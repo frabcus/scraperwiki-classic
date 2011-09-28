@@ -21,8 +21,6 @@ except:
     import simplejson as json
 
 class View(code.Code):
-    render_time = models.IntegerField(blank=True, null=True)
-
     def __init__(self, *args, **kwargs):
         super(View, self).__init__(*args, **kwargs)
         self.wiki_type = 'view'        
