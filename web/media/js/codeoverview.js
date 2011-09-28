@@ -77,29 +77,6 @@ function setupScraperOverview(short_name)
                 return false;
            }
        );
-
-     //license
-     $('#spnLicenseChoice').editable('admin/', {
-              indicator : 'Saving...',
-              tooltip   : 'Click to edit...',
-              cancel    : 'Cancel',
-              submit    : 'Save',
-              onblur: 'ignore',
-              data   : $('#hidLicenseChoices').val(),
-              type   : 'select',
-              event: 'dblclick',
-              placeholder: '',
-              submitdata : {short_name: short_name}
-          });
-
-      $('#aEditLicense').click (
-           function(){
-                sCurrent = $('#spnLicenseChoice').html().trim();
-                $('#spnLicenseChoice').dblclick();
-                $('#spnLicenseChoice select').val(sCurrent);
-                return false;
-           }
-       );          
 }
 
 

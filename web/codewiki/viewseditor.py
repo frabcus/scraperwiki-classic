@@ -1,11 +1,12 @@
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
-from django.shortcuts import render_to_response
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound,HttpResponseForbidden
+from django.shortcuts import render_to_response,get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.mail import mail_admins
+from django.contrib.auth.decorators import login_required
 
 from codewiki import models
 import runsockettotwister
@@ -437,4 +438,34 @@ def quickhelp(request):
     return render_to_response('documentation/quick_help.html', context, context_instance=RequestContext(request))
 
 
+@login_required
+def add_to_vault(request, wiki_type, language, id):
+    """
+    Create a new scraper with the specific type and language, put it in the vault (if
+    the current user is allowed and then we're done)
+    """
+    from codewiki.models import Vault, Scraper, UserCodeRole
+    
+    name = request.GET.get('name', None)
+    
+    if not name:
+        return HttpResponseForbidden("A name is required")        
+    
+    vault = get_object_or_404(Vault, pk=id)
+    if not request.user in vault.members.all():
+        return HttpResponseForbidden("You cannot access this vault")             
 
+    scraper = Scraper()
+    scraper.title = name
+    scraper.language = language
+    scraper.privacy_status = 'private'
+    scraper.vault = vault
+    scraper.save()
+    
+    # Make sure we update the access rights
+    vault.update_access_rights()
+    scraper.commit_code(blankstartupcode['scraper'][language], "Created", request.user)
+    
+    
+    response_url = reverse('editor_edit', kwargs={'wiki_type': wiki_type, 'short_name' : scraper.short_name})
+    return HttpResponseRedirect(response_url)

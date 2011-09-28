@@ -189,7 +189,6 @@ def code_overview(request, wiki_type, short_name):
     assert wiki_type == 'scraper'
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
-    context["license_choices"] = models.LICENSE_CHOICES
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
     previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWSQL__", scraper.description)
@@ -429,10 +428,6 @@ def scraper_admin(request, short_name):
         context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])
         response_text = render_to_string('codewiki/includes/run_interval.html', context, context_instance=RequestContext(request))
 
-    if element_id == 'spnLicenseChoice':
-        scraper.license = request.POST.get('value', None)
-        response_text = scraper.license
-
     scraper.save()
     response.write(response_text)
     return response
@@ -497,17 +492,34 @@ def choose_template(request, wiki_type):
     context = { "wiki_type":wiki_type }
     context["sourcescraper"] = request.GET.get('sourcescraper', '')
     
-    if request.GET.get('ajax'):
-        template = 'codewiki/includes/choose_template.html'
-    else:
-        template = 'codewiki/choose_template.html'
+    vault = request.GET.get('vault', None)
     
-    if wiki_type == "scraper":
-        context["languages"] = models.code.SCRAPER_LANGUAGES
+    # Specify which template we want
+    if request.user.is_authenticated() and request.user.vault_membership.count() > 0 and vault:
+        tpl = 'codewiki/includes/add_to_vault.html'
     else:
-        context["languages"] = models.code.VIEW_LANGUAGES
-    
-    return render_to_response(template, context, context_instance=RequestContext(request))
+        tpl = 'codewiki/includes/choose_template.html'
+        
+    # Either use the old UML version numbers or the new ones for beta users
+    # TODO: Remove UMLCODE 
+    vers =  models.code.OLD_SCRAPER_LANGUAGES_V    
+    if request.user.is_authenticated() and request.user.get_profile().beta_user:
+        vers =  models.code.SCRAPER_LANGUAGES_V        
+
+    # Scraper or View?
+    if wiki_type == "scraper":    
+        src = models.code.SCRAPER_LANGUAGES
+    else:
+        src = models.code.VIEW_LANGUAGES            
+            
+    langs =  []
+    for i,x in enumerate(src):
+        langs.append( (x[0], x[1], vers[i]))      
+          
+    context["languages"] = langs
+    context["vault_id"] = vault # May be none if it wasn't specified
+            
+    return render_to_response(tpl, context, context_instance=RequestContext(request))
 
 
 def convtounicode(text):

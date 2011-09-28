@@ -49,7 +49,7 @@ print el
 <h2>Deep text extraction</h2>
 
 <p>Get all text recursively, throwing away any child tags.</p>
-<code>eg = lxml.html.fromstring('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;lt;/i&gt;lt;/h2&gt;
+<code>eg = lxml.html.fromstring('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;&lt;/i&gt;&lt;/h2&gt;')
 print eg.text_content() # 'A thing goes boom up on the tree'
 </code>
 
@@ -82,12 +82,12 @@ Such an element can be extracted using a recursive function.</p>
 </code>
 
 <p>Navigate around the document.</p>
-<code>eg = lxml.html.fromstring('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;lt;/i&gt;lt;/h2&gt;
+<code>eg = lxml.html.fromstring('&lt;h2&gt;A thing &lt;b&gt;goes boom&lt;/b&gt; up &lt;i&gt;on &lt;em&gt;the tree&lt;/em&gt;&lt;/i&gt;&lt;/h2&gt;')
 print eg[1].tag                # i
 print eg[1].getparent().tag    # h2
 print eg[1].getprevious().tag  # b
 print eg[1].getnext()          # None
-print eg[1].getchildren()      # [ &lt;element em &gt; ]
+print eg[1].getchildren()      # [&lt;Element em&gt;]
 </code>
 
 

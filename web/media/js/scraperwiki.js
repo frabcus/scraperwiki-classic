@@ -93,17 +93,63 @@ function setupNavSearchBoxHint(){
 function newCodeObject(wiki_type)
 {
     url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
-    //if (scraper_short_name != '')
-    //    url += '&sourcescraper=' + scraper_short_name; 
     
-    $.get(url, function(data) 
-    {
-        $.modal('<div id="template_popup">'+data+'</div>', 
-        {
+    $.get(url, function(data){
+        $.modal('<div id="template_popup">'+data+'</div>', {
             overlayClose: true, 
-            autoResize: true, 
-            containerCss:{ borderColor:"#ccc", width:(wiki_type == "scraper" ? 480 : 630)+"px", height:"170px" }, 
-            overlayCss: { cursor:"auto" }
+            autoResize: true,
+            overlayCss: { cursor:"auto" },
+			onOpen: function(dialog) {
+				dialog.data.show();
+				dialog.overlay.fadeIn(200);
+				dialog.container.fadeIn(200);
+			},
+			onClose: function(dialog) {
+				dialog.container.fadeOut(200);
+				dialog.overlay.fadeOut(200, function(){
+					$.modal.close();
+				});
+			}
+        });
+    });
+}
+
+function newVaultCodeObject(id, wiki_type){
+	if(!wiki_type){ wiki_type = 'scraper'; }
+	var url = '/' + wiki_type + 's/new/choose_template/?ajax=1&vault=' + id;
+    $.get(url, function(data){
+        $.modal('<div id="template_popup">' + data + '</div>', {
+            overlayClose: true, 
+            autoResize: true,
+            overlayCss: { cursor:"auto" },
+			onShow: function(dialog){
+				$('li a', dialog.data).bind('click', function(e){
+					e.preventDefault();
+					if($('input', dialog.data).val() == ''){
+						$('span.warning', dialog.data).remove();
+						text = $('label', dialog.data).attr('title');
+						$('p', dialog.data).addClass('error').append('<span class="warning"><span></span>' + text + '</span>');
+						$('input', dialog.data).bind('keyup', function(){
+							$('p', dialog.data).removeClass('error').children('span').remove();
+							$(this).unbind('keyup');
+						})
+					} else {
+						$(this).addClass('active');
+						location.href = $(this).attr('href').split("new_scraper").join( encodeURI( $('input', dialog.data).val() ) );
+					}
+				});
+			},
+			onOpen: function(dialog) {
+				dialog.data.show();
+				dialog.overlay.fadeIn(200);
+				dialog.container.fadeIn(200);
+			},
+			onClose: function(dialog) {
+				dialog.container.fadeOut(200);
+				dialog.overlay.fadeOut(200, function(){
+					$.modal.close();
+				});
+			}
         });
     });
 }
@@ -114,7 +160,11 @@ $(function()
 	setupNavSearchBoxHint();
 
     $('a.editor_view').click(function()  {  newCodeObject('view');  return false; }); 
-    $('a.editor_scraper').click(function()  {  newCodeObject('scraper');  return false; }); 
+    $('a.editor_scraper').click(function()  {  newCodeObject('scraper');  return false; });
+	$('a.add_to_vault').bind('click', function(e){ 
+		e.preventDefault();
+		newVaultCodeObject( $(this).attr('rel'), 'scraper');
+	});
 	
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
@@ -187,37 +237,134 @@ $(function()
 	
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
 	
+	
+	
+	
+	
+	$('div.vault_users_popover').each(function(i,el){
+		//	This centres the Users Popover underneath the Users toolbar button
+		var popo = $(this);
+		var link = $(this).prevAll('.vault_users');
+		var anchor = link.position().left + (0.5 * link.outerWidth());
+		popo.css('left', anchor - (popo.outerWidth() / 2) );
+	});
+	
 	$('body.vaults a.vault_users').bind('mouseenter', function(){
 		$(this).addClass('hover').siblings('div.vault_users_popover').fadeIn(150);
 	}).parent().bind('mouseleave', function(){
-		$(this).children('div.vault_users_popover:visible').fadeOut(400);
-		$(this).children('a.vault_users').removeClass('hover');
-		$(this).find('li.new_user_li').remove();
+	//	if(!$(this).find('#username').is(':focus')){
+			$(this).children('div.vault_users_popover:visible').fadeOut(400, function(){
+				$(this).find('li.new_user_li, li.error').remove();
+				$(this).find('a.add_user').show();
+			});
+			$(this).children('a.vault_users').removeClass('hover');
+	//	}
 	});
 	
 	$('body.vaults a.add_user').bind('click', function(){
 		var input = $('<input>').attr('id','username').attr('type','text').attr('class','text').bind('keydown', function(e){
+			var closure = $(this);
 			if((e.keyCode || e.which) == 13){
-				var username = $(this).val();
-				var vault_id = $(this).parents('div').find('a.add_user').attr('rel');
-				console.log('/vaults/edit/' + vault_id + '/' + username + '/add/');
-				var closure = $(this);
-				$.getJSON('/vaults/edit/' + vault_id + '/' + username + '/add/', function(data) {
-					console.log(data);
-					$.each(data, function(key, val) {
-				    	if(key == 'status' && val == 'fail') {
-							console.log( 'Error: ' + val );
-						} else if ( key == 'fragment') {
-							console.log( closure );
-							closure.parents('ul').append( val );
+				closure.parents('ul').children('.error').slideUp(150);
+				var username = closure.val();
+				var vault_id = closure.parents('div').find('a.add_user').attr('rel');
+				var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
+				$.getJSON(url, function(data) {
+					if(data.status == 'ok'){
+						closure.parents('ul').next('a').slideDown(150);
+						closure.updateUserCount(1).parent().before( data.fragment ).remove();
+					} else if(data.status == 'fail'){
+						if(data.error == 'User is already a member of this vault'){
+							closure.parents('ul').next('a').slideDown(150);
+							closure.parent().remove();
+						} else {
+							closure.parents('ul').append('<li class="error">' + data.error + '</li>');
 						}
-					});
+						
+					}
 				});
 			}
 		});
-		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input);
-		$(this).prev().append(li).children(':last').slideDown(250).find('#username').focus();
+		var confirm = $('<a>').text('Add!').bind('click', function(){
+			var closure = $(this).prev();
+			closure.parents('ul').children('.error').slideUp(150);
+			var username = closure.val();
+			var vault_id = closure.parents('div').find('a.add_user').attr('rel');
+			var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
+			$.getJSON(url, function(data) {
+				if(data.status == 'ok'){
+					closure.parents('ul').next('a').slideDown(150);
+					closure.updateUserCount(1).parent().before( data.fragment ).remove();
+				} else if(data.status == 'fail'){
+					closure.parents('ul').append('<li class="error">' + data.error + '</li>');
+				}
+			});
+		});
+		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input).append(confirm);
+		$(this).slideUp(250).prev().append(li).children(':last').slideDown(250).find('#username').focus();
 	});
+	
+	$('body.vaults a.user_delete').live('click', function(e){
+		var url = $(this).attr('href');
+		var closure = $(this);
+		$.getJSON(url, function(data) {
+			if(data.status == 'ok'){
+				closure.updateUserCount(-1).parent().slideUp(function(){
+					$(this).remove();
+				});
+			} else if(data.status == 'fail'){
+				closure.parents('ul').append('<li class="error">Error: ' + data.error + '</li>');
+			}
+		});
+		e.preventDefault();
+	});
+	
+	jQuery.fn.updateUserCount = function(increment) {
+		//	Must be called from an element within <div class="vault_header"></div>
+		return this.each(function() {
+		    var $el = $(this);
+			var number_of_users = Number($el.parents('.vault_header').find('.vault_users_popover li').not('.new_user_li').length) + increment;
+			if(number_of_users == 1){
+				x_users = '1 user';
+			} else {
+				x_users = number_of_users + ' users';
+			}
+			$el.parents('.vault_header').find('.x_users').text(x_users);
+		});
+	}
+	
+	function move_to_vault(){
+		$('#move_to_vault').bind('change', function(){
+			if($(this).val() == ''){
+				$(this).next().attr('disabled','disabled');
+			} else {
+				$(this).next().attr('disabled','');
+			}
+			console.log($(this).val());
+		}).next().attr('disabled','disabled').bind('click', function(e){
+			e.preventDefault();
+			if($(this).is(':disabled')){
+				// do nothing
+				console.log('naughty');
+			} else {
+				$(this).val('Moving\u2026').attr('disabled','disabled').prev().attr('disabled','disabled');
+				$.getJSON($(this).prev().val(), function(data) {
+					console.log(data);
+					if(data.status == 'ok'){
+						$('#scraper_contributors').load(location.href + ' #scraper_contributors>*', function(){
+							$('#current_vault_link').effect("highlight", {}, 2000);
+							move_to_vault();
+							console.log('partial page refresh succeeded');
+						});
+					} else {
+						$(this).parent().after('<p class="error">Ooops! ' + data.error + '</p>');
+					}
+				});
+			}
+		});
+	}
+	
+	move_to_vault();
 	
 });
 

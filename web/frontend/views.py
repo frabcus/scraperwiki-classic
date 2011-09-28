@@ -1,5 +1,5 @@
 from django import forms
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseForbidden
 from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
@@ -18,7 +18,7 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
 from tagging.models import Tag, TaggedItem
 
-from codewiki.models import UserUserRole, Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
+from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper,Vault, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from registration.backends import get_backend
@@ -41,7 +41,7 @@ def frontpage(request, public_profile_field=None):
     user = request.user
 
     #featured
-    featured_both = Code.objects.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:4]
+    featured_both = Code.objects.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-created_at')[:4]
 	
     #popular tags
     #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
@@ -188,8 +188,8 @@ def help(request, mode=None, language=None):
             for scraper in tutorials[language]:
                 scraper.title = re.sub("^[\d ]+", "", scraper.title)
         else:
-            tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
-        viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
+            tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('created_at')
+        viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('created_at')
         context["include_tag"] = "frontend/help_tutorials.html"
     
     else: 
@@ -473,9 +473,87 @@ def view_vault(request, username=None):
         vaults = request.user.vaults
         
     context['vaults'] = vaults
+    context['vault_membership_count'] = request.user.vault_membership.exclude(user__id=request.user.id).count()
+    context['vault_membership'] = request.user.vault_membership.all().exclude(user__id=request.user.id)
+    
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))
 
+
+@login_required
+def vault_scrapers_remove(request, vaultid, shortname):
+    """
+    Removes the scraper identified by shortname from the vault 
+    identified by vaultid.  This can currently only be done by
+    the vault owner, and only if the scraper is actually in the 
+    vault.
+    
+    Will set the vault property of the scraper to None but does
+    not touch the editorship/ownership which must be done elsewhere.
+    """
+    if not request.is_ajax():
+        return HttpResponseForbidden('This page cannot be called directly')
+    
+    scraper = get_object_or_404( Scraper, short_name=shortname )
+    vault   = get_object_or_404( Vault, pk=vaultid )
+    mime = 'application/json'
+    
+    # Must own the vault
+    if vault.user != request.user:
+        return HttpResponse('{"status": "fail", "error":"You do not own this vault"}', mimetype=mime)            
+    
+    if scraper.vault != vault:
+        return HttpResponse('{"status": "fail", "error":"The scraper is not in this vault"}', mimetype=mime)            
+    
+    # TODO: Decide how we remove the scraper from the vault other than just 
+    # removing the vault propery
+    
+    scraper.vault = None
+    scraper.save()
+
+    return HttpResponse('{"status": "ok"}', mimetype=mime)                    
+
+    
+    
+@login_required
+def vault_scrapers_add(request, vaultid, shortname):
+    """
+    Adds a scraper identified by shortname to the vault (vaultid).
+
+    The current user must be the current owner of the script and they
+    must also be a member of the vault they are trying to add the 
+    scraper to.
+    
+    During the transition, where the scraper's vault property is set
+    the original owner is demoted to an editor, and the vault owner
+    is set as owner (or promoted if they were an editor previously).
+    """
+    if not request.is_ajax():
+        return HttpResponseForbidden('This page cannot be called directly')
+    
+    scraper = get_object_or_404( Scraper, short_name=shortname )
+    vault   = get_object_or_404( Vault, pk=vaultid )
+    mime = 'application/json'
+    
+    if scraper.vault and not scraper.vault.user == vault.user:
+        # If already in a vault make sure the new vault we want is also 
+        # owned by the same user.
+        return HttpResponse('{"status": "fail", "error":"You cannot move this scraper to your own vault"}', mimetype=mime)            
+            
+    # Must be a member of the vault
+    if not request.user in vault.members.all():
+        return HttpResponse('{"status": "fail", "error":"You are not a member of this vault"}', mimetype=mime)            
+            
+    # Old owner is now editor and the new owner should be the vault owner.
+    scraper.privacy_status = 'private'
+    scraper.vault = vault
+    scraper.save()
+    
+    vault.update_access_rights()
+                
+    return HttpResponse('{"status": "ok" }', mimetype=mime)            
+    
+    
 @login_required
 def vault_users(request, vaultid, username, action):
     """
@@ -483,6 +561,9 @@ def vault_users(request, vaultid, username, action):
     only work on the current user's vault so if they don't have one then
     it won't work.
     """
+    if not request.is_ajax():
+        return HttpResponseForbidden('This page cannot be called directly')
+    
     from django.template.loader import render_to_string
     from codewiki.models import Vault
     mime = 'application/json'
@@ -498,11 +579,25 @@ def vault_users(request, vaultid, username, action):
 
     result = {"status": "ok", "error":""}                    
     
-    if action =='add' and not user in vault.members.all():
-        result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user })                 
-        vault.members.add(user)   
-    if action =='remove' and user in vault.members.all():
-        vault.members.remove(user)        
+    editor = request.user == vault.user
+    
+    if action =='adduser':
+        if not user in vault.members.all():
+            result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 
+            vault.members.add(user) 
+            vault.add_user_rights(user)
+        else:
+            result['status'] = 'fail'
+            result['error']  = 'User is already a member of this vault'
+            
+    if action =='removeuser':
+        if user in vault.members.all():
+            vault.members.remove(user)     
+            vault.remove_user_rights(user)           
+        else:
+            result['status'] = 'fail'
+            result['error']  = 'User not in this vault'
+        
     vault.save()        
                 
     

@@ -8,7 +8,6 @@
 
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
-    <input type="hidden" id="hidLicenseChoices" value="{ {% for name, text in license_choices %}'{{name}}':'{{text}}', {% endfor %} }" />
     <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
 </fieldset>
 
@@ -174,10 +173,22 @@
 <div class="content col left" id="scraper_contributors">
     <h3>Contributors</h3>
     {% include 'codewiki/includes/contributors.html' %}
-
-    <h3>License {% if user.is_authenticated and user_edits_it %}<a href="#" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
-    This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.scraper.license}}</span>
-    <p>  </p>
+    
+    {% if request.user.vault_membership.all %}
+        {% if scraper.vault %}
+    <h3>This scraper is in {% if scraper.vault.user.username == user.username %}your vault{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s vault{% endif %}</h3>
+    <p>This scraper is in the vault: <a href="/vaults/" id="current_vault_link">{{ scraper.vault.name }}</a></p>
+        {% else %}
+    <h3>Move this scraper to a vault</h3>
+        {% endif %}
+    <p>As this scraper&rsquo;s owner, you can save it to any of the vaults to which you have access:</p>
+    <p><label for="move_to_vault" style="color:#666; font-size: 0.8em">Move to:</label> <select id="move_to_vault">
+        {% if scraper.vault %}{% else %}<option></option>{% endif %}
+    {% for vault in request.user.vault_membership.all %}
+        <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
+    {% endfor %}
+    </select> <input type="button" value="&rarr; Move!"/></p>
+    {% endif %}
 </div>
 
 <div class="content col right" id="scraper_schedule">
