@@ -623,7 +623,6 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
             info["attachable_here"].append(cp.code.short_name)
 
     if scraper.wiki_type == 'scraper':
-        info['license']     = scraper.scraper.license
         info['records']     = scraper.scraper.record_count  # old style datastore
         
         if 'datasummary' not in quietfields:

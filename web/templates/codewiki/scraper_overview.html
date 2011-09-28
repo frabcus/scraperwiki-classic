@@ -8,7 +8,6 @@
 
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
-    <input type="hidden" id="hidLicenseChoices" value="{ {% for name, text in license_choices %}'{{name}}':'{{text}}', {% endfor %} }" />
     <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
 </fieldset>
 
@@ -174,10 +173,6 @@
 <div class="content col left" id="scraper_contributors">
     <h3>Contributors</h3>
     {% include 'codewiki/includes/contributors.html' %}
-
-    <h3>License {% if user.is_authenticated and user_edits_it %}<a href="#" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
-    This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.scraper.license}}</span>
-    <p>  </p>
 </div>
 
 <div class="content col right" id="scraper_schedule">
