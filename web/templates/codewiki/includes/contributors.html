@@ -116,7 +116,7 @@
                 <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" 
                 {% ifequal scraper.privacy_status 'private' %} checked="checked" {% endifequal %}
                 /></td>
-                <td><h4><label for="privacy_private">Private</label></h4><p><label for="privacy_private">Only selected contributors can see or edit this {{scraper.wiki_type}}.</label></p></td>
+                <td><h4><label for="privacy_private">Private</label></h4><p><label for="privacy_private">Only selected contributors can <br/>see or edit this {{scraper.wiki_type}}.</label></p></td>
             </tr>
             {% endif %}
         </table>
