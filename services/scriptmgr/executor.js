@@ -173,12 +173,14 @@ exports.run_script = function( http_request, http_response ) {
 		
 };
 
-function writeLaunchFile( f, ds, runid, scrapername, querystring ) {
+function writeLaunchFile( f, ds, runid, scrapername, querystring, attachables, webstore_port ) {
 	var launch = {
 		'datastore': ds,
 		'runid': runid,
 		'scrapername': scrapername || '',
-		'querystring': querystring || ''
+		'querystring': querystring || '',
+		'attachables': attachables || [],
+		'webstore_port': webstore_port || 0
 	}
 	var data = JSON.stringify( launch );
 	fs.writeFileSync(f, data, encoding='utf8');
@@ -211,10 +213,11 @@ function execute(http_req, http_res, raw_request_data) {
 				response: http_res,
 				black: request_data.black || '',   // not used
 				white: request_data.white || '',   // not used
-                attachables: request_data.attachables || [],
                 beta_user: request_data.beta_user || false,
+                attachables: request_data.attachables || [],
+                webstore_port: (request_data.beta_user ? webstore_port : 0), 
                 scheduled_run: request_data.scheduled_run || false,
-				permissions: request_data.permissions || []  };
+				permissions: request_data.permissions || [] };
 	
 	
 	if ( ! use_lxc ) {
@@ -226,7 +229,9 @@ function execute(http_req, http_res, raw_request_data) {
 			 				 dataproxy, 
 							 script.run_id, 
 							 script.scraper_name, 
-							 script.query);
+							 script.query, 
+                             script.attachables,
+                             script.webstore_port);
 			
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
@@ -237,16 +242,7 @@ function execute(http_req, http_res, raw_request_data) {
 				if ( script.language == 'ruby' || script.language == 'php' ) {
 					args = ['--script=' + tmpfile,]
 				} else {
-					args = ['--script',tmpfile]
-                    // extra parameters used in the exec.py.  these will need to be added into the block above for ruby and php, as well as into the proper lxc fields
-					if ( script.beta_user && webstore_port )  {
-                        args.push('--webstore_port');
-						args.push( webstore_port);
-					}
-                    if ( script.attachables ) {
-                        args.push('--attachables');
-						args.push(script.attachables.join(" ")+'"'); 
-					}
+					args = ['--script', tmpfile]
 				}
 				
 				exe = './scripts/exec.' + util.extension_for_language(script.language);
@@ -364,7 +360,9 @@ function execute(http_req, http_res, raw_request_data) {
 			 				 dataproxy, 
 							 script.run_id, 
 							 script.scraper_name, 
-							 script.query);
+							 script.query,
+							 script.attachables,
+                             script.webstore_port);
 			
 			util.log.debug('File written to ' + tmpfile );
 			

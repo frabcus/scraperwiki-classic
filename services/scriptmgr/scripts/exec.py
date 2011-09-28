@@ -57,8 +57,6 @@ sys.stderr = ConsoleStream(scraperwiki.logfd)
 
 parser = optparse.OptionParser()
 parser.add_option("--script", metavar="name")    # not the scraper name, this is tmp file name which we load and execute
-parser.add_option("--attachables", default="")
-parser.add_option("--webstore_port", default="0")
 options, args = parser.parse_args()
 
 ##############################################################
@@ -75,6 +73,8 @@ with open(pathname) as f:
     runid       = d['runid']
     scrapername = d['scrapername']
     querystring = d['querystring']
+    attachables = d['attachables']
+    webstore_port = d['webstore_port']
     
 if querystring:
     os.environ['QUERY_STRING'] = querystring
@@ -84,7 +84,7 @@ if querystring:
 host, port = string.split(datastore, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
-scraperwiki.datastore.create(host, port, scrapername, runid, options.attachables.split(), options.webstore_port)
+scraperwiki.datastore.create(host, port, scrapername, runid, attachables, webstore_port)
 
 resource.setrlimit(resource.RLIMIT_CPU, (80, 82,))
 
