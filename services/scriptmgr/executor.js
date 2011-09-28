@@ -235,18 +235,10 @@ function execute(http_req, http_res, raw_request_data) {
 	   		} else {
 				var args;
 				if ( script.language == 'ruby' || script.language == 'php' ) {
-					args = ['--script=' + tmpfile,'--ds=' + dataproxy, '--runid=' + script.run_id]
-					if ( script.scraper_name ) {
-						args.push('--scrapername=' + script.scraper_name )
-					}
+					args = ['--script=' + tmpfile,]
 				} else {
-					args = ['--script',tmpfile,'--ds', dataproxy, '--runid', script.run_id]
-					if ( script.scraper_name ) {
-						args.push('--scrapername')
-						args.push( script.scraper_name )
-					}
-					
-                        // extra parameters used in the exec.py.  these will need to be added into the block above for ruby and php, as well as into the proper lxc fields
+					args = ['--script',tmpfile]
+                    // extra parameters used in the exec.py.  these will need to be added into the block above for ruby and php, as well as into the proper lxc fields
 					if ( script.beta_user && webstore_port )  {
                         args.push('--webstore_port');
 						args.push( webstore_port);
