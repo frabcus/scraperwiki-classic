@@ -1,5 +1,5 @@
 from django import forms
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseForbidden
 from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
@@ -18,7 +18,7 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
 from tagging.models import Tag, TaggedItem
 
-from codewiki.models import UserUserRole, Code, Scraper,Vault, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
+from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper,Vault, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from registration.backends import get_backend
@@ -526,10 +526,6 @@ def vault_scrapers_add(request, vaultid, shortname):
     scraper = get_object_or_404( Scraper, short_name=shortname )
     vault   = get_object_or_404( Vault, pk=vaultid )
     
-    # Must own the scraper
-    if scraper.owner != request.user:
-        return HttpResponseForbidden("You do not own this scraper")
-
     # Must be a member of the vault
     if not request.user in vault.members.all():
         return HttpResponseForbidden("You are not a member of this vault")
