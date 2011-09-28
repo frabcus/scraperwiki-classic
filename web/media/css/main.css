@@ -2367,7 +2367,8 @@ div.tab_tools form {
 	vertical-align: top;
 }
 
-#scraper_contributors li input {
+#scraper_contributors li input,
+#databaseattachablelist li input {
 	float: right;
 }
 
