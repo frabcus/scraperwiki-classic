@@ -39,14 +39,6 @@ SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every t
                     (3600*24*63, 'every two months'), (3600*24*182, 'every six months'),)
 SCHEDULE_OPTIONS_DICT = dict(SCHEDULE_OPTIONS)
 
-LICENSE_CHOICES = (
-    ('Unknown', 'Unknown'),
-    ('Public domain', 'Public domain'),
-    ('Share-alike', 'Share-alike'),
-    ('Crown copyright', 'Crown copyright'),
-    ('Other', 'Other'),
-)
-
 
     # unfortunately has to be a scrapers list because run_interval and last_run not available to code objects
 def scrapers_overdue():
@@ -70,8 +62,6 @@ def scrapers_overdue():
 
 class Scraper (code.Code):
     last_run     = models.DateTimeField(blank=True, null=True)    
-    license      = models.CharField(max_length=100, blank=True, choices=LICENSE_CHOICES, default='Unknown')
-    license_link = models.URLField(verify_exists=False, null=True, blank=True)
     record_count = models.IntegerField(default=0)        
     run_interval = models.IntegerField(default=-1)  # in seconds, we are defaulting to disabled
 

@@ -189,7 +189,6 @@ def code_overview(request, wiki_type, short_name):
     assert wiki_type == 'scraper'
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
-    context["license_choices"] = models.LICENSE_CHOICES
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
     previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWSQL__", scraper.description)
@@ -428,10 +427,6 @@ def scraper_admin(request, short_name):
         context = {'scraper': scraper}
         context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])
         response_text = render_to_string('codewiki/includes/run_interval.html', context, context_instance=RequestContext(request))
-
-    if element_id == 'spnLicenseChoice':
-        scraper.license = request.POST.get('value', None)
-        response_text = scraper.license
 
     scraper.save()
     response.write(response_text)
