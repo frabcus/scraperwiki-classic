@@ -2367,6 +2367,10 @@ div.tab_tools form {
 	vertical-align: top;
 }
 
+#scraper_contributors li input {
+	float: right;
+}
+
 #scraper_attachables {
     width: 55%;
     padding-right: 5%;

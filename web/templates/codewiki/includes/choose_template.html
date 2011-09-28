@@ -1,5 +1,5 @@
 {% load screen_shot %}
-<h1>Create a new Scraper</h1>
+<h1>Create a new {{wiki_type}}</h1>
 <!-- <ul class="views small">
   {% for language, display_language in languages %}
   <li>
@@ -14,6 +14,6 @@
 </ul> -->
 <ul id="chooser">
     {% for language, display_language, version in languages %}
-    <li><a href="{% url editor wiki_type language %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}} <em>v {{ version }}</em></a></li>
+    <li><a href="{% url editor wiki_type language %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}}{% if version %} <em>v {{ version }}</em>{% endif %}</a></li>
     {% endfor %}
 </ul>
