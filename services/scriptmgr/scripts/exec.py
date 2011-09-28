@@ -55,13 +55,21 @@ scraperwiki.logfd = sys.stderr
 sys.stdout = ConsoleStream(scraperwiki.logfd)
 sys.stderr = ConsoleStream(scraperwiki.logfd)
 
+parser = optparse.OptionParser()
+parser.add_option("--script", metavar="name")    # not the scraper name, this is tmp file name which we load and execute
+parser.add_option("--attachables", default="")
+parser.add_option("--webstore_port", default="0")
+options, args = parser.parse_args()
+
 ##############################################################
 # We can replace the parser with a load of the launch.json
 # file and assign the variables appropriately
 ##############################################################
 datastore, runid, scrapername, querystring = None, None, None, None
 
-with open("launch.json") as f:
+pathname, _ = os.path.split(options.script)
+pathname = os.path.join( os.path.abspath(pathname), 'launch.json')
+with open(pathname) as f:
     d = json.loads( f.read() )
     datastore   = d['datastore']
     runid       = d['runid']
@@ -71,13 +79,7 @@ with open("launch.json") as f:
 if querystring:
     os.environ['QUERY_STRING'] = querystring
     os.environ['URLQUERY'] = querystring   
-    
 
-parser = optparse.OptionParser()
-parser.add_option("--script", metavar="name")    # not the scraper name, this is tmp file name which we load and execute
-parser.add_option("--attachables", default="")
-parser.add_option("--webstore_port", default="0")
-options, args = parser.parse_args()
 
 host, port = string.split(datastore, ':')
 
