@@ -494,35 +494,32 @@ def choose_template(request, wiki_type):
     
     vault = request.GET.get('vault', None)
     
+    # Specify which template we want
     if request.user.is_authenticated() and request.user.vault_membership.count() > 0 and vault:
-        from itertools import chain
-        template = 'codewiki/includes/add_to_vault.html'
-        langs =  []
-        for i,x in enumerate(models.code.SCRAPER_LANGUAGES):
-            langs.append( (x[0], x[1], models.code.SCRAPER_LANGUAGES_V[i]))        
-        context["languages"] = langs
-        context["vault_id"] = vault;
+        tpl = 'codewiki/includes/add_to_vault.html'
     else:
-        if request.GET.get('ajax'):
-            template = 'codewiki/includes/choose_template.html'
-        else:
-            template = 'codewiki/choose_template.html'
-    
-        vers =  models.code.OLD_SCRAPER_LANGUAGES_V    
-        if request.user.is_authenticated() and request.user.get_profile().beta_user:
-            vers =  models.code.SCRAPER_LANGUAGES_V        
+        tpl = 'codewiki/includes/choose_template.html'
+        
+    # Either use the old UML version numbers or the new ones for beta users
+    # TODO: Remove UMLCODE 
+    vers =  models.code.OLD_SCRAPER_LANGUAGES_V    
+    if request.user.is_authenticated() and request.user.get_profile().beta_user:
+        vers =  models.code.SCRAPER_LANGUAGES_V        
 
-        if wiki_type == "scraper":    
-            src = models.code.SCRAPER_LANGUAGES
-        else:
-            src = models.code.VIEW_LANGUAGES            
-        langs =  []
-        for i,x in enumerate(src):
-            langs.append( (x[0], x[1], vers[i]))   
+    # Scraper or View?
+    if wiki_type == "scraper":    
+        src = models.code.SCRAPER_LANGUAGES
+    else:
+        src = models.code.VIEW_LANGUAGES            
             
-        context["languages"] = langs
-    
-    return render_to_response(template, context, context_instance=RequestContext(request))
+    langs =  []
+    for i,x in enumerate(src):
+        langs.append( (x[0], x[1], vers[i]))      
+          
+    context["languages"] = langs
+    context["vault_id"] = vault # May be none if it wasn't specified
+            
+    return render_to_response(tpl, context, context_instance=RequestContext(request))
 
 
 def convtounicode(text):
