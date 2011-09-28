@@ -576,6 +576,9 @@ def vault_users(request, vaultid, username, action):
     only work on the current user's vault so if they don't have one then
     it won't work.
     """
+    if not request.is_ajax():
+        return HttpResponseForbidden('This page cannot be called directly')
+    
     from django.template.loader import render_to_string
     from codewiki.models import Vault
     mime = 'application/json'
@@ -598,7 +601,8 @@ def vault_users(request, vaultid, username, action):
             result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 
             vault.members.add(user) 
         else:
-            result['status':'fail', 'error':'User is already a member of this vault']
+            result['status'] = 'fail'
+            result['error']  = 'User is already a member of this vault'
     if action =='removeuser' and user in vault.members.all():
         vault.members.remove(user)        
     vault.save()        
