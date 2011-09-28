@@ -185,17 +185,18 @@
                     <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
                 {% endfor %}
             </select> <input type="button" value="&rarr; Move!"/></p>
+            {% endif %}
+        {% else %}
+            <h3>Move this scraper to a vault</h3>
+            <p>This scraper isn&rsquo;t currently in a vault.</p>
+            <p>You can move it to any of the vaults to which you have access:</p>
+            <p><label for="move_to_vault" style="color:#666; font-size: 0.8em">Move to:</label> <select id="move_to_vault">
+            <option></option>
+            {% for vault in request.user.vault_membership.all %}
+                <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
+            {% endfor %}
+            </select> <input type="button" value="&rarr; Move!"/></p>
         {% endif %}
-    {% else  %}
-        <h3>Move this scraper to a vault</h3>
-        <p>This scraper isn&rsquo;t currently in a vault.</p>
-        <p>You can move it to any of the vaults to which you have access:</p>
-        <p><label for="move_to_vault" style="color:#666; font-size: 0.8em">Move to:</label> <select id="move_to_vault">
-        <option></option>
-        {% for vault in request.user.vault_membership.all %}
-            <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
-        {% endfor %}
-        </select> <input type="button" value="&rarr; Move!"/></p>
     {% endif %}
 </div>
 
