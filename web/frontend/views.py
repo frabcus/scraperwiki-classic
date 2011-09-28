@@ -535,6 +535,11 @@ def vault_scrapers_add(request, vaultid, shortname):
     vault   = get_object_or_404( Vault, pk=vaultid )
     mime = 'application/json'
     
+    if scraper.vault and not scraper.vault.user == vault.user:
+        # If already in a vault make sure the new vault we want is also 
+        # owned by the same user.
+        return HttpResponse('{"status": "fail", "error":"You cannot move this scraper to your own vault"}', mimetype=mime)            
+            
     # Must be a member of the vault
     if not request.user in vault.members.all():
         return HttpResponse('{"status": "fail", "error":"You are not a member of this vault"}', mimetype=mime)            
