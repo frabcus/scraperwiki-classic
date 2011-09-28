@@ -3,7 +3,7 @@
 
 <ul id="chooser">
     {% for language, display_language, version in languages %}
-    <li><a href="/scrapers/new/{{language}}/tovault/{{vault_id}}/new_scraper/"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}} <em>v {{ version }}</em></a></li>
+    <li><a href="/scrapers/new/{{language}}/tovault/{{vault_id}}/?name=new_scraper"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}} <em>v {{ version }}</em></a></li>
     {% endfor %}
 </ul>
 
