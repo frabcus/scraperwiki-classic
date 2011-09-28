@@ -60,6 +60,7 @@ sys.stderr = ConsoleStream(scraperwiki.logfd)
 # file and assign the variables appropriately
 ##############################################################
 datastore, runid, scrapername, querystring = None, None, None, None
+
 with open("launch.json") as f:
     d = json.loads( f.read() )
     datastore   = d['datastore']
