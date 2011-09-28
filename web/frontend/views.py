@@ -586,7 +586,7 @@ def vault_users(request, vaultid, username, action):
             result['error']  = 'User is already a member of this vault'
             
     if action =='removeuser':
-        if not user in vault.members.all():
+        if user in vault.members.all():
             vault.members.remove(user)     
             vault.remove_user_rights(user)           
         else:
