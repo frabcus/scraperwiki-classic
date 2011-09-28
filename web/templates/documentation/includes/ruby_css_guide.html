@@ -79,10 +79,10 @@ end
 <h2>Finding data manually</h2>
 
 <p>Iterate down through the elements in the document and see the tags and attributes on each element.</p>
-<code>for el in doc.children
+<code>for el in doc.css('html').children
     puts el.name
     for el2 in el.children
-        puts "--", el2.name, el2.attributes
+        puts "--" + el2.name + " " + el2.attributes.to_json
     end
 end
 </code>
