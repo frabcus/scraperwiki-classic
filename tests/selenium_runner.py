@@ -153,7 +153,7 @@ if __name__ == '__main__':
                       help="URL of the ScraperWiki web application to test, defaults to http://localhost:8000/",  
                       default="http://localhost:8000/", metavar="application url (string)")
 
-    parser.add_option("--tests", default="test_registration,test_scrapers", 
+    parser.add_option("--tests", default="test_registration,test_scrapers,test_api", 
                      help="Comma separated list of tests to run, defaults to 'test_registration,test_scrapers'. Each parameter can either be a) a module name, e.g. test_registration, b) a class within a module, e.g. test_registration.TestRegistration, or c) just one test method, e.g. test_registration.TestRegistration.test_invalid_email")
     parser.add_option("--verbosity", dest="verbosity", action="store", default=1, type='int', 
                      help="How much to display while running the tests, try 0, 1, 2. Default is 1.")

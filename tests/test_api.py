@@ -19,6 +19,9 @@ class TestApi(SeleniumTest):
         "error": "Invalid API Key"
     }
     
+    user_api_key = None
+    scraper_api_key = None
+    
     # Only use these for checking runevents until the codemirror 'run' button
     # is updated to generate runevents.
     hardcoded_runevent_scraper = "runevent_api_test"
@@ -72,10 +75,13 @@ class TestApi(SeleniumTest):
             return
         self._get_api_base()
         self._setup_db()
+        self.user_api_key = self._set_api_key("user", self.user_name)
+        self.scraper_api_key = self._set_api_key("scraper", self.populate_db_name)
         self.private_scraper_error["short_name"] = self.populate_db_name
         self.activate_users([self.user_name])
         self.set_code_privacy("private", "scraper", self.populate_db_name, 
                             {'username':self.user_name, 'password':self.user_pass})
+        # Add api key test
         self._datastore_privacy_test()
         self._scraperinfo_privacy_test()
         # TODO: waiting on the codemirror 'run' button to generate a run event
@@ -90,7 +96,12 @@ class TestApi(SeleniumTest):
     def _datastore_privacy_test(self):
         """ Check that private scrapers behave as expected """
         s = self.selenium
-        self.set_code_privacy("private", "scraper", self.populate_db_name, {'username':self.user_name,'password':self.user_pass})
+        # Prepare for attaching a scraper
+        with open(os.path.join( os.path.dirname( __file__ ), 'sample_data/python_scraper.txt')) as file:
+            public_scraper_code = file.read().replace('&','&amp').replace('<','&lt').replace('>','&gt').replace('\n', '<br>')
+        public_scraper = self.create_code("python", "scraper", public_scraper_code)
+        
+        # Expect failures (even when logged in for api tests)
         # Check sqlite download, need to log out to ensure correct rejection
         s.open("/logout")
         self.wait_for_page()
@@ -100,55 +111,102 @@ class TestApi(SeleniumTest):
             self.fail()
         except urllib2.HTTPError as exception:
             self.failUnless(exception.code == 403)
-        ### Log back in to check CSV downloading with api key embedded in link
         self.user_login(self.user_name, self.user_pass)
-        ##s.open("/scrapers/" + self.populate_db_name)
-        ##csvurl = s.get_attribute("downloadcsvtable@href")
-        ##response = urllib2.urlopen(csvurl)
-        ##self.failUnless(json.loads(response.read()) == self.private_scraper_error)
         # Check sql query json
         response = urllib2.urlopen(self.api_base + "datastore/sqlite?" + 
                                     urllib.urlencode({"format":"jsondict","name":self.populate_db_name,"query":"select * from swdata"}))
         self.failUnless(json.loads(response.read()) == self.private_scraper_error)
         # Attach DB privacy
-        # TODO: waiting for this error message to be corrected
-        with open(os.path.join( os.path.dirname( __file__ ), 'sample_data/python_scraper.txt')) as file:
-            public_scraper_code = file.read().replace('&','&amp').replace('<','&lt').replace('>','&gt').replace('\n', '<br>')
-        public_scraper = self.create_code("python", "scraper", public_scraper_code)
         response = urllib2.urlopen(self.api_base + "datastore/sqlite?format=jsondict&name=" + public_scraper + 
                                    "&attach=" + self.populate_db_name + "&query=select%20*%20from%20" + self.populate_db_name + ".swdata%20limit%2010")
+        # TODO: waiting for this error message to be corrected
         self.failUnless(json.loads(response.read()) == {"error": "sqlite3.Error: no such table: " + self.populate_db_name + ".swdata"})
+        
+        # Now test for expected successes
+        # Check SQLite downloading (based on logged in user)
+        #urllib2.urlopen(urllib2.Request("http://localhost:8000/scrapers/export_sqlite/se_test_fea19852_3732_4738/", headers={'cookie':self.selenium.get_cookie()}))
+        sqlite_file = urllib2.urlopen(urllib2.Request(self.site_base + "scrapers/export_sqlite/%s/" % self.populate_db_name, headers={'cookie':s.get_cookie()}))
+        self.failUnless(int(sqlite_file.headers.dict['content-length']) > 0)
+        self.failUnless(sqlite_file.headers.dict['content-type'] == 'application/octet-stream')
+        self.failUnless(sqlite_file.headers.dict['content-disposition'] == 'attachment; filename=%s.sqlite' % self.populate_db_name)
+        # Check CSV downloading (api key embedded in link for logged in user)
+        s.open("/scrapers/" + self.populate_db_name)
+        self.wait_for_page()
+        csvurl = s.get_attribute("downloadcsvtable@href")
+        response = urllib2.urlopen(csvurl)
+        self.failUnless(response.headers.dict['content-disposition'] == "attachment; filename=" + self.populate_db_name + ".csv" )
+        self.failUnless(len(response.read()) > 0)
+        self.failUnless(response.headers.dict['content-type'] == 'text/csv')
+        # SQL query JSON
+        s.open("/logout")
+        self.wait_for_page()
+        response = urllib2.urlopen(self.api_base + "datastore/sqlite?format=jsondict&name=" + self.populate_db_name + 
+                                    "&query=select%20*%20from%20swdata&apikey=" + self.scraper_api_key)
+        self.failUnless(len(json.loads(response.read())) == 20)
+        # TODO - below
+        ### Attach DB privacy
+        ##self.user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
+        ##s.open("/admin/codewiki/codepermission/add/")
+        ##s.select('id_code', public_scraper)
+        ##s.select('id_permitted_object', self.populate_db_name)
+        ##s.click("//input[@value='Save']")
+        ##self.wait_for_page()
+        ##response = urllib2.urlopen(self.api_base + "datastore/sqlite?format=jsondict&name=" + public_scraper + "&attach=" + self.populate_db_name + 
+        ##                           "&query=select%20*%20from%20" + self.populate_db_name + ".swdata%20limit%2015")
+        ##self.failUnless(len(json.loads(response.read())) == 15)
         
     
     def _scraperinfo_privacy_test(self):
-        """ Make sure scraperinfo of a private scraper fails """
+        """ Make sure scraperinfo of a private scraper fails unless correct api key specified """
         # TODO: add tests for when fields are specified?
+        # Expecting failure
         url = self.api_base + "scraper/getinfo?format=jsondict&name=" + self.populate_db_name
         scraperinfo = json.loads(urllib2.urlopen(url).read())[0]
         self.failUnless(scraperinfo == self.private_scraper_error)
+        
+        # Use api key, expect success
+        url = self.api_base + "scraper/getinfo?format=jsondict&name=" + self.populate_db_name + "&apikey=" + self.scraper_api_key
+        scraperinfo = json.loads(urllib2.urlopen(url).read())[0]
+        self.failUnless(scraperinfo['privacy_status'] == "private" and scraperinfo['code'])
     
     
     def _runinfo_privacy_test(self):
         """ Make sure runinfo of a private scraper fails """
+        # The first runids and api keys of the private scrapers
         if "dev.scraperwiki.com" in self.site_base:
-            runid = '1316774565.339344_f13fe242-6121-4a55-ad80-b21ac4bc8412'
+            runid = '1316771145.348448_e6b400b9-6a6e-446d-b04e-d9e3b6b667e1'
+            api_key = "02d8ab83-bec0-4934-a1a0-cc75b4df09a4"
         elif "scraperwiki.com" in self.site_base:
-            runid = '1316646705.182498_7220cef2-a698-4205-ae14-aba4c85459d2'
+            runid = '1316897325.456186_009f2d99-df7a-4d86-9115-6654c6812106'
+            api_key = "08216130-1ec6-485c-8a3d-afe64f8f5dbf"
         else:
             # TODO: can't generate runevents dynamically...yet
             return
         # Can't use the private scraper we've just set up because it will have no runevents
         runevent_error = self.private_scraper_error
         runevent_error["short_name"] = self.hardcoded_private_runevent_scraper
+        
         # Get most recent runevent
-        jsonresponse = json.loads(urllib2.urlopen(self.api_base + "scraper/getruninfo?" + 
-                                  "format=jsondict&name=" + self.hardcoded_private_runevent_scraper).read())
+        jsonresponse = json.loads(urllib2.urlopen(self.api_base + "scraper/getruninfo?" + "format=jsondict&name=" + 
+                                  self.hardcoded_private_runevent_scraper).read())
         self.failUnless(jsonresponse == runevent_error)
         # Get first runevent
-        jsonresponse = json.loads(urllib2.urlopen(self.api_base + "scraper/getruninfo?" + 
-                                  "format=jsondict&name=" + self.hardcoded_private_runevent_scraper + 
-                                  "&runid=" + runid).read())
+        jsonresponse = json.loads(urllib2.urlopen(self.api_base + "scraper/getruninfo?" + "format=jsondict&name=" + 
+                                  self.hardcoded_private_runevent_scraper + "&runid=" + runid).read())
         self.failUnless(jsonresponse == runevent_error)
+        
+        # Try the above with an api key, expecting valid results now. Note we're using the local api_key variable
+        jsonresponse = json.loads(urllib2.urlopen(self.api_base + "scraper/getruninfo?" + "format=jsondict&name=" + 
+                                  self.hardcoded_private_runevent_scraper + "&apikey=" + api_key).read())
+        self.failUnless(len(jsonresponse) == 1)
+        self.failUnless("output" in jsonresponse[0])
+        self.failIf(jsonresponse[0]['runid'] == runid)
+        jsonresponse = json.loads(urllib2.urlopen(self.api_base + "scraper/getruninfo?" + "format=jsondict&name=" + 
+                                  self.hardcoded_private_runevent_scraper + "&runid=" + runid + "&apikey=" + api_key).read())
+        self.failUnless(len(jsonresponse) == 1)
+        self.failUnless("output" in jsonresponse[0])
+        self.failUnless(jsonresponse[0]['runid'] == runid)
+        
         
     def _userinfo_privacy_test(self):
         """ Check private scraper does not appear in the userinfo of the owner or an editor """
@@ -158,6 +216,7 @@ class TestApi(SeleniumTest):
         self.selenium.open("/scrapers/" + self.populate_db_name)
         self.wait_for_page()
         self.add_code_editor(editorname, "test user (editor)") 
+        
         # Check private scraper doesn't appear in either editor or owner info
         url = self.api_base + "scraper/getuserinfo?format=jsondict&username=" + self.user_name
         userinfo = json.loads(urllib2.urlopen(url).read())[0]
@@ -165,6 +224,14 @@ class TestApi(SeleniumTest):
         url = self.api_base + "scraper/getuserinfo?format=jsondict&username=" + editorname
         userinfo = json.loads(urllib2.urlopen(url).read())[0]
         self.failUnless('editor' not in userinfo['coderoles'])
+        
+        # Now use an api key, expect the private scraper to appear
+        url = self.api_base + "scraper/getuserinfo?format=jsondict&username=" + self.user_name + "&apikey=" + self.user_api_key
+        userinfo = json.loads(urllib2.urlopen(url).read())[0]
+        self.failUnless(self.populate_db_name in userinfo['coderoles']['owner'])
+        url = self.api_base + "scraper/getuserinfo?format=jsondict&username=" + editorname + "&apikey=" + self.user_api_key
+        userinfo = json.loads(urllib2.urlopen(url).read())[0]
+        self.failUnless(self.populate_db_name in userinfo['coderoles']['editor'])
         
         
     def _scrapersearch_privacy_test(self):
@@ -178,14 +245,22 @@ class TestApi(SeleniumTest):
         s.type('css=#divAboutScraper textarea', description)
         s.click("//div[@id='divAboutScraper']//button[text()='Save']")
         time.sleep(1)
-        # Do the private checking
+        
+        # Do the private checking without an api key
         url = self.api_base + "scraper/search?format=jsondict&searchquery=" + self.populate_db_name
         results = json.loads(urllib2.urlopen(url).read())
         self.failUnless(len(results) == 0)
-
         url = self.api_base + "scraper/search?format=jsondict&searchquery=" + description
         results = json.loads(urllib2.urlopen(url).read())
         self.failUnless(len(results) == 0)
+        
+        # Now with an api key, expect results
+        url = self.api_base + "scraper/search?format=jsondict&searchquery=" + self.populate_db_name + "&apikey=" + self.user_api_key
+        results = json.loads(urllib2.urlopen(url).read())
+        self.failUnless(len(results) == 1)
+        url = self.api_base + "scraper/search?format=jsondict&searchquery=" + description + "&apikey=" + self.user_api_key
+        results = json.loads(urllib2.urlopen(url).read())
+        self.failUnless(len(results) == 1)
         
         
     def _usersearch_test(self):
@@ -288,6 +363,7 @@ class TestApi(SeleniumTest):
         
     def _runinfo_test(self):
         """ Check that querying for runevents works """
+        # The first runids of the protected scrapers
         if "dev.scraperwiki.com" in self.site_base:
             runid = '1316774565.339344_f13fe242-6121-4a55-ad80-b21ac4bc8412'
         elif "scraperwiki.com" in self.site_base:
@@ -349,13 +425,13 @@ class TestApi(SeleniumTest):
 
     def _scraperinfo_quietfields_test(self):
         """ Check scraper info response fields are as expected """
-        always_fields = ['license','description','language','title','tags','short_name','created','records','filemodifieddate',
+        always_fields = ['description','language','title','tags','short_name','created','records','filemodifieddate',
                          'wiki_type','privacy_status','attachable_here','attachables','modifiedcommitdifference']
         fields = ['code','runevents','datasummary','userroles','history','prevcommit']
         
         # Check trying to make all fields quiet leaves irremovable ones alone, and that all fields are present by default
-        checks = [{'json':self._get_info(self.populate_db_name, quietfields='|'.join(always_fields+fields)), 'keys':always_fields[:]     },
-                  {'json':self._get_info(self.populate_db_name),                                             'keys':always_fields+fields }]
+        checks = [{'json':self._get_info(self.populate_db_name, quietfields='|'.join(always_fields+fields)), 'keys':always_fields[:]           },
+                  {'json':self._get_info(self.populate_db_name),                                             'keys':always_fields[:]+fields[:] }]
         
         for check in checks:
             json = check['json']
@@ -495,6 +571,29 @@ class TestApi(SeleniumTest):
         self.wait_for_page()
         html = s.get_html_source()
         self.api_base = re.search('id="id_api_base" value="(?P<api_base>http[s]?://[^"]*)', html).group('api_base')
+        
+        
+    def _set_api_key(self, entity_type, entity_name):
+        """ Set the api key of either a 'scraper' or a 'user'. Entity name must be the short name of a scraper
+        or username of a user """
+        s = self.selenium
+        self.user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
+        api_key = str(uuid.uuid4())
+        if entity_type == 'scraper':
+            s.open("/admin/codewiki/scraper/?q=" + entity_name)
+            apikey_element_id = "id_access_apikey"
+        elif entity_type == 'user':
+            s.open("/admin/auth/user/?q=" + entity_name)
+            apikey_element_id = "id_userprofile_set-0-apikey"
+        self.wait_for_page()
+        s.click('link=' + entity_name)
+        self.wait_for_page()
+        s.type(apikey_element_id, api_key)
+        s.click("//div[@class='submit-row']/input[@value='Save']")
+        self.wait_for_page()
+        self.user_login(self.user_name, self.user_pass)
+        self.wait_for_page()
+        return api_key
         
     
     def _setup_db(self, filename="populate_db_scraper.txt"):
