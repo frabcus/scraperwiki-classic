@@ -51,17 +51,6 @@
 {% load body_class %}
 <body {%  body_class request %}>
 	
-	{% if messages %}
-	<ul class="messages">
-    	{% for message in messages %}
-    	<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    	{% endfor %}
-	</ul>
-	<script type='text/javascript'>
-		//setTimeout( function(){ $('.messages').slideUp(); }, 3000);
-	</script>
-	{% endif %}
-	
 	{% block nav_outer %}
 	<div id="nav_outer">
 		<div id="nav_inner">
@@ -120,13 +109,16 @@
 	</div>
 	{% endblock %}
 
-	<!-- {% block alert_outer %}
-	<div id="alert_outer">
-		<div id="alert_inner">
-			{% block alert %}<h2>Here&rsquo;s an alert! <a href="foo">Linky linky.</a></h2>{% endblock %}
+	{% if messages %}
+		<div id="alert_outer">
+			<div id="alert_inner">
+		    	{% for message in messages %}
+		    		{{ message|safe }}
+		    	{% endfor %}
+			</div>
 		</div>
-	</div>
-    {% endblock %} -->
+	{% endif %}
+
 
 	{% block header_outer %}
 	<div id="header_outer">

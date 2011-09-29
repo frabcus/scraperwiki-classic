@@ -31,6 +31,7 @@ urlpatterns = patterns('',
 
 
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
+    url(r'^scrapers/undo-delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_undo_delete_data, name='scraper_undo_delete_data'),    
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-\.]+)/$',   views.follow,               name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-\.]+)/$', views.unfollow,             name='scraper_unfollow'),    

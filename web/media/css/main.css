@@ -62,6 +62,9 @@ body {
 	background: #fff;
 }
 
+#alert_inner a{
+	margin-left: 40px;
+}
 #nav_inner, #alert_inner, #header_inner, #page_inner, #footer_inner {
 	text-align: left;
 	width: 960px;
@@ -324,7 +327,6 @@ body.frontpage #nav_inner li.frontpage {
 
 #alert_outer,
 .alert_outer {
-	display: none;
 	color: #411;
 	padding: 10px 0 11px 0;
 	border-top: 1px solid #b71;

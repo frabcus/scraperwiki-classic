@@ -37,8 +37,10 @@ def getscraperor404(request, short_name, action):
         scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
         raise Http404
+        
     if not scraper.actionauthorized(request.user, action):
         raise Http404
+        
     return scraper
 
 # this is used by swimport and history diffs

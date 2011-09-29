@@ -46,10 +46,11 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
         message =  "Sorry, that %s doesn't seem to exist" % wiki_type
         heading = "404: File not found"
         return HttpResponseNotFound(render_to_string('404.html', {'heading':heading, 'body':message}, context_instance=RequestContext(request)))
-    
+            
     if rdirect and wiki_type != scraper.wiki_type:
         return HttpResponseRedirect(reverse(rdirect, args=[scraper.wiki_type, short_name]))
-        
+
+    # Only a valid user can undo, and delete the scraper + data ...    
     if not scraper.actionauthorized(request.user, action):
         return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, action), context_instance=RequestContext(request)))
     return scraper
@@ -433,6 +434,24 @@ def scraper_admin(request, short_name):
     return response
 
 
+def scraper_undo_delete_data(request, short_name):
+    scraper = getscraperorresponse(request, "scraper", short_name, None, "undo_delete_data")
+    if isinstance(scraper, HttpResponse):  return scraper
+    
+    try:
+        dataproxy = DataStore(scraper.short_name)
+        dataproxy.request({"maincommand":"undelete_datastore"})
+        scraper.scraper.update_meta()
+        scraper.save()
+        dataproxy.close()
+    except:
+        pass
+
+    messages.add_message(request, messages.INFO, 'You data has been restored')
+        
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
+
+
 def scraper_delete_data(request, short_name):
     scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
     if isinstance(scraper, HttpResponse):  return scraper
@@ -446,7 +465,9 @@ def scraper_delete_data(request, short_name):
     except:
         pass
         
-    messages.add_message(request, messages.INFO, 'You data has been deleted')
+    messages.add_message(request, messages.INFO, 
+                         'You data has been deleted&nbsp;<a href="%s">Undo?</a>' 
+                                % reverse('scraper_undo_delete_data', args=[short_name]))
         
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
@@ -620,113 +641,70 @@ def export_sqlite(request, short_name):
 # the list of attachables should be passed through the controller when a scraper is run; 
 # it will need including in the overdue scrapers list, as well as the stimulate_run record
 def attachauth(request):
-    # aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
     scrapername = request.GET.get("scrapername")
     attachtoname = request.GET.get("attachtoname")
 
-    try:
-        attachtoscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
-    except models.Code.DoesNotExist:
-        return HttpResponse("DoesNotExist")
-
-    # dereference scraper (if not draft) so we can look for the attach list
+    fromscraper, toscraper = None, None
     if scrapername: 
         try:
-            scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
+            fromscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
         except models.Code.DoesNotExist:
             return HttpResponse("Scraper does not exist: %s" % str([scrapername]))
 
-        # check against the attachto list
-        if models.CodePermission.objects.filter(code=scraper, permitted_object=attachtoscraper).count() != 0:
-            return HttpResponse("Yes")
-
-    else:
-        scraper = None
+    if attachtoname:
+        try:
+            toscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
+        except models.Code.DoesNotExist:
+            return HttpResponse("Scraper does not exist: %s" % str([scrapername]))
         
+    if not toscraper or not fromscraper:
+        return HttpResponse("Need a 'from' and a 'to' scraper")
 
-    if attachtoscraper.privacy_status != "private":
-        if scraper:
-            models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
+    if toscraper.privacy_status != 'private':
+        # toscraper is public so anyone can read
         return HttpResponse("Yes")
-        
-    if not scrapername:
-        return HttpResponse("Draft scraper can't connect to private scraper: %s" % str([attachtoname]))
+    
+    # If toscraper is private then it MUST be in a vault. 
+    if fromscraper.privacy_status != 'private':
+        return HttpResponse("Target scraper is private and source scraper is not in the vault")
 
-    if scraper.privacy_status == 'public':
-        return HttpResponse("No: because scraper connecting from is public cannot connect to private")
+    if not fromscraper.vault == toscraper.vault:
+        return HttpResponse("Target scraper is not in the same vault as the source")        
         
-
-    # we're going to use the set of editors of a private/protected scraper be the gateway for access to the 
-    # private attach to scraper (success if there is an overlap in the sets)
-    scraperuserroles = models.UserCodeRole.objects.filter(code=scraper)
-    attachtouserroles = models.UserCodeRole.objects.filter(code=attachtoscraper)
-    usersofattach = [ usercoderole.user  for usercoderole in attachtouserroles  if usercoderole.role in ['owner', 'editor'] ]
-    usersofscraper = [ usercoderole.user  for usercoderole in scraperuserroles  if usercoderole.role in ['owner', 'editor'] ]
-    commonusers = set(usersofattach).intersection(set(usersofscraper))
-    if not commonusers:
-        return HttpResponse("No: because no common owners or editors between the two scrapers")
-        
-    models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
-    return HttpResponse("Yes")
+    return HttpResponse("Yes")    
     
     
 def webstore_attach_auth(request):
     mime = 'application/json'    
-    if internal_attach_auth(request):
-        return HttpResponse("{'attach':'Ok'}", mimetype=mime)        
-    else:
-        return HttpResponse("{'attach':'Fail'}", mimetype=mime)
-
-
-def internal_attach_auth( request ):
-    # aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
     scrapername = request.GET.get("scrapername")
     attachtoname = request.GET.get("attachtoname")
-    
-    mime = 'application/json'
-    
-    try:
-        attachtoscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
-    except models.Code.DoesNotExist:
-        return True
 
-
-    if attachtoscraper.privacy_status != "private":
-        return True
-#        if scraper:
-#            models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
-        
-    # dereference scraper (if not draft) so we can look for the attach list
+    fromscraper, toscraper = None, None
     if scrapername: 
         try:
-            scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
+            fromscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
         except models.Code.DoesNotExist:
-            return False
+            return HttpResponse("{'attach':'Fail', 'error': 'Scraper does not exist: %s' % str([scrapername])}", mimetype=mime)
 
-        # check against the attachto list
-        if models.CodePermission.objects.filter(code=scraper, permitted_object=attachtoscraper).count() != 0:
-            return True
-    else:
-        scraper = None
+    if attachtoname:
+        try:
+            toscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
+        except models.Code.DoesNotExist:
+            return HttpResponse("{'attach':'Fail', 'error': 'Scraper does not exist: %s' % str([attachtoname])}", mimetype=mime)
+        
+    if not toscraper or not fromscraper:
+        return HttpResponse("{'attach':'Fail', 'error': 'Need both a source and a target scraper'", mimetype=mime)
+
+    if toscraper.privacy_status != 'private':
+        # toscraper is public so anyone can read
+            return HttpResponse("{'attach':'Ok'}", mimetype=mime)
     
-        
-    if not scrapername:
-        return False
+    # If toscraper is private then it MUST be in a vault. 
+    if fromscraper.privacy_status != 'private':
+        return HttpResponse("{'attach':'Fail', 'error': 'Target scraper is private and source scraper is not in the vault'", mimetype=mime)        
 
-    if scraper.privacy_status == 'public':
-        return False
+    if not fromscraper.vault == toscraper.vault:
+        return HttpResponse("{'attach':'Fail', 'error': 'Target scraper is not in the same vault as the source'", mimetype=mime)        
         
-    # we're going to use the set of editors of a private/protected scraper be the gateway for access to the 
-    # private attach to scraper (success if there is an overlap in the sets)
-    scraperuserroles = models.UserCodeRole.objects.filter(code=scraper)
-    attachtouserroles = models.UserCodeRole.objects.filter(code=attachtoscraper)
-    usersofattach = [ usercoderole.user  for usercoderole in attachtouserroles  if usercoderole.role in ['owner', 'editor'] ]
-    usersofscraper = [ usercoderole.user  for usercoderole in scraperuserroles  if usercoderole.role in ['owner', 'editor'] ]
-    commonusers = set(usersofattach).intersection(set(usersofscraper))
-    if not commonusers:
-        return False
-        
-    models.CodePermission(code=scraper, permitted_object=attachtoscraper).save()
-    return True
-
-
+    return HttpResponse("{'attach':'Ok'}", mimetype=mime)
+    

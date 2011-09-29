@@ -75,6 +75,8 @@ class SQLiteDatabase(Database):
             res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         elif request["maincommand"] == 'clear_datastore':
             res = self.clear_datastore()
+        elif request["maincommand"] == 'undelete_datastore':
+            res = self.undelete_datastore()
         elif request["maincommand"] == 'sqlitecommand':
             if request["command"] == "downloadsqlitefile":
                 res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
@@ -96,6 +98,13 @@ class SQLiteDatabase(Database):
         return res
 
 
+    def undelete_datastore(self):
+        restore_from = os.path.join(self.scraperresourcedir, "DELETED-defaultdb.sqlite")
+        if os.path.isfile(restore_from):
+            restore_to = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
+            shutil.move(restore_from, restore_to)
+        return {"status":"good"}
+        
 
     def clear_datastore(self):
         scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
