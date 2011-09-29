@@ -461,7 +461,6 @@ def scraper_undo_delete_data(request, short_name):
 
     send_message( request,{
         "message": "Your data has been recovered",
-        "template": "datastore_undeleted",
         "level"  : "info",
         "actions":  [ ]
     })
@@ -486,7 +485,6 @@ def scraper_delete_data(request, short_name):
         
     send_message( request, {
         "message": "Your data has been deleted",
-        "template": "datastore_deleted",
         "level"  : "info",
         "actions": 
             [ 

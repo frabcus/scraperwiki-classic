@@ -28,6 +28,6 @@ def send_message( request, message_dict ):
     except:
         lvl = messages.INFO
 
-    result = render_to_string('frontend/messages/%s.html' % message_dict['template'], message_dict)
+    result = render_to_string('frontend/messages.html', message_dict)
     messages.add_message(request, lvl, mark_safe(result) )
 
