@@ -180,19 +180,16 @@ module ScraperWiki
         unique_keys = unique_keys.map { |x| x.kind_of?(Symbol) ? x.to_s : x }
 
         if data.class == Hash
-            rjdata = _convdata(unique_keys, data)
-            if rjdata.include?("error")
-                raise SqliteException.new(rjdata["error"])
+            data = [ data ]
+        end
+            
+        rjdata = [ ]
+        for ldata in data
+            ljdata = _convdata(unique_keys, ldata)
+            if ljdata.include?("error")
+                raise SqliteException.new(ljdata["error"])
             end
-        else
-            rjdata = [ ]
-            for ldata in data
-                ljdata = _convdata(unique_keys, ldata)
-                if ljdata.include?("error")
-                    raise SqliteException.new(ljdata["error"])
-                end
-                rjdata.push(ljdata)
-            end
+            rjdata.push(ljdata)
         end
 
         ds = SW_DataStore.create()
@@ -210,6 +207,30 @@ module ScraperWiki
             unique_keys.each do |key|
                 qsl.push("unique="+URI.encode(key))
             end
+            
+            # quick and dirty provision of column types to the webstore
+            puts rjdata
+            puts rjdata.class
+            if rjdata.length != 0
+                jargtypes = { }
+                rjdata[0].each_pair do |k, v|
+                    if v != nil
+                        if k[-5..-1] == "_blob"
+                            vt = "blob"  # coerced into affinity none
+                        elsif v.class == Fixnum
+                            vt = "integer"
+                        elsif v.class == Float
+                            vt = "real"
+                        else
+                            vt = "text"
+                        end
+                        jargtypes[k] = vt
+                    end
+                end
+                puts jargtypes
+                qsl.push(("jargtypes="+JSON.generate(jargtypes)))
+            end
+            
             path = "%s/%s/%s?%s" % [username, dirscrapername, table_name, qsl.join("&")]
             #puts JSON.generate(rjdata)
             httpcall = Net::HTTP.new(ds.m_host, ds.m_webstore_port)
