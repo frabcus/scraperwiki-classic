@@ -80,14 +80,18 @@ datastore = nil
 scrapername = nil
 querystring = nil
 runid = nil
-
+attachables = nil
+webstore_port = nil
 File.open( File.dirname(options[:script]) +  "/launch.json","r") do |f|
   results = JSON.parse( f.read )
   datastore = results['datastore']
   runid     = results['runid']
   querystring = results['querystring']
   scrapername = results['scrapername']
+  attachables = results['attachables']
+  webstore_port = results['webstore_port']
 end
+
 
 unless querystring.nil? || querystring == ''
      ENV['QUERY_STRING'] = querystring
@@ -95,12 +99,12 @@ unless querystring.nil? || querystring == ''
 end
 
 host, port = datastore.split(':')
-SW_DataStore.create(host, port, scrapername, runid)
+SW_DataStore.create(host, port, scrapername, runid, attachables, webstore_port)
 
 code = File.new(options[:script], 'r').read()
 begin
     #eval code # this doesn't give you line number of top level errors, instead we use require_relative:
-    require_relative options[:script]
+    require options[:script]
 rescue Exception => e
     est = getExceptionTraceback(e, code, options[:script])
     # for debugging:

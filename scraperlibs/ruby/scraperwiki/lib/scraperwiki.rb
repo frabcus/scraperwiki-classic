@@ -64,7 +64,6 @@ module ScraperWiki
         end
 
         ds = SW_DataStore.create()
-
         ldata = data.dup
         if date != nil
             ldata["date"] = date
@@ -172,7 +171,34 @@ module ScraperWiki
         end
 
         ds = SW_DataStore.create()
-        res = ds.request({'maincommand'=>'save_sqlite', 'unique_keys'=>unique_keys, 'data'=>rjdata, 'swdatatblname'=>table_name})
+        if ds.m_webstore_port == 0
+            res = ds.request({'maincommand'=>'save_sqlite', 'unique_keys'=>unique_keys, 'data'=>rjdata, 'swdatatblname'=>table_name})
+        else
+            username = 'resourcedir'  # gets it into the right subdirectory automatically!!!
+            dirscrapername = ds.m_scrapername
+            if ds.m_scrapername == '' or ds.m_scrapername.nil?
+                dirscrapername = 'DRAFT__' + ds.m_runid.gsub(/[\.\-]/, '_')
+            end
+            
+            # (do something about jargtypes later)
+            qsl = [ ]
+            unique_keys.each do |key|
+                qsl.push("unique="+URI.encode(key))
+            end
+            path = "%s/%s/%s?%s" % [username, dirscrapername, table_name, qsl.join("&")]
+            puts path
+            puts JSON.generate(rjdata)
+            httpcall = Net::HTTP.new(ds.m_host, ds.m_webstore_port)
+            headers =  { "Accept"=>"application/json", "X-Scrapername"=>ds.m_scrapername, "X-Runid"=>ds.m_runid, "Content-Type"=>"application/json" }
+            response = httpcall.post(path, JSON.generate(rjdata), headers)
+            puts response.body
+            res = JSON.parse(response.body)
+            if res["state"] == "error"
+                res["error"] = res["message"]
+            end
+        end
+        
+       
         if res["error"]
             raise SqliteException.new(res["error"])
         end
@@ -282,23 +308,34 @@ module ScraperWiki
         $attachlist.push({"name"=>name, "asname"=>asname})
 
         ds = SW_DataStore.create()
-        res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"attach", 'name'=>name, 'asname'=>asname})
-        if res["error"]
-            if /sqlite3.Error: no such table:/.match(res["error"])
-                raise NoSuchTableSqliteException.new(res["error"])
+
+        if ds.webstore_port == 0
+            res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"attach", 'name'=>name, 'asname'=>asname})
+            if res["error"]
+                if /sqlite3.Error: no such table:/.match(res["error"])
+                    raise NoSuchTableSqliteException.new(res["error"])
+                end
+                raise SqliteException.new(res["error"])
             end
-            raise SqliteException.new(res["error"])
+        else
+            res = {'status'=>'ok'}
         end
+        
         if verbose
             ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>"attach", 'val1'=>name, 'val2'=>asname})
         end
+            
         return res
     end
     
 
     def ScraperWiki.commit(verbose=1)
         ds = SW_DataStore.create()
-        res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"commit"})
+        if ds.webstore_port == 0
+            res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"commit"})
+        else
+            res = {'status'=>'ok'}
+        end
     end
 
     def ScraperWiki.select(sqlquery, data=nil, verbose=1)

@@ -13,7 +13,7 @@ class SW_DataStore
     
     include Singleton
 
-    attr_accessor :m_port, :m_host, :m_scrapername, :m_runid
+    attr_accessor :m_port, :m_host, :m_scrapername, :m_runid, :m_attachables, :m_webstore_port
 
     def initialize
       @m_socket = nil
@@ -21,6 +21,8 @@ class SW_DataStore
       @m_port = nil
       @m_scrapername = ''
       @m_runid = ''
+      @m_attachables = []
+      @webstore_port = 0
     end
 
 
@@ -82,8 +84,10 @@ class SW_DataStore
         return JSON.parse(text)
     end
 
-    # function used to both initialize the settings and get an instance
-    def SW_DataStore.create(host=nil, port = nil, scrapername = '', runid = nil)
+    # function used to both initialize the settings and get an instance! 
+    # this is ridiculous and unnecessary with new webstore.  
+    # we are creating object without the fields merely to access the static variables! 
+    def SW_DataStore.create(host=nil, port = nil, scrapername = '', runid = nil, attachables = nil, webstore_port = nil)
         instance = SW_DataStore.instance
         # so, it might be intended that the host and port are
         # set once, never to be changed, but this is ruby so
@@ -93,6 +97,8 @@ class SW_DataStore
           instance.m_port = port
           instance.m_scrapername = scrapername
           instance.m_runid = runid
+          instance.m_attachables = attachables
+          instance.m_webstore_port = webstore_port
         elsif host && port
           raise "Can't change host and port once connection made"
         elsif !(instance.m_port) || !(instance.m_host)
