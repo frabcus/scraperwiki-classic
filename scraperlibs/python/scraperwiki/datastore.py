@@ -231,7 +231,14 @@ def webstorerequest(req):
         result = e.read()  # the error
     #print result
     jres = json.loads(result)
+    
+    # decode error messages that may be inconveniently packed somewhere into the structure (what a lot of hassle!)
     if jres.get("state") == "error":
-        jres["error"] = jres.get("message", "error")
+        return { "error":jres.get("message", "error") }
+    if (type(jres) == dict) and (type(jres.get("keys")) == list) and (type(jres.get("data")) == list):
+        if "state" in jres["keys"] and len(jres["data"]) == 1:
+            ddata = dict(zip(jres["keys"], jres["data"][0]))
+            if ddata.get("state") == "error":
+                return { "error":ddata.get("message", "error") }
     return jres
     

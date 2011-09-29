@@ -78,13 +78,38 @@ module ScraperWiki
 
     def ScraperWiki.sqliteexecute(sqlquery, data=nil, verbose=2)
         ds = SW_DataStore.create()
-        res = ds.request({'maincommand'=>'sqliteexecute', 'sqlquery'=>sqlquery, 'data'=>data, 'attachlist'=>$attachlist})
-        if res["error"]
-            if /sqlite3.Error: no such table:/.match(res["error"])
-                raise NoSuchTableSqliteException.new(res["error"])
+        if ds.m_webstore_port == 0
+            res = ds.request({'maincommand'=>'sqliteexecute', 'sqlquery'=>sqlquery, 'data'=>data, 'attachlist'=>$attachlist})
+        else
+            username = 'resourcedir'  # gets it into the right subdirectory automatically!!!
+            dirscrapername = ds.m_scrapername
+            if ds.m_scrapername == '' or ds.m_scrapername.nil?
+                dirscrapername = 'DRAFT__' + ds.m_runid.gsub(/[\.\-]/, '_')
             end
-            raise SqliteException.new(res["error"])
+            path = "%s/%s" % [username, dirscrapername]
+            
+            record = {"query"=>sqlquery, "params"=>data, "attach"=>[]}
+            $attachlist.each do |value|
+                record["attach"].push({"user"=>username, "database"=>value["name"], "alias"=>value["asattach"], "securityhash"=>"somthing"})
+            end
+            
+            httpcall = Net::HTTP.new(ds.m_host, ds.m_webstore_port)
+            headers =  { "Accept"=>"application/json+tuples", "X-Scrapername"=>ds.m_scrapername, "X-Runid"=>ds.m_runid, "Content-Type"=>"application/json" }
+            response = httpcall.put(path, JSON.generate(record), headers)
+            res = JSON.parse(response.body)
+            if res["state"] == "error"
+                ScraperWiki.raisesqliteerror(res["message"])
+            end
+            if (res.class == Hash) and (res["keys"].class == Array) and (res["data"].class == Array)
+                if res["keys"].include?("state") and (res["data"].length == 1)
+                    ddata = Hash[*res["keys"].zip(res["data"][0]).flatten]
+                    if ddata["state"] == "error"
+                        ScraperWiki.raisesqliteerror(ddata["message"])
+                    end
+                end
+            end
         end
+
         if verbose
             if data.kind_of?(Array) 
                 data.each do |value|
@@ -186,12 +211,11 @@ module ScraperWiki
                 qsl.push("unique="+URI.encode(key))
             end
             path = "%s/%s/%s?%s" % [username, dirscrapername, table_name, qsl.join("&")]
-            puts path
-            puts JSON.generate(rjdata)
+            #puts JSON.generate(rjdata)
             httpcall = Net::HTTP.new(ds.m_host, ds.m_webstore_port)
             headers =  { "Accept"=>"application/json", "X-Scrapername"=>ds.m_scrapername, "X-Runid"=>ds.m_runid, "Content-Type"=>"application/json" }
             response = httpcall.post(path, JSON.generate(rjdata), headers)
-            puts response.body
+            #puts response.body
             res = JSON.parse(response.body)
             if res["state"] == "error"
                 res["error"] = res["message"]
@@ -303,19 +327,25 @@ module ScraperWiki
         raise SqliteException.new("SW_APIWrapper.search has been deprecated")
     end
 
-
+    def ScraperWiki.raisesqliteerror(rerror)
+        if /sqlite3.Error: no such table:/.match(rerror)  # old dataproxy
+            raise NoSuchTableSqliteException.new(rerror)
+        end
+        if /DB Error: \(OperationalError\) no such table:/.match(rerror)
+            raise NoSuchTableSqliteException.new(rerror)
+        end
+        raise SqliteException.new(rerror)
+    end
+    
     def ScraperWiki.attach(name, asname=nil, verbose=1)
         $attachlist.push({"name"=>name, "asname"=>asname})
 
         ds = SW_DataStore.create()
 
-        if ds.webstore_port == 0
+        if ds.m_webstore_port == 0
             res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"attach", 'name'=>name, 'asname'=>asname})
             if res["error"]
-                if /sqlite3.Error: no such table:/.match(res["error"])
-                    raise NoSuchTableSqliteException.new(res["error"])
-                end
-                raise SqliteException.new(res["error"])
+                ScraperWiki.raisesqliteerror(res)
             end
         else
             res = {'status'=>'ok'}
@@ -331,9 +361,10 @@ module ScraperWiki
 
     def ScraperWiki.commit(verbose=1)
         ds = SW_DataStore.create()
-        if ds.webstore_port == 0
+        if ds.m_webstore_port == 0
             res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"commit"})
         else
+            puts "*** commit() no longer a necessary function call"
             res = {'status'=>'ok'}
         end
     end
