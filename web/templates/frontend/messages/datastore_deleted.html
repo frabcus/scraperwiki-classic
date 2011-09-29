@@ -1,4 +1,4 @@
 {{ message }} 
 {% for text,url,default in actions %}
-	<a href="{{ url }}">{{ text }}</a>
+	<a href="{{ url }}"{% if default %} class="default"{% endif %}>{{ text }}</a>
 {% endfor %}
