@@ -20,7 +20,8 @@ function setupScraperOverview(short_name)
         $('#' + tab_content_name).show();
     
         $("#downloadcsvtable").show(); 
-        $("#downloadcsvtable").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + short_name + "&query=select+*+from+`"+encodeURI(tablename)+"`"); 
+        $("#downloadcsvtable").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + short_name 
+                                                + "&query=select+*+from+`"+encodeURI(tablename)+"`"+"&apikey="+$('#id_apikey').val()); 
     }); 
 
     $('.sqlite_view_schema').click( function() 

@@ -617,15 +617,8 @@ def proxycached(request):
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
 
-def export_csv(request, short_name):
-    tablename = request.GET.get('tablename', "swdata")
-    query = "select * from `%s`" % tablename
-    qsdata = { "name":short_name.encode('utf-8'), "query":query.encode('utf-8'), "format":"csv" }
-    return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
-
-
-    # could be replaced with the dataproxy chunking technology now available in there,
-    # but as it's done, leave it here
+# could be replaced with the dataproxy chunking technology now available in there,
+# but as it's done, leave it here
 def stream_sqlite(dataproxy, filesize, memblock):
     for offset in range(0, filesize, memblock):
         sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "seek":offset, "length":memblock})
