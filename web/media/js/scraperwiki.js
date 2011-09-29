@@ -333,38 +333,7 @@ $(function()
 		});
 	}
 	
-	function move_to_vault(){
-		$('#move_to_vault').bind('change', function(){
-			if($(this).val() == ''){
-				$(this).next().attr('disabled','disabled');
-			} else {
-				$(this).next().attr('disabled','');
-			}
-			console.log($(this).val());
-		}).next().attr('disabled','disabled').bind('click', function(e){
-			e.preventDefault();
-			if($(this).is(':disabled')){
-				// do nothing
-				console.log('naughty');
-			} else {
-				$(this).val('Moving\u2026').attr('disabled','disabled').prev().attr('disabled','disabled');
-				$.getJSON($(this).prev().val(), function(data) {
-					console.log(data);
-					if(data.status == 'ok'){
-						$('#scraper_contributors').load(location.href + ' #scraper_contributors>*', function(){
-							$('#current_vault_link').effect("highlight", {}, 2000);
-							move_to_vault();
-							console.log('partial page refresh succeeded');
-						});
-					} else {
-						$(this).parent().after('<p class="error">Ooops! ' + data.error + '</p>');
-					}
-				});
-			}
-		});
-	}
-	
-	move_to_vault();
+	$('<a>').attr('id','alert_close').bind('click', function(){ $('#alert_outer').slideUp(); }).appendTo('#alert_inner');
 	
 });
 

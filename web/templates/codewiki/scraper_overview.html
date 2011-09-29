@@ -9,6 +9,11 @@
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
     <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
+    {% if scraper.access_apikey %}
+        <input type="text" id="id_apikey" value="{{scraper.access_apikey}}" class="hide">
+    {% else %}
+        <input type="text" id="id_apikey" value="" class="hide">
+    {% endif %}
 </fieldset>
 
 <div class="page_title">
@@ -67,7 +72,7 @@
           {% endfor %}
 
           <div class="content_footer">
-             <p>This dataset has a total of {{scraper.scraper.record_count}} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }} (<span><a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a><a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a></span>).
+             <p>This dataset has a total of {{ total_record_count }} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }} (<span><a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a><a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a></span>).
               </p>
           </div>
           <ul id="sqlite_schema" style="display: none">
@@ -171,8 +176,10 @@
 </div>
 
 <div class="content col left" id="scraper_contributors">
-    <h3>Contributors</h3>
+    <h3>Contributors{% if scraper.vault %} &amp; Vaults{% endif %}</h3>
     {% include 'codewiki/includes/contributors.html' %}
+    
+    <!--
     
     {% if scraper.vault %}
         <h3>This scraper is in {% if scraper.vault.user.username == user.username %}your vault{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s vault{% endif %}</h3>
@@ -198,7 +205,7 @@
         {% endif %}
     {% endif %}
     
-    
+    -->
     
     
     

@@ -73,8 +73,8 @@ with open(pathname) as f:
     runid       = d['runid']
     scrapername = d['scrapername']
     querystring = d['querystring']
-    attachables = d['attachables']
-    webstore_port = d['webstore_port']
+    attachables = d.get('attachables', '')
+    webstore_port = d.get('webstore_port', 0)
     
 if querystring:
     os.environ['QUERY_STRING'] = querystring

@@ -67,34 +67,60 @@
     {% endif %}
 {% endcomment %}
 
+
+{% if scraper.vault %}
+    <div id="privacy_status">
+        <h4><img src="{{ MEDIA_URL }}images/icons/shield-private.png" width="16" height="16" /> 
+            This {{scraper.wiki_type}} is in {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault
+            {% if scraper.owner == request.user and request.user.vault_membership.count %}
+                <a id="show_privacy_choices">[edit]</a>
+            {% endif %}</h4>
+        <p>Location: <a href="/vaults/" id="current_vault_link">{{ scraper.vault.name }}</a> {% if scraper.vault.user.username != user.username %}({{scraper.vault.user.get_profile.name}}&rsquo;s vault){% endif %}</p>
+        <p>Only the users listed above can see or edit <br/>this {{scraper.wiki_type}}.</p>
+        
+        {% if scraper.owner == request.user and request.user.vault_membership.count %}
+        <form id="privacy_status_form">
+            <a id="hide_privacy_choices">[cancel]</a>
+            <h4 style="text-indent: 26px">Move this scraper</h4>
+            <p><label for="move_to_vault" style="color:#666; font-size: 0.8em">As this scraper&rsquo;s owner, you can move it <br/>to any of the vaults to which you have access:</label></p>
+            <p><select id="move_to_vault">
+            {% for vault in request.user.vault_membership.all %}
+                <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
+            {% endfor %}
+            </select> <input type="button" value="&rarr; Move!"/></p>
+        </form>
+        {% endif %}
+    </div>
+{% else %}
+
 <div id="privacy_status">
-    {% ifequal scraper.privacy_status 'public' %}
+    {% if scraper.privacy_status == 'public' %}
         <h4><img src="{{ MEDIA_URL }}images/icons/shield-public.png" width="16" height="16" /> 
             This {{scraper.wiki_type}} is public 
             {% if user_owns_it %}
                 <a id="show_privacy_choices">[edit]</a>
             {% endif %}
         </h4>
-        <p>Anyone can see this scraper, and any registered user can edit it.</p>
-    {% endifequal %}
-    {% ifequal scraper.privacy_status 'visible' %}
+        <p>Anyone can see this {{scraper.wiki_type}}, and any registered user can edit it.</p>
+    {% endif %}
+    {% if scraper.privacy_status == 'visible' %}
         <h4><img src="{{ MEDIA_URL }}images/icons/shield-protected.png" width="16" height="16" /> 
             This {{scraper.wiki_type}} is protected 
             {% if user_owns_it %}
                 <a id="show_privacy_choices">[edit]</a>
             {% endif %}
         </h4>
-        <p>Anyone can see this scraper, but only the contributors listed above can edit it.</p>
-    {% endifequal %}
-    {% ifequal scraper.privacy_status 'private' %}
+        <p>Anyone can see this {{scraper.wiki_type}}, but only the contributors listed above can edit it.</p>
+    {% endif %}
+    {% if scraper.privacy_status == 'private' %}
         <h4><img src="{{ MEDIA_URL }}images/icons/shield-private.png" width="16" height="16" /> 
             This {{scraper.wiki_type}} is private 
             {% if user_owns_it %}
                 <a id="show_privacy_choices">[edit]</a>
             {% endif %}
         </h4>
-        <p>Only the contributors listed above can see or edit this scraper.</p>
-    {% endifequal %}
+        <p>Only the contributors listed above can see or edit this {{scraper.wiki_type}}.</p>
+    {% endif %}
 
     <form id="privacy_status_form">
         <a id="hide_privacy_choices">[cancel]</a>
@@ -119,7 +145,24 @@
                 <td><h4><label for="privacy_private">Private</label></h4><p><label for="privacy_private">Only selected contributors can <br/>see or edit this {{scraper.wiki_type}}.</label></p></td>
             </tr>
             {% endif %}
+            {% if scraper.owner == request.user and request.user.vault_membership.count %}
+            <tr>
+                <td class="radio"></td>
+                <td>
+                    <h4><label for="privacy_vault">Move to a vault</label></h4>
+                    <p><label for="privacy_vault">Only vault members will be able to <br/>see or edit this {{scraper.wiki_type}}.</label></p>
+                    <p><select id="move_to_vault">
+                        <option></option>
+                    {% for vault in request.user.vault_membership.all %}
+                        <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
+                    {% endfor %}
+                    </select> <input type="button" value="&rarr; Move!"/></p>
+                </td>
+            </tr>
+            {% endif %}
         </table>
         <input type="button" value="Save" id="saveprivacy">
     </form>
 </div>
+
+{% endif %}

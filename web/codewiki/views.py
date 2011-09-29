@@ -28,6 +28,8 @@ import urlparse
 try:                import json
 except ImportError: import simplejson as json
 
+PRIVACY_STATUSES = [ 'public', 'visible', 'private', 'deleted']
+
 PRIVACY_STATUSES_UI = [ ('public', 'can be edited by anyone who is logged on'),
                         ('visible', 'can only be edited by those listed as editors'), 
                         ('private', 'cannot be seen by anyone except for the designated editors'), 
@@ -160,6 +162,27 @@ def code_overview(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if isinstance(scraper, HttpResponse):  return scraper
     
+    alert_test = request.GET.get('alert', '')
+    if alert_test:
+        from frontend.utilities.messages import send_message        
+        if alert_test == '1':
+            actions = [
+                ("View this page", reverse('code_overview', args=[wiki_type, short_name]), True,),            
+            ]
+        elif alert_test == '2':
+            actions =  [ 
+                ("View this page", reverse('code_overview', args=[wiki_type, short_name]), True,),
+                ("View it again", reverse('code_overview', args=[wiki_type, short_name]), False,),
+            ]
+        else:
+            actions = []
+            
+        send_message( request,{
+            "message": "This is a simple alert test",
+            "level"  : "info",
+            "actions":  actions,
+        })        
+    
     context = {'selected_tab':'overview', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
     context["userrolemap"] = scraper.userrolemap()
@@ -216,11 +239,17 @@ def code_overview(request, wiki_type, short_name):
 
             # success, have good data
         else:
+            total_rows = 0
             context['sqlitedata'] = [ ]
             for sqltablename, sqltabledata in sqlitedata['tables'].items():
                 sqltabledata["tablename"] = sqltablename
                 context['sqlitedata'].append(sqltabledata)
-
+                try:
+                    total_rows += int( sqltabledata['count'] )
+                except:
+                    pass
+             
+            context['total_record_count'] = total_rows
             try:
                 beta_user = request.user.get_profile().beta_user
             except frontend.models.UserProfile.DoesNotExist:
@@ -292,8 +321,10 @@ def scraper_admin_settags(request, short_name):
 
 def scraper_admin_privacystatus(request, short_name):
     scraper = getscraperor404(request, short_name, "set_privacy_status")
-    scraper.privacy_status = request.POST.get('value', '')
-    scraper.save()
+    newvalue = request.POST.get('value', '')
+    if newvalue and newvalue in PRIVACY_STATUSES:
+        scraper.privacy_status = newvalue
+        scraper.save()
     return HttpResponse(dict(PRIVACY_STATUSES_UI)[scraper.privacy_status])
 
 
@@ -435,6 +466,8 @@ def scraper_admin(request, short_name):
 
 
 def scraper_undo_delete_data(request, short_name):
+    from frontend.utilities.messages import send_message
+    
     scraper = getscraperorresponse(request, "scraper", short_name, None, "undo_delete_data")
     if isinstance(scraper, HttpResponse):  return scraper
     
@@ -447,12 +480,18 @@ def scraper_undo_delete_data(request, short_name):
     except:
         pass
 
-    messages.add_message(request, messages.INFO, 'You data has been restored')
+    send_message( request,{
+        "message": "Your data has been recovered",
+        "level"  : "info",
+        "actions":  [ ]
+    })
         
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
 def scraper_delete_data(request, short_name):
+    from frontend.utilities.messages import send_message
+    
     scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
     if isinstance(scraper, HttpResponse):  return scraper
     
@@ -465,10 +504,15 @@ def scraper_delete_data(request, short_name):
     except:
         pass
         
-    messages.add_message(request, messages.INFO, 
-                         'You data has been deleted&nbsp;<a href="%s">Undo?</a>' 
-                                % reverse('scraper_undo_delete_data', args=[short_name]))
-        
+    send_message( request, {
+        "message": "Your data has been deleted",
+        "level"  : "info",
+        "actions": 
+            [ 
+                ("Undo?", reverse('scraper_undo_delete_data', args=[short_name]), True,)
+            ]
+    } )
+    
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
@@ -592,15 +636,8 @@ def proxycached(request):
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
 
-def export_csv(request, short_name):
-    tablename = request.GET.get('tablename', "swdata")
-    query = "select * from `%s`" % tablename
-    qsdata = { "name":short_name.encode('utf-8'), "query":query.encode('utf-8'), "format":"csv" }
-    return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
-
-
-    # could be replaced with the dataproxy chunking technology now available in there,
-    # but as it's done, leave it here
+# could be replaced with the dataproxy chunking technology now available in there,
+# but as it's done, leave it here
 def stream_sqlite(dataproxy, filesize, memblock):
     for offset in range(0, filesize, memblock):
         sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "seek":offset, "length":memblock})
