@@ -28,6 +28,8 @@ import urlparse
 try:                import json
 except ImportError: import simplejson as json
 
+PRIVACY_STATUSES = [ 'public', 'visible', 'private', 'deleted']
+
 PRIVACY_STATUSES_UI = [ ('public', 'can be edited by anyone who is logged on'),
                         ('visible', 'can only be edited by those listed as editors'), 
                         ('private', 'cannot be seen by anyone except for the designated editors'), 
@@ -298,8 +300,10 @@ def scraper_admin_settags(request, short_name):
 
 def scraper_admin_privacystatus(request, short_name):
     scraper = getscraperor404(request, short_name, "set_privacy_status")
-    scraper.privacy_status = request.POST.get('value', '')
-    scraper.save()
+    newvalue = request.POST.get('value', '')
+    if newvalue and newvalue in PRIVACY_STATUSES:
+        scraper.privacy_status = newvalue
+        scraper.save()
     return HttpResponse(dict(PRIVACY_STATUSES_UI)[scraper.privacy_status])
 
 
