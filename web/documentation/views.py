@@ -2,6 +2,7 @@ from django.template import RequestContext, TemplateDoesNotExist
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.views.decorators.cache import cache_page
 
 from codewiki.models import Code, LANGUAGES_DICT
@@ -83,7 +84,7 @@ def contrib(request, short_name):
     except Code.DoesNotExist:
         raise Http404
     if not scraper.actionauthorized(request.user, "readcode"):
-        raise Http404
+        raise PermissionDenied
     
     context["doccontents"] = scraper.get_vcs_status(-1)["code"]
     context["title"] = scraper.title

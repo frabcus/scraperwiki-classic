@@ -1,6 +1,7 @@
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound,HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound, HttpResponseForbidden
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render_to_response,get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -39,8 +40,8 @@ def getscraperor404(request, short_name, action):
         raise Http404
         
     if not scraper.actionauthorized(request.user, action):
-        raise Http404
-        
+        raise PermissionDenied
+
     return scraper
 
 # this is used by swimport and history diffs
@@ -178,7 +179,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         if wiki_type != scraper.wiki_type:
             return HttpResponseRedirect(reverse("editor_edit", args=[scraper.wiki_type, short_name]))
         if not scraper.actionauthorized(request.user, "readcodeineditor"):
-            return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "readcodeineditor"), context_instance=RequestContext(request)))
+            return HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "readcodeineditor"), context_instance=RequestContext(request)))
        
         # link from history page can take us to "rollback" mode and see earlier revision
         rollback_rev = request.GET.get('rollback_rev', '')

@@ -1,5 +1,6 @@
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
@@ -77,9 +78,9 @@ def scraper_killrunning(request, run_id, event_id):
         except ScraperRunEvent.DoesNotExist:
             raise Http404
         if not event.scraper.actionauthorized(request.user, "killrunning"):
-            raise Http404
+            raise PermissionDenied
         if request.POST.get('killrun', None) != '1':
-            raise Http404
+            raise SuspiciousOperation
 
     killed = kill_running_runid(run_id)   # ought we be using the run event and seeing if we can kill it more smartly
     print "Kill function result on", killed

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os, sys
 
 os.environ['WEBSTORE_SETTINGS'] = sys.argv[1]
