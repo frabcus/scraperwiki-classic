@@ -251,19 +251,19 @@ function changeRoles(sdata, redirect_to_on_fail) {
 function setupChangeEditorStatus()
 {
     // changing editor status
-    $('#addneweditor a').click(function()
+    $('#addneweditor a').live('click', function()
     {
         $('#addneweditor a').hide()
         $('#addneweditor span').show(); 
         $('#contributorserror').hide();
     }); 
-    $('#addneweditor input.cancelbutton').click(function()
+    $('#addneweditor input.cancelbutton').live('click', function()
     {
         $('#addneweditor span').hide(); 
         $('#addneweditor a').show()
         $('#contributorserror').hide();
     }); 
-    $('#addneweditor input.addbutton').click(function()
+    $('#addneweditor input.addbutton').live('click', function()
     {
         $('#contributorserror').hide();
         var thisli = $(this).parents("li:first"); 
@@ -286,20 +286,20 @@ function setupChangeEditorStatus()
         }); 
     }); 
 
-    $('.detachbutton').click(function() 
+    $('.detachbutton').live('click', function() 
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
 		changeRoles( sdata, '/dashboard/' );
     }); 
 
-    $('.demotebutton').click(function() 
+    $('.demotebutton').live('click', function() 
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
 		changeRoles( sdata );
     }); 
-    $('.promotebutton').click(function() 
+    $('.promotebutton').live('click', function() 
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'editor' }; 
@@ -369,7 +369,7 @@ function setupChangeEditorStatus()
 	$('#privacy_status :radio').change(function(){
 		$('#saveprivacy').trigger('click');
 	});
-}   
+}
     
 function setupChangeAttachables(short_name)
 {
@@ -460,3 +460,45 @@ function setupChangeAttachables(short_name)
         .appendTo(ul);
     };
 }
+
+function move_to_vault(){
+	$('#move_to_vault').bind('change', function(){
+		if($(this).val() == ''){
+			$(this).next().attr('disabled','disabled');
+		} else {
+			$(this).next().attr('disabled','');
+		}
+		console.log($(this).val());
+	}).next().attr('disabled','disabled').bind('click', function(e){
+		e.preventDefault();
+		if($(this).is(':disabled')){
+			// do nothing
+			console.log('naughty');
+		} else {
+			$(this).val('Moving\u2026').attr('disabled','disabled').prev().attr('disabled','disabled');
+			$.getJSON($(this).prev().val(), function(data) {
+				console.log(data);
+				if(data.status == 'ok'){
+					$('#scraper_contributors').load(location.href + ' #scraper_contributors>*', function(){
+						$('#current_vault_link').animate({backgroundColor:'#ffff99'}, 100, function(){
+							$(this).animate({backgroundColor:'#F4F8FB'}, 100, function(){
+								$(this).animate({backgroundColor:'#ffff99'}, 100, function(){
+									$(this).animate({backgroundColor:'#F4F8FB'}, 100, function(){
+										$(this).animate({backgroundColor:'#ffff99'}, 100, function(){
+											$(this).animate({backgroundColor:'#F4F8FB'}, 1000);
+										});
+									});
+								});
+							});
+						});
+						move_to_vault();
+					});
+				} else {
+					$(this).parent().after('<p class="error">Ooops! ' + data.error + '</p>');
+				}
+			});
+		}
+	});
+}
+
+move_to_vault();
