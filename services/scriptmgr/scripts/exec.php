@@ -31,6 +31,8 @@ $datastore   = $launch['datastore'];
 $scrapername = $launch['scrapername'];
 $runid 	     = $launch['runid'];
 $querystring = $launch['querystring'];
+$attachables = $launch['attachables'];
+$webstore_port = $launch["webstore_port"]; 
 
 if ( strlen($querystring) > 0 ) {
 	putenv("QUERY_STRING=" . $querystring);
@@ -76,7 +78,7 @@ for ($i = 0; $i < count($QUERY_STRING_a); $i++)
 
 
 $dsinfo = split (':', $datastore) ;
-SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid) ;
+SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid, $attachables, $webstore_port);
 
 // the following might be the only way to intercept syntax errors
 //$errors = array(); 
@@ -102,7 +104,7 @@ date_default_timezone_set('Europe/London');
 try
 {
     // works also as include or eval.  However no way to trap syntax errors
-    require  $script;
+    require $script;
 }
 catch(Exception $e)
 {

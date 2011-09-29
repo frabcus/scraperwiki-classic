@@ -209,8 +209,6 @@ module ScraperWiki
             end
             
             # quick and dirty provision of column types to the webstore
-            puts rjdata
-            puts rjdata.class
             if rjdata.length != 0
                 jargtypes = { }
                 rjdata[0].each_pair do |k, v|
@@ -227,7 +225,6 @@ module ScraperWiki
                         jargtypes[k] = vt
                     end
                 end
-                puts jargtypes
                 qsl.push(("jargtypes="+JSON.generate(jargtypes)))
             end
             

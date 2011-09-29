@@ -26,7 +26,7 @@ m_webstore_port = None   # if not null then will connect to new webstore
 m_attachables = [ ]
 
         # make everything global to the module for simplicity as opposed to half in and half out of a single class
-def create(host, port, scrapername, runid, attachables, webstore_port=None):
+def create(host, port, scrapername, runid, attachables, webstore_port):
     global m_host
     global m_port
     global m_scrapername
@@ -38,8 +38,7 @@ def create(host, port, scrapername, runid, attachables, webstore_port=None):
     m_scrapername = scrapername
     m_runid = runid
     m_attachables = m_attachables
-    if webstore_port:
-        m_webstore_port = int(webstore_port)
+    m_webstore_port = int(webstore_port)
 
         # a \n delimits the end of the record.  you cannot read beyond it or it will hang
 def receiveoneline(socket):
@@ -197,7 +196,7 @@ def webstorerequest(req):
                     else:
                         vt = "text"
                     jargtypes[k] = vt
-        qsl.append(("jargtypes", json.dumps(jargtypes)))
+            qsl.append(("jargtypes", json.dumps(jargtypes)))
 
         target = "%s?%s" % (tableurl, urllib.urlencode(qsl))
         request = urllib2.Request(target)
