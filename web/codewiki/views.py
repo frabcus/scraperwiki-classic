@@ -162,6 +162,27 @@ def code_overview(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if isinstance(scraper, HttpResponse):  return scraper
     
+    alert_test = request.GET.get('alert', '')
+    if alert_test:
+        from frontend.utilities.messages import send_message        
+        if alert_test == '1':
+            actions = [
+                ("View this page", reverse('code_overview', args=[wiki_type, short_name]), True,),            
+            ]
+        elif alert_test == '2':
+            actions =  [ 
+                ("View this page", reverse('code_overview', args=[wiki_type, short_name]), True,),
+                ("View it again", reverse('code_overview', args=[wiki_type, short_name]), False,),
+            ]
+        else:
+            actions = []
+            
+        send_message( request,{
+            "message": "This is a simple alert test",
+            "level"  : "info",
+            "actions":  actions,
+        })        
+    
     context = {'selected_tab':'overview', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
     context["userrolemap"] = scraper.userrolemap()
