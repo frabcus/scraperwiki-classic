@@ -91,7 +91,7 @@ def pdftoxml(pdfdata):
 # code adapted from http://docs.python.org/library/imp.html#examples-imp
 # ideally there is a way to seamlessly overload the __import__ function and get us to call out like this
 # it should also be able to explicitly refer to a named revision
-def swimport(name, swinstance="http://scraperwiki.com"):
+def swimport(name, swinstance="https://scraperwiki.com"):
     import imp
     try:
         return sys.modules[name]
@@ -109,7 +109,7 @@ def swimport(name, swinstance="http://scraperwiki.com"):
     return imp.load_module(name, fp, modulefile.name, (".py", "U", 1))
 
 class SWImporter(object):
-    def __init__(self, swinstance="http://scraperwiki.com"):
+    def __init__(self, swinstance="https://scraperwiki.com"):
         self.swinstance = swinstance
 
     def find_module(self, name, path=None):
@@ -141,7 +141,7 @@ class SWImporter(object):
 
 # callback to a view with parameter lists (cross language capability)
 def jsviewcall(name, **args):
-    url = "http://scraperwiki.com/views/%s/run/?%s" % (name, urllib.urlencode(args))
+    url = "https://scraperwiki.com/views/%s/run/?%s" % (name, urllib.urlencode(args))
     response = urllib.urlopen(url).read()
     try:
         return json.loads(response)
