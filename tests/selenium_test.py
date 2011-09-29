@@ -136,7 +136,7 @@ class SeleniumTest(unittest.TestCase):
         
         # Load the scraper/view code and insert directly into page source, inserting the attachment scraper name if a view
         if code_type == 'view':
-            code_source = code_source.replace('{{sourcescraper}}', code_name)
+            code_source = code_source.replace('{{sourcescraper}}', view_attach_scraper_name)
         s.type('//body[@class="editbox"]', "%s" % code_source)
     
         s.click('btnCommitPopup')

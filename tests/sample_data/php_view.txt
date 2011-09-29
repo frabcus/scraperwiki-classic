@@ -22,7 +22,7 @@
     foreach($rows as $row) {
     print('<tr>');
         foreach ($keys as $key) {
-            print('<th>'.$row[$key].'</th>');
+            print('<td>'.$row[$key].'</td>');
         }
     print('</tr>');
     }
