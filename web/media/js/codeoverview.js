@@ -501,4 +501,6 @@ function move_to_vault(){
 	});
 }
 
-move_to_vault();
+$(function(){
+	move_to_vault();
+});
