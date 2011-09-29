@@ -62,9 +62,6 @@ body {
 	background: #fff;
 }
 
-#alert_inner a{
-	margin-left: 40px;
-}
 #nav_inner, #alert_inner, #header_inner, #page_inner, #footer_inner {
 	text-align: left;
 	width: 960px;
@@ -328,20 +325,18 @@ body.frontpage #nav_inner li.frontpage {
 #alert_outer,
 .alert_outer {
 	color: #411;
-	padding: 10px 0 11px 0;
+	padding: 11px 0 10px 0;
 	border-top: 1px solid #b71;
-	background: #f9c667; /* old browsers */
-	background: -moz-linear-gradient(top, #f9c667 0%, #f79621 100%); /* firefox */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f9c667), color-stop(100%,#f79621)); /* webkit */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9c667', endColorstr='#f79621',GradientType=0 ); /* ie */
+	background: #f9e3a7;
+	background: -moz-linear-gradient(top, #f9e3a7 0%, #fbcb45 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f9e3a7), color-stop(100%,#fbcb45));
+	background: -webkit-linear-gradient(top, #f9e3a7 0%,#fbcb45 100%);
+	background: -o-linear-gradient(top, #f9e3a7 0%,#fbcb45 100%);
+	background: -ms-linear-gradient(top, #f9e3a7 0%,#fbcb45 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9e3a7', endColorstr='#fbcb45',GradientType=0 );
+	background: linear-gradient(top, #f9e3a7 0%,#fbcb45 100%);
 	text-shadow: #fe9 0 1px 0;
 	filter: dropshadow(color=#ffee99, offx=0, offy=1);
-}
-
-#alert_outer h2,
-.alert_outer h2 {
-	font-size: 18px;
-	line-height: 18px;
 }
 
 #alert_outer a,
@@ -352,6 +347,31 @@ body.frontpage #nav_inner li.frontpage {
 #alert_outer a:hover,
 .alertouter a:hover {
 	color: #822;
+}
+
+#alert_inner {
+	position: relative;
+	font-size: 16px;
+	line-height: 20px;
+	text-align: center;
+	font-weight: normal;
+	width: 920px;
+}
+
+#alert_close {
+	display: block;
+	position: absolute;
+	width: 20px;
+	height: 21px;
+	top: 50%;
+	right: 0%;
+	margin-top: -11px;
+	background: transparent url(../images/alert_close.gif) 0 0 no-repeat;
+	cursor: pointer;
+}
+
+#alert_close:hover {
+	background-position: -20px 0;
 }
 
 
