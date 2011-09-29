@@ -352,7 +352,17 @@ $(function()
 					console.log(data);
 					if(data.status == 'ok'){
 						$('#scraper_contributors').load(location.href + ' #scraper_contributors>*', function(){
-							$('#current_vault_link').effect("highlight", {}, 2000);
+							$('#current_vault_link').animate({backgroundColor:'#ffff99'}, 100, function(){
+								$(this).animate({backgroundColor:'#F4F8FB'}, 100, function(){
+									$(this).animate({backgroundColor:'#ffff99'}, 100, function(){
+										$(this).animate({backgroundColor:'#F4F8FB'}, 100, function(){
+											$(this).animate({backgroundColor:'#ffff99'}, 100, function(){
+												$(this).animate({backgroundColor:'#F4F8FB'}, 1000);
+											});
+										});
+									});
+								});
+							});
 							move_to_vault();
 							console.log('partial page refresh succeeded');
 						});

@@ -176,8 +176,10 @@
 </div>
 
 <div class="content col left" id="scraper_contributors">
-    <h3>Contributors</h3>
+    <h3>Contributors{% if scraper.vault %} &amp; Vaults{% endif %}</h3>
     {% include 'codewiki/includes/contributors.html' %}
+    
+    <!--
     
     {% if scraper.vault %}
         <h3>This scraper is in {% if scraper.vault.user.username == user.username %}your vault{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s vault{% endif %}</h3>
@@ -203,7 +205,7 @@
         {% endif %}
     {% endif %}
     
-    
+    -->
     
     
     

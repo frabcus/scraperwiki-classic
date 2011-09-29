@@ -342,17 +342,18 @@ function setupChangeEditorStatus()
 
     // Changing between public / protected(visible) / private
 
-    $('#show_privacy_choices').click(function(){
+    $('#show_privacy_choices').live('click', function(){
         $('#privacy_status form').show();
         $('#privacy_status>h4, #privacy_status>p').hide();
-    })
+    });
 
-    $('#hide_privacy_choices').click(function() 
+    $('#hide_privacy_choices').live('click', function() 
     {
         $('#privacy_status form').hide();
         $('#privacy_status>h4, #privacy_status>p').show();
     }); 
-    $('#saveprivacy').click(function() 
+
+    $('#saveprivacy').live('click', function() 
     {
         var radio_value = $('input[name=privacy_status]:checked').val(); 
         var sdata = { value:radio_value }; 
