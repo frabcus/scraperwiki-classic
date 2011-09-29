@@ -67,7 +67,7 @@
           {% endfor %}
 
           <div class="content_footer">
-             <p>This dataset has a total of {{ scraper.record_count}} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }} (<span><a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a><a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a></span>).
+             <p>This dataset has a total of {{ total_record_count }} scraper.scraper.record_count records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }} (<span><a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a><a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a></span>).
               </p>
           </div>
           <ul id="sqlite_schema" style="display: none">

@@ -216,11 +216,17 @@ def code_overview(request, wiki_type, short_name):
 
             # success, have good data
         else:
+            total_rows = 0
             context['sqlitedata'] = [ ]
             for sqltablename, sqltabledata in sqlitedata['tables'].items():
                 sqltabledata["tablename"] = sqltablename
                 context['sqlitedata'].append(sqltabledata)
-
+                try:
+                    total_rows += int( sqltabledata['count'] )
+                except:
+                    pass
+             
+            context['total_record_count'] = total_rows
             try:
                 beta_user = request.user.get_profile().beta_user
             except frontend.models.UserProfile.DoesNotExist:
