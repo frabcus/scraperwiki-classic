@@ -435,6 +435,8 @@ def scraper_admin(request, short_name):
 
 
 def scraper_undo_delete_data(request, short_name):
+    from frontend.utilities.messages import send_message
+    
     scraper = getscraperorresponse(request, "scraper", short_name, None, "undo_delete_data")
     if isinstance(scraper, HttpResponse):  return scraper
     
@@ -447,12 +449,19 @@ def scraper_undo_delete_data(request, short_name):
     except:
         pass
 
-    messages.add_message(request, messages.INFO, 'You data has been restored')
+    send_message( request,{
+        "message": "Your data has been recovered",
+        "template": "datastore_undeleted",
+        "level"  : "info",
+        "actions":  [ ]
+    })
         
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
 def scraper_delete_data(request, short_name):
+    from frontend.utilities.messages import send_message
+    
     scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
     if isinstance(scraper, HttpResponse):  return scraper
     
@@ -465,10 +474,16 @@ def scraper_delete_data(request, short_name):
     except:
         pass
         
-    messages.add_message(request, messages.INFO, 
-                         'You data has been deleted&nbsp;<a href="%s">Undo?</a>' 
-                                % reverse('scraper_undo_delete_data', args=[short_name]))
-        
+    send_message( request, {
+        "message": "Your data has been deleted",
+        "template": "datastore_deleted",
+        "level"  : "info",
+        "actions": 
+            [ 
+                ("Undo?", reverse('scraper_undo_delete_data', args=[short_name]), True,)
+            ]
+    } )
+    
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
