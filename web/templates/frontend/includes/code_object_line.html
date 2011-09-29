@@ -28,12 +28,19 @@
           <td class="link">Protected</td>
         </tr>
         {% endifequal %}
-	    {% ifequal code.privacy_status 'private' %}
-	    <tr class="status private">
-          <td class="label">Status</td>
-          <td class="link">Private</td>
-        </tr>
-        {% endifequal %}
+        {% if code.vault %}
+            <tr class="status private">
+                <td class="label">Status</td>
+                <td class="link">In a vault</td>
+            </tr>
+        {% else %}
+	        {% if code.privacy_status == 'private' %}
+    	    <tr class="status private">
+              <td class="label">Status</td>
+              <td class="link">Private</td>
+            </tr>
+            {% endif %}
+        {% endif %}
 
         {% if code.is_sick_and_not_running %}
           <tr class="notes">

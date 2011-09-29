@@ -366,6 +366,8 @@ $(function()
 	
 	move_to_vault();
 	
+	$('<a>').attr('id','alert_close').bind('click', function(){ $('#alert_outer').slideUp(); }).appendTo('#alert_inner');
+	
 });
 
 
