@@ -21,12 +21,14 @@
     {% endspaceless %}
 
     <span class="hide">{{contributor.username}}</span>
+    
+    {% if scraper.vault %}{% else %}
 
-	{% ifequal role 'editor' %}
-		{% ifequal request.user.username contributor.username %}
+	{% if role == 'editor' %}
+		{% if request.user.username == contributor.username %}
 			<input type="button" value="demote" class="detachbutton"/>
-		{% endifequal %}		
-	{% endifequal %}
+		{% endif %}		
+	{% endif %}
 	
     {% if user_owns_it %}
       {% ifnotequal scraper.privacy_status 'public' %}
@@ -37,6 +39,8 @@
           <input type="button" value="promote" class="promotebutton"/>
         {% endifequal %}
       {% endifnotequal %}
+    {% endif %}
+    
     {% endif %}
 </li>
 
