@@ -2,6 +2,7 @@ from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent, 
 from django.contrib import admin
 from django.db import models
 from django.db.models import Count
+# from django.contrib.admin import SimpleListFilter
 
 class UserCodeRoleInlines(admin.TabularInline):
     model = UserCodeRole
@@ -20,10 +21,28 @@ def mark_unfeatured(modeladmin, request, queryset):
     queryset.update(featured=False)
 mark_unfeatured.short_description = 'Mark selected items as unfeatured'
 
+# This won't work until Django 1.4
+#class HasVaultFilter(SimpleListFilter):
+#    title = _('has vault')
+#    parameter_name = 'has_vault'
+#
+#    def lookups(self, request, model_admin):
+#        return (
+#            ('yes', _('yes')),
+#            ('no', _('no')),
+#        )
+#
+#    def queryset(self, request, queryset):
+#        if self.value() == 'yes':
+#            return queryset.filter(vault=None)
+#        if self.value() == 'no':
+#            return queryset.exclude(vault=None)
+
 class CodeAdmin(admin.ModelAdmin):
     inlines = (UserCodeRoleInlines,)    
     readonly_fields = ('wiki_type','guid')
     list_display = ('owner_name', 'title', 'short_name', 'status', 'privacy_status', 'vault_name')
+    list_filter = ('status', 'privacy_status', 'featured', 'created_at')
     search_fields = ('title', 'short_name')
 
     def vault_name(self, obj):
@@ -37,11 +56,9 @@ class CodeAdmin(admin.ModelAdmin):
         return None
 
 class ScraperAdmin(CodeAdmin):
-    list_filter = ('status', 'privacy_status', 'featured', 'created_at')
     actions = [mark_featured, mark_unfeatured]
 
 class ViewAdmin(CodeAdmin):
-    list_filter = ('status', 'privacy_status', 'featured', 'created_at')
     actions = [mark_featured, mark_unfeatured]
 
 class VaultAdmin(admin.ModelAdmin):
@@ -66,3 +83,7 @@ admin.site.register(View, ViewAdmin)
 admin.site.register(Vault, VaultAdmin)
 admin.site.register(ScraperRunEvent)
 admin.site.register(CodePermission)
+
+
+
+
