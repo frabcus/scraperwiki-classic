@@ -23,16 +23,25 @@ mark_unfeatured.short_description = 'Mark selected items as unfeatured'
 class CodeAdmin(admin.ModelAdmin):
     inlines = (UserCodeRoleInlines,)    
     readonly_fields = ('wiki_type','guid')
+    list_display = ('owner_name', 'title', 'short_name', 'status', 'privacy_status', 'vault_name')
+    search_fields = ('title', 'short_name')
+
+    def vault_name(self, obj):
+        if obj.vault:
+            return obj.vault.name
+        return None
+
+    def owner_name(self, obj):
+        if obj.owner():
+            return obj.owner().username
+        return None
 
 class ScraperAdmin(CodeAdmin):
-    list_display = ('title', 'short_name', 'last_run', 'status', 'privacy_status')
-    list_filter = ('status', 'last_run', 'privacy_status', 'featured', 'created_at')
-    search_fields = ('title', 'short_name')
+    list_filter = ('status', 'privacy_status', 'featured', 'created_at')
     actions = [mark_featured, mark_unfeatured]
 
 class ViewAdmin(CodeAdmin):
     list_filter = ('status', 'privacy_status', 'featured', 'created_at')
-    search_fields = ('title', 'short_name')
     actions = [mark_featured, mark_unfeatured]
 
 class VaultAdmin(admin.ModelAdmin):
