@@ -22,13 +22,22 @@ class TestApi(SeleniumTest):
     user_api_key = None
     scraper_api_key = None
     
-    # Only use these for checking runevents until the codemirror 'run' button
+    # TODO: use these for checking runevents until the codemirror 'run' button
     # is updated to generate runevents.
     hardcoded_runevent_scraper = "runevent_api_test"
     hardcoded_private_runevent_scraper = "private_runevent_api_test"
-    # also note the details in _runinfo_test() and _runinfo_privacy_test():
     
-    # Check callbacks
+    # TODO list:
+    # Check callbacks are generated properly (simple test)
+    # Once the codemirror 'run' button can dynamically generate a runevent, 
+    #    - Update _scraperinfo_date_test
+    #    - Update _runinfo_test
+    #    - Update _runinfo_privacy_test
+    #    - Remove the hardcoded_* variables
+    # Add scraper title search test to test_search_apis
+    # Update _datastore_privacy_test when table attach error message is corrected to 'permission denied' instead of 'not found'
+    # Test DB attachments in _datastore_privacy_test when it's updated to not use the code permissions table
+    # Make a test query that joins a DB in _advanced_datastore_query
 
     def test_datastore_api(self):
         self._get_api_base()
@@ -40,14 +49,10 @@ class TestApi(SeleniumTest):
         self._get_api_base()
         self._setup_db()
         self._scraperinfo_quietfields_test()
-        # TODO: waiting on the codemirror 'run' button to generate a run event
-        # Currently uses a hardcoded scraper on dev and live
-        if not "localhost" in self.site_base:
-            self._scraperinfo_date_test() 
+        self._scraperinfo_date_test() 
         self._scraperinfo_version_test()
         
     def test_runinfo_api(self):
-        # TODO: waiting on the codemirror 'run' button to generate a run event
         self._get_api_base()
         self._setup_db()
         self._runinfo_test()
@@ -66,7 +71,6 @@ class TestApi(SeleniumTest):
         self._setup_db()
         self._scrapersearch_shortname_test()
         self._scrapersearch_description_test()
-        # TODO: scraper title test?
         self._usersearch_test()
         
     def test_api_privacy(self):
@@ -84,7 +88,6 @@ class TestApi(SeleniumTest):
         # Add api key test
         self._datastore_privacy_test()
         self._scraperinfo_privacy_test()
-        # TODO: waiting on the codemirror 'run' button to generate a run event
         self._runinfo_privacy_test()
         self._userinfo_privacy_test()
         self._scrapersearch_privacy_test()
@@ -124,7 +127,6 @@ class TestApi(SeleniumTest):
         
         # Now test for expected successes
         # Check SQLite downloading (based on logged in user)
-        #urllib2.urlopen(urllib2.Request("http://localhost:8000/scrapers/export_sqlite/se_test_fea19852_3732_4738/", headers={'cookie':self.selenium.get_cookie()}))
         sqlite_file = urllib2.urlopen(urllib2.Request(self.site_base + "scrapers/export_sqlite/%s/" % self.populate_db_name, headers={'cookie':s.get_cookie()}))
         self.failUnless(int(sqlite_file.headers.dict['content-length']) > 0)
         self.failUnless(sqlite_file.headers.dict['content-type'] == 'application/octet-stream')
@@ -143,22 +145,10 @@ class TestApi(SeleniumTest):
         response = urllib2.urlopen(self.api_base + "datastore/sqlite?format=jsondict&name=" + self.populate_db_name + 
                                     "&query=select%20*%20from%20swdata&apikey=" + self.scraper_api_key)
         self.failUnless(len(json.loads(response.read())) == 20)
-        # TODO - below
-        ### Attach DB privacy
-        ##self.user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
-        ##s.open("/admin/codewiki/codepermission/add/")
-        ##s.select('id_code', public_scraper)
-        ##s.select('id_permitted_object', self.populate_db_name)
-        ##s.click("//input[@value='Save']")
-        ##self.wait_for_page()
-        ##response = urllib2.urlopen(self.api_base + "datastore/sqlite?format=jsondict&name=" + public_scraper + "&attach=" + self.populate_db_name + 
-        ##                           "&query=select%20*%20from%20" + self.populate_db_name + ".swdata%20limit%2015")
-        ##self.failUnless(len(json.loads(response.read())) == 15)
         
     
     def _scraperinfo_privacy_test(self):
         """ Make sure scraperinfo of a private scraper fails unless correct api key specified """
-        # TODO: add tests for when fields are specified?
         # Expecting failure
         url = self.api_base + "scraper/getinfo?format=jsondict&name=" + self.populate_db_name
         scraperinfo = json.loads(urllib2.urlopen(url).read())[0]
@@ -180,7 +170,7 @@ class TestApi(SeleniumTest):
             runid = '1316897325.456186_009f2d99-df7a-4d86-9115-6654c6812106'
             api_key = "08216130-1ec6-485c-8a3d-afe64f8f5dbf"
         else:
-            # TODO: can't generate runevents dynamically...yet
+            # TODO: can't generate runevents dynamically (e.g. on localhost) yet
             return
         # Can't use the private scraper we've just set up because it will have no runevents
         runevent_error = self.private_scraper_error
@@ -195,7 +185,7 @@ class TestApi(SeleniumTest):
                                   self.hardcoded_private_runevent_scraper + "&runid=" + runid).read())
         self.failUnless(jsonresponse == runevent_error)
         
-        # Try the above with an api key, expecting valid results now. Note we're using the local api_key variable
+        # Try the above with the api key (defined in this function), expecting valid results now
         jsonresponse = json.loads(urllib2.urlopen(self.api_base + "scraper/getruninfo?" + "format=jsondict&name=" + 
                                   self.hardcoded_private_runevent_scraper + "&apikey=" + api_key).read())
         self.failUnless(len(jsonresponse) == 1)
@@ -369,7 +359,7 @@ class TestApi(SeleniumTest):
         elif "scraperwiki.com" in self.site_base:
             runid = '1316646705.182498_7220cef2-a698-4205-ae14-aba4c85459d2'
         else:
-            # TODO: can't generate runevents dynamically...yet
+            # TODO: can't generate runevents dynamically (e.g. on localhost) yet
             return
         # Get most recent runevent
         jsonresponse = json.loads(urllib2.urlopen(self.api_base + "scraper/getruninfo?" + 
@@ -407,10 +397,12 @@ class TestApi(SeleniumTest):
         self.failUnless(json[0]['code'] == code)
         
         
-    # TODO: waiting on the codemirror 'run' button to generate a run event
-    # Currently uses a hardcoded scraper on dev and live
     def _scraperinfo_date_test(self):
         """ Check that scraper info correctly filters run events """
+        # TODO: waiting on the codemirror 'run' button to generate a run event
+        # Currently uses a hardcoded scraper on dev and live
+        if "localhost" in self.site_base:
+            return
         # Arbitrary date in the future and arbitrary date in the past
         futuredate = str(datetime.date.fromtimestamp(time.time()+1000000).isoformat())
         pastdate =   str(datetime.date.fromtimestamp(time.time()-1000000).isoformat())
