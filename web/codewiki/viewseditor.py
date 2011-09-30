@@ -463,6 +463,7 @@ def add_to_vault(request, wiki_type, language, id):
     scraper.language = language
     scraper.privacy_status = 'private'
     scraper.vault = vault
+    scraper.generate_apikey()
     scraper.save()
     
     # Make sure we update the access rights
