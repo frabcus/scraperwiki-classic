@@ -168,7 +168,7 @@ class TestApi(SeleniumTest):
             api_key = "02d8ab83-bec0-4934-a1a0-cc75b4df09a4"
         elif "scraperwiki.com" in self.site_base:
             runid = '1316897325.456186_009f2d99-df7a-4d86-9115-6654c6812106'
-            api_key = "08216130-1ec6-485c-8a3d-afe64f8f5dbf"
+            api_key = "d82c1c3a-f690-442c-8b75-6c5a09185647"
         else:
             # TODO: can't generate runevents dynamically (e.g. on localhost) yet
             return

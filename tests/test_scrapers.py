@@ -62,7 +62,7 @@ class TestScrapers(SeleniumTest):
 
         s.type('id_comment', comment)
         s.click('id_submit')
-        time.sleep(2)
+        self.wait_for_page()
 
         self.failUnless(s.is_text_present(comment))
         self.failUnless(s.is_text_present("Discussion (1)"))        
