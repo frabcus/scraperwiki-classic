@@ -38,6 +38,7 @@ class TestApi(SeleniumTest):
     # Update _datastore_privacy_test when table attach error message is corrected to 'permission denied' instead of 'not found'
     # Test DB attachments in _datastore_privacy_test when it's updated to not use the code permissions table
     # Make a test query that joins a DB in _advanced_datastore_query
+    # Do the privacy tests for vaulted scrapers - should be the same as private
 
     def test_datastore_api(self):
         self._get_api_base()
@@ -85,7 +86,6 @@ class TestApi(SeleniumTest):
         self.activate_users([self.user_name])
         self.set_code_privacy("private", "scraper", self.populate_db_name, 
                             {'username':self.user_name, 'password':self.user_pass})
-        # Add api key test
         self._datastore_privacy_test()
         self._scraperinfo_privacy_test()
         self._runinfo_privacy_test()
