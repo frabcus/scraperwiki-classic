@@ -1,5 +1,5 @@
 from django.template import RequestContext
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound, HttpResponseForbidden
 from django.template.loader import render_to_string
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
@@ -113,7 +113,7 @@ def rpcexecute(request, short_name, revision=None):
     except models.Code.DoesNotExist:
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':"Sorry, this view does not exist"}, context_instance=RequestContext(request)))
     if not scraper.actionauthorized(request.user, "rpcexecute"):
-        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "rpcexecute"), context_instance=RequestContext(request)))
+        return HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "rpcexecute"), context_instance=RequestContext(request)))
     
     if revision:
         try: 

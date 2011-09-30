@@ -8,14 +8,18 @@ class SW_DataStoreClass
    protected      $m_port     ;
    protected $m_scrapername;
    protected $m_runid;
+   protected $m_attachables; 
+   protected $m_webstore_port;
 
-   function __construct ($host, $port, $scrapername, $runid)
+   function __construct ($host, $port, $scrapername, $runid, $attachables, $webstore_port)
    {
       $this->m_socket    = null     ;
       $this->m_host      = $host    ;
       $this->m_port      = $port    ;
       $this->m_scrapername = $scrapername;
       $this->m_runid = $runid;
+      $this->m_attachables = $attachables; 
+      $this->m_webstore_port = $webstore_port; 
    }
 
 
@@ -42,8 +46,100 @@ class SW_DataStoreClass
       }
    }
 
+   function webstorerequest($req)
+   {
+        if ($req["maincommand"] == "sqlitecommand")
+        {
+            if ($req["command"] == "attach")
+                return (object)(array('status'=>'ok'));   # done at a higher level
+            else if ($req["command"] == "commit")
+                return (object)(array('status'=>'ok'));
+            else
+                return (object)(array("error"=>'Unknown sqlitecommand: '.$req["command"])); 
+            return (object)(array("error"=>'Unknown maincommand: '.$req["maincommand"])); 
+        }
+
+        $webstoreurl = "http://".$this->m_host.":".$this->m_webstore_port; 
+        $username = "resourcedir";  # gets it into the right subdirectory automatically!!!
+        $dirscrapername = $this->m_scrapername; 
+        if (!$this->m_scrapername)
+            $dirscrapername = "DRAFT__".preg_replace("[\.\-]", "_", $this->m_runid); 
+        $databaseurl = $webstoreurl."/".$username."/".$dirscrapername; 
+
+        if ($req["maincommand"] == "save_sqlite")
+        {
+            $table_name = $req["swdatatblname"]; 
+            $tableurl = $databaseurl."/".$table_name; 
+            $qsl = array(); 
+            foreach ($req["unique_keys"] as $key)
+                array_push($qsl, "unique=".urlencode($key)); 
+            $ldata = $req["data"]; 
+
+            # quick and dirty provision of column types to the webstore
+            if (count($ldata) != 0)
+            {
+                $jargtypes = array(); 
+                foreach ($ldata[0] as $k=>$v)
+                {
+                    if ($v != null)
+                    {
+                        if ((count($k) >= 5) && (substr($k, count($k)-5) == "_blob"))
+                            $vt = "blob";  # coerced into affinity none
+                        else if (is_int($v))
+                            $vt = "integer"; 
+                        else if (is_float($v))
+                            $vt = "real"; 
+                        else
+                            $vt = "text"; 
+                        $jargtypes[$k] = $vt; 
+                    }
+                }
+                array_push($qsl, "jargtypes=".json_encode($jargtypes)); 
+            }
+            $target = $tableurl."?".implode("&", $qsl); 
+
+            $curl = curl_init($target);
+            $headers = array("Accept: application/json"); 
+        }
+        else if ($req["maincommand"] == "sqliteexecute")
+        {
+            $curl = curl_init($databaseurl);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+            $headers = array("Accept: application/json+tuples"); 
+            $ldata = array("query"=>$req["sqlquery"], "params"=>$req["data"], "attach"=>array()); 
+            foreach ($req["attachlist"] as $att)
+                array_push($ldata["attach"], array("user"=>$username, "database"=>$att["name"], "alias"=>$att["asname"], "securityhash"=>"somthing")); 
+        }
+
+        $headers[] = "Content-Type: application/json"; 
+        $headers[] = "X-Scrapername: ".$this->m_scrapername; 
+        $headers[] = "X-Runid: ".$this->m_runid; 
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers); 
+        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($ldata)); 
+        $res = curl_exec($curl);
+        curl_close($curl);
+        $jres = json_decode($res); 
+        if (property_exists($jres, 'state') && ($jres->state == 'error'))
+            return (object)(array("error"=>$jres->message)); 
+        if (property_exists($jres, "keys") && property_exists($jres, "data") && (count($jres->data) == 1))
+        {
+            $ddata = array_combine($jres->keys, $jres->data[0]); 
+print_r($ddata); 
+            if ($ddata["state"] == "error")
+                return (object)(array("error"=>$ddata["message"])); 
+        }
+        return $jres;
+   }
+
    function request($req)
    {
+      if ($this->m_webstore_port)
+         return $this->webstorerequest($req); 
+
       $this->connect () ;
       $reqmsg  = json_encode ($req) . "\n" ;
       socket_send ($this->m_socket, $reqmsg, strlen($reqmsg), MSG_EOR) ;
@@ -76,10 +172,10 @@ class SW_DataStoreClass
    }
 
     // function used both to iniatialize the settings and get the object
-   static function create ($host = null, $port = null, $scrapername = null, $runid = null)
+   static function create ($host = null, $port = null, $scrapername = null, $runid = null, $attachables = null, $webstore_port = null)
    {
       if (is_null(self::$m_ds))
-         self::$m_ds = new SW_DataStoreClass ($host, $port, $scrapername, $runid);
+         self::$m_ds = new SW_DataStoreClass ($host, $port, $scrapername, $runid, $attachables, $webstore_port);
       return self::$m_ds;
    }
 }

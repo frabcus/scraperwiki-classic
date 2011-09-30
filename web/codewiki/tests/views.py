@@ -58,12 +58,6 @@ class ScraperViewsTests(TestCase):
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
 
-
-    def test_scraper_export_csv(self):
-        response = self.client.get(reverse('export_csv',
-                            kwargs={'short_name': 'test_scraper'}))
-        self.assertEqual(response.status_code, 302) # this now redirects to the API
-
     def test_scraper_all_tags(self):
         response = self.client.get(reverse('all_tags'))
         self.assertEqual(response.status_code, 200)

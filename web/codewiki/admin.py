@@ -30,7 +30,7 @@ class ScraperAdmin(CodeAdmin):
     actions = [mark_featured, mark_unfeatured]
 
 class ViewAdmin(CodeAdmin):
-    list_filter = ('status', 'mime_type', 'privacy_status','featured',)
+    list_filter = ('status', 'privacy_status', 'featured',)
     search_fields = ('title', 'short_name')
     actions = [mark_featured, mark_unfeatured]
 

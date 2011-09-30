@@ -173,12 +173,14 @@ exports.run_script = function( http_request, http_response ) {
 		
 };
 
-function writeLaunchFile( f, ds, runid, scrapername, querystring ) {
+function writeLaunchFile( f, ds, runid, scrapername, querystring, attachables, webstore_port ) {
 	var launch = {
 		'datastore': ds,
 		'runid': runid,
 		'scrapername': scrapername || '',
-		'querystring': querystring || ''
+		'querystring': querystring || '',
+		'attachables': attachables || [],
+		'webstore_port': webstore_port || 0
 	}
 	var data = JSON.stringify( launch );
 	fs.writeFileSync(f, data, encoding='utf8');
@@ -211,10 +213,11 @@ function execute(http_req, http_res, raw_request_data) {
 				response: http_res,
 				black: request_data.black || '',   // not used
 				white: request_data.white || '',   // not used
-                attachables: request_data.attachables || [],
                 beta_user: request_data.beta_user || false,
+                attachables: request_data.attachables || [],
+                webstore_port: (request_data.beta_user ? webstore_port : 0), 
                 scheduled_run: request_data.scheduled_run || false,
-				permissions: request_data.permissions || []  };
+				permissions: request_data.permissions || [] };
 	
 	
 	if ( ! use_lxc ) {
@@ -226,7 +229,9 @@ function execute(http_req, http_res, raw_request_data) {
 			 				 dataproxy, 
 							 script.run_id, 
 							 script.scraper_name, 
-							 script.query);
+							 script.query, 
+                             script.attachables,
+                             script.webstore_port);
 			
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
@@ -235,26 +240,9 @@ function execute(http_req, http_res, raw_request_data) {
 	   		} else {
 				var args;
 				if ( script.language == 'ruby' || script.language == 'php' ) {
-					args = ['--script=' + tmpfile,'--ds=' + dataproxy, '--runid=' + script.run_id]
-					if ( script.scraper_name ) {
-						args.push('--scrapername=' + script.scraper_name )
-					}
+					args = ['--script=' + tmpfile,]
 				} else {
-					args = ['--script',tmpfile,'--ds', dataproxy, '--runid', script.run_id]
-					if ( script.scraper_name ) {
-						args.push('--scrapername')
-						args.push( script.scraper_name )
-					}
-					
-                        // extra parameters used in the exec.py.  these will need to be added into the block above for ruby and php, as well as into the proper lxc fields
-					if ( script.beta_user && webstore_port )  {
-                        args.push('--webstore_port');
-						args.push( webstore_port);
-					}
-                    if ( script.attachables ) {
-                        args.push('--attachables');
-						args.push(script.attachables.join(" ")+'"'); 
-					}
+					args = ['--script', tmpfile]
 				}
 				
 				exe = './scripts/exec.' + util.extension_for_language(script.language);
@@ -372,7 +360,9 @@ function execute(http_req, http_res, raw_request_data) {
 			 				 dataproxy, 
 							 script.run_id, 
 							 script.scraper_name, 
-							 script.query);
+							 script.query,
+							 script.attachables,
+                             script.webstore_port);
 			
 			util.log.debug('File written to ' + tmpfile );
 			
@@ -381,24 +371,7 @@ function execute(http_req, http_res, raw_request_data) {
 			// Pass the data proxy and runid to the script that will trigger the exec.py
 			var cfgpath = '/mnt/' + rVM + '/config';
 
-			r = script.run_id.replace(/\|/g, "\\|");
-
-			util.log.debug('Setting runid to ' + r );
-			var args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh", dataproxy, r];
-						
-			if ( script.scraper_name && script.scraper_name.length > 0 ) {
-				args.push( script.scraper_name);
-			} else {
-				args.push( ' ' );
-			}
-			
-			util.log.debug( 'QUERYSTRING is ' + script.query);
-			if (script.query) {
-				var qstring = new Buffer(script.query).toString('base64');
-				args.push( qstring );
-			}  
-			util.log.debug(args);
-			
+			var args = [ '-n', rVM, '-f', cfgpath, "/home/startup/runscript", extension];
 	 		e = spawn('/usr/bin/lxc-execute', args );
 			
 			// json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})

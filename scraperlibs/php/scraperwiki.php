@@ -46,7 +46,7 @@ class scraperwiki
    static function sqliteexecute($sqlquery=null, $data=null, $verbose=1)
    {
       $ds = SW_DataStoreClass::create();
-      $result = $ds->request(array('maincommand'=>'sqliteexecute', 'sqlquery'=>$sqlquery, 'data'=>$data));
+      $result = $ds->request(array('maincommand'=>'sqliteexecute', 'sqlquery'=>$sqlquery, 'attachlist'=>self::$attachlist, 'data'=>$data));
       if (property_exists($result, 'error'))
          throw new Exception ($result->error);
       if ($verbose == 2 )
@@ -65,20 +65,20 @@ class scraperwiki
    static function save_sqlite($unique_keys, $data, $table_name="swdata", $verbose=2)
    {
       $ds = SW_DataStoreClass::create();
+      if (!array_key_exists(0, $data))
+          $data = array($data); 
+
       $result = $ds->request(array('maincommand'=>'save_sqlite', 'unique_keys'=>$unique_keys, 'data'=>$data, 'swdatatblname'=>$table_name)); 
       if (property_exists($result, 'error'))
          throw new Exception ($result->error);
 
       if ($verbose == 2)
       {
-         if (array_key_exists(0, $data))
-            $sdata = $data[0]; 
-         else
-            $sdata = $data;
+         $sdata = $data[0]; 
          $pdata = array(); 
          foreach ($sdata as $key=>$value)
             $pdata[scraperwiki::unicode_truncate($key, 50)] = scraperwiki::unicode_truncate($value, 50); 
-         if (array_key_exists(0, $data) && (count($data) >= 2))
+         if (count($data) >= 2)
             $pdata["number_records"] = "Number Records: ".count($data); 
          scraperwiki::sw_dumpMessage(array('message_type'=>'data', 'content'=>$pdata));
       }

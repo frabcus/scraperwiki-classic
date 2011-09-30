@@ -2,6 +2,8 @@ import os, sys, unittest, uuid, time
 from selenium import selenium
 from selenium_test import SeleniumTest
 from urlparse import urlparse
+import urllib2
+from BeautifulSoup import BeautifulSoup
 
 class TestScrapers(SeleniumTest):
     """
@@ -42,6 +44,11 @@ class TestScrapers(SeleniumTest):
         f.close()
     
         return code
+        
+    def _load_view_html(self, scraper_name):
+        return [('<head>\n</head>\n<body>\n <h2>\n  Some data from scraper: %s  (1 columns)\n </h2>' % scraper_name),
+                '<table style="border-collapse:collapse;" border="1">\n  <tbody>\n   <tr>\n    <th>\n     td\n    </th>\n   </tr>' + 
+                '\n   <tr>\n    <td>\n     hello\n    </td>\n   </tr>\n   <tr>\n    <td>\n     world\n    </td>\n   </tr>\n  </tbody>\n </table>']
 
     
     def _add_comment(self, code_name, code_type):
@@ -266,13 +273,17 @@ class TestScrapers(SeleniumTest):
         self._wait_for_run()
         s.click('link=Scraper')
         self.wait_for_page()
-        self._check_clear_data( scraper_name )
         # Check for precreated e-mail scraper and new scraper
         self._check_dashboard_count()
 
-        # View creation
+        # View creation and test that generated html is as expected
         view_name = self.create_code(language, 'view', self._load_data(language, 'view'), scraper_name)
+        s.open("/run/" + view_name)
+        self.wait_for_page()
+        for fragment in self._load_view_html(scraper_name):
+            self.failUnless(fragment in BeautifulSoup(self.selenium.get_html_source()).prettify())
         # Clear up the evidence of testing
+        self._check_clear_data( scraper_name )
         self._check_delete_code( scraper_name, 'scraper' )
         self._check_delete_code( view_name, 'view' )        
         # Only e-mail scraper should be left

@@ -26,7 +26,7 @@ m_webstore_port = None   # if not null then will connect to new webstore
 m_attachables = [ ]
 
         # make everything global to the module for simplicity as opposed to half in and half out of a single class
-def create(host, port, scrapername, runid, attachables, webstore_port=None):
+def create(host, port, scrapername, runid, attachables, webstore_port):
     global m_host
     global m_port
     global m_scrapername
@@ -38,8 +38,7 @@ def create(host, port, scrapername, runid, attachables, webstore_port=None):
     m_scrapername = scrapername
     m_runid = runid
     m_attachables = m_attachables
-    if webstore_port:
-        m_webstore_port = int(webstore_port)
+    m_webstore_port = int(webstore_port)
 
         # a \n delimits the end of the record.  you cannot read beyond it or it will hang
 def receiveoneline(socket):
@@ -157,7 +156,7 @@ def search(name, filterdict, limit=-1, offset=0):
     raise scraperwiki.sqlite.SqliteError("apiwrapper.search has been deprecated")
 
 def webstorerequest(req):
-    print req
+    #print req
     if req.get("maincommand") == "sqlitecommand":
         if req.get("command") == "attach":
             return "{'status': 'ok'}"    # done at the higher level
@@ -173,17 +172,35 @@ def webstorerequest(req):
     if not m_scrapername:
         dirscrapername = "DRAFT__%s" % re.sub("[\.\-]", "_", m_runid)
     databaseurl = "%s/%s/%s" % (webstoreurl, username, dirscrapername)
-    print databaseurl
+    #print databaseurl
     
     if req.get("maincommand") == "save_sqlite":
         table_name = req.get("swdatatblname")
         tableurl = "%s/%s" % (databaseurl, table_name)
-        rqs = urllib.urlencode([ ("unique", key)  for key in req.get("unique_keys") ])
         ldata = req.get("data")
         if type(ldata) == dict:
             ldata = [ldata]
-        target = "%s?%s" % (tableurl, rqs)
+        qsl = [ ("unique", key)  for key in req.get("unique_keys") ]
+        
+            # quick and dirty provision of column types to the webstore
+        if ldata:
+            jargtypes = { }
+            for k, v in ldata[0].items():
+                if v != None:
+                    if k[-5:] == "_blob":
+                        vt = "blob"  # coerced into affinity none
+                    elif type(v) == int:
+                        vt = "integer"
+                    elif type(v) == float:
+                        vt = "real"
+                    else:
+                        vt = "text"
+                    jargtypes[k] = vt
+            qsl.append(("jargtypes", json.dumps(jargtypes)))
+
+        target = "%s?%s" % (tableurl, urllib.urlencode(qsl))
         request = urllib2.Request(target)
+        
         request.add_header("Accept", "application/json")
         request.add_data(json.dumps(ldata))
             
@@ -211,9 +228,16 @@ def webstorerequest(req):
         url.close()
     except urllib2.HTTPError, e:
         result = e.read()  # the error
-    print result
+    #print result
     jres = json.loads(result)
+    
+    # decode error messages that may be inconveniently packed somewhere into the structure (what a lot of hassle!)
     if jres.get("state") == "error":
-        jres["error"] = jres.get("message", "error")
+        return { "error":jres.get("message", "error") }
+    if (type(jres) == dict) and (type(jres.get("keys")) == list) and (type(jres.get("data")) == list):
+        if "state" in jres["keys"] and len(jres["data"]) == 1:
+            ddata = dict(zip(jres["keys"], jres["data"][0]))
+            if ddata.get("state") == "error":
+                return { "error":ddata.get("message", "error") }
     return jres
     

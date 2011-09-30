@@ -13,45 +13,32 @@ require_once 'scraperwiki/stacktrace.php';
 
 ob_implicit_flush(true);
 
-$script = null;
-$datastore = null;
-$scrapername = null; 
-$runid = null; 
+$script 	 = null;
+
+// Load launch.json
+
 for ($idx = 1; $idx < count($argv); $idx += 1)
 {
    $arg  = $argv[$idx] ;
 
-   if (substr($arg, 0, 5) == '--qs=')
-   {
-      $qs = substr($arg,  5);
-	  if ( strlen($qs) > 0 ) {
-		$decoded = base64_decode($qs);
-		putenv("QUERY_STRING=" . $decoded);
-		putenv("URLQUERY=" . $decoded);
-	  }
-   }
-
    if (substr ($arg, 0,  9) == '--script=')
       $script = substr ($arg, 9);
-   if (substr ($arg, 0, 5) == '--ds=')
-      $datastore = substr($arg, 5);
-   if (substr ($arg, 0, 14) == '--scrapername=')
-      $scrapername = substr($arg, 14);
-   if (substr ($arg, 0, 8) == '--runid=')
-      $runid = substr($arg, 8);
-   if (substr($arg, 0, 6) == '--gid=')
-   {
-      $gid = substr($arg,  6);
-      posix_setgid($gid);
-      posix_setegid($gid);
-   }
-   if (substr ($arg, 0, 6) == '--uid=')
-   {
-      $uid = substr($arg, 6);
-      posix_setuid($uid);
-      posix_seteuid($uid);
-   }
 }
+
+$contents 	 = file_get_contents( dirname($script) . '/launch.json');
+$launch 	 = json_decode( $contents, true );
+$datastore   = $launch['datastore'];
+$scrapername = $launch['scrapername'];
+$runid 	     = $launch['runid'];
+$querystring = $launch['querystring'];
+$attachables = $launch['attachables'];
+$webstore_port = $launch["webstore_port"]; 
+
+if ( strlen($querystring) > 0 ) {
+	putenv("QUERY_STRING=" . $querystring);
+	putenv("URLQUERY=" . $querystring);
+}
+
 
 
 function shutdown(){
@@ -91,7 +78,7 @@ for ($i = 0; $i < count($QUERY_STRING_a); $i++)
 
 
 $dsinfo = split (':', $datastore) ;
-SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid) ;
+SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid, $attachables, $webstore_port);
 
 // the following might be the only way to intercept syntax errors
 //$errors = array(); 
@@ -117,7 +104,7 @@ date_default_timezone_set('Europe/London');
 try
 {
     // works also as include or eval.  However no way to trap syntax errors
-    require  $script;
+    require $script;
 }
 catch(Exception $e)
 {

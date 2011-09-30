@@ -31,6 +31,7 @@ urlpatterns = patterns('',
 
 
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
+    url(r'^scrapers/undo-delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_undo_delete_data, name='scraper_undo_delete_data'),    
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-\.]+)/$',   views.follow,               name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-\.]+)/$', views.unfollow,             name='scraper_unfollow'),    
@@ -70,11 +71,11 @@ urlpatterns = patterns('',
     url(r'^handle_session_draft/$',                       viewseditor.handle_session_draft, name="handle_session_draft"),
     url(r'^handle_editor_save/$',                         viewseditor.handle_editor_save,   name="handle_editor_save"),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/edit/$',   viewseditor.edit, name="editor_edit"),
+    url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)/tovault/(?P<id>\d+)/$',    viewseditor.add_to_vault, name="add_to_vault"),
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',            viewseditor.edit, name="editor"),
-
-
+    
     url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$', views.export_sqlite,   name='export_sqlite'),
-    url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),   # this gets redirected to the api preview
+    
 
     # old redirects
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/(?:run|full)/$',   # redirect because it's so common
@@ -83,6 +84,7 @@ urlpatterns = patterns('',
                    lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))),
     #url(r'^(?P<wiki_type>scraper)s/export/(?P<short_name>[\w_\-\.]+)/$', 
     #               lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))),
+    
 
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/code$', 
                    lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('raw', args=[short_name])+"?"+request.META["QUERY_STRING"])),

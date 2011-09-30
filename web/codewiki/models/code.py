@@ -38,6 +38,9 @@ LANGUAGES = [ (k,v) for k,v in LANGUAGES_DICT.iteritems() ]
 # used for new scraper/view dialogs
 # Add "javascript" to enable Javascript
 SCRAPER_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php" ] ]
+SCRAPER_LANGUAGES_V = [ '2.7.1', '1.9.2', '5.3.5', ''] 
+OLD_SCRAPER_LANGUAGES_V = [ '2.6.2', '1.8.7', '5.1', ''] 
+
 VIEW_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php", "html"] ]
 HELP_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php"] ]
 
@@ -54,7 +57,7 @@ PRIVACY_STATUSES = (
 )
 
 STAFF_ACTIONS = set(["run_scraper"])
-CREATOR_ACTIONS = set(["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ])
+CREATOR_ACTIONS = set(["delete_data", "undo_delete_data","schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ])
 EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor", "change_attachables", "attachable_add", "getrawdescription"])
 STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let staff also do anything a creator / editor can, except save code is a bit rude (for now!)
 VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow" ])
@@ -96,19 +99,14 @@ class Code(models.Model):
                                         verbose_name='Scraper Title',
                                         default='Untitled')
     short_name         = models.CharField(max_length=50, unique=True)
-    source             = models.CharField(max_length=100, blank=True)
     description        = models.TextField(blank=True)
     created_at         = models.DateTimeField(auto_now_add=True)
-    deleted            = models.BooleanField()     # deprecated
     status             = models.CharField(max_length=10, blank=True, default='ok')   # "sick", "ok"
     users              = models.ManyToManyField(User, through='UserCodeRole')
     guid               = models.CharField(max_length=1000)
-    published          = models.BooleanField(default=True)  # deprecated
-    first_published_at = models.DateTimeField(null=True, blank=True)   # could be replaced with created_at
     line_count         = models.IntegerField(default=0)    
     featured           = models.BooleanField(default=False)
     istutorial         = models.BooleanField(default=False)
-    isstartup          = models.BooleanField(default=False)
     language           = models.CharField(max_length=32, choices=LANGUAGES,  default='python')
     wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
     relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
@@ -132,9 +130,6 @@ class Code(models.Model):
             self.created_at = datetime.datetime.today()  
 
     def save(self, *args, **kwargs):
-        if self.published and self.first_published_at == None:
-            self.first_published_at = datetime.datetime.today()
-
         if not self.short_name:
             self._buildfromfirsttitle()
 

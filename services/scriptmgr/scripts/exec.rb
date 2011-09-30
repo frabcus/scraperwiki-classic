@@ -68,40 +68,43 @@ Signal.trap("XCPU") do
     raise Exception, "ScraperWiki CPU time exceeded"
 end
 
+
 options = {}
 OptionParser.new do|opts|
    opts.on( '--script=[SCRIPT]') do|script|
      options[:script] = script
    end
-   opts.on( '--ds=[DS]') do|ds|
-     options[:ds] = ds
-   end
-   opts.on( '--gid=[GID]') do|gid|
-     Process::Sys.setregid(gid.to_i, gid.to_i)
-   end
-   opts.on( '--uid=[UID]') do|uid|
-     Process::Sys.setreuid(uid.to_i, uid.to_i)
-   end
-   opts.on( '--scrapername=[SCRAPERNAME]') do|scrapername|
-     options[:scrapername] = scrapername
-   end
-   opts.on( '--qs=[QSTRING]') do|qstring|
-     qs = Base64.decode64(qstring)
-     ENV['QUERY_STRING'] = qs
-     ENV['URLQUERY'] = qs
-   end   
-   opts.on( '--runid=[RUNID]') do|runid|
-     options[:runid] = runid
-   end
 end.parse(ARGV)
 
-host, port = options[:ds].split(':')
-SW_DataStore.create(host, port, options[:scrapername], options[:runid])
+datastore = nil
+scrapername = nil
+querystring = nil
+runid = nil
+attachables = nil
+webstore_port = nil
+File.open( File.dirname(options[:script]) +  "/launch.json","r") do |f|
+  results = JSON.parse( f.read )
+  datastore = results['datastore']
+  runid     = results['runid']
+  querystring = results['querystring']
+  scrapername = results['scrapername']
+  attachables = results['attachables']
+  webstore_port = results['webstore_port']
+end
+
+
+unless querystring.nil? || querystring == ''
+     ENV['QUERY_STRING'] = querystring
+     ENV['URLQUERY'] = querystring
+end
+
+host, port = datastore.split(':')
+SW_DataStore.create(host, port, scrapername, runid, attachables, webstore_port)
 
 code = File.new(options[:script], 'r').read()
 begin
     #eval code # this doesn't give you line number of top level errors, instead we use require_relative:
-    require_relative options[:script]
+    require options[:script]
 rescue Exception => e
     est = getExceptionTraceback(e, code, options[:script])
     # for debugging:

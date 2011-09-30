@@ -20,7 +20,8 @@ function setupScraperOverview(short_name)
         $('#' + tab_content_name).show();
     
         $("#downloadcsvtable").show(); 
-        $("#downloadcsvtable").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + short_name + "&query=select+*+from+`"+encodeURI(tablename)+"`"); 
+        $("#downloadcsvtable").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + short_name 
+                                                + "&query=select+*+from+`"+encodeURI(tablename)+"`"+"&apikey="+$('#id_apikey').val()); 
     }); 
 
     $('.sqlite_view_schema').click( function() 
@@ -77,29 +78,6 @@ function setupScraperOverview(short_name)
                 return false;
            }
        );
-
-     //license
-     $('#spnLicenseChoice').editable('admin/', {
-              indicator : 'Saving...',
-              tooltip   : 'Click to edit...',
-              cancel    : 'Cancel',
-              submit    : 'Save',
-              onblur: 'ignore',
-              data   : $('#hidLicenseChoices').val(),
-              type   : 'select',
-              event: 'dblclick',
-              placeholder: '',
-              submitdata : {short_name: short_name}
-          });
-
-      $('#aEditLicense').click (
-           function(){
-                sCurrent = $('#spnLicenseChoice').html().trim();
-                $('#spnLicenseChoice').dblclick();
-                $('#spnLicenseChoice select').val(sCurrent);
-                return false;
-           }
-       );          
 }
 
 
@@ -273,19 +251,19 @@ function changeRoles(sdata, redirect_to_on_fail) {
 function setupChangeEditorStatus()
 {
     // changing editor status
-    $('#addneweditor a').click(function()
+    $('#addneweditor a').live('click', function()
     {
         $('#addneweditor a').hide()
         $('#addneweditor span').show(); 
         $('#contributorserror').hide();
     }); 
-    $('#addneweditor input.cancelbutton').click(function()
+    $('#addneweditor input.cancelbutton').live('click', function()
     {
         $('#addneweditor span').hide(); 
         $('#addneweditor a').show()
         $('#contributorserror').hide();
     }); 
-    $('#addneweditor input.addbutton').click(function()
+    $('#addneweditor input.addbutton').live('click', function()
     {
         $('#contributorserror').hide();
         var thisli = $(this).parents("li:first"); 
@@ -308,20 +286,20 @@ function setupChangeEditorStatus()
         }); 
     }); 
 
-    $('.detachbutton').click(function() 
+    $('.detachbutton').live('click', function() 
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
 		changeRoles( sdata, '/dashboard/' );
     }); 
 
-    $('.demotebutton').click(function() 
+    $('.demotebutton').live('click', function() 
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
 		changeRoles( sdata );
     }); 
-    $('.promotebutton').click(function() 
+    $('.promotebutton').live('click', function() 
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'editor' }; 
@@ -364,17 +342,18 @@ function setupChangeEditorStatus()
 
     // Changing between public / protected(visible) / private
 
-    $('#show_privacy_choices').click(function(){
+    $('#show_privacy_choices').live('click', function(){
         $('#privacy_status form').show();
         $('#privacy_status>h4, #privacy_status>p').hide();
-    })
+    });
 
-    $('#hide_privacy_choices').click(function() 
+    $('#hide_privacy_choices').live('click', function() 
     {
         $('#privacy_status form').hide();
         $('#privacy_status>h4, #privacy_status>p').show();
     }); 
-    $('#saveprivacy').click(function() 
+
+    $('#saveprivacy').live('click', function() 
     {
         var radio_value = $('input[name=privacy_status]:checked').val(); 
         var sdata = { value:radio_value }; 
@@ -390,7 +369,7 @@ function setupChangeEditorStatus()
 	$('#privacy_status :radio').change(function(){
 		$('#saveprivacy').trigger('click');
 	});
-}   
+}
     
 function setupChangeAttachables(short_name)
 {
@@ -481,3 +460,47 @@ function setupChangeAttachables(short_name)
         .appendTo(ul);
     };
 }
+
+function move_to_vault(){
+	$('#move_to_vault').bind('change', function(){
+		if($(this).val() == ''){
+			$(this).next().attr('disabled','disabled');
+		} else {
+			$(this).next().attr('disabled','');
+		}
+		console.log($(this).val());
+	}).next().attr('disabled','disabled').bind('click', function(e){
+		e.preventDefault();
+		if($(this).is(':disabled')){
+			// do nothing
+			console.log('naughty');
+		} else {
+			$(this).val('Moving\u2026').attr('disabled','disabled').prev().attr('disabled','disabled');
+			$.getJSON($(this).prev().val(), function(data) {
+				console.log(data);
+				if(data.status == 'ok'){
+					$('#scraper_contributors').load(location.href + ' #scraper_contributors>*', function(){
+						$('#current_vault_link').animate({backgroundColor:'#ffff99'}, 100, function(){
+							$(this).animate({backgroundColor:'#F4F8FB'}, 100, function(){
+								$(this).animate({backgroundColor:'#ffff99'}, 100, function(){
+									$(this).animate({backgroundColor:'#F4F8FB'}, 100, function(){
+										$(this).animate({backgroundColor:'#ffff99'}, 100, function(){
+											$(this).animate({backgroundColor:'#F4F8FB'}, 1000);
+										});
+									});
+								});
+							});
+						});
+						move_to_vault();
+					});
+				} else {
+					$(this).parent().after('<p class="error">Ooops! ' + data.error + '</p>');
+				}
+			});
+		}
+	});
+}
+
+$(function(){
+	move_to_vault();
+});

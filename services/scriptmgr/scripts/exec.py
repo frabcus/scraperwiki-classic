@@ -50,9 +50,6 @@ class ConsoleStream:
         return self.m_fd.fileno()
 
 
-# Make sure we have unbuffered outputs
-#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-#sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
 
 scraperwiki.logfd = sys.stderr
 sys.stdout = ConsoleStream(scraperwiki.logfd)
@@ -60,35 +57,34 @@ sys.stderr = ConsoleStream(scraperwiki.logfd)
 
 parser = optparse.OptionParser()
 parser.add_option("--script", metavar="name")    # not the scraper name, this is tmp file name which we load and execute
-parser.add_option("--ds", metavar="server:port")
-parser.add_option("--gid")    # nogroup
-parser.add_option("--uid")    # nobody
-parser.add_option("--scrapername")
-parser.add_option("--runid")
-parser.add_option("--qs")
-parser.add_option("--path")
-parser.add_option("--attachables", default="")
-parser.add_option("--webstore_port", default="0")
 options, args = parser.parse_args()
 
-if options.gid:
-    os.setregid(int(options.gid), int(options.gid))
-if options.uid:
-    os.setreuid(int(options.uid), int(options.uid))
-if options.path:
-    sys.path.append( options.path )
-if options.qs:
-    qstring = base64.b64decode( options.qs )
-    os.environ['QUERY_STRING'] = qstring
-    os.environ['URLQUERY'] = qstring   
+##############################################################
+# We can replace the parser with a load of the launch.json
+# file and assign the variables appropriately
+##############################################################
+datastore, runid, scrapername, querystring = None, None, None, None
+
+pathname, _ = os.path.split(options.script)
+pathname = os.path.join( os.path.abspath(pathname), 'launch.json')
+with open(pathname) as f:
+    d = json.loads( f.read() )
+    datastore   = d['datastore']
+    runid       = d['runid']
+    scrapername = d['scrapername']
+    querystring = d['querystring']
+    attachables = d.get('attachables', '')
+    webstore_port = d.get('webstore_port', 0)
+    
+if querystring:
+    os.environ['QUERY_STRING'] = querystring
+    os.environ['URLQUERY'] = querystring   
 
 
-host, port = string.split(options.ds, ':')
+host, port = string.split(datastore, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
-scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid, options.attachables.split(), options.webstore_port)
-
-
+scraperwiki.datastore.create(host, port, scrapername, runid, attachables, webstore_port)
 
 resource.setrlimit(resource.RLIMIT_CPU, (80, 82,))
 

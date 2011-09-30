@@ -624,8 +624,6 @@
         "model": "codewiki.scraper", 
         "fields": {
             "last_run": null, 
-            "license": "", 
-            "license_link": null, 
             "record_count": 0, 
             "relations": [], 
             "run_interval": 86400
@@ -640,13 +638,11 @@
             "privacy_status": "public", 
             "description": "", 
             "title": "Test Scraper", 
-            "deleted": 0, 
             "created_at": "2010-02-19 07:09:14", 
             "source": "", 
             "featured": 0, 
             "line_count": 0, 
             "published": 1, 
-            "first_published_at": "2010-02-19 07:09:53", 
             "guid": "0"
         }
     }, 
@@ -664,8 +660,6 @@
         "model": "codewiki.scraper", 
         "fields": {
             "last_run": null, 
-            "license": "", 
-            "license_link": null, 
             "record_count": 0, 
             "relations": [], 
             "run_interval": 86400
@@ -680,13 +674,11 @@
             "privacy_status": "public", 
             "description": "", 
             "title": "Test Scraper", 
-            "deleted": 0, 
             "created_at": "2010-02-19 07:09:14", 
             "source": "", 
             "featured": 0, 
             "line_count": 0, 
             "published": 1, 
-            "first_published_at": "2010-02-19 07:09:53", 
             "guid": "0"
         }
     }, 

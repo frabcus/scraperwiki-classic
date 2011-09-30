@@ -76,6 +76,10 @@ process.on('uncaughtException', function (err) {
 
 
 http.createServer(function (req, res) {
+	// Decide whether we will accept the connection (from twister machine and 
+	// local dataproxy/httpproxy only)
+	
+	
 	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/'];
 	handler(req,res);
 }).listen(settings.port, settings.listen_on || "0.0.0.0");

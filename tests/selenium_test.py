@@ -126,8 +126,8 @@ class SeleniumTest(unittest.TestCase):
         s.answer_on_next_prompt( code_name )        
         s.click('//a[@class="editor_%s"]' % code_type)        
         time.sleep(1)
-        link_name = '%s %s' % ({ "python":"Python", "ruby":"Ruby", "php":"PHP" }[language], code_type)
-        s.click( 'link=%s' % link_name )
+        link_name = { "python":"Python", "ruby":"Ruby", "php":"PHP" }[language]
+        s.click("//a[text()=' %s ']" % link_name )
         self.wait_for_page()
     
         # Prompt and wait for save button to activate
@@ -136,7 +136,7 @@ class SeleniumTest(unittest.TestCase):
         
         # Load the scraper/view code and insert directly into page source, inserting the attachment scraper name if a view
         if code_type == 'view':
-            code_source = code_source.replace('{{sourcescraper}}', code_name)
+            code_source = code_source.replace('{{sourcescraper}}', view_attach_scraper_name)
         s.type('//body[@class="editbox"]', "%s" % code_source)
     
         s.click('btnCommitPopup')
@@ -165,7 +165,7 @@ class SeleniumTest(unittest.TestCase):
             s.click('link=' + code_name)
             self.wait_for_page()
             s.select("id_privacy_status", "label=Private")
-            s.click("//div[@class='submit-row']/input[@value='Save']")
+            s.click("//input[@value='Save']")
             self.wait_for_page()
             self.user_login(owner['username'], owner['password'])
             s.open("/%ss/" % code_type + code_name)
