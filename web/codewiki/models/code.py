@@ -190,9 +190,6 @@ class Code(models.Model):
                 return True
         return False
 
-    def clean_description(self):
-        self.description
-
     def set_guid(self):
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
@@ -205,11 +202,11 @@ class Code(models.Model):
                 return owner[0]
         return None
 
-        # this function to be deleted
-    def requesters(self):
+
+    def editors(self):
         if self.pk:
-            requesters = self.users.filter(usercoderole__role='requester')
-        return requesters        
+            return self.users.filter(usercoderole__role='editor')
+        return None
 
     def attachable_scraperdatabases(self):
         return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all()  if cp.permitted_object.privacy_status != "deleted" ]

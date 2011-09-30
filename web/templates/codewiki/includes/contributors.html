@@ -12,12 +12,6 @@
       {% endfor %}
     {% endwith %}
 
-    {% with 'requester' as role %}
-      {% for contributor in userrolemap.requesters %}
-        {% include 'codewiki/includes/contributor.html' %}
-      {% endfor %}
-    {% endwith %}
-
     {% with 'editor' as role %}
       {% for contributor in userrolemap.editor %}  
         {% include 'codewiki/includes/contributor.html' %}
