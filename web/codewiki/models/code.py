@@ -265,16 +265,6 @@ class Code(models.Model):
         return euserrole
         
     
-    def unfollow(self, user):
-        """
-        Deliberately not making this generic, as you can't stop being an owner
-        or editor
-        """
-        UserCodeRole.objects.filter(code=self, 
-                                    user=user, 
-                                    role='follow').delete()
-        return True
-
     # uses lists of users rather than userroles so that you can test containment easily
     def userrolemap(self):
         result = { "editor":[], "owner":[] }

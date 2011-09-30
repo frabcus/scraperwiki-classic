@@ -45,22 +45,6 @@
   {% endifnotequal %}
 {% endif %}
 
-{% comment %}
-    {% if userrolemap.follow %}
-    <h3>Followers</h3>
-    {% ifnotequal scraper.privacy_status 'public' %}
-        <p id="followernoaccessmessage">(Do not have edit access to this {{scraper.wiki_type}}.)</p>
-    {% endifnotequal %}
-    <ul>
-    {% with 'follow' as role %}
-        {% for contributor in userrolemap.follow %}  
-        {% include 'codewiki/includes/contributor.html' %}
-        {% endfor %}
-    {% endwith %}
-    </ul>
-    {% endif %}
-{% endcomment %}
-
 
 {% if scraper.vault %}
     <div id="privacy_status">

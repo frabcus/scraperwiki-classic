@@ -550,16 +550,6 @@ def raw_about_markup(request, wiki_type, short_name):
         return HttpResponse("sorry, you do not have permission to edit the description of this scraper", mimetype='text/plain')
     return HttpResponse(scraper.description, mimetype='text/x-web-textile')
 
-def follow(request, short_name):
-    scraper = getscraperor404(request, short_name, "setfollow")
-    scraper.add_user_role(request.user, 'follow')
-    return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
-
-def unfollow(request, short_name):
-    scraper = getscraperor404(request, short_name, "setfollow")
-    scraper.unfollow(request.user)
-    return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
-
 
 def choose_template(request, wiki_type):
     context = { "wiki_type":wiki_type }
