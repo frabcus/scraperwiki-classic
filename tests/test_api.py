@@ -33,7 +33,7 @@ class TestApi(SeleniumTest):
     #    - Update _scraperinfo_date_test
     #    - Update _runinfo_test
     #    - Update _runinfo_privacy_test
-    #    - Remove the hardcoded_* variables
+    #    - Remove the hardcoded_* variables above
     # Add scraper title search test to test_search_apis
     # Update _datastore_privacy_test when table attach error message is corrected to 'permission denied' instead of 'not found'
     # Test DB attachments in _datastore_privacy_test when it's updated to not use the code permissions table
