@@ -524,7 +524,7 @@ class TestApi(SeleniumTest):
         if attach:
             params['attach'] = attach
         response = urllib2.urlopen(self.api_base + "datastore/sqlite?" + urllib.urlencode(params))
-        # Check the content type (where specified) and possibly content disposition
+        # Check the content type (where specified) and content disposition where appropriate
         if type == "jsondict" or type == "jsonlist":
             self.failUnless(response.headers.dict['content-disposition'] == "attachment; filename=" + scraper + ".json" )
         elif type == "csv":
