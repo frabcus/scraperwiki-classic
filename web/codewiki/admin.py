@@ -74,7 +74,7 @@ class VaultAdmin(admin.ModelAdmin):
 
 class ScraperRunEventAdmin(admin.ModelAdmin):
     list_display = ('run_id', 'scraper', 'run_started', 'run_ended', 'pages_scraped', 'first_url_scraped')
-    search_fields = ('scraper','first_url_scraped')
+    search_fields = ('first_url_scraped',)
 
 admin.site.register(Scraper, ScraperAdmin)
 admin.site.register(View, ViewAdmin)
