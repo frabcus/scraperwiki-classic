@@ -36,7 +36,7 @@ mark_unfeatured.short_description = 'Mark selected items as unfeatured'
 class CodeAdmin(admin.ModelAdmin):
     inlines = (UserCodeRoleInlines,)    
     readonly_fields = ('wiki_type','guid')
-    list_display = ('title', 'short_name', 'owner_name', 'status', 'privacy_status', 'vault_name')
+    list_display = ('owner_name', 'title', 'short_name', 'status', 'privacy_status', 'vault_name')
     list_filter = ('status', 'privacy_status', 'featured', 'created_at')
     search_fields = ('title', 'short_name')
 
@@ -61,7 +61,6 @@ class VaultAdmin(admin.ModelAdmin):
     Administration for a vault object, not sure yet whether we should hide
     the membership list so that we (scraperwiki) can't see it.
     """
-
     def queryset(self, request):
         return Vault.objects.annotate(member_count=Count('members'))
     def member_count(self, inst):
