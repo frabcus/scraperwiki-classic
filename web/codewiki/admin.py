@@ -61,7 +61,6 @@ class VaultAdmin(admin.ModelAdmin):
     Administration for a vault object, not sure yet whether we should hide
     the membership list so that we (scraperwiki) can't see it.
     """
-
     def queryset(self, request):
         return Vault.objects.annotate(member_count=Count('members'))
     def member_count(self, inst):
