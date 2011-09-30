@@ -1,4 +1,8 @@
-{{ message }} 
-{% for text,url,default in actions %}
-	<a href="{{ url }}"{% if default %} class="default"{% endif %}>{{ text }}</a>
-{% endfor %}
+<div id="alert_outer" class="{{ level }}">
+	<div id="alert_inner">
+	    {{ message }} 
+        {% for text,url,default in actions %}
+        	<a href="{{ url }}"{% if default %} class="default"{% endif %}>{{ text }}</a>
+        {% endfor %}
+    </div>
+</div>

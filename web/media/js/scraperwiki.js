@@ -231,7 +231,8 @@ $(function()
 	$('a.submit_link').each(function(){
 		id = $(this).siblings(':submit').attr('id');
 		$(this).addClass(id + '_link')
-	}).bind('click', function(){
+	}).bind('click', function(e){
+		e.preventDefault();
 		$(this).siblings(':submit').trigger('click');
 	}).siblings(':submit').hide();
 	
@@ -333,7 +334,14 @@ $(function()
 		});
 	}
 	
-	$('<a>').attr('id','alert_close').bind('click', function(){ $('#alert_outer').slideUp(); }).appendTo('#alert_inner');
+	if($('#alert_outer').length){
+		$('<a>').attr('id','alert_close').bind('click', function(){ 
+			$('#alert_outer').slideUp(250);
+			$('#nav_outer').animate({marginTop:0}, 250);
+		}).appendTo('#alert_inner');
+		$('#nav_outer').css('margin-top', $('#alert_outer').outerHeight());
+	}
+	
 	
 });
 

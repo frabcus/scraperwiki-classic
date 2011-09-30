@@ -50,6 +50,12 @@
 
 {% load body_class %}
 <body {%  body_class request %}>
+
+{% if messages %}
+	{% for message in messages %}
+		{{ message|safe }}
+	{% endfor %}
+{% endif %}
 	
 	{% block nav_outer %}
 	<div id="nav_outer">
@@ -108,16 +114,6 @@
 		</div>
 	</div>
 	{% endblock %}
-
-	{% if messages %}
-		<div id="alert_outer">
-			<div id="alert_inner">
-		    	{% for message in messages %}
-		    		{{ message|safe }}
-		    	{% endfor %}
-			</div>
-		</div>
-	{% endif %}
 
 
 	{% block header_outer %}
