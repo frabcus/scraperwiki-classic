@@ -69,15 +69,4 @@ class ScraperViewsTests(TestCase):
         response = self.client.get(reverse('search', kwargs={'q': 'test'}))
         self.assertEqual(response.status_code, 200)
 
-    def test_scraper_follow(self):
-        self.client.login(username='test_user', password='123456')
-        response = self.client.get(reverse('scraper_follow',
-                kwargs={'short_name': 'test_scraper'}))
-        self.assertEqual(response.status_code, 302)
-
-    def test_scraper_unfollow(self):
-        self.client.login(username='test_user', password='123456')
-        response = self.client.get(reverse('scraper_unfollow',
-                kwargs={'short_name': 'test_scraper'}))
-        self.assertEqual(response.status_code, 302)
 
