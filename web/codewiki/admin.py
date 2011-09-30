@@ -1,6 +1,8 @@
 from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent, CodePermission, Vault
 from django.contrib import admin
 from django.db import models
+from django.db.models import Count
+# from django.contrib.admin import SimpleListFilter
 
 class UserCodeRoleInlines(admin.TabularInline):
     model = UserCodeRole
@@ -19,19 +21,44 @@ def mark_unfeatured(modeladmin, request, queryset):
     queryset.update(featured=False)
 mark_unfeatured.short_description = 'Mark selected items as unfeatured'
 
+# This won't work until Django 1.4
+#class HasVaultFilter(SimpleListFilter):
+#    title = _('has vault')
+#    parameter_name = 'has_vault'
+#
+#    def lookups(self, request, model_admin):
+#        return (
+#            ('yes', _('yes')),
+#            ('no', _('no')),
+#        )
+#
+#    def queryset(self, request, queryset):
+#        if self.value() == 'yes':
+#            return queryset.filter(vault=None)
+#        if self.value() == 'no':
+#            return queryset.exclude(vault=None)
+
 class CodeAdmin(admin.ModelAdmin):
     inlines = (UserCodeRoleInlines,)    
     readonly_fields = ('wiki_type','guid')
+    list_display = ('owner_name', 'title', 'short_name', 'status', 'privacy_status', 'vault_name')
+    list_filter = ('status', 'privacy_status', 'featured', 'created_at')
+    search_fields = ('title', 'short_name')
+
+    def vault_name(self, obj):
+        if obj.vault:
+            return obj.vault.name
+        return None
+
+    def owner_name(self, obj):
+        if obj.owner():
+            return obj.owner().username
+        return None
 
 class ScraperAdmin(CodeAdmin):
-    list_display = ('title', 'short_name', 'last_run', 'status', 'privacy_status')
-    list_filter = ('status', 'last_run', 'privacy_status', 'featured',)
-    search_fields = ('title', 'short_name')
     actions = [mark_featured, mark_unfeatured]
 
 class ViewAdmin(CodeAdmin):
-    list_filter = ('status', 'privacy_status', 'featured',)
-    search_fields = ('title', 'short_name')
     actions = [mark_featured, mark_unfeatured]
 
 class VaultAdmin(admin.ModelAdmin):
@@ -39,9 +66,16 @@ class VaultAdmin(admin.ModelAdmin):
     Administration for a vault object, not sure yet whether we should hide
     the membership list so that we (scraperwiki) can't see it.
     """
-    list_display = ('user', 'plan', 'created_at')
-    list_filter = ('plan',)
-    search_fields = ('user',)
+
+    def queryset(self, request):
+        return Vault.objects.annotate(member_count=Count('members'))
+    def member_count(self, inst):
+        return inst.member_count
+    member_count.admin_order_field = 'member_count'
+
+    list_display = ('user', 'name', 'plan', 'created_at', 'member_count')
+    list_filter = ('plan', 'created_at')
+    search_fields = ('name',)
 
 
 admin.site.register(Scraper, ScraperAdmin)
@@ -49,3 +83,7 @@ admin.site.register(View, ViewAdmin)
 admin.site.register(Vault, VaultAdmin)
 admin.site.register(ScraperRunEvent)
 admin.site.register(CodePermission)
+
+
+
+

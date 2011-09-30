@@ -16,6 +16,10 @@ class TestScrapers(SeleniumTest):
     Also checks some language-independant features including privacy and
     comments.
     """
+    
+    # TODO:
+    # Add more comprehensive views tests - currently only does very basic generation check
+    #    Check content type header is set correctly
 
     def test_ruby_create(self):
         self._language_create("ruby")
@@ -58,7 +62,7 @@ class TestScrapers(SeleniumTest):
 
         s.type('id_comment', comment)
         s.click('id_submit')
-        time.sleep(2)
+        self.wait_for_page()
 
         self.failUnless(s.is_text_present(comment))
         self.failUnless(s.is_text_present("Discussion (1)"))        
