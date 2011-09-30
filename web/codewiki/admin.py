@@ -8,11 +8,6 @@ class UserCodeRoleInlines(admin.TabularInline):
     model = UserCodeRole
     extra = 1
 
-class ScraperRunEventInlines(admin.TabularInline):
-    model = ScraperRunEvent
-    extra = 0
-
-
 def mark_featured(modeladmin, request, queryset):
     queryset.update(featured=True)
 mark_featured.short_description = 'Mark selected items as featured'
@@ -41,7 +36,7 @@ mark_unfeatured.short_description = 'Mark selected items as unfeatured'
 class CodeAdmin(admin.ModelAdmin):
     inlines = (UserCodeRoleInlines,)    
     readonly_fields = ('wiki_type','guid')
-    list_display = ('owner_name', 'title', 'short_name', 'status', 'privacy_status', 'vault_name')
+    list_display = ('title', 'short_name', 'owner_name', 'status', 'privacy_status', 'vault_name')
     list_filter = ('status', 'privacy_status', 'featured', 'created_at')
     search_fields = ('title', 'short_name')
 
@@ -73,15 +68,18 @@ class VaultAdmin(admin.ModelAdmin):
         return inst.member_count
     member_count.admin_order_field = 'member_count'
 
-    list_display = ('user', 'name', 'plan', 'created_at', 'member_count')
+    list_display = ('name', 'user', 'plan', 'created_at', 'member_count')
     list_filter = ('plan', 'created_at')
     search_fields = ('name',)
 
+class ScraperRunEventAdmin(admin.ModelAdmin):
+    list_display = ('run_id', 'scraper', 'run_started', 'run_ended', 'pages_scraped', 'first_url_scraped')
+    search_fields = ('scraper','first_url_scraped')
 
 admin.site.register(Scraper, ScraperAdmin)
 admin.site.register(View, ViewAdmin)
 admin.site.register(Vault, VaultAdmin)
-admin.site.register(ScraperRunEvent)
+admin.site.register(ScraperRunEvent, ScraperRunEventAdmin)
 admin.site.register(CodePermission)
 
 
