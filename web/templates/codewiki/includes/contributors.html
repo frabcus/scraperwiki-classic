@@ -12,12 +12,6 @@
       {% endfor %}
     {% endwith %}
 
-    {% with 'requester' as role %}
-      {% for contributor in userrolemap.requesters %}
-        {% include 'codewiki/includes/contributor.html' %}
-      {% endfor %}
-    {% endwith %}
-
     {% with 'editor' as role %}
       {% for contributor in userrolemap.editor %}  
         {% include 'codewiki/includes/contributor.html' %}
@@ -33,7 +27,7 @@
 </ul>
 
 {% if user_owns_it %}
-  {% ifnotequal scraper.privacy_status 'public' %}
+  {% if scraper.privacy_status == 'protected' %}
     <div id="addneweditor">
       <span class="hide">
         Editor username:
@@ -48,35 +42,18 @@
     <div id="contributorserror" style="display: none">
         None
     </div>
-  {% endifnotequal %}
+  {% endif %}
 {% endif %}
-
-{% comment %}
-    {% if userrolemap.follow %}
-    <h3>Followers</h3>
-    {% ifnotequal scraper.privacy_status 'public' %}
-        <p id="followernoaccessmessage">(Do not have edit access to this {{scraper.wiki_type}}.)</p>
-    {% endifnotequal %}
-    <ul>
-    {% with 'follow' as role %}
-        {% for contributor in userrolemap.follow %}  
-        {% include 'codewiki/includes/contributor.html' %}
-        {% endfor %}
-    {% endwith %}
-    </ul>
-    {% endif %}
-{% endcomment %}
 
 
 {% if scraper.vault %}
     <div id="privacy_status">
         <h4><img src="{{ MEDIA_URL }}images/icons/shield-private.png" width="16" height="16" /> 
-            This {{scraper.wiki_type}} is in {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault
+            This {{scraper.wiki_type}} is in a vault
             {% if scraper.owner == request.user and request.user.vault_membership.count %}
                 <a id="show_privacy_choices">[edit]</a>
             {% endif %}</h4>
-        <p>Location: <a href="/vaults/" id="current_vault_link">{{ scraper.vault.name }}</a> {% if scraper.vault.user.username != user.username %}({{scraper.vault.user.get_profile.name}}&rsquo;s vault){% endif %}</p>
-        <p>Only the users listed above can see or edit <br/>this {{scraper.wiki_type}}.</p>
+        <p>This {{scraper.wiki_type}} can only be seen or edited by the members of <a href="/vaults/" id="current_vault_link" title="This is {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault">{{ scraper.vault.name }}</a>, listed above.</p>
         
         {% if scraper.owner == request.user and request.user.vault_membership.count %}
         <form id="privacy_status_form">
@@ -137,14 +114,6 @@
                 /></td>
                 <td><h4><label for="privacy_protected">Protected</label></h4><p><label for="privacy_protected">Everyone can see this {{scraper.wiki_type}}, but only selected contributors can edit it.</label></p></td>
             </tr>
-            {% if user.is_staff %}
-            <tr class="staff">
-                <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" 
-                {% ifequal scraper.privacy_status 'private' %} checked="checked" {% endifequal %}
-                /></td>
-                <td><h4><label for="privacy_private">Private</label></h4><p><label for="privacy_private">Only selected contributors can <br/>see or edit this {{scraper.wiki_type}}.</label></p></td>
-            </tr>
-            {% endif %}
             {% if scraper.owner == request.user and request.user.vault_membership.count %}
             <tr>
                 <td class="radio"></td>
