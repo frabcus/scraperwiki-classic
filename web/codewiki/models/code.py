@@ -158,6 +158,9 @@ class Code(models.Model):
         self.vcs.savecode(description, "docs")
         rev = self.vcs.commit(message="save docs", user=user)
 
+    def generate_apikey(self):
+        import uuid
+        self.access_apikey = str( uuid.uuid4() )
 
     def get_commit_log(self, filename):
         return self.vcs.getcommitlog(filename)

@@ -546,6 +546,7 @@ def vault_scrapers_add(request, vaultid, shortname):
     # Old owner is now editor and the new owner should be the vault owner.
     scraper.privacy_status = 'private'
     scraper.vault = vault
+    scraper.generate_apikey()
     scraper.save()
     
     vault.update_access_rights()
