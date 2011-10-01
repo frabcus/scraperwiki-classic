@@ -33,11 +33,12 @@ class TestApi(SeleniumTest):
     #    - Update _scraperinfo_date_test
     #    - Update _runinfo_test
     #    - Update _runinfo_privacy_test
-    #    - Remove the hardcoded_* variables
+    #    - Remove the hardcoded_* variables above
     # Add scraper title search test to test_search_apis
     # Update _datastore_privacy_test when table attach error message is corrected to 'permission denied' instead of 'not found'
     # Test DB attachments in _datastore_privacy_test when it's updated to not use the code permissions table
     # Make a test query that joins a DB in _advanced_datastore_query
+    # Do the privacy tests for vaulted scrapers - should be the same as private
 
     def test_datastore_api(self):
         self._get_api_base()
@@ -85,7 +86,6 @@ class TestApi(SeleniumTest):
         self.activate_users([self.user_name])
         self.set_code_privacy("private", "scraper", self.populate_db_name, 
                             {'username':self.user_name, 'password':self.user_pass})
-        # Add api key test
         self._datastore_privacy_test()
         self._scraperinfo_privacy_test()
         self._runinfo_privacy_test()
@@ -168,7 +168,7 @@ class TestApi(SeleniumTest):
             api_key = "02d8ab83-bec0-4934-a1a0-cc75b4df09a4"
         elif "scraperwiki.com" in self.site_base:
             runid = '1316897325.456186_009f2d99-df7a-4d86-9115-6654c6812106'
-            api_key = "08216130-1ec6-485c-8a3d-afe64f8f5dbf"
+            api_key = "d82c1c3a-f690-442c-8b75-6c5a09185647"
         else:
             # TODO: can't generate runevents dynamically (e.g. on localhost) yet
             return
@@ -524,7 +524,7 @@ class TestApi(SeleniumTest):
         if attach:
             params['attach'] = attach
         response = urllib2.urlopen(self.api_base + "datastore/sqlite?" + urllib.urlencode(params))
-        # Check the content type (where specified) and possibly content disposition
+        # Check the content type (where specified) and content disposition where appropriate
         if type == "jsondict" or type == "jsonlist":
             self.failUnless(response.headers.dict['content-disposition'] == "attachment; filename=" + scraper + ".json" )
         elif type == "csv":

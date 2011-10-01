@@ -476,6 +476,10 @@ a#alert_close:hover {
 	background-image: url(../images/header_icon_vault.gif);
 }
 
+.running_scrapers #header_inner {
+	background-image: url(../images/header_icon_stopwatch.gif);
+}
+
 #header_inner h2 {
 	font-size: 30px;
 	line-height: 36px;
