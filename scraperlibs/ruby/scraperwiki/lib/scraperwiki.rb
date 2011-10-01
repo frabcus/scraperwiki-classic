@@ -213,9 +213,9 @@ module ScraperWiki
                 jargtypes = { }
                 rjdata[0].each_pair do |k, v|
                     if v != nil
-                        if k[-5..-1] == "_blob"
-                            vt = "blob"  # coerced into affinity none
-                        elsif v.class == Fixnum
+                        #if k[-5..-1] == "_blob"
+                        #    vt = "blob"  # coerced into affinity none
+                        if v.class == Fixnum
                             vt = "integer"
                         elsif v.class == Float
                             vt = "real"
@@ -284,6 +284,7 @@ module ScraperWiki
         if result["data"].length == 0
             return default
         end
+        # consider casting to type
         return result["data"][0][0]
     end
 

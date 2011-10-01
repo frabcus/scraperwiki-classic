@@ -1,5 +1,6 @@
 import re
 import datetime
+import pickle
 import scraperwiki
 
 class SqliteError(Exception):  pass
@@ -185,12 +186,13 @@ def table_info(name):
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 
 
-            # also needs to handle the types better (could save json and datetime objects handily
 def save_var(name, value, verbose=2):
-    data = {"name":name, "value_blob":value, "type":type(value).__name__}
-    save(unique_keys=["name"], data=data, table_name="swvariables", verbose=verbose)
+    data = {"name":name, "value_pickle":pickle.dumps(value), "type":type(value).__name__}
+    save(unique_keys=["name"], data=data, table_name="swvariables2", verbose=verbose)
 
-def get_var(name, default=None, verbose=2):
+
+    # old function -- get round problem that blob type (of no affinity) doesn't actually work in sqlalchemy!
+def get_var_blob(name, default, verbose):
     try:
         result = execute("select value_blob, type from swvariables where name=?", (name,), verbose)
     except NoSuchTableSqliteError, e:
@@ -199,6 +201,16 @@ def get_var(name, default=None, verbose=2):
     if not data:
         return default
     return data[0][0]
+    
 
-
+def get_var(name, default=None, verbose=2):
+    try:
+        result = execute("select value_pickle, type from swvariables2 where name=?", (name,), verbose)
+    except NoSuchTableSqliteError, e:
+        #return default
+        return get_var_blob(name, default, verbose)
+    data = result.get("data")
+    if not data:
+        return default
+    return pickle.loads(str(data[0][0]))
 

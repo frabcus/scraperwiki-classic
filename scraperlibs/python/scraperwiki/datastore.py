@@ -187,9 +187,12 @@ def webstorerequest(req):
             jargtypes = { }
             for k, v in ldata[0].items():
                 if v != None:
-                    if k[-5:] == "_blob":
-                        vt = "blob"  # coerced into affinity none
-                    elif type(v) == int:
+                        # serious issue encountered here as blob doesn't mean same thing in SqlAlchemy as it does in Sqlite
+                        # in the former it's a binary string, in Sqlite it means an uncoerced column with no type affinity
+                        # (and therefore ideal for saving of variables of different types)
+                    #if k[-5:] == "_blob":
+                    #    vt = "blob"  # coerced into affinity none
+                    if type(v) == int:
                         vt = "integer"
                     elif type(v) == float:
                         vt = "real"

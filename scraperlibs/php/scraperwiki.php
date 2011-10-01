@@ -148,13 +148,15 @@ class scraperwiki
       scraperwiki::save_sqlite(array("name"), $data, "swvariables"); 
    }
 
-   static function get_var($name, $default=None)
+   static function get_var($name, $default=null)
    {
       $ds = SW_DataStoreClass::create();
       try  { $result = scraperwiki::sqliteexecute("select value_blob, type from swvariables where name=?", array($name)); }
       catch (Exception $e)
       {
          if (substr($e->getMessage(), 0, 29) == 'sqlite3.Error: no such table:')
+            return $default;
+         if (substr($e->getMessage(), 0, 43) == 'DB Error: (OperationalError) no such table:')
             return $default;
          throw $e;
       }
