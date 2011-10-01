@@ -43,6 +43,7 @@ urlpatterns = patterns('',
                                                           views.scraper_delete_scraper, name='scraper_delete_scraper'),
         
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+\?name=.*)$', views.code_overview,    name='code_overview'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/comments/$', views.comments,         name='scraper_comments'),
     
