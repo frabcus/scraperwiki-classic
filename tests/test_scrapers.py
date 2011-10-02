@@ -16,6 +16,10 @@ class TestScrapers(SeleniumTest):
     Also checks some language-independant features including privacy and
     comments.
     """
+    
+    # TODO:
+    # Add more comprehensive views tests - currently only does very basic generation check
+    #    Check content type header is set correctly
 
     def test_ruby_create(self):
         self._language_create("ruby")
@@ -32,8 +36,6 @@ class TestScrapers(SeleniumTest):
     def test_common_features_view(self):
         self._common_create('view')
         
-    
-    
     def _load_data(self, language, obj):
         thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (language, obj,))
             
@@ -60,7 +62,7 @@ class TestScrapers(SeleniumTest):
 
         s.type('id_comment', comment)
         s.click('id_submit')
-        time.sleep(2)
+        self.wait_for_page()
 
         self.failUnless(s.is_text_present(comment))
         self.failUnless(s.is_text_present("Discussion (1)"))        
@@ -83,21 +85,26 @@ class TestScrapers(SeleniumTest):
         self.failUnless( count == scraper_count, msg='There are %s items instead of %s' % (scraper_count,count,) )
         
 
-    def _check_clear_data(self, scraper_name):
+    def _check_clear_recover_data(self, scraper_name):
         s = self.selenium     
                 
         s.open('/scrapers/%s/' % scraper_name)        
-        self.wait_for_page('view the scraper page to check we cleared the data')        
+        self.wait_for_page('view the scraper page to check we cleared the data')  
+        # Clear the datastore
         s.click('btnClearDatastore')
-        s.get_confirmation()
         self.wait_for_page('clear the datastore')
-                    
-        if s.is_text_present('Exception Location'):
-            print s.get_body_text()
-            self.fail('An error occurred deleting data')
-            
-        self.failIf(s.is_text_present( 'This dataset has a total of' ), 
-                        msg='The data does not appear to have been deleted')
+        self.failUnless(s.is_text_present( 'Your data has been deleted' ))
+        self.failIf(s.is_text_present( 'This dataset has a total of' ))
+        # Recover the datastore
+        s.click("link=Undo?")
+        self.wait_for_page()
+        self.failUnless(s.is_text_present( 'Your data has been recovered' ))
+        self.failUnless(s.is_text_present( 'This dataset has a total of' ))
+        # Delete it again
+        s.click('btnClearDatastore')
+        self.wait_for_page('clear the datastore')
+        self.failUnless(s.is_text_present( 'Your data has been deleted' ))
+        self.failIf(s.is_text_present( 'This dataset has a total of' ))
 
 
     def _check_delete_code(self, code_name, code_type):
@@ -283,7 +290,7 @@ class TestScrapers(SeleniumTest):
         for fragment in self._load_view_html(scraper_name):
             self.failUnless(fragment in BeautifulSoup(self.selenium.get_html_source()).prettify())
         # Clear up the evidence of testing
-        self._check_clear_data( scraper_name )
+        self._check_clear_recover_data( scraper_name )
         self._check_delete_code( scraper_name, 'scraper' )
         self._check_delete_code( view_name, 'view' )        
         # Only e-mail scraper should be left

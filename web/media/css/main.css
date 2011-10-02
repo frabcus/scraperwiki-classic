@@ -476,6 +476,10 @@ a#alert_close:hover {
 	background-image: url(../images/header_icon_vault.gif);
 }
 
+.running_scrapers #header_inner {
+	background-image: url(../images/header_icon_stopwatch.gif);
+}
+
 #header_inner h2 {
 	font-size: 30px;
 	line-height: 36px;
@@ -2602,7 +2606,8 @@ border-top: navajowhite;
 }
 
 #current_vault_link {
-	padding: 5px 6px 3px 6px;
+	padding: 3px 4px 1px 4px;
+	margin: 0 -3px;
 }
 
 
@@ -5642,11 +5647,6 @@ body.vaults .vault h3 {
 	padding: 7px 10px 8px 10px;
 }
 
-body.vaults .vault h3 span {
-	font-weight: normal;
-	color: #666;
-}
-
 body.vaults .vault_header {
 	position: relative;
 	border: 1px solid #ccc;
@@ -5745,6 +5745,10 @@ body.vaults .vault_users_popover li:last-child {
 body.vaults .vault_users_popover li:hover {
     background-color: #F4F8FB;
     color: #000;
+}
+
+body.vaults .vault_users_popover a:hover {
+	text-decoration: none;	
 }
 
 body.vaults .vault_users_popover .gravatar {
@@ -5878,21 +5882,21 @@ body.vaults .vault_footer {
 	padding: 7px 12px;
 }
 
-body.vaults .vault_header a {
+body.vaults .vault_header a.vault_users {
 	float: right;
 	position: relative;
 	margin-top: 7px;
 	margin-right: 15px;
 }
 
-body.vaults .vault_header a,
+body.vaults .vault_header a.vault_users,
 body.vaults .vault_footer a {
 	color: #666;
 	cursor: pointer;
 	line-height: 21px;
 }
 
-body.vaults .vault_header a img, body.vaults .vault_footer a img {
+body.vaults .vault_header a.vault_users img, body.vaults .vault_footer a img {
 	vertical-align: -2px;
 	width: 16px;
 	height: 16px;
@@ -5904,7 +5908,7 @@ body.vaults .vault_footer .add_to_vault {
 	margin-right: 20px;
 }
 
-body.vaults .vault_header a:hover,
+body.vaults .vault_header a.vault_users:hover,
 body.vaults .vault_footer a:hover {
 	color: #298105;
 	text-decoration: none;

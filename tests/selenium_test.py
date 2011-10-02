@@ -195,10 +195,10 @@ class SeleniumTest(unittest.TestCase):
         s = self.selenium
         # Pause here to force sync and bypass intermittent issues such 
         # as blank JS alerts interrupting selenium and logout failure
-        time.sleep(1)
+        time.sleep(2)
         s.open("/logout")
         self.wait_for_page()
-        time.sleep(1) # likewise
+        time.sleep(2) # likewise
         s.type('id_nav_user_or_email', username)
         s.type('id_nav_password', password)
         s.click('nav_login_submit')

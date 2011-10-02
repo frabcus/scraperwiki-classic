@@ -1315,6 +1315,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
             ChangeInEditor("saved"); 
 
+			if(_gaq){
+				_gaq.push(['_trackPageview', "/" + wiki_type + "s/" + $('#id_title').val() + "/saved/"]);
+			}
+
             if (callback) {
                 callback();
             }
