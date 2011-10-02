@@ -271,7 +271,12 @@ module ScraperWiki
 
             # also needs to handle the types better (could save json and datetime objects handily
     def ScraperWiki.save_var(name, value, verbose=2)
-        data = { "name" => name, "value_blob" => value, "type" => value.class }
+        vtype = String(value.class)
+        svalue = value.to_s
+        if vtype != "Fixnum" and vtype != "String" and vtype != "Float" and vtype != "NilClass"
+            puts "*** object of type "+vtype+" converted to string\n"
+        end
+        data = { "name" => name, "value_blob" => svalue, "type" => vtype }
         ScraperWiki.save_sqlite(unique_keys=["name"], data=data, table_name="swvariables", verbose=verbose)
     end
 
@@ -285,7 +290,18 @@ module ScraperWiki
             return default
         end
         # consider casting to type
-        return result["data"][0][0]
+        svalue = result["data"][0][0]
+        vtype = result["data"][0][1]
+        if vtype == "Fixnum"
+            return svalue.to_i
+        end
+        if vtype == "Float"
+            return svalue.to_f
+        end
+        if vtype == "NilClass"
+            return nil
+        end
+        return svalue
     end
 
     # These are DEPRECATED and just here for compatibility

@@ -138,13 +138,10 @@ class scraperwiki
 
    static function save_var($name, $value)
    {
-      if (is_int($value))
-         $jvalue = $value; 
-      else if (is_double($value))
-         $jvalue = $value; 
-      else
-         $jvalue = $value; //json_encode($value); 
-      $data = array("name"=>$name, "value_blob"=>$jvalue, "type"=>gettype($value)); 
+      $vtype = gettype($value); 
+      if (($vtype != "integer") && ($vtype != "string") && ($vtype != "double") && ($vtype != "NULL"))
+         print_r("*** object of type $vtype converted to string\n"); 
+      $data = array("name"=>$name, "value_blob"=>strval($value), "type"=>$vtype); 
       scraperwiki::save_sqlite(array("name"), $data, "swvariables"); 
    }
 
@@ -163,7 +160,15 @@ class scraperwiki
       $data = $result->data; 
       if (count($data) == 0)
          return $default; 
-      return $data[0][0]; 
+      $svalue = $data[0][0]; 
+      $vtype = $data[0][1];
+      if ($vtype == "integer")
+         return intval($svalue); 
+      if ($vtype == "double")
+         return floatval($svalue); 
+      if ($vtype == "NULL")
+         return null;
+      return $vtype; 
    }
 
 
