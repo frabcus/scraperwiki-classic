@@ -1,12 +1,10 @@
 
 # List of titles (and optional paragraph) for each of the documentation pages
 page_titles = {
-    "ajax_topic_guide": ("Using Ajax from ScraperWiki", "Para"),
     "docindex" : ("",""),
-    "gmap_topic_guide" : ("Google Maps",""),
-    "jquery_topic_guide" : ("Using JQuery",""),
+
     "intro_screencast" : ("Introductory screencast",""),
-    
+    "technical_overview" : ("Technical overview","All the component parts of ScraperWiki and how they work together"),    
     "faq" : ("Frequently Asked Questions",""),    
     
     "ruby_intro_tutorial" : ("First scraper tutorial","How to use ScraperWiki for people who can already code Ruby"),
@@ -42,6 +40,8 @@ page_titles = {
     
     "shared_libraries" : ("3rd party libraries","Binaries availabile inside ScraperWiki"),
 
-    "technical_overview" : ("Technical overview","All the component parts of ScraperWiki and how they work together"),    
+    "ajax_topic_guide": ("Using Ajax from ScraperWiki", "Para"),
+    "gmap_topic_guide" : ("Google Maps",""),
+    "jquery_topic_guide" : ("Using JQuery",""),
 }
 
