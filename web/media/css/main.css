@@ -4673,6 +4673,7 @@ ul#chooser li a.active em {
 
 #chooser_name p {
 	margin: 15px 20px;
+	position: relative;
 }
 
 #chooser_name .warning {
@@ -4683,13 +4684,13 @@ ul#chooser li a.active em {
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
-	box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+	box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 	padding: 10px;
 	font-size: 14px;
 	line-height: 18px;
 	width: 260px;
 	left: 50%;
-	bottom: -52px;
+	top: 34px;
 	margin: 0 0 0 -140px;
 }
 
