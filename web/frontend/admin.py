@@ -1,5 +1,5 @@
 from frontend.models import *
-from codewiki.models import UserUserRole, Vault
+from codewiki.models import UserUserRole, Vault, UserCodeRole
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -48,14 +48,22 @@ remove_beta.short_description = 'Mark user as NOT beta user'
 
 
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'profile_name', 'vault_count', 'is_active', 'is_staff','is_beta_user', 'date_joined', 'last_login')
-    list_filter = ('is_active', 'is_staff', 'is_superuser')
+    list_display = ('username', 'profile_name', 'email', 'scrapers', 'vaults', 'is_active', 'is_staff','is_beta_user','date_joined', 'last_login',)
+    list_filter = ('is_active', 'is_staff', 'is_superuser',)
+    ordering = ('-date_joined',)
+    search_fields  = ('username','email','profile_name',)
     actions = [make_beta, remove_beta]
 
     def is_beta_user(self, obj):
-        return obj.get_profile().beta_user
+        if obj.get_profile().beta_user:
+            return 'YES'
+        else:
+            return 'no'
 
-    def vault_count(self, obj):
+    def scrapers(self, obj):
+        return UserCodeRole.objects.filter(user=obj, role='owner').count()    
+
+    def vaults(self, obj):
         return obj.vaults.count()
         
     def profile_name(self, obj):
