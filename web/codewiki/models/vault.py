@@ -73,5 +73,6 @@ class Vault(models.Model):
 
     class Meta:
         app_label = 'codewiki'
+        ordering = ['-name']
 
 

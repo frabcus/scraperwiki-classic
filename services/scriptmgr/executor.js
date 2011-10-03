@@ -55,6 +55,7 @@ exports.init = function( settings ) {
 	extra_path = settings.extra_path;
 	max_runs = settings.vm_count;
     webstore_port = settings.webstore_port; 
+	console.log( 'Webstore port is ' + webstore_port );
 }
 
 
