@@ -513,7 +513,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         failedmessage = ''
         m = re.match ('^HTTP/1\\..\\s+([0-9]+)\\s+(.*?)[\r\n]', page)
         if m :
-            if m.group(1) != '200' :
+            ch = m.group(1)[0]
+            if ch == '4' or ch =='5':
                 failedmessage = 'Failed:' + m.group(1) + "  " + m.group(2)
         else :
             failedmessage = 'Failed: (code missing)'
