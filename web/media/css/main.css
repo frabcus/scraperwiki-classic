@@ -1,5 +1,6 @@
 /* @override
 	http://scraperwiki.local:8000/media/css/main.css?
+	http://localhost:8000/media/css/main.css?
 */
 
 /* HORS D'OUVRE */
@@ -4672,6 +4673,7 @@ ul#chooser li a.active em {
 
 #chooser_name p {
 	margin: 15px 20px;
+	position: relative;
 }
 
 #chooser_name .warning {
@@ -4682,13 +4684,13 @@ ul#chooser li a.active em {
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
-	box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+	box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 	padding: 10px;
 	font-size: 14px;
 	line-height: 18px;
 	width: 260px;
 	left: 50%;
-	bottom: -52px;
+	top: 34px;
 	margin: 0 0 0 -140px;
 }
 
@@ -5714,6 +5716,7 @@ body.vaults .vault_users_popover ul {
 }
 
 body.vaults .vault_users_popover li {
+	position: relative;
     padding: 8px 8px;
     line-height: 24px;
     border-top: 1px solid #aaa;
@@ -5760,6 +5763,12 @@ body.vaults .vault_users_popover .gravatar {
     margin: 0 5px 0 0;
 }
 
+body.vaults img.vault_owner_flash {
+	position: absolute;
+	top: -1px;
+	right: -1px;
+}
+
 body.vaults .vault_header .vault_users_popover a.user_delete,
 body.vaults .vault_header .vault_users_popover a.user_delete:hover {
 	display: block;
@@ -5779,9 +5788,9 @@ body.vaults .vault_header .vault_users_popover a.user_delete:hover {
 body.vaults .vault_header .vault_users_popover a.add_user,
 body.vaults .vault_header .vault_users_popover a.add_user:hover {
     display: block;
-    margin-top: 10px;
     text-align: center;
     cursor: pointer;
+    padding: 10px 0 0 0;
 }
 
 body.vaults .vault_header .vault_users_popover a.add_user:hover {
