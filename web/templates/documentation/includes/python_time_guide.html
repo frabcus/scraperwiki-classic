@@ -3,22 +3,29 @@ Two very common things this happens with are dates/times and locations.</p>
 
 <p>For more details, read the <a href="http://labix.org/python-dateutil">python-dateutil docs</a>, or the <a href=""></a>.</p>
 
-<h2>Parsing basic dates/times</h2>
+<h2>Parsing dates/times</h2>
 
 <p>The easiest way is to use a general purpose function that detects
 many common date formats, and converts them into a Python
-datetime object.
+date object.
 </p>
 
 <code>import dateutil.parser
 
-print dateutil.parser.parse('21 June 2010') # 2010-06-21 00:00:00
-print dateutil.parser.parse('10-Jul-1899')  # 1899-07-10 00:00:00
-print dateutil.parser.parse('01/01/01')     # 2001-01-01 00:00:00
-print dateutil.parser.parse('Tue 27 Sep 2011 00:25:48 BST') # 2011-09-27 00:25:48+01:00
+print dateutil.parser.parse('21 June 2010').date() # 2010-06-21
+print dateutil.parser.parse('10-Jul-1899').date()  # 1899-07-10
+print dateutil.parser.parse('01/01/01').date()     # 2001-01-01
 
+print dateutil.parser.parse('21 June 2010').date().__class__ # &lt;type 'datetime.date'&gt;
+</code>
+
+<p>Or you can parse times as well, making a Python datetime object.
+
+<code>print dateutil.parser.parse('Tue 27 Sep 2011 00:25:48 BST') # 2011-09-27 00:25:48+01:00
 print dateutil.parser.parse('21 June 2010').__class__ # &lt;type 'datetime.datetime'&gt;
 </code>
+
+<h2>Ambiguous cases</h2>
 
 <p>This sometimes goes wrong. For example,
 is this the 2nd March (US) or 3rd February (UK)?</p>
@@ -26,8 +33,8 @@ is this the 2nd March (US) or 3rd February (UK)?</p>
 <code>print dateutil.parser.parse('3/2/1999') # 1999-03-02 00:00:00
 </code>
 
-<p>You can fix it by giving dateutil hints. Or if you really want control,
-giving a completely explicit format string.</p>
+<p>You can fix it by giving dateutil various hints. Or if you really want
+control, use a completely explicit format string.</p>
 
 <code>print dateutil.parser.parse('3/2/1999', dayfirst=True) # 1999-02-03 00:00:00
 
@@ -37,17 +44,19 @@ print datetime.datetime.strptime('3/2/1999', '%d/%m/%Y') # 1999-02-03 00:00:00
 
 <h2>Saving to the datestore</h2>
 
-<p>Once you have a datetime object, this is easy as pie. You just save the Python
-datetime object.</p>
+<p>This is easy as pie. You just save either the Python date or datetime
+object, and ScraperWiki will convert it into the format SQLite needs.</p>
 
-<code>data = { 
+<code>birth_datetime = dateutil.parser.parse('1/2/1997 9pm') 
+data = { 
     'name':'stilton', 
-    'birth_date':dateutil.parser.parse('1/2/1997') 
+    'birth_datetime' : birth_datetime,
+    'birth_date' : birth_datetime.date()
 }
 scraperwiki.sqlite.save(unique_keys=['name'], data=data)
 </code>
 
-<h2>Geocoding</h2>
+<h2>Querying with sqlite</h2>
 
 <p>Foo
 </p>
