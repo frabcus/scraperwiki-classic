@@ -78,6 +78,7 @@ scrapers, or extract it through the API.
 
 <dt>scraperwiki.<strong>sqlite.get_var</strong>(key[, default])</dt>
     <dd>Retrieves a single value that was saved by save_var.
+        Only works for string, float, or int types.  For anything else, use pickle to turn it into a string
     </dd>
 </dl>
 

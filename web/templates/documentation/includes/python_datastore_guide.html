@@ -41,13 +41,21 @@ scraperwiki.sqlite.save(["a"], data)
 
 <p>It's often useful to be able to quickly and easily save one metadata
 value. For example, to record which page the last run of the scraper managed to
-get up to. 
+get up to. </p>
 
 <code>scraperwiki.sqlite.save_var('last_page', 27)
 print scraperwiki.sqlite.get_var('last_page')
 </code>
 
 <p>It's stored in a simple table called swvariables.</p>
+
+<p>If you want to save anything other than an int, float or string type, use pickle, 
+eg</p>
+
+<code>scraperwiki.sqlite.save_var('timestamp', pickle.dumps(datetime.datetime.now())
+print pickle.loads(scraperwiki.sqlite.get_var('timestamp'))</code>
+
+
 
 <h2>Finding out the schema</h2>
 

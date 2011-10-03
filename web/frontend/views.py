@@ -475,7 +475,8 @@ def view_vault(request, username=None):
     context['vaults'] = vaults
     context['vault_membership_count'] = request.user.vault_membership.exclude(user__id=request.user.id).count()
     context['vault_membership'] = request.user.vault_membership.all().exclude(user__id=request.user.id)
-    
+    context["api_base"] = "%s/api/1.0/" % settings.API_URL
+        
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))
 
