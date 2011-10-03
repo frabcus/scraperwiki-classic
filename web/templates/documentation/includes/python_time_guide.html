@@ -56,10 +56,11 @@ data = {
 scraperwiki.sqlite.save(unique_keys=['name'], data=data)
 </code>
 
-<h2>Querying with sqlite</h2>
+<h2>Querying dates</h2>
 
-<p>Foo
+<p>From the Web API for a scraper, you can do queries based on dates.
 </p>
 
-<code>Blah
-</code>
+<code>select * from swdata where birth_date < '2000-01-01'</code>
+
+
