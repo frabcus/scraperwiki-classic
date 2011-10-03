@@ -3409,8 +3409,8 @@ ul.scraper_list .description {
 	margin: 0;
 	font-size: 13px;
 	color: #666;
-	width: 60%;
-	margin-left: 100px;
+	width: 50%;
+	margin-left: 130px;
 }
 
 ul.scraper_list table {
@@ -5877,6 +5877,11 @@ body.vaults .vault_contents li.code_object_line h3 {
 
 body.vaults table.code_about {
 	padding: 0;
+}
+
+body.vaults .vault_contents li.code_object_line p.description {
+	margin: 5px 0 0 130px;
+	color: #999;
 }
 
 body.vaults .vault_footer {
