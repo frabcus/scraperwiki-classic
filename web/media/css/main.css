@@ -5788,6 +5788,10 @@ body.vaults .vault_header .vault_users_popover a.add_user:hover {
 	color: #298105;
 }
 
+body.vaults .vault_header a.add_user img {
+	vertical-align: -2px;
+}
+
 body.vaults .vault_header .vault_users_popover .new_user_li {
 	cursor: default;
 }
@@ -5826,6 +5830,13 @@ body.vaults .vault_header .vault_users_popover li.error {
 	cursor: default;
 }
 
+body.vaults .ui-autocomplete {
+	font-size: 12px;
+}
+
+body.vaults .ui-autocomplete .ui-menu-item a {
+	padding: 7px;
+}
 
 
 
