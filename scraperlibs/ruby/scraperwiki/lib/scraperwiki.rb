@@ -286,6 +286,11 @@ module ScraperWiki
         rescue NoSuchTableSqliteException => e   
             return default
         end
+        
+        if !result.has_key?("data") 
+            return default          
+        end 
+        
         if result["data"].length == 0
             return default
         end
