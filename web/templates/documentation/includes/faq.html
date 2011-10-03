@@ -238,9 +238,9 @@ print urllib.urlopen(url).read()
                 This appears on all HTML views, and is a link back to the view. It gives us and you credit,
                 and ensures sources are cited.
                 </p>
-                <p>You can call httpresponseheader (see {% doc_link_full 'LANG_help_documentation' language %})
-                to set the MIME type to something else such as image/png. ScraperWiki will then no
-                longer attempt to add the banner.
+                <p>If your view is generating something other than HTML, such as json, csv or an image file you 
+                should set the httpresponseheader to the appropriate MIME type (see {% doc_link_full 'LANG_help_documentation' language %}), 
+                and the banner will no longer appear.  (eg in Python: scraperwiki.utils.httpresponseheader("Content-Type", "text/json"))
                 </p>
                 <p>If you are finding the banners annoying in a particular set of cases, please get in 
                 touch. At some point we'll add ways to vary the banner for different circumstances.</p>

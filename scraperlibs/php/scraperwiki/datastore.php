@@ -83,9 +83,9 @@ class SW_DataStoreClass
                 {
                     if ($v != null)
                     {
-                        if ((count($k) >= 5) && (substr($k, count($k)-5) == "_blob"))
-                            $vt = "blob";  # coerced into affinity none
-                        else if (is_int($v))
+                        //if ((count($k) >= 5) && (substr($k, count($k)-5) == "_blob"))
+                        //    $vt = "blob";  # coerced into affinity none
+                        if (is_int($v))
                             $vt = "integer"; 
                         else if (is_float($v))
                             $vt = "real"; 
@@ -128,9 +128,9 @@ class SW_DataStoreClass
         if (property_exists($jres, "keys") && property_exists($jres, "data") && (count($jres->data) == 1))
         {
             $ddata = array_combine($jres->keys, $jres->data[0]); 
-print_r($ddata); 
-            if ($ddata["state"] == "error")
-                return (object)(array("error"=>$ddata["message"])); 
+            if (property_exists((object)($ddata), "state"))  // should be has_key (when I can look it up)
+                if ($ddata["state"] == "error")
+                    return (object)(array("error"=>$ddata["message"])); 
         }
         return $jres;
    }

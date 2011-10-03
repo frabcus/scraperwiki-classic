@@ -214,21 +214,6 @@ def rpcexecute(request, short_name, revision=None):
         response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-2"/>', panepresent))
     return response
             
-#    if 'Content-Type' in response  and 'html' in response['Content-Type']:
-        # We do not want the banner on this page, so let's pass
-#        pass
-#    else:
-        # Resort to using the old method 
-#        if not panepresent["scraperwikipane"]:
-#            firstcode = "".join(panepresent["firstfivelines"]).strip()
-#            if not contenttypesettings:   # suppress if content-type was set
-#                if not re.match("[\w_\s=]*[\(\[\{]", firstcode):   # looks like it is not json code
-#                    if re.search("(?i)<\s*(?:b|i|a|h\d|script|ul|table).*?>", firstcode):   # looks like it is html
-#                        response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-2"/>', panepresent))
-    
-#    return response
-                
-                
 
 # liable to hang if UMLs not operative
 def testactiveumls(n):

@@ -138,17 +138,14 @@ class scraperwiki
 
    static function save_var($name, $value)
    {
-      if (is_int($value))
-         $jvalue = $value; 
-      else if (is_double($value))
-         $jvalue = $value; 
-      else
-         $jvalue = $value; //json_encode($value); 
-      $data = array("name"=>$name, "value_blob"=>$jvalue, "type"=>gettype($value)); 
+      $vtype = gettype($value); 
+      if (($vtype != "integer") && ($vtype != "string") && ($vtype != "double") && ($vtype != "NULL"))
+         print_r("*** object of type $vtype converted to string\n"); 
+      $data = array("name"=>$name, "value_blob"=>strval($value), "type"=>$vtype); 
       scraperwiki::save_sqlite(array("name"), $data, "swvariables"); 
    }
 
-   static function get_var($name, $default=None)
+   static function get_var($name, $default=null)
    {
       $ds = SW_DataStoreClass::create();
       try  { $result = scraperwiki::sqliteexecute("select value_blob, type from swvariables where name=?", array($name)); }
@@ -156,12 +153,22 @@ class scraperwiki
       {
          if (substr($e->getMessage(), 0, 29) == 'sqlite3.Error: no such table:')
             return $default;
+         if (substr($e->getMessage(), 0, 43) == 'DB Error: (OperationalError) no such table:')
+            return $default;
          throw $e;
       }
       $data = $result->data; 
       if (count($data) == 0)
          return $default; 
-      return $data[0][0]; 
+      $svalue = $data[0][0]; 
+      $vtype = $data[0][1];
+      if ($vtype == "integer")
+         return intval($svalue); 
+      if ($vtype == "double")
+         return floatval($svalue); 
+      if ($vtype == "NULL")
+         return null;
+      return $vtype; 
    }
 
 

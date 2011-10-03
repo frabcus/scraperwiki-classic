@@ -66,6 +66,8 @@ def databaseexception(errmap):
     
     if re.match('sqlite3.Error: no such table:', mess):
         return NoSuchTableSqliteError(mess)
+    if re.match('DB Error: \(OperationalError\) no such table:', mess):
+        return NoSuchTableSqliteError(mess)
     return SqliteError(mess)
         
 
@@ -185,10 +187,17 @@ def table_info(name):
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 
 
-            # also needs to handle the types better (could save json and datetime objects handily
+# everything strings, blob type actually redundant because sqlalchemy not able to handle sqlite way of doing blob; treats as binary
+typesmessaged = [ ]
 def save_var(name, value, verbose=2):
-    data = {"name":name, "value_blob":value, "type":type(value).__name__}
+    vtype = type(value).__name__
+    if vtype not in ["int", "float", "str", "unicode", "NoneType"]:
+        if vtype not in typesmessaged:
+            print "*** type %s not supported by save_var; try using pickle.dumps()" % vtype
+            typesmessaged.append(vtype)
+    data = {"name":name, "value_blob":unicode(value), "type":vtype}
     save(unique_keys=["name"], data=data, table_name="swvariables", verbose=verbose)
+    
 
 def get_var(name, default=None, verbose=2):
     try:
@@ -198,7 +207,16 @@ def get_var(name, default=None, verbose=2):
     data = result.get("data")
     if not data:
         return default
-    return data[0][0]
-
-
-
+    val, vtype = data[0]
+    if vtype == "int":
+        return int(val)
+    if vtype == "float":
+        return float(val)
+    if vtype == "str":
+        return str(val)
+    if vtype == "NoneType":
+        assert val == "None", val
+        return None
+    return val  # comes out unicode
+    
+    
