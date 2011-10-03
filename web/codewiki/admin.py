@@ -1,7 +1,9 @@
 from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent, CodePermission, Vault
+from django.contrib.auth.models import User
 from django.contrib import admin
 from django.db import models
 from django.db.models import Count
+from django import forms
 # from django.contrib.admin import SimpleListFilter
 
 class UserCodeRoleInlines(admin.TabularInline):
@@ -56,6 +58,14 @@ class ScraperAdmin(CodeAdmin):
 class ViewAdmin(CodeAdmin):
     actions = [mark_featured, mark_unfeatured]
 
+
+# Override sort order of user objects by replacing form element, as per:
+# http://stackoverflow.com/questions/923799/reorder-users-in-django-auth/1158484#1158484
+class VaultAdminForm(forms.ModelForm):
+    members = forms.ModelMultipleChoiceField(queryset=User.objects.order_by('username'))
+    class Meta:
+        model = Vault
+
 class VaultAdmin(admin.ModelAdmin):
     """
     Administration for a vault object, not sure yet whether we should hide
@@ -70,6 +80,8 @@ class VaultAdmin(admin.ModelAdmin):
     list_display = ('name', 'user', 'plan', 'created_at', 'member_count')
     list_filter = ('plan', 'created_at')
     search_fields = ('name',)
+
+    form = VaultAdminForm
 
 class ScraperRunEventAdmin(admin.ModelAdmin):
     list_display = ('run_id', 'scraper', 'run_started', 'run_ended', 'pages_scraped', 'first_url_scraped')
