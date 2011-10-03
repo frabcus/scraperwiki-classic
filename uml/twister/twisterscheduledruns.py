@@ -92,7 +92,9 @@ class ScheduledRunMessageLoopHandler:
         if bfinished:
             self.upost["exitstatus"] = self.exceptionmessage and 'exceptionmessage' or 'done'
             self.upost["domainscrapes"] = json.dumps(self.domainscrapes)
-
+            if self.exceptionmessage:
+                self.upost['exceptionmessage'] = self.exceptionmessage
+                
         # urllib.urlencode applies str() to each value in the list, which is dumb.
         # to get a proper error, print some chinese characters
         # need to get an explanation for this design of urlencode
