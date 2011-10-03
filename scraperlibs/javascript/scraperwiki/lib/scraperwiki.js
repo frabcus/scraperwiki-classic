@@ -1,3 +1,4 @@
+var jsdom = require('jsdom');
 var request = require('request');
 var dp = require('./dataproxy');
 
@@ -34,12 +35,22 @@ exports.parseError = parseError = function(err) {
 }
 
 
-exports.scrape = function( url, callback ) {
-	request(url, function (error, response, body) {
-	  if (!error && response.statusCode == 200) {
-	    callback( body );
-	  } else {
-		// Parse the stack and throw it with our new throw
-		parseError(error);
-	}
-})};
+
+exports.scrape = function( url, func ) {
+    request({ uri: url }, function (error, response, body) {
+        if (error && response.statusCode !== 200) {
+            console.log('Error when contacting morty.co.uk')
+        } else {
+            jsdom.env({
+                  html: body,
+                  scripts: [ 'https://media.scraperwiki.com/js/jquery-1.5.2.min.js' ]
+                }, 
+
+                function (err, window) {
+                   var $ = window.jQuery;
+                   func($, body);
+                }
+            );
+        }
+    });
+}

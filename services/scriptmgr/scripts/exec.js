@@ -2,20 +2,16 @@
 
 var fs = require('fs');
 
-var opts = require('opts');
-var options = [
-  {  long        : 'script', value : true },
-  {  long        : 'attachables', value : true  },
-];
-opts.parse(options, true);
+var script = '/home/scriptrunner/script.js';
+// if not exist then try /tmp/script.js
 
 var launch = JSON.parse( fs.readFileSync('launch.json', 'utf-8') );
 var datastore = launch['datastore'];
 var runid = launch['runid'];
 var scrapername = launch['scrapername'];
 var querystring = launch['querystring'];
-
-# TODO: Set querystring
+var attachables = launch['attachables'];
+var webstore_port = launch['webstore_port'];
 
 var sw = require('scraperwiki');
 var parts = datastore.split(':');
@@ -29,7 +25,7 @@ process.on('uncaughtException', function (err) {
 	sw.dumpMessage( err );
 });
 
-var scriptfile = opts.get('script');
+var scriptfile = script;
 try {
 	// Load and run the script provided to us
 	require( scriptfile );
