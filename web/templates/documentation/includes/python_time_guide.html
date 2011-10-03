@@ -17,7 +17,7 @@ print dateutil.parser.parse('10-Jul-1899')  # 1899-07-10 00:00:00
 print dateutil.parser.parse('01/01/01')     # 2001-01-01 00:00:00
 print dateutil.parser.parse('Tue 27 Sep 2011 00:25:48 BST') # 2011-09-27 00:25:48+01:00
 
-print dateutil.parser.parse('21 June 2010').class # &lt;type 'datetime.datetime'&gt;
+print dateutil.parser.parse('21 June 2010').__class__ # &lt;type 'datetime.datetime'&gt;
 </code>
 
 <p>This sometimes goes wrong. For example,
@@ -30,12 +30,22 @@ is this the 2nd March (US) or 3rd February (UK)?</p>
 giving a completely explicit format string.</p>
 
 <code>print dateutil.parser.parse('3/2/1999', dayfirst=True) # 1999-02-03 00:00:00
+
+import datetime
 print datetime.datetime.strptime('3/2/1999', '%d/%m/%Y') # 1999-02-03 00:00:00
 </code>
 
 <h2>Saving to the datestore</h2>
 
-<p>Once you have a datetime object, this is easy as pie.</p>
+<p>Once you have a datetime object, this is easy as pie. You just save the Python
+datetime object.</p>
+
+<code>data = { 
+    'name':'stilton', 
+    'birth_date':dateutil.parser.parse('1/2/1997') 
+}
+scraperwiki.sqlite.save(unique_keys=['name'], data=data)
+</code>
 
 <h2>Geocoding</h2>
 
