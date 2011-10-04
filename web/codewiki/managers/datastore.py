@@ -1,5 +1,6 @@
 import  settings
 import  socket
+import  struct
 import  urllib
 
 try:
@@ -13,6 +14,10 @@ class DataStore(object):
         self.sbuffer = [ ] 
         self.m_socket = socket.socket()
         self.m_socket.connect((settings.DATAPROXY_HOST, settings.DATAPROXY_PORT))
+        
+        # Set receive timeout to be 10 seconds
+        self.m_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('LL', 10, 0))
+        
         data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("short_name", short_name) ]
         self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         
