@@ -143,6 +143,132 @@ blankstartupcode = { 'scraper' : { 'python': "import scraperwiki\n\n# Blank Pyth
                                   }
                    }
 
+def newedit(request, short_name='__new__', wiki_type='scraper', language='python'):
+    
+    # quick and dirty corrections to incoming urls, which should really be filtered in the url.py settings
+    language = language.lower()
+    if language not in blankstartupcode[wiki_type]:
+        language = 'python'
+    
+    context = {'selected_tab':'code'}
+    
+    if re.match('[\d\.\w]+$', request.GET.get('codemirrorversion', '')):
+        context["codemirrorversion"] = request.GET.get('codemirrorversion')
+    else:
+        context["codemirrorversion"] = settings.CODEMIRROR_VERSION
+        # should have really been tied in with codemirrorversion.  values can be plain,none or another editor when we have one
+    context["texteditor"] = request.GET.get("texteditor", "codemirror")
+
+    # if this is a matching draft scraper pull it in
+    draftscraper = request.session.get('ScraperDraft')
+    if draftscraper and draftscraper.get('scraper') and (short_name == "__new__" or draftscraper.get('scraper').short_name == short_name):
+        scraper = draftscraper.get('scraper')
+        
+        context['code'] = draftscraper.get('code', ' missing')
+        context['rev'] = 'draft'
+        context['revdate'] = 'draft'
+        context['revdateepoch'] = None
+
+    # Load an existing scraper preference
+    elif short_name != "__new__":
+        try:
+            scraper = models.Code.objects.get(short_name=short_name)
+        except models.Code.DoesNotExist:
+            message =  "Sorry, this %s does not exist" % wiki_type
+            return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
+        if wiki_type != scraper.wiki_type:
+            return HttpResponseRedirect(reverse("editor_edit", args=[scraper.wiki_type, short_name]))
+        if not scraper.actionauthorized(request.user, "readcodeineditor"):
+            return HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "readcodeineditor"), context_instance=RequestContext(request)))
+       
+        # link from history page can take us to "rollback" mode and see earlier revision
+        rollback_rev = request.GET.get('rollback_rev', '')
+        if rollback_rev != "":
+            get_rev = int(rollback_rev)
+            assert get_rev >= 0 # too confusing for now otherwise!
+            context['rollback_rev'] = rollback_rev
+            use_commit = 'currcommit'
+        else:
+            # default to getting most recent (from file should it have changed
+            # but not been committed), hence the revision is always previous
+            # commit
+            get_rev = -1
+            use_commit = 'prevcommit'
+
+        status = scraper.get_vcs_status(get_rev)
+        if rollback_rev == "":
+            assert 'currcommit' not in status 
+
+        # assert not status['ismodified']  # should hold, but disabling it for now
+        if 'code' in status:
+            context['code'] = status["code"]
+        else:
+            context['code'] = ''
+        context['rev'] = status.get(use_commit,{}).get("rev", "0")
+        context['revdate'] = status.get(use_commit,{}).get("date")
+        context['revdateepoch'] = _datetime_to_epoch(context['revdate'])
+        revuser = status.get(use_commit,{}).get("user")
+        # If there is no user for the revision we should just use the scraper owner        
+        if revuser is None:
+            revuser = scraper.owner()
+            
+        context['revusername'] = revuser.username
+        try:
+            context['revuserrealname'] = revuser.get_profile().name
+        except frontend.models.UserProfile.DoesNotExist:
+            context['revuserrealname'] = revuser.username
+        except AttributeError:  # happens with AnonymousUser which has no get_profile function!
+            context['revuserrealname'] = revuser.username
+                
+    # create a temporary scraper object
+    else:
+        if wiki_type == 'view':
+            scraper = models.View()
+        else:
+            scraper = models.Scraper()
+
+        startupcode = blankstartupcode[wiki_type][language]
+        
+        startuptemplate = request.GET.get('template') or request.GET.get('fork')
+        if startuptemplate:
+            try:
+                templatescraper = models.Code.objects.get(short_name=startuptemplate)
+                if not templatescraper.actionauthorized(request.user, "readcode"):
+                    startupcode = startupcode.replace("Blank", "Not authorized to read this code")
+                else:
+                    startupcode = templatescraper.saved_code()
+                    if 'fork' in request.GET:
+                        scraper.title = templatescraper.title
+                        context['fork'] = request.GET.get('fork') # record as a fork
+            except models.Code.DoesNotExist:
+                startupcode = startupcode.replace("Blank", "Missing template for")
+
+        context['rev'] = 'unsaved'
+        context['revdate'] = 'unsaved'
+        context['revdateepoch'] = None
+            
+        # replace the phrase: sourcescraper = 'working-example' with sourcescraper = 'replacement-name'
+        inputscrapername = request.GET.get('sourcescraper', False)
+        if inputscrapername:
+            startupcode = re.sub('''(?<=sourcescraper = ["']).*?(?=["'])''', inputscrapername, startupcode)
+        
+        scraper.language = language
+        context['code'] = startupcode
+
+
+    #if a source scraper has been set, then pass it to the page
+    if scraper.wiki_type == 'view' and request.GET.get('sourcescraper'):
+        context['sourcescraper'] = request.GET.get('sourcescraper')
+
+    context['scraper'] = scraper
+    context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
+
+    if scraper.actionauthorized(request.user, "savecode") or context['rev'] in ('draft', 'unsaved'):
+        context['savecode_authorized'] = "yes"
+    
+    return render_to_response('codewiki/neweditor.html', context, context_instance=RequestContext(request))
+
+
 def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
     # quick and dirty corrections to incoming urls, which should really be filtered in the url.py settings
