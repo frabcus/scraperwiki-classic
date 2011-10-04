@@ -5,7 +5,7 @@
 {% block javascript %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>
 <script type="text/javascript">
-{% if settings.SHOW_APIKEY_UI %}
+
 var showinglookup= { 
     sqlite:'.format, .name, .apikey_scraper, .attach, .query, .callback', 
     getinfo:'.format, .name, .apikey_scraper, .version, .history_start_date, .quietfields, .callback',
@@ -14,16 +14,6 @@ var showinglookup= {
     search:'.format, .searchquery, .apikey_user, .maxrows, .callback',
     usersearch:'.format, .searchquery, .nolist, .maxrows, .callback'
 }
-{% else %}
-var showinglookup= { 
-    sqlite:'.format, .name, .attach, .query, .callback', 
-    getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
-    getruninfo:'.format, .name, .runid, .callback',
-    getuserinfo:'.format, .username, .callback',
-    search:'.format, .searchquery, .maxrows, .callback',
-    usersearch:'.format, .searchquery, .nolist, .maxrows, .callback'
-}
-{% endif %}
 
 $(function()
 {
