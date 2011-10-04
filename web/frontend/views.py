@@ -410,20 +410,20 @@ def tags(request):
     
 def tag(request, tag):
     ttag = get_tag(tag)
-    if not ttag:
-        raise Http404()
+    code_objects = None
+    
+    if ttag:
+        # query set of code objects this user can see
+        user_visible_code_objects = scraper_search_query(request.user, None)
 
-    # query set of code objects this user can see
-    user_visible_code_objects = scraper_search_query(request.user, None)
+        # inlining of tagging.models.get_by_model() but removing the content_type_id condition so that tags 
+        # attached to scrapers and views get interpreted as tags on code objects
+        code_objects = user_visible_code_objects.extra(
+            tables=['tagging_taggeditem'],
+            where=['tagging_taggeditem.tag_id = %s', 'codewiki_code.id = tagging_taggeditem.object_id'], 
+            params=[ttag.pk])
 
-    # inlining of tagging.models.get_by_model() but removing the content_type_id condition so that tags 
-    # attached to scrapers and views get interpreted as tags on code objects
-    code_objects = user_visible_code_objects.extra(
-        tables=['tagging_taggeditem'],
-        where=['tagging_taggeditem.tag_id = %s', 'codewiki_code.id = tagging_taggeditem.object_id'], 
-        params=[ttag.pk])
-
-    return render_to_response('frontend/tag.html', {'tag' : ttag, 'scrapers': code_objects}, context_instance=RequestContext(request))
+    return render_to_response('frontend/tag.html', {'tag_string': tag, 'tag' : ttag, 'scrapers': code_objects}, context_instance=RequestContext(request))
 
 def resend_activation_email(request):
     form = ResendActivationEmailForm(request.POST or None)
