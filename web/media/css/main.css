@@ -323,7 +323,8 @@ body.frontpage #nav_inner li.frontpage {
 
 /* ALERT BAR */
 
-#alert_outer {
+#alert_outer,
+.alert_outer {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -346,7 +347,8 @@ body.frontpage #nav_inner li.frontpage {
 	filter: dropshadow(color=#ffee99, offx=0, offy=1);
 }
 
-#alert_outer a {
+#alert_outer a,
+.alert_outer a {
 	color: #411;
 	font-size: 14px;
 	line-height: 20px;
@@ -366,7 +368,8 @@ body.frontpage #nav_inner li.frontpage {
 	background: linear-gradient(top, rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0.1) 51%,rgba(255,255,255,0) 100%);
 }
 
-#alert_outer a:hover {
+#alert_outer a:hover,
+.alert_outer a:hover {
 	text-decoration: none;
 	border-color: #daa744;
 	background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.4) 51%, rgba(255,255,255,0.2) 100%);
@@ -378,7 +381,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50%,rgba(255,255,255,0.4) 51%,rgba(255,255,255,0.2) 100%);
 }
 
-#alert_inner {
+#alert_inner,
+.alert_inner {
 	position: relative;
 	font-size: 16px;
 	line-height: 20px;
