@@ -19,7 +19,6 @@ dbhost  = localhost
 cache   = 127.0.0.1:11211
 lxc_server = 127.0.0.1
 twister_update_url = http://127.0.0.1:9090/update?
-whitelist_url = http://localhost:8000/whitelist/config.json
 
 [httpsproxy]
 host	= 127.0.0.1
@@ -30,7 +29,6 @@ passwd  = scraperwiki
 db      = scraperwiki_cache
 cache   = 127.0.0.1:11211
 twister_update_url = http://127.0.0.1:9090/update?
-whitelist_url = http://localhost:8000/whitelist/config.json
 
 [ftpproxy]
 host	= 127.0.0.1
