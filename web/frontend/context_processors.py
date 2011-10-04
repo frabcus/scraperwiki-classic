@@ -69,8 +69,6 @@ def template_settings(request):
     for setting in availible_settings:
         if setting in settings_dict:
             template_settings[setting] = settings_dict[setting]
-    
-    template_settings['SHOW_APIKEY_UI'] = True
             
     return {'settings' : template_settings}
 
