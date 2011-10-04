@@ -3,8 +3,8 @@
 {% block title %}Scrapers and requests tagged &lsquo;{{tag.name}}&rsquo;{% endblock %}
 
 {% block header %}
-	<h2><a href="/tags/">Browse by tag</a> / <a href="{% url single_tag tag.name %}">{{tag.name}}</a></h2>
-	<p>Showing all scrapers and requests tagged with &lsquo;{{tag.name}}&rsquo;</p>
+	<h2><a href="/tags/">Browse by tag</a>{%if tag%} / <a href="{% url single_tag tag.name %}">{{tag.name}}{% endif %}</a></h2>
+		<p>Showing all scrapers and requests tagged with &lsquo;{{tag_string}}&rsquo;</p>
 {% endblock %}
 
 {% block tabs %}

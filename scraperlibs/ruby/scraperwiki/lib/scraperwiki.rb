@@ -160,7 +160,10 @@ module ScraperWiki
             if !/[a-zA-Z0-9_\- ]+$/.match(key)
                 return { "error"=>'key must be simple text', "bad_key"=> key }
             end
-            
+
+            if value.kind_of?(Date) || value.kind_of?(Time)
+                value = value.iso8601
+            end
             if ![Fixnum, Float, String, TrueClass, FalseClass, NilClass].include?(value.class)
                 value = value.to_s
             end

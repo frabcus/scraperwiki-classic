@@ -323,7 +323,8 @@ body.frontpage #nav_inner li.frontpage {
 
 /* ALERT BAR */
 
-#alert_outer {
+#alert_outer,
+.alert_outer {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -346,7 +347,8 @@ body.frontpage #nav_inner li.frontpage {
 	filter: dropshadow(color=#ffee99, offx=0, offy=1);
 }
 
-#alert_outer a {
+#alert_outer a,
+.alert_outer a {
 	color: #411;
 	font-size: 14px;
 	line-height: 20px;
@@ -366,7 +368,8 @@ body.frontpage #nav_inner li.frontpage {
 	background: linear-gradient(top, rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0.1) 51%,rgba(255,255,255,0) 100%);
 }
 
-#alert_outer a:hover {
+#alert_outer a:hover,
+.alert_outer a:hover {
 	text-decoration: none;
 	border-color: #daa744;
 	background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.4) 51%, rgba(255,255,255,0.2) 100%);
@@ -378,7 +381,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50%,rgba(255,255,255,0.4) 51%,rgba(255,255,255,0.2) 100%);
 }
 
-#alert_inner {
+#alert_inner,
+.alert_inner {
 	position: relative;
 	font-size: 16px;
 	line-height: 20px;
@@ -1441,7 +1445,7 @@ body.profiles.edit small.error_hint {
 	border: 2px solid #39c;
 	border-top: none;
 	margin-bottom: 6px;
-	padding: 12px 15px 0 15px;
+	padding: 12px 15px;
 	display: none;
 	position: relative;
 	-moz-border-radius-bottomright: 4px;
@@ -1456,11 +1460,45 @@ body.profiles.edit small.error_hint {
 
 #request_options div p {
 	margin: 0;
-	padding-bottom: 15px;
 	line-height: 18px;
 	font-size: 14px;
 	color: #666;
+	padding-left: 45px;
+	background: transparent url(../images/request_data_icon_scraper.gif) 0px 1px no-repeat;
+	min-height: 32px;
 }
+
+#request_options div p + p {
+	margin-top: 15px;
+}
+
+#request_options #private p {
+	background-image: url(../images/request_data_icon_vault.gif);
+}
+
+#request_options #viz p {
+	background-image: url(../images/request_data_icon_viz.gif);
+}
+
+#request_options #app p {
+	background-image: url(../images/request_data_icon_app.gif);
+}
+
+#request_options #etl p {
+	background-image: url(../images/request_data_icon_etl.gif);
+}
+
+#page_inner #request_options p.paid {
+	background-image: url(../images/request_data_icon_paid.gif);
+}
+
+#page_inner #request_options p.free {
+	background-image: url(../images/request_data_icon_free.gif);
+}
+
+
+
+
 
 #request_form ul {
 	padding: 0;
@@ -3409,8 +3447,8 @@ ul.scraper_list .description {
 	margin: 0;
 	font-size: 13px;
 	color: #666;
-	width: 60%;
-	margin-left: 100px;
+	width: 50%;
+	margin-left: 130px;
 }
 
 ul.scraper_list table {
@@ -5877,6 +5915,11 @@ body.vaults .vault_contents li.code_object_line h3 {
 
 body.vaults table.code_about {
 	padding: 0;
+}
+
+body.vaults .vault_contents li.code_object_line p.description {
+	margin: 5px 0 0 130px;
+	color: #999;
 }
 
 body.vaults .vault_footer {
