@@ -51,7 +51,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'profile_name', 'email', 'scrapers', 'vaults', 'is_active', 'is_staff','is_beta_user','date_joined', 'last_login',)
     list_filter = ('is_active', 'is_staff', 'is_superuser',)
     ordering = ('-date_joined',)
-    search_fields  = ('username','email','profile_name',)
+    search_fields  = ('username','email',)
     actions = [make_beta, remove_beta]
 
     def is_beta_user(self, obj):
