@@ -91,6 +91,7 @@ def GetSrcDoc(request, srcdoc):
         qtail = "?%s" % urllib.urlencode({"url":pdfurl})
     else:
         pdfurl, pdffile, imgstem, qtail = None, None, None, None
+        
     return pdfurl, pdffile, imgstem, qtail
         
         
@@ -146,7 +147,6 @@ def cropimg(request, format, srcdoc, page, cropping):
     # It is possible that imgstem is None.
     if not pdfurl or not imgstem:
         return HttpResponse(open(os.path.join(settings.MEDIA_DIR, 'images', '404.png'), "rb").read(), mimetype='image/png')
-
 
     imgfile = "%s_%04d.png" % (imgstem, page)
     imgpixwidth = 800
