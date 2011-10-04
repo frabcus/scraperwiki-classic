@@ -18,7 +18,11 @@ import cgi
 def docmain(request, language=None, path=None):
     from titles import page_titles
 
-    language = language or request.session.get('language', 'python')
+    language_session = request.session.get('language', 'python')
+    if not language and language_session:
+        return HttpResponseRedirect(reverse('docsroot', kwargs={'language':language_session}) )
+    language = language or language_session
+
     request.session['language'] = language
     context = {'language': language }
    
