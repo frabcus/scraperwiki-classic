@@ -32,7 +32,6 @@ exports.bind = function( key, socket, type ) {
 		obj = create_binding(key);
 	} 
 	
-	connections[key] = obj;
 	// set the relevant connection if we have space
 	if ( type == ConnectionTypeEnum.READER ) {
 		
@@ -47,9 +46,31 @@ exports.bind = function( key, socket, type ) {
 		obj.Writers.push( socket );
 		
 	}
-	
+	connections[key] = obj;
+		
 	return true;
 }
+
+
+/******************************************************************************
+* 
+******************************************************************************/
+exports.unbind = function( socket, type ) {
+	var obj = connections[key] || null;
+	if ( obj == null )
+		return;
+
+	if ( type == ConnectionTypeEnum.READER ) {
+		delete obj.Readers[socket];
+	} else if ( type == ConnectionTypeEnum.WRITER ) {
+		delete obj.Writers[socket];		
+	}
+	
+	if ( obj.Writers.length == obj.Readers.length == 0 ) {
+		delete connections[key];
+	}
+}
+
 
 function create_binding( k ) {
 	return {
