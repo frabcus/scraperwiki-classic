@@ -14,7 +14,9 @@ var http = require('http');
 var url  = require('url');
 var _    = require('underscore')._;
 var opts = require('opts');
+var sio  = require('socket.io');
 
+var registry = require(path.join(__dirname,'registry'));
 var logging = require( path.join(__dirname,'logging'))
 
 
@@ -40,7 +42,25 @@ logging.setup( settings.logfile, settings.loglevel );
 
 
 
+var io = sio.listen( settings.read_port )
 
+/**********************************************************************
+* Socket.io connections are readers only
+* The client JS will be delivered
+*       via http://server:settings.read_port/socket.io/socket.io.js
+**********************************************************************/
+io.sockets.on('connection', function (socket) {
+	socket.on('register', function (data) {
+	    // read the run_id and connect to the main registry
+	    // we'll then use socket.emit to write the response
+	    // socket.emit('news', { hello: 'world' });
+		var key = data['runid'];
+		if ( ! registry.bind( key, socket, register.ConnectionTypeEnum.READER ) ) {
 
+		} else {
+	
+		}
+	});
+});
 
 
