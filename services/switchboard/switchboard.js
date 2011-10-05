@@ -38,9 +38,9 @@ opts.parse(options, true);
 
 var config_path = opts.get('config') || './appsettings.switchboard.js';
 var settings = require(config_path).settings;
+
 logging.setup( settings.logfile, settings.loglevel );
-
-
+registry.set_max( settings.max_readers, settings.max_writers );
 
 var io = sio.listen( settings.read_port )
 
