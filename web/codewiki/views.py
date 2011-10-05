@@ -559,7 +559,7 @@ def scraper_undelete_scraper(request, wiki_type, short_name):
     
     scraper = get_object_or_404(Scraper, short_name=short_name)
     if scraper.privacy_status == "deleted" and scraper.owner() == request.user:
-        scraper.privacy_status = scraper.vault and 'private' or 'public'
+        scraper.privacy_status = scraper.vault and 'private' or 'visible'
         scraper.save()
         
         send_message( request, {
