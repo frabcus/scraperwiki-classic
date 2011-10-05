@@ -58,6 +58,13 @@
         {% endif %}
         </div>
     </div>
+
+    {%if descriptionfromcode %}
+    <div class="staff">
+      <h2>Text derived from the code</h2>
+      {{descriptionfromcode|safe}}
+    </div>
+    {% endif %}
 </div>
 
 {% include 'codewiki/includes/tags.html' %}

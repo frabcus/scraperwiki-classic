@@ -14,6 +14,7 @@ from django.conf import settings
 
 from managers.datastore import DataStore
 from codewiki import models
+from codeparsers import MakeDescriptionFromCode
 import frontend
 
 import urllib
@@ -206,6 +207,10 @@ def code_overview(request, wiki_type, short_name):
 
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
+    if request.user.is_staff:
+        context["descriptionfromcode"] = MakeDescriptionFromCode(scraper.language, scraper.saved_code())
+        print context["descriptionfromcode"]
+        
     # view tpe
     if wiki_type == 'view':
         context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
