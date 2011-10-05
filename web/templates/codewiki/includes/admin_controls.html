@@ -12,7 +12,7 @@
         <input type="hidden" name="delete_data" value="1" />
         <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
         <a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/clean.png" width="16" height="16" alt="" /> Clear the datastore</a>
-        <p>Removes all data for this scraper.<br/>This cannot be undone.</p>
+        <p>Removes all the data this <br/>scraper has collected.</p>
       </form>
     {% endifequal %}
 
@@ -21,7 +21,6 @@
     <input type="hidden" name="delete_scraper" value="1" />
     <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this {{scraper.wiki_type}}?" />
     <a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Delete this {{scraper.wiki_type}}</a>
-    <p>Careful &ndash; This cannot be undone!</p>
   </form>
   </div>
 {% else %}
