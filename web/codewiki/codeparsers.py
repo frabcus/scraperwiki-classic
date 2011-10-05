@@ -6,7 +6,10 @@ def MakeDescriptionFromCode(language, code):
     if language != "python":
         return ""
 
-    mnode = ast.parse(code)
+    try:
+        mnode = ast.parse(code)
+    except SyntaxError, e:
+        return "This scraper has a syntax error: <br/><b>%s</b>"%str(e)
     mdocstring = ast.get_docstring(mnode)
     if not mdocstring:
         return ""
