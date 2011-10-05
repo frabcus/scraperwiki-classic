@@ -16,7 +16,6 @@ body {
 
 #draft_warning, #protected_warning, #login_warning, #rollback_warning {
 	text-align: center;
-	font-size: 0.8em;
 	border-bottom: solid 1px #c38938;
 }
 
