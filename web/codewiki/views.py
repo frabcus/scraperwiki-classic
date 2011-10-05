@@ -167,19 +167,19 @@ def code_overview(request, wiki_type, short_name):
         from frontend.utilities.messages import send_message        
         if alert_test == '1':
             actions = [
-                ("Action 1", reverse('code_overview', args=[wiki_type, short_name]), True,),            
+                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),            
             ]
             level = 'info'
         elif alert_test == '2':
             actions =  [ 
-                ("Action 1", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Action 2", reverse('code_overview', args=[wiki_type, short_name]), False,),
+                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
+                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
             ]
             level = 'warning'
         elif alert_test == '3':
             actions =  [ 
-                ("Action 1", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Action 2", reverse('code_overview', args=[wiki_type, short_name]), False,),
+                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
+                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
             ]
             level = 'error'
         else:
@@ -517,7 +517,7 @@ def scraper_delete_data(request, short_name):
         "level"  : "info",
         "actions": 
             [ 
-                ("Undo?", reverse('scraper_undo_delete_data', args=[short_name]), True,)
+                ("Undo?", reverse('scraper_undo_delete_data', args=[short_name]), False,)
             ]
     } )
     
@@ -532,14 +532,43 @@ def scraper_schedule_scraper(request, short_name):
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
+
 def scraper_delete_scraper(request, wiki_type, short_name):
+    from frontend.utilities.messages import send_message            
+    
     scraper = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")
     if isinstance(scraper, HttpResponse):  return scraper
+    scraper.previous_privacy = scraper.privacy_status
     scraper.privacy_status = "deleted"
     scraper.save()
-    request.notifications.add("Your %s has been deleted" % wiki_type)
+    
+    send_message( request, {
+        "message": "Your %s has been deleted" % wiki_type,
+        "level"  : "info",
+        "actions": 
+            [ 
+                ("Undo?", reverse('scraper_undelete_scraper', args=[wiki_type, short_name]), False,)
+            ]
+     } )
+
     return HttpResponseRedirect(reverse('dashboard'))
 
+
+def scraper_undelete_scraper(request, wiki_type, short_name):
+    from frontend.utilities.messages import send_message                
+    from codewiki.models import Code
+    
+    scraper = get_object_or_404(Code, short_name=short_name)
+    if scraper.privacy_status == "deleted" and scraper.owner() == request.user:
+        scraper.privacy_status = scraper.vault and 'private' or scraper.previous_privacy
+        scraper.save()
+        
+        send_message( request, {
+            "message": "Your %s has been recovered" % wiki_type,
+            "level"  : "info",
+         } )
+        
+    return HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))
 
 
 

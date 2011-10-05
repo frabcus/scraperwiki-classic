@@ -300,7 +300,9 @@ def scraper_search_handler(request):
     # scrapers we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
     quietfields = request.GET.get('quietfields', "").split("|")
-    for scraper in scrapers[:(maxrows+len(nolist))]:
+    offset = request.GET.get('offset', 0)
+    
+    for scraper in scrapers[offset:(offset+maxrows+len(nolist))]:
         if scraper.short_name in nolist:
             continue
         res = {'short_name':scraper.short_name }

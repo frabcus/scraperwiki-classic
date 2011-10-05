@@ -112,6 +112,7 @@ class Code(models.Model):
     relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
     forked_from        = models.ForeignKey('self', null=True, blank=True)
     privacy_status     = models.CharField(max_length=32, choices=PRIVACY_STATUSES, default='public')
+    previous_privacy   = models.CharField(max_length=32, choices=PRIVACY_STATUSES, null=True, blank=True)
     
     # For private scrapers this can be provided to API calls as proof that the caller has access
     # to the scraper, it is really a shared secret between us and the caller. For the datastore 
@@ -186,7 +187,7 @@ class Code(models.Model):
     def is_sick_and_not_running(self):
         lastscraperrunevent = self.last_runevent()
         if self.status == 'sick':
-            if (not lastscraperrunevent.id) or (lastscraperrunevent.id and lastscraperrunevent.pid == -1):
+            if (not lastscraperrunevent) or (not lastscraperrunevent.id) or (lastscraperrunevent.id and lastscraperrunevent.pid == -1):
                 return True
         return False
 

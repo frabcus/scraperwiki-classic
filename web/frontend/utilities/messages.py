@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 #        "level"  : "info",
 #        "actions": 
 #            [ 
-#                ("Undo?", "https://.....", True,)
+#                ("Undo?", "https://.....", True,) # Boolean denotes secondary action
 #            ]
 #    } )        
 

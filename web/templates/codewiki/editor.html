@@ -121,38 +121,22 @@
 {% endif %}
 
 <div class="editor">
-    {% ifnotequal rev 'draft' %}
-    <div id="draft_warning" class="alert_outer" style="display:none;">
-    {% else %}
-    <div id="draft_warning" class="alert_outer">
-    {% endifnotequal %}
-        A temporary version of your {{scraper.wiki_type}} has been saved. 
-        <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, 
-        or <a href="{% url delete_draft %}">discard changes</a>.
+    
+    <div id="draft_warning" class="alert_outer"{% ifnotequal rev 'draft' %} style="display:none;"{% endifnotequal %}>
+        A temporary version of your {{scraper.wiki_type}} has been saved. <a href="{% url login %}?next={% url handle_session_draft %}">Sign in to save permanently</a> <a class="secondary" href="{% url delete_draft %}">Discard this {{scraper.wiki_type}}</a>
     </div>
 
     <div id="protected_warning" class="alert_outer" style="display:none;" >
-        This {{scraper.wiki_type}} is protected, so you can only watch other people editing. Ask the owner 
-        <a href="{% if scraper.owner.username %}{% url profiles_profile_detail scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a>
-        to give you permission to edit it, or 
-        <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">fork it</a>.
+        This {{scraper.wiki_type}} is protected: You can only watch other people editing. <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">Fork to edit this {{scraper.wiki_type}} yourself</a>
     </div>
 
     <div id="login_warning" class="alert_outer" style="display:none;" >
-        You need to 
-        {% if scraper.short_name %}
-            <a href="{% url login %}?next={% url editor_edit scraper.wiki_type scraper.short_name %}">sign in or create an account</a> 
-        {% else %}
-            sign in or create an account
-        {% endif %}
-        to edit an existing {{scraper.wiki_type}}, 
-        or you can <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">fork it</a>.
-        Meanwhile, view the source code and watch other people editing below.
+        You are in read-only mode. <a href="{% url login %}{% if scraper.short_name %}?next={% url editor_edit scraper.wiki_type scraper.short_name %}{% endif %}">Sign in to edit this {{scraper.wiki_type}}</a> <a class="secondary" href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">Fork as a guest</a>
     </div>
 
     <div id="rollback_warning" class="alert_outer" style="display:none;" >
         <strong>Warning:</strong> You are viewing an earlier version of this {{scraper.wiki_type}}.
-        If you save it, then it will be saved as the most recent version.
+        If you save, the newest version will be overwritten.
     </div>
 
 

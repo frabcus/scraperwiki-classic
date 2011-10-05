@@ -11,8 +11,10 @@ function traceToSWStackDump($trace, $script, $scriptlines, $skipa = 1, $skipb = 
         $stackentry = array("linenumber" => $linenumber, "duplicates" => 1); 
         $stackentry["file"] = (realpath($stackPoint["file"]) == realpath($script) ? "<string>" : $stackPoint["file"]); 
 
+		$stackentry["linetext"] = "";
         if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
             $stackentry["linetext"] = $scriptlines[$linenumber - 1];
+
 
         if (array_key_exists("args", $stackPoint) and count($stackPoint["args"]) != 0)
         {
