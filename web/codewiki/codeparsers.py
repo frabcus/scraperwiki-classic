@@ -19,15 +19,14 @@ def MakeDescriptionFromCode(language, code):
     
     funcnodes = [ node  for node in mnode.body  if type(node) == ast.FunctionDef]
     if funcnodes:
+        res.append("<dl>")
         for fnode in funcnodes:
-            res.append("<p>")
-            res.append("<b>%s(%s)</b>" % (fnode.name, ", ".join([arg.id  for arg in fnode.args.args])))
+            res.append("<dt><b>%s(%s)</b></dt>" % (fnode.name, ", ".join([arg.id  for arg in fnode.args.args])))
             fdocstring = ast.get_docstring(fnode)
             if fdocstring:
-                res.append("<ul>%s</ul>"%fdocstring)
-            res.append("</p>")
+                res.append("<dd>%s</dd>"%fdocstring)
+        res.append("</dl>")
     else:
         res.append("<p>&lt;no functions&gt;</p>")
-
     return "\n".join(res)
 
