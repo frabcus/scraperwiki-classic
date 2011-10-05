@@ -543,7 +543,7 @@ def scraper_delete_scraper(request, wiki_type, short_name):
     scraper.save()
     
     send_message( request, {
-        "message": "Your scraper has been deleted",
+        "message": "Your %s has been deleted" % wiki_type,
         "level"  : "info",
         "actions": 
             [ 
