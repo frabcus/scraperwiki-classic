@@ -209,7 +209,6 @@ def code_overview(request, wiki_type, short_name):
     
     if request.user.is_staff:
         context["descriptionfromcode"] = MakeDescriptionFromCode(scraper.language, scraper.saved_code())
-        print context["descriptionfromcode"]
         
     # view tpe
     if wiki_type == 'view':
