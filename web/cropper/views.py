@@ -145,7 +145,7 @@ def cropimg(request, format, srcdoc, page, cropping):
 
     pdfurl, pdffile, imgstem, qtail = GetSrcDoc(request, srcdoc)
     # It is possible that imgstem is None.
-    if not pdfurl or not imgstem:
+    if pdfurl is None or imgstem is None:
         return HttpResponse(open(os.path.join(settings.MEDIA_DIR, 'images', '404.png'), "rb").read(), mimetype='image/png')
 
     imgfile = "%s_%04d.png" % (imgstem, page)
