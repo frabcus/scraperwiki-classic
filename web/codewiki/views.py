@@ -556,19 +556,19 @@ def scraper_delete_scraper(request, wiki_type, short_name):
 
 def scraper_undelete_scraper(request, wiki_type, short_name):
     from frontend.utilities.messages import send_message                
-    from codewiki.models import Scraper
+    from codewiki.models import Code
     
-    scraper = get_object_or_404(Scraper, short_name=short_name)
+    scraper = get_object_or_404(Code, short_name=short_name)
     if scraper.privacy_status == "deleted" and scraper.owner() == request.user:
         scraper.privacy_status = scraper.vault and 'private' or scraper.previous_privacy
         scraper.save()
         
         send_message( request, {
-            "message": "Your scraper has been recovered",
+            "message": "Your %s has been recovered" % wiki_type,
             "level"  : "info",
          } )
         
-    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
+    return HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))
 
 
 
