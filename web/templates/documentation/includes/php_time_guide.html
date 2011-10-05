@@ -33,17 +33,17 @@ print get_class(date_create('21 June 2010')) . "\n"; # DateTime
 <p>This sometimes goes wrong. For example,
 is this the 2nd March (US) or 3rd February (UK)?</p>
 
-<code>$when = date_create('3/2/1999'); print_date($when); # 1999-03-02T00:00:00+0000
+<code>$when = date_create('3/2/1999 01:00'); print_date($when); # 1999-03-02T01:00:00+0000
 </code>
 
 <p>You can fix it with an explicit format string.</p>
 
-<code>$when = date_create_from_format('%d/%m/%Y', '3/2/1999'); print_date($when); # 1999-02-03T12:04:11+0000
+<code>$when = date_create_from_format('d/m/Y H:i', '3/2/1999 01:00'); print_date($when); # 1999-02-03T12:04:11+0000
 </code>
 
 <h2>Saving to the datestore</h2>
 
-<p>This is easy as pie. You just save either the PHP date or datetime
+<p>This is easy as pie. You just save either the PHP DateTime
 object, and ScraperWiki will convert it into the format SQLite needs.</p>
 
 <code>$birth_datetime = date_create('1/2/1997 9pm');
