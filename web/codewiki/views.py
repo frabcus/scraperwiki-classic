@@ -167,19 +167,19 @@ def code_overview(request, wiki_type, short_name):
         from frontend.utilities.messages import send_message        
         if alert_test == '1':
             actions = [
-                ("Action 1", reverse('code_overview', args=[wiki_type, short_name]), True,),            
+                ("Action 1", reverse('code_overview', args=[wiki_type, short_name]), False,),            
             ]
             level = 'info'
         elif alert_test == '2':
             actions =  [ 
-                ("Action 1", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Action 2", reverse('code_overview', args=[wiki_type, short_name]), False,),
+                ("Action 1", reverse('code_overview', args=[wiki_type, short_name]), False,),
+                ("Action 2", reverse('code_overview', args=[wiki_type, short_name]), True,),
             ]
             level = 'warning'
         elif alert_test == '3':
             actions =  [ 
-                ("Action 1", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Action 2", reverse('code_overview', args=[wiki_type, short_name]), False,),
+                ("Action 1", reverse('code_overview', args=[wiki_type, short_name]), False,),
+                ("Action 2", reverse('code_overview', args=[wiki_type, short_name]), True,),
             ]
             level = 'error'
         else:
