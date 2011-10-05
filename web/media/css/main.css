@@ -10,8 +10,12 @@ h1, h2, h3, h4, h5, h6 {
 	margin: 0;
 }
 
-br.clear {
+br.clear,
+span.clear {
+	display: block;
 	clear: both;
+	height: 0;
+	line-height: 0;
 }
 
 .hide {
@@ -3555,7 +3559,7 @@ ul.scraper_list .screenshot img {
 	color: #808080;
 	font-variant: small-caps;
 	margin: 0;
-	padding: 0.5em 0;
+	padding: 0;
 }
 
 .code_about li {
@@ -5911,10 +5915,6 @@ body.vaults .vault_contents li.code_object_line h3 {
 	font-size: 18px;
 	padding: 5px 0;
 	width: 500px;
-}
-
-body.vaults table.code_about {
-	padding: 0;
 }
 
 body.vaults .vault_contents li.code_object_line p.description {
