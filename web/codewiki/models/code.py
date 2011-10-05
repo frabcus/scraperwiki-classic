@@ -17,6 +17,7 @@ from codewiki import util
 from codewiki.models.vault import Vault
 from frontend.models import UserProfile
 import textile   # yuk
+import creoleparser  # creoleparser.text2html(cdesc); method may include pre and post processing of text to handle links and paramstrings encoding nicely
 
 try:
     import json
@@ -320,6 +321,8 @@ class Code(models.Model):
                 cdesc = "%s\n\n_Has %d secret query-string environment variable%s._" % (cdesc, nqsenvvars, (nqsenvvars>1 and "s" or ""))
 
         return textile.textile(cdesc)   # wikicreole at the very least here!!!
+
+        
 
     def description_safepart(self):   # used in the api output
         cdesc = re.sub('(?s)__BEGIN_QSENVVARS__.*?__END_QSENVVARS__', '', self.description)

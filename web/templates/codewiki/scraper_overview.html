@@ -124,7 +124,8 @@
         {% else %}
             <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>
         {% endif %}
-{%comment%}
+        
+       {%comment%}
         {% if user.is_staff %}
           <span class="staff">
           {% if ckanresource %}
@@ -135,8 +136,9 @@
           {% endif %}
           </span>
         {% endif %}
-{%endcomment%}
+       {%endcomment%}
     </h2>
+
     <div class="text_wiki">
         <div id="divAboutScraper">
         {% if scraper.description %}
@@ -151,6 +153,13 @@
             {% endif %}</p>
         {% endif %}</div>
     </div>
+
+    {%if descriptionfromcode %}
+    <div id="descriptionfromcode" class="staff">
+      <h2>Text derived from the code</h2>
+      {{descriptionfromcode|safe}}
+    </div>
+    {% endif %}
 </div>
 
 {% include 'codewiki/includes/tags.html' %}
