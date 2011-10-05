@@ -12,8 +12,13 @@ function traceToSWStackDump($trace, $script, $scriptlines, $skipa = 1, $skipb = 
         $stackentry["file"] = (realpath($stackPoint["file"]) == realpath($script) ? "<string>" : $stackPoint["file"]); 
 
 		$stackentry["linetext"] = "";
-        if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
+        if (($linenumber >= 0) && ($linenumber < count($scriptlines))) {
             $stackentry["linetext"] = $scriptlines[$linenumber - 1];
+        } else {
+            # XXX bit of a hack to show the line number in third party libraries
+            $stackentry["file"] .= ":" . $linenumber;
+        }
+
 
 
         if (array_key_exists("args", $stackPoint) and count($stackPoint["args"]) != 0)
