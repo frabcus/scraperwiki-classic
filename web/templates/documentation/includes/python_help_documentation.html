@@ -78,7 +78,8 @@ scrapers, or extract it through the API.
 
 <dt>scraperwiki.<strong>sqlite.get_var</strong>(key[, default])</dt>
     <dd>Retrieves a single value that was saved by save_var.
-        Only works for string, float, or int types.  For anything else, use pickle to turn it into a string
+        Only works for string, float, or int types.  
+        For anything else, use the pickle library to turn it into a string.
     </dd>
 </dl>
 
@@ -89,13 +90,18 @@ scrapers, or extract it through the API.
 
 
 <h3>Views</h3>
+
 <dt>scraperwiki.<strong>utils.httpresponseheader</strong>(headerkey, headervalue)</dt>
     <dd>Set the content-type header to something other than HTML when using a ScraperWiki "view" 
     <dd>(e.g. "Content-Type", "image/png")
     </dd>
+
+<dt>scraperwiki.<strong>dumpMessage</strong>({"content":base64.encodestring(binstring), "message_type":"console", "encoding":"base64"})</dt>
+    <dd>The method for outputting the binary string binstring that contains, for example, a png image</dd>
+
 <dt>scraperwiki.<strong>utils.GET</strong>()</dt>
-    <dd>The query_string map when using a ScraperWiki "view".
-    </dd>
+    <dd>The query_string map when using a ScraperWiki "view".</dd>
+    <dd>prefer to use: dict(cgi.parse_qsl(os.getenv("QUERY_STRING", ""))).</dd>
 
 <h3>Geocoding</h3>
 <p>Some installed functions to help you transform between different coordinate systems.</p> 

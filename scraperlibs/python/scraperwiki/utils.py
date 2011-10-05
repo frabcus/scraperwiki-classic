@@ -40,9 +40,9 @@ def httpresponseheader(headerkey, headervalue):
     import scraperwiki
     scraperwiki.dumpMessage({'message_type': 'httpresponseheader', 'headerkey': headerkey, 'headervalue': headervalue})
 
-# deprecated if possible
+# to be deprecated if possible
 def GET():
-    return dict(cgi.parse_qsl(os.getenv("QUERY_STRING")))
+    return dict(cgi.parse_qsl(os.getenv("QUERY_STRING", "")))
 
 
 urllib2opener = None
