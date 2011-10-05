@@ -547,7 +547,7 @@ def scraper_delete_scraper(request, wiki_type, short_name):
         "level"  : "info",
         "actions": 
             [ 
-                ("Undo?", reverse('scraper_undelete_scraper', args=[scraper.wiki_type, short_name]), True,)
+                ("Undo?", reverse('scraper_undelete_scraper', args=[wiki_type, short_name]), True,)
             ]
      } )
 
