@@ -532,14 +532,42 @@ def scraper_schedule_scraper(request, short_name):
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
+
 def scraper_delete_scraper(request, wiki_type, short_name):
+    from frontend.utilities.messages import send_message            
+    
     scraper = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")
     if isinstance(scraper, HttpResponse):  return scraper
     scraper.privacy_status = "deleted"
     scraper.save()
-    request.notifications.add("Your %s has been deleted" % wiki_type)
+    
+    send_message( request, {
+        "message": "Your scraper has been deleted",
+        "level"  : "info",
+        "actions": 
+            [ 
+                ("Undo?", reverse('scraper_undelete_scraper', args=[scraper.wiki_type, short_name]), True,)
+            ]
+     } )
+
     return HttpResponseRedirect(reverse('dashboard'))
 
+
+def scraper_undelete_scraper(request, wiki_type, short_name):
+    from frontend.utilities.messages import send_message                
+    from codewiki.models import Scraper
+    
+    scraper = get_object_or_404(Scraper, short_name=short_name)
+    if scraper.privacy_status == "deleted" and scraper.owner() == request.user:
+        scraper.privacy_status = scraper.vault and 'private' or 'public'
+        scraper.save()
+        
+        send_message( request, {
+            "message": "Your scraper has been recovered",
+            "level"  : "info",
+         } )
+        
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
 
