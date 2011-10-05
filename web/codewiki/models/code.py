@@ -186,7 +186,7 @@ class Code(models.Model):
     def is_sick_and_not_running(self):
         lastscraperrunevent = self.last_runevent()
         if self.status == 'sick':
-            if (not lastscraperrunevent.id) or (lastscraperrunevent.id and lastscraperrunevent.pid == -1):
+            if (not lastscraperrunevent) or (not lastscraperrunevent.id) or (lastscraperrunevent.id and lastscraperrunevent.pid == -1):
                 return True
         return False
 
