@@ -172,8 +172,8 @@ def code_overview(request, wiki_type, short_name):
             level = 'info'
         elif alert_test == '2':
             actions =  [ 
-                ("Action 2", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
+                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
+                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
             ]
             level = 'warning'
         elif alert_test == '3':
