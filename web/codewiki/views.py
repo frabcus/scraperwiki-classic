@@ -538,6 +538,7 @@ def scraper_delete_scraper(request, wiki_type, short_name):
     
     scraper = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")
     if isinstance(scraper, HttpResponse):  return scraper
+    scraper.previous_privacy = scraper.privacy_status
     scraper.privacy_status = "deleted"
     scraper.save()
     
@@ -559,7 +560,7 @@ def scraper_undelete_scraper(request, wiki_type, short_name):
     
     scraper = get_object_or_404(Scraper, short_name=short_name)
     if scraper.privacy_status == "deleted" and scraper.owner() == request.user:
-        scraper.privacy_status = scraper.vault and 'private' or 'visible'
+        scraper.privacy_status = scraper.vault and 'private' or scraper.previous_privacy
         scraper.save()
         
         send_message( request, {
