@@ -6,8 +6,6 @@ from django.contrib.auth.admin import UserAdmin
 class MessageAdmin(admin.ModelAdmin):
     pass
 
-class DataEnquiryAdmin(admin.ModelAdmin):
-    pass
 
 
 class UserProfileStack(admin.StackedInline):
@@ -46,6 +44,10 @@ def remove_beta(modeladmin, request, queryset):
         p.save()
 remove_beta.short_description = 'Mark user as NOT beta user'
 
+class DataEnquiryAdmin(admin.ModelAdmin):
+    list_display = ('date_of_enquiry', 'category', 'email', 'first_name', 'last_name', 'telephone',)
+    list_filter = ('category', 'broadcast' )
+    ordering = ('-date_of_enquiry',)
 
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'profile_name', 'email', 'scrapers', 'vaults', 'is_active', 'is_staff','is_beta_user','date_joined', 'last_login',)
