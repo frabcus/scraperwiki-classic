@@ -38,9 +38,8 @@ def GetDispatcherStatus():
         fin = urllib2.urlopen(settings.DISPATCHERURL + '/Status')
         lines = fin.readlines()
     except urllib2.URLError, e:
-        msg = 'The dispatcher at %s appears to be down for run_scrapers script:\n%s' % (settings.DISPATCHERURL,e)
-        mail_admins(subject="[ScraperWiki] Dispatcher down?", message=msg, fail_silently=True)
-        raise
+        pass
+        return None
     else:
         fin.close()
         
