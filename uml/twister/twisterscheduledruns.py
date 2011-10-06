@@ -44,7 +44,9 @@ class updaterunobjectReceiver(protocol.Protocol):
         
     def connectionLost(self, reason):
         if reason.type in [ResponseDone, PotentialDataLoss]:
-            self.logger.debug("updaterunobject response: "+"".join(self.rbuffer)[:1000])
+                # sometimes need to print huge amount out to read the html formatted error
+            #self.logger.debug("updaterunobject response: %s"% str("".join(self.rbuffer)[:50000]))
+            self.logger.debug("updaterunobject response: %s"% str(["".join(self.rbuffer)[:2000]]))
         else:
             self.logger.warning("nope "+str([reason.getErrorMessage(), reason.type, self.rbuffer]))
         self.finished.callback(None)
@@ -112,8 +114,8 @@ class ScheduledRunMessageLoopHandler:
             data = json.loads(line)
             if not isinstance(data, dict):
                 raise TypeError('Incorrect type of JSON')
-        except:
-            self.logger.debug( "Failed to loads() " + line )
+        except Exception, e:
+            self.logger.debug( "Failed to json.loads() %s %s" % (str([line]), str(e)))
             return
                     
         message_type = data.get('message_type')

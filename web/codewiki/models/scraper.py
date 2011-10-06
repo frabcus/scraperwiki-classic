@@ -27,12 +27,15 @@ import code
 import view
 import urllib2
 
+import logging
+
 try:
     import json
 except:
     import simplejson as json
 
-from django.core.mail import send_mail
+# for now till we establish logging into the django system
+logger = logging
 
 SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every two days'), (3600*24*3, 'every three days'), 
                     (3600*24*7, 'once a week'), (3600*24*14, 'every two weeks'), (3600*24*31, 'once a month'), 
@@ -85,13 +88,17 @@ class Scraper (code.Code):
     def update_meta(self):
         dataproxy = DataStore(self.short_name)
         try:
-            self.record_count = 0
+            newcount = 0
             datasummary = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":-1})
             if "error" not in datasummary:
+
                 for tabledata in datasummary.get("tables", {}).values():
-                    self.record_count += tabledata["count"]
+                    newcount += tabledata["count"]
+                    
+                # Only update the record count when we have definitely not failed.
+                self.record_count = newcount                   
             else:
-                print "logthis", datasummary
+                print "logthis", datasummary                
         except Exception, e:
             print "logthis", e
         finally:

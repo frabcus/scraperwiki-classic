@@ -27,7 +27,6 @@ cd ../services/scriptmgr
 node ./scriptmgr.js &
 cd -
 ./etc/local.d/dataproxy		restart
-./etc/local.d/dispatcher	restart
 ./etc/local.d/ftpproxy		restart
 ./etc/local.d/httpproxy		restart
 ./etc/local.d/httpsproxy	restart
