@@ -36,6 +36,7 @@ class SW_DataStoreClass
             $this->m_socket    = socket_create (AF_INET, SOCK_STREAM, SOL_TCP) ;
             socket_connect     ($this->m_socket, $this->m_host, $this->m_port) ;
             socket_getsockname ($this->m_socket, $addr, $port) ;
+            print "socket_getsockname " . $addr . ":" . $port . "\n";
             $getmsg = sprintf  ("GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n", 'lxc', $port, urlencode($this->m_scrapername), urlencode($this->m_runid)) ;
             socket_send        ($this->m_socket, $getmsg, strlen($getmsg), MSG_EOR) ;
 
