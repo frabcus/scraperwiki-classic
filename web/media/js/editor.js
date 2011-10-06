@@ -1506,23 +1506,23 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 	$('li.console, li.console a').bind('click', function(){
-		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/console'); }
+		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/console']); }
 	});
 
 	$('li.data, li.data a').bind('click', function(){
-		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/data'); }
+		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/data']); }
 	});
 
 	$('li.sources, li.sources a').bind('click', function(){
-		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/sources'); }
+		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/sources']); }
 	});
 
 	$('li.chat, li.chat a').bind('click', function(){
-		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/chat'); }
+		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/chat']); }
 	});
 
 	$('a.helplink').bind('click', function(){
-		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/documentation'); }
+		if(_gaq){ _gaq.push(['_trackPageview', window.location.pathname + '/tab/documentation']); }
 	});
 	
 	
