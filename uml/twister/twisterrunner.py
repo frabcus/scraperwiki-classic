@@ -25,7 +25,7 @@ def SetControllerHost(config):
     global nodecontrollername
     global nodecontrollerhost
     global nodecontrollerport
-    umls = config.get('dispatcher', 'umllist').split(',')
+    umls = config.get('twister', 'umllist').split(',')
     nodecontrollername = umls[0]
     # TODO: This needs to be a list
     nodecontrollerhost = config.get(nodecontrollername, 'host')
