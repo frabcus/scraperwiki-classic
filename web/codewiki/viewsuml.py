@@ -49,18 +49,19 @@ def running_scrapers(request):
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
     
     statusscrapers = GetDispatcherStatus()
-    for status in statusscrapers:
-        if status['scraperID']:
-            scrapers = Code.objects.filter(guid=status['scraperID'])
-            if scrapers:
-                status['scraper'] = scrapers[0]
+    if statusscrapers:
+        for status in statusscrapers:
+            if status['scraperID']:
+                scrapers = Code.objects.filter(guid=status['scraperID'])
+                if scrapers:
+                    status['scraper'] = scrapers[0]
         
-        scraperrunevents = ScraperRunEvent.objects.filter(run_id=status['runID'])
-        status['killable'] = request.user.is_staff
-        if scraperrunevents:
-            status['scraperrunevent'] = scraperrunevents[0]
-            if status['scraper'].owner() == request.user:
-                status['killable'] = True
+            scraperrunevents = ScraperRunEvent.objects.filter(run_id=status['runID'])
+            status['killable'] = request.user.is_staff
+            if scraperrunevents:
+                status['scraperrunevent'] = scraperrunevents[0]
+                if status['scraper'].owner() == request.user:
+                    status['killable'] = True
 
     context = { 'statusscrapers': statusscrapers, 'events':recentevents, 'eventsmax':recenteventsmax }
     context['activeumls'] = GetUMLstatuses()
