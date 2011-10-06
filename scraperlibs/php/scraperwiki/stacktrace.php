@@ -42,8 +42,12 @@ function exceptionHandler($exception, $script)
     $linenumber = $exception->getLine(); 
     $finalentry = array("linenumber" => $linenumber, "duplicates" => 1); 
     $finalentry["file"] = (realpath($exception->getFile()) == realpath($script) ? "<string>" : $exception->getFile()); 
-    if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
+    if (($linenumber >= 0) && ($linenumber < count($scriptlines))) {
         $finalentry["linetext"] = $scriptlines[$linenumber - 1]; 
+    } else {
+        # XXX bit of a hack to show the line number in third party libraries
+        $finalentry["file"] .= ":" . $linenumber;
+    }
     $finalentry["furtherlinetext"] = $exception->getMessage(); 
     $stackdump[] = $finalentry; 
     
