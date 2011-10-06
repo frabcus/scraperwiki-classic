@@ -27,6 +27,7 @@ def SetControllerHost(config):
     global nodecontrollerport
     umls = config.get('dispatcher', 'umllist').split(',')
     nodecontrollername = umls[0]
+    # TODO: This needs to be a list
     nodecontrollerhost = config.get(nodecontrollername, 'host')
     nodecontrollerport = config.getint(nodecontrollername, 'via')
 
@@ -183,24 +184,25 @@ def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, clie
     
 
 def MakeRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev):
-    if beta_user:
-        return MakeSocketRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev)
+    # Here for historical reasons - send everyone to the node controller host for now (although we may
+    # add more in future)
+    return MakeSocketRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev)
 
     # alternatively run the dispatcher the old way 
     # (this can also contain a beta flag to say whether it should be using the lxc)
-    args = ['./firestarter/runner.py']
-    args.append('--guid=%s' % guid)
-    args.append('--language=%s' % language)
-    args.append('--name=%s' % scrapername)
-    args.append('--urlquery=%s' % urlquery)
-    if beta_user:
-        args.append('--beta_user')
-    if not username:
-        args.append('--draft')
-
-    code = code.encode('utf8')
-    args = [i.encode('utf8') for i in args]
-    logger.debug("./firestarter/runner.py: %s" % args)
+#    args = ['./firestarter/runner.py']
+#    args.append('--guid=%s' % guid)
+#    args.append('--language=%s' % language)
+#    args.append('--name=%s' % scrapername)
+#    args.append('--urlquery=%s' % urlquery)
+#    if beta_user:
+#        args.append('--beta_user')
+#    if not username:
+#        args.append('--draft')
+#
+#    code = code.encode('utf8')
+#    args = [i.encode('utf8') for i in args]
+#    logger.debug("./firestarter/runner.py: %s" % args)
 
     # from here we should somehow get the runid
-    return reactor.spawnProcess(spawnRunner(client, code, logger), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
+#    return reactor.spawnProcess(spawnRunner(client, code, logger), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
