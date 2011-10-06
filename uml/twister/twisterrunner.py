@@ -129,6 +129,8 @@ class spawnRunner(protocol.ProcessProtocol):
             self.client.scheduledrunmessageloophandler.schedulecompleted()
             self.client.factory.scheduledruncomplete(self.client, reason.type==ProcessDone)
 
+    def controllerconnectionrequestFailure(self, failure):
+        self.logger.info("controllerconnectionrequest failure received "+str(failure))
 
 
 # simply ciphers through the two functions
@@ -140,7 +142,8 @@ class ControllerConnectionProtocol(protocol.Protocol):
     def dataReceived(self, data):
         #self.srunner.logger.debug("*** controller socket connection data: "+data)
         self.srunner.outReceived(data)
-        
+
+
 clientcreator = protocol.ClientCreator(reactor, ControllerConnectionProtocol)
 
 
@@ -174,7 +177,7 @@ def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, clie
     srunner.pid = "NewSpawnRunner"  # for the kill_run function
 
     deferred = clientcreator.connectTCP(nodecontrollerhost, nodecontrollerport)
-    deferred.addCallback(srunner.gotcontrollerconnectionprotocol)
+    deferred.addCallbacks(srunner.gotcontrollerconnectionprotocol, srunner.controllerconnectionrequestFailure)
 
     return srunner
     

@@ -295,6 +295,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                 self.writejson({'content':"scraper run can only be done through stimulate_run method", 'message_type':'console'}); 
                 return 
 
+            logger.info("about to run code %s" % str(parsed_data)[:100])
             self.runcode(parsed_data)
         
         elif command == "umlcontrol":

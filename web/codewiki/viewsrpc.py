@@ -4,6 +4,9 @@ from django.template.loader import render_to_string
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail, mail_admins
+
+import smtplib
 
 from django.conf import settings
 
@@ -16,6 +19,9 @@ import base64
 import cgi
 import ConfigParser
 import datetime
+
+import logging
+logger = logging
 
 
 try:                import json
@@ -248,15 +254,18 @@ def twistermakesrunevent(request):
     try:
         return Dtwistermakesrunevent(request)
     except Exception, e:
-        print e
-    return HttpResponse("no done")
+        logger.error("twistermakesruneventerror: %s" % (str(e)))
+        mail_admins(subject="twistermakesruneventerror: %s" % (str(e)[:50]), message=(str(e)))
+    return HttpResponse("no done %s" % str(e))
         
 
 def Dtwistermakesrunevent(request):
     if request.POST.get("django_key") != config.get('twister', 'djangokey'):
+        logger.error("twister wrong djangokey")
         return HttpResponse("no access")
     run_id = request.POST.get("run_id")
     if not run_id:
+        logger.error("twisterbad run_id")
         return HttpResponse("bad run_id - %s" % (request.POST,) )
         
     matchingevents = models.ScraperRunEvent.objects.filter(run_id=run_id)
@@ -277,7 +286,6 @@ def Dtwistermakesrunevent(request):
     else:
         event = matchingevents[0]
 
-    
     # standard updates
     event.output = request.POST.get("output")
     event.records_produced = int(request.POST.get("records_produced"))
@@ -295,7 +303,9 @@ def Dtwistermakesrunevent(request):
         event.scraper.update_meta() # enable if views ever have metadata that needs updating each refresh
         event.scraper.save()
 
-        domainscrapes = json.loads(request.POST.get("domainscrapes"))
+        # report the pages that were scraped
+        jdomainscrapes = request.POST.get("domainscrapes")
+        domainscrapes = json.loads(jdomainscrapes)
         for netloc, vals in domainscrapes.items():
             domainscrape = models.DomainScrape(scraper_run_event=event, domain=netloc)
             domainscrape.pages_scraped = vals["pages_scraped"]
@@ -305,15 +315,21 @@ def Dtwistermakesrunevent(request):
     event.save()
 
     # Send email if this is an email scraper
-    emailers = event.scraper.users.filter(usercoderole__role='email')
-    if emailers.count() > 0:
-        subject, message = getemailtext(event)
-        if event.scraper.status == 'ok':
-            if message:  # no email if blank
-                for user in emailers:
-                    send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=True)
-        else:
-            mail_admins(subject="SICK EMAILER: %s" % subject, message=message)
+    if request.POST.get("exitstatus"):
+        emailers = event.scraper.users.filter(usercoderole__role='email')
+        if emailers.count() > 0:
+            subject, message = getemailtext(event)
+            if event.scraper.status == 'ok':
+                if message:  # no email if blank
+                    for user in emailers:
+                        try:
+                            send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=False)
+                        except smtplib.SMTPException, e:
+                            logger.error("emailer failed %s %s" % (str(user), str(e)))
+                            mail_admins(subject="email failed to send: %s" % (str(user)), message=str(e))
+            else:
+                logger.error("emailer failed %s %s" % (str(user), str(e)))
+                mail_admins(subject="SICK EMAILER: %s" % subject, message=message)
 
     return HttpResponse("done")
 

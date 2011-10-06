@@ -27,12 +27,15 @@ import code
 import view
 import urllib2
 
+import logging
+
 try:
     import json
 except:
     import simplejson as json
 
-from django.core.mail import send_mail
+# for now till we establish logging into the django system
+logger = logging
 
 SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every two days'), (3600*24*3, 'every three days'), 
                     (3600*24*7, 'once a week'), (3600*24*14, 'every two weeks'), (3600*24*31, 'once a month'), 
