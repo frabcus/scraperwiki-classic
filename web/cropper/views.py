@@ -7,6 +7,8 @@ import re, os, urlparse, urllib, cStringIO
 import tempfile, shutil
 import Image, ImageDraw, ImageEnhance, ImageChops
 
+import logging
+logger = logging
 
 #There is an API  http://tinyurl.com/api-create.php?url='.$u
 # need a form that submits and makes this possible.  (checking it's for a PDF as well)
@@ -113,10 +115,10 @@ def croppage(request, srcdoc, page, cropping):
             return HttpResponse("Error fetching: %s; %s" % (pdfurl, str(e)))
         if headers.subtype != 'pdf':
             return HttpResponse("%s is not pdf type; it's \"%s\"" % (pdfurl, headers.subtype))
-        print (tpdffile.name, pdffile)
+        #print (tpdffile.name, pdffile)
         shutil.copy(tpdffile.name, pdffile)
     
-    data = { "page":int(page), "srcdoc":srcdoc, "cropping":cropping, "qtail":qtail, "pdfurl":pdfurl }
+    data = { "page":int(page), "srcdoc":srcdoc, "cropping":cropping, "qtail":qtail, "pdfurl":pdfurl, "MAIN_URL":settings.MAIN_URL }
     data.update(pdfinfo(pdffile))
     
     data["losecroppings"] = [ ]
@@ -148,10 +150,15 @@ def cropimg(request, format, srcdoc, page, cropping):
     if (not pdfurl) or (not imgstem):
         return HttpResponse(open(os.path.join(settings.MEDIA_DIR, 'images', '404.png'), "rb").read(), mimetype='image/png')
 
+    if not os.path.isfile(pdffile):
+            # possibly should download it
+        return HttpResponse(open(os.path.join(settings.MEDIA_DIR, 'images', '404.png'), "rb").read(), mimetype='image/png')
+
     imgfile = "%s_%04d.png" % (imgstem, page)
     imgpixwidth = 800
+    
     if not os.path.isfile(imgfile):
-        cmd = 'convert -quiet -density 192 "%s[%d]" -resize %d "%s" > /dev/null 2>&1' % (pdffile, page-1, imgpixwidth, imgfile)
+        cmd = 'convert -quiet -density 192 "%s[%d]" -resize %d -define png:color-type=2 "%s" > /dev/null 2>&1' % (pdffile, page-1, imgpixwidth, imgfile)
         os.system(cmd)
 
     croppings = filter(lambda x:x, cropping.split("/"))
@@ -162,16 +169,20 @@ def cropimg(request, format, srcdoc, page, cropping):
             if not os.path.isfile(jpgimgfile):
                 cmd = 'convert -quiet -density 192 "%s[%d]" -resize %d "%s" > /dev/null 2>&1' % (pdffile, page-1, imgpixwidth, jpgimgfile)
                 os.system(cmd)
-            print "\n\njpg/png sizes", os.path.getsize(jpgimgfile), os.path.getsize(imgfile)
+            #print "\n\njpg/png sizes", os.path.getsize(jpgimgfile), os.path.getsize(imgfile)
             if os.path.getsize(jpgimgfile) < os.path.getsize(imgfile) / pngfilesizejpgfactor:
                 return HttpResponse(open(jpgimgfile, "rb").read(), mimetype='image/jpeg')
         return HttpResponse(open(imgfile, "rb").read(), mimetype='image/png')
 
 
-    # here on is executed only if there is a cropping to be applied
-    pfp = Image.open(imgfile)
-    swid, shig = pfp.getbbox()[2:]
+    # png images began causing problems by loading in mode="I" instead of mode="RGB"
+    # fixed with the -define png:color-type=2 setting above
 
+    # here on is executed only if there is a cropping to be applied
+    pfp = Image.open(imgfile)    
+    #pfp = Image.open(jpgimgfile)
+    swid, shig = pfp.getbbox()[2:]
+    
     highlightrects = [ ]
     clip = None
     for crop in croppings:
@@ -188,6 +199,7 @@ def cropimg(request, format, srcdoc, page, cropping):
     # then plots white rectangle over it, which when ImageChops.darker() is applied 
     # between the two favours the lighter original in instead of the white rectangles
     if highlightrects:
+        # print pfp.mode  must not be I
         dpfp = ImageEnhance.Brightness(pfp).enhance(dkpercent / 100.0)
         ddpfp = ImageDraw.Draw(dpfp)
         for rect in highlightrects:
@@ -222,6 +234,7 @@ def cropimg(request, format, srcdoc, page, cropping):
                 imgout = jpgimgout
                 imgmimetype = 'image/jpeg'
         except IOError, e:
+            logging.warning(str(e.args))
             assert e.args[0] == 'encoder jpeg not available', e.args
 
     imgout.reset()

@@ -42,6 +42,8 @@ SCRAPERWIKI_DIR     = HOME_DIR + '/web/'      # top level directory of the insta
 
 SCRAPERWIKI_DIR     = os.path.dirname(os.path.realpath(__file__)) # top level directory of the installation
 HOME_DIR            = os.path.dirname(SCRAPERWIKI_DIR) # the parent directory of SCRAPERWIKI_DIR
+CROPPER_SOURCE_DIR  = HOME_DIR + '/croppercache/source/'          # directory of cached PDF files
+CROPPER_IMG_DIR     = HOME_DIR + '/croppercache/img/'             # directory of rendered and cropped pdfs
 
 SPLITSCRAPERS_DIR   = HOME_DIR + '/splitscrapers/'
 
