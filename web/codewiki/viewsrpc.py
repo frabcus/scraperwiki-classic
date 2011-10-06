@@ -316,21 +316,29 @@ def Dtwistermakesrunevent(request):
 
     # Send email if this is an email scraper
     if request.POST.get("exitstatus"):
+        logger.info('Checking if this is an email scraper')
         emailers = event.scraper.users.filter(usercoderole__role='email')
+        logger.info('There are %d email users' % emailers.count())        
         if emailers.count() > 0:
             subject, message = getemailtext(event)
+            logger.info("Retrieved subject %s and message %s" % (subject,message,))                    
             if event.scraper.status == 'ok':
+                logger.info("Status OK")                    
                 if message:  # no email if blank
+                    logger.info("Have message")                                    
                     for user in emailers:
                         try:
                             send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=False)
                         except smtplib.SMTPException, e:
                             logger.error("emailer failed %s %s" % (str(user), str(e)))
                             mail_admins(subject="email failed to send: %s" % (str(user)), message=str(e))
+                else:
+                    logger.info("No message")                                        
             else:
                 logger.error("emailer failed %s %s" % (str(user), str(e)))
                 mail_admins(subject="SICK EMAILER: %s" % subject, message=message)
-
+    else:
+        logger.info('Not a mail scraper ...')        
     return HttpResponse("done")
 
 
