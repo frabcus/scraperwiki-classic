@@ -34,7 +34,8 @@ class SW_DataStoreClass
       if (is_null($this->m_socket))
       {
             $this->m_socket    = socket_create (AF_INET, SOCK_STREAM, SOL_TCP) ;
-            socket_connect     ($this->m_socket, $this->m_host, $this->m_port) ;
+            if (socket_connect     ($this->m_socket, $this->m_host, $this->m_port) === FALSE)
+                throw new Exception("Could not socket_connect to datastore");
             socket_getsockname ($this->m_socket, $addr, $port) ;
             //print "socket_getsockname " . $addr . ":" . $port . "\n";
             $getmsg = sprintf  ("GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n", 'lxc', $port, urlencode($this->m_scrapername), urlencode($this->m_runid)) ;
