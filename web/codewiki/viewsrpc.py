@@ -335,7 +335,6 @@ def Dtwistermakesrunevent(request):
                 else:
                     logger.info("No message")                                        
             else:
-                logger.error("emailer failed %s %s" % (str(user), str(e)))
                 mail_admins(subject="SICK EMAILER: %s" % subject, message=message)
     else:
         logger.info('Not a mail scraper ...')        
