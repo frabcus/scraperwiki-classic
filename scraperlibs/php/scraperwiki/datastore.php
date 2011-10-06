@@ -39,7 +39,7 @@ class SW_DataStoreClass
             socket_getsockname ($this->m_socket, $addr, $port) ;
             //print "socket_getsockname " . $addr . ":" . $port . "\n";
             $getmsg = sprintf  ("GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n", 'lxc', $port, urlencode($this->m_scrapername), urlencode($this->m_runid)) ;
-            socket_send        ($this->m_socket, $getmsg, strlen($getmsg), MSG_EOR) ;
+            socket_write        ($this->m_socket, $getmsg);
 
             socket_recv        ($this->m_socket, $buffer, 0xffff, 0) ;
             $result = json_decode($buffer, true);
@@ -144,7 +144,7 @@ class SW_DataStoreClass
 
       $this->connect () ;
       $reqmsg  = json_encode ($req) . "\n" ;
-      socket_send ($this->m_socket, $reqmsg, strlen($reqmsg), MSG_EOR) ;
+      socket_write ($this->m_socket, $reqmsg);
 
       $text = '' ;
       while (true)
@@ -168,7 +168,7 @@ class SW_DataStoreClass
 
    function close ()
    {
-      socket_send  ($this->m_socket, ".\n", 2, MSG_EOR) ;
+      socket_write  ($this->m_socket, ".\n");
       socket_close ($this->m_socket) ;
       $this->m_socket = undef ;
    }
