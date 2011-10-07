@@ -97,9 +97,12 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
             if type(value) == datetime.date:
                 value = value.isoformat()
             elif type(value) == datetime.datetime:
-                value = value.astimezone(pytz.timezone('UTC')).isoformat()
-                assert "+00:00" in value
-                value = value.replace("+00:00", "")
+                if value.tzinfo is None:
+                    value = value.isoformat()
+                else:
+                    value = value.astimezone(pytz.timezone('UTC')).isoformat()
+                    assert "+00:00" in value
+                    value = value.replace("+00:00", "")
             elif value == None:
                 pass
             elif isinstance(value, SqliteError):
