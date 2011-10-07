@@ -161,8 +161,13 @@ module ScraperWiki
                 return { "error"=>'key must be simple text', "bad_key"=> key }
             end
 
-            if value.kind_of?(Date) || value.kind_of?(Time)
+            if value.kind_of?(Date) 
                 value = value.iso8601
+            end
+            if value.kind_of?(Time)
+                value = value.iso8601
+                raise "internal error, timezone came out as non-UTC while converting to SQLite format" unless value.match(/\+00:00$/)
+                value.gsub!(/\+00:00$/, '')
             end
             if ![Fixnum, Float, String, TrueClass, FalseClass, NilClass].include?(value.class)
                 value = value.to_s
