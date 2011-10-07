@@ -596,11 +596,7 @@ def choose_template(request, wiki_type):
     else:
         tpl = 'codewiki/includes/choose_template.html'
         
-    # Either use the old UML version numbers or the new ones for beta users
-    # TODO: Remove UMLCODE 
-    vers =  models.code.OLD_SCRAPER_LANGUAGES_V    
-    if request.user.is_authenticated() and request.user.get_profile().beta_user:
-        vers =  models.code.SCRAPER_LANGUAGES_V        
+    vers =  models.code.SCRAPER_LANGUAGES_V        
 
     # Scraper or View?
     if wiki_type == "scraper":    

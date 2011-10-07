@@ -35,8 +35,8 @@
                 $('#pdfpageid').Jcrop( { onSelect: setCrop, onChange: setCrop, keySupport: false } ); 
             }); 
 
-            var imglink = "https://scraperwiki.com{% url cropimg 'png' srcdoc page cropping %}{{qtail}}"; 
-            var linkedimg = '<a title="PDF excerpt" href="https://scraperwiki.com/{% url croppage srcdoc page cropping %}{{qtail}}"><img src="'+imglink+'"></a>'; 
+            var imglink = "{{MAIN_URL}}{% url cropimg 'png' srcdoc page cropping %}{{qtail}}"; 
+            var linkedimg = '<a title="PDF excerpt" href="{{MAIN_URL}}{% url croppage srcdoc page cropping %}{{qtail}}"><img src="'+imglink+'"></a>'; 
             $('#imglink').attr("href", imglink); 
             $('p#share_links input').attr('value', linkedimg); 
 

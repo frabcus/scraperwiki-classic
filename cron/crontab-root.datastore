@@ -1,9 +1,0 @@
-MAILTO=cron@scraperwiki.com
-SHELL=/bin/bash
-
-# m h  dom mon dow   command
-0 3 * * * tar zcfP /root/backup/scraperwiki.tar.gz /var/www/scraperwiki --exclude "/var/www/scraperwiki/resourcedir"
-0 3 * * * tar zcfP /root/backup/etc.tar.gz /etc
-0 3 * * * dir=$(mktemp -d) && for s in $(ls /var/www/scraperwiki/resourcedir); do sqlite3 /var/www/scraperwiki/resourcedir/$s/defaultdb.sqlite .dump | gzip > $dir/$s.sql.gz; done && tar zcfP /root/backup/sqlite.tar.gz $dir && rm -rf $dir
-0 5 * * * rsync -qazr /root/backup datastore.backup.bytemark.co.uk::datastore/
-0 23 * * * rsync -qazr -e 'ssh -i /root/backup-key.rsa' /root/backup/ swbackup@kippax.scraperwiki.com:/home/swbackup/burbage/ -b --suffix=.`date +\%A | tr '[A-Z]' '[a-z]'`

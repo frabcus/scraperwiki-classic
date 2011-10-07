@@ -166,7 +166,7 @@
                         <li><a href="/admin/">Django admin</a></li>
                       {% endif %}
                   {% endif %}
-                  <li><a href="{% url running_scrapers %}" title="Interact with current sandbox status">UML status</a></li>
+                  <li><a href="{% url running_scrapers %}" title="Interact with current sandbox status">LXC status</a></li>
                   <li><a href="/munin/" title="Server usage monitoring">Munin</a></li>
                   <li><a href="{% url kpi %}" title="Key performance indicators">KPIs</a></li>
               </ul>
@@ -194,7 +194,7 @@
 		<div id="footer_inner">
 			{% block footer %}
             {% load site_stats %}
-			<p class="stats">has gathered <strong>{% num_data_rows %} rows of data</strong> and counting&hellip;</p>
+            <!-- <p class="stats">has gathered <strong>{% num_data_rows %} rows of data</strong> and counting&hellip;</p>-->
 			<dl>
 				<dt>About</dt>
 				<dd>

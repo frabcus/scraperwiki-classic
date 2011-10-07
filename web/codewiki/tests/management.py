@@ -1,14 +1,13 @@
 import unittest
 import datetime
 from codewiki.models import Scraper
-from codewiki.management.commands.run_scrapers import Command
+from codewiki.util import get_overdue_scrapers
 
 class TestRunScrapers(unittest.TestCase):
     def setUp(self):
         # Remove any Scrapers created by a fixture
         [x.delete() for x in Scraper.objects.all()]
-        command = Command()
-        self.scrapers = command.get_overdue_scrapers()
+        self.scrapers = get_overdue_scrapers()
 
     def testNeverRun(self):
         # Published scrapers that have never been run should
