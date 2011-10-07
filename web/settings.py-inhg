@@ -80,8 +80,6 @@ USE_DUMMY_VIEWS = False # use a dummy when running views in iframes
 
 SCREENSHOT_DIR = '/tmp/'
 
-UMLURLS = [ ]  # no umls for local installs
-
 if DEBUG:
     TEMPLATE_CONTEXT_PROCESSORS += (
         'frontend.context_processors.sqldebug',

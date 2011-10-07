@@ -49,7 +49,6 @@ def running_scrapers(request):
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
     
     context = { 'statusscrapers': None, 'events':recentevents, 'eventsmax':recenteventsmax }
-#    context['activeumls'] = GetUMLstatuses()
 
     c = Command()
     context['overdue_count'] = c.get_overdue_scrapers().count()
