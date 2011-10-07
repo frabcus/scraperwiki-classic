@@ -11,7 +11,6 @@ from django.contrib.auth.decorators import login_required
 
 from codewiki import models
 import runsockettotwister
-from codewiki.management.commands.run_scrapers import GetDispatcherStatus
 import frontend
 
 import vc

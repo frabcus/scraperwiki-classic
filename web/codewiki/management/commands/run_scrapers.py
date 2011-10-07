@@ -55,33 +55,6 @@ def GetDispatcherStatus():
     return result
 
 
-def GetUMLstatuses():
-    result = { }
-    for umlurl in settings.UMLURLS:
-        umlname = "uml0"+umlurl[-2:] # make its name
-        try:
-            stat, ereason = urllib2.urlopen(umlurl + "/Status", timeout=2).read(), None
-        except urllib2.URLError, e:
-            stat, ereason = None, e.reason
-        except TypeError:
-            stat, ereason = urllib2.urlopen(umlurl + "/Status").read(), None  # no timeout field exists in Python2.5
-        except:
-            stat,ereason = None, 'Bad connection'
-            
-        if stat:
-            result[umlname] = { "runidnames":re.findall("runID=(.*?)&scrapername=(.*)\n", stat) }
-        else:
-            result[umlname] = { "error":ereason }
-            
-        
-    # fake data
-    #if not settings.UMLURLS:
-    #    result["uml001"] = { "runids":["zzzz.xxx_1", "zzzz.xxx_2"] }
-    #    result["uml002"] = { "error":"bugger bogner" }
-
-    return result
-
-
 def is_currently_running(scraper):
     return urllib2.urlopen(settings.DISPATCHERURL + '/Status').read().find(scraper.guid) > 0    
 

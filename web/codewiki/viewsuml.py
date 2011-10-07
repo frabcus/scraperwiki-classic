@@ -18,7 +18,7 @@ import time
 import os
 import signal
 
-from codewiki.management.commands.run_scrapers import GetDispatcherStatus, GetUMLstatuses, kill_running_runid
+from codewiki.management.commands.run_scrapers import kill_running_runid
 from viewsrpc import testactiveumls  # not to use
 
 
@@ -48,23 +48,8 @@ def running_scrapers(request):
     recenteventsmax = 20
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
     
-    statusscrapers = GetDispatcherStatus()
-    if statusscrapers:
-        for status in statusscrapers:
-            if status['scraperID']:
-                scrapers = Code.objects.filter(guid=status['scraperID'])
-                if scrapers:
-                    status['scraper'] = scrapers[0]
-        
-            scraperrunevents = ScraperRunEvent.objects.filter(run_id=status['runID'])
-            status['killable'] = request.user.is_staff
-            if scraperrunevents:
-                status['scraperrunevent'] = scraperrunevents[0]
-                if status['scraper'].owner() == request.user:
-                    status['killable'] = True
-
-    context = { 'statusscrapers': statusscrapers, 'events':recentevents, 'eventsmax':recenteventsmax }
-    context['activeumls'] = GetUMLstatuses()
+    context = { 'statusscrapers': None, 'events':recentevents, 'eventsmax':recenteventsmax }
+#    context['activeumls'] = GetUMLstatuses()
 
     c = Command()
     context['overdue_count'] = c.get_overdue_scrapers().count()
