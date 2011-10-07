@@ -5,13 +5,9 @@ import sys
 import os.path
 
 # TODO:
-# Cron jobs are a mess:
-#    env.cron_version = "dev"
-#    env.cron_version = "www"
-#    env.cron_version = "umls"
-# Restart things for firebox etc, if specified
+# Restart things for firebox, webstore if specified (and indeed twister for webserver)
 # Full deploy that restarts everything too
-# Pull puppet on kippax, then do everything else
+# Pull puppet on kippax, then pull elsewhere in one command
 # Run Django tests automatically - on local or on dev?
 # Run Selenium tests - on local or on dev?
 # Merge code from default into stable for you (on dev)
@@ -80,6 +76,10 @@ def run_in_virtualenv(command):
     return run(temp + env.activate + '&&' + command)
 
 def run_buildout():
+    with cd(env.path):
+        run('[ -f "bin/activate" ] || virtualenv --no-site-packages .')
+        run_in_virtualenv('[ -f "bin/buildout" || pip install zc.buildout')
+
     run_in_virtualenv('buildout -N -qq')
 
 def django_db_migrate():
@@ -89,10 +89,6 @@ def django_db_migrate():
 def update_js_cache_revision():
     # Put the current HG revision in a file so that Django can use it to avoid caching JS files
     run_in_virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
-
-def install_cron():
-    run('crontab %(path)s/cron/crontab.%(cron_version)s' % env)
-    sudo('crontab %(path)s/cron/crontab-root.%(cron_version)s' % env)
 
 def _update_cron_if_exists(local_file):
     run('[ -e %s ] && sudo cp %s /etc/cron.d/ || echo -n'  % (local_file, local_file), shell=True)
@@ -111,19 +107,14 @@ def deploy_done():
         return
 
     message = """From: ScraperWiki <developers@scraperwiki.com>
-Subject: New Scraperwiki Deployment to %(cron_version)s (deployed by %(user)s)
+Subject: New Scraperwiki Deployment of '%(task)s' to flock '%(flock)s' (deployed by %(name)s)
 
-%(user)s deployed
+%(name)s deployed
 
 Old revision: %(old_revision)s
 New revision: %(new_revision)s
 
-""" % {
-        'cron_version' : env.cron_version,
-        'user' : env.name,
-        'old_revision': env.old_revision,
-        'new_revision': env.new_revision,
-        }
+""" % env
     sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
 
 def code_pull():
@@ -162,7 +153,7 @@ buildout=no, stops it updating buildout which can be slow'''
 
 @task
 @roles('webstore')
-def webstore(buildout='yes'):
+def webstore(buildout='no'): # default to no until ready
     '''Deploys webstore SQL database. XXX currently doesn't restart any daemons.
 
 buildout=no, stops it updating buildout which can be slow'''
@@ -222,10 +213,6 @@ def setup():
     sudo('chown -R %(fab_user)s %(path)s' % env)
     sudo('cd %(path)s; easy_install virtualenv' % env)
     run('hg clone %(web_path)s %(path)s' % env, fail='ignore')
-    run('cd %(path)s; virtualenv --no-site-packages .' % env)
-    run_in_virtualenv('easy_install pip')
-
-    deploy()
 '''
 
 '''

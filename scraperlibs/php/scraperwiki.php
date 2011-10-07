@@ -72,7 +72,11 @@ class scraperwiki
       foreach ($data as &$row) {
           foreach ($row as $key => &$value) {
                 if ($value instanceof DateTime) {
-                    $value = $value->format(DATE_ISO8601);
+                    $new_value = clone $value;
+                    $new_value->setTimezone(new DateTimeZone('UTC'));
+                    $value = $new_value->format(DATE_ISO8601);
+                    assert(strpos($value, "+0000") !== FALSE);
+                    $value = str_replace("+0000", "", $value);
                 }
           }
     }
