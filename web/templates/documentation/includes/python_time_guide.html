@@ -58,6 +58,8 @@ data = {
 scraperwiki.sqlite.save(unique_keys=['name'], data=data)
 </code>
 
+<p>Times are saved as UTC, as SQLite doesn't parse explicit timezones.</p>
+
 <h2>Querying dates</h2>
 
 <p>From the Web API for a scraper, you can do queries based on dates.
