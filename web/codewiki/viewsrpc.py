@@ -30,37 +30,6 @@ except ImportError: import simplejson as json
 config = ConfigParser.ConfigParser()
 config.readfp(open(settings.CONFIGFILE))
 
-def MakeRunner(request, scraper, code):
-    runner_path = "%s/runner.py" % settings.FIREBOX_PATH
-    failed = False
-
-    urlquerystring = request.META["QUERY_STRING"]
-    
-    # append post values to the query string (so we can consume them experimentally)
-    # we could also be passing in the sets of scraper environment variables in this way too
-    # though maybe we need a generalized version of the --urlquery= that sets an environment variables explicitly
-    # the bottleneck appears to be the runner.py command line instantiation
-    # (POST is a django.http.QueryDict which destroys information about the order of the incoming parameters) 
-    if list(request.POST):
-        qsl = cgi.parse_qsl(urlquerystring)
-        qsl.extend(request.POST.items())
-        urlquerystring = urllib.urlencode(qsl)
-        print "sending in new querystring:", urlquerystring
-    
-    
-    args = [ runner_path.encode('utf8') ]
-    args.append('--guid=%s' % scraper.guid.encode('utf8'))
-    args.append('--language=%s' % scraper.language.lower().encode('utf8'))
-    args.append('--name=%s' % scraper.short_name.encode('utf8'))
-    args.append('--cpulimit=80')
-    args.append('--urlquery=%s' % urlquerystring.encode('utf8'))
-    
-    runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    runner.stdin.write(code.encode('utf8'))
-    
-    runner.stdin.close()
-    return runner
-
 
 
 def scraperwikitag(scraper, html, panepresent):
@@ -141,12 +110,8 @@ def rpcexecute(request, short_name, revision=None):
         revision = -1
     
     # run it the socket method for staff members who can handle being broken
-#    if request.user.is_staff:
     runnerstream = runsockettotwister.RunnerSocket()
     runnerstream.runview(request.user, scraper, revision, request.META["QUERY_STRING"])
-#    else:
-#        runner = MakeRunner(request, scraper, code)
-#        runnerstream = runner.stdout
 
     # we build the response on the fly in case we get a contentheader value before anything happens
     response = None 

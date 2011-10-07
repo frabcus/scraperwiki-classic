@@ -62,9 +62,6 @@ SESSION_TIMEOUT = 1209600
 
 QUICKCACHE_DIR      = HOME_DIR + '/quickcache/'   # leave blank to disable caching
 
-FIREBOX_PATH = '/var/www/scraperwiki/uml/firestarter/'
-sys.path.append(FIREBOX_PATH)
-
 EMAIL_FROM = 'noreply@localhost'
 
 ORBITED_URL = 'http://localhost:8001'
