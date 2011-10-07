@@ -191,8 +191,8 @@ def firebox():
 
 @task
 def merge_to_stable():
-    '''In your local copy, merges changes from default branch to stable in mercurial,
-in preparation for a deploy. Make sure you commit everything first.'''
+    '''In your local copy, merges changes from default branch to stable in Mercurial,
+in preparation for a deploy. Pushes to server. Make sure you commit everything first.'''
 
     # grab anything remote
     local('hg update default')
@@ -200,13 +200,14 @@ in preparation for a deploy. Make sure you commit everything first.'''
     local('hg push')
 
     # just in case someone committed stuff to stable, merge that to dev
-    local('hg merge stable')
-    local('hg commit -m "Merge from stable to dev via fab" || echo "merge failed"')
+    local('hg merge stable || echo "merge failed"')
+    local('hg commit -m "Merge from stable to dev via fab"')
 
     # merge everything to stable
     local('hg update stable')
-    local('hg merge default')
-    local('hg commit -m "Merge to stable via fab" || echo "merge failed"')
+    local('hg merge default || echo "merge failed"')
+    local('hg commit -m "Merge to stable via fab"')
+    local('hg push')
 
     # done, working in default again
     local('hg update default')
