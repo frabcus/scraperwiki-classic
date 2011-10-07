@@ -4,18 +4,16 @@ import getpass
 import sys
 
 # TODO:
-# Cron:
+# Cron jobs are a mess:
 #    env.cron_version = "dev"
 #    env.cron_version = "www"
 #    env.cron_version = "umls"
-
+# Restart things for firebox etc.
 # Full deploy that restarts everything too
-# Cron jobs are a mess
 # Pull puppet on kippax, then do everything else
-# Use "local" to run Django tests automatically
-# Use "local" to run Selenium tests.
-# Use "local" to merge code from default into stable for you
-
+# Run Django tests automatically - on local or on dev?
+# Run Selenium tests - on local or on dev?
+# Merge code from default into stable for you (on dev)
 
 # Example use:
 # fab dev webserver
@@ -199,22 +197,6 @@ def setup():
 def run_puppet():
     sudo("puppetd --no-daemonize --onetime --debug")        
     
-@task
-def deploy():
-    code_pull()
-    
-    if env.buildout:
-        buildout()
-                
-    install_cron()
-
-    if env.email_deploy:
-        email(old_revision, new_revision)
-
-    print "Deploy successful"
-    print "Old revision = %s" % old_revision
-    print "New revision = %s" % new_revision
-
 @task
 def test():
     if env.host != "dev.scraperwiki.com":
