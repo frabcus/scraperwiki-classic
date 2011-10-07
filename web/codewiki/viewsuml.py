@@ -18,7 +18,7 @@ import time
 import os
 import signal
 
-from codewiki.util import kill_running_runid
+from codewiki.util import kill_running_runid, get_overdue_scrapers
 from viewsrpc import testactiveumls  # not to use
 
 

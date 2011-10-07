@@ -5,7 +5,10 @@ import re
 # Probably early code that could entirely evapourate with some aggressive refactoring
 # Quick alteration from scavenged slugify function to use underscores instead of dashes
 
-def get_overdue_scrapers(self):
+def kill_running_runid(run_id):
+    pass
+
+def get_overdue_scrapers():
     """
     Obtains a queryset of scrapers that should have already been run, we 
     will order these with the ones that have run least recently hopefully
