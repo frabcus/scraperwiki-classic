@@ -85,9 +85,7 @@ def django_db_migrate():
     run_in_virtualenv('cd web; python manage.py migrate --verbosity=0')
 
 def update_js_cache_revision():
-    """
-    Put the current HG revision in a file so that Django can use it to avoid caching JS files
-    """
+    # Put the current HG revision in a file so that Django can use it to avoid caching JS files
     run_in_virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def install_cron():
@@ -95,7 +93,6 @@ def install_cron():
     sudo('crontab %(path)s/cron/crontab-root.%(cron_version)s' % env)
 
 def restart_webserver():
-    "Restart the web server"
     sudo('apache2ctl graceful')
 
 def deploy_done():
@@ -203,5 +200,4 @@ def test():
         print "Testing can only be done on the dev machine"
     else:
         run_in_virtualenv('cd web; python manage.py test')
-
 '''

@@ -3,11 +3,5 @@ SHELL=/bin/bash
 
 # m h  dom mon dow   command
 
-# Remove dummy users, scrapers etc. that the Selenium test script can make
-0 0 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py clear_selenium_byproducts
-
-# Every morning update KPIs
-0 4 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_kpis
-
 # Every minute, get new screenshots of scrapers from screenshot server
 * * * * * rsync -qazr -e "ssh -i /home/scraperdeploy/screenshooter-key.rsa" screenshooter@kippax.scraperwiki.com:/home/screenshooter/screenshots/ /var/www/scraperwiki/web/media/screenshots/
