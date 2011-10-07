@@ -5,13 +5,9 @@ import sys
 import os.path
 
 # TODO:
-# Cron jobs are a mess:
-#    env.cron_version = "dev"
-#    env.cron_version = "www"
-#    env.cron_version = "umls"
-# Restart things for firebox etc, if specified
+# Restart things for firebox, webstore if specified (and indeed twister for webserver)
 # Full deploy that restarts everything too
-# Pull puppet on kippax, then do everything else
+# Pull puppet on kippax, then pull elsewhere in one command
 # Run Django tests automatically - on local or on dev?
 # Run Selenium tests - on local or on dev?
 # Merge code from default into stable for you (on dev)
@@ -157,7 +153,7 @@ buildout=no, stops it updating buildout which can be slow'''
 
 @task
 @roles('webstore')
-def webstore(buildout='yes'):
+def webstore(buildout='no'): # default to no until ready
     '''Deploys webstore SQL database. XXX currently doesn't restart any daemons.
 
 buildout=no, stops it updating buildout which can be slow'''
@@ -217,10 +213,6 @@ def setup():
     sudo('chown -R %(fab_user)s %(path)s' % env)
     sudo('cd %(path)s; easy_install virtualenv' % env)
     run('hg clone %(web_path)s %(path)s' % env, fail='ignore')
-
-    run_in_virtualenv('easy_install pip')
-
-    deploy()
 '''
 
 '''
