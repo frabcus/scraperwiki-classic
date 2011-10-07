@@ -220,34 +220,6 @@ def rpcexecute(request, short_name, revision=None):
         response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-2"/>', panepresent))
     return response
             
-
-# liable to hang if UMLs not operative
-def testactiveumls(n):
-    result = [ ]
-    code = "from subprocess import Popen, PIPE\nprint Popen(['hostname'], stdout=PIPE).communicate()[0]"
-    
-    runner_path = "%s/runner.py" % settings.FIREBOX_PATH
-    args = [runner_path, '--language=python', '--cpulimit=80']
-    
-    for i in range(n):
-        runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        runner.stdin.write(code)
-        runner.stdin.close()
-        
-        lns = [ ]
-        for line in runner.stdout:
-            message = json.loads(line)
-            if message['message_type'] == "console":
-                if message.get('message_sub_type') != 'consolestatus':
-                    lns.append(message['content'].strip())
-            elif message['message_type'] == "executionstatus":
-                pass
-            else:
-                lns.append(line)
-        result.append('\n'.join(lns))
-    return result
-
-
 # this form is protected by the django key known to twister, so does not need to be obstructed by the csrf machinery
 @csrf_exempt
 def twistermakesrunevent(request):

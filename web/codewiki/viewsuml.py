@@ -19,13 +19,11 @@ import os
 import signal
 
 from codewiki.util import kill_running_runid, get_overdue_scrapers
-from viewsrpc import testactiveumls  # not to use
-
 
 # Redirects to history page now, with # link to right place.
 # NB: It only accepts the run_id hashes (NOT the Django id) so people can't
 # run through every value and get the URL names of each scraper. It is
-# for use in hyperlinks from the UML status page where only the run id is known.
+# for use in hyperlinks from the  status page where only the run id is known.
 # Hyperlinks within scraper pages should use the Django id of the run and link
 # to the # link in the history page.
 def run_event(request, run_id):

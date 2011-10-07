@@ -74,8 +74,6 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created and sender == User:
         try:
             profile = UserProfile(user=instance)
-            # TODO: UML
-            profile.beta_user = True
             profile.save()
         except:
             # syncdb is saving the superuser
