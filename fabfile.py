@@ -145,9 +145,6 @@ kicks webserver so it starts using new code.
 
 buildout=no, stops it updating buildout which can be slow'''
 
-    update_crons()
-    sys.exit()
-
     if buildout not in ['yes','no']:
         raise Exception("buildout must be yes or no")
 
