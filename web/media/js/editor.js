@@ -973,7 +973,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
               
 
-    function startingrun(lrunID, luml, lchatname) 
+    function startingrun(lrunID, llxc, lchatname) 
     {
         //show the output area
         resizeControls('up');
@@ -982,11 +982,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         $('#running_annimation').show();
         runID = lrunID; 
-        uml = luml; 
+        lxc = llxc; 
 
         //clear the tabs
         clearOutput();
-        writeToConsole('Starting run ... ' + (isstaff ? " [on "+uml+"]" : "")); 
+        writeToConsole('Starting run ... ' + (isstaff ? " [on "+lxc+"]" : "")); 
         writeToChat('<i>' + lchatname + ' runs scraper</i>'); 
 
         //unbind run button

@@ -49,6 +49,7 @@ def running_scrapers(request):
 
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
 
+
 def scraper_killrunning(request, run_id, event_id):
     event = None
     if event_id or not request.user.is_staff:
