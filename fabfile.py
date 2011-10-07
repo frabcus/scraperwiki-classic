@@ -195,22 +195,22 @@ def merge_to_stable():
 in preparation for a deploy. Pushes to server. Make sure you commit everything first.'''
 
     # grab anything remote
-    local('hg update default')
-    local('hg pull --rebase') # configure the rebase extension in your ~/.hgrc
-    local('hg push')
+    local('hg --quiet update default')
+    local('hg --quiet pull --rebase') # configure the rebase extension in your ~/.hgrc
+    local('hg --quiet push')
 
     # just in case someone committed stuff to stable, merge that to dev
-    local('hg merge stable || echo "merge failed"')
-    local('hg commit -m "Merge from stable to dev via fab" || echo "no commit needed"')
+    local('hg --quiet merge stable || echo "merge failed"')
+    local('hg --quiet commit -m "Merge from stable to dev via fab" || echo "no commit needed"')
 
     # merge everything to stable
-    local('hg update stable')
-    local('hg merge default || echo "merge failed"')
-    local('hg commit -m "Merge to stable via fab" || echo "no commit needed"')
-    local('hg push')
+    local('hg --quiet update stable')
+    local('hg --quiet merge default || echo "merge failed"')
+    local('hg --quiet commit -m "Merge to stable via fab" || echo "no commit needed"')
+    local('hg --quiet push')
 
     # done, working in default again
-    local('hg update default')
+    local('hg --quiet update default')
 
 '''
 @task
