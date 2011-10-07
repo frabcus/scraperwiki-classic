@@ -192,7 +192,7 @@ def twistermakesrunevent(request):
         return Dtwistermakesrunevent(request)
     except Exception, e:
         logger.error("twistermakesruneventerror: %s" % (str(e)))
-        mail_admins(subject="twistermakesruneventerror: %s" % (str(e)[:50]), message=(str(e)))
+        mail_admins(subject="twistermakesruneventerror: %s" % (str(e)[:30]), message=(str(e)))
     return HttpResponse("no done %s" % str(e))
         
 
@@ -204,7 +204,7 @@ def Dtwistermakesrunevent(request):
     if not run_id:
         logger.error("twisterbad run_id")
         return HttpResponse("bad run_id - %s" % (request.POST,) )
-        
+
     matchingevents = models.ScraperRunEvent.objects.filter(run_id=run_id)
     if not matchingevents:
         event = models.ScraperRunEvent()
@@ -240,6 +240,10 @@ def Dtwistermakesrunevent(request):
         event.scraper.update_meta() # enable if views ever have metadata that needs updating each refresh
         event.scraper.save()
 
+    event.save()
+
+    # Event needs to be saved first as it is used in the following DomainScraper
+    if request.POST.get("exitstatus"):
         # report the pages that were scraped
         jdomainscrapes = request.POST.get("domainscrapes")
         domainscrapes = json.loads(jdomainscrapes)
@@ -249,7 +253,6 @@ def Dtwistermakesrunevent(request):
             domainscrape.bytes_scraped = vals["bytes_scraped"]
             domainscrape.save()
 
-    event.save()
 
     # Send email if this is an email scraper
     if request.POST.get("exitstatus"):
