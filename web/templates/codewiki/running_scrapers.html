@@ -1,6 +1,6 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}UML status{% endblock %}
+{% block title %}Status{% endblock %}
 
 {% block css %}
 
@@ -444,8 +444,8 @@ $(document).ready(function()
 
 
 {% block header %}
-<h2>UML status</h2>
-<p>What's going on in twister, the UMLs and related places</p>
+<h2>Status</h2>
+<p>What's going on in twister, the LXCs and related places</p>
 {% endblock %}
 
 {% block content_outer  %}
@@ -488,9 +488,9 @@ $(document).ready(function()
 <p>Number of overdue scrapers: <b>{{overdue_count}}</b></p>
 
 
-<h2 id="umlstatus">UML status <small>(reload page to update)</small> <a href="#umlstatus">#</a></h2>
+<h2 id="umlstatus">Status <small>(reload page to update)</small> <a href="#umlstatus">#</a></h2>
 
-<h3>Current runs (from each UML controller)</h3>
+<h3>Current runs (from each controller)</h3>
 <table class="data">
 {% for umlname, umlstatus in activeumls.items %}
   <tr><th>{{umlname}}</th>
@@ -510,7 +510,7 @@ $(document).ready(function()
 </table>
 
 
-<h3>Current runs (from dispatcher)</h3>
+<h3>Current runs</h3>
 <table class="data">
 <tr><th>UML</th><th>Scraper</th><th>Time</th><th>Kill button</th><th>Run id</th></tr>
 {% for status in statusscrapers %}

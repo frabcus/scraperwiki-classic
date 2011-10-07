@@ -53,20 +53,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     rbufsize       = 0
 
     def ident(self, params):
-        uml = params.get('uml')
+        vm_ctr = params.get('uml')
         port = params.get('port')
         
         runID      = None
         short_name = ''
 
-        # we will set host to either host of the uml or (if we have lxc_server set)
-        # to the LXC server.
-        try:
-            # This may be the VM name being passed through as part of the ident
-            uml_host  = config.get(uml, 'host')                    
-        except:
-            uml_host = None            
-        
         host = None
         add = None
         try:
@@ -75,20 +67,17 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except:
             host = None
 
-        self.logger.debug(str({"uml":uml, "uml_host":uml_host, "host":host}))
+        self.logger.debug(str({"uml":vm_ctr, "host":host}))
         self.attachauthurl = config.get("dataproxy", 'attachauthurl')
 
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()               
         
-        if host and (rem[0].startswith(add) or rem[0].startswith('10.0.1') or uml == 'lxc'):
+        if host and (rem[0].startswith(add) or rem[0].startswith('10.0.1') or vm_ctr == 'lxc'):
             # No need to do the ident, we will return a non-existent runID,short_name for now
             self.logger.debug('We are using LXC so use parameters for ident')
             self.logger.debug( "%s -> %s" % (params.get('vrunid'), params.get("vscrapername",''),) )
             return params.get('vrunid'), params.get("vscrapername", '')            
-        else:
-            via    = config.get(uml, 'via' )
-            lident = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (uml_host, via, port, loc[1])).read()   
 
                 # should be using cgi.parse_qs(query) technology here                
         self.logger.debug("LIDENT: %s" % (lident,) )                                

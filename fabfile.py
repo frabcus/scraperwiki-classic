@@ -1,111 +1,85 @@
-import getpass
-
-# TODO:
-# Use "local" to run Django tests automatically
-# Use "local" to run Selenium tests.
-
 from fabric.api import *
 
-# globals
-PROJECT_NAME = 'ScraperWiki'
+import getpass
+import sys
+import os.path
 
-# These are taken from and named after our puppet classes.
-# We should move to using them for fab deployment.
-# env.roledefs = {
-#    'webserver': ['rush', 'yelland']
-#    'datastore': ['burbage', 'kippax']
-#    'vm': ['horsell', 'kippax'],
+# TODO:
+# Cron jobs are a mess:
+#    env.cron_version = "dev"
+#    env.cron_version = "www"
+#    env.cron_version = "umls"
+# Restart things for firebox etc, if specified
+# Full deploy that restarts everything too
+# Pull puppet on kippax, then do everything else
+# Run Django tests automatically - on local or on dev?
+# Run Selenium tests - on local or on dev?
+# Merge code from default into stable for you (on dev)
 
-#    'refine': ['burbage', '']
-#    'sandbox': ['burbage', '']
-#    'muninserver': ['rush', '']
-#    'backup': ['kippax', '']
-#}
+# Example use:
+# fab dev webserver
+# fab dev webserver:buildout=no
+# fab dev webserver:buildout=no --hide=running,stdout
 
 ###########################################################################
 # Server configurations
 
-# If git+git fails then sudo easy_install pip==0.8.2
-# environments
+env.server_lookup = {
+    ('webserver', 'dev'): ['yelland.scraperwiki.com'], 
+    ('webserver', 'live'): ['rush.scraperwiki.com:7822'],
+
+    ('webstore', 'dev'): ['ewloe.scraperwiki.com'], 
+    ('webstore', 'live'): ['burbage.scraperwiki.com:7822'],
+
+    ('firebox', 'dev'): ['kippax.scraperwiki.com'], 
+    ('firebox', 'live'): ['horsell.scraperwiki.com:7822'],
+}
+# This is slightly magic - we want to generate the host list from the pair of
+# the service deployed (e.g. firebox) and the flock (e.g. live). This gets
+# fabric to call the function do_server_lookup to do that work -
+# do_server_lookup in turn uses the env.server_lookup dictionary above
+env.roledefs = {
+    'webserver' : lambda: do_server_lookup('webserver'),
+    'webstore' : lambda: do_server_lookup('webstore'),
+    'firebox' : lambda: do_server_lookup('firebox')
+}
+
+env.path = '/var/www/scraperwiki'
+env.activate = env.path + '/bin/activate'
+env.user = 'scraperdeploy'
+env.name = getpass.getuser()
+
+# Call one of these tasks first to set which flock of servers you're working on
 @task
 def dev():
-    "On the scraperwiki server, accessible from http://dev.scraperwiki.com"
-    env.hosts = ['dev.scraperwiki.com']
-    env.path = '/var/www/scraperwiki'
+    '''Call first to deploy to development servers'''
+    env.flock = 'dev'
     env.branch = 'default'
-    env.web_path = 'file:///home/scraperwiki/scraperwiki'
-    env.activate = env.path + '/bin/activate'
-    env.user = 'scraperdeploy'
-    env.cron_version = "dev"
-    env.webserver = True
-    env.buildout = True
     env.email_deploy = False
-    env.email_deploy = "deploy@scraperwiki.com"
-
-@task
-def dev_services():
-    "The UML and datastore server (kippax)"
-    env.hosts = ['kippax.scraperwiki.com']
-    env.path = '/var/www/scraperwiki'
-    env.branch = 'default'
-    env.web_path = 'file:///home/scraperwiki/scraperwiki'
-    env.activate = env.path + '/bin/activate'
-    env.user = 'scraperdeploy'
-    env.cron_version = "umls"
-    env.webserver = False
-    env.buildout = False
-    env.email_deploy = False
-    
-@task
-def dev_webstore():
-    "The UML and datastore server (kippax)"
-    env.hosts = ['ewloe.scraperwiki.com']
-    env.path = '/var/www/scraperwiki'
-    env.branch = 'default'
-    env.web_path = 'file:///home/scraperwiki/scraperwiki'
-    env.activate = env.path + '/bin/activate'
-    env.user = 'scraperdeploy'
-    env.cron_version = "umls"
-    env.webserver = False
-    env.buildout = True
-    env.email_deploy = False    
 
 @task
 def live():
-    "The main www server"
-    env.hosts = ['scraperwiki.com:7822']
-    env.path = '/var/www/scraperwiki'
+    '''Call first to deploy to live servers'''
+    env.flock = 'live'
     env.branch = 'stable'
-    env.web_path = 'file:///home/scraperwiki/scraperwiki'
-    env.activate = env.path + '/bin/activate'
-    env.user = 'scraperdeploy'
-    env.cron_version = "www"
-    env.webserver = True
-    env.buildout = True
-    env.email_deploy = "deploy@scraperwiki.com"
-
-@task
-def live_services():
-    "The UML and datastore server (burbage)"
-    env.hosts = ['burbage.scraperwiki.com:7822']
-    env.path = '/var/www/scraperwiki'
-    env.branch = 'stable'
-    env.web_path = 'file:///home/scraperwiki/scraperwiki'
-    env.activate = env.path + '/bin/activate'
-    env.user = 'scraperdeploy'
-    env.cron_version = "umls"
-    env.webserver = False
-    env.buildout = False
     env.email_deploy = "deploy@scraperwiki.com"
 
 ###########################################################################
 # Helpers
 
+def do_server_lookup(task):
+    if not 'flock' in env:
+        raise Exception("specify which flock (e.g. dev/live) first")
+    hosts = env.server_lookup[(task, env.flock)]
+    print "server_lookup: deploying '%s' on flock '%s', hosts: %s" % (task, env.flock, hosts)
+    env.task = task
+    return hosts
+
 def run_in_virtualenv(command):
     temp = 'cd %s; source ' % env.path
     return run(temp + env.activate + '&&' + command)
 
-def buildout():
+def run_buildout():
     run_in_virtualenv('buildout -N -qq')
 
 def django_db_migrate():
@@ -113,20 +87,29 @@ def django_db_migrate():
     run_in_virtualenv('cd web; python manage.py migrate --verbosity=0')
 
 def update_js_cache_revision():
-    """
-    Put the current HG revision in a file so that Django can use it to avoid caching JS files
-    """
+    # Put the current HG revision in a file so that Django can use it to avoid caching JS files
     run_in_virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def install_cron():
     run('crontab %(path)s/cron/crontab.%(cron_version)s' % env)
     sudo('crontab %(path)s/cron/crontab-root.%(cron_version)s' % env)
 
+def _update_cron_if_exists(local_file):
+    run('[ -e %s ] && sudo cp %s /etc/cron.d/ || echo -n'  % (local_file, local_file), shell=True)
+
+def update_crons():
+    # deploy cron files for all servers, just this task, or just this task and flock
+    _update_cron_if_exists('%(path)s/cron/scraperwiki-all' % env)
+    _update_cron_if_exists('%(path)s/cron/scraperwiki-%(task)s-%(flock)s' % env)
+    _update_cron_if_exists('%(path)s/cron/scraperwiki-%(task)s' % env)
+
 def restart_webserver():
-    "Restart the web server"
     sudo('apache2ctl graceful')
 
-def email(old_revision=None, new_revision=None):
+def deploy_done():
+    if not env.email_deploy:
+        return
+
     message = """From: ScraperWiki <developers@scraperwiki.com>
 Subject: New Scraperwiki Deployment to %(cron_version)s (deployed by %(user)s)
 
@@ -138,23 +121,103 @@ New revision: %(new_revision)s
 """ % {
         'cron_version' : env.cron_version,
         'user' : env.name,
-        'old_revision': old_revision,
-        'new_revision': new_revision,
+        'old_revision': env.old_revision,
+        'new_revision': env.new_revision,
         }
     sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
+
+def code_pull():
+    with cd(env.path):
+        env.old_revision = run("hg identify")
+        run("hg pull --quiet; hg update --quiet -C %(branch)s" % env)
+        env.new_revision = run("hg identify")
+        if env.old_revision == env.new_revision:
+            print "WARNING: code hasn't changed since last update"
 
 ###########################################################################
 # Tasks
 
 @task
-def setup():
-    """
-    Setup a fresh virtualenv as well as a few useful directories, then run
-    a full deployment
-    """
+@roles('webserver')
+def webserver(buildout='yes'):
+    '''Deploys Django web application, runs schema migrations, clears caches,
+kicks webserver so it starts using new code. 
 
+buildout=no, stops it updating buildout which can be slow'''
+
+    if buildout not in ['yes','no']:
+        raise Exception("buildout must be yes or no")
+
+    code_pull()
+
+    if buildout == 'yes':
+        run_buildout()
+    django_db_migrate()
+    update_js_cache_revision()
+    restart_webserver()   
+
+    update_crons()
+    deploy_done()
+
+
+@task
+@roles('webstore')
+def webstore(buildout='yes'):
+    '''Deploys webstore SQL database. XXX currently doesn't restart any daemons.
+
+buildout=no, stops it updating buildout which can be slow'''
+
+    if buildout not in ['yes','no']:
+        raise Exception("buildout must be yes or no")
+
+    code_pull()
+
+    if buildout == 'yes':
+        run_buildout()
+
+    update_crons()
+    deploy_done()
+
+
+@task
+@roles('firebox')
+def firebox():
+    '''Deploys LXC script sandbox executor. XXX currently doesn't restart any daemons'''
+    code_pull()
+
+    update_crons()
+    deploy_done()
+
+
+@task
+def merge_to_stable():
+    '''In your local copy, merges changes from default branch to stable in Mercurial,
+in preparation for a deploy. Pushes to server. Make sure you commit everything first.'''
+
+    # grab anything remote
+    local('hg update default')
+    local('hg pull --rebase') # configure the rebase extension in your ~/.hgrc
+    local('hg push')
+
+    # just in case someone committed stuff to stable, merge that to dev
+    local('hg merge stable || echo "merge failed"')
+    local('hg commit -m "Merge from stable to dev via fab" || echo "no commit needed"')
+
+    # merge everything to stable
+    local('hg update stable')
+    local('hg merge default || echo "merge failed"')
+    local('hg commit -m "Merge to stable via fab" || echo "no commit needed"')
+    local('hg push')
+
+    # done, working in default again
+    local('hg update default')
+
+'''
+@task
+def setup():
     # this really ought to make sure it checks out default vs. stable
-    raise Exception("not implemented")
+    raise Exception("not implemented, really old broken code")
+
     sudo('hg clone file:///home/scraperwiki/scraperwiki %(path)s' % env)        
     sudo('chown -R %(fab_user)s %(path)s' % env)
     sudo('cd %(path)s; easy_install virtualenv' % env)
@@ -163,52 +226,17 @@ def setup():
     run_in_virtualenv('easy_install pip')
 
     deploy()
+'''
 
+'''
 @task
 def run_puppet():
-    """
-    Runs the puppetd on the specific machine
-    """
     sudo("puppetd --no-daemonize --onetime --debug")        
     
-@task
-def deploy():
-    """
-    Deploy the latest version of the site to the servers, install any
-    required third party modules, install the virtual host and 
-    then restart the webserver
-    """
-
-    env.name = getpass.getuser()
-    import time
-
-    with cd(env.path):
-        old_revision = run("hg identify")
-        run("hg pull; hg update -C %(branch)s" % env)
-        new_revision = run("hg identify")
-    
-    if env.buildout:
-        buildout()
-                
-    if env.webserver:
-        django_db_migrate()
-        update_js_cache_revision()
-        restart_webserver()   
-
-    install_cron()
-
-    if env.email_deploy:
-        email(old_revision, new_revision)
-
-    print "Deploy successful"
-    print "Old revision = %s" % old_revision
-    print "New revision = %s" % new_revision
-
 @task
 def test():
     if env.host != "dev.scraperwiki.com":
         print "Testing can only be done on the dev machine"
     else:
         run_in_virtualenv('cd web; python manage.py test')
-
-
+'''

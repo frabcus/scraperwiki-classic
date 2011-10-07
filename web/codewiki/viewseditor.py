@@ -11,7 +11,6 @@ from django.contrib.auth.decorators import login_required
 
 from codewiki import models
 import runsockettotwister
-from codewiki.management.commands.run_scrapers import GetDispatcherStatus
 import frontend
 
 import vc
@@ -106,13 +105,7 @@ def run_event_json(request, run_id):
         result['run_started'] = event.run_started.isoformat()
     if event.run_ended:
         result['run_ended'] = event.run_ended.isoformat()
-    
-    statusscrapers = GetDispatcherStatus()
-    if statusscrapers:
-        for status in statusscrapers:
-            if status['runID'] == event.run_id:
-                result['dispatcherstatus'] = status
-    
+        
     return HttpResponse(json.dumps(result))
 
 

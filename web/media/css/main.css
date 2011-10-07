@@ -4825,8 +4825,8 @@ ul#chooser li a.active em {
 	float: right;
 	overflow: hidden;
 	width: 200px;
-	height: 125px;
-	margin: 0 0 10px 20px;
+	height: 200px;
+	margin: 0 0 20px 20px;
 }
 
 .blog_latest .blog_headline .image_wrap img {

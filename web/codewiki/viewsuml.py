@@ -18,14 +18,12 @@ import time
 import os
 import signal
 
-from codewiki.management.commands.run_scrapers import GetDispatcherStatus, GetUMLstatuses, kill_running_runid
-from viewsrpc import testactiveumls  # not to use
-
+from codewiki.util import kill_running_runid, get_overdue_scrapers
 
 # Redirects to history page now, with # link to right place.
 # NB: It only accepts the run_id hashes (NOT the Django id) so people can't
 # run through every value and get the URL names of each scraper. It is
-# for use in hyperlinks from the UML status page where only the run id is known.
+# for use in hyperlinks from the  status page where only the run id is known.
 # Hyperlinks within scraper pages should use the Django id of the run and link
 # to the # link in the history page.
 def run_event(request, run_id):
@@ -40,36 +38,17 @@ def run_event(request, run_id):
 
 @login_required
 def running_scrapers(request):
-    from codewiki.management.commands.run_scrapers import Command
-        
     if not request.user.is_staff:
         return HttpResponseRedirect( reverse('dashboard') )    
         
     recenteventsmax = 20
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
     
-    statusscrapers = GetDispatcherStatus()
-    if statusscrapers:
-        for status in statusscrapers:
-            if status['scraperID']:
-                scrapers = Code.objects.filter(guid=status['scraperID'])
-                if scrapers:
-                    status['scraper'] = scrapers[0]
-        
-            scraperrunevents = ScraperRunEvent.objects.filter(run_id=status['runID'])
-            status['killable'] = request.user.is_staff
-            if scraperrunevents:
-                status['scraperrunevent'] = scraperrunevents[0]
-                if status['scraper'].owner() == request.user:
-                    status['killable'] = True
-
-    context = { 'statusscrapers': statusscrapers, 'events':recentevents, 'eventsmax':recenteventsmax }
-    context['activeumls'] = GetUMLstatuses()
-
-    c = Command()
-    context['overdue_count'] = c.get_overdue_scrapers().count()
+    context = { 'statusscrapers': None, 'events':recentevents, 'eventsmax':recenteventsmax }
+    context['overdue_count'] = get_overdue_scrapers().count()
 
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
+
 
 def scraper_killrunning(request, run_id, event_id):
     event = None

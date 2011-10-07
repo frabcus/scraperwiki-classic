@@ -183,19 +183,15 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         # If the rem[0] IP address is in configuration as an open IP then we should just let it pass
         # and return None,None,False
         try:
-            print 'Looking for open addresses'
             open_addresses = config.get(varName, 'open_addresses')
-            print 'Setting value is ', open_addresses, ' comparing ', rem[0]            
             if open_addresses and rem[0] in open_addresses.split(','):
                     return None,None,False
         except Exception, e:
             print e
         
-
         #  If running as a transparent HTTP or HTTPS then the remote end is connecting
         #  to port 80 or 443 irrespective of where we think it is connecting to; for a
         #  non-transparent proxy use the actual port.
-        #
         if   mode == 'H' : port = 80
         elif mode == 'S' : port = 443
         
@@ -207,14 +203,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         for attempt in range(5):
             try:
-                # If the connection comes form the lxc_server (that we know about from config)
-                # then use it.
-                if lxc_server and '10.0' in rem[0]:
-                    print 'using LXC at ', lxc_server
-                    ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
-                else:
-                    print 'Attempting old-style ident'
-                    ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
+                ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
                 if ident.strip() != "":
                     break
             except:

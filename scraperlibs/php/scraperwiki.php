@@ -68,6 +68,15 @@ class scraperwiki
       if (!array_key_exists(0, $data))
           $data = array($data); 
 
+      # convert special types
+      foreach ($data as &$row) {
+          foreach ($row as $key => &$value) {
+                if ($value instanceof DateTime) {
+                    $value = $value->format(DATE_ISO8601);
+                }
+          }
+    }
+
       $result = $ds->request(array('maincommand'=>'save_sqlite', 'unique_keys'=>$unique_keys, 'data'=>$data, 'swdatatblname'=>$table_name)); 
       if (property_exists($result, 'error'))
          throw new Exception ($result->error);

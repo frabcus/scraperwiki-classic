@@ -30,37 +30,6 @@ except ImportError: import simplejson as json
 config = ConfigParser.ConfigParser()
 config.readfp(open(settings.CONFIGFILE))
 
-def MakeRunner(request, scraper, code):
-    runner_path = "%s/runner.py" % settings.FIREBOX_PATH
-    failed = False
-
-    urlquerystring = request.META["QUERY_STRING"]
-    
-    # append post values to the query string (so we can consume them experimentally)
-    # we could also be passing in the sets of scraper environment variables in this way too
-    # though maybe we need a generalized version of the --urlquery= that sets an environment variables explicitly
-    # the bottleneck appears to be the runner.py command line instantiation
-    # (POST is a django.http.QueryDict which destroys information about the order of the incoming parameters) 
-    if list(request.POST):
-        qsl = cgi.parse_qsl(urlquerystring)
-        qsl.extend(request.POST.items())
-        urlquerystring = urllib.urlencode(qsl)
-        print "sending in new querystring:", urlquerystring
-    
-    
-    args = [ runner_path.encode('utf8') ]
-    args.append('--guid=%s' % scraper.guid.encode('utf8'))
-    args.append('--language=%s' % scraper.language.lower().encode('utf8'))
-    args.append('--name=%s' % scraper.short_name.encode('utf8'))
-    args.append('--cpulimit=80')
-    args.append('--urlquery=%s' % urlquerystring.encode('utf8'))
-    
-    runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    runner.stdin.write(code.encode('utf8'))
-    
-    runner.stdin.close()
-    return runner
-
 
 
 def scraperwikitag(scraper, html, panepresent):
@@ -141,12 +110,8 @@ def rpcexecute(request, short_name, revision=None):
         revision = -1
     
     # run it the socket method for staff members who can handle being broken
-#    if request.user.is_staff:
     runnerstream = runsockettotwister.RunnerSocket()
     runnerstream.runview(request.user, scraper, revision, request.META["QUERY_STRING"])
-#    else:
-#        runner = MakeRunner(request, scraper, code)
-#        runnerstream = runner.stdout
 
     # we build the response on the fly in case we get a contentheader value before anything happens
     response = None 
@@ -220,34 +185,6 @@ def rpcexecute(request, short_name, revision=None):
         response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-2"/>', panepresent))
     return response
             
-
-# liable to hang if UMLs not operative
-def testactiveumls(n):
-    result = [ ]
-    code = "from subprocess import Popen, PIPE\nprint Popen(['hostname'], stdout=PIPE).communicate()[0]"
-    
-    runner_path = "%s/runner.py" % settings.FIREBOX_PATH
-    args = [runner_path, '--language=python', '--cpulimit=80']
-    
-    for i in range(n):
-        runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        runner.stdin.write(code)
-        runner.stdin.close()
-        
-        lns = [ ]
-        for line in runner.stdout:
-            message = json.loads(line)
-            if message['message_type'] == "console":
-                if message.get('message_sub_type') != 'consolestatus':
-                    lns.append(message['content'].strip())
-            elif message['message_type'] == "executionstatus":
-                pass
-            else:
-                lns.append(line)
-        result.append('\n'.join(lns))
-    return result
-
-
 # this form is protected by the django key known to twister, so does not need to be obstructed by the csrf machinery
 @csrf_exempt
 def twistermakesrunevent(request):
@@ -255,7 +192,7 @@ def twistermakesrunevent(request):
         return Dtwistermakesrunevent(request)
     except Exception, e:
         logger.error("twistermakesruneventerror: %s" % (str(e)))
-        mail_admins(subject="twistermakesruneventerror: %s" % (str(e)[:50]), message=(str(e)))
+        mail_admins(subject="twistermakesruneventerror: %s" % (str(e)[:30]), message=(str(e)))
     return HttpResponse("no done %s" % str(e))
         
 
@@ -267,7 +204,7 @@ def Dtwistermakesrunevent(request):
     if not run_id:
         logger.error("twisterbad run_id")
         return HttpResponse("bad run_id - %s" % (request.POST,) )
-        
+
     matchingevents = models.ScraperRunEvent.objects.filter(run_id=run_id)
     if not matchingevents:
         event = models.ScraperRunEvent()
@@ -303,6 +240,10 @@ def Dtwistermakesrunevent(request):
         event.scraper.update_meta() # enable if views ever have metadata that needs updating each refresh
         event.scraper.save()
 
+    event.save()
+
+    # Event needs to be saved first as it is used in the following DomainScraper
+    if request.POST.get("exitstatus"):
         # report the pages that were scraped
         jdomainscrapes = request.POST.get("domainscrapes")
         domainscrapes = json.loads(jdomainscrapes)
@@ -312,7 +253,6 @@ def Dtwistermakesrunevent(request):
             domainscrape.bytes_scraped = vals["bytes_scraped"]
             domainscrape.save()
 
-    event.save()
 
     # Send email if this is an email scraper
     if request.POST.get("exitstatus"):
