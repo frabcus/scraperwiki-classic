@@ -5,6 +5,23 @@ import re
 # Probably early code that could entirely evapourate with some aggressive refactoring
 # Quick alteration from scavenged slugify function to use underscores instead of dashes
 
+def get_overdue_scrapers(self):
+    """
+    Obtains a queryset of scrapers that should have already been run, we 
+    will order these with the ones that have run least recently hopefully
+    being near the top of the list.
+    
+    If this command was starting with --ignore-emails then we will exclude 
+    those scrapers that are actually email scrapers in disguise.
+    """
+    from codewiki.models import Scraper
+    from django.conf import settings
+        
+    #get all scrapers where interval > 0 and require running
+    scrapers = Scraper.objects.exclude(privacy_status="deleted").filter(run_interval__gt=0)
+    scrapers = scrapers.extra(where=[settings.OVERDUE_SQL], params=settings.OVERDUE_SQL_PARAMS).order_by('-last_run')
+    return scrapers
+
 def Nslugify(value):
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
     value = unicode(re.sub('[^\w\s\-]', '', value).strip().lower())

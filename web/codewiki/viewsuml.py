@@ -18,7 +18,7 @@ import time
 import os
 import signal
 
-from codewiki.management.commands.run_scrapers import kill_running_runid
+from codewiki.util import kill_running_runid
 from viewsrpc import testactiveumls  # not to use
 
 
@@ -40,8 +40,6 @@ def run_event(request, run_id):
 
 @login_required
 def running_scrapers(request):
-    from codewiki.management.commands.run_scrapers import Command
-        
     if not request.user.is_staff:
         return HttpResponseRedirect( reverse('dashboard') )    
         
@@ -49,9 +47,7 @@ def running_scrapers(request):
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
     
     context = { 'statusscrapers': None, 'events':recentevents, 'eventsmax':recenteventsmax }
-
-    c = Command()
-    context['overdue_count'] = c.get_overdue_scrapers().count()
+    context['overdue_count'] = get_overdue_scrapers().count()
 
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
 
