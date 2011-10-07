@@ -201,7 +201,7 @@ in preparation for a deploy. Make sure you commit everything first.'''
 
     # just in case someone committed stuff to stable, merge that to dev
     local('hg merge stable')
-    local('hg commit -m "Merge from stable to dev via fab')
+    local('hg commit -m "Merge from stable to dev via fab"')
 
     # merge everything to stable
     local('hg update stable')
