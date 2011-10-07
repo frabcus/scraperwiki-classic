@@ -201,12 +201,12 @@ in preparation for a deploy. Pushes to server. Make sure you commit everything f
 
     # just in case someone committed stuff to stable, merge that to dev
     local('hg merge stable || echo "merge failed"')
-    local('hg commit -m "Merge from stable to dev via fab"')
+    local('hg commit -m "Merge from stable to dev via fab" || echo "no commit needed"')
 
     # merge everything to stable
     local('hg update stable')
     local('hg merge default || echo "merge failed"')
-    local('hg commit -m "Merge to stable via fab"')
+    local('hg commit -m "Merge to stable via fab" || echo "no commit needed"')
     local('hg push')
 
     # done, working in default again
