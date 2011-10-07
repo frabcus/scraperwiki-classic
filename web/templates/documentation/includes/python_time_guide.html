@@ -1,7 +1,7 @@
 <p>An important part of scraping is turning string data into structured data.
 Two very common things this happens with are dates and times.</p>
 
-<p>For more details, read the <a href="http://labix.org/python-dateutil">python-dateutil docs</a>, or the <a href="">XXX</a>.</p>
+<p>For more details, read the Python <a href="http://labix.org/python-dateutil">dateutil (parser) docs</a>, and the <a href="http://docs.python.org/library/datetime.html">datetime docs</a>.</p>
 
 <h2>Parsing dates/times</h2>
 
@@ -21,7 +21,7 @@ print dateutil.parser.parse('21 June 2010').date().__class__ # &lt;type 'datetim
 
 <p>Or you can parse times as well, making a Python datetime object.
 
-<code>print dateutil.parser.parse('Tue 27 Sep 2011 00:25:48 BST') # 2011-09-27 00:25:48+01:00
+<code>print dateutil.parser.parse('Tue 27 Sep 2011 00:25:48') # 2011-09-27 00:25:48
 print dateutil.parser.parse('21 June 2010 6am').__class__ # &lt;type 'datetime.datetime'&gt;
 </code>
 
@@ -57,6 +57,8 @@ data = {
 }
 scraperwiki.sqlite.save(unique_keys=['name'], data=data)
 </code>
+
+<p>Times are saved as UTC, as SQLite doesn't parse explicit timezones.</p>
 
 <h2>Querying dates</h2>
 
