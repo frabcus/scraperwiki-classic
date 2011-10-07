@@ -1,9 +1,0 @@
-MAILTO=cron@scraperwiki.com
-SHELL=/bin/bash
-
-# m h  dom mon dow   command
-0 4 * * * tar zcfP /root/backup/scraperwiki.tar.gz /var/www/scraperwiki --exclude "/var/www/scraperwiki/uml/data" --exclude "*.cow"
-0 4 * * * tar zcfP /root/backup/etc.tar.gz /etc
-0 4 * * * cd /var/www/scraperwiki/uml/data && ls -rt | tail -10 | xargs tar cf /root/backup/data-last-10.tar
-0 6 * * * rsync -qazr /root/backup umi.backup.bytemark.co.uk::umi/
-0 21 * * * rsync -qazr -e 'ssh -i /root/backup-key' /root/backup/ swbackup@kippax.scraperwiki.com:/home/swbackup/burbage/ -b --suffix=.`date +\%A | tr '[A-Z]' '[a-z]'`
