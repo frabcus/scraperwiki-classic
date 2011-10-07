@@ -49,6 +49,9 @@ $(document).ready(function() {
                 prefix = "Rollback preview of ";
             } else {
                 prefix = "Last edited";
+                if (lastRev != $('#originalrev').val()) {
+                    prefix = "Last saved";
+                }
             }
 
             var twhen = new Date(lastRevDateEpoch * 1000);
