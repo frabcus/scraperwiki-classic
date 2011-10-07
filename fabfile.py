@@ -2,13 +2,14 @@ from fabric.api import *
 
 import getpass
 import sys
+import os.path
 
 # TODO:
 # Cron jobs are a mess:
 #    env.cron_version = "dev"
 #    env.cron_version = "www"
 #    env.cron_version = "umls"
-# Restart things for firebox etc.
+# Restart things for firebox etc, if specified
 # Full deploy that restarts everything too
 # Pull puppet on kippax, then do everything else
 # Run Django tests automatically - on local or on dev?
@@ -71,6 +72,7 @@ def do_server_lookup(task):
         raise Exception("specify which flock (e.g. dev/live) first")
     hosts = env.server_lookup[(task, env.flock)]
     print "server_lookup: deploying '%s' on flock '%s', hosts: %s" % (task, env.flock, hosts)
+    env.task = task
     return hosts
 
 def run_in_virtualenv(command):
@@ -91,6 +93,15 @@ def update_js_cache_revision():
 def install_cron():
     run('crontab %(path)s/cron/crontab.%(cron_version)s' % env)
     sudo('crontab %(path)s/cron/crontab-root.%(cron_version)s' % env)
+
+def _update_cron_if_exists(local_file):
+    run('[ -e %s ] && sudo cp %s /etc/cron.d/ || echo -n'  % (local_file, local_file), shell=True)
+
+def update_crons():
+    # deploy cron files for all servers, just this task, or just this task and flock
+    _update_cron_if_exists('%(path)s/cron/scraperwiki-all' % env)
+    _update_cron_if_exists('%(path)s/cron/scraperwiki-%(task)s-%(flock)s' % env)
+    _update_cron_if_exists('%(path)s/cron/scraperwiki-%(task)s' % env)
 
 def restart_webserver():
     sudo('apache2ctl graceful')
@@ -134,6 +145,9 @@ kicks webserver so it starts using new code.
 
 buildout=no, stops it updating buildout which can be slow'''
 
+    update_crons()
+    sys.exit()
+
     if buildout not in ['yes','no']:
         raise Exception("buildout must be yes or no")
 
@@ -145,6 +159,7 @@ buildout=no, stops it updating buildout which can be slow'''
     update_js_cache_revision()
     restart_webserver()   
 
+    update_crons()
     deploy_done()
 
 
@@ -162,6 +177,8 @@ buildout=no, stops it updating buildout which can be slow'''
 
     if buildout == 'yes':
         run_buildout()
+
+    update_crons()
     deploy_done()
 
 
@@ -171,6 +188,7 @@ def firebox():
     '''Deploys LXC script sandbox executor. XXX currently doesn't restart any daemons'''
     code_pull()
 
+    update_crons()
     deploy_done()
 
 '''
