@@ -2,7 +2,8 @@ from django.conf.urls.defaults import *
 
 # please use "import <something> as local_name" as this removes issues of name collision.
 import frontend.views as frontend_views
-import codewiki.views, codewiki.viewsuml
+import codewiki.views
+import codewiki.viewsuml
 
 from django.contrib.syndication.views import feed as feed_view
 from django.views.generic import date_based, list_detail
@@ -88,6 +89,6 @@ urlpatterns = patterns('',
     (r'^editor/$', lambda request: HttpResponseRedirect('/scrapers/new/python?template=tutorial_python_trivial')),
     (r'^scrapers/show/(?P<short_name>[\w_\-]+)/(?:data/|map-only/)?$', 
                    lambda request, short_name: HttpResponseRedirect(reverse('code_overview', args=['scraper', short_name]))),
-#    http://scraperwiki.com/scrapers/epsrc-grants-1/
+
     
 )
