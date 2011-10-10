@@ -19,6 +19,10 @@ try:
 except:
     import simplejson as json
 
+
+class TimeoutException(Exception): 
+    pass 
+
 def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
     #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)
     readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library.  codes: http://www.sqlite.org/c3ref/c_alter_table.html
@@ -219,10 +223,20 @@ class SQLiteDatabase(Database):
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
         self.logger.debug("XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50]))
 
+        def timeout_handler(signum, frame):
+            raise TimeoutException()
+
+        timeout_len = 30
+
         self.establishconnection(True)
         try:
+            # In the absence of a user toolkit for managing the database we will manually tweak
+            # the timeout for creating indices
+            if 'create index' in sqlquery.lower():
+                timeout_len = 180
+            
                 # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
-            signal.alarm(30)  # should use set_progress_handler !!!!
+            signal.alarm(timeout_len, timeout_handler)  # should use set_progress_handler !!!!
             if data:
                 self.m_sqlitedbcursor.execute(sqlquery, data)  # handle "(?,?,?)", (val, val, val)
             else:
@@ -277,6 +291,10 @@ class SQLiteDatabase(Database):
             signal.alarm(0)
             self.logger.debug("user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000]))
             return {"error":"sqlite3.Error: %s" % str(e)}
+        except TimeoutException,tout:
+            signal.alarm(0)
+            self.logger.debug("user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000]))
+            return { "error" : "Query timeout: %s" % str(tout) }
 
 
     def sqliteattach(self, name, asname):
