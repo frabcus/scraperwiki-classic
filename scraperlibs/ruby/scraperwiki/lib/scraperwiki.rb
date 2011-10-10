@@ -122,7 +122,9 @@ module ScraperWiki
     end
 
 
-    # Allows to the execution of user defined SQL against the database.
+    # Allows to the execution of user defined SQL against the database. When using this
+    # method care should be taken to also call ScraperWiki::commit() at the appropriate
+    # times to make sure that data is saved.
     #
     # === Parameters
     #
@@ -414,7 +416,15 @@ module ScraperWiki
 
 
 
-
+    # Shows all of the tables available in the database
+    #
+    # === Parameters
+    #
+    # * _dbname_ = The database name to connect to
+    #
+    # === Example
+    # ScraperWiki::show_tables()
+    #
     def ScraperWiki.show_tables(dbname=nil)
         name = "sqlite_master"
         if dbname != nil
@@ -426,6 +436,15 @@ module ScraperWiki
     end
 
 
+    # Retrieves information about the table specified by name
+    #
+    # === Parameters
+    #
+    # * _name_ = The name we want information on
+    #
+    # === Example
+    # ScraperWiki::table_info('swdata')
+    #
     def ScraperWiki.table_info(name)
         sname = name.split(".")
         if sname.length == 2
@@ -440,19 +459,6 @@ module ScraperWiki
         return res
     end
 
-
-    def ScraperWiki.getDataByDate(name, start_date, end_date, limit=-1, offset=0)
-        raise SqliteException.new("getDataByDate has been deprecated")
-    end
-    
-    def ScraperWiki.getDataByLocation(name, lat, lng, limit=-1, offset=0)
-        raise SqliteException.new("getDataByLocation has been deprecated")
-    end
-        
-    def ScraperWiki.search(name, filterdict, limit=-1, offset=0)
-        raise SqliteException.new("SW_APIWrapper.search has been deprecated")
-    end
-
     def ScraperWiki.raisesqliteerror(rerror)
         if /sqlite3.Error: no such table:/.match(rerror)  # old dataproxy
             raise NoSuchTableSqliteException.new(rerror)
@@ -462,7 +468,20 @@ module ScraperWiki
         end
         raise SqliteException.new(rerror)
     end
-    
+
+    # Attaches to a different database so that it can be queried along with
+    # the current scraper's database.
+    #
+    # === Parameters
+    #
+    # * _name_ = The name of the database to attach to
+    # * _asname_ = The name you wish this database to be known as in queries
+    # * _verbose_ = A verbosity level
+    #
+    # === Example
+    # ScraperWiki::attach('another_db', 'secondary')
+    # Query can then call: select * from `secondary.swdata` ...
+    #    
     def ScraperWiki.attach(name, asname=nil, verbose=1)
         $attachlist.push({"name"=>name, "asname"=>asname})
 
@@ -484,7 +503,19 @@ module ScraperWiki
         return res
     end
     
-
+    # Commits any previous sqlexecute calls to ensure the data is written into the database
+    #
+    # === Parameters
+    #
+    # * _verbose_ = A verbosity level
+    #
+    # === Returns
+    # The output of the commit() command
+    #
+    # === Example
+    # ScraperWiki::sqliteexecute('create index ...')    
+    # ScraperWiki::commit()
+    #    
     def ScraperWiki.commit(verbose=1)
         ds = SW_DataStore.create()
         if ds.m_webstore_port == 0
@@ -495,6 +526,20 @@ module ScraperWiki
         end
     end
 
+    # Allows for a simplified select statement
+    #
+    # === Parameters
+    #
+    # * _sqlquery_ = A valid select statement, without the select keyword
+    # * _data_ = Any data provided for ? replacements in the query
+    # * _verbose_ = A verbosity level
+    #
+    # === Returns
+    # A list of hashes containing the returned data
+    #
+    # === Example
+    # ScraperWiki::select('* from swdata')    
+    #    
     def ScraperWiki.select(sqlquery, data=nil, verbose=1)
         if data != nil && sqlquery.scan(/\?/).length != 0 && data.class != Array
             data = [data]
@@ -507,6 +552,8 @@ module ScraperWiki
         end
         return res
     end
+
+################################################################################ Deprecated code
 
 
     # <b>DEPRECATED:</b> use ScraperWiki.attach
@@ -577,4 +624,20 @@ module ScraperWiki
         end
         return ScraperWiki.save_var(metadata_name, value)
     end    
+
+    # <b>DEPRECATED:</b>    
+    def ScraperWiki.getDataByDate(name, start_date, end_date, limit=-1, offset=0)
+        raise SqliteException.new("getDataByDate has been deprecated")
+    end
+    
+    # <b>DEPRECATED:</b>    
+    def ScraperWiki.getDataByLocation(name, lat, lng, limit=-1, offset=0)
+        raise SqliteException.new("getDataByLocation has been deprecated")
+    end
+        
+    # <b>DEPRECATED:</b>        
+    def ScraperWiki.search(name, filterdict, limit=-1, offset=0)
+        raise SqliteException.new("SW_APIWrapper.search has been deprecated")
+    end
+
 end
