@@ -502,7 +502,7 @@ def handle_editor_save(request):
     # (some of the operation was moved to advancesave so we have the 
     # rev number to pass to the runner in advance.  All this needs refactoring)
     if request.user.is_authenticated():
-        if not scraper.actionauthorized(request.user, "savecode"):
+        if not scraper.actionauthorized(request.user, "savecode") and not request.user == scraper.owner():
             return HttpResponse(json.dumps({'status':'Failed', 'message':"Not allowed to save this scraper"}))
         
         if not advancesave:
