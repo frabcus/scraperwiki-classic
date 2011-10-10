@@ -463,14 +463,17 @@ def handle_editor_save(request):
         scraper.language = language
         scraper.title = title
 
+        target_priv = None
         fork = request.POST.get("fork", None)
         if fork:
             try:
                 scraper.forked_from = models.Code.objects.exclude(privacy_status="deleted").get(short_name=fork)
                 if scraper.forked_from.vault:
+                    target_priv = 'private'
                     scraper.set_invault = scraper.forked_from.vault
                 else:
-                    scraper.privacy_status = scraper.forked_from.privacy_status
+                    target_priv = scraper.forked_from.privacy_status
+                    
             except models.Code.DoesNotExist:
                 pass
 
@@ -509,10 +512,14 @@ def handle_editor_save(request):
             (rev, revdate) = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
         else:
             (rev, revdate) = advancesave
-
+            
+        need_save = False
+        if target_priv:
+            scraper.privacy_status = target_priv
+            scraper.save()
+            
         if hasattr(scraper, 'set_invault') and scraper.set_invault:
             scraper.vault = scraper.set_invault
-            scraper.privacy_status = 'private'
             scraper.save()
             scraper.vault.update_access_rights()
             
