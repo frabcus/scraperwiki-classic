@@ -145,10 +145,7 @@ class Code(models.Model):
 
     @property
     def vcs(self):
-        if self.forked_from:
-            return vc.MercurialInterface(self.get_repo_path(), self.forked_from.get_repo_path())
-        else:
-            return vc.MercurialInterface(self.get_repo_path())
+        return vc.MercurialInterface(self.get_repo_path())
 
     def commit_code(self, code_text, commit_message, user):
         self.vcs.savecode(code_text, "code")
