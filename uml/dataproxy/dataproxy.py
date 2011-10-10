@@ -202,6 +202,8 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     break
             self.logger.debug("ending connection %s - %s" % (short_name, runID))
             self.connection.close()
+            if db:
+                db.close()
         except:
             self.logger.error("do_GET uncaught exception: %s" % traceback.format_exc())
 
