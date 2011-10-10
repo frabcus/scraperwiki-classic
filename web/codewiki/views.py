@@ -295,7 +295,7 @@ def code_overview(request, wiki_type, short_name):
         
     forked_from_this = None
     if wiki_type == 'scraper':
-        forked_from_this = Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private')
+        forked_from_this = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private')
         
         
     # unfinished CKAN integration
