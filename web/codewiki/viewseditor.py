@@ -467,9 +467,10 @@ def handle_editor_save(request):
         if fork:
             try:
                 scraper.forked_from = models.Code.objects.exclude(privacy_status="deleted").get(short_name=fork)
-                scraper.privacy_status = scraper.forked_from.privacy_status
                 if scraper.forked_from.vault:
                     scraper.set_invault = scraper.forked_from.vault
+                else:
+                    scraper.privacy_status = scraper.forked_from.privacy_status
             except models.Code.DoesNotExist:
                 pass
 
@@ -511,6 +512,7 @@ def handle_editor_save(request):
 
         if scraper.set_invault:
             scraper.vault = scraper.set_invault
+            scraper.privacy_status = 'private'
             scraper.save()
             scraper.vault.update_access_rights()
             
