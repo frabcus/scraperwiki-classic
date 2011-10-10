@@ -467,6 +467,7 @@ def handle_editor_save(request):
         if fork:
             try:
                 scraper.forked_from = models.Code.objects.exclude(privacy_status="deleted").get(short_name=fork)
+                scraper.privacy_status = scraper.forked_from.privacy_status
             except models.Code.DoesNotExist:
                 pass
 
