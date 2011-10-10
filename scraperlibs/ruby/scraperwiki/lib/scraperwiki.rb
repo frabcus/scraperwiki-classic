@@ -27,6 +27,12 @@ module ScraperWiki
         ScraperWiki.dumpMessage({'message_type' => 'httpresponseheader', 'headerkey' => headerkey, 'headervalue' => headervalue})
     end
 
+    # The scrape method fetches the content from a webserver.
+    # === Parameters
+    # * _url_ = The URL to fetch
+    # * _params_ = The parameters to send with a POST request
+    # === Example
+    # ScraperWiki::scrape('http://scraperwiki.com')
     def ScraperWiki.scrape(url, params = nil)
       client = HTTPClient.new
       client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
