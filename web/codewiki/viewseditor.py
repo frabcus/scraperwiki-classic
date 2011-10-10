@@ -469,7 +469,7 @@ def handle_editor_save(request):
                 scraper.forked_from = models.Code.objects.exclude(privacy_status="deleted").get(short_name=fork)
                 scraper.privacy_status = scraper.forked_from.privacy_status
                 if scraper.forked_from.vault:
-                    scraper.vault = scraper.forked_from.vault
+                    scraper.set_invault = scraper.forked_from.vault
             except models.Code.DoesNotExist:
                 pass
 
@@ -508,6 +508,12 @@ def handle_editor_save(request):
             (rev, revdate) = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
         else:
             (rev, revdate) = advancesave
+
+        if scraper.set_invault:
+            scraper.vault = scraper.set_invault
+            scraper.save()
+            scraper.vault.update_access_rights()
+            
 
         response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
         return HttpResponse(json.dumps({'redirect':'true', 'url':response_url, 'rev':rev, 'revdateepoch':_datetime_to_epoch(revdate) }))
