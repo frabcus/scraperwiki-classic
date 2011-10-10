@@ -23,16 +23,31 @@ module ScraperWiki
         $logfd.flush()
     end
 
+    # Allows _views_ to set some header values, those supported
+    # are Content-type, Content-disposition and Location.
+    #
+    # === Parameters
+    # * _headerkey_ = The header key to be set
+    # * _headervalue_ = The value for the header
+    #
+    # === Example
+    #
+    # ScraperWiki::httpresponseheader('Content-type', 'application/json')
+    #
     def ScraperWiki.httpresponseheader(headerkey, headervalue)
         ScraperWiki.dumpMessage({'message_type' => 'httpresponseheader', 'headerkey' => headerkey, 'headervalue' => headervalue})
     end
 
     # The scrape method fetches the content from a webserver.
+    #
     # === Parameters
+    #
     # * _url_ = The URL to fetch
     # * _params_ = The parameters to send with a POST request
+    #
     # === Example
     # ScraperWiki::scrape('http://scraperwiki.com')
+    #
     def ScraperWiki.scrape(url, params = nil)
       client = HTTPClient.new
       client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -44,6 +59,17 @@ module ScraperWiki
       end
     end
 
+
+    # Converts the provided UK postcode to latitude and longitude 
+    # pair.
+    #
+    # === Parameters
+    #
+    # * _postcode_ = A valid UK postcode
+    #
+    # === Example
+    # ScraperWiki::gb_postcode_to_latlng('L3 6RP')
+    #
     def ScraperWiki.gb_postcode_to_latlng(postcode)
         uri = URI.parse("http://views.scraperwiki.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
         sres = Net::HTTP.get(uri)
@@ -61,6 +87,20 @@ module ScraperWiki
         string.scan(/./u)[0,size].join
     end
 
+    # Saves the provided data into a local database for this scraper. Data is upserted
+    # into this table (inserted if it does not exist, updated if the unique keys say it 
+    # does).
+    #
+    # === Parameters
+    #
+    # * _unique_keys_ = A list of column names, that used together should be unique
+    # * _data_ = A hash of the data where the Key is the column name, the Value the row
+    #            value.  If sending lots of data this can be a list of hashes.
+    # * _table_name_ = The name that the newly created table should use.
+    #
+    # === Example
+    # ScraperWiki::save(['id'], {'id'=>1})
+    #
     def ScraperWiki.save(unique_keys, data, date=nil, latlng=nil, table_name="swdata")
         if unique_keys != nil && !unique_keys.kind_of?(Array)
             raise 'unique_keys must be nil or an array'
@@ -82,6 +122,17 @@ module ScraperWiki
     end
 
 
+    # Allows to the execution of user defined SQL against the database.
+    #
+    # === Parameters
+    #
+    # * _sqlquery_ = A valid SQL statement
+    # * _data_ = Data replacement values for the sql statement
+    # * _verbose_ = Verbosity level, 0 for no output.
+    #
+    # === Example
+    # ScraperWiki::sqliteexecute('select * from swdata')
+    #
     def ScraperWiki.sqliteexecute(sqlquery, data=nil, verbose=2)
         ds = SW_DataStore.create()
         if ds.m_webstore_port == 0
@@ -184,6 +235,21 @@ module ScraperWiki
     end
 
 
+    # Saves the provided data into a local database for this scraper. Data is upserted
+    # into this table (inserted if it does not exist, updated if the unique keys say it 
+    # does).
+    #
+    # === Parameters
+    #
+    # * _unique_keys_ = A list of column names, that used together should be unique
+    # * _data_ = A hash of the data where the Key is the column name, the Value the row
+    #            value.  If sending lots of data this can be a list of hashes.
+    # * _table_name_ = The name that the newly created table should use.
+    # * _verbose_ = A verbosity level, 2 is the maximum (and default) and 0 means no debug  output
+    #
+    # === Example
+    # ScraperWiki::save(['id'], {'id'=>1})
+    #
     def ScraperWiki.save_sqlite(unique_keys, data, table_name="swdata", verbose=2)
         if !data
             ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => "EMPTY SAVE IGNORED"})
@@ -283,7 +349,18 @@ module ScraperWiki
         return res
     end
 
-            # also needs to handle the types better (could save json and datetime objects handily
+    # Allows the user to save a single variable (at a time) to carry state across runs of
+    # the scraper.
+    #
+    # === Parameters
+    #
+    # * _name_ = The variable name
+    # * _value_ = The value of the variable
+    # * _verbose_ = Verbosity level
+    #
+    # === Example
+    # ScraperWiki::save_var('current', 100)
+    #
     def ScraperWiki.save_var(name, value, verbose=2)
         vtype = String(value.class)
         svalue = value.to_s
@@ -294,6 +371,17 @@ module ScraperWiki
         ScraperWiki.save_sqlite(unique_keys=["name"], data=data, table_name="swvariables", verbose=verbose)
     end
 
+    # Allows the user to retrieve a previously saved variable
+    #
+    # === Parameters
+    #
+    # * _name_ = The variable name to fetch
+    # * _default_ = The value to use if the variable name is not found
+    # * _verbose_ = Verbosity level
+    #
+    # === Example
+    # ScraperWiki::get_var('current', 0)
+    #
     def ScraperWiki.get_var(name, default=nil, verbose=2)
         begin
             result = ScraperWiki.sqliteexecute("select value_blob, type from swvariables where name=?", [name], verbose)
@@ -323,24 +411,8 @@ module ScraperWiki
         return svalue
     end
 
-    # These are DEPRECATED and just here for compatibility
-    def ScraperWiki.get_metadata(metadata_name, default = nil)
-        if !$metadatamessagedone == nil
-            puts "*** instead of get_metadata('"+metadata_name+"') please use\n    get_var('"+metadata_name+"')"
-            metadatamessagedone = true
-        end
-        result = ScraperWiki.get_var(metadata_name, default)
-        return result
-    end
 
-    # These are DEPRECATED and just here for compatibility
-    def ScraperWiki.save_metadata(metadata_name, value)
-        if !$metadatamessagedone
-            puts "*** instead of save_metadata('"+metadata_name+"') please use\n    save_var('"+metadata_name+"')"
-            $metadatamessagedone = true
-        end
-        return ScraperWiki.save_var(metadata_name, value)
-    end
+
 
 
     def ScraperWiki.show_tables(dbname=nil)
@@ -436,7 +508,8 @@ module ScraperWiki
         return res
     end
 
-    # old functions put back in for regression
+
+    # <b>DEPRECATED:</b> use ScraperWiki.attach
     def ScraperWiki.getData(name, limit=-1, offset=0)
         if !$apiwrapperattacheddata.include?(name)
             puts "*** instead of getData('"+name+"') please use\n    ScraperWiki.attach('"+name+"') \n    print ScraperWiki.select('* from `"+name+"`.swdata')"
@@ -471,6 +544,7 @@ module ScraperWiki
         end
     end
 
+    # <b>DEPRECATED:</b> use ScraperWiki.attach instead
     def ScraperWiki.getKeys(name)
         if !$apiwrapperattacheddata.include?(name)
             puts "*** instead of getKeys('"+name+"') please use\n    ScraperWiki.attach('"+name+"') \n    print ScraperWiki.sqliteexecute('select * from `"+name+"`.swdata limit 0')['keys']"
@@ -483,4 +557,24 @@ module ScraperWiki
         end
         return result["keys"]
     end
+    
+    
+    # <b>DEPRECATED:</b>
+    def ScraperWiki.get_metadata(metadata_name, default = nil)
+        if !$metadatamessagedone == nil
+            puts "*** instead of get_metadata('"+metadata_name+"') please use\n    get_var('"+metadata_name+"')"
+            metadatamessagedone = true
+        end
+        result = ScraperWiki.get_var(metadata_name, default)
+        return result
+    end
+
+    # <b>DEPRECATED:</b>
+    def ScraperWiki.save_metadata(metadata_name, value)
+        if !$metadatamessagedone
+            puts "*** instead of save_metadata('"+metadata_name+"') please use\n    save_var('"+metadata_name+"')"
+            $metadatamessagedone = true
+        end
+        return ScraperWiki.save_var(metadata_name, value)
+    end    
 end
