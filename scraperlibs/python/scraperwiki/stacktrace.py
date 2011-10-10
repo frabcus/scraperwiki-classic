@@ -25,10 +25,14 @@ def getExceptionTraceback(code):
     for frame, file, linenumber, func, lines, index in inspect.getinnerframes(exc_traceback, context=1)[1:]:  # skip outer frame
         stackentry = { "linenumber":linenumber, "file":file }
         if func != "<module>":
-            args, varargs, varkw, locals = inspect.getargvalues(frame)
-            funcargs = inspect.formatargvalues(args, varargs, varkw, locals, formatvalue=formatvalue)
-            stackentry["furtherlinetext"] = "%s(%s)" % (func, funcargs)  # double brackets to make it stand out
-        
+            try:
+                args, varargs, varkw, locals = inspect.getargvalues(frame)
+                funcargs = inspect.formatargvalues(args, varargs, varkw, locals, formatvalue=formatvalue)
+                stackentry["furtherlinetext"] = "%s(%s)" % (func, funcargs)  # double brackets to make it stand out
+            except:
+                # TODO: Do something useful here.
+                pass
+                
         if file == "<string>" and 0 <= linenumber - 1 < len(codelines):
             stackentry["linetext"] = codelines[linenumber - 1]  # have to do this as context=1 doesn't work (it doesn't give me anything in lines)
         else:

@@ -440,6 +440,7 @@ def handle_editor_save(request):
     if not title or title.lower() == 'untitled':
         return HttpResponse(json.dumps({'status' : 'Failed', 'message':"title is blank or untitled"}))
     
+    target_priv = None    
     if guid:
         try:
             scraper = models.Code.objects.exclude(privacy_status="deleted").get(guid=guid)   # should this use short_name?
@@ -463,7 +464,6 @@ def handle_editor_save(request):
         scraper.language = language
         scraper.title = title
 
-        target_priv = None
         fork = request.POST.get("fork", None)
         if fork:
             try:

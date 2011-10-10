@@ -292,7 +292,11 @@ def code_overview(request, wiki_type, short_name):
 
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
-
+        
+    forked_from_this = None
+    if wiki_type == 'scraper':
+        forked_from_this = Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted', privacy_status='private')
+        
         
     # unfinished CKAN integration
     if False and dataproxy and request.user.is_staff:
