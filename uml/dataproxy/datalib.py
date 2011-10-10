@@ -235,8 +235,9 @@ class SQLiteDatabase(Database):
             if 'create index' in sqlquery.lower():
                 timeout_len = 180
             
-                # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
-            signal.alarm(timeout_len, timeout_handler)  # should use set_progress_handler !!!!
+            # If the query hasn't run in timeout_len seconds then we'll timeout
+            signal.signal(signal.SIGALRM, timeout_handler)                
+            signal.alarm(timeout_len)  # should use set_progress_handler !!!!
             if data:
                 self.m_sqlitedbcursor.execute(sqlquery, data)  # handle "(?,?,?)", (val, val, val)
             else:
