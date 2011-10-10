@@ -71,11 +71,14 @@ class SQLiteDatabase(Database):
         self.logger = logging.getLogger('dataproxy')
 
     def close(self):
-        if self.m_sqlitedbcursor:
-            self.m_sqlitedbcursor.close()
-        if self.m_sqlitedbconn:
-            self.m_sqlitedbconn.close()
-
+        try:
+            if self.m_sqlitedbcursor:
+                self.m_sqlitedbcursor.close()
+            if self.m_sqlitedbconn:
+                self.m_sqlitedbconn.close()
+        except:
+            pass
+            
     def process(self, request):
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
