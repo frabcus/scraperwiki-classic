@@ -510,7 +510,7 @@ def handle_editor_save(request):
         else:
             (rev, revdate) = advancesave
 
-        if scraper.set_invault:
+        if hasattr(scraper, 'set_invault') and scraper.set_invault:
             scraper.vault = scraper.set_invault
             scraper.privacy_status = 'private'
             scraper.save()
