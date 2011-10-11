@@ -440,6 +440,7 @@ def handle_editor_save(request):
     if not title or title.lower() == 'untitled':
         return HttpResponse(json.dumps({'status' : 'Failed', 'message':"title is blank or untitled"}))
     
+    target_priv = None    
     if guid:
         try:
             scraper = models.Code.objects.exclude(privacy_status="deleted").get(guid=guid)   # should this use short_name?
@@ -467,6 +468,12 @@ def handle_editor_save(request):
         if fork:
             try:
                 scraper.forked_from = models.Code.objects.exclude(privacy_status="deleted").get(short_name=fork)
+                if scraper.forked_from.vault:
+                    target_priv = 'private'
+                    scraper.set_invault = scraper.forked_from.vault
+                else:
+                    target_priv = scraper.forked_from.privacy_status
+                    
             except models.Code.DoesNotExist:
                 pass
 
@@ -498,13 +505,24 @@ def handle_editor_save(request):
     # (some of the operation was moved to advancesave so we have the 
     # rev number to pass to the runner in advance.  All this needs refactoring)
     if request.user.is_authenticated():
-        if not scraper.actionauthorized(request.user, "savecode"):
+        if not scraper.actionauthorized(request.user, "savecode") and not request.user == scraper.owner():
             return HttpResponse(json.dumps({'status':'Failed', 'message':"Not allowed to save this scraper"}))
         
         if not advancesave:
             (rev, revdate) = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
         else:
             (rev, revdate) = advancesave
+            
+        need_save = False
+        if target_priv:
+            scraper.privacy_status = target_priv
+            scraper.save()
+            
+        if hasattr(scraper, 'set_invault') and scraper.set_invault:
+            scraper.vault = scraper.set_invault
+            scraper.save()
+            scraper.vault.update_access_rights()
+            
 
         response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
         return HttpResponse(json.dumps({'redirect':'true', 'url':response_url, 'rev':rev, 'revdateepoch':_datetime_to_epoch(revdate) }))

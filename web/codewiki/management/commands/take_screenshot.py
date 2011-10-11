@@ -37,6 +37,11 @@ class Command(BaseCommand):
                                         size = size_values)
 
     def handle(self, *args, **options):
+        """
+            Starting to think we should just accept connections here to trigger the screenshooting (in seq)
+            rather than trying to find what needs doing. 
+        """
+        
         if not options['url_prefix']:
             print "You must provide the url_prefix on which the views are running"
             return
@@ -54,11 +59,11 @@ class Command(BaseCommand):
         if options['short_name']:
             scrapers = Scraper.objects.filter(short_name=options['short_name']).exclude(privacy_status="deleted")
         elif options['run_scrapers']:
-            scrapers = Scraper.objects.exclude(privacy_status="deleted").order_by("-id")
+            scrapers = Scraper.objects.exclude(privacy_status="deleted").exclude(short_name__endswith='.emailer').order_by("-id")
         else:
             scrapers = []
 
-        for scraper in scrapers:
+        for scraper in scrapers[0:400]:
             self.add_screenshots(scraper, settings.SCRAPER_SCREENSHOT_SIZES, options)
 
         if options['verbose']:

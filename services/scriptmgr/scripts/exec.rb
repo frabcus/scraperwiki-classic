@@ -19,6 +19,10 @@ class ConsoleStream
         @fd   = fd
         @text = ''
     end
+    
+    def tty?
+      return false 
+    end
 
     # Do our best to turn anything into unicode, for display on console
     # (for datastore, we give errors if it isn't already UTF-8)

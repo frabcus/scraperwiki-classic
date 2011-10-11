@@ -53,12 +53,16 @@ class ScreenShooter(object):
                 print _memsize()
             try:
                 image = self._get_renderer(shot['size'][0], shot['size'][1]).render(shot['url'])
+                if self.verbose:
+                    print 'Got Renderered image, saving'
                 image.save(shot['filename'], 'png')
             except RuntimeError:
                 print "Timeout screenshooting %s" % shot['url']
         sys.exit(0)
 
     def add_shot(self, url, filename, size):
+        if self.verbose:
+            print 'Adding ', url
         self.shots.append({'url': url, 'filename': filename, 'size': size})
         
     def run(self, verbose=False):
@@ -68,6 +72,7 @@ class ScreenShooter(object):
 
 if __name__ == '__main__':
     s = ScreenShooter()
+    print 'Adding shots'
     s.add_shot('http://google.com', 'google.png', (200, 200))
     s.add_shot('http://amazon.com', 'amazon.png', (200, 200))
-    s.run()
+    s.run(verbose=True)

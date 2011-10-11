@@ -120,15 +120,26 @@ def out_csvhtml(dataproxy, short_name, format):
     return response
     
 
+# TODO: Fix this so that we can stream the results to either the browser or the download.  Currently
+# this dies on large data ~38k rows (depending on query) with a timeout and so the user gets nothing
+# but maybe we should do iterating over the results as they come in and part-encoding the stream with
+# each row?
 def out_json(dataproxy, callback, short_name, format):
     # json is not chunked.  The output is of finite fixed bite sizes because it is generally used by browsers which aren't going to survive a huge download
     # however could chunk the jsondict type stream_wise as above by manually creating the outer bracketing as with htmltable
     result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
+    
+    if not result:
+        dataproxy.close()
+        return HttpResponse("Error: A timeout occurred retrieving data from the dataproxy")        
+        
     if format == "jsondict":
         try:
             res = simplejson.loads(result)
         except ValueError, e:
-            return HttpResponse("Error:%s" % (e.message,))
+            dataproxy.close()            
+            return HttpResponse("Error: %s" % (e.message,))
+            
         if "error" not in res:
             dictlist = [ dict(zip(res["keys"], values))  for values in res["data"] ]
             result = simplejson.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
@@ -256,12 +267,14 @@ def sqlite_handler(request):
         dataproxy.close()
         return HttpResponse("Error: the format '%s' is not supported" % format)
 
+
     if format in ["csv", 'htmltable']:   
         return out_csvhtml(dataproxy, scraper.short_name, format)
     if format == "rss2":
         return out_rss2(dataproxy, scraper)
-    return out_json(dataproxy, request.GET.get("callback"), scraper.short_name, format)
-
+        
+    return  out_json(dataproxy, request.GET.get("callback"), scraper.short_name, format)
+    
 
 def scraper_search_handler(request):
     apikey = request.GET.get('apikey', None)

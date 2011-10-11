@@ -19,6 +19,10 @@ try:
 except:
     import simplejson as json
 
+
+class TimeoutException(Exception): 
+    pass 
+
 def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
     #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)
     readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library.  codes: http://www.sqlite.org/c3ref/c_alter_table.html
@@ -66,6 +70,15 @@ class SQLiteDatabase(Database):
 
         self.logger = logging.getLogger('dataproxy')
 
+    def close(self):
+        try:
+            if self.m_sqlitedbcursor:
+                self.m_sqlitedbcursor.close()
+            if self.m_sqlitedbconn:
+                self.m_sqlitedbconn.close()
+        except:
+            pass
+            
     def process(self, request):
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
@@ -172,7 +185,8 @@ class SQLiteDatabase(Database):
 #                self.m_sqlitedbconn.set_progress_handler(progress_handler, 1000000)  # can be order of 0.4secs 
 #            except AttributeError:
 #                pass  # must be python version 2.6
-            self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
+             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
+             
         return True
                 
                 
@@ -219,10 +233,21 @@ class SQLiteDatabase(Database):
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
         self.logger.debug("XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50]))
 
+        def timeout_handler(signum, frame):
+            raise TimeoutException()
+
+        timeout_len = 30
+
         self.establishconnection(True)
         try:
-                # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
-            signal.alarm(30)  # should use set_progress_handler !!!!
+            # In the absence of a user toolkit for managing the database we will manually tweak
+            # the timeout for creating indices
+            if 'create index' in sqlquery.lower():
+                timeout_len = 180
+            
+            # If the query hasn't run in timeout_len seconds then we'll timeout
+            signal.signal(signal.SIGALRM, timeout_handler)                
+            signal.alarm(timeout_len)  # should use set_progress_handler !!!!
             if data:
                 self.m_sqlitedbcursor.execute(sqlquery, data)  # handle "(?,?,?)", (val, val, val)
             else:
@@ -277,6 +302,10 @@ class SQLiteDatabase(Database):
             signal.alarm(0)
             self.logger.debug("user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000]))
             return {"error":"sqlite3.Error: %s" % str(e)}
+        except TimeoutException,tout:
+            signal.alarm(0)
+            self.logger.debug("user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000]))
+            return { "error" : "Query timeout: %s" % str(tout) }
 
 
     def sqliteattach(self, name, asname):
