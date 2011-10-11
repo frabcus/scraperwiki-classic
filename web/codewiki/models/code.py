@@ -322,7 +322,11 @@ class Code(models.Model):
             if nqsenvvars:
                 cdesc = "%s\n\n_Has %d secret query-string environment variable%s._" % (cdesc, nqsenvvars, (nqsenvvars>1 and "s" or ""))
 
-        return textile.textile(cdesc)   # wikicreole at the very least here!!!
+        text = textile.textile(cdesc)   # wikicreole at the very least here!!!
+        text = text.replace("&#8220;", '"')
+        text = text.replace("&#8221;", '"')        
+        text = text.replace("&#8217;", "'")                
+        return text
 
         
 
