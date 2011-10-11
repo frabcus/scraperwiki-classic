@@ -49,7 +49,7 @@ class Command(BaseCommand):
         if options['short_name']:
             views = View.objects.filter(short_name=options['short_name']).exclude(privacy_status="deleted")
         elif options['run_views']:
-            views = View.objects.exclude(privacy_status="deleted").order_by("-id")
+            views = View.objects.filter(has_screen_shot=False).exclude(privacy_status="deleted").order_by("-id")
         else:
             views = []
 
@@ -59,11 +59,11 @@ class Command(BaseCommand):
         if options['short_name']:
             scrapers = Scraper.objects.filter(short_name=options['short_name']).exclude(privacy_status="deleted")
         elif options['run_scrapers']:
-            scrapers = Scraper.objects.exclude(privacy_status="deleted").exclude(short_name__endswith='.emailer').order_by("-id")
+            scrapers = Scraper.objects.filter(has_screen_shot=False).exclude(privacy_status="deleted").exclude(short_name__endswith='.emailer').order_by("-id")
         else:
             scrapers = []
 
-        for scraper in scrapers[0:400]:
+        for scraper in scrapers:
             self.add_screenshots(scraper, settings.SCRAPER_SCREENSHOT_SIZES, options)
 
         if options['verbose']:
