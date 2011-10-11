@@ -68,7 +68,8 @@ class Command(BaseCommand):
             self.add_screenshots(view, settings.VIEW_SCREENSHOT_SIZES, options)
 
         for scraper in scrapers:
-            self.add_screenshots(scraper, settings.SCRAPER_SCREENSHOT_SIZES, options)
+            if not scraper.has_screenshot()
+                self.add_screenshots(scraper, settings.SCRAPER_SCREENSHOT_SIZES, options)
 
         if options['verbose']:
             print "------ Starting Screenshooting ------"
