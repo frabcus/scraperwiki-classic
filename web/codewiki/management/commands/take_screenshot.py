@@ -54,7 +54,8 @@ class Command(BaseCommand):
         if options['short_name']:
             scrapers = Scraper.objects.filter(short_name=options['short_name']).exclude(privacy_status="deleted")
         elif options['run_scrapers']:
-            scrapers = Scraper.objects.exclude(privacy_status="deleted").order_by("-id")
+            # Exclude user's emailers
+            scrapers = Scraper.objects.exclude(privacy_status="deleted").exclude(short_name__endswith='.emailer').order_by("-id")
         else:
             scrapers = []
 
