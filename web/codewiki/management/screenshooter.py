@@ -53,6 +53,8 @@ class ScreenShooter(object):
                 print _memsize()
             try:
                 image = self._get_renderer(shot['size'][0], shot['size'][1]).render(shot['url'])
+                if self.verbose:
+                    print 'Got Renderered image, saving'
                 image.save(shot['filename'], 'png')
             except RuntimeError:
                 print "Timeout screenshooting %s" % shot['url']
