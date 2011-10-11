@@ -46,9 +46,10 @@ class ScreenShooter(object):
             return renderer
         
     def __take_screenshots(self):
+        count = 1
         for shot in self.shots:
             if self.verbose:
-                print "Taking screenshot %s" % shot['filename']
+                print "%d Taking screenshot %s" % (count,shot['filename'],)
                 print shot['url']
                 print _memsize()
             try:
@@ -56,14 +57,22 @@ class ScreenShooter(object):
                 if self.verbose:
                     print 'Got Renderered image, saving'
                 image.save(shot['filename'], 'png')
+                
+                if self.verbose:
+                    print 'Processed: %s <%s>' ( str(shot['wiki_type']), str(shot['id']), )
+                    
+                # TODO:
+                # Notify via HTTP that shot['wiki_type'] with id shot['id'] now has an image
+                # - Maybe we should post the image?
             except RuntimeError:
                 print "Timeout screenshooting %s" % shot['url']
+            count = count + 1
         sys.exit(0)
 
-    def add_shot(self, url, filename, size):
+    def add_shot(self, url, filename, size, wiki_type, id):
         if self.verbose:
             print 'Adding ', url
-        self.shots.append({'url': url, 'filename': filename, 'size': size})
+        self.shots.append({'url': url, 'filename': filename, 'size': size, 'wiki_type': wiki_type, 'id':id})
         
     def run(self, verbose=False):
         self.verbose = verbose
