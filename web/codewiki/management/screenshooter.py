@@ -57,10 +57,7 @@ class ScreenShooter(object):
                 if self.verbose:
                     print 'Got Renderered image, saving'
                 image.save(shot['filename'], 'png')
-                
-                if self.verbose:
-                    print 'Processed: %s <%d>' ( shot['wiki_type'], shot['id'], )
-                    
+                                    
                 # TODO:
                 # Notify via HTTP that shot['wiki_type'] with id shot['id'] now has an image
                 # - Maybe we should post the image?
