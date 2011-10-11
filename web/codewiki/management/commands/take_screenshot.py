@@ -34,7 +34,9 @@ class Command(BaseCommand):
         for size_name, size_values in sizes.items():
             self.screenshooter.add_shot(url = view.get_screenshot_url(options['url_prefix']), 
                                         filename = view.get_screenshot_filepath(size_name),
-                                        size = size_values)
+                                        size = size_values,
+                                        wiki_type=view.wiki_type, 
+                                        id=view.id)
 
     def handle(self, *args, **options):
         """
@@ -68,7 +70,10 @@ class Command(BaseCommand):
             self.add_screenshots(view, settings.VIEW_SCREENSHOT_SIZES, options)
 
         for scraper in scrapers:
-            self.add_screenshots(scraper, settings.SCRAPER_SCREENSHOT_SIZES, options)
+            if not scraper.has_screenshot():
+                self.add_screenshots(scraper, settings.SCRAPER_SCREENSHOT_SIZES, options)
+            elif options['verbose']:
+                print '%s has a screenshot' % (scraper.short_name,)
 
         if options['verbose']:
             print "------ Starting Screenshooting ------"
