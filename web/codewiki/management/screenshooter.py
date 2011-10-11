@@ -49,7 +49,7 @@ class ScreenShooter(object):
         count = 1
         for shot in self.shots:
             if self.verbose:
-                print "%d Taking screenshot %s" % (count,shot['filename'],)
+                print "%d: Taking screenshot %s" % (count,shot['filename'],)
                 print shot['url']
                 print _memsize()
             try:
@@ -59,7 +59,7 @@ class ScreenShooter(object):
                 image.save(shot['filename'], 'png')
                 
                 if self.verbose:
-                    print 'Processed: %s <%s>' ( str(shot['wiki_type']), str(shot['id']), )
+                    print 'Processed: %s <%d>' ( shot['wiki_type'], shot['id'], )
                     
                 # TODO:
                 # Notify via HTTP that shot['wiki_type'] with id shot['id'] now has an image
