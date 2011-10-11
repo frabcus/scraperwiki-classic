@@ -6,6 +6,7 @@ import os.path
 
 # TODO:
 # Restart things for firebox, webstore if specified (and indeed twister for webserver)
+#   httpproxy and dataproxy will need pgrep killing as not coded right
 # Full deploy that restarts everything too
 # Pull puppet on kippax, then pull elsewhere in one command
 # Run Django tests automatically - on local or on dev?
@@ -29,6 +30,8 @@ env.server_lookup = {
 
     ('firebox', 'dev'): ['kippax.scraperwiki.com'], 
     ('firebox', 'live'): ['horsell.scraperwiki.com:7822'],
+
+    ('screenshooter', 'live'): ['kippax.scraperwiki.com'], # bit nasty that this is a dev server!
 }
 # This is slightly magic - we want to generate the host list from the pair of
 # the service deployed (e.g. firebox) and the flock (e.g. live). This gets
@@ -37,7 +40,8 @@ env.server_lookup = {
 env.roledefs = {
     'webserver' : lambda: do_server_lookup('webserver'),
     'webstore' : lambda: do_server_lookup('webstore'),
-    'firebox' : lambda: do_server_lookup('firebox')
+    'firebox' : lambda: do_server_lookup('firebox'),
+    'screenshooter' : lambda: do_server_lookup('screenshooter')
 }
 
 env.path = '/var/www/scraperwiki'
@@ -149,6 +153,17 @@ buildout=no, stops it updating buildout which can be slow'''
 
     update_crons()
     deploy_done()
+
+# Currently this is just for the live site, to make the screenshots run
+# on a separate server, as they would often break and spin and take down
+# the live site.
+@task
+@roles('screenshooter')
+def screenshooter():
+    with cd("/home/screenshooter/scraperwiki"):
+        run("sudo -u screenshooter hg pull --quiet")
+        run("sudo -u screenshooter hg update --quiet -C %(branch)s" % env)
+        run("sudo -u screenshooter -s -- 'source bin/activate; buildout -N -qq'")
 
 
 @task
