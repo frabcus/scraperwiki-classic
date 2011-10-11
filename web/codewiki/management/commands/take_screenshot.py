@@ -63,7 +63,7 @@ class Command(BaseCommand):
         else:
             scrapers = []
 
-        for scraper in scrapers[0:200]:
+        for scraper in scrapers[0:400]:
             self.add_screenshots(scraper, settings.SCRAPER_SCREENSHOT_SIZES, options)
 
         if options['verbose']:

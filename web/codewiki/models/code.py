@@ -114,6 +114,7 @@ class Code(models.Model):
     forked_from        = models.ForeignKey('self', null=True, blank=True)
     privacy_status     = models.CharField(max_length=32, choices=PRIVACY_STATUSES, default='public')
     previous_privacy   = models.CharField(max_length=32, choices=PRIVACY_STATUSES, null=True, blank=True)
+    has_screen_shot    = models.BooleanField( default=False )
     
     # For private scrapers this can be provided to API calls as proof that the caller has access
     # to the scraper, it is really a shared secret between us and the caller. For the datastore 
