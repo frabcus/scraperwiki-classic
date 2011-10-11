@@ -37,6 +37,11 @@ class Command(BaseCommand):
                                         size = size_values)
 
     def handle(self, *args, **options):
+        """
+            Starting to think we should just accept connections here to trigger the screenshooting (in seq)
+            rather than trying to find what needs doing. 
+        """
+        
         if not options['url_prefix']:
             print "You must provide the url_prefix on which the views are running"
             return
