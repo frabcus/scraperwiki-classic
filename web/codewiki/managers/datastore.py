@@ -15,8 +15,9 @@ class DataStore(object):
         self.m_socket = socket.socket()
         self.m_socket.connect((settings.DATAPROXY_HOST, settings.DATAPROXY_PORT))
         
-        # Set receive timeout to be 20 seconds so that this failing doesn't cause us to 404
-        self.m_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('LL', 20, 0))
+        # Set receive timeout to be 25 seconds so that this failing doesn't cause us to 404
+        # If this doesn't work out, change to using select() with a timeout (both individual and overall)
+        self.m_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('LL', 25, 0))
         
         data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("short_name", short_name) ]
         self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
