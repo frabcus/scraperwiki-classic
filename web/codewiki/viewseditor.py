@@ -518,6 +518,10 @@ def handle_editor_save(request):
             scraper.privacy_status = target_priv
             scraper.save()
             
+            # TODO: Copy across the screenshot from the original
+            # Guess this has to be post-save so we have a slug.
+
+            
         if hasattr(scraper, 'set_invault') and scraper.set_invault:
             scraper.vault = scraper.set_invault
             scraper.save()
