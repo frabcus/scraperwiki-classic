@@ -3,6 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<title>{% block title %}{% endblock %} | ScraperWiki</title>
+	<link rel="image_src" href="{{ MEDIA_URL }}images/footer_tractor.png" />
 
     {% block meta %}{% endblock %}
 
@@ -50,6 +51,8 @@
 
 {% load body_class %}
 <body {%  body_class request %}>
+    
+<img src="{{ MEDIA_URL }}images/footer_tractor.png" width="140" height="90" alt="ScraperWiki.com" style="position: absolute; left: -9000px" />
 
 {% if messages %}
 	{% for message in messages %}

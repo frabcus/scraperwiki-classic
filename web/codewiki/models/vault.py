@@ -7,8 +7,7 @@ PLAN_TYPES = (
     ('corporate', 'Corporate'),    
 )
 
-# One instance per user that has a premium account. 
-# TODO: Constrain this so each user can only have one.
+# Multiple instances per user are now allowed
 class Vault(models.Model):
     
     user = models.ForeignKey(User, related_name='vaults')

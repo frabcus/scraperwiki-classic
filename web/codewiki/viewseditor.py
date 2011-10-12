@@ -518,6 +518,20 @@ def handle_editor_save(request):
             scraper.privacy_status = target_priv
             scraper.save()
             
+            # Copy across the screenshot from the original
+            # Guess this has to be post-save so we have a slug.
+            if scraper.forked_from.has_screenshot():
+                import shutil
+                try:
+                    src = scraper.forked_from.get_screenshot_filepath()
+                    rt, ext = os.path.splitext(src)
+                    dst = os.path.join( os.path.dirname(src), scraper.short_name ) + ext
+                    shutil.copyfile(src, dst)
+                    scraper.has_screen_shot = True
+                    scraper.save()
+                except:
+                    pass
+                    
         if hasattr(scraper, 'set_invault') and scraper.set_invault:
             scraper.vault = scraper.set_invault
             scraper.save()

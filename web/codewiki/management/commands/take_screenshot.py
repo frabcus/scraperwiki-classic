@@ -16,7 +16,6 @@ class Command(BaseCommand):
                         help='Should the Scrapers be run?'),
         make_option('--run_views', dest='run_views', action="store_true",
                         help='Should the Views be run?'),
-        # XXX todo can just use a config variable for knowing where views are now?
         make_option('--url_prefix', '-u', dest='url_prefix',
                         help='First prat of URL which the views are running on, e.g. https://views.scraperwiki.com'),
         make_option('--verbose', dest='verbose', action="store_true",
