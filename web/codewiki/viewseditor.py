@@ -520,7 +520,7 @@ def handle_editor_save(request):
             
             # Copy across the screenshot from the original
             # Guess this has to be post-save so we have a slug.
-            if scraper.forked_from.has_screenshot():
+            if scraper.forked_from and scraper.forked_from.has_screenshot():
                 import shutil
                 try:
                     src = scraper.forked_from.get_screenshot_filepath()
@@ -529,8 +529,9 @@ def handle_editor_save(request):
                     shutil.copyfile(src, dst)
                     scraper.has_screen_shot = True
                     scraper.save()
-                except:
-                    pass
+                except Exception, e:
+                    import logging
+                    logg.error(e)
                     
         if hasattr(scraper, 'set_invault') and scraper.set_invault:
             scraper.vault = scraper.set_invault
