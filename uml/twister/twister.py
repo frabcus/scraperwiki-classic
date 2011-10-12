@@ -22,8 +22,8 @@ import time
 import datetime
 import grp, pwd
 import urllib, urlparse
-from proxycallbacks import ClientUpdater
 import json
+import cgi
 
 from twisted.internet import protocol, utils, reactor, task
 
@@ -37,7 +37,7 @@ from twisted.internet.error import ProcessDone
 
 from twisterconfig import poptions, config, stdoutlog, djangokey, djangourl, logging, logger, jstime
 from twisterrunner import MakeRunner
-
+from proxycallbacks import ClientUpdater
 
 agent = Agent(reactor)
 
@@ -60,7 +60,6 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # autosave, autoload, or draft when guid is not set
-        self.runobjectmaker = None
         self.clienttype = None # 'editing', 'umlmonitoring', 'rpcrunning', 'scheduledrun', 'stimulate_run', 'httpget'
         
 
@@ -107,19 +106,44 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
     # this will generalize to making status and other outputs from here
     def handlehttpgetcase(self, line):
         if line:
-            self.httpheaders = line.split(" ", (self.httpheaders and 2 or 1))   # GET query 1.1
+            self.httpheaders.append(line.split(" ", (self.httpheaders and 1 or 2)))   # first line is GET /path?query HTTP/1.0
             return
+        if self.httpgetreplied:
+            return
+            
+        # else we are on the blank line after the header
+        self.transport.write('HTTP/1.0 200 OK\r\n')  
+        self.transport.write('Connection: Close\r\n')  
+        self.transport.write('Pragma: no-cache\r\n')  
+        self.transport.write('Cache-Control: no-cache\r\n')  
+        self.transport.write('Content-Type: text/text\r\n')  
+        self.transport.write('\r\n')
+        
+        path, q, query = self.httpheaders[0][1].partition("?")
+        querydict = dict(cgi.parse_qsl(query))
+        if path == "/status":
+            self.transport.write('Now with %d connectedclients, %d rpcrunningclients, %d stimulate_runclients, %d httpgetclients, %d umlmonitoringclients, %d draftscraperclients, %d guidclients, %d running processes\n' % \
+                    (len(self.factory.connectedclients), len(self.factory.rpcrunningclients), len(self.factory.stimulate_runclients), len(self.factory.httpgetclients), len(self.factory.umlmonitoringclients), len(self.factory.draftscraperclients), sum([eoos.Dcountclients()  for eoos in self.factory.guidclientmap.values()]), len(self.factory.runidclientmap)))
 
-        self.transport.write('HTTP/1.0 200 OK\n')  
-        self.transport.write('Connection: Close\n')  
-        self.transport.write('Pragma: no-cache\n')  
-        self.transport.write('Cache-Control: no-cache\n')  
-        self.transport.write('Content-Type: text/text\n')  
-        self.transport.write('\n')
+            # querydict is what would be sent by the notify function in httpproxy
+            # (could use another secret key in the config file to validate the call)
+        if path == "/sources":
+                runid           = runID,
+                scraperid       = scraperID,
+                url             = self.path,
+                failedmessage   = failedmessage,
+                bytes           = bytes,
+                mimetype        = mimetype,
+                cacheid         = cacheid,
+                last_cacheid    = cached is not None or '',
+                cached          = cached is not None,
+                ddiffers        = ddiffers, 
+                fetchtime       = time.time() - starttime
+
         self.transport.write('hi there')
-        self.transport.write(str(self.httpheaders)+'\n')
-        self.transport.loseConnection()
 
+        self.transport.loseConnection()
+        self.httpgetreplied = True
 
 
     # messages from the client
@@ -134,11 +158,13 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                 self.clienttype = "httpget"
                 self.factory.clientConnectionRegistered(self)
                 self.httpheaders = [ ]
-                self.handlehttpgetcase(line)
+                self.httpgetreplied = False
                 
             if self.clienttype == "httpget":
                 self.handlehttpgetcase(line)
             
+                # otherwise this is a message coming in from django or the browser editor
+                # (though the django ones could be done with an httppost or something)
             elif line:
                 try:
                     parsed_data = json.loads(line)
@@ -327,7 +353,6 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         elif command == 'giveselrange':
             self.writeall(None, json.dumps({'message_type':'giveselrange', 'selrange':parsed_data.get('selrange'), 'chatname':self.chatname }))
             
-        
         elif command == 'automode':
             automode = parsed_data.get('automode')
             if automode == self.automode:
@@ -368,9 +393,6 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
     def writeline(self, line):
         if self.clienttype != "scheduledrun":
             self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together (old case)
-        if self.runobjectmaker:
-            assert self.processrunning
-            self.runobjectmaker.receiveline(line)
             
     def writejson(self, data):
         self.writeline(json.dumps(data))
@@ -401,9 +423,10 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             msg = "%s (%s)" % (msg, reason)
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
         logger.debug(msg)
-        if self.processrunning.controllerconnection:
-            self.processrunning.controllerconnection.transport.loseConnection()
-
+        if self.processrunning.controllerconnection:   # possible for process to have been made, but connection to never have been got
+            self.processrunning.controllerconnection.transport.loseConnection()   # this will cause it to clean up
+        else:
+            self.processrunning.processEnded("no connection had ever been made")
     
             # stimulate_run, draftscraper run and rpcrun
     def runcode(self, parsed_data):
@@ -418,6 +441,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         rev = parsed_data.get('rev', '')
         bmakerunobject =  parsed_data.get('bmakerunobject', False)
         self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, beta_user, attachables, rev, bmakerunobject, agent)
+        self.factory.runidclientmap[self.processrunning.jdata["runid"]] = self
         self.factory.notifyMonitoringClients(self)
         
         
@@ -569,9 +593,10 @@ class RunnerFactory(protocol.ServerFactory):
         self.stimulate_runclients = [ ]
         self.httpgetclients = [ ]
 
+            # tables for quick access
         self.scheduledrunners = { } # maps from short_name to client objects (that are also put into guidclientmap)
-        
         self.guidclientmap = { }  # maps from short_name to EditorsOnOneScraper objects
+        self.runidclientmap = { } # maps runid to the client controlling the running
 
         # Get these settings from config 
         try:
@@ -643,6 +668,7 @@ class RunnerFactory(protocol.ServerFactory):
             beta_user = scraperoverdue.get("beta_user", False)
             attachables = scraperoverdue.get('attachables', [])
             sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, beta_user, attachables, sclient.originalrev, True, agent)
+            self.runidclientmap[scleint.processrunning.jdata["runid"]] = sclient
             self.notifyMonitoringClients(sclient)
 
 
