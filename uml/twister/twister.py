@@ -19,38 +19,17 @@ import sys
 import os
 import signal
 import time
-import ConfigParser
 import datetime
-import optparse, grp, pwd
+import grp, pwd
 import urllib, urlparse
-import logging, logging.config
 
 from proxycallbacks import ClientUpdater
 
-try:
-    import cloghandler
-except:
-    pass
+
+from twisterconfig import poptions, config, stdoutlog, djangokey, djangourl, logging, logger
 
 
-
-parser = optparse.OptionParser()
-parser.add_option("--pidfile")
-parser.add_option("--config")
-parser.add_option("--logfile")
-parser.add_option("--setuid", action="store_true")
-poptions, pargs = parser.parse_args()
-
-config = ConfigParser.ConfigParser()
-config.readfp(open(poptions.config))
-
-    # primarily to pick up syntax errors
-stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)  
-
-logger = logging.getLogger('twister')
-
-try:    import json
-except: import simplejson as json
+import json
 
 from twisted.internet import protocol, utils, reactor, task
 
@@ -63,7 +42,6 @@ from twisted.internet.defer import succeed, Deferred
 from twisted.internet.error import ProcessDone
 
 
-from twisterscheduledruns import ScheduledRunMessageLoopHandler
 from twisterrunner import MakeRunner, jstime, SetControllerHost
 
 SetControllerHost(config)
@@ -89,7 +67,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # autosave, autoload, or draft when guid is not set
-
+        self.runobjectmaker = None
         self.clienttype = None # 'editing', 'umlmonitoring', 'rpcrunning', 'scheduledrun', 'stimulate_run', 'httpget'
         
 
@@ -208,6 +186,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
             scrapername = parsed_data["scrapername"]
             guid = parsed_data["guid"]
+            assert guid
             username = parsed_data["username"]
             clientnumber = parsed_data["clientnumber"]
 
@@ -230,6 +209,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             
             if client:
                 logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
+                assert client.clienttype == "editing" and client.guid
                 if not client.processrunning:
                     client.runcode(parsed_data)
                     self.writejson({"status":"run started"})  
@@ -282,6 +262,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.writeall(json.dumps(jline), json.dumps(jotherline))
             self.factory.notifyMonitoringClientsSmallmessage(self, "typingnote")
             
+            # this one only applies to draft scrapers when you click run
         elif command == 'run':
             if self.processrunning:
                 self.writejson({'content':"Already running! (shouldn't happen)", 'message_type':'console'}); 
@@ -394,8 +375,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
     def writeline(self, line):
         if self.clienttype != "scheduledrun":
             self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
-        else:
-            self.scheduledrunmessageloophandler.receiveline(line)
+        if self.runobjectmaker:
+            assert self.processrunning
+            self.runobjectmaker.receiveline(line)
             
     def writejson(self, data):
         self.writeline(json.dumps(data))
@@ -426,18 +408,11 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             msg = "%s (%s)" % (msg, reason)
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
         logger.debug(msg)
-        if self.processrunning.pid == "NewSpawnRunner":
-            logger.debug("LosingConnectionNewWay "+self.processrunning.pid)
-            if hasattr(self.processrunning, 'controllerconnection'):
-                self.processrunning.controllerconnection.transport.loseConnection()
-        else:
-            try:      # (should kill using the new dispatcher call)
-                os.kill(self.processrunning.pid, signal.SIGKILL)
-            except:
-                pass
+        if self.processrunning.controllerconnection:
+            self.processrunning.controllerconnection.transport.loseConnection()
 
     
-            # this more recently can be called from stimulate_run from django (many of these parameters could be in the client)
+            # stimulate_run, draftscraper run and rpcrun
     def runcode(self, parsed_data):
         code = parsed_data.get('code', '')
         guid = parsed_data.get('guid', '')
@@ -448,7 +423,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         beta_user = parsed_data.get('beta_user', False)
         attachables = parsed_data.get('attachables', [])
         rev = parsed_data.get('rev', '')
-        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, beta_user, attachables, rev)
+        bmakerunobject =  parsed_data.get('bmakerunobject', False)
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, beta_user, attachables, rev, bmakerunobject, djangokey, djangourl, agent)
         self.factory.notifyMonitoringClients(self)
         
         
@@ -666,15 +642,12 @@ class RunnerFactory(protocol.ServerFactory):
 
             self.clientConnectionMade(sclient)  # allocates the client number
             self.scheduledrunners[scrapername] = sclient
-            djangokey = config.get("twister", "djangokey")
-            djangourl = config.get("twister", "djangourl")
-            sclient.scheduledrunmessageloophandler = ScheduledRunMessageLoopHandler(sclient, logger, djangokey, djangourl, agent)
             self.clientConnectionRegistered(sclient)  
 
             logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
             beta_user = scraperoverdue.get("beta_user", False)
             attachables = scraperoverdue.get('attachables', [])
-            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, logger, beta_user, attachables, sclient.originalrev)
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, logger, beta_user, attachables, sclient.originalrev, True, djangokey, djangourl, agent)
             self.notifyMonitoringClients(sclient)
 
 

@@ -86,6 +86,7 @@ class RunnerSocket:
         data = { "command":'stimulate_run', "language":language, "code":code, "rev":rev, 
                  "username":user.username, "scrapername":scraper.short_name, "clientnumber":clientnumber, "guid":scraper.guid }
         data["attachables"] = [ ascraper.short_name  for ascraper in scraper.attachable_scraperdatabases() ]
+        data["bmakerunobject"] = (scraper.wiki_type == "scraper")
 
         # pass in what we get from the request and ignore the description_envvars
         lqs = scraper.description_envvars().get("QUERY_STRING", "")

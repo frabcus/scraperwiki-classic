@@ -11,9 +11,7 @@ from twisted.web.http_headers import Headers
 import datetime
 import urlparse
 import urllib
-
-try:    import json
-except: import simplejson as json
+import json
 
 class StringProducer(object):
     implements(IBodyProducer)
@@ -57,7 +55,7 @@ APPROXLENOUTPUTLIMIT = 3000
 temptailmessage = "\n\n[further output lines suppressed]\n"
 
 class ScheduledRunMessageLoopHandler:
-    def __init__(self, client, logger, djangokey, djangourl, agent):
+    def __init__(self, client, username, logger, djangokey, djangourl, agent):
         # a partial implementation of editor.js
         self.exceptionmessage = [ ]
         self.completiondata = None
@@ -77,6 +75,7 @@ class ScheduledRunMessageLoopHandler:
         
         self.logger = logger
         self.djangourl = djangourl
+        self.username = username
         self.agent = agent
 
     def updaterunobjectFailure(self, failure):
@@ -123,7 +122,7 @@ class ScheduledRunMessageLoopHandler:
         if message_type == 'executionstatus':
             if content == "startingrun":
                 self.upost["run_id"] = data.get("runID")
-                self.output = "%sEXECUTIONSTATUS: uml=%s runid=%s\n" % (self.output, data.get("uml"), data.get("runID"))
+                self.output = "%sEXECUTIONSTATUS: uml=%s usename=%s runid=%s\n" % (self.output, data.get("uml"), self.username, data.get("runID"))
             elif content == "runcompleted":
                 self.logger.debug( "Got run completed : %s" % (line,)  )                
                 self.completiondata = data
@@ -191,13 +190,7 @@ class ScheduledRunMessageLoopHandler:
                 self.outputmessage.append(content[:APPROXLENOUTPUTLIMIT])
                 content = content[APPROXLENOUTPUTLIMIT:]
 
-        elif message_type == "editorstatus":
-            pass
-            
-        elif message_type == "chat":
-            pass
-
-        else:
+        elif message_type not in ["editorstatus", "saved", "chat"]:
             self.outputmessage.append("Unknown: %s\n" % line)
             
         

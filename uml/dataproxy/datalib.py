@@ -185,7 +185,7 @@ class SQLiteDatabase(Database):
 #                self.m_sqlitedbconn.set_progress_handler(progress_handler, 1000000)  # can be order of 0.4secs 
 #            except AttributeError:
 #                pass  # must be python version 2.6
-             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
+            self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
              
         return True
                 

@@ -4,6 +4,8 @@ from twisted.internet.defer import succeed, Deferred
 from twisted.internet.defer import Deferred
 from twisted.internet.error import ProcessDone
 
+from twisterscheduledruns import ScheduledRunMessageLoopHandler
+
 import sys
 import os
 import datetime
@@ -11,8 +13,7 @@ import time
 import uuid
 import urllib, urlparse
 
-try:    import json
-except: import simplejson as json
+import json
 
 def jstime(dt):
     return str(1000*int(time.mktime(dt.timetuple()))+dt.microsecond/1000)
@@ -25,8 +26,7 @@ def SetControllerHost(config):
     global nodecontrollername
     global nodecontrollerhost
     global nodecontrollerport
-    umls = config.get('twister', 'umllist').split(',')
-    nodecontrollername = umls[0]
+    nodecontrollername = "lxc001"
     # TODO: This needs to be a list
     nodecontrollerhost = config.get(nodecontrollername, 'host')
     nodecontrollerport = config.getint(nodecontrollername, 'via')
@@ -40,15 +40,12 @@ class spawnRunner(protocol.ProcessProtocol):
         self.umlname = ''
         self.buffer = ''
         self.logger = logger
-        self.style = "OldSpawnRunner"
         self.httpheaders = [ ]
         self.httpheadersdone = False
+        self.controllerconnection = None
         
     def connectionMade(self):
-        self.logger.debug("Starting run "+self.style)
-        if self.style == "OldSpawnRunner":
-            self.transport.write(self.code)
-            self.transport.closeStdin()
+        self.logger.debug("Starting run ")
     
     # called when the connection to the controntroller is opened
     def gotcontrollerconnectionprotocol(self, controllerconnection):
@@ -111,7 +108,8 @@ class spawnRunner(protocol.ProcessProtocol):
 
         # could move into a proper function in the client once slimmed down slightly
     def processEnded(self, reason):
-        self.client.processrunning = None
+        self.client.processrunning = None  # remove back connection
+        self.controllerconnection = None
 
         sreason = str([reason])
         if sreason == "[<twisted.python.failure.Failure <class 'twisted.internet.error.ProcessDone'>>]":
@@ -124,10 +122,13 @@ class spawnRunner(protocol.ProcessProtocol):
     
         self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished', 'contentextra':sreason}))
         
+        if self.client.runobjectmaker:
+            self.client.runobjectmaker.schedulecompleted()
+            self.client.runobjectmaker = None
+            
         if self.client.clienttype == "editing":
             self.client.factory.notifyMonitoringClients(self.client)
         elif self.client.clienttype == "scheduledrun":
-            self.client.scheduledrunmessageloophandler.schedulecompleted()
             self.client.factory.scheduledruncomplete(self.client, reason.type==ProcessDone)
 
     def controllerconnectionrequestFailure(self, failure):
@@ -148,16 +149,15 @@ class ControllerConnectionProtocol(protocol.Protocol):
 clientcreator = protocol.ClientCreator(reactor, ControllerConnectionProtocol)
 
 
-
 # this is the new way that totally bypasses the dispatcher.  
 # we reuse the spawnRunner class only for its user defined functions, not its processprotocol functions!
-def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev):
+def MakeRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev, bmakerunobject, djangokey, djangourl, agent):
     srunner = spawnRunner(client, code, logger)  # reuse this class and its functions
 
     jdata = { }
     jdata["code"] = code.replace('\r', '')
     jdata["cpulimit"] = 80
-    jdata["draft"] = (not username)
+    jdata["draft"] = (not username)   # or could be done by lack of presence of guid
     jdata["username"] = username   # comes through when done with stimulate_run, and we can use this for the dataproxy permissions (whether it can add to the attachables list)
     jdata["language"] = language
     jdata["scraperid"] = guid
@@ -174,16 +174,12 @@ def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, clie
     #logger.info(str(jdata))
     
     srunner.jdata = jdata
-    srunner.style = "NewSpawnRunner"
-    srunner.pid = "NewSpawnRunner"  # for the kill_run function
+    if bmakerunobject:
+        client.runobjectmaker = ScheduledRunMessageLoopHandler(client, username, logger, djangokey, djangourl, agent)
+        logger.info("Making run object on %s client# %d" % (scrapername, client.clientnumber))
 
     deferred = clientcreator.connectTCP(nodecontrollerhost, nodecontrollerport)
     deferred.addCallbacks(srunner.gotcontrollerconnectionprotocol, srunner.controllerconnectionrequestFailure)
 
     return srunner
     
-
-def MakeRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev):
-    # Here for historical reasons - send everyone to the node controller host for now (although we may
-    # add more in future)
-    return MakeSocketRunner(scrapername, guid, language, urlquery, username, code, client, logger, beta_user, attachables, rev)
