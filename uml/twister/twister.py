@@ -22,13 +22,7 @@ import time
 import datetime
 import grp, pwd
 import urllib, urlparse
-
 from proxycallbacks import ClientUpdater
-
-
-from twisterconfig import poptions, config, stdoutlog, djangokey, djangourl, logging, logger
-
-
 import json
 
 from twisted.internet import protocol, utils, reactor, task
@@ -41,10 +35,9 @@ from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed, Deferred
 from twisted.internet.error import ProcessDone
 
+from twisterconfig import poptions, config, stdoutlog, djangokey, djangourl, logging, logger, jstime
+from twisterrunner import MakeRunner
 
-from twisterrunner import MakeRunner, jstime, SetControllerHost
-
-SetControllerHost(config)
 
 agent = Agent(reactor)
 
@@ -76,7 +69,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
         # this returns localhost and is unable to distinguish between orbited or django source
         #socket = self.transport.getHandle()
-        #self.logger.info("socket  %s %s" % (socket.getpeername(), type(socket.getpeername())))
+        #logger.info("socket  %s %s" % (socket.getpeername(), type(socket.getpeername())))
         
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand
@@ -199,7 +192,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                         if lclient.clientnumber == clientnumber:
                             client = lclient
 
-            if parsed_data.get('django_key') != config.get('twister', 'djangokey'):
+            if parsed_data.get('django_key') != djangokey:
                 logger.error("djangokey_mismatch")
                 self.writejson({'status':'twister djangokey mismatch'})
                 if client:
@@ -229,7 +222,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.scrapername = parsed_data.get('scrapername', '')
             self.scraperlanguage = parsed_data.get('language', '')
             self.guid = parsed_data.get("guid", '')
-            if parsed_data.get('django_key') == config.get('twister', 'djangokey'):
+            if parsed_data.get('django_key') == djangokey:
                 self.clienttype = "rpcrunning"
                 logger.info("connection open %s: %s %s client# %d" % (self.clienttype, self.username, self.scrapername, self.clientnumber)) 
                 self.factory.clientConnectionRegistered(self)  
@@ -374,7 +367,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
     # message to the client
     def writeline(self, line):
         if self.clienttype != "scheduledrun":
-            self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
+            self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together (old case)
         if self.runobjectmaker:
             assert self.processrunning
             self.runobjectmaker.receiveline(line)
@@ -424,7 +417,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         attachables = parsed_data.get('attachables', [])
         rev = parsed_data.get('rev', '')
         bmakerunobject =  parsed_data.get('bmakerunobject', False)
-        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, beta_user, attachables, rev, bmakerunobject, djangokey, djangourl, agent)
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, beta_user, attachables, rev, bmakerunobject, agent)
         self.factory.notifyMonitoringClients(self)
         
         
@@ -551,6 +544,7 @@ class requestoverduescrapersReceiver(protocol.Protocol):
                     jdata["language"] = jdata["language"].lower()
                 self.factory.requestoverduescrapersAction(jdata)
             except ValueError:
+                #logger.warning("".join(self.rbuffer))
                 logger.warning("request overdue bad json: "+str(self.rbuffer)[:1000]+" "+str(reason.type))
         else:
             logger.warning("nope "+str([reason.getErrorMessage(), reason.type, self.rbuffer]))
@@ -567,7 +561,8 @@ class RunnerFactory(protocol.ServerFactory):
         self.anonymouscount = 1
         self.announcecount = 0
         
-        self.connectedclients = [ ]
+            # clients separated into their separate categories
+        self.connectedclients = [ ]   # what a client first appears in before any further information has come to identify what it is
         self.umlmonitoringclients = [ ]
         self.draftscraperclients = [ ]
         self.rpcrunningclients = [ ]
@@ -647,7 +642,7 @@ class RunnerFactory(protocol.ServerFactory):
             logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
             beta_user = scraperoverdue.get("beta_user", False)
             attachables = scraperoverdue.get('attachables', [])
-            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, logger, beta_user, attachables, sclient.originalrev, True, djangokey, djangourl, agent)
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, beta_user, attachables, sclient.originalrev, True, agent)
             self.notifyMonitoringClients(sclient)
 
 
@@ -661,7 +656,7 @@ class RunnerFactory(protocol.ServerFactory):
 
     # able to send out just a change for on a particular client in umlstatuschanges, or the full state of what's happening as umlstatusdata if required
     def notifyMonitoringClients(self, cclient):  # cclient is the one whose state has changed (it can be normal editor or a umlmonitoring case)
-        Dtclients = len(self.connectedclients) + len(self.rpcrunningclients) + len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        Dtclients = len(self.connectedclients) + len(self.rpcrunningclients) + len(self.stimulate_runclients) + len(self.httpgetclients) + len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
         if len(self.clients) != Dtclients:
             logger.error("Miscount of clients %d %d" % (len(self.clients), Dtclients))
         
