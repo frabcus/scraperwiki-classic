@@ -82,17 +82,22 @@ def diffseq(request, short_name):
 def run_event_json(request, run_id):
     event = None
     try:
-        event = models.ScraperRunEvent.objects.get(run_id=run_id)
+        event = models.ScraperRunEvent.objects.filter(run_id=run_id)[0]
     except models.ScraperRunEvent.DoesNotExist:
         pass
     except models.ScraperRunEvent.MultipleObjectsReturned:
         pass
+    except:
+        pass
 
     if not event and re.match("\d+$", run_id):
         try:
-            event = models.ScraperRunEvent.objects.get(pk=run_id)
+            event = models.ScraperRunEvent.objects.filter(pk=run_id)[0]
         except models.ScraperRunEvent.DoesNotExist:
             pass
+        except:
+            pass
+            
     if not event:
         return HttpResponse(json.dumps({"error":"run event does not exist", "output":"ERROR: run event does not exist"}))
     
