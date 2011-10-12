@@ -440,7 +440,7 @@ def handle_editor_save(request):
     if not title or title.lower() == 'untitled':
         return HttpResponse(json.dumps({'status' : 'Failed', 'message':"title is blank or untitled"}))
     
-    target_priv = None    
+    target_priv, fork = None, None    
     if guid:
         try:
             scraper = models.Code.objects.exclude(privacy_status="deleted").get(guid=guid)   # should this use short_name?
@@ -523,11 +523,9 @@ def handle_editor_save(request):
             scraper.vault.update_access_rights()
             
         if fork:
-            print 'Testing on fork'
-            # Copy across the screenshot from the original
-            # TODO: This isn't working, need to implement
+            # Copy across the screenshot from the original            
+            import logging
             if scraper.forked_from and scraper.forked_from.has_screenshot():
-                print 'Has screenshot'
                 import shutil
                 try:
                     src = scraper.forked_from.get_screenshot_filepath()
@@ -537,7 +535,7 @@ def handle_editor_save(request):
                     scraper.has_screen_shot = True
                     scraper.save()
                 except Exception, e:
-                    pass
+                    logging.error( str(e) )
         
 
         response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
