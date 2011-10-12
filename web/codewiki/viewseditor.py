@@ -513,14 +513,21 @@ def handle_editor_save(request):
         else:
             (rev, revdate) = advancesave
             
-        need_save = False
         if target_priv:
             scraper.privacy_status = target_priv
             scraper.save()
+                                
+        if hasattr(scraper, 'set_invault') and scraper.set_invault:
+            scraper.vault = scraper.set_invault
+            scraper.save()
+            scraper.vault.update_access_rights()
             
+        if fork:
+            print 'Testing on fork'
             # Copy across the screenshot from the original
-            # Guess this has to be post-save so we have a slug.
+            # TODO: This isn't working, need to implement
             if scraper.forked_from and scraper.forked_from.has_screenshot():
+                print 'Has screenshot'
                 import shutil
                 try:
                     src = scraper.forked_from.get_screenshot_filepath()
@@ -530,14 +537,8 @@ def handle_editor_save(request):
                     scraper.has_screen_shot = True
                     scraper.save()
                 except Exception, e:
-                    import logging
-                    logg.error(e)
-                    
-        if hasattr(scraper, 'set_invault') and scraper.set_invault:
-            scraper.vault = scraper.set_invault
-            scraper.save()
-            scraper.vault.update_access_rights()
-            
+                    pass
+        
 
         response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
         return HttpResponse(json.dumps({'redirect':'true', 'url':response_url, 'rev':rev, 'revdateepoch':_datetime_to_epoch(revdate) }))
