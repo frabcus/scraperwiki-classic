@@ -91,12 +91,14 @@ class Scraper (code.Code):
             newcount = 0
             datasummary = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":-1})
             if "error" not in datasummary:
-
-                for tabledata in datasummary.get("tables", {}).values():
-                    newcount += tabledata["count"]
+                if 'total_rows' in datasummary:
+                    self.record_count = datasummary['total_rows']
+                else:
+                    for tabledata in datasummary.get("tables", {}).values():
+                        newcount += tabledata["count"]
                     
-                # Only update the record count when we have definitely not failed.
-                self.record_count = newcount                   
+                    # Only update the record count when we have definitely not failed.
+                    self.record_count = newcount                   
             else:
                 print "logthis", datasummary                
         except Exception, e:

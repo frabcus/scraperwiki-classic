@@ -82,17 +82,22 @@ def diffseq(request, short_name):
 def run_event_json(request, run_id):
     event = None
     try:
-        event = models.ScraperRunEvent.objects.get(run_id=run_id)
+        event = models.ScraperRunEvent.objects.filter(run_id=run_id)[0]
     except models.ScraperRunEvent.DoesNotExist:
         pass
     except models.ScraperRunEvent.MultipleObjectsReturned:
         pass
+    except:
+        pass
 
     if not event and re.match("\d+$", run_id):
         try:
-            event = models.ScraperRunEvent.objects.get(pk=run_id)
+            event = models.ScraperRunEvent.objects.filter(pk=run_id)[0]
         except models.ScraperRunEvent.DoesNotExist:
             pass
+        except:
+            pass
+            
     if not event:
         return HttpResponse(json.dumps({"error":"run event does not exist", "output":"ERROR: run event does not exist"}))
     
@@ -440,7 +445,7 @@ def handle_editor_save(request):
     if not title or title.lower() == 'untitled':
         return HttpResponse(json.dumps({'status' : 'Failed', 'message':"title is blank or untitled"}))
     
-    target_priv = None    
+    target_priv, fork = None, None    
     if guid:
         try:
             scraper = models.Code.objects.exclude(privacy_status="deleted").get(guid=guid)   # should this use short_name?
@@ -513,20 +518,30 @@ def handle_editor_save(request):
         else:
             (rev, revdate) = advancesave
             
-        need_save = False
         if target_priv:
             scraper.privacy_status = target_priv
             scraper.save()
-            
-            # TODO: Copy across the screenshot from the original
-            # Guess this has to be post-save so we have a slug.
-
-            
+                                
         if hasattr(scraper, 'set_invault') and scraper.set_invault:
             scraper.vault = scraper.set_invault
             scraper.save()
             scraper.vault.update_access_rights()
             
+        if fork:
+            # Copy across the screenshot from the original            
+            import logging
+            if scraper.forked_from and scraper.forked_from.has_screenshot():
+                import shutil
+                try:
+                    src = scraper.forked_from.get_screenshot_filepath()
+                    rt, ext = os.path.splitext(src)
+                    dst = os.path.join( os.path.dirname(src), scraper.short_name ) + ext
+                    shutil.copyfile(src, dst)
+                    scraper.has_screen_shot = True
+                    scraper.save()
+                except Exception, e:
+                    logging.error( str(e) )
+        
 
         response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
         return HttpResponse(json.dumps({'redirect':'true', 'url':response_url, 'rev':rev, 'revdateepoch':_datetime_to_epoch(revdate) }))

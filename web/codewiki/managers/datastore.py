@@ -15,8 +15,10 @@ class DataStore(object):
         self.m_socket = socket.socket()
         self.m_socket.connect((settings.DATAPROXY_HOST, settings.DATAPROXY_PORT))
         
-        # Set receive timeout to be 20 seconds so that this failing doesn't cause us to 404
-        self.m_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('LL', 20, 0))
+        # Set receive timeout to be 25 seconds so that this failing doesn't cause us to 404 on the 
+        # scraper overview page.
+        # If this doesn't work out, change to using select() with a timeout (both individual and overall)
+        self.m_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('LL', 25, 0))
         
         data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("short_name", short_name) ]
         self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
@@ -51,10 +53,19 @@ class DataStore(object):
             if res:
                 return res
                 
+        timeout = False
+        srec = None        
         while True:
-            srec = self.m_socket.recv(1024)
+            try:
+                srec = self.m_socket.recv(1024)
+                timeout = False                                
+            except:
+                timeout = True                
+
             if not srec:
-                return json.dumps({'error': "socket from dataproxy has unfortunately closed"})
+                msg = timeout and "The dataproxy connection timed out, please retry." or "socket from dataproxy has closed"
+                return json.dumps({'error': msg })
+                
             ssrec = srec.split("\n")  # multiple strings if a "\n" exists
             self.sbuffer.append(ssrec.pop(0))
             if ssrec:

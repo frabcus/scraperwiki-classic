@@ -198,6 +198,7 @@ class SQLiteDatabase(Database):
         self.logger.debug('Performing datasummary for %s' % self.short_name )                
                         
         self.authorizer_func = authorizer_readonly
+        total_rows = 0
         tables = { }
         try:
             for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):          
@@ -217,11 +218,11 @@ class SQLiteDatabase(Database):
                         tables[name]["rows"] = rows
                     tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
-                
+                total_rows += int(tables[name]["count"])
         except sqlite3.Error, e:
             return {"error":"sqlite3.Error: "+str(e)}
         
-        result = {"tables":tables}
+        result = {"tables":tables, 'total_rows': total_rows }
         if self.short_name:
             scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
             if os.path.isfile(scrapersqlitefile):

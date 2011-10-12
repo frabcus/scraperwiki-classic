@@ -32,6 +32,7 @@ feeds = {
     'latest_code_objects_by_search_term': LatestCodeObjectsBySearchTerm,
     'latest_code_objects_by_tag': LatestCodeObjectsByTag,
     'code_object_comments': CommentsForCode,
+    'scraper_comments': CommentsForCode, # Don't remove this, breaks subscribers feeds 
 }
 
 
