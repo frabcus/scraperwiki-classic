@@ -6,6 +6,10 @@ import re
 # Quick alteration from scavenged slugify function to use underscores instead of dashes
 
 def kill_running_runid(run_id):
+    """
+    Currently this is done by running_scrapers by asking twister to do it, this needs 
+    hooking up the same way.
+    """
     pass
 
 def get_overdue_scrapers():
