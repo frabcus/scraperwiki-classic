@@ -88,7 +88,7 @@ $(document).ready(function() {
 
     // runtime information
     var runID = ''; 
-    var uml = ''; 
+    var lxc = ''; 
 
     var parsers = Array();
     var stylesheets = Array();
@@ -947,7 +947,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         //hide annimation
         $('#running_annimation').hide();
         runID = ''; 
-        uml = ''; 
+        lxc = ''; 
 
         // suppress any more activity to the preview frame
         if (draftpreviewwindow != undefined) 

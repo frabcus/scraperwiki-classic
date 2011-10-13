@@ -61,7 +61,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # autosave, autoload, or draft when guid is not set
         self.clienttype = None # 'editing', 'umlmonitoring', 'rpcrunning', 'scheduledrun', 'stimulate_run', 'httpget'
-        
+        self.bufferclient = '' # incoming messages from the client
 
     def connectionMade(self):
         logger.info("connection client# %d" % self.factory.clientcount)
@@ -148,9 +148,11 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
     # messages from the client
     def dataReceived(self, data):
-        # chunking has recently become necessary because records (particularly from typing) can get concatenated
-        # probably shows we should be using LineReceiver
-        for lline in data.split("\r\n"):
+            # probably should be using LineReceiver
+        #logger.debug("rrrr %s" % [data])
+        lines  = (self.bufferclient+data).split("\r\n")
+        self.bufferclient = lines.pop(-1)
+        for lline in lines:
             line = lline.strip()
             
             # handle case where we have an http connection rather than plain socket connection

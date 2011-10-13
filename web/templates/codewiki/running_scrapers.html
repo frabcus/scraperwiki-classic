@@ -381,15 +381,17 @@ $(document).ready(function()
     }
 
     //send a message to the server
-    function sendjson(jdata) 
+    function sendjson(json_data) 
     {
+        var jdata = $.toJSON(json_data); 
         try 
         {
-            conn.send($.toJSON(jdata));  
-        }
+            conn.send(jdata + "\r\n");  
+        } 
         catch(err) 
         { alert("Send error: " + $.toJSON(err)); }
     }
+
 
 
     var imgrefresharr = [ ]; 

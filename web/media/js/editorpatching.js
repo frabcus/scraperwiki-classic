@@ -1,3 +1,5 @@
+
+// Self contained functions that produce computations based on the CodeMirror1 codeeditor
 function CM_cleanText(text)  { return text.replace(/\u00a0/g, " ").replace(/\u200b/g, ""); }
 function CM_isBR(node)  { var nn = node.nodeName; return nn == "BR" || nn == "br"; }
 function CM_nodeText(node)  { return node.textContent || node.innerText || node.nodeValue || ""; }
