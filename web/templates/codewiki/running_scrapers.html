@@ -484,76 +484,9 @@ $(document).ready(function()
     <a id="showmonitoradmin" href="#">toggle connection admin...</a>
 </div>
 
-<h2>Scheduler backlog</h2>
 <p>Number of overdue scrapers: <b>{{overdue_count}}</b></p>
 
-
-<h2 id="umlstatus">Status <small>(reload page to update)</small> <a href="#umlstatus">#</a></h2>
-
-<h3>Current runs (from each controller)</h3>
-<table class="data">
-{% for umlname, umlstatus in activeumls.items %}
-  <tr><th>{{umlname}}</th>
-    <td>
-    {% if umlstatus.error %}
-      <b>{{umlstatus.error}}</b>
-    {% else %}
-      {% if umlstatus.runidnames %}
-        {% for runid, scrapername in umlstatus.runidnames %}<a href="{% url run_event runid %}">{{scrapername}}</a> {% endfor %}
-      {% else %}
-        no running processes
-      {% endif %}
-    {% endif %}
-    </td>
-  </tr>
-{% endfor %}
-</table>
-
-
-<h3>Current runs</h3>
-<table class="data">
-<tr><th>UML</th><th>Scraper</th><th>Time</th><th>Kill button</th><th>Run id</th></tr>
-{% for status in statusscrapers %}
-  <tr>
-    <td>{{status.uname}}</td>
-    <td>
-    {% if status.scraper %}
-      <a href="{% url code_overview status.scraper.wiki_type status.scraper.short_name %}">{{status.scraper.short_name}}</a>
-    {% else %}
-      {{status.scraperID}}--
-    {% endif %}
-    </td>
-
-    <td>
-    {% if status.scraperrunevent %}
-      <a href="{% url scraper_history status.scraperrunevent.scraper.wiki_type status.scraperrunevent.scraper.short_name %}#run_{{ status.scraperrunevent.id }}">{{status.runtime|floatformat}} secs</a>
-    {% else %}
-      {{status.runtime|floatformat}} secs
-    {% endif %}
-    </td>
-
-    <td>
-    {% if status.killable %}
-      {% if status.scraperrunevent %}
-        <form action="{% url scraper_killrunning status.runID status.scraperrunevent.id %}" method="post">
-      {% else %}
-        <form action="{% url scraper_killrunning status.runID %}" method="post">
-      {% endif %}
-          {% csrf_token %}
-          <input type="hidden" id="hidKillRun" name="killrun" value="1" />
-          <input type="submit" id="btnKillRun" class="danger" value="Kill running scraper" />
-        </form>
-    {% endif %}
-    </td>
-
-    <td><small>{{status.runID}}</small></td>
-  </tr>
-{% endfor %}
-</table>
-
-
-
-<h3>Recent runs (from django, max {{ eventsmax }})</h3>
+<h3>Recent {{eventsmax}} run events</h3>
 <table class="data">
   <tr>
     <th>Scraper</th>

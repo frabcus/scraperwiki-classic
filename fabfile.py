@@ -67,6 +67,11 @@ def live():
 ###########################################################################
 # Helpers
 
+def parse_bool(s):
+    if s not in ['yes','no']:
+        raise Exception("buildout must be yes or no")
+    return s == 'yes'
+
 def do_server_lookup(task):
     if not 'flock' in env:
         raise Exception("specify which flock (e.g. dev/live) first")
@@ -139,13 +144,11 @@ def webserver(buildout='yes'):
 kicks webserver so it starts using new code. 
 
 buildout=no, stops it updating buildout which can be slow'''
-
-    if buildout not in ['yes','no']:
-        raise Exception("buildout must be yes or no")
+    buildout = parse_bool(buildout)
 
     code_pull()
 
-    if buildout == 'yes':
+    if buildout:
         run_buildout()
     django_db_migrate()
     update_js_cache_revision()
@@ -172,13 +175,11 @@ def webstore(buildout='no'): # default to no until ready
     '''Deploys webstore SQL database. XXX currently doesn't restart any daemons.
 
 buildout=no, stops it updating buildout which can be slow'''
-
-    if buildout not in ['yes','no']:
-        raise Exception("buildout must be yes or no")
+    buildout = parse_bool(buildout)
 
     code_pull()
 
-    if buildout == 'yes':
+    if buildout:
         run_buildout()
 
     update_crons()
