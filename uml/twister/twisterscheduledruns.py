@@ -77,6 +77,7 @@ class ScheduledRunMessageLoopHandler:
         self.upost["scrapername"] = client.scrapername
         self.upost["clientnumber"] = client.clientnumber
         self.upost['runID'] = runid
+        self.upost['run_id'] = runid
         self.upost['revision'] = rev
         
         self.username = username
