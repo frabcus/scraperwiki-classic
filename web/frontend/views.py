@@ -460,6 +460,32 @@ def test_error(request):
 ###############################################################################
 
 @login_required
+def transfer_vault(request, vaultid, username):
+    """
+    When called by the owner of a vault, the ownership of the vault
+    can be transfered to another account.
+    """
+    mime = 'application/json'
+            
+    vault = get_object_or_404( Vault, pk=vaultid)
+    new_owner = get_object_or_404( User, username=username )
+    
+    if not vault.user == request.user:
+        return HttpResponse('{"status": "fail", "error":"You cannot transfer ownership of this vault"}', mimetype=mime)                    
+        
+    # Add the new owner as owner and as a member, the old owner will now just become 
+    # a member instead
+    vault.members.add(new_owner) 
+    vault.user = new_owner
+    vault.save()
+    
+    # Does not require the vault to be saved again
+    vault.update_access_rights()
+    return HttpResponse('{"status": "ok"}', mimetype=mime)       
+    
+
+
+@login_required
 def view_vault(request, username=None):
     """
     View the details of the vault for the specific user. If they have no vault
