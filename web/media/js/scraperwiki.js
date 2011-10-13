@@ -106,6 +106,36 @@ function newCodeObject(wiki_type, sourcescraper)
 				dialog.overlay.fadeIn(200);
 				dialog.container.fadeIn(200);
 			},
+			onShow: function(dialog){
+				$('#simplemodal-container').css('height', 'auto');
+				$('#chooser_vaults h2', dialog.data).bind('click', function(e){
+					if($(this).next().is(':visible')){
+						$(this).children('input').attr('checked', false);
+						$(this).nextAll('p').slideUp(250);
+					} else {
+						$(this).children('input').attr('checked', true);
+						$(this).nextAll('p').slideDown(250);
+						$('#chooser_name_box').focus();
+					}
+				});
+				$('li a', dialog.data).bind('click', function(e){
+					e.preventDefault();
+					if($('#chooser_vaults h2 input', dialog.data).is(':checked')){
+						if($('#chooser_name_box', dialog.data).val() == ''){
+							$('span.warning', dialog.data).remove();
+							text = $('label', dialog.data).attr('title');
+							$('p', dialog.data).eq(0).addClass('error').append('<span class="warning"><span></span>' + text + '</span>');
+							$('#chooser_name_box', dialog.data).bind('keyup', function(){
+								$('p.error', dialog.data).removeClass('error').children('span').remove();
+								$(this).unbind('keyup');
+							})
+						} else {
+							$(this).addClass('active');
+							location.href = $(this).attr('href') + '/tovault/' + $('#chooser_vault').val() + '/?name=' + $('#chooser_name_box').val();
+						}
+					}
+				});
+			},
 			onClose: function(dialog) {
 				dialog.container.fadeOut(200);
 				dialog.overlay.fadeOut(200, function(){

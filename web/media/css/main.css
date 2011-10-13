@@ -4670,11 +4670,12 @@ ul.commitlist li.neweditingsession span {
 
 ul#chooser {
 	padding: 0;
-	margin: 15px ;
+	margin: 15px 15px 12px 15px;
 	border: 1px solid #aaa;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
+	min-width: 300px;
 }
 
 ul#chooser li {
@@ -4740,7 +4741,8 @@ ul#chooser li a.active em {
 	position: relative;
 }
 
-#chooser_name .warning {
+#chooser_name .warning,
+#chooser_vaults .warning {
 	position: absolute;
 	display: block;
 	color: #a73c23;
@@ -4756,9 +4758,11 @@ ul#chooser li a.active em {
 	left: 50%;
 	top: 34px;
 	margin: 0 0 0 -140px;
+	z-index: 9999;
 }
 
-#chooser_name .warning span {
+#chooser_name .warning span,
+#chooser_vaults .warning span {
 	position: absolute;
 	width: 0;
     height: 0;
@@ -4777,7 +4781,8 @@ ul#chooser li a.active em {
 	position: relative;
 }
 
-#chooser_name .error label {
+#chooser_name .error label,
+#chooser_vaults .error label {
 	color: #a73c23;
 }
 
@@ -4791,8 +4796,36 @@ ul#chooser li a.active em {
 	border: 2px solid #a73c23;
 }
 
+#chooser_vaults {
+	margin: 15px;
+	background: #eceef2;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	padding: 10px 0;
+}
 
+#chooser_vaults h2 {
+	font-size: 14px;
+	color: #666;
+	cursor: default;
+}
 
+#chooser_vaults h2 input {
+	vertical-align: 1px;
+}
+
+#chooser_vaults p {
+	font-size: 14px;
+	margin: 10px 0 0 0;
+	position: relative;
+}
+
+#chooser_vaults #chooser_name_box {
+	width: 12em;
+	line-height: 18px;
+	font-size: 13px;
+}
 
 
 /* #template_popup li {
