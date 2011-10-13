@@ -149,7 +149,7 @@ def MakeRunner(scrapername, guid, language, urlquery, username, code, client, be
     
     srunner.jdata = jdata
     if bmakerunobject:
-        client.runobjectmaker = ScheduledRunMessageLoopHandler(client, username, agent,  jdata["runid"],rev)
+        srunner.runobjectmaker = ScheduledRunMessageLoopHandler(client, username, agent,  jdata["runid"],rev)
         logger.info("Making run object on %s client# %d" % (scrapername, client.clientnumber))
 
     deferred = clientcreator.connectTCP(nodecontrollerhost, nodecontrollerport)
