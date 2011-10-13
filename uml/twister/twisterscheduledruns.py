@@ -58,6 +58,7 @@ APPROXLENOUTPUTLIMIT = 3000
 temptailmessage = "\n\n[further output lines suppressed]\n"
 
 class ScheduledRunMessageLoopHandler:
+    
     def __init__(self, client, username, agent, runid, rev):
         # a partial implementation of editor.js
         self.exceptionmessage = [ ]
