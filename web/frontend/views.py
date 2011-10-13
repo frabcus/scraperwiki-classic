@@ -49,7 +49,7 @@ def frontpage(request, public_profile_field=None):
     tags = []
     for tag in tags_sorted:
         # email (for emailers) and test far outweigh other tags :(
-        if tag.name not in ['test','email']:
+        if tag[0].name not in ['test','email']:
             tags.append(tag[0])
     
     data = {
