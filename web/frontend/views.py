@@ -463,7 +463,9 @@ def test_error(request):
 def transfer_vault(request, vaultid, username):
     """
     When called by the owner of a vault, the ownership of the vault
-    can be transfered to another account.
+    can be transfered to another account (whether they are currently a member or not).
+    
+    Once complete the access rights on all of the scrapers should also be 
     """
     mime = 'application/json'
             
