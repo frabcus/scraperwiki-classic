@@ -373,6 +373,8 @@ class Code(models.Model):
         # privacy_status: "public", "visible", "private", "deleted"
         if self.privacy_status == "deleted":
             return False
+            
+            # extra type control condition
         if action == "rpcexecute" and self.wiki_type != "view":
             return False
         

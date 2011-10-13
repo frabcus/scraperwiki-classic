@@ -40,13 +40,10 @@ def run_event(request, run_id):
 def running_scrapers(request):
     if not request.user.is_staff:
         return HttpResponseRedirect( reverse('dashboard') )    
-        
     recenteventsmax = 20
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
-    
-    context = { 'statusscrapers': None, 'events':recentevents, 'eventsmax':recenteventsmax }
+    context = { 'events':recentevents, 'eventsmax':recenteventsmax }
     context['overdue_count'] = get_overdue_scrapers().count()
-
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
 
 
