@@ -200,7 +200,9 @@ def Dtwistermakesrunevent(request):
     if request.POST.get("django_key") != config.get('twister', 'djangokey'):
         logger.error("twister wrong djangokey")
         return HttpResponse("no access")
-    run_id = request.POST.get("run_id")
+    run_id   = request.POST.get("run_id")
+    revision = request.POST.get('revision')
+    
     if not run_id:
         logger.error("twisterbad run_id")
         return HttpResponse("bad run_id - %s" % (request.POST,) )

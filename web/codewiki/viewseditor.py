@@ -82,7 +82,7 @@ def diffseq(request, short_name):
 def run_event_json(request, run_id):
     event = None
     try:
-        event = models.ScraperRunEvent.objects.filter(run_id=run_id)[0]
+        event = models.ScraperRunEvent.objects.filter(run_id=run_id).order_by('pid')[0]
     except models.ScraperRunEvent.DoesNotExist:
         pass
     except models.ScraperRunEvent.MultipleObjectsReturned:
@@ -92,7 +92,7 @@ def run_event_json(request, run_id):
 
     if not event and re.match("\d+$", run_id):
         try:
-            event = models.ScraperRunEvent.objects.filter(pk=run_id)[0]
+            event = models.ScraperRunEvent.objects.filter(pk=run_id).order_by('pid')[0]
         except models.ScraperRunEvent.DoesNotExist:
             pass
         except:

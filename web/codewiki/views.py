@@ -111,8 +111,15 @@ def scraper_history(request, wiki_type, short_name):
     
     # now obtain the run-events and sort together
     if scraper.wiki_type == 'scraper':
-        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started')
-        for runevent in runevents:
+        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started','pid')
+        seen = []
+        events = []
+        for r in runevents:
+            if not r.run_id in seen:
+                seen.append( r.run_id )
+                events.append( r )
+            
+        for runevent in events:
             item = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
             if runevent.run_ended:
                 item["runduration"] = runevent.getduration()
@@ -589,6 +596,7 @@ def raw_about_markup(request, wiki_type, short_name):
 
 
 def choose_template(request, wiki_type):
+    
     context = { "wiki_type":wiki_type }
     context["sourcescraper"] = request.GET.get('sourcescraper', '')
     
