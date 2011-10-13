@@ -119,7 +119,11 @@ function newCodeObject(wiki_type, sourcescraper)
 					}
 				});
 				$('li a', dialog.data).bind('click', function(e){
-					e.preventDefault();
+					if($('#chooser_vaults h2 input').is(":visible") ) {
+						e.preventDefault();
+					} else {
+						return;
+					}
 					if($('#chooser_vaults h2 input', dialog.data).is(':checked')){
 						if($('#chooser_name_box', dialog.data).val() == ''){
 							$('span.warning', dialog.data).remove();
