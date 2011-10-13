@@ -111,7 +111,7 @@ def scraper_history(request, wiki_type, short_name):
     
     # now obtain the run-events and sort together
     if scraper.wiki_type == 'scraper':
-        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started,pid')
+        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started','pid')
         seen = []
         events = []
         for r in runevents:
