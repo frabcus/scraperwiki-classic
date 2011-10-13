@@ -58,7 +58,7 @@ APPROXLENOUTPUTLIMIT = 3000
 temptailmessage = "\n\n[further output lines suppressed]\n"
 
 class ScheduledRunMessageLoopHandler:
-    def __init__(self, client, username, agent):
+    def __init__(self, client, username, agent, runid, rev):
         # a partial implementation of editor.js
         self.exceptionmessage = [ ]
         self.completiondata = None
@@ -75,6 +75,8 @@ class ScheduledRunMessageLoopHandler:
         self.upost["records_produced"] = 0
         self.upost["scrapername"] = client.scrapername
         self.upost["clientnumber"] = client.clientnumber
+        self.upost['runID'] = runid
+        self.upost['revision'] = rev
         
         self.username = username
         self.agent = agent
@@ -123,7 +125,6 @@ class ScheduledRunMessageLoopHandler:
         content = data.get("content")
         if message_type == 'executionstatus':
             if content == "startingrun":
-                self.upost["run_id"] = data.get("runID")
                 self.output = "%sEXECUTIONSTATUS: uml=%s usename=%s runid=%s\n" % (self.output, data.get("uml"), self.username, data.get("runID"))
                 self.updaterunobject(False)
 
