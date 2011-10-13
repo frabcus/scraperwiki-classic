@@ -165,7 +165,7 @@
 {% include 'codewiki/includes/tags.html' %}
 
 <div class="content full" id="scraper_views">
-    <h2>Views using this data from this scraper <a href="{% url choose_template 'view' %}" class="edit editor_view">[create a new view]</a></h2>    
+    <h2>Views using this data from this scraper <a href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" class="edit editor_view">[create a new view]</a></h2>    
         {% if related_views %}
         <ul class="views">
             {% for related_view in related_views %}
@@ -176,7 +176,7 @@
             {% endfor %}
         </ul>
         {% else %}
-        <p>No views currently use data from this scraper. <a href="{% url choose_template 'view' %}" class="editor_view">Would you like to create one?</a>
+        <p>No views currently use data from this scraper. <a href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" class="editor_view">Would you like to create one?</a>
         {% endif %}
     <br class="clear"/>
 </div>

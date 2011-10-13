@@ -589,6 +589,7 @@ def raw_about_markup(request, wiki_type, short_name):
 
 
 def choose_template(request, wiki_type):
+    
     context = { "wiki_type":wiki_type }
     context["sourcescraper"] = request.GET.get('sourcescraper', '')
     
