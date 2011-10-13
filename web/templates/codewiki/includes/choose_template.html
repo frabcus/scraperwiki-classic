@@ -17,3 +17,19 @@
     <li><a href="{% url editor wiki_type language %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}}{% if version %} <em>v {{ version }}</em>{% endif %}</a></li>
     {% endfor %}
 </ul>
+{# if this user owns / is a member of any vaults  #}
+<div id="chooser_vaults">
+    <h2><input type="checkbox" /> Put this in a vault&hellip;</h2>
+    <p style="display:none">
+        <label for="chooser_vault">Vault:</label>
+        <select id="chooser_vault" name="chooser_vault">
+            {# for each of the vaults #}
+            <option vaule="{# vault name #}">{# vault name #}</option>
+            {# end for #}
+        </select>
+    </p>
+    <p style="display: none">
+        <label for="chooser_name_box" title="You need to name your {{wiki_type}} before it can be created in the Vault">Save as:</label> <input type="text" id="chooser_name_box" class="text" />
+    </p>
+</div>
+{# end if #}
