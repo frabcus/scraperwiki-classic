@@ -26,6 +26,8 @@ config.readfp(open(poptions.config))
 djangokey = config.get("twister", "djangokey")
 djangourl = config.get("twister", "djangourl")
 
+
+
 nodecontrollername = "lxc001"
 nodecontrollerhost = config.get(nodecontrollername, 'host')
 nodecontrollerport = config.getint(nodecontrollername, 'via')

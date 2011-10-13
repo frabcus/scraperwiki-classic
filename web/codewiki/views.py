@@ -622,6 +622,10 @@ def choose_template(request, wiki_type):
           
     context["languages"] = langs
     context["vault_id"] = vault # May be none if it wasn't specified
+    try:
+        context['user_vaults'] = request.user.vaults
+    except:
+        context['user_vaults'] = None
             
     return render_to_response(tpl, context, context_instance=RequestContext(request))
 

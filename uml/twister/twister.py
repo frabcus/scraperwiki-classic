@@ -668,7 +668,7 @@ class RunnerFactory(protocol.ServerFactory):
             beta_user = scraperoverdue.get("beta_user", False)
             attachables = scraperoverdue.get('attachables', [])
             sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, beta_user, attachables, sclient.originalrev, True, agent)
-            self.runidclientmap[scleint.processrunning.jdata["runid"]] = sclient
+            self.runidclientmap[sclient.processrunning.jdata["runid"]] = sclient
             self.notifyMonitoringClients(sclient)
 
 
