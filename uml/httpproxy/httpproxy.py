@@ -502,7 +502,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.notify \
             (   self.connection.getpeername()[0],
-                runid           = "", #runID, commented out to test we can do this based on IP
+                runid           = runID,
                 scraperid       = scraperID,
                 url             = self.path,
                 failedmessage   = failedmessage,
