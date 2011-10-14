@@ -182,10 +182,10 @@ function handleNotify(req,res) {
 	util.log.debug( 'Notify request ' + req.url);
 	
 	var arg;
-	if ( urlObj.query.runid && urlObj.query.runid.length > 0 ) {
-		arg = { runid: urlObj.query.runid }
+	if ( urlObj.query.remote_ip && urlObj.query.remote_ip.length > 0 ) {
+		arg = { ip: urlObj.query.remote_ip }
 	} else {
-		arg = { ip: urlObj.query.remote_ip }		
+		arg = { runid: urlObj.query.runid }		
 	}
 	
 	script = exec.get_details( arg );		
