@@ -181,7 +181,14 @@ function handleNotify(req,res) {
 	var urlObj = url.parse(req.url, true);	
 	util.log.debug( 'Notify request ' + req.url);
 	
-	script = exec.get_details( {runid: urlObj.query.runid } );		
+	var arg;
+	if ( urlObj.query.runid && urlObj.query.runid.length > 0 ) {
+		arg = { runid: urlObj.query.runid }
+	} else {
+		arg = { ip: urlObj.query.remote_ip }		
+	}
+	
+	script = exec.get_details( arg );		
 	if ( script ) {
 		delete urlObj.query.runid;
 		s = JSON.stringify( urlObj.query );
