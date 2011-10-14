@@ -119,12 +119,13 @@ function newCodeObject(wiki_type, sourcescraper)
 					}
 				});
 				$('li a', dialog.data).bind('click', function(e){
-					if( $('#chooser_vaults h2 input').is(":visible")  ) {
-						if ( ! $('#chooser_vaults h2 input').is(":checked") ) return false;
-						e.preventDefault();
-					} else {
-						return false;
-					}
+					if( ! $('#chooser_vaults h2 input').is(":visible")  ) 
+						return;
+
+					if ( ! $('#chooser_vaults h2 input').is(":checked") ) 
+						return;
+						
+					e.preventDefault();
 					if($('#chooser_vaults h2 input', dialog.data).is(':checked')){
 						if($('#chooser_name_box', dialog.data).val() == ''){
 							$('span.warning', dialog.data).remove();
