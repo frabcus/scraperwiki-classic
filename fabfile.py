@@ -169,17 +169,16 @@ buildout=no, stops it updating buildout which can be slow'''
     restart = parse_bool(restart)
     buildout = parse_bool(buildout)
 
-    if restart:
-        restart_daemon('twister', 'twister.py')
-    sys.exit()
-
     code_pull()
 
     if buildout:
         run_buildout()
     django_db_migrate()
     update_js_cache_revision()
+
     restart_webserver()   
+    if restart:
+        restart_daemon('twister', 'twister.py')
 
     update_crons()
     deploy_done()
@@ -198,16 +197,21 @@ def screenshooter():
 
 @task
 @roles('webstore')
-def webstore(buildout='no'): # default to no until ready
-    '''Deploys webstore SQL database. XXX currently doesn't restart any daemons.
+def webstore(buildout='no', restart='no'): # default buildout to no until ready
+    '''Deploys webstore SQL database.
 
+restart=yes, restarts daemons XXX make them able to gracefully restart so default is yes
 buildout=no, stops it updating buildout which can be slow'''
+    restart = parse_bool(restart)
     buildout = parse_bool(buildout)
 
     code_pull()
 
     if buildout:
         run_buildout()
+    if restart:
+        restart_daemon('dataproxy', 'dataproxy.py')
+        #restart_daemon('webstore', 'webstore/run_store.py') # XXX doesn't work yet
 
     update_crons()
     deploy_done()
