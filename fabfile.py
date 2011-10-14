@@ -130,8 +130,8 @@ def restart_daemon(name, process_check = None):
     run('sudo -i /etc/init.d/%s start' % name)
 
 def deploy_done():
-#    if not env.email_deploy:
-#        return
+    if not env.email_deploy:
+        return
 
     env.changelog = local('hg log -r %(old_revision)s:%(new_revision)s' % env)
 
@@ -145,8 +145,7 @@ New revision: %(new_revision)s
 
 %(changelog)s
 """ % env
-    print message
-    sys.exit()
+
     sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
 
 def code_pull():
