@@ -32,8 +32,6 @@ var lasttouchedtime = undefined;
 
 var cachehidlookup = { }; // this itself is a cache of a cache
 
-var SelectEditorLine;     // function used to make the Line number in the console clickable
-
 function cgiescape(text) 
 {
     if (typeof text == 'number')
