@@ -376,6 +376,7 @@ def scraper_search_handler(request):
     return response
 
 
+
 def usersearch_handler(request):
     query = request.GET.get('searchquery') 
     try:   
@@ -390,18 +391,39 @@ def usersearch_handler(request):
         
         # usernames we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
-    requestinguser = request.GET.get("requestinguser", "")
     
+    srequestinguser = request.GET.get("requestinguser", "")
+    lrequestinguser = User.objects.filter(username=srequestinguser)
+    if lrequestinguser:
+        requestinguser = lrequestinguser[0]
+    else:
+        requestinguser = None
+
+
     if query:
         users = User.objects.filter(username__icontains=query)
         userprofiles = User.objects.filter(userprofile__name__icontains=query)
         users_all = users | userprofiles
     else:
         users_all = User.objects.all()
-    users_all = users_all.order_by('-date_joined')
+    users_all = users_all.order_by('username')
+
+        # if there is a requestinguser, then rank by overlaps and sort
+        # (inefficient, but I got no other ideas right now)
+        # (could be doing something with scraper.userrolemap())
+    if requestinguser:
+        requestuserscraperset = set([usercoderole.code.short_name  for usercoderole in requestinguser.usercoderole_set.all()])
+        userlist = list(users_all)
+        for user in userlist:
+            user.colleaguescore = len(requestuserscraperset.intersection([usercoderole.code.short_name  for usercoderole in user.usercoderole_set.all()]))
+        userlist.sort(key=lambda user:user.colleaguescore, reverse=True)
+        #for user in userlist:
+        #    print (user, user.colleaguescore)
+    else:
+        userlist = users_all[:(maxrows+len(nolist))]
 
     result = [ ]
-    for user in users_all[:(maxrows+len(nolist))]:
+    for user in userlist:
         if user.username not in nolist:
             res = {'username':user.username, "profilename":user.get_profile().name, "date_joined":user.date_joined.isoformat() }
             result.append(res)
