@@ -6013,7 +6013,6 @@ body.vaults .vault_footer {
 	background: linear-gradient(top, #e8e8e8 0%,#cccccc 100%);
 	text-align: left;
 	padding: 7px 12px;
-	display: none;
 }
 
 body.vaults .vault_header a.vault_users {
@@ -6037,15 +6036,18 @@ body.vaults .vault_header a.vault_users img, body.vaults .vault_footer a img {
 	margin-right: 3px;
 }
 
-body.vaults .vault_header .vault_users,
-body.vaults .vault_footer .add_to_vault {
+body.vaults .vault_header .vault_users {
 	margin-right: 20px;
 }
 
-body.vaults .vault_header a.vault_users:hover,
-body.vaults .vault_footer a:hover {
+body.vaults .vault_header a.vault_users:hover {
 	color: #298105;
 	text-decoration: none;
+}
+
+body.vaults .vault_footer a:hover {
+	text-decoration: none;
+	color: #5285bd;
 }
 
 body.vaults .vault_header a.vault_users:hover,
@@ -6066,6 +6068,20 @@ body.vaults .vault_header .vault_users_popover a:hover {
 	padding: 0;
 	float: none;
 	color: #666;
+}
+
+body.vaults .transfer_ownership span {
+	display: none;
+}
+
+body.vaults .transfer_ownership a {
+	line-height: 24px;
+}
+
+body.vaults .transfer_ownership .error {
+	color: #a73c23;
+	font-size: 14px;
+	margin-left: 10px;
 }
 
 body.vaults .vault_contents.empty {

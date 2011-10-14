@@ -362,7 +362,6 @@ $(function()
 						searchquery:request.term
 					},
 					success: function( data ) {
-						console.log(data);
 						response( $.map( data, function( item ) {
 							return {
 								label: item.profilename + ' (' + item.username + ')',
@@ -437,6 +436,58 @@ $(function()
 			$el.parents('.vault_header').find('.x_users').text(x_users);
 		});
 	}
+	
+	$('body.vaults .transfer_ownership a').bind('click', function(e){
+		e.preventDefault();
+		$(this).next('span').show().children(':text').focus();
+		$('span', this).show();
+	});
+	
+	$('body.vaults .transfer_ownership input:text').autocomplete({
+		minLength: 2,
+		source: function( request, response ) {
+			$.ajax({
+				url: $('#id_api_base').val() + "scraper/usersearch",
+				dataType: "jsonp",
+				data: {
+					format:"jsondict", 
+					maxrows:10, 
+					searchquery:request.term
+				},
+				success: function( data ) {
+					response( $.map( data, function( item ) {
+						return {
+							label: item.profilename + ' (' + item.username + ')',
+							value: item.username
+						}
+					}));
+				}
+			});
+		},
+		select: function( event, ui ) {
+			// submit the name
+			$(this).next('input').attr('disabled',false);
+		}
+	}).next().bind('click', function(){
+		var url = $(this).parent().prev().attr('href') + $(this).prev().val();
+		var button = $(this).val('Transferring\u2026');
+		$.ajax({
+			url: url,
+			dataType: 'json',
+			success: function(data) {
+				if(data.status == 'ok'){
+					window.location.reload();
+				} else if(data.status == 'fail'){
+					button.after('<em class="error">Error: ' + data.error + '</em>');
+					button.val('Transfer!');
+				}
+			}, 
+			error: function(data){
+				button.after('<em class="error">Error: ' + data.error + '</em>');
+				button.val('Transfer!');
+			}
+		});
+	}).attr('disabled', true);
 	
 	if($('#alert_outer').length){
 		$('<a>').attr('id','alert_close').bind('click', function(){ 

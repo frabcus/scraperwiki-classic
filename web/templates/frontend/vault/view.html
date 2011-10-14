@@ -59,10 +59,14 @@
     	{% endif %}
     	</div>
         
+        {% if request.user.is_staff %}
         <div class="vault_footer">
-            <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a new scraper in this vault</a>
-            <!-- <a class="move_to_vault"><img src="{{ MEDIA_URL }}images/icons/cog_go.png" width="16" height="16"/> Move an item here</a> -->
+            <p class="transfer_ownership">
+                <a href="/vaults/{{ vault.id }}/transfer/"><img src="{{ MEDIA_URL }}images/icons/forward_arrow.png" width="16" height="16"> Transfer ownership of this vault<span> to:</span></a>
+                <span class="new_owner"><input type="text"/> <input type="button" value="Transfer!" /></span>
+            </p>
         </div>
+        {% endif %}
         
     </div>
     
@@ -111,11 +115,6 @@
     	    </div>
     	{% endif %}
     	</div>
-        
-        <div class="vault_footer">
-            <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a new scraper in this vault</a>
-            <!-- <a class="move_to_vault"><img src="{{ MEDIA_URL }}images/icons/cog_go.png" width="16" height="16"/> Move an item here</a> -->
-        </div>
         
     </div>
 	{% endfor %}
