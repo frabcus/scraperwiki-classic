@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.views.decorators.cache import cache_page
+from django.contrib.auth.models import AnonymousUser
 
 from codewiki.models import Code, LANGUAGES_DICT
 
@@ -101,8 +102,10 @@ def contrib(request, short_name):
 def docsexternal(request):
     language = request.session.get('language', 'python')
     api_base = "%s/api/1.0/" % settings.API_URL
-
+    
     context = {'language':language, 'api_base':api_base }
+    if type(request.user) != AnonymousUser:
+        context['requestinguser'] = request.user.username
     context["scrapername"] = request.GET.get("name", "")
     return render_to_response('documentation/apibase.html', context, context_instance=RequestContext(request))
 

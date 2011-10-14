@@ -390,6 +390,7 @@ def usersearch_handler(request):
         
         # usernames we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
+    requestinguser = request.GET.get("requestinguser", "")
     
     if query:
         users = User.objects.filter(username__icontains=query)
