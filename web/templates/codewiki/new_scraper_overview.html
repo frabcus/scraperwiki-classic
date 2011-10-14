@@ -39,7 +39,7 @@
 	    <span class="latestdomain">
 	    {% if latestdomain %}
 	        {% for d in latestdomain %}
-                {{ d.domain }}
+                <a href="{{ d.domain }}">{{ d.domain }}</a>
             {% endfor %}
         {% else %}
             Hasn&rsquo;t run yet
@@ -95,31 +95,44 @@
     <li class="clear"></li>
 </ul>
 
+{% if scraper.is_sick_and_not_running %}
+<div class="sick">
+    <p>It looks like this scraper is broken!</p>
+    {% if scraper.last_runevent.exception_message %}
+    <p>On its last run it generated the following error: foo bar</p>
+    {% else %}
+    <p>We&rsquo;re not quite sure what&rsquo;s wrong with it. Could you <a href="#">take a look?</a></p>
+    {% endif %}
+</div>
+{% endif %}
+
 <div class="about">
     <div class="schedule">
         <h3><strong>Last run:</strong> 
             {% if scraper.last_runevent %}
               {% ifequal scraper.last_runevent.pid -1 %}
-                  <a href="#run_{{ scraper.last_runevent.id }}">{{scraper.last_runevent.run_started|timesince}} ago</a>
+                  <a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}">{{scraper.last_runevent.run_started|timesince}} ago</a>
               {% else %}
-                <a href="#run_{{ scraper.last_runevent.id }}">right now</a>.
+                <a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}">right now</a>
               {% endifequal %}
             {% else %}
                Has not run yet
             {% endif %}
         </h3>
-        <h4>Scraped: X URLs</h4>
-        <p></p>
-        <p></p>
+        {% if scraper.last_runevent %}
+            <h4>Scraped: {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from {% for d in latestdomain %}<a href="{{ d.domain }}">{{ d.domain }}</a>{% endfor %}</h4>
+        {% endif %}
+        {% if scraper.last_runevent.exception_message %}
+            <p class="exception">This scraper failed on its last run:<br/>{{ scraper.last_runevent.exception_message }}</p>
+        {% endif %}
         <h3>Schedule</h3>
         {% ifnotequal scraper.scraper.next_run.year 9999 %}
-        {{scraper.scraper.run_interval}}
         <h4>Runs: {{scraper.scraper.run_interval|schedule}}</h4>
         <h4>Will next run:
             {% ifequal scraper.scraper.next_run|timeuntil '0 minutes' %}
-                ASAP
+                <abbr title="This scraper will be run at the soonest possible opportunity">ASAP</abbr>
             {% else %}
-                in {{scraper.scraper.next_run|timeuntil}}
+                <abbr title="{{scraper.scraper.next_run}}">in {{scraper.scraper.next_run|timeuntil}}</abbr>
             {% endifequal %}
         {% else %}
         <h4>No schedule set: <a href="#">Run manually, now!</a></h4>
@@ -142,22 +155,24 @@
         </div>
         <div id="divContributors">
             {% if scraper.privacy_status == 'public' %}
-        	    <abbr title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</abbr>
+        	    <abbr title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public:</abbr>
             {% endif %}
         	{% if scraper.privacy_status == 'visible' %}
-        	    <abbr title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected</abbr>
+        	    <abbr title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected:</abbr>
             {% endif %}
             {% if scraper.vault %}
-                <abbr title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</abbr>
+                <abbr title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault:</abbr>
             {% endif %}
             {% if scraper.privacy_status == 'private' %}
-        	    <abbr title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</abbr>
+        	    <abbr title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private:</abbr>
         	{% endif %}
+        	{{ scraper.usercoderole_set.count }} {% if scraper.privacy_status == 'public' %}contributor{% else %}editor{% endif %}{{ scraper.usercoderole_set.count|pluralize }}
         </div>
     </div>
 </div>
 
 <div class="data">
+    {% if sqlitedata %}
     <ul class="titlebar">
         <li><h3>This scraper&rsquo;s datatore</h3></li>
         <li><a class="api">Explore with API</a></li>
@@ -171,12 +186,31 @@
         </li>
         <li class="clear"></li>
     </ul>
+    <table>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>    
+    </table>
+    {% else %}
+    <ul class="titlebar">
+        <li><h3>This scraper has no data yet</h3></li>
+        <li><a href="">Import Data</a></li>
+        <li class="clear"></li>
+    </ul>
+    {% endif %}
 </div>
 
 <div class="history">
     <ul class="titlebar">
         <li><h3>This scraper&rsquo;s history</h3></li>
         <li><a class="full_history">Show full history</a></li>
+    </ul>
+</div>
+
+<div class="chat">
+    <ul class="titlebar">
+        <li><h3>This scraper&rsquo;s chat</h3></li>
     </ul>
 </div>
 
