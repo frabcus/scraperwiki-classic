@@ -188,6 +188,7 @@ function handleNotify(req,res) {
 		arg = { runid: urlObj.query.runid }		
 	}
 	
+	// todo: check the scraper name against the one provided????
 	script = exec.get_details( arg );		
 	if ( script ) {
 		delete urlObj.query.runid;
