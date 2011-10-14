@@ -1,17 +1,12 @@
+// Main module.  All references to codeeditor have been moved into editorcodemirror.js
 
 
+var lastRev = null; 
+var setupKeygrabs;     // function
+var inRollback = false;
 
-$(document).ready(function() {
-
-    // editor window dimensions
-    var codeeditor = null;
-    var codemirroriframe = null; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
-    var codeeditorreadonly = false; 
-    var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
-    var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
-    var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
-    var draftpreviewwindow = null;
-
+$(document).ready(function() 
+{
     // variable transmitted through the html
     var short_name = $('#short_name').val();
     var guid = $('#scraper_guid').val();
@@ -19,27 +14,28 @@ $(document).ready(function() {
     var userrealname = $('#userrealname').val(); 
     var isstaff = $('#isstaff').val(); 
     var beta_user = $('#beta_user').val(); 
-    var scraperlanguage = $('#scraperlanguage').val(); 
+    scraperlanguage = $('#scraperlanguage').val(); 
     var run_type = $('#code_running_mode').val();
-    var codemirror_url = $('#codemirror_url').val();
+    codemirror_url = $('#codemirror_url').val();
     var wiki_type = $('#id_wiki_type').val(); 
     var savecode_authorized = $('#savecode_authorized').val(); 
     
-    var texteditor = $('#texteditor').val(); 
+    texteditor = $('#texteditor').val(); 
     if (window.location.hash == "#plain")
         texteditor = "plain"; 
+    if (navigator.userAgent.match(/iPad|iPhone|iPod/i) != null)
+        texteditor = "plain"; 
     
-    var lastRev = $('#originalrev').val(); 
+    lastRev = $('#originalrev').val(); 
     var lastRevDateEpoch = ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
     var lastRevUserName = $('#originalrevusername').val(); 
     var lastRevUserRealName = $('#originalrevuserrealname').val(); 
     var rollbackRev = $('#rollback_rev').val(); 
 
-    var inRollback = false;
     if (rollbackRev != "") 
         inRollback = true;
 
-    var lastupdaterevcall = null; 
+    var lastupdaterevcall = null;   // timeout object
     function writeUpdateLastSavedRev() 
     {
         lastupdaterevcall = null; 
@@ -84,37 +80,11 @@ $(document).ready(function() {
     }
     lastupdaterevcall = window.setTimeout(writeUpdateLastSavedRev, 50); 
 
-    var lastsavedcode   = ''; // used to tell if we should expect a null back from the revision log
+    var lastsavedcode  = ''; // used to tell if we should expect a null back from the revision log
 
     // runtime information
     var runID = ''; 
-    var uml = ''; 
-
-    var parsers = Array();
-    var stylesheets = Array();
-    var indentUnits = Array();
-    var parserConfig = Array();
-    var parserName = Array();
-    var codemirroroptions = undefined; 
-
-    var pageIsDirty = true;
-
-    var atsavedundo = 0; // recorded at start of save operation
-    var savedundo = 0; 
-    var lastundo = 0;
-
-    var receiverecordcall = null; 
-    var receiverecordqueue = [ ]; 
-    var receivechatqueue = [ ]; 
-    var receivechainpatchqueue = [ ]; // coming in
-    var receivechainpatchcall = null; // or function or "waitingforonchange", "doingothertyping"
-
-    var lasttypetime = new Date(); 
-    var chainpatches = [ ];   // stack going out
-    var chainpatchnumber = 0; // counts them going out 
-
-    var nextchainpatchnumbertoreceive = 0; 
-    var lastreceivedchainpatch = null; 
+    var lxc = ''; 
 
     setupCodeEditor(); 
     setupMenu();
@@ -122,254 +92,7 @@ $(document).ready(function() {
     setupToolbar();
     setupResizeEvents();
     setupOrbited();
-    
 
-    // keep delivery load of chain patches down and remove excess typing signals
-    function sendChainPatches()
-    {
-        if (chainpatches.length > 0)
-        {
-            var chainpatch = chainpatches.shift(); 
-            //writeToChat("-- "+$.toJSON(chainpatch)); 
-            if (bConnected)
-                sendjson(chainpatch); 
-        }
-        // clear out the ones that are pure typing messages sent in non-broadcast mode
-        while ((chainpatches.length > 0) && (chainpatches[0].insertlinenumber == undefined))
-            chainpatches.shift(); 
-
-        if (chainpatches.length > 0)
-            window.setTimeout(sendChainPatches, 2); 
-    }
-
-    // called from editortabs.js
-    SelectEditorLine = function(iLine)
-    {
-        codeeditor.selectLines(codeeditor.nthLine(iLine), 0, codeeditor.nthLine(iLine + 1), 0); 
-    }
-
-
-    function ChangeInEditor(changetype) 
-    {
-        lasttypetime = new Date(); 
-        var lpageIsDirty; 
-        if (codemirroriframe)
-        {
-            var historysize = codeeditor.historySize(); 
-            var automode = $('input#automode').val(); 
-    
-            if (changetype == "saved")
-                savedundo = atsavedundo
-            if (changetype == "reload")
-                savedundo = historysize.undo + historysize.lostundo; 
-            if ((changetype == "reload") || (changetype == "initialized"))
-                lastsavedcode = codeeditor.getCode(); 
-            if (changetype == "initialized")
-                lastundo = 0; 
-    
-            var lpageIsDirty = (historysize.undo + historysize.lostundo != savedundo); 
-        }
-        else
-            lpageIsDirty = (changetype == "edit"); 
-
-        if (pageIsDirty != lpageIsDirty)
-        {
-            pageIsDirty = lpageIsDirty; 
-            if ((lastRev != "") && (lastRev != "unsaved") && (lastRev != "draft") && (!inRollback)) {
-                $('.editor_controls #btnCommitPopup').attr('disabled', !pageIsDirty); 
-            } else {
-                $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-            }
-        }
-
-        if (changetype != 'edit')
-            return; 
-        if (automode != 'autosave')
-            return; 
-        
-        // if patches are coming in of we are waiting for a timeout then don't send any patches back 
-        // as this can create a ping-pong effect between two windows of the same editing user
-        if (receivechainpatchcall != null)
-            return; 
-        
-        // make outgoing patches (if there is anyone to receive them)
-        if (codemirroriframe && (countclientsconnected != 1))
-        {
-            var llchainpatches = [ ];
-            lastundo = MakeChainPatches(llchainpatches, codeeditor, lastundo); 
-            for (var i = 0; i < llchainpatches.length; i++)
-            {
-                var chainpatch = llchainpatches[i]; 
-                chainpatch['chainpatchnumber'] = chainpatchnumber;
-                chainpatch['chatname'] = chatname;
-                chainpatch['rev'] = lastRev; 
-                chainpatch['clientnumber'] = clientnumber; 
-                if (chainpatch['insertions'] != null)
-                    chainpatches.push(chainpatch); 
-                else
-                    writeToChat("<i>Chain patch failed to be generated</i>"); // still advance chainpatchnumber so all the watchers can get out of sync accordingly
-                chainpatchnumber++; 
-            }
-            if (nextchainpatchnumbertoreceive >= 0)
-                nextchainpatchnumbertoreceive = chainpatchnumber; 
-        }
-        
-        // plain text area case not coded for
-        else 
-        {
-            chainpatches.push({"command":'typing', "chainpatchnumber":chainpatchnumber, "rev":lastRev, "clientnumber":clientnumber}); 
-            chainpatchnumber++; 
-            if (nextchainpatchnumbertoreceive >= 0)
-                nextchainpatchnumbertoreceive = chainpatchnumber; 
-        }
-        
-        if (chainpatches.length > 0)
-            sendChainPatches(); 
-    }
-
-
-
-    //setup code editor
-    function setupCodeEditor()
-    {
-        // destroy any existing codemirror, so we can remake it with right readonly state
-        if (codeeditor) {
-            codeeditor.toTextArea("id_code"); 
-            codeeditor = null;
-            codemirroriframe = null;  // this only gets set once again when we know the editor has been initialized
-        }
-
-        // set other things readonly or not
-        $('#id_title').attr("readonly", (codeeditorreadonly ? "yes" : ""));
-
-        // just a normal textarea
-        if (texteditor == "plain")
-        {
-            $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
-            setupKeygrabs();
-            resizeControls('first');
-            $('#id_code').attr("readonly", (codeeditorreadonly ? "yes" : ""));
-            setCodeeditorBackgroundImage(codeeditorreadonly ? 'url(/media/images/staff.png)' : 'none');
-            return;
-        }
-
-        // codemirror
-        parsers['python'] = ['../contrib/python/js/parsepython.js'];
-        parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
-        parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
-        parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
-        parsers['javascript'] = ['tokenizejavascript.js', 'parsejavascript.js']; 
-
-        stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
-        stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css'];
-        stylesheets['ruby'] = ['/media/ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
-        stylesheets['html'] = [codemirror_url+'/css/xmlcolors.css', codemirror_url+'/css/jscolors.css', codemirror_url+'/css/csscolors.css', '/media/css/codemirrorcolours.css']; 
-        stylesheets['javascript'] = [codemirror_url+'/css/jscolors.css', '/media/css/codemirrorcolours.css']; 
-
-        indentUnits['python'] = 4;
-        indentUnits['php'] = 4;
-        indentUnits['ruby'] = 2;
-        indentUnits['html'] = 4;
-        indentUnits['javascript'] = 4;
-
-        parserConfig['python'] = {'pythonVersion': 2, 'strictErrors': true}; 
-        parserConfig['php'] = {'strictErrors': true}; 
-        parserConfig['ruby'] = {'strictErrors': true}; 
-        parserConfig['html'] = {'strictErrors': true}; 
-        parserConfig['javascript'] = {'strictErrors': true}; 
-
-        parserName['python'] = 'PythonParser';
-        parserName['php'] = 'PHPHTMLMixedParser'; // 'PHPParser';
-        parserName['ruby'] = 'RubyParser';
-        parserName['html'] = 'HTMLMixedParser';
-        parserName['javascript'] = 'JSParser';
-
-        // allow php to access HTML style parser
-        parsers['php'] = parsers['html'].concat(parsers['php']);
-        stylesheets['php'] = stylesheets['html'].concat(stylesheets['php']); 
-
-        // track what readonly state we thought we were going to, in case it
-        // changes mid setup of CodeMirror
-        var expectedreadonly = codeeditorreadonly;
-
-        codemirroroptions = {
-            parserfile: parsers[scraperlanguage],
-            stylesheet: stylesheets[scraperlanguage],
-            path: codemirror_url + "js/",
-            domain: document.domain, 
-            textWrapping: true,
-            lineNumbers: true,
-            indentUnit: indentUnits[scraperlanguage],
-            readOnly: expectedreadonly, // cannot be changed once started up
-            undoDepth: 200,  // defaults to 50.  
-            undoDelay: 300,  // (default is 800)
-            tabMode: "shift", 
-            disableSpellcheck: true,
-            autoMatchParens: true,
-            width: '100%',
-            parserConfig: parserConfig[scraperlanguage],
-            enterMode: "flat",    // default is "indent" (which I have found buggy),  also can be "keep"
-            electricChars: false, // default is on, the auto indent whe { is typed (annoying when doing html)
-            reindentOnLoad: false, 
-            onChange: function ()  { ChangeInEditor("edit"); },  // (prob impossible to tell difference between actual typing and patch insertions from another window)
-            //noScriptCaching: true, // essential when hacking the codemirror libraries
-
-            // this is called once the codemirror window has finished initializing itself
-            initCallback: function() 
-            {
-                codemirroriframe = codeeditor.frame // $("#id_code").next().children(":first"); (the object is now a HTMLIFrameElement so you have to set the height as an attribute rather than a function)
-                codemirroriframeheightdiff = codemirroriframe.height - $("#codeeditordiv").height(); 
-                codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
-                setupKeygrabs();
-                resizeControls('first');
-                ChangeInEditor("initialized"); 
-
-                // set up other readonly values, after rebuilding the CodeMirror editor
-                setCodeeditorBackgroundImage(expectedreadonly ? 'url(/media/images/staff.png)' : 'none');
-
-                if (expectedreadonly) {
-                    $('.editor_controls #btnCommitPopup').hide();
-                    $('.editor_controls #btnForkNow').show();
-                } else {
-                    $('.editor_controls #btnCommitPopup').show();
-                    $('.editor_controls #btnForkNow').hide();
-                }
-
-                // our readonly state was changed under our feet while setting
-                // up CodeMirror; force a resetup of CodeMirror again
-                if (expectedreadonly != codeeditorreadonly) 
-                {
-                    var lcodeeditorreadonly = codeeditorreadonly; 
-                    codeeditorreadonly = expectedreadonly;  // set it back 
-                    setCodeMirrorReadOnly(lcodeeditorreadonly);
-                }
-            } 
-        };
-
-        // now puts it in a state of building where codeeditor!=null and codemirroriframe==null
-        codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
-    }
-
-
-
-    function setCodeMirrorReadOnly(val) 
-    {
-        if (codeeditorreadonly == val) 
-            return;
-        codeeditorreadonly = val;
-        writeToChat('set codemirror editor to ' + (codeeditorreadonly ? "readonly" : "editable")); 
-
-            // this rebuilds the entire code editor again!!!
-        window.setTimeout(setupCodeEditor, 1); 
-    }
-
-    function setCodeeditorBackgroundImage(lcodeeditorbackgroundimage)
-    {
-        if (codemirroriframe) // also signifies the frame has been built
-            codeeditor.win.document.body.style.backgroundImage = lcodeeditorbackgroundimage; 
-        else
-            $('#id_code').css("background-image", lcodeeditorbackgroundimage); 
-    }
 
     //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
     //which means we have to do some seemingly random binds/unbinds
@@ -381,7 +104,7 @@ $(document).ready(function() {
         $(cd).bind('keydown', sKeyCombination, function(evt) { oFunction(); return false; }); 
     }
 
-    function setupKeygrabs()
+    setupKeygrabs = function()
     {
         if (navigator.userAgent.toLowerCase().indexOf("mac") != -1) 
         {
@@ -394,49 +117,6 @@ $(document).ready(function() {
         addHotkey('ctrl+p', popupPreview); 
     };
 
-        // context sensitive detection (not used at the moment)
-    function popupHelp()
-    {
-        // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
-        var cursorpos = codeeditor.cursorPosition(true); 
-        var cursorendpos = codeeditor.cursorPosition(false); 
-        var line = codeeditor.lineContent(cursorpos.line); 
-        var character = cursorpos.character; 
-
-        var ip = character; 
-        var ie = character;
-        while ((ip >= 1) && line.charAt(ip-1).match(/[\w\.#]/g))
-            ip--; 
-        while ((ie < line.length) && line.charAt(ie).match(/\w/g))
-            ie++; 
-        var word = line.substring(ip, ie); 
-
-        while ((ip >= 1) && line.charAt(ip-1).match(/[^'"]/g))
-            ip--; 
-        while ((ie < line.length) && line.charAt(ie).match(/[^'"]/g))
-            ie++; 
-        if ((ip >= 1) && (ie < line.length) && line.charAt(ip-1).match(/['"]/g) && (line.charAt(ip-1) == line.charAt(ie)))
-            word = line.substring(ip, ie); 
-        if (word.match(/^\W*$/g))
-            word = ""; 
-
-        var quickhelpparams = { language:scraperlanguage, short_name:short_name, wiki_type:wiki_type, username:username, line:line, character:character, word:word }; 
-        if (cursorpos.line == cursorendpos.line)
-            quickhelpparams["endcharacter"] = cursorendpos.character; 
-
-        $.modal('<iframe width="100%" height="100%" src='+$('input#quickhelpurl').val()+'?'+$.param(quickhelpparams)+'></iframe>', 
-        {
-            overlayClose: true,
-            containerCss: { borderColor:"#ccc", height:"80%", padding:0, width:"90%" }, 
-            overlayCss: { cursor:"auto" }, 
-            onShow: function() 
-            {
-                $('.simplemodal-wrap').css("overflow", "hidden"); 
-                $('.simplemodal-wrap iframe').width($('.simplemodal-wrap').width()-2); 
-                $('.simplemodal-wrap iframe').height($('.simplemodal-wrap').height()-2); 
-            }
-        }); 
-    }
 
     //Setup Menu
     function setupMenu()
@@ -518,80 +198,10 @@ $(document).ready(function() {
     }
 
 
-    //read data back from twisted
-    ReceiveRecordJ = function(jdata)
+
+    // read data back from twisted (called from editorqueues)
+    receiveRecordMain = function(data) 
     {
-        if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
-            receivechatqueue.push(jdata); 
-        else if (jdata.message_type == 'othertyping')
-        {
-            $('#lasttypedtimestamp').text(String(new Date())); 
-            if (jdata.insertlinenumber != undefined)
-                receivechainpatchqueue.push(jdata); 
-        }
-        else
-            receiverecordqueue.push(jdata); 
-
-        // allow the user to clear the choked data if they want
-        if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) 
-        {
-            $('.editor_controls #run').val('Finishing');
-            $('.editor_controls #run').unbind('click.abort');
-            $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
-        }
-
-        if ((receiverecordcall == null) && (receiverecordqueue.length + receivechatqueue.length >= 1))
-            receiverecordcall = window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  
-
-        if (receivechainpatchqueue.length != 0)
-        {
-            if (receivechainpatchcall != null)
-                window.clearTimeout(receivechainpatchcall); 
-            receivechainpatchcall = window.setTimeout(function() { receiveChainpatchFromQueue(null); }, 10);  
-        }
-        
-        // clear batched up data that's choking the system
-        if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
-            window.setTimeout(clearJunkFromQueue, 1); 
-    }
-
-    function clearJunkFromQueue() 
-    {
-        var lreceiverecordqueue = [ ]; 
-        for (var i = 0; i < receiverecordqueue.length; i++) 
-        {
-            jdata = receiverecordqueue[i]; 
-            if ((jdata.message_type != "data") && (jdata.message_type != "console") && (jdata.message_type != "sqlitecall"))
-                lreceiverecordqueue.push(jdata); 
-        }
-
-        if (receiverecordqueue.length != lreceiverecordqueue.length) 
-        {
-            message = "Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length; 
-            writeToConsole(message); 
-            receiverecordqueue = lreceiverecordqueue; 
-        }
-    }
-
-    // run our own queue not in the timeout system (letting chat messages get to the front)
-    function receiveRecordFromQueue() 
-    {
-        receiverecordcall = null; 
-        var jdata; 
-        if (receivechatqueue.length != 0)
-            jdata = receivechatqueue.shift(); 
-        else if (receiverecordqueue.length != 0) 
-            jdata = receiverecordqueue.shift(); 
-        else
-            return; 
-        
-        receiveRecord(jdata);
-        if (receiverecordqueue.length + receivechatqueue.length >= 1)
-            receiverecordcall = window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
-    }
-
-    //read data back from twisted
-    function receiveRecord(data) {
           if (data.nowtime)
              servernowtime = parseISOdate(data.nowtime); 
 			
@@ -654,7 +264,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
           } else {
               writeToConsole(data.content, data.message_type); 
           }
-      }
+    }
 
 
     //send code request run
@@ -671,7 +281,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }
 
         //send the data
-        var code = (codeeditor ? codeeditor.getCode() : $('#id_code').val())
+        var code = getcodefromeditor(); 
         var urlquery = (!$('#id_urlquery').length || $('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         data = {
             "command"   : "run",
@@ -712,8 +322,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 saveScraper(stimulate_run); 
             else if (lastsavedcode && (lastsavedcode != code) && codemirroriframe)
             {
-                var historysize = codeeditor.historySize(); 
-                writeToChat("Page should have been marked dirty but wasn't: historysize="+historysize.undo+"  savedundo="+savedundo); 
+                writeToChat("Page should have been marked dirty but wasn't: historysize="+codeeditorundosize()+"  savedundo="+savedundo); 
                 saveScraper(stimulate_run); 
             }
             else if (stimulate_run == "editorstimulaterun")
@@ -915,67 +524,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 
-    // code shared with reload code so we can use same system to suppress edited messages from codemirror
-    function receiveChainpatchFromQueue(reloadedcode)
-    {
-        // handle bail out conditions
-        if (reloadedcode == null)
-        {
-            if (nextchainpatchnumbertoreceive == -1)
-                receivechainpatchqueue.length = 0; 
-            var chainpatch = (receivechainpatchqueue.length != 0 ? receivechainpatchqueue.shift() : null); 
-            if ((chainpatch != null) && ((chainpatch.chainpatchnumber != nextchainpatchnumbertoreceive) || (chainpatch.rev != lastRev)))
-            {
-                    // this will be handled some other time (for someone joining in as we are already in full flow)
-                writeToChat('<i>'+chainpatch.chatname+' typed something but this window is not synchronized to receive it</i>'); 
-                nextchainpatchnumbertoreceive = -1; 
-                receivechainpatchqueue.length = 0; 
-                chainpatch = null; 
-            }
-            if (chainpatch == null)
-            {
-                receivechainpatchcall = null; 
-                $('li#idtopcodetab a').removeClass("othertypingalert").css("background-color", "#ffffff");
-                return; 
-            }
-        }
-
-            // the callback into the onchange function appears to happen in same thread without a timeout 
-            // so we have to suppress the re-edits with this flag here.
-            // some callbacks into onchange are deferred, so it is unpredictable and hard to detect 
-            // (unless we were going to watch the patches being created and compare them to the one we committed to tell the difference between typing)
-            // so we're going to use a few second delay to suppress messages going through and highlight with an chatalert colour on the tab
-            // which will help see stuff when it appears to go wrong.  
-        $('li#idtopcodetab a').addClass("othertypingalert").css("background-color", "#ffff87"); // backgroundcolour setting by class doesn't work
-        if ((reloadedcode != null) && (receivechainpatchcall != null))
-            window.clearTimeout(receivechainpatchcall); 
-        receivechainpatchcall = "doingothertyping"; 
-        if (reloadedcode == null)
-        {
-            var mismatchlines = recordOtherTyping(chainpatch, codeeditor);  
-
-            // log the mismatch cases, which look like they are coming from the unreliability of 
-            // CM_newLines where the lines are changed prior to the next undo stack commit
-            // therefore the set of patches are actually inconsistent, usually between immediate successor patches, 
-            // so we have the previous patch and the ptime difference to verify this
-            if (mismatchlines.length != 0)
-            {
-                writeToChat("Mismatches "+$.toJSON(mismatchlines)); 
-                writeToChat("chainpatch " + $.toJSON(chainpatch)); 
-                if (lastreceivedchainpatch)
-                    writeToChat("prevchainpatch " + $.toJSON(lastreceivedchainpatch)); 
-            }
-            nextchainpatchnumbertoreceive++;  // next value expected
-            chainpatchnumber = nextchainpatchnumbertoreceive; 
-            lastreceivedchainpatch = chainpatch; 
-        }
-        else
-            codeeditor.setCode(reloadedcode); 
-        receivechainpatchcall = window.setTimeout(function() { receiveChainpatchFromQueue(null); }, (((reloadedcode == null) && (receivechainpatchqueue.length != 0)) ? 10 : 5000));  
-    }
 
               
-
+        // message received from twister case
     function startingrun(lrunID, llxc, lchatname) 
     {
         //show the output area
@@ -1022,7 +573,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         //hide annimation
         $('#running_annimation').hide();
         runID = ''; 
-        uml = ''; 
+        lxc = ''; 
 
         // suppress any more activity to the preview frame
         if (draftpreviewwindow != undefined) 
@@ -1035,30 +586,12 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 
-    function makeSelection(selrange)
-    {
-        if (codemirroriframe)
-        {
-            var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
-            var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
-            codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
-        }
-    }
 
-    function transmitSelection()
-    {
-        var curposstart = codeeditor.cursorPosition(true); 
-
-        var curposend = codeeditor.cursorPosition(false); 
-        var selrange = { startline:codeeditor.lineNumber(curposstart.line)-1, startoffset:curposstart.character, 
-                         endline:codeeditor.lineNumber(curposend.line)-1, endoffset:curposend.character }; 
-        sendjson({"command":'giveselrange', "selrange":selrange, "username":username}); 
-    }
 
     function reloadScraper()
     {
         $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
-        var oldcode = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
+        var oldcode = getcodefromeditor(); 
         var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: oldcode }, timeout: 10000 }); 
         var reloaddata = $.evalJSON(reloadajax.responseText); 
         if (codemirroriframe)
@@ -1238,15 +771,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         if (!bSuccess)
             return; 
 
-        if (codemirroriframe)
-        {
-            var historysize = codeeditor.historySize(); 
-            atsavedundo = historysize.undo + historysize.lostundo; 
-        }
-        else
-            atsavedundo = 1; 
+        atsavedundo = codeeditorundosize(); 
 
-        var currentcode = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
+        var currentcode = getcodefromeditor(); 
         var sdata = {
                         title           : $('#id_title').val(),
                         commit_message  : "cccommit",   // could get some use out of this if we wanted to
@@ -1386,9 +913,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
 
 
-
-
-
         // share this with history.html through codeviewer.js, and start to bring in the diff technology from there
         // and also set the date for the revision
     var fetchedcache = { }; // cached code of different versions
@@ -1452,59 +976,12 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
 
 
-    //resize code editor
-   function resizeCodeEditor()
-   {
-       if (codemirroriframe)
-       {
-            //resize the iFrame inside the editor wrapping div
-            codemirroriframe.height = (($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
-            codemirroriframe.width = (($("#codeeditordiv").width() + codemirroriframewidthdiff) + 'px');
-    
-            //resize the output area so the console scrolls correclty
-            iWindowHeight = $(window).height();
-            iEditorHeight = $("#codeeditordiv").height();
-            iControlsHeight = $('.editor_controls').height();
-            iCodeEditorTop = parseInt($("#codeeditordiv").position().top);
-            iOutputEditorTabs = $('#outputeditordiv .tabs').height();
-            iOutputEditorDiv = iWindowHeight - (iEditorHeight + iControlsHeight + iCodeEditorTop) - 30; 
-            $("#outputeditordiv").height(iOutputEditorDiv + 'px');   
-            //$("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
-            $("#outputeditordiv .info").height((iOutputEditorDiv - iOutputEditorTabs) + 'px');
-            //iOutputEditorTabs
-        }
-        else
-        {
-            $("#id_code").css("height", ($("#codeeditordiv").height()-10) + 'px'); 
-            $("#id_code").css("width", ($("#codeeditordiv").width()-8) + 'px'); 
-        }
-    }
 
-
-    //click bar to resize
-    function resizeControls(sDirection) 
+    function onWindowResize() 
     {
-        if (sDirection == 'first')
-            previouscodeeditorheight = $(window).height() * 3/5; 
-        else if (sDirection != 'up' && sDirection != 'down')
-            sDirection = 'none';
-
-        //work out which way to go
-        var maxheight = $("#codeeditordiv").height() + $(window).height() - ($("#outputeditordiv").position().top + 5); 
-        if (($("#codeeditordiv").height() + 5 <= maxheight) && (sDirection == 'none' || sDirection == 'down')) 
-        {
-            previouscodeeditorheight = $("#codeeditordiv").height();
-            $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
-        } 
-        else if ((sDirection == 'first') || (sDirection == 'none') || ((sDirection == 'up') && ($("#codeeditordiv").height() + 5 >= maxheight)))
-            $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
-    }
-
-    function onWindowResize() {
         var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-        if (maxheight < $("#codeeditordiv").height()){
+        if (maxheight < $("#codeeditordiv").height())
             $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
-        }
         resizeCodeEditor();
     }
 

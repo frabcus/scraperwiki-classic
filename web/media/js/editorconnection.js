@@ -1,8 +1,10 @@
+// Module to manage the connection to twister via Orbited
+// (Replace this if we use SocketIO)
+
 var buffer = "";
 var conn = undefined; // Orbited connection
 var bConnected  = false; 
 var bSuppressDisconnectionMessages = false; 
-var ReveiveRecordJ; // incoming function called from editorconnection.js
 
 function setupOrbited() 
 {

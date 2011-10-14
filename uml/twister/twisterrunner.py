@@ -21,7 +21,7 @@ class spawnRunner(protocol.ProcessProtocol):
     def __init__(self, client, code):
         self.client = client
         self.code = code
-        self.buffer = ''
+        self.lbuffer = [ ]
         self.httpheaders = [ ]
         self.httpheadersdone = False
         self.controllerconnection = None
@@ -55,8 +55,14 @@ class spawnRunner(protocol.ProcessProtocol):
     def outReceived(self, data):
         logger.debug("spawnrunner received for client# %d %s" % (self.client.clientnumber, data[:180]))
             # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
-        lines  = (self.buffer+data).split("\n")
-        self.buffer = lines.pop(-1)
+
+        lines = [ ]
+        spldata = data.split("\n")
+        self.lbuffer.append(spldata.pop(0))
+        while spldata:
+            lines.append("".join(self.lbuffer))
+            self.lbuffer = [ spldata.pop(0) ]  # next one in
+
         
         for line in lines:
                 # strip out the httpheaders that come back at the start of a node connection
