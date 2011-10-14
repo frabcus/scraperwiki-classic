@@ -130,8 +130,8 @@ def restart_daemon(name, process_check = None):
     run('sudo -i /etc/init.d/%s start' % name)
 
 def deploy_done():
-    if not env.email_deploy:
-        return
+#    if not env.email_deploy:
+#        return
 
     env.changelog = local('hg log -r %(old_revision)s:%(new_revision)s' % env)
 
@@ -145,14 +145,15 @@ New revision: %(new_revision)s
 
 %(changelog)s
 """ % env
-
+    print message
+    sys.exit()
     sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
 
 def code_pull():
     with cd(env.path):
-        env.old_revision = run("hg identify")
+        env.old_revision = run("hg identify -i")
         run("hg pull --quiet; hg update --quiet -C %(branch)s" % env)
-        env.new_revision = run("hg identify")
+        env.new_revision = run("hg identify -i")
         if env.old_revision == env.new_revision:
             print "WARNING: code hasn't changed since last update"
 
