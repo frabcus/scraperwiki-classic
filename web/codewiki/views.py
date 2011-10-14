@@ -336,7 +336,7 @@ def code_overview(request, wiki_type, short_name):
 
 # Rewrite of the overview page by Zarino
 def new_code_overview(request, wiki_type, short_name):
-    from codewiki.models import ScraperRunEvent
+    from codewiki.models import ScraperRunEvent, DomainScrape
     
     scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if isinstance(scraper, HttpResponse):  return scraper
@@ -466,6 +466,8 @@ def new_code_overview(request, wiki_type, short_name):
 
         # which domains have been scraped
         context["domainscrapes"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:10]
+        
+        context["latestdomain"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:1]
 
 
     except socket.error, e:
@@ -502,12 +504,12 @@ def new_code_overview(request, wiki_type, short_name):
     if dataproxy:
         dataproxy.close()
 
-    # Set first_url based on the history
-    history = ScraperRunEvent.objects.filter(scraper=scraper, first_url_scraped__isnull=False).order_by('pid')
-    if history and history.count() > 0:
-        context['first_url'] = history[0].first_url_scraped
-    else:
-        context['first_url'] = None
+    try:
+        event = ScraperRunEvent.objects.filter(scraper=scraper).order_by('-last_run')[0]
+        context['domain_scrapes'] = DomainScrape.objects.filter(scraper_run_event=event).all()
+    except:
+        context['domain_scrapes'] = []
+
         
     return render_to_response('codewiki/new_scraper_overview.html', context, context_instance=RequestContext(request))
 

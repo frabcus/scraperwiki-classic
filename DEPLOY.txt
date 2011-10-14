@@ -11,5 +11,5 @@ Deploying to a server
 
 In the root directory of your local install of ScraperWiki run
 
-> $ fab deploy [dev|live|staging]
+> $ fab [dev|live] webserver:buildout=no
 
