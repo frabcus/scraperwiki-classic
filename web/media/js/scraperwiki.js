@@ -469,7 +469,7 @@ $(function()
 			$(this).next('input').attr('disabled',false);
 		}
 	}).next().bind('click', function(){
-		var url = $(this).parent().prev().attr('href') + $(this).prev().val();
+		var url = $(this).parent().prev().attr('href') + $(this).prev().val() + '/';
 		var button = $(this).val('Transferring\u2026');
 		$.ajax({
 			url: url,

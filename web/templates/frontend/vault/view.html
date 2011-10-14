@@ -49,8 +49,8 @@
     	    {% endfor %}
     	    </ul>
     	{% else %}
+    	    <h5>This vault contains no scrapers: <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	    <div class="empty_vault">
-    	        <h5>This vault contains no scrapers: <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	        <h4>This vault is empty!</h4>
     	        <!-- <p>Perhaps you&rsquo;d like to read our <a>Vaults FAQ</a>,<br/>or <a>move some scrapers or views</a> here?</p> -->
     	        <p>Vaults are a great way to keep scrapers secure, <br/>while sharing them with the people that matter.</p>
@@ -105,9 +105,9 @@
     	        {% include 'frontend/includes/vault_scraper_line.html' %}
     	    {% endfor %}
     	    </ul>
-    	{% else %}
+    	{% else %}    
+    	    <h5>This vault contains no scrapers: <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	    <div class="empty_vault">
-    	        <h5>This vault contains no scrapers: <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	        <h4>This vault is empty!</h4>
     	        <!-- <p>Perhaps you&rsquo;d like to read our <a>Vaults FAQ</a>,<br/>or <a>move some scrapers or views</a> here?</p> -->
     	        <p>Vaults are a great way to keep scrapers secure, <br/>while sharing them with the people that matter.</p>

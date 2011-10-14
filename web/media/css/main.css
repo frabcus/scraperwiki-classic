@@ -5949,6 +5949,7 @@ body.vaults .ui-autocomplete .ui-menu-item a {
 body.vaults .vault_contents {
 	border-right: 1px solid #ccc;
 	border-left: 1px solid #ccc;
+	position: relative;
 }
 
 body.vaults .vault_contents h5 {
@@ -5959,6 +5960,13 @@ body.vaults .vault_contents h5 {
 	font-weight: normal;
 	text-transform: uppercase;
 	padding: 7px 10px 6px 10px;
+}
+
+body.vaults .vault_contents.empty h5 {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0
 }
 
 body.vaults .vault_contents h5 a {
@@ -6085,7 +6093,7 @@ body.vaults .transfer_ownership .error {
 }
 
 body.vaults .vault_contents.empty {
-	padding: 10px;
+	padding: 40px 10px 10px 10px;
 	border-bottom: 1px solid #ccc;
 }
 
