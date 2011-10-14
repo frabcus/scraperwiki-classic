@@ -3424,6 +3424,30 @@ div.highlight {
 	margin-bottom: 0.5em;
 }
 
+/* user lists */
+
+ul.user_list {
+	margin: 0;
+	padding: 0;
+}
+
+ul.user_list li {
+    float: left;
+    padding-right: 25px;
+    line-height: 38px;
+}
+
+ul.user_list li.clear {
+    float: none;
+    clear: both;
+}
+
+ul.user_list li .gravatar {
+    width: 32px;
+    height: 32px;
+    margin: 0 10px 0 0;
+}
+
 /* scraper lists */
 
 ul.scraper_list {

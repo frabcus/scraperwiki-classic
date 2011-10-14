@@ -302,6 +302,7 @@ def search(request, q=""):
         return render_to_response('frontend/search_results.html',
             {
                 'scrapers': scrapers,
+                'users': users,
                 'tags': tags,
                 'scrapers_num_results': scrapers_num_results,
                 'users_num_results': users_num_results,

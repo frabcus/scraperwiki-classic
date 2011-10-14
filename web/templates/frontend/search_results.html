@@ -15,6 +15,16 @@
 
 {% block content %}
     <div class="content">
+        {% if users %}
+            <ul class="user_list">
+                {% for other_user in users %}
+                    {% include 'frontend/includes/user_line.html' %}
+                {% endfor %}
+                <li class="clear"></li>
+            </ul>
+        {% else %}
+        {% endif %}
+
         {% if tags %}
             <div class="tag_suggestion">
                 {% if tags|length_is:"1" %}

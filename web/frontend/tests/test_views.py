@@ -98,8 +98,13 @@ class FrontEndViewsSearchTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['scrapers_num_results'], 2)
     
-    def test_user_search(self):
+    def test_user_search_by_human_name(self):
         response = self.client.get(reverse('search', kwargs={'q':'Generalpurpose'}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['users_num_results'], 1)
+
+    def test_user_search_by_unix_name(self):
+        response = self.client.get(reverse('search', kwargs={'q':'test_admin'}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['users_num_results'], 1)
 

@@ -91,9 +91,10 @@ def scraper_search_query(user, query, apikey=None):
     return scrapers_all.distinct()
 
 def user_search_query(user, query, apikey=None):
-    users_name = UserProfile.objects.filter(name__icontains=query)
-    users_bio = UserProfile.objects.filter(bio__icontains=query)
-    users_all = users_name | users_bio
+    users_name = User.objects.filter(userprofile__name__icontains=query)
+    users_bio = User.objects.filter(userprofile__bio__icontains=query)
+    users_username = User.objects.filter(username__icontains=query)
+    users_all = users_name | users_bio | users_username
     users_all.order_by('-created_at')
     return users_all.distinct()
 
