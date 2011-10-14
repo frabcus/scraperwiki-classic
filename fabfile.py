@@ -19,6 +19,7 @@ import time
 # fab dev webserver
 # fab dev webserver:buildout=no
 # fab dev webserver:buildout=no --hide=running,stdout
+# fab dev firebox:restart=yes
 
 ###########################################################################
 # Server configurations
@@ -123,12 +124,13 @@ def restart_webserver():
 
 # process_check - a string to search in command line names to check if process has not died
 def restart_daemon(name, process_check = None):
-    run('sudo /etc/init.d/%s stop' % name)
+    run('sudo -i /etc/init.d/%s stop' % name)
     if process_check:
         with settings(warn_only=True):
-            run_with_retries('ps auxxwwww | grep %s | egrep -v "/bin/bash|grep"; true' % process_check)
+            run_with_retries('ps auxxwwww | egrep -- "%s" | egrep -v "/bin/bash|grep"; true' % process_check)
 
-    run('sudo /etc/init.d/%s start' % name)
+    # this needs a login shell with "sudo -i" to start scriptmgr, for unknown reasons
+    run('sudo -i /etc/init.d/%s start' % name)
 
 def deploy_done():
     if not env.email_deploy:
@@ -162,9 +164,7 @@ def webserver(buildout='yes', restart='no'):
     '''Deploys Django web application, runs schema migrations, clears caches,
 kicks webserver so it starts using new code. 
 
-restart=yes, restarts daemons like twisted that we don't want to restart 
-        every time as it disturbs users. XXX get rid of this by making
-        twisted tolerant of that. always gracefully restarts Apache.
+restart=yes, also restarts twisted (Apache is gracefully restarted always)
 buildout=no, stops it updating buildout which can be slow'''
     restart = parse_bool(restart)
     buildout = parse_bool(buildout)
@@ -200,7 +200,7 @@ def screenshooter():
 def webstore(buildout='no', restart='no'): # default buildout to no until ready
     '''Deploys webstore SQL database.
 
-restart=yes, restarts daemons XXX make them able to gracefully restart so default is yes
+restart=yes, restarts daemons
 buildout=no, stops it updating buildout which can be slow'''
     restart = parse_bool(restart)
     buildout = parse_bool(buildout)
@@ -219,9 +219,19 @@ buildout=no, stops it updating buildout which can be slow'''
 
 @task
 @roles('firebox')
-def firebox():
-    '''Deploys LXC script sandbox executor. XXX currently doesn't restart any daemons'''
+def firebox(restart='no'):
+    '''Deploys LXC script sandbox executor. XXX currently doesn't restart any daemons
+
+restart=yes, restarts daemons'''
+    restart = parse_bool(restart)
+
     code_pull()
+
+    if restart:
+        restart_daemon('httpproxy', '--mode=H')
+        restart_daemon('httpsproxy', '--mode=S')
+        restart_daemon('ftpproxy', 'ftpproxy.py')
+        restart_daemon('scriptmgr', 'scriptmgr.js')
 
     update_crons()
     deploy_done()
