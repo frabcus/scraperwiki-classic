@@ -119,7 +119,8 @@ function newCodeObject(wiki_type, sourcescraper)
 					}
 				});
 				$('li a', dialog.data).bind('click', function(e){
-					if( $('#chooser_vaults h2 input').is(":visible") && $('#chooser_vaults h2 input').is(":checked") ) {
+					if( $('#chooser_vaults h2 input').is(":visible")  ) {
+						if ( $('#chooser_vaults h2 input').is(":checked") ) return false;
 						e.preventDefault();
 					} else {
 						return false;
