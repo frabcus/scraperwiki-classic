@@ -6,13 +6,10 @@ import os.path
 import time
 
 # TODO:
-# Restart things for firebox, webstore if specified (and indeed twister for webserver)
-#   httpproxy and dataproxy will need pgrep killing as not coded right
 # Full deploy that restarts everything too
 # Pull puppet on kippax, then pull elsewhere in one command
 # Run Django tests automatically - on local or on dev?
 # Run Selenium tests - on local or on dev?
-# Merge code from default into stable for you (on dev)
 # Show change log between old/new revision in email?
 
 # Example use:
@@ -136,6 +133,8 @@ def deploy_done():
     if not env.email_deploy:
         return
 
+    env.changelog = local('hg log -r %(old_revision)s:%(new_revision)s' % env)
+
     message = """From: ScraperWiki <developers@scraperwiki.com>
 Subject: New Scraperwiki Deployment of '%(task)s' to flock '%(flock)s' (deployed by %(name)s)
 
@@ -144,7 +143,9 @@ Subject: New Scraperwiki Deployment of '%(task)s' to flock '%(flock)s' (deployed
 Old revision: %(old_revision)s
 New revision: %(new_revision)s
 
+%(changelog)s
 """ % env
+
     sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
 
 def code_pull():
