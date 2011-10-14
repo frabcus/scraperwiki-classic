@@ -68,6 +68,7 @@ module ScraperWiki
     # * _postcode_ = A valid UK postcode
     #
     # === Example
+    #
     # ScraperWiki::gb_postcode_to_latlng('L3 6RP')
     #
     def ScraperWiki.gb_postcode_to_latlng(postcode)
