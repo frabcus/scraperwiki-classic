@@ -1,8 +1,9 @@
+// Main module.  All references to codeeditor have been moved into editorcodemirror.js
+
+
 var lastRev = null; 
-var codemirror_url; 
-var scraperlanguage; 
-var setupKeygrabs; // function
-var ChangeInEditor; // function
+var setupKeygrabs;     // function
+var inRollback = false;
 
 $(document).ready(function() 
 {
@@ -31,7 +32,6 @@ $(document).ready(function()
     var lastRevUserRealName = $('#originalrevuserrealname').val(); 
     var rollbackRev = $('#rollback_rev').val(); 
 
-    var inRollback = false;
     if (rollbackRev != "") 
         inRollback = true;
 
@@ -80,17 +80,11 @@ $(document).ready(function()
     }
     lastupdaterevcall = window.setTimeout(writeUpdateLastSavedRev, 50); 
 
-    var lastsavedcode   = ''; // used to tell if we should expect a null back from the revision log
+    var lastsavedcode  = ''; // used to tell if we should expect a null back from the revision log
 
     // runtime information
     var runID = ''; 
     var lxc = ''; 
-
-    var pageIsDirty = true;
-
-    var atsavedundo = 0; // recorded at start of save operation
-    var savedundo = 0; 
-    var lastundo = 0;
 
     setupCodeEditor(); 
     setupMenu();
@@ -98,86 +92,6 @@ $(document).ready(function()
     setupToolbar();
     setupResizeEvents();
     setupOrbited();
-
-    ChangeInEditor = function(changetype) 
-    {
-        lasttypetime = new Date(); 
-        var lpageIsDirty; 
-        if (codemirroriframe)
-        {
-            var historysize = codeeditor.historySize(); 
-            var automode = $('input#automode').val(); 
-    
-            if (changetype == "saved")
-                savedundo = atsavedundo
-            if (changetype == "reload")
-                savedundo = historysize.undo + historysize.lostundo; 
-            if ((changetype == "reload") || (changetype == "initialized"))
-                lastsavedcode = codeeditor.getCode(); 
-            if (changetype == "initialized")
-                lastundo = 0; 
-    
-            var lpageIsDirty = (historysize.undo + historysize.lostundo != savedundo); 
-        }
-        else
-            lpageIsDirty = (changetype == "edit"); 
-
-        if (pageIsDirty != lpageIsDirty)
-        {
-            pageIsDirty = lpageIsDirty; 
-            if ((lastRev != "") && (lastRev != "unsaved") && (lastRev != "draft") && (!inRollback)) {
-                $('.editor_controls #btnCommitPopup').attr('disabled', !pageIsDirty); 
-            } else {
-                $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-            }
-        }
-
-        if (changetype != 'edit')
-            return; 
-        if (automode != 'autosave')
-            return; 
-        
-        // if patches are coming in of we are waiting for a timeout then don't send any patches back 
-        // as this can create a ping-pong effect between two windows of the same editing user
-        if (receivechainpatchcall != null)
-            return; 
-        
-        // make outgoing patches (if there is anyone to receive them)
-        if (codemirroriframe && (countclientsconnected != 1))
-        {
-            var llchainpatches = [ ];
-            lastundo = MakeChainPatches(llchainpatches, codeeditor, lastundo); 
-            for (var i = 0; i < llchainpatches.length; i++)
-            {
-                var chainpatch = llchainpatches[i]; 
-                chainpatch['chainpatchnumber'] = chainpatchnumber;
-                chainpatch['chatname'] = chatname;
-                chainpatch['rev'] = lastRev; 
-                chainpatch['clientnumber'] = clientnumber; 
-                if (chainpatch['insertions'] != null)
-                    chainpatches.push(chainpatch); 
-                else
-                    writeToChat("<i>Chain patch failed to be generated</i>"); // still advance chainpatchnumber so all the watchers can get out of sync accordingly
-                chainpatchnumber++; 
-            }
-            if (nextchainpatchnumbertoreceive >= 0)
-                nextchainpatchnumbertoreceive = chainpatchnumber; 
-        }
-        
-        // plain text area case not coded for
-        else 
-        {
-            chainpatches.push({"command":'typing', "chainpatchnumber":chainpatchnumber, "rev":lastRev, "clientnumber":clientnumber}); 
-            chainpatchnumber++; 
-            if (nextchainpatchnumbertoreceive >= 0)
-                nextchainpatchnumbertoreceive = chainpatchnumber; 
-        }
-        
-        if (chainpatches.length > 0)
-            sendChainPatches(); 
-    }
-
-
 
 
     //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
@@ -203,49 +117,6 @@ $(document).ready(function()
         addHotkey('ctrl+p', popupPreview); 
     };
 
-        // context sensitive detection (not used at the moment)
-    function popupHelp()
-    {
-        // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
-        var cursorpos = codeeditor.cursorPosition(true); 
-        var cursorendpos = codeeditor.cursorPosition(false); 
-        var line = codeeditor.lineContent(cursorpos.line); 
-        var character = cursorpos.character; 
-
-        var ip = character; 
-        var ie = character;
-        while ((ip >= 1) && line.charAt(ip-1).match(/[\w\.#]/g))
-            ip--; 
-        while ((ie < line.length) && line.charAt(ie).match(/\w/g))
-            ie++; 
-        var word = line.substring(ip, ie); 
-
-        while ((ip >= 1) && line.charAt(ip-1).match(/[^'"]/g))
-            ip--; 
-        while ((ie < line.length) && line.charAt(ie).match(/[^'"]/g))
-            ie++; 
-        if ((ip >= 1) && (ie < line.length) && line.charAt(ip-1).match(/['"]/g) && (line.charAt(ip-1) == line.charAt(ie)))
-            word = line.substring(ip, ie); 
-        if (word.match(/^\W*$/g))
-            word = ""; 
-
-        var quickhelpparams = { language:scraperlanguage, short_name:short_name, wiki_type:wiki_type, username:username, line:line, character:character, word:word }; 
-        if (cursorpos.line == cursorendpos.line)
-            quickhelpparams["endcharacter"] = cursorendpos.character; 
-
-        $.modal('<iframe width="100%" height="100%" src='+$('input#quickhelpurl').val()+'?'+$.param(quickhelpparams)+'></iframe>', 
-        {
-            overlayClose: true,
-            containerCss: { borderColor:"#ccc", height:"80%", padding:0, width:"90%" }, 
-            overlayCss: { cursor:"auto" }, 
-            onShow: function() 
-            {
-                $('.simplemodal-wrap').css("overflow", "hidden"); 
-                $('.simplemodal-wrap iframe').width($('.simplemodal-wrap').width()-2); 
-                $('.simplemodal-wrap iframe').height($('.simplemodal-wrap').height()-2); 
-            }
-        }); 
-    }
 
     //Setup Menu
     function setupMenu()
@@ -410,7 +281,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }
 
         //send the data
-        var code = (codeeditor ? codeeditor.getCode() : $('#id_code').val())
+        var code = getcodefromeditor(); 
         var urlquery = (!$('#id_urlquery').length || $('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         data = {
             "command"   : "run",
@@ -451,8 +322,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 saveScraper(stimulate_run); 
             else if (lastsavedcode && (lastsavedcode != code) && codemirroriframe)
             {
-                var historysize = codeeditor.historySize(); 
-                writeToChat("Page should have been marked dirty but wasn't: historysize="+historysize.undo+"  savedundo="+savedundo); 
+                writeToChat("Page should have been marked dirty but wasn't: historysize="+codeeditorundosize()+"  savedundo="+savedundo); 
                 saveScraper(stimulate_run); 
             }
             else if (stimulate_run == "editorstimulaterun")
@@ -656,7 +526,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
 
               
-
+        // message received from twister case
     function startingrun(lrunID, llxc, lchatname) 
     {
         //show the output area
@@ -716,30 +586,12 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 
-    function makeSelection(selrange)
-    {
-        if (codemirroriframe)
-        {
-            var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
-            var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
-            codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
-        }
-    }
 
-    function transmitSelection()
-    {
-        var curposstart = codeeditor.cursorPosition(true); 
-
-        var curposend = codeeditor.cursorPosition(false); 
-        var selrange = { startline:codeeditor.lineNumber(curposstart.line)-1, startoffset:curposstart.character, 
-                         endline:codeeditor.lineNumber(curposend.line)-1, endoffset:curposend.character }; 
-        sendjson({"command":'giveselrange', "selrange":selrange, "username":username}); 
-    }
 
     function reloadScraper()
     {
         $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
-        var oldcode = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
+        var oldcode = getcodefromeditor(); 
         var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: oldcode }, timeout: 10000 }); 
         var reloaddata = $.evalJSON(reloadajax.responseText); 
         if (codemirroriframe)
@@ -919,15 +771,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         if (!bSuccess)
             return; 
 
-        if (codemirroriframe)
-        {
-            var historysize = codeeditor.historySize(); 
-            atsavedundo = historysize.undo + historysize.lostundo; 
-        }
-        else
-            atsavedundo = 1; 
+        atsavedundo = codeeditorundosize(); 
 
-        var currentcode = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
+        var currentcode = getcodefromeditor(); 
         var sdata = {
                         title           : $('#id_title').val(),
                         commit_message  : "cccommit",   // could get some use out of this if we wanted to
@@ -1067,9 +913,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
 
 
-
-
-
         // share this with history.html through codeviewer.js, and start to bring in the diff technology from there
         // and also set the date for the revision
     var fetchedcache = { }; // cached code of different versions
@@ -1134,11 +977,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
 
 
-    function onWindowResize() {
+    function onWindowResize() 
+    {
         var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-        if (maxheight < $("#codeeditordiv").height()){
+        if (maxheight < $("#codeeditordiv").height())
             $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
-        }
         resizeCodeEditor();
     }
 

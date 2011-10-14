@@ -16,12 +16,36 @@ var parserConfig = Array();
 var parserName = Array();
 var codemirroroptions = undefined; 
 
+var codemirror_url; 
+var scraperlanguage; 
+
+var pageIsDirty = true;
+
+var atsavedundo = 0; // recorded at start of save operation
+var savedundo = 0; 
+var lastundo = 0;
+
+
    // called from editortabs.js
 function SelectEditorLine(iLine)
 {
     codeeditor.selectLines(codeeditor.nthLine(iLine), 0, codeeditor.nthLine(iLine + 1), 0); 
 }
 
+function getcodefromeditor()
+{
+    return (codeeditor ? codeeditor.getCode() : $('#id_code').val()); 
+}
+
+function codeeditorundosize()
+{
+    if (codemirroriframe)
+    {
+        var historysize = codeeditor.historySize(); 
+        return historysize.undo + historysize.lostundo; 
+    }
+    return 1; 
+}
 
 //setup code editor
 function setupCodeEditor()
@@ -214,4 +238,149 @@ function resizeControls(sDirection)
     else if ((sDirection == 'first') || (sDirection == 'none') || ((sDirection == 'up') && ($("#codeeditordiv").height() + 5 >= maxheight)))
         $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
 }
+
+
+function ChangeInEditor(changetype) 
+{
+    lasttypetime = new Date(); 
+    var lpageIsDirty; 
+    if (codemirroriframe)
+    {
+        var historysize = codeeditor.historySize(); 
+        var automode = $('input#automode').val(); 
+
+        if (changetype == "saved")
+            savedundo = atsavedundo
+        if (changetype == "reload")
+            savedundo = historysize.undo + historysize.lostundo; 
+        if ((changetype == "reload") || (changetype == "initialized"))
+            lastsavedcode = codeeditor.getCode(); 
+        if (changetype == "initialized")
+            lastundo = 0; 
+
+        var lpageIsDirty = (historysize.undo + historysize.lostundo != savedundo); 
+    }
+    else
+        lpageIsDirty = (changetype == "edit"); 
+
+    if (pageIsDirty != lpageIsDirty)
+    {
+        pageIsDirty = lpageIsDirty; 
+        if ((lastRev != "") && (lastRev != "unsaved") && (lastRev != "draft") && (!inRollback)) {
+            $('.editor_controls #btnCommitPopup').attr('disabled', !pageIsDirty); 
+        } else {
+            $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+        }
+    }
+
+    if (changetype != 'edit')
+        return; 
+    if (automode != 'autosave')
+        return; 
+    
+    // if patches are coming in of we are waiting for a timeout then don't send any patches back 
+    // as this can create a ping-pong effect between two windows of the same editing user
+    if (receivechainpatchcall != null)
+        return; 
+    
+    // make outgoing patches (if there is anyone to receive them)
+    if (codemirroriframe && (countclientsconnected != 1))
+    {
+        var llchainpatches = [ ];
+        lastundo = MakeChainPatches(llchainpatches, codeeditor, lastundo); 
+        for (var i = 0; i < llchainpatches.length; i++)
+        {
+            var chainpatch = llchainpatches[i]; 
+            chainpatch['chainpatchnumber'] = chainpatchnumber;
+            chainpatch['chatname'] = chatname;
+            chainpatch['rev'] = lastRev; 
+            chainpatch['clientnumber'] = clientnumber; 
+            if (chainpatch['insertions'] != null)
+                chainpatches.push(chainpatch); 
+            else
+                writeToChat("<i>Chain patch failed to be generated</i>"); // still advance chainpatchnumber so all the watchers can get out of sync accordingly
+            chainpatchnumber++; 
+        }
+        if (nextchainpatchnumbertoreceive >= 0)
+            nextchainpatchnumbertoreceive = chainpatchnumber; 
+    }
+    
+    // plain text area case not coded for
+    else 
+    {
+        chainpatches.push({"command":'typing', "chainpatchnumber":chainpatchnumber, "rev":lastRev, "clientnumber":clientnumber}); 
+        chainpatchnumber++; 
+        if (nextchainpatchnumbertoreceive >= 0)
+            nextchainpatchnumbertoreceive = chainpatchnumber; 
+    }
+    
+    if (chainpatches.length > 0)
+        sendChainPatches(); 
+}
+
+
+function makeSelection(selrange)
+{
+    if (codemirroriframe)
+    {
+        var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
+        var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
+        codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
+    }
+}
+
+function transmitSelection()
+{
+    var curposstart = codeeditor.cursorPosition(true); 
+
+    var curposend = codeeditor.cursorPosition(false); 
+    var selrange = { startline:codeeditor.lineNumber(curposstart.line)-1, startoffset:curposstart.character, 
+                        endline:codeeditor.lineNumber(curposend.line)-1, endoffset:curposend.character }; 
+    sendjson({"command":'giveselrange', "selrange":selrange, "username":username}); 
+}
+
+    // context sensitive detection (not used at the moment)
+function popupHelp()
+{
+    // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
+    var cursorpos = codeeditor.cursorPosition(true); 
+    var cursorendpos = codeeditor.cursorPosition(false); 
+    var line = codeeditor.lineContent(cursorpos.line); 
+    var character = cursorpos.character; 
+
+    var ip = character; 
+    var ie = character;
+    while ((ip >= 1) && line.charAt(ip-1).match(/[\w\.#]/g))
+        ip--; 
+    while ((ie < line.length) && line.charAt(ie).match(/\w/g))
+        ie++; 
+    var word = line.substring(ip, ie); 
+
+    while ((ip >= 1) && line.charAt(ip-1).match(/[^'"]/g))
+        ip--; 
+    while ((ie < line.length) && line.charAt(ie).match(/[^'"]/g))
+        ie++; 
+    if ((ip >= 1) && (ie < line.length) && line.charAt(ip-1).match(/['"]/g) && (line.charAt(ip-1) == line.charAt(ie)))
+        word = line.substring(ip, ie); 
+    if (word.match(/^\W*$/g))
+        word = ""; 
+
+    var quickhelpparams = { language:scraperlanguage, short_name:short_name, wiki_type:wiki_type, username:username, line:line, character:character, word:word }; 
+    if (cursorpos.line == cursorendpos.line)
+        quickhelpparams["endcharacter"] = cursorendpos.character; 
+
+    $.modal('<iframe width="100%" height="100%" src='+$('input#quickhelpurl').val()+'?'+$.param(quickhelpparams)+'></iframe>', 
+    {
+        overlayClose: true,
+        containerCss: { borderColor:"#ccc", height:"80%", padding:0, width:"90%" }, 
+        overlayCss: { cursor:"auto" }, 
+        onShow: function() 
+        {
+            $('.simplemodal-wrap').css("overflow", "hidden"); 
+            $('.simplemodal-wrap iframe').width($('.simplemodal-wrap').width()-2); 
+            $('.simplemodal-wrap iframe').height($('.simplemodal-wrap').height()-2); 
+        }
+    }); 
+}
+
 
