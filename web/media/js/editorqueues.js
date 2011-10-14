@@ -1,9 +1,15 @@
+// Module to manage the incoming queues of records to twister
+// most outgoing information goes directly to sendjson() in editorconnection, 
+// except for the editorpatchqueues.js
+
+
 var receiverecordcall = null;     // timeout object
 var receiverecordqueue = [ ]; 
 var receivechatqueue = [ ]; 
 var receivechainpatchqueue = [ ]; // coming in
 var receivechainpatchcall = null; // timeout object
 var receiveRecordMain = null;     // function in main editor.js
+
 
 //read data back from twisted
 function ReceiveRecordJ(jdata)
@@ -76,3 +82,6 @@ function receiveRecordFromQueue()
     if (receiverecordqueue.length + receivechatqueue.length >= 1)
         receiverecordcall = window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
 }
+
+
+// chain patches outg

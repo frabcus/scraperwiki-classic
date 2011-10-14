@@ -1,3 +1,14 @@
+// Module for handling the console, sources, data, chat tabs at the bottom of the editor
+
+// Important functions:
+//  writeToChat(seMessage, sechatname)
+//  writeExceptionDump
+//  writeToSources
+//  writeToSqliteData
+//  clearOutput
+
+
+
 var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
 var outputMaxItems = 400;
 var sTabCurrent = ''; 
@@ -21,7 +32,7 @@ var lasttouchedtime = undefined;
 
 var cachehidlookup = { }; // this itself is a cache of a cache
 
-var SelectEditorLine; // function
+var SelectEditorLine;     // function used to make the Line number in the console clickable
 
 function cgiescape(text) 
 {
