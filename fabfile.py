@@ -3,20 +3,19 @@ from fabric.api import *
 import getpass
 import sys
 import os.path
+import time
 
 # TODO:
-# Restart things for firebox, webstore if specified (and indeed twister for webserver)
-#   httpproxy and dataproxy will need pgrep killing as not coded right
 # Full deploy that restarts everything too
 # Pull puppet on kippax, then pull elsewhere in one command
 # Run Django tests automatically - on local or on dev?
 # Run Selenium tests - on local or on dev?
-# Merge code from default into stable for you (on dev)
 
 # Example use:
 # fab dev webserver
 # fab dev webserver:buildout=no
 # fab dev webserver:buildout=no --hide=running,stdout
+# fab dev firebox:restart=yes
 
 ###########################################################################
 # Server configurations
@@ -74,7 +73,7 @@ def parse_bool(s):
 
 def do_server_lookup(task):
     if not 'flock' in env:
-        raise Exception("specify which flock (e.g. dev/live) first")
+            raise Exception("specify which flock (e.g. dev/live) first")
     hosts = env.server_lookup[(task, env.flock)]
     print "server_lookup: deploying '%s' on flock '%s', hosts: %s" % (task, env.flock, hosts)
     env.task = task
@@ -90,6 +89,14 @@ def run_buildout():
         run_in_virtualenv('[ -f "bin/buildout" || pip install zc.buildout')
 
     run_in_virtualenv('buildout -N -qq')
+
+def run_with_retries(cmd, success_output='', attempts=5, delay=1):
+    for attempt in range(attempts):
+        ret = run(cmd, shell=True)
+        if ret == success_output:
+            return
+        time.sleep(delay)
+    raise Exception("failed to get expected output '%s' after %d retries: %s" % (success_output, attempts, cmd))
 
 def django_db_migrate():
     run_in_virtualenv('cd web; python manage.py syncdb --verbosity=0')
@@ -111,9 +118,21 @@ def update_crons():
 def restart_webserver():
     sudo('apache2ctl graceful')
 
+# process_check - a string to search in command line names to check if process has not died
+def restart_daemon(name, process_check = None):
+    run('sudo -i /etc/init.d/%s stop' % name)
+    if process_check:
+        with settings(warn_only=True):
+            run_with_retries('ps auxxwwww | egrep -- "%s" | egrep -v "/bin/bash|grep"; true' % process_check)
+
+    # this needs a login shell with "sudo -i" to start scriptmgr, for unknown reasons
+    run('sudo -i /etc/init.d/%s start' % name)
+
 def deploy_done():
     if not env.email_deploy:
         return
+
+    env.changelog = local('hg log -r %(old_revision)s:%(new_revision)s' % env)
 
     message = """From: ScraperWiki <developers@scraperwiki.com>
 Subject: New Scraperwiki Deployment of '%(task)s' to flock '%(flock)s' (deployed by %(name)s)
@@ -123,14 +142,16 @@ Subject: New Scraperwiki Deployment of '%(task)s' to flock '%(flock)s' (deployed
 Old revision: %(old_revision)s
 New revision: %(new_revision)s
 
+%(changelog)s
 """ % env
+
     sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
 
 def code_pull():
     with cd(env.path):
-        env.old_revision = run("hg identify")
+        env.old_revision = run("hg identify -i")
         run("hg pull --quiet; hg update --quiet -C %(branch)s" % env)
-        env.new_revision = run("hg identify")
+        env.new_revision = run("hg identify -i")
         if env.old_revision == env.new_revision:
             print "WARNING: code hasn't changed since last update"
 
@@ -139,11 +160,13 @@ def code_pull():
 
 @task
 @roles('webserver')
-def webserver(buildout='yes'):
+def webserver(buildout='yes', restart='no'):
     '''Deploys Django web application, runs schema migrations, clears caches,
 kicks webserver so it starts using new code. 
 
+restart=yes, also restarts twisted (Apache is gracefully restarted always)
 buildout=no, stops it updating buildout which can be slow'''
+    restart = parse_bool(restart)
     buildout = parse_bool(buildout)
 
     code_pull()
@@ -152,7 +175,10 @@ buildout=no, stops it updating buildout which can be slow'''
         run_buildout()
     django_db_migrate()
     update_js_cache_revision()
+
     restart_webserver()   
+    if restart:
+        restart_daemon('twister', 'twister.py')
 
     update_crons()
     deploy_done()
@@ -171,16 +197,21 @@ def screenshooter():
 
 @task
 @roles('webstore')
-def webstore(buildout='no'): # default to no until ready
-    '''Deploys webstore SQL database. XXX currently doesn't restart any daemons.
+def webstore(buildout='no', restart='no'): # default buildout to no until ready
+    '''Deploys webstore SQL database.
 
+restart=yes, restarts daemons
 buildout=no, stops it updating buildout which can be slow'''
+    restart = parse_bool(restart)
     buildout = parse_bool(buildout)
 
     code_pull()
 
     if buildout:
         run_buildout()
+    if restart:
+        restart_daemon('dataproxy', 'dataproxy.py')
+        #restart_daemon('webstore', 'webstore/run_store.py') # XXX doesn't work yet
 
     update_crons()
     deploy_done()
@@ -188,9 +219,19 @@ buildout=no, stops it updating buildout which can be slow'''
 
 @task
 @roles('firebox')
-def firebox():
-    '''Deploys LXC script sandbox executor. XXX currently doesn't restart any daemons'''
+def firebox(restart='no'):
+    '''Deploys LXC script sandbox executor. XXX currently doesn't restart any daemons
+
+restart=yes, restarts daemons'''
+    restart = parse_bool(restart)
+
     code_pull()
+
+    if restart:
+        restart_daemon('httpproxy', '--mode=H')
+        restart_daemon('httpsproxy', '--mode=S')
+        restart_daemon('ftpproxy', 'ftpproxy.py')
+        restart_daemon('scriptmgr', 'scriptmgr.js')
 
     update_crons()
     deploy_done()
