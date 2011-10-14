@@ -9,8 +9,7 @@
         <input type="submit" value="Go" />
     </form></h2>
     <p>
-      {{ scrapers_num_results }} result{{scrapers_num_results|pluralize}} found &bull; 
-      <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">Create RSS feed for this search term</a>
+      {{ scrapers_num_results }} result{{scrapers_num_results|pluralize}} found &bull; <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">Create RSS feed for this search term</a>
     </p>
 {% endblock %}
 

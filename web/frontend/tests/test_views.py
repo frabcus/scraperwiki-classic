@@ -62,7 +62,7 @@ class FrontEndViewsDocumentationTests(TestCase):
 
     def test_help(self):
         response = self.client.get('/help/', follow=True)
-        self.assertEqual(response.redirect_chain, [('http://testserver/docs/', 301)])
+        self.assertEqual(response.redirect_chain, [('http://testserver/docs/', 301), ('http://testserver/docs/python/', 302)])
 
     def test_contact_form(self):
         response = self.client.get(reverse('contact_form'))
@@ -94,17 +94,16 @@ class FrontEndViewsSearchTests(TestCase):
     fixtures = ['test_data']
 
     def test_scraper_search(self):
-        scrapers = Code.objects.filter(title__icontains="test")
         response = self.client.get(reverse('search', kwargs={'q':'test'}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['scrapers_num_results'], 2)
     
-#    def test_user_search(self):
+    def test_user_search(self):
+        response = self.client.get(reverse('search', kwargs={'q':'Generalpurpose'}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['users_num_results'], 1)
+
+
 #        scrapers = Code.objects.filter(title__icontains="test")
-#        response = self.client.get(reverse('search', kwargs={'q':'test'}))
-#        self.assertEqual(response.status_code, 200)
-#        self.assertEqual(response.context['scrapers_num_results'], 1)
-    
-
-
+#        scrapers = Code.objects.filter(title__icontains="Generalpurpose")
 

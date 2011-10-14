@@ -612,6 +612,30 @@
         }
     }, 
     {
+        "pk": 1,
+        "model": "frontend.userprofile",
+        "fields" : {
+            "user" : 1,
+            "name" : "Administrative Testuser",
+            "bio" : "I am an admin test user, oh yay",
+            "created_at": "2010-01-01 19:11:11", 
+            "beta_user" : 0,
+            "apikey" : ""
+        }
+    },
+    {
+        "pk": 2,
+        "model": "frontend.userprofile",
+        "fields" : {
+            "user" : 2,
+            "name" : "Generalpurpose Testuser",
+            "bio" : "I am a general purpose test user, yes",
+            "created_at": "2010-01-01 19:11:11", 
+            "beta_user" : 0,
+            "apikey" : ""
+        }
+    },
+    {
         "pk": 1, 
         "model": "sites.site", 
         "fields": {
