@@ -10,7 +10,6 @@ import time
 # Pull puppet on kippax, then pull elsewhere in one command
 # Run Django tests automatically - on local or on dev?
 # Run Selenium tests - on local or on dev?
-# Show change log between old/new revision in email?
 
 # Example use:
 # fab dev webserver
