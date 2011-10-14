@@ -259,19 +259,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def notify (self, sending_host, **query) :
-        # We don't to do this for open access IPs but it won;t hurt
-        try:
-            lxc_server = config.get(varName, 'lxc_server')
-        except:
-            lxc_server = None
-        
-        if lxc_server and '10.0' in sending_host:
-            host = lxc_server
-        else:
-            host = sending_host
-        
+        # We don't to do this for open access IPs but it won't hurt
+        lxc_server = config.get(varName, 'lxc_server')
         query['message_type'] = 'sources'
-        try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+        
+        try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (lxc_server, urllib.urlencode(query))).read()
         except : pass
 
     def bodyOffset (self, page) :
@@ -520,7 +512,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 last_cacheid    = cached is not None or '',
                 cached          = cached is not None,
                 ddiffers        = ddiffers, 
-                fetchtime       = time.time() - starttime
+                fetchtime       = time.time() - starttime,
+                remote_ip       = remote[0]
             )
 
         self.connection.sendall (page)

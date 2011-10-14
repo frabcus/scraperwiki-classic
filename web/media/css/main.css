@@ -5949,9 +5949,10 @@ body.vaults .ui-autocomplete .ui-menu-item a {
 body.vaults .vault_contents {
 	border-right: 1px solid #ccc;
 	border-left: 1px solid #ccc;
+	position: relative;
 }
 
-body.vaults .vault_contents h4 {
+body.vaults .vault_contents h5 {
 	background-color: #F4F8FB;
 	border-bottom: 1px solid #D3E7F5;
 	color: #5d7ea6;
@@ -5959,6 +5960,28 @@ body.vaults .vault_contents h4 {
 	font-weight: normal;
 	text-transform: uppercase;
 	padding: 7px 10px 6px 10px;
+}
+
+body.vaults .vault_contents.empty h5 {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0
+}
+
+body.vaults .vault_contents h5 a {
+	float: right;
+	color: #5d7ea6;
+	cursor: pointer;
+}
+
+body.vaults .vault_contents h5 a img {
+	vertical-align: -3px;
+}
+
+body.vaults .vault_contents h5 a:hover {
+	text-decoration: none;
+	color: #599e4d;
 }
 
 body.vaults .vault_contents li.code_object_line {
@@ -6021,15 +6044,18 @@ body.vaults .vault_header a.vault_users img, body.vaults .vault_footer a img {
 	margin-right: 3px;
 }
 
-body.vaults .vault_header .vault_users,
-body.vaults .vault_footer .add_to_vault {
+body.vaults .vault_header .vault_users {
 	margin-right: 20px;
 }
 
-body.vaults .vault_header a.vault_users:hover,
-body.vaults .vault_footer a:hover {
+body.vaults .vault_header a.vault_users:hover {
 	color: #298105;
 	text-decoration: none;
+}
+
+body.vaults .vault_footer a:hover {
+	text-decoration: none;
+	color: #5285bd;
 }
 
 body.vaults .vault_header a.vault_users:hover,
@@ -6052,8 +6078,22 @@ body.vaults .vault_header .vault_users_popover a:hover {
 	color: #666;
 }
 
+body.vaults .transfer_ownership span {
+	display: none;
+}
+
+body.vaults .transfer_ownership a {
+	line-height: 24px;
+}
+
+body.vaults .transfer_ownership .error {
+	color: #a73c23;
+	font-size: 14px;
+	margin-left: 10px;
+}
+
 body.vaults .vault_contents.empty {
-	padding: 10px;
+	padding: 40px 10px 10px 10px;
 	border-bottom: 1px solid #ccc;
 }
 
@@ -6077,7 +6117,7 @@ body.vaults .empty_vault h4 {
 	color: #888;
 	text-transform: none;
 	padding: 0;
-} 
+}
 
 body.vaults .empty_vault p + p {
 	margin-top: 10px;

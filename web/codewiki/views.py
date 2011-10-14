@@ -334,6 +334,184 @@ def code_overview(request, wiki_type, short_name):
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
+# Rewrite of the overview page by Zarino
+def new_code_overview(request, wiki_type, short_name):
+    from codewiki.models import ScraperRunEvent
+    
+    scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
+    if isinstance(scraper, HttpResponse):  return scraper
+    
+    alert_test = request.GET.get('alert', '')
+    if alert_test:
+        from frontend.utilities.messages import send_message        
+        if alert_test == '1':
+            actions = [
+                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),            
+            ]
+            level = 'info'
+        elif alert_test == '2':
+            actions =  [ 
+                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
+                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
+            ]
+            level = 'warning'
+        elif alert_test == '3':
+            actions =  [ 
+                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
+                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
+            ]
+            level = 'error'
+        else:
+            actions = []
+            
+        send_message( request,{
+            "message": "This is an example " + level + " alert",
+            "level"  :  level,
+            "actions":  actions,
+        })        
+    
+    context = {'selected_tab':'overview', 'scraper':scraper }
+    context["scraper_tags"] = scraper.gettags()
+    context["userrolemap"] = scraper.userrolemap()
+    
+    # if {% if a in b %} worked we wouldn't need these two
+    context["user_owns_it"] = (request.user in context["userrolemap"]["owner"])
+    context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
+    
+    context["PRIVACY_STATUSES"] = PRIVACY_STATUSES_UI[0:2]  
+    if request.user.is_staff:
+        context["PRIVACY_STATUSES"] = PRIVACY_STATUSES_UI[0:3]  
+    context["privacy_status_name"] = dict(PRIVACY_STATUSES_UI).get(scraper.privacy_status)
+
+    context["api_base"] = "%s/api/1.0/" % settings.API_URL
+    
+    if request.user.is_staff:
+        context["descriptionfromcode"] = MakeDescriptionFromCode(scraper.language, scraper.saved_code())
+        
+    # view tpe
+    if wiki_type == 'view':
+        context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
+        if scraper.language == 'html':
+            code = scraper.saved_code()
+            if re.match('<div\s+class="inline">', code):
+                context["htmlcode"] = code
+        return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
+
+    #
+    # (else) scraper type section
+    #
+    assert wiki_type == 'scraper'
+
+    context["schedule_options"] = models.SCHEDULE_OPTIONS
+    context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
+
+    previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWSQL__", scraper.description)
+    previewrssfeeds = re.findall("(?s)__BEGINPREVIEWRSS__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWRSS__", scraper.description)
+    
+        # there's a good case for having this load through the api by ajax
+        # instead of inlining it and slowing down the page load considerably
+    dataproxy = None
+    try:
+        dataproxy = DataStore(scraper.short_name)
+        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":10})
+        if not sqlitedata:
+            context['sqliteconnectionerror'] = 'No content in response'
+        elif type(sqlitedata) in [str, unicode]:
+            context['sqliteconnectionerror'] = sqlitedata
+        elif 'tables' not in sqlitedata:
+            if 'status' in sqlitedata:
+                if sqlitedata['status'] == 'No sqlite database':
+                    pass # just leave 'sqlitedata' not in context
+                else:
+                    context['sqliteconnectionerror'] = sqlitedata['status']
+            else:
+                context['sqliteconnectionerror'] = 'Response with unexpected format'
+
+            # success, have good data
+        else:
+            total_rows = 0
+            context['sqlitedata'] = [ ]
+            for sqltablename, sqltabledata in sqlitedata['tables'].items():
+                sqltabledata["tablename"] = sqltablename
+                context['sqlitedata'].append(sqltabledata)
+                try:
+                    total_rows += int( sqltabledata['count'] )
+                except:
+                    pass
+             
+            context['total_record_count'] = total_rows
+            try:
+                beta_user = request.user.get_profile().beta_user
+            except frontend.models.UserProfile.DoesNotExist:
+                beta_user = False
+            except AttributeError:  # happens with AnonymousUser which has no get_profile function!
+                beta_user = False
+                
+            # add in the user defined sql tables.  
+            # the hazard is if you put in a very large request then it will time out before 
+            # your page gets generated, so we must protect against this type of thing
+            if beta_user:
+                for utabnum, previewsqltable in reversed(list(enumerate(previewsqltables))):
+                    lsqlitedata = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery":previewsqltable, "data":[]})
+                    if "keys" in lsqlitedata:   # otherwise 'error' is in the result
+                        context['sqlitedata'].insert(0, {"tablename":"user_defined_%d"%(utabnum+1), "keys":lsqlitedata["keys"], "rows":lsqlitedata["data"], "sql":previewsqltable})
+
+            # make rssuserfeeds
+            if beta_user and previewrssfeeds:
+                apiurl = urlparse.urljoin(settings.API_URL, reverse('api:method_sqlite'))
+                context["rssuserfeeds"] = [ ]
+                for previewrssfeed in previewrssfeeds:
+                    apqs = { "format":"rss2", "name":scraper.short_name, "query":previewrssfeed }
+                    context["rssuserfeeds"].append("%s?%s" % (apiurl, urllib.urlencode(apqs)))
+
+        # which domains have been scraped
+        context["domainscrapes"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:10]
+
+
+    except socket.error, e:
+        context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
+        
+    forked_from_this = None
+    if wiki_type == 'scraper':
+        forked_from_this = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private')
+        
+        
+    # unfinished CKAN integration
+    if False and dataproxy and request.user.is_staff:
+        try:
+            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":"ckan_datastore", "asname":"src"})
+            ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
+            attachlist = [{"name":"ckan_datastore", "asname":"src"}]
+            lsqlitedata = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery":ckansqlite, "data":(scraper.short_name,), "attachlist":attachlist})
+        except socket.error, e:
+            lsqlitedata = None
+
+        if lsqlitedata:
+            if lsqlitedata.get("data"):
+                context['ckanresource'] = dict(zip(lsqlitedata["keys"], lsqlitedata["data"][0]))
+                
+            if context.get('sqlitedata') and "ckanresource" not in context:
+                ckanparams = {"name": scraper.short_name,
+                              "title": scraper.title.encode('utf-8'),
+                              "url": settings.MAIN_URL+reverse('code_overview', args=[scraper.wiki_type, short_name])}
+                ckanparams["resources_url"] = settings.MAIN_URL+reverse('export_sqlite', args=[scraper.short_name])
+                ckanparams["resources_format"] = "Sqlite"
+                ckanparams["resources_description"] = "Scraped data"
+                context["ckansubmit"] = "http://ckan.net/package/new?%s" % urllib.urlencode(ckanparams)
+
+    if dataproxy:
+        dataproxy.close()
+
+    # Set first_url based on the history
+    history = ScraperRunEvent.objects.filter(scraper=scraper, first_url_scraped__isnull=False).order_by('pid')
+    if history and history.count() > 0:
+        context['first_url'] = history[0].first_url_scraped
+    else:
+        context['first_url'] = None
+        
+    return render_to_response('codewiki/new_scraper_overview.html', context, context_instance=RequestContext(request))
+
+
 # all remaining functions are ajax or temporary pages linked only 
 # through the site, so throwing 404s is adequate
 

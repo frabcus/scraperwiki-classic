@@ -48,7 +48,9 @@ def frontpage(request, public_profile_field=None):
     tags_sorted = sorted([(tag, int(tag.count)) for tag in Tag.objects.usage_for_model(Scraper, counts=True)], key=lambda k:k[1], reverse=True)[:40]
     tags = []
     for tag in tags_sorted:
-        tags.append(tag[0])
+        # email (for emailers) and test far outweigh other tags :(
+        if tag[0].name not in ['test','email']:
+            tags.append(tag[0])
     
     data = {
 			'featured_both': featured_both,
@@ -469,8 +471,15 @@ def transfer_vault(request, vaultid, username):
     """
     mime = 'application/json'
             
-    vault = get_object_or_404( Vault, pk=vaultid)
-    new_owner = get_object_or_404( User, username=username )
+    try:
+        vault = Vault.objects.get(pk=vaultid)
+    except:
+        return HttpResponse('{"status": "fail", "error":"Could not find the requested vault"}', mimetype=mime)                    
+        
+    try:
+        new_owner = User.objects.get(username=username )
+    except:
+        return HttpResponse('{"status": "fail", "error":"Cannot find that user"}', mimetype=mime)                    
     
     if not vault.user == request.user:
         return HttpResponse('{"status": "fail", "error":"You cannot transfer ownership of this vault"}', mimetype=mime)                    
