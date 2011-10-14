@@ -3,6 +3,7 @@ from fabric.api import *
 import getpass
 import sys
 import os.path
+import time
 
 # TODO:
 # Restart things for firebox, webstore if specified (and indeed twister for webserver)
@@ -12,6 +13,7 @@ import os.path
 # Run Django tests automatically - on local or on dev?
 # Run Selenium tests - on local or on dev?
 # Merge code from default into stable for you (on dev)
+# Show change log between old/new revision in email?
 
 # Example use:
 # fab dev webserver
@@ -74,7 +76,7 @@ def parse_bool(s):
 
 def do_server_lookup(task):
     if not 'flock' in env:
-        raise Exception("specify which flock (e.g. dev/live) first")
+            raise Exception("specify which flock (e.g. dev/live) first")
     hosts = env.server_lookup[(task, env.flock)]
     print "server_lookup: deploying '%s' on flock '%s', hosts: %s" % (task, env.flock, hosts)
     env.task = task
@@ -90,6 +92,14 @@ def run_buildout():
         run_in_virtualenv('[ -f "bin/buildout" || pip install zc.buildout')
 
     run_in_virtualenv('buildout -N -qq')
+
+def run_with_retries(cmd, success_output='', attempts=5, delay=1):
+    for attempt in range(attempts):
+        ret = run(cmd, shell=True)
+        if ret == success_output:
+            return
+        time.sleep(delay)
+    raise Exception("failed to get expected output '%s' after %d retries: %s" % (success_output, attempts, cmd))
 
 def django_db_migrate():
     run_in_virtualenv('cd web; python manage.py syncdb --verbosity=0')
@@ -110,6 +120,15 @@ def update_crons():
 
 def restart_webserver():
     sudo('apache2ctl graceful')
+
+# process_check - a string to search in command line names to check if process has not died
+def restart_daemon(name, process_check = None):
+    run('sudo /etc/init.d/%s stop' % name)
+    if process_check:
+        with settings(warn_only=True):
+            run_with_retries('ps auxxwwww | grep %s | egrep -v "/bin/bash|grep"; true' % process_check)
+
+    run('sudo /etc/init.d/%s start' % name)
 
 def deploy_done():
     if not env.email_deploy:
@@ -139,12 +158,20 @@ def code_pull():
 
 @task
 @roles('webserver')
-def webserver(buildout='yes'):
+def webserver(buildout='yes', restart='no'):
     '''Deploys Django web application, runs schema migrations, clears caches,
 kicks webserver so it starts using new code. 
 
+restart=yes, restarts daemons like twisted that we don't want to restart 
+        every time as it disturbs users. XXX get rid of this by making
+        twisted tolerant of that. always gracefully restarts Apache.
 buildout=no, stops it updating buildout which can be slow'''
+    restart = parse_bool(restart)
     buildout = parse_bool(buildout)
+
+    if restart:
+        restart_daemon('twister', 'twister.py')
+    sys.exit()
 
     code_pull()
 
