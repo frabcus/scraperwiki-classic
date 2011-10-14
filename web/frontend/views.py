@@ -48,7 +48,9 @@ def frontpage(request, public_profile_field=None):
     tags_sorted = sorted([(tag, int(tag.count)) for tag in Tag.objects.usage_for_model(Scraper, counts=True)], key=lambda k:k[1], reverse=True)[:40]
     tags = []
     for tag in tags_sorted:
-        tags.append(tag[0])
+        # email (for emailers) and test far outweigh other tags :(
+        if tag[0].name not in ['test','email']:
+            tags.append(tag[0])
     
     data = {
 			'featured_both': featured_both,
@@ -458,6 +460,41 @@ def test_error(request):
 ###############################################################################
 # Vault specific views
 ###############################################################################
+
+@login_required
+def transfer_vault(request, vaultid, username):
+    """
+    When called by the owner of a vault, the ownership of the vault
+    can be transfered to another account (whether they are currently a member or not).
+    
+    Once complete the access rights on all of the scrapers should also be 
+    """
+    mime = 'application/json'
+            
+    try:
+        vault = Vault.objects.get(pk=vaultid)
+    except:
+        return HttpResponse('{"status": "fail", "error":"Could not find the requested vault"}', mimetype=mime)                    
+        
+    try:
+        new_owner = User.objects.get(username=username )
+    except:
+        return HttpResponse('{"status": "fail", "error":"Cannot find that user"}', mimetype=mime)                    
+    
+    if not vault.user == request.user:
+        return HttpResponse('{"status": "fail", "error":"You cannot transfer ownership of this vault"}', mimetype=mime)                    
+        
+    # Add the new owner as owner and as a member, the old owner will now just become 
+    # a member instead
+    vault.members.add(new_owner) 
+    vault.user = new_owner
+    vault.save()
+    
+    # Does not require the vault to be saved again
+    vault.update_access_rights()
+    return HttpResponse('{"status": "ok"}', mimetype=mime)       
+    
+
 
 @login_required
 def view_vault(request, username=None):

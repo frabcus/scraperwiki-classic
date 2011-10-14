@@ -17,3 +17,21 @@
     <li><a href="{% url editor wiki_type language %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}}{% if version %} <em>v {{ version }}</em>{% endif %}</a></li>
     {% endfor %}
 </ul>
+{% if user_vaults.count %}
+{% if wiki_type == 'scraper' %}
+<div id="chooser_vaults">
+    <h2><input type="checkbox" /> Save this in a vault&hellip;</h2>
+    <p style="display: none">
+        <label for="chooser_name_box" title="You need to name your {{wiki_type}} before it can be created in the Vault">Save as:</label> <input type="text" id="chooser_name_box" class="text" />
+    </p>
+    <p style="display: none">
+        <label for="chooser_vault">Save in:</label>
+        <select id="chooser_vault" name="chooser_vault">
+			{% for v in user_vaults.all %}
+            	<option value="{{ v.id }}">{{ v.name }}</option>
+			{% endfor %}
+        </select>
+    </p>
+</div>
+{% endif %}
+{% endif %}

@@ -181,7 +181,15 @@ function handleNotify(req,res) {
 	var urlObj = url.parse(req.url, true);	
 	util.log.debug( 'Notify request ' + req.url);
 	
-	script = exec.get_details( {runid: urlObj.query.runid } );		
+	var arg;
+	if ( urlObj.query.remote_ip && urlObj.query.remote_ip.length > 0 ) {
+		arg = { ip: urlObj.query.remote_ip }
+	} else {
+		arg = { runid: urlObj.query.runid }		
+	}
+	
+	// todo: check the scraper name against the one provided????
+	script = exec.get_details( arg );		
 	if ( script ) {
 		delete urlObj.query.runid;
 		s = JSON.stringify( urlObj.query );

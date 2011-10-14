@@ -106,6 +106,42 @@ function newCodeObject(wiki_type, sourcescraper)
 				dialog.overlay.fadeIn(200);
 				dialog.container.fadeIn(200);
 			},
+			onShow: function(dialog){
+				$('#simplemodal-container').css('height', 'auto');
+				$('#chooser_vaults h2', dialog.data).bind('click', function(e){
+					if($(this).next().is(':visible')){
+						$(this).children('input').attr('checked', false);
+						$(this).nextAll('p').slideUp(250);
+					} else {
+						$(this).children('input').attr('checked', true);
+						$(this).nextAll('p').slideDown(250);
+						$('#chooser_name_box').focus();
+					}
+				});
+				$('li a', dialog.data).bind('click', function(e){
+					if( ! $('#chooser_vaults h2 input').is(":visible")  ) 
+						return;
+
+					if ( ! $('#chooser_vaults h2 input').is(":checked") ) 
+						return;
+						
+					e.preventDefault();
+					if($('#chooser_vaults h2 input', dialog.data).is(':checked')){
+						if($('#chooser_name_box', dialog.data).val() == ''){
+							$('span.warning', dialog.data).remove();
+							text = $('label', dialog.data).attr('title');
+							$('p', dialog.data).eq(0).addClass('error').append('<span class="warning"><span></span>' + text + '</span>');
+							$('#chooser_name_box', dialog.data).bind('keyup', function(){
+								$('p.error', dialog.data).removeClass('error').children('span').remove();
+								$(this).unbind('keyup');
+							})
+						} else {
+							$(this).addClass('active');
+							location.href = $(this).attr('href') + '/tovault/' + $('#chooser_vault').val() + '/?name=' + $('#chooser_name_box').val();
+						}
+					}
+				});
+			},
 			onClose: function(dialog) {
 				dialog.container.fadeOut(200);
 				dialog.overlay.fadeOut(200, function(){
@@ -326,7 +362,6 @@ $(function()
 						searchquery:request.term
 					},
 					success: function( data ) {
-						console.log(data);
 						response( $.map( data, function( item ) {
 							return {
 								label: item.profilename + ' (' + item.username + ')',
@@ -401,6 +436,58 @@ $(function()
 			$el.parents('.vault_header').find('.x_users').text(x_users);
 		});
 	}
+	
+	$('body.vaults .transfer_ownership a').bind('click', function(e){
+		e.preventDefault();
+		$(this).next('span').show().children(':text').focus();
+		$('span', this).show();
+	});
+	
+	$('body.vaults .transfer_ownership input:text').autocomplete({
+		minLength: 2,
+		source: function( request, response ) {
+			$.ajax({
+				url: $('#id_api_base').val() + "scraper/usersearch",
+				dataType: "jsonp",
+				data: {
+					format:"jsondict", 
+					maxrows:10, 
+					searchquery:request.term
+				},
+				success: function( data ) {
+					response( $.map( data, function( item ) {
+						return {
+							label: item.profilename + ' (' + item.username + ')',
+							value: item.username
+						}
+					}));
+				}
+			});
+		},
+		select: function( event, ui ) {
+			// submit the name
+			$(this).next('input').attr('disabled',false);
+		}
+	}).next().bind('click', function(){
+		var url = $(this).parent().prev().attr('href') + $(this).prev().val() + '/';
+		var button = $(this).val('Transferring\u2026');
+		$.ajax({
+			url: url,
+			dataType: 'json',
+			success: function(data) {
+				if(data.status == 'ok'){
+					window.location.reload();
+				} else if(data.status == 'fail'){
+					button.after('<em class="error">Error: ' + data.error + '</em>');
+					button.val('Transfer!');
+				}
+			}, 
+			error: function(data){
+				button.after('<em class="error">Error: ' + data.error + '</em>');
+				button.val('Transfer!');
+			}
+		});
+	}).attr('disabled', true);
 	
 	if($('#alert_outer').length){
 		$('<a>').attr('id','alert_close').bind('click', function(){ 

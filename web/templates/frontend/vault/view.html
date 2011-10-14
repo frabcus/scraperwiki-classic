@@ -42,13 +42,14 @@
         
         <div class="vault_contents{% if vault.code_objects.count == 0 %} empty{% endif %}">
     	{% if vault.code_objects.count > 0 %}
-            <h4>This vault contains {{ vault.code_objects.count }} item{{ vault.code_objects.count|pluralize }}:</h4>
+            <h5>This vault contains {{ vault.code_objects.count }} scraper{{ vault.code_objects.count|pluralize }}: <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	    <ul class="scraper_list">
     	    {% for code in vault.code_objects.all %}
     	        {% include 'frontend/includes/vault_scraper_line.html' %}
     	    {% endfor %}
     	    </ul>
     	{% else %}
+    	    <h5>This vault contains no scrapers <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	    <div class="empty_vault">
     	        <h4>This vault is empty!</h4>
     	        <!-- <p>Perhaps you&rsquo;d like to read our <a>Vaults FAQ</a>,<br/>or <a>move some scrapers or views</a> here?</p> -->
@@ -58,10 +59,14 @@
     	{% endif %}
     	</div>
         
+        {% if request.user.is_staff %}
         <div class="vault_footer">
-            <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a new scraper in this vault</a>
-            <!-- <a class="move_to_vault"><img src="{{ MEDIA_URL }}images/icons/cog_go.png" width="16" height="16"/> Move an item here</a> -->
+            <p class="transfer_ownership">
+                <a href="/vaults/{{ vault.id }}/transfer/"><img src="{{ MEDIA_URL }}images/icons/forward_arrow.png" width="16" height="16"> Transfer ownership of this vault<span> to:</span></a>
+                <span class="new_owner"><input type="text"/> <input type="button" value="Transfer!" /></span>
+            </p>
         </div>
+        {% endif %}
         
     </div>
     
@@ -94,25 +99,22 @@
         
         <div class="vault_contents{% if vault.code_objects.count == 0 %} empty{% endif %}">
     	{% if vault.code_objects.count > 0 %}
-            <h4>This vault contains {{ vault.code_objects.count }} item{{ vault.code_objects.count|pluralize }}:</h4>
+            <h5>This vault contains {{ vault.code_objects.count }} scraper{{ vault.code_objects.count|pluralize }}: <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	    <ul class="scraper_list">
     	    {% for code in vault.code_objects.all %}
     	        {% include 'frontend/includes/vault_scraper_line.html' %}
     	    {% endfor %}
     	    </ul>
-    	{% else %}
+    	{% else %}    
+    	    <h5>This vault contains no scrapers <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	    <div class="empty_vault">
     	        <h4>This vault is empty!</h4>
     	        <!-- <p>Perhaps you&rsquo;d like to read our <a>Vaults FAQ</a>,<br/>or <a>move some scrapers or views</a> here?</p> -->
     	        <p>Vaults are a great way to keep scrapers secure, <br/>while sharing them with the people that matter.</p>
+    	        <p>You can <a class="add_to_vault" rel="{{ vault.id }}" href="">create a new scraper in this vault</a>, or move an <br/>existing scraper here by selecting this vault from the <br/>dropdown menu on the scraper&rsquo;s overview page.</p>
     	    </div>
     	{% endif %}
     	</div>
-        
-        <div class="vault_footer">
-            <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a new scraper in this vault</a>
-            <!-- <a class="move_to_vault"><img src="{{ MEDIA_URL }}images/icons/cog_go.png" width="16" height="16"/> Move an item here</a> -->
-        </div>
         
     </div>
 	{% endfor %}
