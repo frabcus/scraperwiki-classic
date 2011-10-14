@@ -71,8 +71,7 @@ module ScraperWiki
     # ScraperWiki::gb_postcode_to_latlng('L3 6RP')
     #
     def ScraperWiki.gb_postcode_to_latlng(postcode)
-        uri = URI.parse("https://views.scraperwiki.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
-        sres = Net::HTTP.get(uri)
+        sres = ScraperWiki.scrape("https://views.scraperwiki.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
         jres = JSON.parse(sres)
         if jres["lat"] and jres["lng"]
             return [jres["lat"], jres["lng"]]
