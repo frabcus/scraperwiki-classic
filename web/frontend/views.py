@@ -471,8 +471,15 @@ def transfer_vault(request, vaultid, username):
     """
     mime = 'application/json'
             
-    vault = get_object_or_404( Vault, pk=vaultid)
-    new_owner = get_object_or_404( User, username=username )
+    try:
+        vault = Vault.objects.get(pk=vaultid)
+    except:
+        return HttpResponse('{"status": "fail", "error":"Could not find the requested vault"}', mimetype=mime)                    
+        
+    try:
+        new_owner = User.objects.get(username=username )
+    except:
+        return HttpResponse('{"status": "fail", "error":"Cannot find that user"}', mimetype=mime)                    
     
     if not vault.user == request.user:
         return HttpResponse('{"status": "fail", "error":"You cannot transfer ownership of this vault"}', mimetype=mime)                    
