@@ -466,6 +466,8 @@ def new_code_overview(request, wiki_type, short_name):
 
         # which domains have been scraped
         context["domainscrapes"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:10]
+        
+        context["latestdomain"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:1]
 
 
     except socket.error, e:
