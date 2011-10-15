@@ -105,9 +105,6 @@ def docsexternal(request):
     context = {'language':language, 'api_base':api_base }
     
     context["scrapername"] = request.GET.get("name", "")
-    context['escaped_scrapername' ] = context['scrapername']
-    if context['escaped_scrapername'].find(' ') > 0:
-        context['escaped_scrapername' ] = '`%s`' % (context["scrapername"],)
         
     return render_to_response('documentation/apibase.html', context, context_instance=RequestContext(request))
 
