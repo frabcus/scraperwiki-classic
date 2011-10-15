@@ -275,7 +275,7 @@ class Code(models.Model):
     
     # uses lists of users rather than userroles so that you can test containment easily
     def userrolemap(self):
-        result = { "editor":[], "owner":[] }
+        result = { "editor":[], "owner":[]}
         for usercoderole in self.usercoderole_set.all():
             if usercoderole.role not in result:
                 result[usercoderole.role] = [ ]
