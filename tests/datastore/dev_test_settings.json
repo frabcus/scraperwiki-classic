@@ -1,6 +1,6 @@
 {
-	"host"          : "localhost", 
-	"port"          : 9005, 
+	"host"          : "127.0.0.1", 
+	"port"          : 9003, 
 	"scrapername"   : "test", 
 	"runid" 	    : "123",
 	"attachables"   : "",

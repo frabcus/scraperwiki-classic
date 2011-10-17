@@ -2,6 +2,7 @@
 Tests for the dataproxy/datastore/whatever that can test the common edge cases
 and should exercise the python library at the same time.
 """
+import uuid
 import os, sys
 import unittest
 import json
@@ -18,10 +19,16 @@ class DataStoreTester(unittest.TestCase):
     """
     Create a datastore connection for the tests to use
     """
-    
+
     def setUp(self):
-        settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )
-        scraperwiki.datastore.create( **settings )
+        scraperwiki.logfd = sys.stdout
+        self.settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
+        self.settings['scrapername'], self.settings['runid'] = self.random_details()
+        
+        scraperwiki.datastore.create( **self.settings )
+        
+    def random_details(self):
+        return 'x_' + str(uuid.uuid4()), str(uuid.uuid4()), 
         
     def tearDown(self):
         # Clean up after each run
@@ -29,13 +36,9 @@ class DataStoreTester(unittest.TestCase):
         
         
 class ValidTests( DataStoreTester ):
-    """
-    Tests that we expect to succeed
-    """
-    
-    def test_example(self):
-        self.assertEqual('', '')
-
+            
+    def test_simple_create(self):
+        scraperwiki.sqlite.save(['id'], {'id':1})
 
 
 class InvalidTests( DataStoreTester ):
@@ -45,6 +48,7 @@ class InvalidTests( DataStoreTester ):
     """
     
     def test_example(self):
+        scraperwiki.datastore.create( **self.settings )        
         self.assertEqual('failed', 'failed')
 
 
