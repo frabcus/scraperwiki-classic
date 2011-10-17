@@ -848,9 +848,11 @@ def proxycached(request):
         result['type'] = 'exception'
         result['content'] = str(e)
     except BadStatusLine, sl:
-        result['type'] = 'exception'
-        result['content'] = str(sl)
-        print result['content']
+        # This happens even though it is sending us a valid result.  I blame the broken dataproxy
+        # so in the meantime we're going to cheat.
+        if not 'content' in result:
+            result['type'] = 'exception'
+            result['content'] = str(sl)
     except Exception, exc:
         result['type'] = 'exception'
         result['content'] = str(exc)

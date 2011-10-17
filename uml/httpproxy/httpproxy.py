@@ -118,7 +118,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         return soc
 
     def sendReply (self, reply) :
-        self.connection.send  ('HTTP/1.0 200 OK\r\n')
+        self.connection.send  ('HTTP/1.1 200 OK\r\n')
         self.connection.send  ('Connection: Close\r\n')
         self.connection.send  ('Pragma: no-cache\r\n')
         self.connection.send  ('Cache-Control: no-cache\r\n')
