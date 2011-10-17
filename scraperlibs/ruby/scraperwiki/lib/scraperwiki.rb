@@ -139,6 +139,9 @@ module ScraperWiki
         ds = SW_DataStore.create()
         if ds.m_webstore_port == 0
             res = ds.request({'maincommand'=>'sqliteexecute', 'sqlquery'=>sqlquery, 'data'=>data, 'attachlist'=>$attachlist})
+            if (res.class == Hash) and res.include?("error")
+                ScraperWiki.raisesqliteerror(res["error"])
+            end
         else
             username = 'resourcedir'  # gets it into the right subdirectory automatically!!!
             dirscrapername = ds.m_scrapername
