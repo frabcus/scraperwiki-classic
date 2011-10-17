@@ -18,7 +18,11 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
 from tagging.models import Tag, TaggedItem
 
+<<<<<<< local
 from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper, Vault, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
+=======
+from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper,Vault, View, scraper_search_query, user_search_query, HELP_LANGUAGES, LANGUAGES_DICT
+>>>>>>> other
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from registration.backends import get_backend
@@ -295,11 +299,17 @@ def search(request, q=""):
         # the call to scraper_search_query above.
         scrapers = scrapers.exclude(usercoderole__role='email') 
         scrapers_num_results = tags.count() + scrapers.count()
+
+        users = user_search_query(request.user, q)
+        users_num_results = users.count()
+
         return render_to_response('frontend/search_results.html',
             {
                 'scrapers': scrapers,
+                'users': users,
                 'tags': tags,
                 'scrapers_num_results': scrapers_num_results,
+                'users_num_results': users_num_results,
                 'form': form,
                 'query': q},
             context_instance=RequestContext(request))

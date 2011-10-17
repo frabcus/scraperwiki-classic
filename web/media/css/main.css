@@ -3424,6 +3424,30 @@ div.highlight {
 	margin-bottom: 0.5em;
 }
 
+/* user lists */
+
+ul.user_list {
+	margin: 0;
+	padding: 0;
+}
+
+ul.user_list li {
+    float: left;
+    padding-right: 25px;
+    line-height: 38px;
+}
+
+ul.user_list li.clear {
+    float: none;
+    clear: both;
+}
+
+ul.user_list li .gravatar {
+    width: 32px;
+    height: 32px;
+    margin: 0 10px 0 0;
+}
+
 /* scraper lists */
 
 ul.scraper_list {
@@ -3508,72 +3532,6 @@ div.pagination {
 	text-align: center;
 }
 
-
-/* ul.scraper_list {
-	margin-top: 0;
-	position: relative;
-	padding: 0;
-}
-
-ul.scraper_list li {
-	list-style-type: none;
-	padding: 1em 0.2em 1em 0.2em;
-	border-bottom: dotted 1px #ccc;
-	min-height: 80px;
-}
-
-ul.scraper_list li img {
-	vertical-align: baseline;
-}
-
-ul.scraper_list li h3 {
-	padding: 0 0 0.2em 0;
-}
-
-ul.scraper_list li p {
-	padding: 0.5em 0;
-	margin: 0;
-	font-size: 0.9em;
-}
-
-ul.scraper_list small {
-	font-size: 0.7em;
-}
-
-ul.scraper_list span.status {
-	color: #fff;
-	padding: 0 0.5em;
-}
-
-ul.scraper_list span.status.unpublished {
-	background-color: #ccc;
-}
-
-ul.scraper_list span.edit a {
-	color: green;
-}
-
-ul.scraper_list p {
-	padding: 0.3em 0;
-	line-height: 1.4em;
-}
-
-ul.scraper_list ul.code_about {
-	display: inline;
-	font-weight: normal;
-	font-size: 0.8em;
-}
-
-ul.scraper_list ul.code_about li {
-	padding-bottom: 0;
-	padding-top: 0;
-	border-bottom: 0;
-}
-
-ul.scraper_list .screenshot img {
-	float: left;
-	margin: 0 5px 5px 0;
-} */
 
 /* code_about (languages / wiki type) */
 

@@ -94,6 +94,14 @@ def scraper_search_query(user, query, apikey=None):
     scrapers_all = scrapers_all.order_by('-created_at')
     return scrapers_all.distinct()
 
+def user_search_query(user, query, apikey=None):
+    users_name = User.objects.filter(userprofile__name__icontains=query)
+    users_bio = User.objects.filter(userprofile__bio__icontains=query)
+    users_username = User.objects.filter(username__icontains=query)
+    users_all = users_name | users_bio | users_username
+    users_all.order_by('-created_at')
+    return users_all.distinct()
+
 
 class Code(models.Model):
 
@@ -271,7 +279,7 @@ class Code(models.Model):
     
     # uses lists of users rather than userroles so that you can test containment easily
     def userrolemap(self):
-        result = { "editor":[], "owner":[] }
+        result = { "editor":[], "owner":[]}
         for usercoderole in self.usercoderole_set.all():
             if usercoderole.role not in result:
                 result[usercoderole.role] = [ ]

@@ -490,7 +490,7 @@ module ScraperWiki
         if ds.m_webstore_port == 0
             res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"attach", 'name'=>name, 'asname'=>asname})
             if res["error"]
-                ScraperWiki.raisesqliteerror(res)
+                ScraperWiki.raisesqliteerror(res["error"])
             end
         else
             res = {'status'=>'ok'}

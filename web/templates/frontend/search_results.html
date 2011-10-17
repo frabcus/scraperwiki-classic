@@ -9,13 +9,22 @@
         <input type="submit" value="Go" />
     </form></h2>
     <p>
-      {{ scrapers_num_results }} result{{scrapers_num_results|pluralize}} found &bull; 
-      <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">Create RSS feed for this search term</a>
+      {{ scrapers_num_results }} result{{scrapers_num_results|pluralize}} found &bull; <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">Create RSS feed for this search term</a>
     </p>
 {% endblock %}
 
 {% block content %}
     <div class="content">
+        {% if users %}
+            <ul class="user_list">
+                {% for other_user in users %}
+                    {% include 'frontend/includes/user_line.html' %}
+                {% endfor %}
+                <li class="clear"></li>
+            </ul>
+        {% else %}
+        {% endif %}
+
         {% if tags %}
             <div class="tag_suggestion">
                 {% if tags|length_is:"1" %}
@@ -39,7 +48,7 @@
                 {% endfor %}
             </ul>
         {% else %}
-            <p>No scrapers found</p>
+        <p>No scrapers match &lsquo;{{ query }}&rsquo;, would you like to <a href="/browse/">browse</a>?</p>
         {% endif %}
         
 

@@ -243,7 +243,7 @@ $(function()
                             maxtablecount = table.count; 
                         }
                         if (maxtablename != null)
-                            $('#id_query').val("select * from "+maxtablename+" limit 10").keyup(); // same as change
+                            $('#id_query').val("select * from `"+maxtablename+"` limit 10").keyup(); // same as change
                     }
                 }
                 else if (v && v.error)
