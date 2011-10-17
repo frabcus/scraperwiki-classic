@@ -164,8 +164,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.sendReply ('Page not found in cache')
             return
 
-        self.sendReply ( page )
-        #self.connection.sendall (page)
+        self.connection.sendall (page)
         
 
     def ident (self) :

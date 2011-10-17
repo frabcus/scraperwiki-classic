@@ -847,15 +847,13 @@ def proxycached(request):
     except urllib2.URLError, e: 
         result['type'] = 'exception'
         result['content'] = str(e)
-        raise e
     except BadStatusLine, sl:
         result['type'] = 'exception'
         result['content'] = str(sl)
-        raise sl
+        print result['content']
     except Exception, exc:
         result['type'] = 'exception'
         result['content'] = str(exc)
-        raise exc
         
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
