@@ -9,7 +9,7 @@ from twisted.internet import protocol, reactor
 from twisted.web.client import Agent, ResponseDone
 from twisted.internet.defer import succeed, Deferred
 from twisted.internet.defer import Deferred
-from twisted.internet.error import ProcessDone
+from twisted.internet.error import ConnectionRefusedError, ConnectionDone
 
 from twisterconfig import logger
 from twisterconfig import nodecontrollername, nodecontrollerhost, nodecontrollerport
@@ -66,7 +66,6 @@ class spawnRunner(protocol.ProcessProtocol):
         
         for line in lines:
                 # strip out the httpheaders that come back at the start of a node connection
-            logger.debug("doing: "+str([line]))
             if not self.httpheadersdone:
                 if re.match("HTTP/", line):
                     assert not self.httpheaders
@@ -88,16 +87,13 @@ class spawnRunner(protocol.ProcessProtocol):
 
 
         # could move into a proper function in the client once slimmed down slightly
-    def processEnded(self, reason):
-        self.controllerconnection = None
-        self.client.processrunning = None  # remove back connection
+    def endingrun(self, sreason):
+        if not self.controllerconnection:
+            self.controllerconnection = None   # consider case where connection hadn't been made yet
+        else:
+            logger.debug("endingrun called when no controllerconnection had been made")
+        self.client.processrunning = None  # remove back connection made as return value of MakeRunner
         del self.client.factory.runidclientmap[self.jdata["runid"]]
-
-        sreason = str([reason])
-        if sreason == "[<twisted.python.failure.Failure <class 'twisted.internet.error.ProcessDone'>>]":
-            sreason = ""  # seems difficult to find the actual class type to compare with, but get rid of this "error" that really isn't an error
-        elif sreason == "[<twisted.python.failure.Failure <class 'twisted.internet.error.ConnectionDone'>>]":
-            sreason = ""  # seems difficult to find the actual class type to compare with, but get rid of this "error" that really isn't an error
 
         # other errors (eg connection lost) could put more useful errors into the client
         logger.debug("run process %s ended client# %d %s" % (self.client.clienttype, self.client.clientnumber, sreason))
@@ -109,10 +105,25 @@ class spawnRunner(protocol.ProcessProtocol):
         if self.client.clienttype == "editing":
             self.client.factory.notifyMonitoringClients(self.client)
         elif self.client.clienttype == "scheduledrun":
-            self.client.factory.scheduledruncomplete(self.client, reason.type==ProcessDone)
+            self.client.factory.scheduledruncomplete(self.client)
+
+# could move into a proper function in the client once slimmed down slightly
+    def processEnded(self, reason):
+        if reason.type != ConnectionDone:
+            sreason = str(reason.type)   # put a message here if there has been some irregularities
+        else:
+            sreason = ""
+        self.endingrun(sreason)
+        reason.trap(ConnectionDone)  # denotes that we have handled this correctly
 
     def controllerconnectionrequestFailure(self, failure):
-        logger.info("controllerconnectionrequest failure received "+str(failure))
+        if failure.type == ConnectionRefusedError:
+            sreason = "Connection to node-controller refused.  (Maybe it's not running)"
+        else:
+            sreason = "controllerconnectionrequest failure received: "+str(failure)
+        logger.info("controllerconnectionrequest failure received: "+sreason)
+        self.endingrun(sreason)
+        failure.trap(ConnectionRefusedError)  # denotes that we have handled this correctly
 
 
 # simply ciphers through the two functions
