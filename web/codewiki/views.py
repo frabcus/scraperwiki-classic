@@ -825,17 +825,17 @@ def convtounicode(text):
 
 def proxycached(request):
     from httplib import BadStatusLine
+    from urlparse import urljoin
     
     cacheid = request.POST.get('cacheid', None)
-    
-    # delete this later when no more need for debugging
     if not cacheid:   
         cacheid = request.GET.get('cacheid', None)
     
     if not cacheid:
         return HttpResponse(json.dumps({'type':'error', 'content':"No cacheid found"}), mimetype="application/json")
     
-    proxyurl = settings.HTTPPROXYURL + "/Page?" + cacheid
+    proxyurl = urljoin(settings.HTTPPROXYURL , "/Page?" + cacheid )
+    
     result = { 'proxyurl':proxyurl, 'cacheid':cacheid }
     
     try:
@@ -849,13 +849,15 @@ def proxycached(request):
     except urllib2.URLError, e: 
         result['type'] = 'exception'
         result['content'] = str(e)
+        raise e
     except BadStatusLine, sl:
         result['type'] = 'exception'
         result['content'] = str(sl)
     except Exception, exc:
         result['type'] = 'exception'
         result['content'] = str(exc)
-    
+        raise exc
+        
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
 
