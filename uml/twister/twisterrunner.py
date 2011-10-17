@@ -148,7 +148,7 @@ def MakeRunner(scrapername, guid, language, urlquery, username, code, client, be
     jdata = { }
     jdata["code"] = code.replace('\r', '')
     jdata["cpulimit"] = 80
-    jdata["draft"] = (not username)   # or could be done by lack of presence of guid
+    jdata["draft"] = (not scrapername)
     jdata["username"] = username   # comes through when done with stimulate_run, and we can use this for the dataproxy permissions (whether it can add to the attachables list)
     jdata["language"] = language
     jdata["scraperid"] = guid
@@ -162,7 +162,7 @@ def MakeRunner(scrapername, guid, language, urlquery, username, code, client, be
     jdata["runid"] = '%.6f_%s' % (time.time(), uuid.uuid4())
     if jdata.get("draft"):
        jdata["runid"] = "draft|||%s" % jdata["runid"]
-    #logger.info(str(jdata))
+    #logger.info("jjjjjjj "+str(jdata))
     
     srunner.jdata = jdata
     if bmakerunobject:
