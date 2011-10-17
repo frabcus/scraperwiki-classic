@@ -565,7 +565,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         $('.editor_controls #run').bind('click.run', sendCode);
         writeToConsole(content); 
         if (contentextra)
-            writeToConsole("internalwarning: "+contentextra); 
+            writeToConsole("*** internalwarning: "+contentextra); 
 
         //change title
         document.title = document.title.replace('*', '');
