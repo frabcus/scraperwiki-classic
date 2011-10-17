@@ -1,3 +1,14 @@
+// Module for handling the console, sources, data, chat tabs at the bottom of the editor
+
+// Important functions:
+//  writeToChat(seMessage, sechatname)
+//  writeExceptionDump
+//  writeToSources
+//  writeToSqliteData
+//  clearOutput
+
+
+
 var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
 var outputMaxItems = 400;
 var sTabCurrent = ''; 
@@ -20,8 +31,6 @@ var earliesteditor = servernowtime;
 var lasttouchedtime = undefined; 
 
 var cachehidlookup = { }; // this itself is a cache of a cache
-
-var SelectEditorLine; // function
 
 function cgiescape(text) 
 {
@@ -244,10 +253,10 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
             smessage.push("<b>"+lmimetype+"</b>"); 
 
         // this is the orange up-arrow link that doesn't work because something wrong in the server, so hide it for now
-//        if (cacheid != undefined) {
-//            smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
-//			smessage.push( cacheid );
-//		}
+        if (cacheid != undefined) {
+            smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
+			smessage.push( cacheid );
+		}
 		
         if (cached == 'True')
             smessage.push('(from cache)'); 

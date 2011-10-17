@@ -64,7 +64,7 @@ STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let
 VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow" ])
 
 
-def scraper_search_query(user, query, apikey=None):
+def scraper_search_query_unordered(user, query, apikey=None):
     if query:
         scrapers = Code.objects.filter(title__icontains=query)
         scrapers_description = Code.objects.filter(description__icontains=query)
@@ -87,8 +87,20 @@ def scraper_search_query(user, query, apikey=None):
         scrapers_all = scrapers_all.exclude(Q(privacy_status="private") & ~(Q(usercoderole__user=u) & Q(usercoderole__role='owner')) & ~(Q(usercoderole__user=u) & Q(usercoderole__role='editor')))
     else:
         scrapers_all = scrapers_all.exclude(privacy_status="private")
+    return scrapers_all
+        
+def scraper_search_query(user, query, apikey=None):
+    scrapers_all = scraper_search_query_unordered(user, query, apikey=None)
     scrapers_all = scrapers_all.order_by('-created_at')
     return scrapers_all.distinct()
+
+def user_search_query(user, query, apikey=None):
+    users_name = User.objects.filter(userprofile__name__icontains=query)
+    users_bio = User.objects.filter(userprofile__bio__icontains=query)
+    users_username = User.objects.filter(username__icontains=query)
+    users_all = users_name | users_bio | users_username
+    users_all.order_by('-created_at')
+    return users_all.distinct()
 
 
 class Code(models.Model):
@@ -267,7 +279,7 @@ class Code(models.Model):
     
     # uses lists of users rather than userroles so that you can test containment easily
     def userrolemap(self):
-        result = { "editor":[], "owner":[] }
+        result = { "editor":[], "owner":[]}
         for usercoderole in self.usercoderole_set.all():
             if usercoderole.role not in result:
                 result[usercoderole.role] = [ ]

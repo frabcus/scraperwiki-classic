@@ -11,8 +11,8 @@ var showinglookup= {
     getinfo:'.format, .name, .apikey_scraper, .version, .history_start_date, .quietfields, .callback',
     getruninfo:'.format, .name, .apikey_scraper, .runid, .callback',
     getuserinfo:'.format, .username, .apikey_user, .callback',
-    search:'.format, .searchquery, .apikey_user, .maxrows, .callback',
-    usersearch:'.format, .searchquery, .nolist, .maxrows, .callback'
+    search:'.format, .searchquery, .requestinguser, .apikey_user, .maxrows, .callback',  // also has .nolist, but the description is for users
+    usersearch:'.format, .searchquery, .nolist, .requestinguser, .maxrows, .callback'
 }
 
 $(function()
@@ -243,7 +243,7 @@ $(function()
                             maxtablecount = table.count; 
                         }
                         if (maxtablename != null)
-                            $('#id_query').val("select * from "+maxtablename+" limit 10").keyup(); // same as change
+                            $('#id_query').val("select * from `"+maxtablename+"` limit 10").keyup(); // same as change
                     }
                 }
                 else if (v && v.error)
@@ -392,10 +392,15 @@ $(function()
                 <label for="id_maxrows">maxrows</label>
                 <input type="text" name="maxrows" id="id_maxrows" value="5">
         	</li> 
+
         	<li class="nolist">
             <label for="id_nolist">nolist<span class="desc">, space separated list of users not to return</span></label>
                 <input type="text" name="nolist" id="id_nolist">
         	</li> 
+            <li class="requestinguser">
+            <label for="id_requestinguser">requestinguser<span class="desc"> who makes the search (orders the matches)</span></label>
+                <input type="text" name="requestinguser" id="id_requestinguser" value="{{requestinguser}}">
+            </li> 
          	<li class="callback">
                 <label for="id_callback">callback<span class="desc"> for JSONP (optional)</span></label>
                 <input type="text" name="callback" id="id_callback">

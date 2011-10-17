@@ -84,6 +84,7 @@ class ScheduledRunMessageLoopHandler:
         self.agent = agent
 
     def updaterunobjectFailure(self, failure):
+            # could check for the type and use the retry functionality that exists in twister
         logger.info("requestoverduescrapers failure received "+str(failure))
     
     def updaterunobjectResponse(self, response):

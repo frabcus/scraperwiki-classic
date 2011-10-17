@@ -18,7 +18,7 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
 from tagging.models import Tag, TaggedItem
 
-from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper,Vault, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
+from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper, Vault, View, scraper_search_query, user_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from registration.backends import get_backend
@@ -295,11 +295,17 @@ def search(request, q=""):
         # the call to scraper_search_query above.
         scrapers = scrapers.exclude(usercoderole__role='email') 
         scrapers_num_results = tags.count() + scrapers.count()
+
+        users = user_search_query(request.user, q)
+        users_num_results = users.count()
+
         return render_to_response('frontend/search_results.html',
             {
                 'scrapers': scrapers,
+                'users': users,
                 'tags': tags,
                 'scrapers_num_results': scrapers_num_results,
+                'users_num_results': users_num_results,
                 'form': form,
                 'query': q},
             context_instance=RequestContext(request))
@@ -471,8 +477,15 @@ def transfer_vault(request, vaultid, username):
     """
     mime = 'application/json'
             
-    vault = get_object_or_404( Vault, pk=vaultid)
-    new_owner = get_object_or_404( User, username=username )
+    try:
+        vault = Vault.objects.get(pk=vaultid)
+    except:
+        return HttpResponse('{"status": "fail", "error":"Could not find the requested vault"}', mimetype=mime)                    
+        
+    try:
+        new_owner = User.objects.get(username=username )
+    except:
+        return HttpResponse('{"status": "fail", "error":"Cannot find that user"}', mimetype=mime)                    
     
     if not vault.user == request.user:
         return HttpResponse('{"status": "fail", "error":"You cannot transfer ownership of this vault"}', mimetype=mime)                    

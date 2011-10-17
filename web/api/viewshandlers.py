@@ -24,7 +24,7 @@ from django.utils import simplejson
 
 from frontend.models import UserProfile
 
-from codewiki.models import Scraper, Code, ScraperRunEvent, CodePermission, scraper_search_query, scrapers_overdue
+from codewiki.models import Scraper, Code, UserCodeRole, ScraperRunEvent, CodePermission, scraper_search_query, scraper_search_query_unordered, scrapers_overdue
 from codewiki.managers.datastore import DataStore
 import frontend
 from cStringIO import StringIO
@@ -306,16 +306,47 @@ def scraper_search_handler(request):
     # TODO: If the user has specified an API key then we should pass them into
     # the search query and refine the resultset  to show only valid scrapers
     if boverduescraperrequest:
-        scrapers = scrapers_overdue()  
+        scrapers_all = scrapers_overdue()  
     else:
-        scrapers = scraper_search_query(user=None, query=query, apikey=apikey)
+        scrapers_all = scraper_search_query_unordered(user=None, query=query, apikey=apikey)
+
 
     # scrapers we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
     quietfields = request.GET.get('quietfields', "").split("|")
-#    offset = request.GET.get('offset', 0)
-    
-    for scraper in scrapers[:(maxrows+len(nolist))]:
+    #offset = request.GET.get('offset', 0)
+
+    srequestinguser = request.GET.get("requestinguser", "")
+    lrequestinguser = User.objects.filter(username=srequestinguser)
+    if lrequestinguser:
+        requestinguser = lrequestinguser[0]
+    else:
+        requestinguser = None
+
+    # convert the query into an ordered list
+    if boverduescraperrequest:
+        scraperlist = scrapers_all
+        
+            # probably a way of sorting by some ranking on these ownership fields right in the database
+    elif requestinguser:
+        scraperlist = list(scrapers_all.distinct())
+        for scraper in scraperlist:
+            usercoderoles = UserCodeRole.objects.filter(code=scraper, user=requestinguser)
+            if usercoderoles:
+                if usercoderoles[0].role == "owner":
+                    scraper.colleaguescore = (3, scraper.short_name)  # created_at
+                elif usercoderoles[0].role == "editor":
+                    scraper.colleaguescore = (2, scraper.short_name)  # created_at
+                else:
+                    scraper.colleaguescore = (1, scraper.short_name)  # created_at
+            else:
+                scraper.colleaguescore = (0, scraper.short_name)  # created_at
+        scraperlist.sort(key=lambda user:user.colleaguescore, reverse=True)
+    else:
+        scrapers_all = scrapers_all.order_by('-created_at')
+        scraperlist = scrapers_all.distinct()[:(maxrows+len(nolist))]
+
+    for scraper in scraperlist:
         if scraper.short_name in nolist:
             continue
         res = {'short_name':scraper.short_name }
@@ -376,6 +407,7 @@ def scraper_search_handler(request):
     return response
 
 
+
 def usersearch_handler(request):
     query = request.GET.get('searchquery') 
     try:   
@@ -391,16 +423,38 @@ def usersearch_handler(request):
         # usernames we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
     
+    srequestinguser = request.GET.get("requestinguser", "")
+    lrequestinguser = User.objects.filter(username=srequestinguser)
+    if lrequestinguser:
+        requestinguser = lrequestinguser[0]
+    else:
+        requestinguser = None
+
+
     if query:
         users = User.objects.filter(username__icontains=query)
         userprofiles = User.objects.filter(userprofile__name__icontains=query)
         users_all = users | userprofiles
     else:
         users_all = User.objects.all()
-    users_all = users_all.order_by('-date_joined')
+    users_all = users_all.order_by('username')
+
+        # if there is a requestinguser, then rank by overlaps and sort
+        # (inefficient, but I got no other ideas right now)
+        # (could be doing something with scraper.userrolemap())
+    if requestinguser:
+        requestuserscraperset = set([usercoderole.code.short_name  for usercoderole in requestinguser.usercoderole_set.all()])
+        userlist = list(users_all)
+        for user in userlist:
+            user.colleaguescore = len(requestuserscraperset.intersection([usercoderole.code.short_name  for usercoderole in user.usercoderole_set.all()]))
+        userlist.sort(key=lambda user:user.colleaguescore, reverse=True)
+        #for user in userlist:
+        #    print (user, user.colleaguescore)
+    else:
+        userlist = users_all[:(maxrows+len(nolist))]
 
     result = [ ]
-    for user in users_all[:(maxrows+len(nolist))]:
+    for user in userlist:
         if user.username not in nolist:
             res = {'username':user.username, "profilename":user.get_profile().name, "date_joined":user.date_joined.isoformat() }
             result.append(res)

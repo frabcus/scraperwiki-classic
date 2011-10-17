@@ -118,15 +118,14 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         return soc
 
     def sendReply (self, reply) :
-
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/plain\n')
-        self.connection.send  ('\n' )
+        self.connection.send  ('HTTP/1.1 200 OK\r\n')
+        self.connection.send  ('Connection: Close\r\n')
+        self.connection.send  ('Pragma: no-cache\r\n')
+        self.connection.send  ('Cache-Control: no-cache\r\n')
+        self.connection.send  ('Content-Type: text/plain\r\n')
+        self.connection.send  ('\r\n' )
         self.connection.send  (reply)
-        self.connection.send  ('\n' )
+        self.connection.send  ('\r\n' )
 
     def sendStatus (self) :
 
@@ -151,11 +150,13 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def sendPage (self, id) :
         """
-        Retreive page from cache if possible
+        Retreive page from cache if possible, as this is being called with URLLib
+        it really should act as a proper HTTP request
         """
         # TODO: Add better handling for the page not being found in the cache
         if not id:
             self.log_message('No ID argument passed to sendPage()')
+            self.sendReply ('Unspecified ID')            
             return 
 
         page = cache_client.get(id)
@@ -164,6 +165,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         self.connection.sendall (page)
+        
 
     def ident (self) :
 
@@ -259,19 +261,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def notify (self, sending_host, **query) :
-        # We don't to do this for open access IPs but it won;t hurt
-        try:
-            lxc_server = config.get(varName, 'lxc_server')
-        except:
-            lxc_server = None
-        
-        if lxc_server and '10.0' in sending_host:
-            host = lxc_server
-        else:
-            host = sending_host
-        
+        # We don't to do this for open access IPs but it won't hurt
+        lxc_server = config.get(varName, 'lxc_server')
         query['message_type'] = 'sources'
-        try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+        
+        try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (lxc_server, urllib.urlencode(query))).read()
         except : pass
 
     def bodyOffset (self, page) :
@@ -520,7 +514,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 last_cacheid    = cached is not None or '',
                 cached          = cached is not None,
                 ddiffers        = ddiffers, 
-                fetchtime       = time.time() - starttime
+                fetchtime       = time.time() - starttime,
+                remote_ip       = remote[0]
             )
 
         self.connection.sendall (page)

@@ -68,11 +68,11 @@ module ScraperWiki
     # * _postcode_ = A valid UK postcode
     #
     # === Example
+    #
     # ScraperWiki::gb_postcode_to_latlng('L3 6RP')
     #
     def ScraperWiki.gb_postcode_to_latlng(postcode)
-        uri = URI.parse("http://views.scraperwiki.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
-        sres = Net::HTTP.get(uri)
+        sres = ScraperWiki.scrape("https://views.scraperwiki.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
         jres = JSON.parse(sres)
         if jres["lat"] and jres["lng"]
             return [jres["lat"], jres["lng"]]
@@ -490,7 +490,7 @@ module ScraperWiki
         if ds.m_webstore_port == 0
             res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"attach", 'name'=>name, 'asname'=>asname})
             if res["error"]
-                ScraperWiki.raisesqliteerror(res)
+                ScraperWiki.raisesqliteerror(res["error"])
             end
         else
             res = {'status'=>'ok'}

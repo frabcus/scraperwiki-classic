@@ -33,7 +33,7 @@ from twisted.web.http import PotentialDataLoss
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed, Deferred
-from twisted.internet.error import ProcessDone
+from twisted.internet.error import ConnectionDone, ConnectionRefusedError
 
 from twisterconfig import poptions, config, stdoutlog, djangokey, djangourl, logging, logger, jstime
 from twisterrunner import MakeRunner
@@ -61,7 +61,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # autosave, autoload, or draft when guid is not set
         self.clienttype = None # 'editing', 'umlmonitoring', 'rpcrunning', 'scheduledrun', 'stimulate_run', 'httpget'
-        
+        self.bufferclient = '' # incoming messages from the client
 
     def connectionMade(self):
         logger.info("connection client# %d" % self.factory.clientcount)
@@ -148,9 +148,11 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
     # messages from the client
     def dataReceived(self, data):
-        # chunking has recently become necessary because records (particularly from typing) can get concatenated
-        # probably shows we should be using LineReceiver
-        for lline in data.split("\r\n"):
+            # probably should be using LineReceiver
+        #logger.debug("rrrr %s" % [data])
+        lines  = (self.bufferclient+data).split("\r\n")
+        self.bufferclient = lines.pop(-1)
+        for lline in lines:
             line = lline.strip()
             
             # handle case where we have an http connection rather than plain socket connection
@@ -626,7 +628,11 @@ class RunnerFactory(protocol.ServerFactory):
         d.addCallbacks(self.requestoverduescrapersResponse, self.requestoverduescrapersFailure)
 
     def requestoverduescrapersFailure(self, failure):
-        logger.info("requestoverduescrapers failure received "+str(failure))
+        if failure.type == ConnectionRefusedError:
+            logger.info("requestoverduescrapers ConnectionRefused")
+        else:
+            logger.warning("requestoverduescrapers failure received "+str(failure.type))
+        failure.trap(ConnectionRefusedError)  # (doesn't do anything as there's no higher level error handling anyway)
 
     def requestoverduescrapersResponse(self, response):
         finished = Deferred()
@@ -672,7 +678,7 @@ class RunnerFactory(protocol.ServerFactory):
             self.notifyMonitoringClients(sclient)
 
 
-    def scheduledruncomplete(self, sclient, processsucceeded):
+    def scheduledruncomplete(self, sclient):
         logger.debug("scheduledruncomplete %d" % sclient.clientnumber)
         self.clientConnectionLost(sclient)  # not called from connectionList because there is no socket actually associated with this object
         del self.scheduledrunners[sclient.scrapername]
