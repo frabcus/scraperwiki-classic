@@ -847,15 +847,18 @@ def proxycached(request):
     except urllib2.URLError, e: 
         result['type'] = 'exception'
         result['content'] = str(e)
+        raise e
     except BadStatusLine, sl:
         # This happens even though it is sending us a valid result.  I blame the broken dataproxy
         # so in the meantime we're going to cheat.
         if not 'content' in result:
             result['type'] = 'exception'
             result['content'] = str(sl)
+            raise TypeError( str(result) )
     except Exception, exc:
         result['type'] = 'exception'
         result['content'] = str(exc)
+        raise exc
         
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
