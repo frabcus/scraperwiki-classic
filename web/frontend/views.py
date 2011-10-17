@@ -18,11 +18,7 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
 from tagging.models import Tag, TaggedItem
 
-<<<<<<< local
-from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper, Vault, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
-=======
-from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper,Vault, View, scraper_search_query, user_search_query, HELP_LANGUAGES, LANGUAGES_DICT
->>>>>>> other
+from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper, Vault, View, scraper_search_query, user_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from registration.backends import get_backend

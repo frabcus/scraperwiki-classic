@@ -104,12 +104,8 @@ def docsexternal(request):
     api_base = "%s/api/1.0/" % settings.API_URL
     
     context = {'language':language, 'api_base':api_base }
-<<<<<<< local
     if type(request.user) != AnonymousUser:
         context['requestinguser'] = request.user.username
-=======
-    
->>>>>>> other
     context["scrapername"] = request.GET.get("name", "")
         
     return render_to_response('documentation/apibase.html', context, context_instance=RequestContext(request))
