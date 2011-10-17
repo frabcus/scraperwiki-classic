@@ -3,5 +3,5 @@ SHELL=/bin/bash
 
 # m h  dom mon dow   command
 
-# Every minute, get new screenshots of scrapers from screenshot server
-* * * * * 1002 rsync --verbose  --progress --stats -azr -e "ssh -i /home/scraperdeploy/screenshooter-key.rsa" screenshooter@kippax.scraperwiki.com:/home/screenshooter/screenshots/ /var/www/scraperwiki/web/media/screenshots/
+# Every hour, get new screenshots of scrapers from screenshot server
+0 * * * * root rsync --verbose  --progress --stats -azr -e "ssh -i /home/scraperdeploy/screenshooter-key.rsa" screenshooter@kippax.scraperwiki.com:/home/screenshooter/screenshots/ /var/www/scraperwiki/web/media/screenshots/
