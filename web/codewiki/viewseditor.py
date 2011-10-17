@@ -334,9 +334,12 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         if revuser is None:
             revuser = scraper.owner()
             
-        context['revusername'] = revuser.username
+        context['revusername'] = revuser and revuser.username or 'unknown'
         try:
-            context['revuserrealname'] = revuser.get_profile().name
+            if revuser:
+                context['revuserrealname'] = revuser.get_profile().name
+            else:                            
+                context['revuserrealname'] = 'Unknown'
         except frontend.models.UserProfile.DoesNotExist:
             context['revuserrealname'] = revuser.username
         except AttributeError:  # happens with AnonymousUser which has no get_profile function!
