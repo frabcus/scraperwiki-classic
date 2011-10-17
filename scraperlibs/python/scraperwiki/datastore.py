@@ -91,8 +91,13 @@ def request(req):
 
 
 def close():
-    m_socket.sendall('.\n')  # what's this for?
-    m_socket.close()
+    global m_socket
+
+    try:
+        m_socket.close()
+    except:
+        pass
+        
     m_socket = None
 
 
