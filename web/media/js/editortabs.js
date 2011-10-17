@@ -127,7 +127,7 @@ function popupCached(cacheid, lmimetype)
 {
     modaloptions = { overlayClose: true, 
                         overlayCss: { cursor:"auto" }, 
-                        containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
+                        containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:'20px', width:"90%", "text-align":"left", cursor:"auto" }, 
                         containerId: 'simplemodal-container' 
                     }; 
 
