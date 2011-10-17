@@ -825,6 +825,7 @@ def convtounicode(text):
 
 def proxycached(request):
     from httplib import BadStatusLine
+    from urlparse import urljoin
     
     cacheid = request.POST.get('cacheid', None)
     if not cacheid:   
@@ -833,7 +834,8 @@ def proxycached(request):
     if not cacheid:
         return HttpResponse(json.dumps({'type':'error', 'content':"No cacheid found"}), mimetype="application/json")
     
-    proxyurl = settings.HTTPPROXYURL + "/Page?" + cacheid
+    proxyurl = urljoin(settings.HTTPPROXYURL , "/Page?" + cacheid )
+    
     result = { 'proxyurl':proxyurl, 'cacheid':cacheid }
     
     try:
@@ -849,12 +851,8 @@ def proxycached(request):
         result['content'] = str(e)
         raise e
     except BadStatusLine, sl:
-        # This happens even though it is sending us a valid result.  I blame the broken dataproxy
-        # so in the meantime we're going to cheat.
-        if not 'content' in result:
-            result['type'] = 'exception'
-            result['content'] = str(sl)
-            raise TypeError( str(result) )
+        result['type'] = 'exception'
+        result['content'] = str(sl)
     except Exception, exc:
         result['type'] = 'exception'
         result['content'] = str(exc)
