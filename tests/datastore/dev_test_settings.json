@@ -1,0 +1,8 @@
+{
+	"host"          : "localhost", 
+	"port"          : 9005, 
+	"scrapername"   : "test", 
+	"runid" 	    : "123",
+	"attachables"   : "",
+	"webstore_port" : 0
+}
