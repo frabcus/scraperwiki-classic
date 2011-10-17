@@ -156,6 +156,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         # TODO: Add better handling for the page not being found in the cache
         if not id:
             self.log_message('No ID argument passed to sendPage()')
+            self.sendReply ('Unspecified ID')            
             return 
 
         page = cache_client.get(id)
@@ -164,6 +165,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         self.connection.sendall (page)
+        
 
     def ident (self) :
 
