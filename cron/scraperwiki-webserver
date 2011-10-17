@@ -2,7 +2,7 @@ MAILTO=cron@scraperwiki.com
 SHELL=/bin/bash
 
 # Backup database, and scraper mercurial repositories
-0 5 * * * root mysqldump -u backup --single-transaction --quick scraperwiki_live | gzip > /root/backup/mysql-backup.sql.gz
+0 5 * * * root mysqldump --single-transaction --quick scraperwiki_live | gzip > /root/backup/mysql-backup.sql.gz
 0 5 * * * root cd /var/www/scraperwiki/ && source bin/activate && dir=$(mktemp -d) && for s in $(ls splitscrapers/); do hg clone splitscrapers/$s $dir/$s 2>&1 >/dev/null | grep -v "Not trusting file"; done && tar zcfP /root/backup/mercurial.tar.gz $dir && rm -rf $dir
 0 7 * * * root rsync -qazr /root/backup umi.backup.bytemark.co.uk::scraperwiki-web/
 
