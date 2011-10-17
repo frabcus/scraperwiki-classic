@@ -64,7 +64,7 @@ STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let
 VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow" ])
 
 
-def scraper_search_query(user, query, apikey=None):
+def scraper_search_query_unordered(user, query, apikey=None):
     if query:
         scrapers = Code.objects.filter(title__icontains=query)
         scrapers_description = Code.objects.filter(description__icontains=query)
@@ -87,6 +87,10 @@ def scraper_search_query(user, query, apikey=None):
         scrapers_all = scrapers_all.exclude(Q(privacy_status="private") & ~(Q(usercoderole__user=u) & Q(usercoderole__role='owner')) & ~(Q(usercoderole__user=u) & Q(usercoderole__role='editor')))
     else:
         scrapers_all = scrapers_all.exclude(privacy_status="private")
+    return scrapers_all
+        
+def scraper_search_query(user, query, apikey=None):
+    scrapers_all = scraper_search_query_unordered(user, query, apikey=None)
     scrapers_all = scrapers_all.order_by('-created_at')
     return scrapers_all.distinct()
 
