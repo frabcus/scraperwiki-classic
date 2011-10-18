@@ -57,7 +57,7 @@ class DataStore(object):
         srec = None        
         while True:
             try:
-                srec = self.m_socket.recv(1024)
+                srec = self.m_socket.recv(2048)
                 timeout = False                                
             except:
                 timeout = True                
