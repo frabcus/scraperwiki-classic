@@ -64,9 +64,9 @@ def scrape (url, params = None, force_cache=False) :
 
     headers = None
     if force_cache:
-        headers = {'X-Force-Cache': 'True'}
-
-    req = urllib2.Request(url, data, headers)
+        req = urllib2.Request(url, data, headers={'X-Force-Cache': 'True'})
+    else:
+        req = urllib2.Request(url, data)        
     fin  = urllib2.urlopen(req)
     text = fin.read()
     fin.close()   # get the mimetype here
