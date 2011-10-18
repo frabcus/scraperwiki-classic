@@ -22,7 +22,7 @@ class Vault(models.Model):
 
     def scrapers(self):
         from codewiki.models import UserCodeRole, Scraper                
-        return Scraper.objects.filter(vault=self)
+        return Scraper.objects.filter(vault=self).exclude(privacy_status='deleted')
 
     def add_user_rights(self, user ):
         """
