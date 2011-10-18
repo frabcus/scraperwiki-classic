@@ -65,6 +65,8 @@ class scraperwiki
    static function save_sqlite($unique_keys, $data, $table_name="swdata", $verbose=2)
    {
       $ds = SW_DataStoreClass::create();
+      if (count($data) == 0)
+          return;
       if (!array_key_exists(0, $data))
           $data = array($data); 
 
