@@ -59,10 +59,15 @@ def urllibSetup(http_proxy):
 #  Scrape a URL optionally with parameters. This is effectively a wrapper around
 #  urllib2.orlopen().
 #
-def scrape (url, params = None) :
+def scrape (url, params = None, force_cache=False) :
     data = params and urllib.urlencode(params) or None
 
-    fin  = urllib2.urlopen(url, data)
+    headers = None
+    if force_cache:
+        headers = {'X-Force-Cache': 'True'}
+
+    req = urllib2.Request(url, data, headers)
+    fin  = urllib2.urlopen(req)
     text = fin.read()
     fin.close()   # get the mimetype here
 
