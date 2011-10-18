@@ -206,6 +206,7 @@ function execute(http_req, http_res, raw_request_data) {
 	var script = { run_id : request_data.runid, 
 			 	scraper_name : request_data.scrapername || "",
 			    scraper_guid : request_data.scraperid,
+				username: request_data.username || "",
 			 	query : request_data.urlquery, 
 			 	pid: -1, 
 				vm: '', 
@@ -220,6 +221,7 @@ function execute(http_req, http_res, raw_request_data) {
                 scheduled_run: request_data.scheduled_run || false,
 				permissions: request_data.permissions || [] };
 	
+	util.log.debug("USERNAME:" + script.username);
 	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
