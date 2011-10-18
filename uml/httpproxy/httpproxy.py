@@ -269,7 +269,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         except : pass
 
     def bodyOffset (self, page) :
-
         try    : offset1 = string.index (page, '\r\n\r\n')
         except : offset1 = 0x3fffffff
         try    : offset2 = string.index (page, '\n\n'    )
@@ -463,7 +462,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     if ctag and cache_client:
                         if self.fetchedDiffers(fetched, cached):
                             cache_client.set(ctag, fetched)
-
+                        else:
+                            print 'Page has changed between fetches'
+                            
             finally :
                 if soc is not None :
                     soc.close()
