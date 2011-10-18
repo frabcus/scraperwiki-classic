@@ -411,7 +411,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #   * Page was not in the cache anyway
         #
         starttime = time.time()
-        if isSW or cacheFor <= 0 or cached is None:
+        if isSW or cached is None: # cacheFor <= 0 or
 
             startat = time.strftime ('%Y-%m-%d %H:%M:%S')
             soc = None
