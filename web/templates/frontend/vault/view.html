@@ -40,8 +40,8 @@
             </div>
         </div>
         
-        <div class="vault_contents{% if vault.code_objects.count == 0 %} empty{% endif %}">
-    	{% if vault.code_objects.count > 0 %}
+        <div class="vault_contents{% if vault.scrapers.count == 0 %} empty{% endif %}">
+    	{% if vault.scrapers.count > 0 %}
             <h5>This vault contains {{ vault.scrapers.count }} scraper{{ vault.scrapers.count|pluralize }}: <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	    <ul class="scraper_list">
     	    {% for code in vault.scrapers.all %}
@@ -97,11 +97,11 @@
             </div>
         </div>
         
-        <div class="vault_contents{% if vault.code_objects.count == 0 %} empty{% endif %}">
-    	{% if vault.code_objects.count > 0 %}
-            <h5>This vault contains {{ vault.code_objects.count }} scraper{{ vault.code_objects.count|pluralize }}: <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
+        <div class="vault_contents{% if vault.scrapers.count == 0 %} empty{% endif %}">
+    	{% if vault.scrapers.count > 0 %}
+            <h5>This vault contains {{ vault.scrapers.count }} scraper{{ vault.scrapers.count|pluralize }}: <a class="add_to_vault" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Create a scraper in here</a></h5>
     	    <ul class="scraper_list">
-    	    {% for code in vault.code_objects.all %}
+    	    {% for code in vault.scrapers.all %}
     	        {% include 'frontend/includes/vault_scraper_line.html' %}
     	    {% endfor %}
     	    </ul>
