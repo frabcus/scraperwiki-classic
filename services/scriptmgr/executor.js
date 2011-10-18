@@ -221,8 +221,6 @@ function execute(http_req, http_res, raw_request_data) {
                 scheduled_run: request_data.scheduled_run || false,
 				permissions: request_data.permissions || [] };
 	
-	util.log.debug("USERNAME:" + script.username);
-	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
 		var tmpfile = path.join( code_folder, "script." + util.extension_for_language(script.language) );

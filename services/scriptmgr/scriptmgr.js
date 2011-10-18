@@ -164,7 +164,7 @@ function handleIdent(req,res) {
 		res.write( 'scraperid=' + script.scraper_guid + "\n");
 		res.write( 'runid=' + script.run_id  + "\n");		
 		res.write( 'scrapername=' + script.scraper_name + "\n");	
-		if ( script.scheduled_run ) {
+		if ( script.username != '*SCHEDULED*' ) {
 			res.write( 'option=webcache:10\n');				
 		}
 		res.end('\n')
