@@ -22,23 +22,20 @@ m_host = None
 m_port = None
 m_scrapername = None
 m_runid = None
-m_webstore_port = None   # if not null then will connect to new webstore
 m_attachables = [ ]
 
         # make everything global to the module for simplicity as opposed to half in and half out of a single class
-def create(host, port, scrapername, runid, attachables, webstore_port):
+def create(host, port, scrapername, runid, attachables, webstore_port=0):
     global m_host
     global m_port
     global m_scrapername
     global m_runid
     global m_attachables
-    global m_webstore_port
     m_host = host
     m_port = int(port)
     m_scrapername = scrapername
     m_runid = runid
     m_attachables = m_attachables
-    m_webstore_port = int(webstore_port)
 
         # a \n delimits the end of the record.  you cannot read beyond it or it will hang
 def receiveoneline(socket):
@@ -79,9 +76,6 @@ def ensure_connected():
         
 
 def request(req):
-    if m_webstore_port:
-        return webstorerequest(req)
-    
     ensure_connected()
     m_socket.sendall(json.dumps(req)+'\n')
     line = receiveoneline(m_socket)
@@ -160,89 +154,4 @@ def getDataByLocation(name, lat, lng, limit=-1, offset=0):
 def search(name, filterdict, limit=-1, offset=0):
     raise scraperwiki.sqlite.SqliteError("apiwrapper.search has been deprecated")
 
-def webstorerequest(req):
-    if req.get("maincommand") == "sqlitecommand":
-        if req.get("command") == "attach":
-            return "{'status': 'ok'}"    # done at the higher level
-        elif req.get("command") == "commit":
-            return "{'status': 'ok'}"    # no operation
-        else:
-            return {"error":'Unknown sqlitecommand: %s' % req.get("command")}
-        return {"error":'Unknown maincommand: %s' % req.get("maincommand")}
-
-    webstoreurl = "http://%s:%s" % (m_host, m_webstore_port)
-    username = "resourcedir"  # gets it into the right subdirectory automatically!!!
-    dirscrapername = m_scrapername
-    if not m_scrapername:
-        dirscrapername = "DRAFT__%s" % re.sub("[\.\-]", "_", m_runid)
-    databaseurl = "%s/%s/%s" % (webstoreurl, username, dirscrapername)
-    
-    if req.get("maincommand") == "save_sqlite":
-        table_name = req.get("swdatatblname")
-        tableurl = "%s/%s" % (databaseurl, table_name)
-        ldata = req.get("data")
-        if type(ldata) == dict:
-            ldata = [ldata]
-        qsl = [ ("unique", key)  for key in req.get("unique_keys") ]
-        
-            # quick and dirty provision of column types to the webstore
-        if ldata:
-            jargtypes = { }
-            for k, v in ldata[0].items():
-                if v != None:
-                        # serious issue encountered here as blob doesn't mean same thing in SqlAlchemy as it does in Sqlite
-                        # in the former it's a binary string, in Sqlite it means an uncoerced column with no type affinity
-                        # (and therefore ideal for saving of variables of different types)
-                    #if k[-5:] == "_blob":
-                    #    vt = "blob"  # coerced into affinity none
-                    if type(v) == int:
-                        vt = "integer"
-                    elif type(v) == float:
-                        vt = "real"
-                    else:
-                        vt = "text"
-                    jargtypes[k] = vt
-            qsl.append(("jargtypes", json.dumps(jargtypes)))
-
-        target = "%s?%s" % (tableurl, urllib.urlencode(qsl))
-        request = urllib2.Request(target)
-        
-        request.add_header("Accept", "application/json")
-        request.add_data(json.dumps(ldata))
-            
-        
-    elif req.get("maincommand") == "sqliteexecute":
-        class PutRequest(urllib2.Request):
-            def get_method(self):
-                return "PUT"
-        request = PutRequest(databaseurl)
-        request.add_header("Accept", "application/json+tuples")
-
-        record = {"query":req.get("sqlquery"), "params":req.get("data"), "attach":[]}
-        for name, asattach in req.get("attachlist"):
-            record["attach"].append({"user":username, "database":name, "alias":asattach, "securityhash":"somthing"})
-            
-        request.add_data(json.dumps(record))
-
-
-    request.add_header("Content-Type", "application/json")
-    request.add_header("X-Scrapername", m_scrapername)
-    request.add_header("X-Runid", m_runid)
-    try:
-        url = urllib2.urlopen(request)
-        result = url.read()
-        url.close()
-    except urllib2.HTTPError, e:
-        result = e.read()  # the error
-    jres = json.loads(result)
-    
-    # decode error messages that may be inconveniently packed somewhere into the structure (what a lot of hassle!)
-    if jres.get("state") == "error":
-        return { "error":jres.get("message", "error") }
-    if (type(jres) == dict) and (type(jres.get("keys")) == list) and (type(jres.get("data")) == list):
-        if "state" in jres["keys"] and len(jres["data"]) == 1:
-            ddata = dict(zip(jres["keys"], jres["data"][0]))
-            if ddata.get("state") == "error":
-                return { "error":ddata.get("message", "error") }
-    return jres
     

@@ -171,6 +171,7 @@ function handleIdent(req,res) {
 		if ( script.username != '*SCHEDULED*' ) {
 			res.write( 'option=webcache:10\n');				
 		}
+		
 		res.end('\n')
 	}
 	else {
