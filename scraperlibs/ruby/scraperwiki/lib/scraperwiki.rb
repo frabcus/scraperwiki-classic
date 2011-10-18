@@ -266,6 +266,8 @@ module ScraperWiki
 
         if data.class == Hash
             data = [ data ]
+        elsif data.length == 0
+            return
         end
             
         rjdata = [ ]
@@ -334,8 +336,10 @@ module ScraperWiki
             pdata = { }
             if rjdata.class == Hash
                 sdata = rjdata
-            else
+            elsif rjdata.length != 0 
                 sdata = rjdata[0]
+            else
+                sdata = {}
             end
             sdata.each_pair do |key, value|
                 key = ScraperWiki._unicode_truncate(key.to_s, 50)
