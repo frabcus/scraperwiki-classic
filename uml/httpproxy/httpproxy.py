@@ -456,7 +456,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
                     if ctag and cache_client:
                         if self.fetchedDiffers(fetched, cached):
-                            cache_client.set(ctag, fetched)
+                            cache_client.set(ctag, fetched, time=3600) # expire in an hour
                         else:
                             print '%s has changed between fetches' % (self.path,)
                             
