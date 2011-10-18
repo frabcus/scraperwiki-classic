@@ -365,8 +365,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #
         cbits = None
 
-        force_cache = False
-
         #  GET is easy, note the path, the content is empty. Cookies will be set
         #  later.
         #
@@ -438,9 +436,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                             continue
                         if key == 'x-cache'     :
                             continue
-                        if key == 'X-Force-Cache':
-                            force_cache = True
-                            continue
                         soc.send ('%s: %s\r\n' % (key, value))
                     if isSW :
                         soc.send ("%s: %s\r\n" % ('x-scraperid', scraperID and scraperID or ''))
@@ -460,7 +455,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     fetched = self.getResponse(soc)
 
                     if ctag and cache_client:
-                        if force_cache or self.fetchedDiffers(fetched, cached):
+                        if self.fetchedDiffers(fetched, cached):
                             cache_client.set(ctag, fetched)
                         else:
                             print '%s has changed between fetches' % (self.path,)
