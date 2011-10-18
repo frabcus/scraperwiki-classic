@@ -281,6 +281,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if cached is None:
             return True
         else:
+            # Looks like this will fail even if there is just an updated date field in the content
             fbo = self.bodyOffset(fetched)
             cbo = self.bodyOffset(cached)
             return fetched[fbo:] != cached[cbo:]
@@ -463,7 +464,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                         if self.fetchedDiffers(fetched, cached):
                             cache_client.set(ctag, fetched)
                         else:
-                            print 'Page has changed between fetches'
+                            print '%s has changed between fetches' % (self.path,)
                             
             finally :
                 if soc is not None :
