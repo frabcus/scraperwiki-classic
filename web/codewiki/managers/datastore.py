@@ -63,7 +63,7 @@ class DataStore(object):
                 timeout = True                
 
             if not srec:
-                msg = timeout and "The dataproxy connection timed out, please retry." or "socket from dataproxy has closed"
+                msg = timeout and "The dataproxy connection timed out, please retry." or "The socket from the dataproxy has closed"
                 return json.dumps({'error': msg })
                 
             ssrec = srec.split("\n")  # multiple strings if a "\n" exists
