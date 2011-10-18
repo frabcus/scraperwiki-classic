@@ -132,7 +132,7 @@ def deploy_done():
     if not env.email_deploy:
         return
 
-    env.changelog = local('hg log -r %(old_revision)s:%(new_revision)s' % env)
+    env.changelog = local('hg log -r %(old_revision)s:%(new_revision)s' % env, capture=True)
 
     message = """From: ScraperWiki <developers@scraperwiki.com>
 Subject: New Scraperwiki Deployment of '%(task)s' to flock '%(flock)s' (deployed by %(name)s)
