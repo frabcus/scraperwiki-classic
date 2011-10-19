@@ -216,7 +216,7 @@ def get_var(name, default=None, verbose=2):
         # Doesn't seem to be catching the no such table.
         return default        
         
-    data = result.get("data")
+    data = result.get("data", None)
     if not data:
         return default
     val, vtype = data[0]
