@@ -19,7 +19,7 @@ class DatastoreProtocol(basic.LineReceiver):
         """
         Initialise the local attributes that we want
         """
-        self.read_header = False
+        self.have_read_header = False
         self.headers = {}
         self.params = None
         self.action = None
@@ -31,8 +31,19 @@ class DatastoreProtocol(basic.LineReceiver):
         Process the provided JSON obj (has already been converted to JSON)
         and make sure the response is sent with self.sendLine()
         """
-        pass
-        
+        if self.db is None:
+            # We don't have a database yet so this must be the first message
+            firstmessage = {"status":"good"}
+            # Are these passed in parameters? Check self.params?
+            firstmessage["short_name"] = '' # short_name
+            firstmessage["runID"]      = '' #runID
+            firstmessage["dataauth"]   = '' #dataauth
+            self.sendLine( json.dumps(firstmessage)  )
+            
+            db = datalib.SQLiteDatabase(self, config.get('dataproxy', 'resourcedir'), self.short_name, self.dataauth, self.runID, self.attachables)            
+        else:
+            # Decide what to do based on the command in obj
+            pass
         
     def lineReceived(self, line):
         """
@@ -42,19 +53,17 @@ class DatastoreProtocol(basic.LineReceiver):
         # See if we have read all of the HTTP header yet.
         # Store what we need to store for this client 
         # connection
+        print line
+        
         self.factory.connection_count += 1
-        if not self.read_header and line.strip() == '':
-            self.read_header = True
+        if not self.have_read_header and line.strip() == '':
+            self.have_read_header = True
             return
             
-        if self.read_header:
+        if self.have_read_header:
             print self.action
             print self.params
             print self.headers
-            
-            # We are now ready to process the JSON that is in 'line'
-            #if not self.db:
-            #    db = SQLiteDatabase()
             
             try:
                 obj = json.loads(line)
@@ -69,6 +78,15 @@ class DatastoreProtocol(basic.LineReceiver):
                 k,v = line.split(':')
                 self.headers[k.strip()] = v.strip()
 
+
+    def connectionLost(self, reason):
+        """
+        Called when the connection was lost, we should clean up the DB here
+        by closing the connection we have to it.
+        """
+        if self.db:
+            self.db.close()
+            self.db = None
 
 
     def parse_params(self, line):

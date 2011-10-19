@@ -8,10 +8,11 @@ import unittest
 import json
 try:
     import scraperwiki
-except:
+except Exception, e:
     print '*' * 80
     print '* Make sure the folder containing scraperlibs/python is in your $PYTHONPATH'
     print '*' * 80
+    print e
     sys.exit(0)
 
 

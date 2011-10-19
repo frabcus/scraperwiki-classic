@@ -13,8 +13,6 @@ import twisted.manhole.telnet
 
 from datastore import DatastoreFactory
 
-print sys.argv
-
 application = service.Application("datastore")
 logfile = DailyLogFile("datastore.log", "/var/log/scraperwiki/")
 application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
@@ -22,10 +20,13 @@ application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
 # attach the service to its parent application
 service = service.MultiService()
 
-f = DatastoreFactory()
-dsf = internet.TCPServer(2112, f)
-dsf.setServiceParent( service )
+# Setup the datastore server.
+ds_factory = DatastoreFactory()
+ds_service = internet.TCPServer(2112, ds_factory)
+ds_service.setServiceParent( service )
 
+# Setup manhole, although it appears we can't quit and instead
+# have to CTRL+] instead.
 manhole = twisted.manhole.telnet.ShellFactory()
 manhole.username = "boss"
 manhole.password = "sekrit"
