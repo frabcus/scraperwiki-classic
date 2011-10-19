@@ -476,8 +476,7 @@ class SqliteSaveInfo:
                 istart = int(mnum.group(1))
         for i in range(10000):
             newidxname = "%s_index%d" % (self.swdatatblname, istart+i)
-            idx_dict = self.sqliteexecute("select name from main.sqlite_master where name=?", (newidxname,))
-            if not 'data' in idx_dict:
+            if not self.sqliteexecute("select name from main.sqlite_master where name=?", (newidxname,))['data']:
                 break
             
         res = { "newindex": newidxname }
