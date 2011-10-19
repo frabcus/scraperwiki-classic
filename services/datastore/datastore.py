@@ -6,10 +6,18 @@ are stored on disk and access over a network.
 """
 from twisted.internet import reactor, protocol
 from twisted.protocols import basic
+from twisted.internet import defer
+from twisted.internet.threads import deferToThread
 
 from datalib import SQLiteDatabase
+
+import ConfigParser
 import re, uuid, urlparse
-import json
+import json, time
+
+configfile = '/var/www/scraperwiki/uml/uml.cfg'
+config = ConfigParser.ConfigParser()
+config.readfp(open(configfile))
 
 class DatastoreProtocol(basic.LineReceiver):
     """
@@ -25,6 +33,17 @@ class DatastoreProtocol(basic.LineReceiver):
         self.action = None
         self.db = None
         
+        self.short_name,self.dataauth, self.runID, self.attachables = None, None, None, []
+        
+    def db_process_success(self, res):
+        result = json.dumps( res )            
+        if result:
+            print result[:200]
+        self.sendLine( result + "\n" )
+
+    def db_process_error(self, failure):
+        print failure
+        #self.sendLine( result + "\n" )
         
     def process(self, obj):
         """ 
@@ -32,18 +51,26 @@ class DatastoreProtocol(basic.LineReceiver):
         and make sure the response is sent with self.sendLine()
         """
         if self.db is None:
-            # We don't have a database yet so this must be the first message
-            firstmessage = {"status":"good"}
-            # Are these passed in parameters? Check self.params?
-            firstmessage["short_name"] = '' # short_name
-            firstmessage["runID"]      = '' #runID
-            firstmessage["dataauth"]   = '' #dataauth
+            # First pass through
+            firstmessage = obj
+            # We probably want details from self.params
+            firstmessage["short_name"] = self.short_name
+            firstmessage["runID"]      = self.runID
+            # TODO: Make sure this is correct
+            firstmessage["dataauth"]   = self.dataauth
+            print 'Ready to send response of ' + str(firstmessage)
             self.sendLine( json.dumps(firstmessage)  )
-            
-            db = datalib.SQLiteDatabase(self, config.get('dataproxy', 'resourcedir'), self.short_name, self.dataauth, self.runID, self.attachables)            
+            #print 'Connecting to - ' + config.get('dataproxy', 'resourcedir')
+            self.db = SQLiteDatabase(self, '/var/www/scraperwiki/resourcedir', self.short_name, self.dataauth, self.runID, self.attachables)            
         else:
-            # Decide what to do based on the command in obj
-            pass
+            # Second and subsequent connections (when we have DB) we will
+            # defer to run in its own thread
+            print obj
+            d = deferToThread( self.db.process, obj )
+            d.addCallback( self.db_process_success )
+            d.addErrback( self.db_process_error )
+            
+
         
     def lineReceived(self, line):
         """
@@ -53,18 +80,12 @@ class DatastoreProtocol(basic.LineReceiver):
         # See if we have read all of the HTTP header yet.
         # Store what we need to store for this client 
         # connection
-        print line
-        
         self.factory.connection_count += 1
         if not self.have_read_header and line.strip() == '':
             self.have_read_header = True
-            return
-            
+            line = '{"status": "good"}'
+                        
         if self.have_read_header:
-            print self.action
-            print self.params
-            print self.headers
-            
             try:
                 obj = json.loads(line)
                 self.process( obj )                
@@ -72,18 +93,35 @@ class DatastoreProtocol(basic.LineReceiver):
                 print e
                 
         else:
+            print '- Parsing headers'            
             if self.params is None:
                 self.parse_params(line)
             else:
                 k,v = line.split(':')
                 self.headers[k.strip()] = v.strip()
 
-
+            if 'short_name' in self.params:
+                self.attachauthurl = config.get("dataproxy", 'attachauthurl')                
+                self.short_name = self.params['short_name']
+                self.runID = 'fromfrontend.%s.%s' % (self.short_name, time.time()) 
+                self.dataauth = "fromfrontend"
+            else:
+                self.short_name  = self.params['vscrapername']
+                self.runID       = self.params['vrunid']
+                if self.runID[:8] == "draft|||" and self.short_name:
+                    self.dataauth = "draft"
+                else:
+                    self.dataauth = "writable"
+            if 'attachables' in self.params:
+                self.attachables = self.params['attachables']
+            
+            
     def connectionLost(self, reason):
         """
         Called when the connection was lost, we should clean up the DB here
         by closing the connection we have to it.
         """
+        print '- Connection lost'
         if self.db:
             self.db.close()
             self.db = None
@@ -93,6 +131,7 @@ class DatastoreProtocol(basic.LineReceiver):
         """
         Parse the GET request and store the parameters we received.
         """
+        print '- Parsing parameters'        
         self.params = {}        
         m = re.match('GET /(.*) HTTP/(\d+).(\d+)', line)
         if not m:
@@ -117,5 +156,7 @@ class DatastoreFactory( protocol.ServerFactory ):
     
     
 if __name__ == '__main__':
-    reactor.listenTCP( 2112, DatastoreFactory())
+    DatastoreProtocol.delimiter = '\n'
+    print '- Listening'    
+    reactor.listenTCP( 9003, DatastoreFactory())
     reactor.run()

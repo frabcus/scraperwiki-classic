@@ -22,7 +22,7 @@ service = service.MultiService()
 
 # Setup the datastore server.
 ds_factory = DatastoreFactory()
-ds_service = internet.TCPServer(2112, ds_factory)
+ds_service = internet.TCPServer(9003, ds_factory)
 ds_service.setServiceParent( service )
 
 # Setup manhole, although it appears we can't quit and instead

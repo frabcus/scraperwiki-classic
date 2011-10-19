@@ -175,7 +175,7 @@ class SQLiteDatabase(Database):
                         return False
                     os.mkdir(self.scraperresourcedir)
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
-                self.logger.debug('Connecting to %s' % scrapersqlitefile )
+                print 'Connecting to %s' % scrapersqlitefile 
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
                 self.logger.debug('Connected to %s' % scrapersqlitefile )                
             else:
@@ -232,7 +232,7 @@ class SQLiteDatabase(Database):
     
     
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
-        self.logger.debug("XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50]))
+        print "XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50])
 
         def timeout_handler(signum, frame):
             raise TimeoutException()
@@ -247,13 +247,13 @@ class SQLiteDatabase(Database):
                 timeout_len = 180
             
             # If the query hasn't run in timeout_len seconds then we'll timeout
-            signal.signal(signal.SIGALRM, timeout_handler)                
-            signal.alarm(timeout_len)  # should use set_progress_handler !!!!
+            #signal.signal(signal.SIGALRM, timeout_handler)                
+            #signal.alarm(timeout_len)  # should use set_progress_handler !!!!
             if data:
                 self.m_sqlitedbcursor.execute(sqlquery, data)  # handle "(?,?,?)", (val, val, val)
             else:
                 self.m_sqlitedbcursor.execute(sqlquery)
-            signal.alarm(0)
+            #signal.alarm(0)
 
             #INSERT/UPDATE/DELETE/REPLACE), and commits transactions implicitly before a non-DML, non-query statement (i. e. anything other than SELECT
             #check that only SELECT has a legitimate return state
@@ -296,16 +296,16 @@ class SQLiteDatabase(Database):
 
         
         except sqlite3.Error, e:
-            signal.alarm(0)
-            self.logger.debug("user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000]))
+            #signal.alarm(0)
+            print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             return {"error":"sqlite3.Error: %s" % str(e)}
         except ValueError, e:
-            signal.alarm(0)
-            self.logger.debug("user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000]))
+            #signal.alarm(0)
+            print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             return {"error":"sqlite3.Error: %s" % str(e)}
         except TimeoutException,tout:
-            signal.alarm(0)
-            self.logger.debug("user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000]))
+            #signal.alarm(0)
+            print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
             return { "error" : "Query timeout: %s" % str(tout) }
 
 
@@ -341,9 +341,9 @@ class SQLiteDatabase(Database):
 
     def sqlitecommit(self):
         self.establishconnection(True)
-        signal.alarm(10)
+        #signal.alarm(10)
         self.m_sqlitedbconn.commit()
-        signal.alarm(0)
+        #signal.alarm(0)
         return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
 
 
@@ -405,13 +405,14 @@ class SqliteSaveInfo:
         return res
     
     def rebuildinfo(self):
-        if not self.sqliteexecute("select * from main.sqlite_master where name=?", (self.swdatatblname,))["data"]:
+        resdict = self.sqliteexecute("select * from main.sqlite_master where name=?", (self.swdatatblname,))
+        if 'error' in resdict or not 'data' in resdict:
             return False
 
         tblinfo = self.sqliteexecute("PRAGMA main.table_info(`%s`)" % self.swdatatblname)
             # there's a bug:  PRAGMA main.table_info(swdata) returns the schema for otherdatabase.swdata 
             # following an attach otherdatabase where otherdatabase has a swdata and main does not
-            
+        
         self.swdatakeys = [ a[1]  for a in tblinfo["data"] ]
         self.swdatatypes = [ a[2]  for a in tblinfo["data"] ]
         self.sqdatatemplate = "insert or replace into main.`%s` values (%s)" % (self.swdatatblname, ",".join(["?"]*len(self.swdatakeys)))
@@ -450,6 +451,9 @@ class SqliteSaveInfo:
     def findclosestindex(self, unique_keys):
         idxlist = self.sqliteexecute("PRAGMA main.index_list(`%s`)" % self.swdatatblname)  # [seq,name,unique]
         uniqueindexes = [ ]
+        if 'error' in idxlist:
+            return None, None
+            
         for idxel in idxlist["data"]:
             if idxel[2]:
                 idxname = idxel[1]
@@ -472,7 +476,8 @@ class SqliteSaveInfo:
                 istart = int(mnum.group(1))
         for i in range(10000):
             newidxname = "%s_index%d" % (self.swdatatblname, istart+i)
-            if not self.sqliteexecute("select name from main.sqlite_master where name=?", (newidxname,))["data"]:
+            idx_dict = self.sqliteexecute("select name from main.sqlite_master where name=?", (newidxname,))
+            if not 'data' in idx_dict:
                 break
             
         res = { "newindex": newidxname }
