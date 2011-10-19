@@ -53,10 +53,8 @@ class DatastoreProtocol(basic.LineReceiver):
         if self.db is None:
             # First pass through
             firstmessage = obj
-            # We probably want details from self.params
             firstmessage["short_name"] = self.short_name
             firstmessage["runID"]      = self.runID
-            # TODO: Make sure this is correct
             firstmessage["dataauth"]   = self.dataauth
             print 'Ready to send response of ' + str(firstmessage)
             self.sendLine( json.dumps(firstmessage)  )
@@ -64,8 +62,10 @@ class DatastoreProtocol(basic.LineReceiver):
             self.db = SQLiteDatabase(self, '/var/www/scraperwiki/resourcedir', self.short_name, self.dataauth, self.runID, self.attachables)            
         else:
             # Second and subsequent connections (when we have DB) we will
-            # defer to run in its own thread
-            print obj
+            # defer to run in its own thread for a single activity on the db
+            # class.  The next request may well be on another thread, but 
+            # *currently* we force sequential access - this will need fixing 
+            # when we have zero shared state.
             d = deferToThread( self.db.process, obj )
             d.addCallback( self.db_process_success )
             d.addErrback( self.db_process_error )
