@@ -405,8 +405,7 @@ class SqliteSaveInfo:
         return res
     
     def rebuildinfo(self):
-        resdict = self.sqliteexecute("select * from main.sqlite_master where name=?", (self.swdatatblname,))
-        if 'error' in resdict or not 'data' in resdict:
+        if not self.sqliteexecute("select * from main.sqlite_master where name=?", (self.swdatatblname,))['data']:
             return False
 
         tblinfo = self.sqliteexecute("PRAGMA main.table_info(`%s`)" % self.swdatatblname)
