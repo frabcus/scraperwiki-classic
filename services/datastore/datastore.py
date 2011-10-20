@@ -63,6 +63,7 @@ class DatastoreProtocol(basic.LineReceiver):
               output straight to the stream?
         """
         json.dump( res, self.transport )
+        self.transport.write('\n')
         #result = json.dumps( res )            
 #        if result:
 #            log.msg( result[:200], logLevel=logging.DEBUG )
