@@ -2,8 +2,17 @@
 Datastore.py
 
 A server that handles incoming connections to various Sqlite databases that 
-are stored on disk and access over a network.
+are stored on disk and accessed over a network. This datastore, like the old 
+dataproxy still maintains a connection (per scraper run) and so forces commands 
+in sequence.
+
+Things to check/do:
+ - We use deferToThread() for sqlite, can this be optimised with twisted dbapi?
+ - Can we better handle huge lines of content?
+ - Remove the partial HTTP, either go full HTTP or remove it.
+ 
 """
+from twisted.python import log
 from twisted.internet import reactor, protocol
 from twisted.protocols import basic
 from twisted.internet import defer
@@ -11,16 +20,26 @@ from twisted.internet.threads import deferToThread
 
 from datalib import SQLiteDatabase
 
-import ConfigParser
+import ConfigParser, logging
 import re, uuid, urlparse
-import json, time
+import json, time, sys
 
-configfile = '/var/www/scraperwiki/uml/uml.cfg'
-config = ConfigParser.ConfigParser()
-config.readfp(open(configfile))
+
+###############################################################################
+# Classes
+###############################################################################
+
 
 class DatastoreProtocol(basic.LineReceiver):
     """
+    Basic LineReceiver implementation (as the protocol is line-at-a-time)
+    
+    For historical reasons this handles the initial handshake as a HTTP 
+    request, and once initiated then treats it like a socket (without any
+    headers being sent in the response). Each line received is expected to
+    be a JSON string, which is then loaded and processed before returning
+    the response, again as a JSON string. Each line sent and received is 
+    delimited by \n.
     """
     
     def __init__(self, *args, **kwargs):
@@ -31,19 +50,32 @@ class DatastoreProtocol(basic.LineReceiver):
         self.headers = {}
         self.params = None
         self.action = None
-        self.db = None
-        
+        self.db     = None
         self.short_name,self.dataauth, self.runID, self.attachables = None, None, None, []
         
+        
     def db_process_success(self, res):
+        """
+        Called on a successful database action, the data we are given is encoded and 
+        then written as a line.  
+        
+        TODO: A more optimal solution might be to find out if json.dumps can write the
+              output straight to the stream?
+        """
         result = json.dumps( res )            
         if result:
-            print result[:200]
+            log.msg( result[:200], logLevel=logging.DEBUG )
         self.sendLine( result + "\n" )
 
+
     def db_process_error(self, failure):
-        print failure
+        """
+        A failed database action. This is likely to be an unhandled exception in
+        the datalib so we really should return a valid response.
+        """
+        log.err( failure )
         #self.sendLine( result + "\n" )
+        
         
     def process(self, obj):
         """ 
@@ -56,9 +88,8 @@ class DatastoreProtocol(basic.LineReceiver):
             firstmessage["short_name"] = self.short_name
             firstmessage["runID"]      = self.runID
             firstmessage["dataauth"]   = self.dataauth
-            print 'Ready to send response of ' + str(firstmessage)
+            log.msg( 'Ready to send response of ' + str(firstmessage), logLevel=logging.DEBUG )
             self.sendLine( json.dumps(firstmessage)  )
-            #print 'Connecting to - ' + config.get('dataproxy', 'resourcedir')
             self.db = SQLiteDatabase(self, '/var/www/scraperwiki/resourcedir', self.short_name, self.dataauth, self.runID, self.attachables)            
         else:
             # Second and subsequent connections (when we have DB) we will
@@ -66,12 +97,20 @@ class DatastoreProtocol(basic.LineReceiver):
             # class.  The next request may well be on another thread, but 
             # *currently* we force sequential access - this will need fixing 
             # when we have zero shared state.
+            log.msg( 'Starting async call', logLevel=logging.DEBUG)                                                                     
             d = deferToThread( self.db.process, obj )
             d.addCallback( self.db_process_success )
             d.addErrback( self.db_process_error )
             
 
+    def lineLengthExceeded(self, line):
+        """
+        TODO: When more than 64k is sent, we should let the user know there 
+              was a problem
+        """
+        pass
         
+
     def lineReceived(self, line):
         """
         Handles incoming lines of text (correctly separated) these,
@@ -84,18 +123,23 @@ class DatastoreProtocol(basic.LineReceiver):
         if not self.have_read_header and line.strip() == '':
             self.have_read_header = True
             line = '{"status": "good"}'
+            log.msg( 'Finished reading headers', logLevel=logging.DEBUG)
                         
         if self.have_read_header:
             try:
+                log.msg( 'Starting process message', logLevel=logging.DEBUG)                                                
                 obj = json.loads(line)
-                self.process( obj )                
+                self.process( obj )       
             except Exception, e:
-                print e
+                log.err(e)
                 
         else:
-            print '- Parsing headers'            
+            log.msg( 'Parsing headers', logLevel=logging.DEBUG)
             if self.params is None:
-                self.parse_params(line)
+                if not self.parse_params(line):
+                    self.sendLine('500 Failed')
+                    self.transport.loseConnection()
+                    return
             else:
                 k,v = line.split(':')
                 self.headers[k.strip()] = v.strip()
@@ -112,6 +156,7 @@ class DatastoreProtocol(basic.LineReceiver):
                     self.dataauth = "draft"
                 else:
                     self.dataauth = "writable"
+                    
             if 'attachables' in self.params:
                 self.attachables = self.params['attachables']
             
@@ -121,7 +166,7 @@ class DatastoreProtocol(basic.LineReceiver):
         Called when the connection was lost, we should clean up the DB here
         by closing the connection we have to it.
         """
-        print '- Connection lost'
+        print 'Connection lost'
         if self.db:
             self.db.close()
             self.db = None
@@ -131,7 +176,7 @@ class DatastoreProtocol(basic.LineReceiver):
         """
         Parse the GET request and store the parameters we received.
         """
-        print '- Parsing parameters'        
+        log.msg( 'Parsing parameters',logLevel=logging.DEBUG)
         self.params = {}        
         m = re.match('GET /(.*) HTTP/(\d+).(\d+)', line)
         if not m:
@@ -147,16 +192,29 @@ class DatastoreProtocol(basic.LineReceiver):
     
         if qs:
             self.params.update( dict( [ p.split('=') for p in qs.split('&') ] ) )
+            return True
+        return False
 
-            
+    
 class DatastoreFactory( protocol.ServerFactory ):
     protocol = DatastoreProtocol
-    
     connection_count = 0
     
+###############################################################################
+# Init and run (locally)
+###############################################################################
     
+# Set the maximum line length and the line delimiter
+DatastoreProtocol.delimiter = '\n'
+DatastoreProtocol.MAX_LENGTH = 65536
+
+# Load the config file from the usual place.
+configfile = '/var/www/scraperwiki/uml/uml.cfg'
+config = ConfigParser.ConfigParser()
+config.readfp(open(configfile))
+
+
 if __name__ == '__main__':
-    DatastoreProtocol.delimiter = '\n'
-    print '- Listening'    
+    log.startLogging(sys.stdout)    
     reactor.listenTCP( 9003, DatastoreFactory())
     reactor.run()
