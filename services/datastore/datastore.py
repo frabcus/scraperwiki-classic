@@ -207,7 +207,7 @@ class DatastoreFactory( protocol.ServerFactory ):
     
 # Set the maximum line length and the line delimiter
 DatastoreProtocol.delimiter = '\n'
-DatastoreProtocol.MAX_LENGTH = 65536
+DatastoreProtocol.MAX_LENGTH = 262144 # HUGE buffer
 
 # Load the config file from the usual place.
 configfile = '/var/www/scraperwiki/uml/uml.cfg'
