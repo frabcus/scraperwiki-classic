@@ -131,7 +131,7 @@ class DatastoreProtocol(basic.LineReceiver):
                 obj = json.loads(line)
                 self.process( obj )       
             except Exception, e:
-                print line
+                print len(line)
                 log.err(e)
                 
         else:
