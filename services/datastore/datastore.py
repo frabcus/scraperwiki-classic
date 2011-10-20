@@ -108,6 +108,7 @@ class DatastoreProtocol(basic.LineReceiver):
         TODO: When more than 64k is sent, we should let the user know there 
               was a problem
         """
+        print 'LINE EXCEEDED 64k'
         pass
         
 
