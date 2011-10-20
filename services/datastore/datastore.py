@@ -51,7 +51,7 @@ class DatastoreProtocol(basic.LineReceiver):
         self.params = None
         self.action = None
         self.db     = None
-        self.short_name,self.dataauth, self.runID, self.attachables = None, None, None, []
+        self.short_name, self.dataauth, self.runID, self.attachables = None, None, None, []
         
         
     def db_process_success(self, res):
@@ -62,10 +62,11 @@ class DatastoreProtocol(basic.LineReceiver):
         TODO: A more optimal solution might be to find out if json.dumps can write the
               output straight to the stream?
         """
-        result = json.dumps( res )            
-        if result:
-            log.msg( result[:200], logLevel=logging.DEBUG )
-        self.sendLine( result + "\n" )
+        json.dump( res, self.transport )
+        #result = json.dumps( res )            
+#        if result:
+#            log.msg( result[:200], logLevel=logging.DEBUG )
+#        self.sendLine( result + "\n" )
 
 
     def db_process_error(self, failure):
