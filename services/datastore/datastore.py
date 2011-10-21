@@ -148,7 +148,7 @@ class DatastoreProtocol(basic.LineReceiver):
                 self.headers[k.strip()] = v.strip()
 
             if 'short_name' in self.params:
-                self.attachauthurl = config.get("dataproxy", 'attachauthurl')                
+                self.attachauthurl = config.get("datarouter", 'attachauthurl')                
                 self.short_name = self.params['short_name']
                 self.runID = 'fromfrontend.%s.%s' % (self.short_name, time.time()) 
                 self.dataauth = "fromfrontend"

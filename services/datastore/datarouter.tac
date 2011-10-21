@@ -2,7 +2,7 @@
 #    twistd -ny datastore.tac
 
 """
-This is the tac file for the datastore
+This is the tac file for the datarouter
 """
 
 import os, sys
@@ -23,10 +23,9 @@ application = service.Application("datarouter")
 # attach the service to its parent application
 service = service.MultiService()
 
-port = 10000
-ds_factory = DatastoreFactory()
-ds_service = internet.TCPServer(port, ds_factory)
-ds_service.setServiceParent( service )
+dr_factory = DatarouterFactory()
+dr_service = internet.TCPServer(9003, dr_factory)
+dr_service.setServiceParent( service )
 
 
 service.setServiceParent(application)

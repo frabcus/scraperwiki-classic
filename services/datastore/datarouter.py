@@ -76,6 +76,7 @@ class DatarouterProtocol(basic.LineReceiver):
         after the http headers will be JSON which expect a JSON response
         """
         log.msg('Received: ' + line)
+        # TODO: If self.connection is None then we are not connection to a datastore
         self.connection.sendMessage(line + "\n")
         log.msg('Sent: ' + line)        
             
@@ -97,9 +98,17 @@ class DatarouterFactory( protocol.ServerFactory ):
     
     instances = []
     last_used = 0
+
+    def __init__(self):
+        self.instances = None
     
-    def set_instances(self, instances):
-        self.instances = instances[:]
+    def set_instances(self):
+        self.instances = []
+        for l in [x.strip() for x in config.get( 'datarouter', 'stores' ).split(',')]:
+            h,p = l.split(':')
+            self.instances.append( (h,int(p),) )
+        print self.instances
+        
 
     def choose_instance( self ):
         """
@@ -108,6 +117,9 @@ class DatarouterFactory( protocol.ServerFactory ):
         to make sure certain short_names are routed to certain routers. Suggest
         memcached style arrangement (not the crc32(name) modulo solution)
         """
+        if not self.instances:
+            self.set_instances()
+            
         if self.last_used >= len(self.instances):
             self.last_used = 0
         i = self.instances[self.last_used]
@@ -131,6 +143,5 @@ config.readfp(open(configfile))
 if __name__ == '__main__':
     log.startLogging(sys.stdout)    
     df = DatarouterFactory()
-    df.set_instances( [ ('127.0.0.1',10000), ('127.0.0.1',10001) ] )
     reactor.listenTCP( 9003, df)
     reactor.run()
