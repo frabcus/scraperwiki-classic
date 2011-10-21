@@ -1,0 +1,222 @@
+/* @override http://localhost:8000/media/css/new_scraper_overview.css */
+
+#divContent {
+	padding: 0;
+	width: 788px;
+}
+
+ul, ul li, p, h1, h2, h3, h4, h5 {
+	padding: 0;
+	margin: 0;
+}
+
+#header_inner p span {
+	margin-right: 20px;
+}
+
+#header_inner p span:before {
+	content: ".";
+	display: inline-block;
+	background: #fff;
+	width: 16px;
+	height: 16px;
+	margin-right: 3px;
+	opacity: 0.7;
+}
+
+#header_inner p span a {
+	text-decoration: none;
+}
+
+
+
+/* TOOLBARS & TITLEBARS */
+
+ul.toolbar ul,
+ul.titlebar ul {
+	display: none;
+}
+
+ul.toolbar {
+	background: #ccc;
+	padding: 10px;
+}
+
+ul.titlebar {
+	margin-top: 20px;
+}
+
+ul.titlebar h3 {
+	margin-left: 10px;
+}
+
+ul.toolbar li {
+	float: left;
+	margin-right: 10px;
+	position: relative;
+}
+
+ul.titlebar li {
+	position: relative;
+	float: right;
+	margin-right: 10px;
+}
+
+ul.toolbar li a,
+ul.titlebar li a {
+	cursor: pointer;
+}
+
+ul.titlebar li.first {
+	float: left;
+}
+
+ul.toolbar li.share {
+	float: right;
+	margin-right: 0;
+}
+
+ul.toolbar li.clear,
+ul.titlebar li.clear {
+	clear: both;
+	float: none;
+}
+
+ul.toolbar li a,
+ul.titlebar li a {
+	border: 1px solid #999;
+	padding: 3px 5px 2px 5px;
+	color: #666;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+ul.toolbar li a:hover,
+ul.titlebar li a:hover {
+	text-decoration: none;
+}
+
+ul.toolbar li ul,
+ul.titlebar li ul {
+	position: absolute;
+	top: 18px;
+	background: #eee;
+	border: 1px solid #ccc;
+	font-size: 14px;
+}
+
+ul.toolbar li ul li,
+ul.titlebar li ul li {
+	width: 100%;
+	margin: 0;
+}
+
+ul.toolbar li ul li a,
+ul.titlebar li ul li a {
+	padding: 5px;
+	display: block;
+	border: none;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0;
+}
+
+ul.toolbar li ul li a:hover,
+ul.titlebar li ul li a:hover {
+	text-decoration: none;
+	background-color: #f9f9f9;
+}
+
+ul.toolbar li:hover ul,
+ul.titlebar li:hover ul {
+	display: block;
+}
+
+ul.titlebar .download ul {
+	width: 180px;
+}
+
+
+
+
+
+/* ABOUT & SCHEDULE */
+
+div.schedule, div.description {
+	float: left;
+	width: 374px;
+	height: 100%;
+	padding: 10px;
+}
+
+div.schedule {
+	background-color: #eee;
+}
+
+div.description {
+	background-color: #ddd;
+}
+
+div.about h3,
+div.about h4 {
+	font-size: 16px;
+	font-weight: normal;
+}
+
+div.about h3 strong {
+	font-weight: normal;
+	text-transform: uppercase;
+}
+
+div.about h3 {
+	border-bottom: 1px solid #ccc;
+	padding-bottom: 2px;
+	margin-bottom: 3px;
+	margin-top: 20px;
+}
+
+div.about h3:first-child {
+	margin-top: 0;
+}
+
+div.description h3 {
+	border-bottom-color: #bbb;
+}
+
+#divContributors {
+	display: inline-block;
+	padding: 5px 7px;
+	background-color: #eee;
+	margin-top: 20px;
+}
+
+
+
+
+
+/* DATA, HISTORY & CHAT */
+
+.data_content, ul.data_tabs, .data .content_footer {
+	margin: 0 10px;
+}
+
+div.data_content {
+	overflow: auto;
+	border: none;
+	max-height: 400px;
+}
+
+ul.data_tabs li {
+	font-size: 14px;
+	padding: 4px 8px 0 8px;
+}
+
+.data_content table {
+	border-collapse: collapse;
+	border: none;
+	margin-bottom: 0;
+}
+
+
+
