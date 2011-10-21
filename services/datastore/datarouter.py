@@ -2,12 +2,7 @@
 datarouter.py
 
 A server routes client connections to datastore instances on the same machine (for now)
-allowing us to have one per CPU
-
-Things to check/do:
- - We use deferToThread() for sqlite, can this be optimised with twisted dbapi?
- - Can we better handle huge lines of content?
- - Remove the partial HTTP, either go full HTTP or remove it.
+allowing us to have one per CPU.
  
 """
 from twisted.python import log
@@ -115,7 +110,8 @@ class DatarouterFactory( protocol.ServerFactory ):
         Does a round robin on all of the instances available and chooses which
         one to use.  We can replace this with something just as naive later on 
         to make sure certain short_names are routed to certain routers. Suggest
-        memcached style arrangement (not the crc32(name) modulo solution)
+        memcached style arrangement (not the crc32(name) modulo solution) - see
+        continuum style routing.
         """
         if not self.instances:
             self.set_instances()

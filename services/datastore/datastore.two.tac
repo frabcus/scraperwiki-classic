@@ -16,7 +16,7 @@ import twisted.manhole.telnet
 from datastore import DatastoreFactory
 from datarouter import DatarouterFactory
 
-application = service.Application("datarouter")
+application = service.Application("datastore_two")
 #logfile = DailyLogFile("datastore2.log", "/var/log/scraperwiki/")
 #application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
 
