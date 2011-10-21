@@ -4,10 +4,6 @@
 """
 This is the tac file for the datastore
 """
-
-import os, sys
-import multiprocessing    
-
 from twisted.application import service, internet
 from twisted.python.log import ILogObserver, FileLogObserver
 from twisted.python.logfile import DailyLogFile
@@ -17,8 +13,8 @@ from datastore import DatastoreFactory
 from datarouter import DatarouterFactory
 
 application = service.Application("datastore_one")
-#logfile = DailyLogFile("datastore1.log", "/var/log/scraperwiki/")
-#application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
+logfile = DailyLogFile("datastore1.log", "/var/log/scraperwiki/")
+application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
 
 # attach the service to its parent application
 service = service.MultiService()
