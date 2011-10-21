@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from twisted.python import log
 
 import ConfigParser
@@ -54,18 +55,18 @@ class Database(object):
 
 class SQLiteDatabase(Database):
 
-    def __init__(self, ldataproxy, resourcedir, short_name, dataauth, runID, attachables):
-        self.dataproxy = ldataproxy  # this is just to give access to self.dataproxy.connection.send()
+    def __init__(self, resourcedir, short_name, dataauth, runID, attachables, attachauthurl):
+        self.attachauthurl = attachauthurl
         self.m_resourcedir = resourcedir
-        self.short_name = short_name
-        self.dataauth = dataauth
-        self.runID = runID
-        self.attachables = attachables
+        self.short_name    = short_name
+        self.dataauth      = dataauth
+        self.runID         = runID
+        self.attachables   = attachables
         
-        self.m_sqlitedbconn = None
+        self.m_sqlitedbconn   = None
         self.m_sqlitedbcursor = None
-        self.authorizer_func = None  
-        self.sqlitesaveinfo = { }  # tablename -> info
+        self.authorizer_func  = None  
+        self.sqlitesaveinfo   = { }  # tablename -> info
 
         if self.short_name:
             self.scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
@@ -176,7 +177,6 @@ class SQLiteDatabase(Database):
                         return False
                     os.mkdir(self.scraperresourcedir)
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
-                print 'Connecting to %s' % scrapersqlitefile 
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
                 log.msg('Connected to %s' % scrapersqlitefile, logLevel=logging.DEBUG )                
             else:
@@ -233,7 +233,6 @@ class SQLiteDatabase(Database):
     
     
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
-        print "XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50])
 
         def timeout_handler(signum, frame):
             raise TimeoutException()
@@ -292,16 +291,16 @@ class SQLiteDatabase(Database):
                     break
                 arg["moredata"] = True
                 log.msg("midchunk %s %d" % (self.short_name, len(odata),), logLevel=logging.DEBUG)
-                self.dataproxy.connection.sendall(json.dumps(arg)+'\n')
+                #self.dataproxy.connection.sendall(json.dumps(arg)+'\n')
             return arg
         except sqlite3.Error, e:
-            print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
+            #print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             return {"error":"sqlite3.Error: %s" % str(e)}
         except ValueError, e:
-            print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
+            #print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             return {"error":"sqlite3.Error: %s" % str(e)}
         except TimeoutException,tout:
-            print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
+            #print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
             return { "error" : "Query timeout: %s" % str(tout) }
 
 
@@ -315,7 +314,7 @@ class SQLiteDatabase(Database):
         if name not in self.attachables:
             log.msg("requesting permission to attach %s to %s" % (self.short_name, name), logLevel=logging.INFO)
             aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
-            ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
+            ares = urllib.urlopen("%s?%s" % (self.attachauthurl, urllib.urlencode(aquery))).read()
             log.msg("permission to attach %s to %s response: %s" % (self.short_name, name, ares), logLevel=logging.INFO)
             if ares == "Yes":
                 self.attachables.append(name)
@@ -491,3 +490,57 @@ class SqliteSaveInfo:
         values = [ data.get(k)  for k in self.swdatakeys ]
         return self.sqliteexecute(self.sqdatatemplate, values)
 
+
+###############################################################################
+# Handling this being launched as a process so that we aren't constrained by 
+# being on a single CPU.
+###############################################################################
+database = None
+
+def initialise_standalone(settings):
+    """
+    {
+        "resourcedir":"/var/www/scraperwiki/resourcedir",
+        "short_name":"",
+        "dataauth": "",
+        "runID": "",
+        "attachables": "",
+        "attachauthurl": ""
+    }
+    """    
+    global database    
+    try:
+        d_settings = json.loads(settings)
+    except Exception, e:
+        return False, e.message
+            
+    try:
+        database = SQLiteDatabase(**d_settings)
+    except Exception, ce:
+        return False, ce.message            
+        
+    return True, None
+
+
+if __name__ == '__main__':
+    # We should read lines of text from stdin and process them, and then write 
+    # any output to stdout. The first message *should* be an initialisation 
+    # message and if so then we can configure the database to use. 
+    init_string = sys.stdin.readline()
+    status,err = initialise_standalone(init_string)
+    if not status:
+        sys.stdout.write('{"status":"fail", "error": "%s"}\n' % err)
+        sys.exit(1)
+    
+    sys.stdout.write('{"status":"success"}\n')    
+    for line in sys.stdin:
+        try:
+            request = json.loads(line)
+        except Exception, e:
+            sys.exit(2)
+            
+        result = database.process( request )
+        sys.stdout.write( json.dumps(result) )
+        sys.stdout.write( '\n' )
+        
+        

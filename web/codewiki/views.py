@@ -91,12 +91,7 @@ def comments(request, wiki_type, short_name):
     context = {'selected_tab':'comments', 'scraper':scraper }
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
-def scraper_history(request, wiki_type, short_name):
-    scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_history", "history")
-    if isinstance(scraper, HttpResponse):  return scraper
-    
-    context = { 'selected_tab': 'history', 'scraper': scraper, "user":request.user }
-    
+def populate_itemlog(scraper):
     itemlog = [ ]
     for commitentry in scraper.get_commit_log("code"):
         item = { "type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"] }
@@ -132,8 +127,15 @@ def scraper_history(request, wiki_type, short_name):
             itemlog.append(item)
         
         itemlog.sort(key=lambda x: x["datetime"], reverse=True)
+        return itemlog
+        
+def scraper_history(request, wiki_type, short_name):
+    scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_history", "history")
+    if isinstance(scraper, HttpResponse):  return scraper
     
-    context["itemlog"] = itemlog
+    context = { 'selected_tab': 'history', 'scraper': scraper, "user":request.user }
+
+    context["itemlog"] = populate_itemlog(scraper)
     context["filestatus"] = scraper.get_file_status()
     
     return render_to_response('codewiki/history.html', context, context_instance=RequestContext(request))
@@ -510,7 +512,8 @@ def new_code_overview(request, wiki_type, short_name):
     except:
         context['domain_scrapes'] = []
 
-        
+    context["itemlog"] = populate_itemlog(scraper)
+            
     return render_to_response('codewiki/new_scraper_overview.html', context, context_instance=RequestContext(request))
 
 
