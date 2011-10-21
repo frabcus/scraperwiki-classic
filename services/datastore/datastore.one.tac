@@ -1,8 +1,8 @@
 # You can run this .tac file directly with:
-#    twistd -ny datarouter.tac
+#    twistd -ny datastore.tac
 
 """
-This is the tac file for the datarouter
+This is the tac file for the datastore
 """
 
 import os, sys
@@ -17,15 +17,16 @@ from datastore import DatastoreFactory
 from datarouter import DatarouterFactory
 
 application = service.Application("datarouter")
-#logfile = DailyLogFile("datarouter.log", "/var/log/scraperwiki/")
+#logfile = DailyLogFile("datastore1.log", "/var/log/scraperwiki/")
 #application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
 
 # attach the service to its parent application
 service = service.MultiService()
 
-dr_factory = DatarouterFactory()
-dr_service = internet.TCPServer(9003, dr_factory)
-dr_service.setServiceParent( service )
+port = 10000
+ds_factory = DatastoreFactory()
+ds_service = internet.TCPServer(port, ds_factory)
+ds_service.setServiceParent( service )
 
 
 service.setServiceParent(application)
