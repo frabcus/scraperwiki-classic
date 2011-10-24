@@ -1048,10 +1048,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
         else:
             # Copy the list that is in the sqlite_data dict
             for row in sqlite_data['data']:
-                l = []
-                for i in row:
-                    l.append( escape( i ) )
-                data.append(l)
+                data.append( map(escape,row) )
     except Exception, e:
         print e
     finally:
