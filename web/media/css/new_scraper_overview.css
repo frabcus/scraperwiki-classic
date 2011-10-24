@@ -28,6 +28,10 @@ ul, ul li, p, h1, h2, h3, h4, h5 {
 	text-decoration: none;
 }
 
+span.privacystatus {
+	cursor: help;
+}
+
 
 
 /* TOOLBARS & TITLEBARS */
@@ -43,11 +47,7 @@ ul.toolbar {
 }
 
 ul.titlebar {
-	margin-top: 20px;
-}
-
-ul.titlebar h3 {
-	margin-left: 10px;
+	margin: 0 0 20px 0;
 }
 
 ul.toolbar li {
@@ -59,7 +59,8 @@ ul.toolbar li {
 ul.titlebar li {
 	position: relative;
 	float: right;
-	margin-right: 10px;
+	margin-left: 10px;
+	top: 2px;
 }
 
 ul.toolbar li a,
@@ -69,6 +70,8 @@ ul.titlebar li a {
 
 ul.titlebar li.first {
 	float: left;
+	margin-left: 0;
+	top: 0;
 }
 
 ul.toolbar li.share {
@@ -100,6 +103,7 @@ ul.titlebar li a:hover {
 ul.toolbar li ul,
 ul.titlebar li ul {
 	position: absolute;
+	z-index: 100;
 	top: 18px;
 	background: #eee;
 	border: 1px solid #ccc;
@@ -143,62 +147,100 @@ ul.titlebar .download ul {
 
 /* ABOUT & SCHEDULE */
 
-div.schedule, div.description {
-	float: left;
-	width: 374px;
+td.schedule, td.description {
+	width: 354px;
 	height: 100%;
-	padding: 10px;
+	padding: 20px;
+	vertical-align: top;
 }
 
-div.schedule {
+td.schedule {
 	background-color: #eee;
 }
 
-div.description {
+td.description {
 	background-color: #ddd;
 }
 
-div.about h3,
-div.about h4 {
+table.about h3,
+table.about h4 {
 	font-size: 16px;
 	font-weight: normal;
 }
 
-div.about h3 strong {
+table.about h3 strong {
 	font-weight: normal;
 	text-transform: uppercase;
 }
 
-div.about h3 {
+table.about h3 {
 	border-bottom: 1px solid #ccc;
 	padding-bottom: 2px;
 	margin-bottom: 3px;
 	margin-top: 20px;
 }
 
-div.about h3:first-child {
+table.about h3:first-child {
 	margin-top: 0;
 }
 
-div.description h3 {
+td.description h3 {
 	border-bottom-color: #bbb;
 }
 
-#divContributors {
-	display: inline-block;
-	padding: 5px 7px;
-	background-color: #eee;
+ul.buttons {
 	margin-top: 20px;
 }
 
+ul.buttons li {
+	float: left;
+}
+
+ul.buttons li.clear {
+	float: none;
+	clear: both;
+}
+
+ul.buttons li a {
+	display: block;
+	padding: 3px 8px 2px 8px;
+	background-color: #ccc;
+	line-height: 20px;
+}
+
+ul.buttons li a:hover {
+	text-decoration: none;
+	background-color: #c3c3c3;
+}
+
+ul.buttons a img {
+	vertical-align: -2px;
+	margin-right: 2px;
+}
+
+ul.buttons a.selected,
+ul.buttons li a.selected:hover {
+	background-color: #f9f9f9;
+}
+
+#privacy_status, #contributors {
+	background-color: #f9f9f9;
+	margin: 0;
+	padding: 10px;
+}
+
+#privacy_status p {
+	padding: 0;
+}
 
 
 
 
 /* DATA, HISTORY & CHAT */
 
-.data_content, ul.data_tabs, .data .content_footer {
-	margin: 0 10px;
+div.data, div.history, div.chat {
+	padding: 20px;
+	border-bottom: 1px solid #eee;
 }
 
 div.data_content {
@@ -210,12 +252,121 @@ div.data_content {
 ul.data_tabs li {
 	font-size: 14px;
 	padding: 4px 8px 0 8px;
+	background-color: #eee;
+}
+
+ul.data_tabs li.selected {
+	background-color: #ccc;
+	color: #333;
 }
 
 .data_content table {
 	border-collapse: collapse;
 	border: none;
 	margin-bottom: 0;
+}
+
+.dataTables_wrapper {
+	background: #bbb;
+}
+
+.datapreview  {
+	border: 1px solid #ccc;
+}
+
+.dataTables_length {
+	
+}
+
+.datapreview td {
+	padding: 3px 5px;
+}
+
+#datapreviews {
+	font-size: 14px;
+}
+
+#datapreviews .ui-buttonset .ui-button {
+	margin-right: -1px;
+	padding: 0 5px;
+	font-size: 12px;
+	line-height: 18px;
+	font-weight: normal;
+	color: #333;
+}
+
+#datapreviews .dataTables_info {
+	float: left;
+	width: auto;
+	display: inline;
+	line-height: 22px;
+}
+
+#datapreviews .dataTables_paginate {
+	margin-right: 0;
+}
+
+#datapreviews .ui-toolbar {
+	padding: 5px 8px;
+	font-weight: normal;
+	line-height: 22px;
+	-moz-border-radius: 0;
+	-webkit-border-radius: 0;
+	border-radius: 0;
+	border: 0;
+	background-color: #ccc;
+	color: #333;
+}
+
+.dataTables_length select {
+	vertical-align: 1px;
+}
+
+#datapreviews span.css_right {
+	position: absolute;
+	top: 50%;
+	right: 0;
+	margin-top: -8px;
+}
+
+#datapreviews .DataTables_sort_wrapper {
+	position: relative;
+	padding: 2px 5px;
+	cursor: pointer;
+}
+
+
+
+
+#datapreviews tr.odd {
+	background-color: #e4f2f8;
+}
+
+#datapreviews tr.even {
+	background-color: white;
+}
+#datapreviews tr.odd td.sorting_1 {
+	background-color: #d4e9f4;
+}
+
+#datapreviews tr.odd td.sorting_2 {
+	background-color: #deeff7;
+}
+
+#datapreviews tr.odd td.sorting_3 {
+	background-color: #e4f2f8;
+}
+
+#datapreviews tr.even td.sorting_1 {
+	background-color: #f3f9fc;
+}
+
+#datapreviews tr.even td.sorting_2 {
+	background-color: #f7fbfd;
+}
+
+#datapreviews tr.even td.sorting_3 {
+	background-color: #fbfdfe;
 }
 
 
