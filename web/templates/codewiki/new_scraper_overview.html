@@ -351,6 +351,7 @@
         $(document).ready(function() {
             $('#datapreview_{{forloop.counter}}').dataTable( {
                 "bProcessing": true,
+                "bServerSide": true,
 				"bJQueryUI": true,
 				"sPaginationType": "full_numbers",
                 "sAjaxSource": '{{MEDIA_URL}}jsondata.txt'
