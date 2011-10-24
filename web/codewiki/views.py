@@ -995,6 +995,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
     """
     DataTable ( http://www.datatables.net/usage/server-side ) implementation for the new scraper page
     """
+    from django.utils.html import escape
     mime = 'application/json'    
     
     if not wiki_type == 'scraper':
@@ -1045,8 +1046,8 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
             # Log the error
             data = [ ]
         else:
-            # Copy the list that is in the sqlite_data dict
-            data = sqlite_data['data'][:]
+            # For each row map each item against escape
+            data = map( lambda b: map(escape,b), sqlite_data['data'])
     except Exception, e:
         print e
     finally:
