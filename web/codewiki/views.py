@@ -1036,11 +1036,11 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
             raise Http404()
         
         columns = [ "`%s`" % c for c in columns]
+            
         # Build query and do the count for the same query
-        query = 'select %s from `%s` limit %d offset %d ' % (','.join(columns), table_name, limit, offset,)
-        print query
+        sorter = ''
+        query = 'select %s from `%s` limit %d offset %d' % (','.join(columns), table_name, limit, offset,)
         sqlite_data = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery": query, "attachlist":"", "streamchunking": False, "data": ""})        
-        print sqlite_data
         # We need to now convert this to the aaData list of lists
         if 'error' in sqlite_data:
             # Log the error
