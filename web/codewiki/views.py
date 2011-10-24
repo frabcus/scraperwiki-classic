@@ -1034,6 +1034,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
         else:
             raise Http404()
         
+        columns = [ "`%s`" % c for c in columns]
         # Build query and do the count for the same query
         query = 'select %s from `%s` limit %d offset %d ' % (','.join(columns), table_name, limit, offset,)
         print query
