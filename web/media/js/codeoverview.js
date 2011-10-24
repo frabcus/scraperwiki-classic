@@ -359,13 +359,13 @@ function setupChangeEditorStatus()
 
     $('#show_privacy_choices').live('click', function(){
         $('#privacy_status form').show();
-        $('#privacy_status>p').hide();
+        $('#privacy_status>p, #show_privacy_choices').hide();
     });
 
     $('#hide_privacy_choices').live('click', function() 
     {
         $('#privacy_status form').hide();
-        $('#privacy_status>p').show();
+        $('#privacy_status>p, #show_privacy_choices').show();
     }); 
 
     $('#saveprivacy').live('click', function() 

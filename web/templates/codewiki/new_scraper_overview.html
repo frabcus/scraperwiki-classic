@@ -66,16 +66,16 @@
         {% endif %}
         </span> 
         {% if scraper.privacy_status == 'public' %}
-    	    <span class="privacystatus" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
+    	    <span class="privacystatus public" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
         {% endif %}
     	{% if scraper.privacy_status == 'visible' %}
-    	    <span class="privacystatus" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected</span>
+    	    <span class="privacystatus visible" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected</span>
         {% endif %}
         {% if scraper.vault %}
-            <span class="privacystatus" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</span>
+            <span class="privacystatus private" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</span>
         {% endif %}
         {% if scraper.privacy_status == 'private' %}
-    	    <span class="privacystatus" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</span>
+    	    <span class="privacystatus private" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</span>
     	{% endif %} 
     </p>
 {% endblock %}
@@ -94,7 +94,7 @@
 </fieldset>
 
 <ul class="toolbar">
-    <li class="peek"><a href="#">Take a peek</a></li>
+    <li class="viewsource"><a href="#">View Source</a></li>
     <li class="edit"><a href="#">Edit</a></li>
     <li class="copy"><a href="#">Copy</a></li>
     <li class="share">
@@ -188,6 +188,9 @@
         	    <li class="clear"></li>
             </ul>
         	<div id="privacy_status">
+        	    {% if scraper.owner == request.user and request.user.vault_membership.count %}
+                    <a class="editlink" id="show_privacy_choices"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" /><span>Change</span></a>
+                {% endif %}
         	    {% if scraper.privacy_status == 'public' %}
                     <p>This {{scraper.wiki_type}} is public. Anyone can see this {{scraper.wiki_type}}, and any registered user can edit it.</p>
                 {% endif %}
@@ -203,9 +206,8 @@
                 {% endif %}
         	    
         	    {% if scraper.owner == request.user and request.user.vault_membership.count %}
-                    <a class="editlink" id="show_privacy_choices"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" /><span>Change</span></a>
-                    <a class="cancel" id="hide_privacy_choices"><img src="{{ MEDIA_URL }}images/icons/cancel.png" width="16" height="16" /><span>Cancel</span></a>
                     <form id="privacy_status_form">
+                        <!--<a class="cancel" id="hide_privacy_choices"><img src="{{ MEDIA_URL }}images/icons/cancel.png" width="16" height="16" /><span>Cancel</span></a>-->
                         <table cellspacing="0" cellpadding="0">
                             <tr class="first">
                                 <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" 
@@ -331,7 +333,7 @@
     <ul class="data_tabs">
         {% for sqltabledata in sqlitedata %}
           <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
-            <span class="tablename">{{sqltabledata.tablename}}</span> ({{sqltabledata.count}}  row{{sqltabledata.count|pluralize}})
+            <span class="tablename">{{sqltabledata.tablename}}</span> <i>{{sqltabledata.count}}  record{{sqltabledata.count|pluralize}}</i>
           </li>
         {% endfor %}
         <li class="clear"></li>
@@ -354,7 +356,12 @@
                 "bServerSide": true,
 				"bJQueryUI": true,
 				"sPaginationType": "full_numbers",
-                "sAjaxSource": '{% url scraper_data_view "scraper",scraper.short_name,"swdata" %}'
+                "sAjaxSource": '{% url scraper_data_view "scraper",scraper.short_name,sqltabledata.tablename %}',
+                "sScrollX": "100%",
+                "bScrollCollapse": true,
+                "aoColumnDefs": [
+                    { "sWidth": "10%", "aTargets": [ -1 ] }
+                    ]
             } );
         } );
         </script>

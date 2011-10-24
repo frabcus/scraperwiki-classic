@@ -520,9 +520,10 @@ a#alert_close:hover {
 #header_inner #aEditTitle {
 	display: inline-block;
 	width: 28px;
-	height: 32px;
+	height: 28px;
+	vertical-align: -4px;
 	text-indent: -9000px;
-	background: transparent url(../images/edit_title.png) -2px 2px no-repeat;
+	background: transparent url(../images/edit_title.gif) 4px 4px no-repeat;
 	opacity: 0.4;
 	cursor: pointer;
 }
@@ -2469,6 +2470,13 @@ div.tab_tools form {
 #scraper_contributors li {
 	padding: 10px;
 	line-height: 24px;
+	position: relative;
+}
+
+#scraper_contributors img.vault_owner_flash {
+	position: absolute;
+	top: -1px;
+	right: -1px;
 }
 
 #scraper_contributors li:nth-child(2n) {
