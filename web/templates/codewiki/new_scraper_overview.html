@@ -354,7 +354,7 @@
                 "bServerSide": true,
 				"bJQueryUI": true,
 				"sPaginationType": "full_numbers",
-                "sAjaxSource": '{{MEDIA_URL}}jsondata.txt'
+                "sAjaxSource": '{% url scraper_data_view "scraper",scraper.short_name,"swdata" %}'
             } );
         } );
         </script>

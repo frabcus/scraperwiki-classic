@@ -39,6 +39,7 @@ PRIVACY_STATUSES_UI = [ ('public', 'can be edited by anyone who is logged on'),
 
 
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
+    # Got fed up of this returning one thing and having to check the type. 
     if action in ["delete_scraper", "delete_data"]:
         if not (request.method == 'POST' and request.POST.get(action, None) == '1'):
             raise SuspiciousOperation # not the best description of error, but best available, see comment on getscraperor404 below
@@ -48,15 +49,15 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
     except models.Code.DoesNotExist:
         message =  "Sorry, that %s doesn't seem to exist" % wiki_type
         heading = "404: File not found"
-        return HttpResponseNotFound(render_to_string('404.html', {'heading':heading, 'body':message}, context_instance=RequestContext(request)))
+        return None, HttpResponseNotFound(render_to_string('404.html', {'heading':heading, 'body':message}, context_instance=RequestContext(request)))
             
     if rdirect and wiki_type != scraper.wiki_type:
-        return HttpResponseRedirect(reverse(rdirect, args=[scraper.wiki_type, short_name]))
+        return None,HttpResponseRedirect(reverse(rdirect, args=[scraper.wiki_type, short_name]))
 
     # Only a valid user can undo, and delete the scraper + data ...    
     if not scraper.actionauthorized(request.user, action):
-        return HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, action), context_instance=RequestContext(request)))
-    return scraper
+        return None,HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, action), context_instance=RequestContext(request)))
+    return scraper, None
 
 
 # XXX This should not throw 404s for malformed request or lack of permissions, but 
@@ -86,8 +87,8 @@ def getscraperor404(request, short_name, action):
 
 
 def comments(request, wiki_type, short_name):
-    scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
-    if isinstance(scraper, HttpResponse):  return scraper
+    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
+    if resp: return resp
     context = {'selected_tab':'comments', 'scraper':scraper }
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
@@ -130,8 +131,8 @@ def populate_itemlog(scraper):
         return itemlog
         
 def scraper_history(request, wiki_type, short_name):
-    scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_history", "history")
-    if isinstance(scraper, HttpResponse):  return scraper
+    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "scraper_history", "history")
+    if resp: return resp
     
     context = { 'selected_tab': 'history', 'scraper': scraper, "user":request.user }
 
@@ -169,8 +170,8 @@ def gitpush(request, wiki_type, short_name):
 
 
 def code_overview(request, wiki_type, short_name):
-    scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
-    if isinstance(scraper, HttpResponse):  return scraper
+    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
+    if resp: return resp
     
     alert_test = request.GET.get('alert', '')
     if alert_test:
@@ -340,8 +341,8 @@ def code_overview(request, wiki_type, short_name):
 def new_code_overview(request, wiki_type, short_name):
     from codewiki.models import ScraperRunEvent, DomainScrape
     
-    scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
-    if isinstance(scraper, HttpResponse):  return scraper
+    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
+    if resp: return resp
     
     alert_test = request.GET.get('alert', '')
     if alert_test:
@@ -674,8 +675,8 @@ def scraper_admin(request, short_name):
 def scraper_undo_delete_data(request, short_name):
     from frontend.utilities.messages import send_message
     
-    scraper = getscraperorresponse(request, "scraper", short_name, None, "undo_delete_data")
-    if isinstance(scraper, HttpResponse):  return scraper
+    scraper,resp = getscraperorresponse(request, "scraper", short_name, None, "undo_delete_data")
+    if resp: return resp
     
     try:
         dataproxy = DataStore(scraper.short_name)
@@ -698,8 +699,8 @@ def scraper_undo_delete_data(request, short_name):
 def scraper_delete_data(request, short_name):
     from frontend.utilities.messages import send_message
     
-    scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
-    if isinstance(scraper, HttpResponse):  return scraper
+    scraper,resp = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
+    if resp: return resp
     
     try:
         dataproxy = DataStore(scraper.short_name)
@@ -734,8 +735,9 @@ def scraper_schedule_scraper(request, short_name):
 def scraper_delete_scraper(request, wiki_type, short_name):
     from frontend.utilities.messages import send_message            
     
-    scraper = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")
-    if isinstance(scraper, HttpResponse):  return scraper
+    scraper,resp = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")
+    if resp: return resp
+    
     scraper.previous_privacy = scraper.privacy_status
     scraper.privacy_status = "deleted"
     scraper.save()
@@ -772,8 +774,8 @@ def scraper_undelete_scraper(request, wiki_type, short_name):
 
     # this is for the purpose of editing the description, so must be controlled as it has secret password environment settings
 def raw_about_markup(request, wiki_type, short_name):
-    scraper = getscraperorresponse(request, wiki_type, short_name, None, "getrawdescription")
-    if isinstance(scraper, HttpResponse):  
+    scraper,resp = getscraperorresponse(request, wiki_type, short_name, None, "getrawdescription")
+    if resp:
         return HttpResponse("sorry, you do not have permission to edit the description of this scraper", mimetype='text/plain')
     return HttpResponse(scraper.description, mimetype='text/x-web-textile')
 
@@ -972,4 +974,90 @@ def webstore_attach_auth(request):
         return HttpResponse("{'attach':'Fail', 'error': 'Target scraper is not in the same vault as the source'", mimetype=mime)        
         
     return HttpResponse("{'attach':'Ok'}", mimetype=mime)
+    
+
+def get_columns_from_sql(sql):
+    """
+    Pull the columns from the sql create statement, at least until we can get the datastore
+    to display useful metadata
+    # 'CREATE TABLE `swdata` (`id` integer)'}}
+    """    
+    import re
+    
+    m = re.match('.*\((.*)\).*', sql)
+    if not m:
+        return [ ]
+        
+    return [r.split('`')[1] for r in m.groups(0)[0].split(',')]
+
+
+def scraper_data_view(request, wiki_type, short_name, table_name):
+    """
+    DataTable ( http://www.datatables.net/usage/server-side ) implementation for the new scraper page
+    """
+    mime = 'application/json'    
+    
+    if not wiki_type == 'scraper':
+        # 415 - Unsupported Media Type
+        # The entity of the request is in a format not supported by the requested resource
+        return HttpResponse( status=415 )
+    
+    scraper,resp = getscraperorresponse( request, wiki_type, short_name, 
+                                    "code_overview", "overview")    
+    if resp: return resp
+    
+    # We have *mostly* validated the request now. So we need to load up the 
+    # parameters we have been sent and the table_name we have been given and 
+    # work out a query that satisfies it.  We also need to get the columns and 
+    # put them in a list so that we can use them to sort on.
+    offset      = int( request.REQUEST.get('iDisplayStart', '0')   )
+    limit       = int( request.REQUEST.get('iDisplayLength', '10') )
+    total_rows  = 0
+    total_after_filter = 0
+    
+    columns = []
+    data = []
+    
+    # Interact with the database
+    dataproxy = None
+    try:
+        dataproxy = DataStore(scraper.short_name)
+        
+        # We will ask for a datasummary (pending new metadata call) 
+        sqlite_data = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":1})
+        if 'tables' in sqlite_data and table_name in sqlite_data['tables']:
+            table = sqlite_data['tables'][table_name]
+            total_rows = table['count']
+            total_after_filter = total_rows
+            sql = table['sql']
+            columns = get_columns_from_sql( sql )
+        else:
+            raise Http404()
+        
+        # Build query and do the count for the same query
+        query = 'select %s from `%s` limit %d offset %d ' % (','.join(columns), table_name, limit, offset,)
+        print query
+        sqlite_data = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery": query, "attachlist":"", "streamchunking": False, "data": ""})        
+        print sqlite_data
+        # We need to now convert this to the aaData list of lists
+        if 'error' in sqlite_data:
+            # Log the error
+            data = [ ]
+        else:
+            # Copy the list that is in the sqlite_data dict
+            data = sqlite_data['data'][:]
+    except Exception, e:
+        print e
+    finally:
+        if dataproxy:
+            dataproxy.close()
+    
+
+    results = {
+        'iTotalRecords'        : total_rows,
+        'iTotalDisplayRecords' : total_after_filter,
+        'sEcho'  : int( request.REQUEST['sEcho'] ), # Cast at suggestion of docs
+        'aaData' : data
+    }
+    return HttpResponse( json.dumps(results) , mimetype=mime)
     
