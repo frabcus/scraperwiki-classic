@@ -7,6 +7,8 @@ page_titles = {
     "technical_overview" : ("Technical overview","All the component parts of ScraperWiki and how they work together"),    
     "faq" : ("Frequently Asked Questions",""),    
     
+    "javascript_intro_tutorial" :("First scraper tutorial", "How to use ScraperWiki for people who can already code Javascript"),
+    
     "ruby_intro_tutorial" : ("First scraper tutorial","How to use ScraperWiki for people who can already code Ruby"),
     "ruby_datastore_guide" : ("Datastore copy & paste guide","A guide to the ScraperWiki SQL datastore for Ruby programmers"),
     "ruby_help_documentation" : ("ScraperWiki library functions","All the functions in the Ruby ScraperWiki module"),

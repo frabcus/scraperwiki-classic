@@ -14,8 +14,6 @@ short_name = ""
 class CommentsForCode(Feed):
     
     def get_object(self, bits):
-        # In case of "/rss/beats/0613/foo/bar/baz/", or other such clutter,
-        # check that bits has only one member.
         if len(bits) != 1:
             raise ObjectDoesNotExist
         short_name = bits[0]
