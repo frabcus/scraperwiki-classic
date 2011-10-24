@@ -1046,9 +1046,8 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
             # Log the error
             data = [ ]
         else:
-            # Copy the list that is in the sqlite_data dict
-            for row in sqlite_data['data']:
-                data.append( map(escape,row) )
+            # For each row map each item against escape
+            data = map( lambda b: map(escape,b), sqlite_data['data'])
     except Exception, e:
         print e
     finally:
