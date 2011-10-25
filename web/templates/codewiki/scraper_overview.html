@@ -18,7 +18,11 @@
 
 <div class="page_title">
     <ul class="title_links">
-        <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}#sqlite">Explore with ScraperWiki API</a></li>
+        {% if scraper.access_apikey %}
+            <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}&apikey_scraper={{scraper.access_apikey}}#sqlite">Explore with ScraperWiki API</a></li>
+        {% else %}
+            <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}#sqlite">Explore with ScraperWiki API</a></li>
+        {% endif %}
         <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
         <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
         {% for rssuserfeed in rssuserfeeds %}
