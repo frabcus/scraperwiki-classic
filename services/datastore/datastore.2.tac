@@ -8,7 +8,6 @@ This is the tac file for the datastore
 from twisted.application import service, internet
 from twisted.python.log import ILogObserver, FileLogObserver
 from twisted.python.logfile import DailyLogFile
-import twisted.manhole.telnet
 
 from datastore import DatastoreFactory
 from datarouter import DatarouterFactory
