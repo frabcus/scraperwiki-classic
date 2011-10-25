@@ -177,10 +177,10 @@ class SQLiteDatabase(Database):
                     os.mkdir(self.scraperresourcedir)
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
                 print 'Connecting to %s' % scrapersqlitefile 
-                self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
+                self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile, check_same_thread=False)
                 log.msg('Connected to %s' % scrapersqlitefile, logLevel=logging.DEBUG )                
             else:
-                self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
+                self.m_sqlitedbconn = sqlite3.connect(":memory:", check_same_thread=False)   # draft scrapers make a local version
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
 #            try:
 #                self.m_sqlitedbconn.set_progress_handler(progress_handler, 1000000)  # can be order of 0.4secs 
