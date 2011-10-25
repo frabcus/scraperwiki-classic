@@ -14,7 +14,7 @@ DESC="Datastore.3"
 NAME="datastore.3"
 VARDIR=/var
 PIDFILE=$VARDIR/run/$NAME.pid
-LOGFILE=$VARDIR/log/$NAME.log
+LOGFILE=$VARDIR/log/scraperwiki/$NAME.log
 DAEMON=/bin/sh
 CONFIG=/var/www/scraperwiki/uml/uml.cfg
 DAEMON_ARGS="/var/www/scraperwiki/services/datastore/datastore.3.tac"
@@ -25,8 +25,8 @@ export PYTHONPATH="/var/www/scraperwiki/services/datastore:$PYTHONPATH"
 case "$1" in
   start)
     logger "$DESC: Starting"
-    echo "Starting $DESC..."
-    twistd -y "$DAEMON_ARGS" --logfile "/var/log/scraperwiki/$NAME.log" --pidfile "$PIDFILE"
+    echo "Starting $DESC... $PIDFILE"
+    twistd -y "$DAEMON_ARGS" --logfile "$LOGFILE" --pidfile "$PIDFILE"
     ;;
   stop)
     logger "$DESC: Stopping"
