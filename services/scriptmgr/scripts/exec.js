@@ -11,7 +11,6 @@ var runid = launch['runid'];
 var scrapername = launch['scrapername'];
 var querystring = launch['querystring'];
 var attachables = launch['attachables'];
-var webstore_port = launch['webstore_port'];
 
 var sw = require('scraperwiki');
 var parts = datastore.split(':');

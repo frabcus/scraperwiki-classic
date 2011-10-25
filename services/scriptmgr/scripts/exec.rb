@@ -85,7 +85,6 @@ scrapername = nil
 querystring = nil
 runid = nil
 attachables = nil
-webstore_port = nil
 File.open( File.dirname(options[:script]) +  "/launch.json","r") do |f|
   results = JSON.parse( f.read )
   datastore = results['datastore']
@@ -93,7 +92,6 @@ File.open( File.dirname(options[:script]) +  "/launch.json","r") do |f|
   querystring = results['querystring']
   scrapername = results['scrapername']
   attachables = results['attachables']
-  webstore_port = results['webstore_port']
 end
 
 
@@ -103,7 +101,7 @@ unless querystring.nil? || querystring == ''
 end
 
 host, port = datastore.split(':')
-SW_DataStore.create(host, port, scrapername, runid, attachables, webstore_port)
+SW_DataStore.create(host, port, scrapername, runid, attachables)
 
 code = File.new(options[:script], 'r').read()
 begin

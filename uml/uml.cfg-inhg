@@ -1,3 +1,9 @@
+[datarouter]
+dbtype	= sqlite3
+resourcedir = /var/www/scraperwiki/resourcedir
+attachauthurl = http://localhost:8000/attachauth
+stores = 127.0.0.1:10000
+
 [dispatcher]
 host	= 127.0.0.1
 port	= 9000

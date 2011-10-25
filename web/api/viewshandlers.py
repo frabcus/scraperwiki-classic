@@ -37,10 +37,10 @@ def getscraperorresponse(short_name):
     try:
         scraper = Code.objects.get(short_name=short_name)
     except Code.DoesNotExist:
-        return "Sorry, this scraper does not exist"
+        return None, "Sorry, this scraper does not exist"
 #    if not scraper.actionauthorized(user, "apidataread"):
 #        return scraper.authorizationfailedmessage(user, "apidataread").get("body")
-    return scraper
+    return scraper, None
     
 
 # see http://stackoverflow.com/questions/1189111/unicode-to-utf8-for-csv-files-python-via-xlrd
@@ -214,9 +214,9 @@ def sqlite_handler(request):
     short_name = request.GET.get('name')
     apikey = request.GET.get('apikey', None)
     
-    scraper = getscraperorresponse(short_name)
-    if type(scraper) in [str, unicode]:
-        result = json.dumps({'error':scraper, "short_name":short_name})
+    scraper,err = getscraperorresponse(short_name)
+    if err:
+        result = json.dumps({'error':err, "short_name":short_name})
         if request.GET.get("callback"):
             result = "%s(%s)" % (request.GET.get("callback"), result)
         return HttpResponse(result)
@@ -516,9 +516,9 @@ def runevent_handler(request):
     apikey = request.GET.get('apikey', None)
     
     short_name = request.GET.get('name')
-    scraper = getscraperorresponse(short_name)
-    if type(scraper) in [str, unicode]:
-        result = json.dumps({'error':scraper, "short_name":short_name})
+    scraper,err = getscraperorresponse(short_name)
+    if err:
+        result = json.dumps({'error':err, "short_name":short_name})
         if request.GET.get("callback"):
             result = "%s(%s)" % (request.GET.get("callback"), result)
         return HttpResponse(result)
@@ -639,8 +639,15 @@ def scraperinfo_handler(request):
         rev = None
 
     for short_name in request.GET.get('name', "").split():
-        scraper = getscraperorresponse(short_name)
+        scraper,err = getscraperorresponse(short_name)
 
+        if err:
+            result = json.dumps({'error':err, "short_name":short_name})
+            if request.GET.get("callback"):
+                result = "%s(%s)" % (request.GET.get("callback"), result)
+            return HttpResponse(result)
+
+        
         # Check accessibility if this scraper is private using 
         # apikey
         if hasattr(scraper, "privacy_status") and scraper.privacy_status == 'private':            

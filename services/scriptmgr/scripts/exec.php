@@ -32,7 +32,6 @@ $scrapername = $launch['scrapername'];
 $runid 	     = $launch['runid'];
 $querystring = $launch['querystring'];
 $attachables = $launch['attachables'];
-$webstore_port = $launch["webstore_port"]; 
 
 if ( strlen($querystring) > 0 ) {
 	putenv("QUERY_STRING=" . $querystring);
@@ -78,7 +77,7 @@ for ($i = 0; $i < count($QUERY_STRING_a); $i++)
 
 
 $dsinfo = split (':', $datastore) ;
-SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid, $attachables, $webstore_port);
+SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid, $attachables);
 
 // the following might be the only way to intercept syntax errors
 //$errors = array(); 

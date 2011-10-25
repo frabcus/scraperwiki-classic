@@ -221,12 +221,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             if key == 'scraperid' :
                 scraperID = value
                 continue
-            if key == 'allow'  :
-                self.m_allowed.append (value)
-                continue
-            if key == 'block'  :
-                self.m_blocked.append (value)
-                continue
             if key == 'option' :
                 name, opt = string.split (value, ':')
                 if name == 'webcache' : cache = int(opt)
@@ -269,7 +263,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         except : pass
 
     def bodyOffset (self, page) :
-
         try    : offset1 = string.index (page, '\r\n\r\n')
         except : offset1 = 0x3fffffff
         try    : offset2 = string.index (page, '\n\n'    )
@@ -282,6 +275,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if cached is None:
             return True
         else:
+            # Looks like this will fail even if there is just an updated date field in the content
             fbo = self.bodyOffset(fetched)
             cbo = self.bodyOffset(cached)
             return fetched[fbo:] != cached[cbo:]
@@ -417,7 +411,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #   * Page was not in the cache anyway
         #
         starttime = time.time()
-        if isSW or cacheFor <= 0 or cached is None:
+        if isSW or cacheFor <= 0 or cached is None: # 
 
             startat = time.strftime ('%Y-%m-%d %H:%M:%S')
             soc = None
@@ -462,8 +456,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
                     if ctag and cache_client:
                         if self.fetchedDiffers(fetched, cached):
-                            cache_client.set(ctag, fetched)
-
+                            cache_client.set(ctag, fetched, time=3600) # expire in an hour
+                        else:
+                            print '%s has changed between fetches' % (self.path,)
+                            
             finally :
                 if soc is not None :
                     soc.close()

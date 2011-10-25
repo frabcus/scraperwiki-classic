@@ -74,7 +74,6 @@ with open(pathname) as f:
     scrapername = d['scrapername']
     querystring = d['querystring']
     attachables = d.get('attachables', '')
-    webstore_port = d.get('webstore_port', 0)
     
 if querystring:
     os.environ['QUERY_STRING'] = querystring
@@ -84,7 +83,7 @@ if querystring:
 host, port = string.split(datastore, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
-scraperwiki.datastore.create(host, port, scrapername, runid, attachables, webstore_port)
+scraperwiki.datastore.create(host, port, scrapername, runid, attachables)
 
 resource.setrlimit(resource.RLIMIT_CPU, (80, 82,))
 

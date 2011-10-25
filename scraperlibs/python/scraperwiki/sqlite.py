@@ -212,7 +212,11 @@ def get_var(name, default=None, verbose=2):
         result = execute("select value_blob, type from swvariables where name=?", (name,), verbose)
     except NoSuchTableSqliteError, e:
         return default
-    data = result.get("data")
+    except:
+        # Doesn't seem to be catching the no such table.
+        return default        
+        
+    data = result.get("data", None)
     if not data:
         return default
     val, vtype = data[0]

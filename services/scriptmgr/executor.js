@@ -33,7 +33,6 @@ var scripts_ip = [ ];
 var max_runs = 100;
 var dataproxy = '';
 var httpproxy;
-var webstore_port = 0; 
 
 /******************************************************************************
 * Called to configure the executor, allowing it to determine whether we are
@@ -54,8 +53,6 @@ exports.init = function( settings ) {
 	dataproxy = settings.dataproxy;
 	extra_path = settings.extra_path;
 	max_runs = settings.vm_count;
-    webstore_port = settings.webstore_port; 
-	console.log( 'Webstore port is ' + webstore_port );
 }
 
 
@@ -174,14 +171,13 @@ exports.run_script = function( http_request, http_response ) {
 		
 };
 
-function writeLaunchFile( f, ds, runid, scrapername, querystring, attachables, webstore_port ) {
+function writeLaunchFile( f, ds, runid, scrapername, querystring, attachables ) {
 	var launch = {
 		'datastore': ds,
 		'runid': runid,
 		'scrapername': scrapername || '',
 		'querystring': querystring || '',
-		'attachables': attachables || [],
-		'webstore_port': webstore_port || 0
+		'attachables': attachables || []
 	}
 	var data = JSON.stringify( launch );
 	fs.writeFileSync(f, data, encoding='utf8');
@@ -206,6 +202,7 @@ function execute(http_req, http_res, raw_request_data) {
 	var script = { run_id : request_data.runid, 
 			 	scraper_name : request_data.scrapername || "",
 			    scraper_guid : request_data.scraperid,
+				username: request_data.username || "",
 			 	query : request_data.urlquery, 
 			 	pid: -1, 
 				vm: '', 
@@ -216,10 +213,8 @@ function execute(http_req, http_res, raw_request_data) {
 				white: request_data.white || '',   // not used
                 beta_user: request_data.beta_user || false,
                 attachables: request_data.attachables || [],
-                webstore_port: (request_data.beta_user ? webstore_port : 0), 
                 scheduled_run: request_data.scheduled_run || false,
 				permissions: request_data.permissions || [] };
-	
 	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
@@ -231,8 +226,7 @@ function execute(http_req, http_res, raw_request_data) {
 							 script.run_id, 
 							 script.scraper_name, 
 							 script.query, 
-                             script.attachables,
-                             script.webstore_port);
+                             script.attachables);
 			
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
@@ -362,8 +356,7 @@ function execute(http_req, http_res, raw_request_data) {
 							 script.run_id, 
 							 script.scraper_name, 
 							 script.query,
-							 script.attachables,
-                             script.webstore_port);
+							 script.attachables);
 			
 			util.log.debug('File written to ' + tmpfile );
 			

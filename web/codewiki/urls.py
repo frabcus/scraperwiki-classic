@@ -44,6 +44,7 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/undelete-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_undelete_scraper, name='scraper_undelete_scraper'),
 
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/data/(?P<table_name>[\w_\-\.]+)/$', views.scraper_data_view,    name='scraper_data_view'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/new/$',          views.new_code_overview,    name='new_code_overview'),
                                                                       
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),

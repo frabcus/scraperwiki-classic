@@ -163,7 +163,15 @@ function handleIdent(req,res) {
 		
 		res.write( 'scraperid=' + script.scraper_guid + "\n");
 		res.write( 'runid=' + script.run_id  + "\n");		
-		res.write( 'scrapername=' + script.scraper_name + "\n");	
+		res.write( 'scrapername=' + script.scraper_name + "\n");
+		
+		// If we have a username, we know that a user is running it in 
+		// the editor, so when it isn't *SCHEDULED* (nice magic string)	
+		// we should force it to cache
+		if ( script.username != '*SCHEDULED*' ) {
+			res.write( 'option=webcache:10\n');				
+		}
+		
 		res.end('\n')
 	}
 	else {

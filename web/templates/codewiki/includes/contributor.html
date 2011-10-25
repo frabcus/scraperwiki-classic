@@ -15,7 +15,9 @@
 		  {% ifequal role 'email' %}
               (is emailed output)
       	  {% else %}
-              ({{role}})
+      	      {% if role != 'owner' %}
+                  ({{role}})
+              {% endif %}
           {% endifequal %}
 	  {% endifequal %}
     {% endspaceless %}
@@ -42,5 +44,9 @@
     {% endif %}
     
     {% endif %}
+    
+    
+    {% if role == 'owner' %}<img class="vault_owner_flash" src="{{ MEDIA_URL }}/images/vault_owner_flash.png" width="39" height="39" />{% endif %}
+    
 </li>
 
