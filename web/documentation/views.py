@@ -107,6 +107,8 @@ def docsexternal(request):
     if type(request.user) != AnonymousUser:
         context['requestinguser'] = request.user.username
     context["scrapername"] = request.GET.get("name", "")
+    context["apikey_scraper"] = request.GET.get("apikey_scraper", "")
+    context["apikey_user"] = request.GET.get("apikey_user", "")
         
     return render_to_response('documentation/apibase.html', context, context_instance=RequestContext(request))
 
