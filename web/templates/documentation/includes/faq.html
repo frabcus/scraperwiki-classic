@@ -26,6 +26,7 @@
            <li><a href="#rollback">How do I revert to an earlier version of my code?</a></li>
            <li><a href="#viewsbanner">When do views show a "powered by ScraperWiki" banner?</a></li>
            <li><a href="#files">Can I save files, and if so where?</a></li>
+           <li><a href="#commands">Wow, I can run arbitary commands!</a></li>
      </ul>
      <h2>Licensing questions</h2>
      <ul>
@@ -256,9 +257,17 @@ print urllib.urlopen(url).read()
                in a clean environment each time so data can't leak between
                scripts. You must save any permanent data in the datastore, or
                elsewhere on the web.</p>
+           </dd>
+
+           <dt id="commands">Wow, I can run arbitary commands!</dt>
+           <dd>
                <p>Feel free to spawn external commands and download arbitary extra
                binaries or code applications. It'll be slow, so if there is
                something you use a lot ask us to install it permanently.</p>
+               <p>See <a href="https://scraperwiki.com/scrapers/bash_demo/edit/">this example</a>
+               which spawns a bash shell script and sed.</p>
+               <p>There are some <a href="/docs/shared/shared_libraries/">shared binaries</a>
+               which you can use from any language in that way.</p> 
            </dd>
 
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
