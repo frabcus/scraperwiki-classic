@@ -87,6 +87,7 @@ class FrontEndViewsDocumentationTests(TestCase):
         self.assertEquals(len(mail.outbox), 1)
         self.assertEquals(mail.outbox[0].subject, '[ScraperWiki Feedback] [help] Just checking your form works')
         self.assertEquals(mail.outbox[0].from_email, '"Mr. X Feedbacker" <test_contact@django.scraperwiki.com>')
+        self.assertEquals(mail.outbox[0].body, 'Thanks for your help & all :)\n')
 
     def test_live_tutorials(self):    
         # make some dummy tutorials
