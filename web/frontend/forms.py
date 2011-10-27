@@ -72,9 +72,9 @@ class UserProfileForm(forms.ModelForm):
 
         return super(UserProfileForm, self).save(*args,**kwargs)
 
-class scraperContactForm(ContactForm):
+class ScraperWikiContactForm(ContactForm):
     def __init__(self, data=None, files=None, request=None, *args, **kwargs):
-        super(scraperContactForm, self).__init__(data=data, files=files, request=request, *args, **kwargs)
+        super(ScraperWikiContactForm, self).__init__(data=data, files=files, request=request, *args, **kwargs)
         if not request.user.is_authenticated():
             self.fields['captcha'] = CaptchaField()
         
