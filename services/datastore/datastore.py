@@ -155,7 +155,7 @@ class DatastoreProtocol(basic.LineReceiver):
         self.factory.connection_count += 1
         if not self.have_read_header and line.strip() == '':
             self.have_read_header = True
-            if 'X-Scraper-Verified' in self.headers:
+            if not 'X-Scraper-Verified' in self.headers:
                 line = '{"status": "good"}'
             log.msg( 'Finished reading headers', logLevel=logging.DEBUG)
                         
