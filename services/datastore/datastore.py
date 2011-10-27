@@ -155,7 +155,6 @@ class DatastoreProtocol(basic.LineReceiver):
         self.factory.connection_count += 1
         if not self.have_read_header and line.strip() == '':
             self.have_read_header = True
-            line = '{"status": "good"}'
             log.msg( 'Finished reading headers', logLevel=logging.DEBUG)
                         
         if self.have_read_header:
