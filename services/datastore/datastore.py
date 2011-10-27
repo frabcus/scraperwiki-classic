@@ -177,6 +177,7 @@ class DatastoreProtocol(basic.LineReceiver):
             else:
                 k,v = line.split(':')
                 self.headers[k.strip()] = v.strip()
+                log.msg( '%s:%s' % (k,v,) )
 
             if 'short_name' in self.params:
                 self.attachauthurl = config.get("datarouter", 'attachauthurl')                
