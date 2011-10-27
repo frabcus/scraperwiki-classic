@@ -108,6 +108,7 @@ class DatastoreProtocol(basic.LineReceiver):
             if not 'X-Scraper-Verified' in self.headers:
                 # First pass through when we are not through HTTP,
                 # TODO: Remove this code path
+                log.msg( 'Traditional connection, first request', logLevel=logging.DEBUG )
                 firstmessage = obj
                 firstmessage["short_name"] = self.short_name
                 firstmessage["runID"]      = self.runID
@@ -165,6 +166,7 @@ class DatastoreProtocol(basic.LineReceiver):
                 obj = json.loads(line)
                 self.process( obj )       
             except Exception, e:
+                log.msg('Failed: %s' % (line,))
                 log.err(e)
                 
         else:
