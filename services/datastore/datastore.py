@@ -155,15 +155,16 @@ class DatastoreProtocol(basic.LineReceiver):
         self.factory.connection_count += 1
         if not self.have_read_header and line.strip() == '':
             self.have_read_header = True
+            if 'X-Scraper-Verified' in self.headers:
+                line = '{"status": "good"}'
             log.msg( 'Finished reading headers', logLevel=logging.DEBUG)
                         
         if self.have_read_header:
             try:
-                log.msg( 'Starting process message', logLevel=logging.DEBUG)                                                
+                log.msg( 'Starting process message %s' % (line,), logLevel=logging.DEBUG)                                                
                 obj = json.loads(line)
                 self.process( obj )       
             except Exception, e:
-                print len(line)
                 log.err(e)
                 
         else:
