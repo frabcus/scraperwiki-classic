@@ -174,7 +174,7 @@ class DatastoreProtocol(basic.LineReceiver):
                     self.transport.loseConnection()
                     return
             else:
-                log.msg( 'Parsing headers:' % (line,), logLevel=logging.DEBUG)                
+                log.msg( 'Parsing headers: %s' % (line,), logLevel=logging.DEBUG)                
                 k,v = line.split(':')
                 self.headers[k.strip()] = v.strip()
                 log.msg( '%s:%s' % (k,v,) )
