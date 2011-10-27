@@ -224,13 +224,15 @@ class DatastoreProtocol(basic.LineReceiver):
             return
             
         qs = m.groups(0)[0]
+        log.msg( qs )
         if '?' in qs:
             self.action = qs[ :qs.find('?') ]            
             qs = qs[ qs.find('?')+1: ]
         else:
             self.action = qs
             qs = None
-    
+        log.msg( qs )
+        
         if qs:
             self.params.update( dict( [ p.split('=') for p in qs.split('&') ] ) )
             return True
