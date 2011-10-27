@@ -120,17 +120,12 @@ class DatastoreProtocol(basic.LineReceiver):
                 # This will at some point be on the main code path
                 secret_key = '%s%s' % (self.short_name, self.factory.secret,)
                 possibly = hashlib.sha256(secret_key).hexdigest()  
-                log.msg( 'Comparing %s == %s' % (possibly,self.headers['X-Scraper-Verified'],) , 
+                log.msg( 'Comparing %s == %s' % (possibly, self.headers['X-Scraper-Verified'],) , 
                          logLevel=logging.DEBUG)                                                                                     
                 if not possibly == self.headers['X-Scraper-Verified']:
                     self.write_fail('Permission refused')
                     return
                     
-                # Looks like this is a verified scraper (based on the http ident)
-
-        if not line.strip():
-            return
-
         # We will either get here on the second request of a connected socket because the db
         # will be set, or because the firstmessage wasn't sent so we will process this as part 
         # of the first request
@@ -164,6 +159,9 @@ class DatastoreProtocol(basic.LineReceiver):
             log.msg( 'Finished reading headers', logLevel=logging.DEBUG)
                         
         if self.have_read_header:
+            if line.strip() == '':
+                return
+                
             try:
                 log.msg( 'Starting process message %s' % (line,), logLevel=logging.DEBUG)                                                
                 obj = json.loads(line)
