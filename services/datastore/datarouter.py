@@ -228,6 +228,6 @@ config.readfp(open(configfile))
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)    
-    df = DatarouterFactory()
-    reactor.listenTCP( 9003, df)
+    reactor.listenTCP( 9003, DatarouterFactory())
+    reactor.listenTCP( 80, DatarouterFactory())    
     reactor.run()

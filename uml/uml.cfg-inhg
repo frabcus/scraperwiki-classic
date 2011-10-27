@@ -3,6 +3,7 @@ dbtype	= sqlite3
 resourcedir = /var/www/scraperwiki/resourcedir
 attachauthurl = http://localhost:8000/attachauth
 stores = 127.0.0.1:10000
+proxy_secret = your_secret_here
 
 [dispatcher]
 host	= 127.0.0.1
@@ -25,6 +26,7 @@ dbhost  = localhost
 cache   = 127.0.0.1:11211
 lxc_server = 127.0.0.1
 twister_update_url = http://127.0.0.1:9090/update?
+proxy_secret = your_secret_here
 
 [httpsproxy]
 host	= 127.0.0.1

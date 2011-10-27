@@ -352,7 +352,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         if isLocal:
             if 'X-Scrapername' in self.headers:
-                secret = config.get(varName, 'webstore_secret')
+                secret = config.get(varName, 'proxy_secret')
                 secret_key = '%s%s' % (self.headers['X-Scrapername'], secret,)
                 self.headers['X-Scraper-Verified'] =  hashlib.sha256(secret_key).hexdigest()
                 print 'Incoming headers contain X-Scrapername'                
