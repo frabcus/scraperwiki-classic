@@ -168,13 +168,13 @@ class DatastoreProtocol(basic.LineReceiver):
                 log.err(e)
                 
         else:
-            log.msg( 'Parsing headers', logLevel=logging.DEBUG)
             if self.params is None:
                 if not self.parse_params(line):
                     self.sendLine('500 Failed')
                     self.transport.loseConnection()
                     return
             else:
+                log.msg( 'Parsing headers:' % (line,), logLevel=logging.DEBUG)                
                 k,v = line.split(':')
                 self.headers[k.strip()] = v.strip()
                 log.msg( '%s:%s' % (k,v,) )
@@ -205,6 +205,7 @@ class DatastoreProtocol(basic.LineReceiver):
         Called when the connection was lost, we should clean up the DB here
         by closing the connection we have to it.
         """
+        log.msg( reason )
         log.msg( 'Connection lost',logLevel=logging.DEBUG)
         if self.db:
             self.db.close()
@@ -215,7 +216,7 @@ class DatastoreProtocol(basic.LineReceiver):
         """
         Parse the GET request and store the parameters we received.
         """
-        log.msg( 'Parsing parameters',logLevel=logging.DEBUG)
+        log.msg( 'Parsing parameters:%s' % (line,),logLevel=logging.DEBUG)
         self.params = {}        
         m = re.match('(\w+) /(.*) HTTP/(\d+).(\d+)', line)
         if not m:
@@ -233,6 +234,8 @@ class DatastoreProtocol(basic.LineReceiver):
         if qs:
             self.params.update( dict( [ p.split('=') for p in qs.split('&') ] ) )
             return True
+            
+        log.msg( 'Failed to parse query string from %s' % (line,),logLevel=logging.DEBUG)            
         return False
 
     
