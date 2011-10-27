@@ -159,9 +159,6 @@ class DatastoreProtocol(basic.LineReceiver):
             log.msg( 'Finished reading headers', logLevel=logging.DEBUG)
                         
         if self.have_read_header:
-            if line.strip() == '':
-                return
-                
             try:
                 log.msg( 'Starting process message %s' % (line,), logLevel=logging.DEBUG)                                                
                 obj = json.loads(line)
