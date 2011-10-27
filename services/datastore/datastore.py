@@ -217,8 +217,9 @@ class DatastoreProtocol(basic.LineReceiver):
         """
         log.msg( 'Parsing parameters',logLevel=logging.DEBUG)
         self.params = {}        
-        m = re.match('GET /(.*) HTTP/(\d+).(\d+)', line)
+        m = re.match('(\w+) /(.*) HTTP/(\d+).(\d+)', line)
         if not m:
+            log.msg( 'Failed to match url for GET request',logLevel=logging.DEBUG)            
             return
             
         qs = m.groups(0)[0]
