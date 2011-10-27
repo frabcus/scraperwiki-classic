@@ -128,6 +128,9 @@ class DatastoreProtocol(basic.LineReceiver):
                     
                 # Looks like this is a verified scraper (based on the http ident)
 
+        if not line.strip():
+            return
+
         # We will either get here on the second request of a connected socket because the db
         # will be set, or because the firstmessage wasn't sent so we will process this as part 
         # of the first request
