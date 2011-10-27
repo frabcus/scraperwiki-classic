@@ -13,6 +13,7 @@ from django.db.models import Q
 from captcha.fields import CaptchaField
 from codewiki.models import SCHEDULE_OPTIONS, Scraper, Code
 
+from email.Utils import parseaddr, formataddr
 
 #from django.forms.extras.widgets import Textarea
 class SearchForm(forms.Form):
@@ -83,7 +84,7 @@ class ScraperWikiContactForm(ContactForm):
     recipient_list = [settings.FEEDBACK_EMAIL]
 
     def from_email(self):
-        return self.cleaned_data['email']
+        return formataddr((self.cleaned_data['name'], self.cleaned_data['email']))
 
 
 class SigninForm(forms.Form):

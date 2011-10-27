@@ -76,15 +76,17 @@ class FrontEndViewsDocumentationTests(TestCase):
 
         self.assertEquals(len(mail.outbox), 0)
         response = self.client.post(reverse('contact_form'), {
-            'name': 'Mr. X Feedbacker', 'email': 'test_views@djangounittest.scraperwiki.com',
+            'name': 'Mr. X Feedbacker', 'email': 'test_contact@django.scraperwiki.com',
             'title': 'Just checking your form works', 'subject_dropdown': 'help', 'body': 'Thanks for your help & all :)',
             'captcha_0': captcha.hashkey, 'captcha_1': captcha.response
         })
         print response.content
         self.assertRedirects(response, reverse('contact_form_sent'), status_code = 302, target_status_code = 200)
 
+        # https://docs.djangoproject.com/en/dev/topics/email/#emailmessage-objects
         self.assertEquals(len(mail.outbox), 1)
         self.assertEquals(mail.outbox[0].subject, '[ScraperWiki Feedback] [help] Just checking your form works')
+        self.assertEquals(mail.outbox[0].from_email, '"Mr. X Feedbacker" <test_contact@django.scraperwiki.com>')
 
     def test_live_tutorials(self):    
         # make some dummy tutorials
