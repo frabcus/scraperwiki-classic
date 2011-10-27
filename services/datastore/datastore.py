@@ -223,7 +223,7 @@ class DatastoreProtocol(basic.LineReceiver):
             log.msg( 'Failed to match url for GET request',logLevel=logging.DEBUG)            
             return
             
-        qs = m.groups(0)[0]
+        qs = m.groups(0)[1]
         log.msg( qs )
         if '?' in qs:
             self.action = qs[ :qs.find('?') ]            
