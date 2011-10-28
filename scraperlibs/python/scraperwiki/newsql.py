@@ -51,8 +51,10 @@ def execute(sqlquery, data=None, verbose=1):
         
     global attachlist
     
-    result = scraperwiki.datastore.make_request({"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist})
+    m = {"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist}
+    result = scraperwiki.datastore.make_request(m)
     if "Error" in result:
+        print 'Sent ', m
         raise databaseexception(result)
     if "status" not in result and "keys" not in result:
         raise Exception(str(result))
@@ -73,16 +75,30 @@ def execute(sqlquery, data=None, verbose=1):
     
 
 
-def databaseexception(errmap):
-    mess = errmap["error"]
+def databaseexception(arg):
+
+    if isinstance(arg, str) or isinstance(arg, unicode):
+        errmap = json.loads(arg)        
+        if isinstance(errmap, unicode):
+            errmap = json.loads(errmap)
+    else:
+        errmap = arg    
+    print errmap
+    
+    if 'Error' in errmap:
+        mess = errmap["Error"]
+    else:
+        mess = errmap["error"]        
     for k, v in errmap.items():
-        if k != "error":
+        if k.lower() != "Error":
             mess = "%s; %s:%s" % (mess, k, v)
     
     if re.match('sqlite3.Error: no such table:', mess):
         return NoSuchTableSqliteError(mess)
+        
     if re.match('DB Error: \(OperationalError\) no such table:', mess):
         return NoSuchTableSqliteError(mess)
+        
     return SqliteError(mess)
         
 
@@ -90,23 +106,23 @@ def databaseexception(errmap):
 
 def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
     if unique_keys != None and type(unique_keys) not in [ list, tuple ]:
-        raise databaseexception({ "error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) })
+        raise databaseexception({ "Error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) })
 
     def convdata(unique_keys, scraper_data):
         if unique_keys:
             for key in unique_keys:
                 if key not in scraper_data:
-                    return { "error":'unique_keys must be a subset of data', "bad_key":key }
+                    return { "Error":'unique_keys must be a subset of data', "bad_key":key }
                 if scraper_data[key] == None:
-                    return { "error":'unique_key value should not be None', "bad_key":key }
+                    return { "Error":'unique_key value should not be None', "bad_key":key }
         jdata = { }
         for key, value in scraper_data.items():
             if not key:
-                return { "error": 'key must not be blank', "bad_key":key }
+                return { "Error": 'key must not be blank', "bad_key":key }
             if type(key) not in [unicode, str]:
-                return { "error":'key must be string type', "bad_key":key }
+                return { "Error":'key must be string type', "bad_key":key }
             if not re.match("[a-zA-Z0-9_\- ]+$", key):
-                return { "error":'key must be simple text', "bad_key":key }
+                return { "Error":'key must be simple text', "bad_key":key }
             
             if type(value) == datetime.date:
                 value = value.isoformat()
@@ -120,12 +136,12 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
             elif value == None:
                 pass
             elif isinstance(value, SqliteError):
-                return {"error": str(value)}
+                return {"Error": str(value)}
             elif type(value) == str:
                 try:
                     value = value.decode("utf-8")
                 except:
-                    return {"error": "Binary strings must be utf-8 encoded"}
+                    return {"Error": "Binary strings must be utf-8 encoded"}
             elif type(value) not in [int, bool, float, unicode, str]:
                 value = unicode(value)
             jdata[key] = value
@@ -134,7 +150,7 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
 
     if type(data) == dict:
         rjdata = convdata(unique_keys, data)
-        if rjdata.get("error"):
+        if rjdata.get("Error"):
             raise databaseexception(rjdata)
         if date:
             rjdata["date"] = date
@@ -142,12 +158,12 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
         rjdata = [ ]
         for ldata in data:
             ljdata = convdata(unique_keys, ldata)
-            if ljdata.get("error"):
+            if ljdata.get("Error"):
                 raise databaseexception(ljdata)
             rjdata.append(ljdata)
     result = scraperwiki.datastore.make_request({"maincommand":'save_sqlite', "unique_keys":unique_keys, "data":rjdata, "swdatatblname":table_name})
 
-    if "error" in result:
+    if "Error" in result:
         raise databaseexception(result)
 
     if verbose >= 2:
@@ -167,7 +183,7 @@ def attach(name, asname=None, verbose=1):
     global attachlist
     attachlist.append({"name":name, "asname":asname})
     result = scraperwiki.datastore.make_request({"maincommand":'sqlitecommand', "command":"attach", "name":name, "asname":asname})
-    if "error" in result:
+    if "Error" in result:
         raise databaseexception(result)
     if "status" not in result:
         raise Exception("possible signal timeout: "+str(result))
@@ -177,7 +193,7 @@ def attach(name, asname=None, verbose=1):
 
 def commit(verbose=1):
     result = scraperwiki.datastore.make_request({"maincommand":'sqlitecommand', "command":"commit"})
-    if "error" in result:
+    if "Error" in result:
         raise databaseexception(result)
     if "status" not in result:
         raise Exception("possible signal timeout: "+str(result))

@@ -27,20 +27,18 @@ m_attachables = [ ]
 verify = ''
 def make_request(data):
     data = {
-        'command':json.dumps(data),
+        'command': json.dumps(data),
         'scrapername': m_scrapername,
         'runid': m_runid,
         'attachables': ','.join(m_attachables),
         'verify': verify
     }
-    
-    headers = { 'X-Scrapername' : m_scrapername or '',
-    'Content-Type': 'application/json' }
-    data = urllib.urlencode(data)
+
+    headers = { 'X-Scrapername' : m_scrapername }
     url = 'http://%s:%s/' % (m_host,m_port,)
-            
-    req = urllib2.Request(url, data, headers)
+    req = urllib2.Request(url, urllib.urlencode(data), headers)
     response = urllib2.urlopen(req)
+
     return response.read()    
     
 

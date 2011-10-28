@@ -64,6 +64,7 @@ options, args = parser.parse_args()
 # file and assign the variables appropriately
 ##############################################################
 datastore, runid, scrapername, querystring = None, None, None, None
+http_stores = []
 
 pathname, _ = os.path.split(options.script)
 pathname = os.path.join( os.path.abspath(pathname), 'launch.json')
@@ -74,13 +75,21 @@ with open(pathname) as f:
     scrapername = d['scrapername']
     querystring = d['querystring']
     attachables = d.get('attachables', '')
+    if 'http_stores' in d:
+        http_stores = [x.strip() for x in d['http_stores'].split(',')]
+        
+    
     
 if querystring:
     os.environ['QUERY_STRING'] = querystring
     os.environ['URLQUERY'] = querystring   
 
-
-host, port = string.split(datastore, ':')
+if http_stores:
+    import random
+    s = random.choice( http_stores )
+    host, port = string.split(s, ':')
+else:
+    host, port = string.split(datastore, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
 scraperwiki.datastore.create(host, port, scrapername, runid, attachables)

@@ -87,6 +87,7 @@ class WebDatastoreResource(resource.Resource):
             attachables = map( cgi.escape, request.args.get('attachables', []) )
         
             if command == "":
+                log.msg(  str(request.args) )
                 raise Exception("No command was supplied")
                 
             if not self.check_hash(request, scrapername):
@@ -123,7 +124,8 @@ class WebDatastoreResource(resource.Resource):
         return form
                 
     def render_POST(self, request):
-        log.msg( "Received POST request")
+        log.msg( "Received POST request: %s" % str(request.args))
+        
         d = deferToThread( self.process, request)
         d.addCallback(self._write, request)
         d.addErrback(self._error, request)
