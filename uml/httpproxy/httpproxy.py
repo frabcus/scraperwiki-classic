@@ -314,7 +314,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         isSW = netloc.startswith('127.0.0.1') or netloc.endswith('scraperwiki.com')
         
         remote = self.connection.getpeername()
-        isLocal = remote[0].startswith('10.0.1')
+        isLocal = remote[0].startswith('10.0.1') or remote[0] == '127.0.0.1'
+        print "Is Local? %s" % str(isLocal)
         
         #  Path /Status returns status information.
         #

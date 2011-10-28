@@ -296,12 +296,15 @@ class SQLiteDatabase(Database):
             return arg
         except sqlite3.Error, e:
             print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
+            log.err( e )
             return {"error":"sqlite3.Error: %s" % str(e)}
-        except ValueError, e:
+        except ValueError, ve:
             print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
-            return {"error":"sqlite3.Error: %s" % str(e)}
+            log.err( ve )            
+            return {"error":"sqlite3.Error: %s" % str(ve)}
         except TimeoutException,tout:
             print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
+            log.err( ve )
             return { "error" : "Query timeout: %s" % str(tout) }
 
 
