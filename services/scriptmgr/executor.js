@@ -33,7 +33,6 @@ var scripts_ip = [ ];
 var max_runs = 100;
 var dataproxy = '';
 var httpproxy;
-var http_stores = ''; 
 /******************************************************************************
 * Called to configure the executor, allowing it to determine whether we are
 * using LXC, or whether it is on a local dev machine.
@@ -49,9 +48,6 @@ exports.init = function( settings ) {
 		httpproxy = settings.httpproxy;
 	};
 
-	if ( settings.http_stores && settings.use_http )
-		http_stores = settings.http_stores;
-		
 	code_folder = settings.code_folder;
 	dataproxy = settings.dataproxy;
 	extra_path = settings.extra_path;
@@ -182,9 +178,6 @@ function writeLaunchFile( f, ds, runid, scrapername, querystring, attachables ) 
 		'querystring': querystring || '',
 		'attachables': attachables || []
 	}
-	if ( http_stores.length > 0 )
-		launch['http_stores'] = http_stores	
-		
 	var data = JSON.stringify( launch );
 	fs.writeFileSync(f, data, encoding='utf8');
 }

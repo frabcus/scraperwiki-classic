@@ -74,22 +74,13 @@ with open(pathname) as f:
     runid       = d['runid']
     scrapername = d['scrapername']
     querystring = d['querystring']
-    attachables = d.get('attachables', '')
-    if 'http_stores' in d:
-        http_stores = [x.strip() for x in d['http_stores'].split(',')]
+    attachables = d.get('attachables', '')        
         
-    
-    
 if querystring:
     os.environ['QUERY_STRING'] = querystring
     os.environ['URLQUERY'] = querystring   
 
-if http_stores:
-    import random
-    s = random.choice( http_stores )
-    host, port = string.split(s, ':')
-else:
-    host, port = string.split(datastore, ':')
+host, port = string.split(datastore, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
 scraperwiki.datastore.create(host, port, scrapername, runid, attachables)
