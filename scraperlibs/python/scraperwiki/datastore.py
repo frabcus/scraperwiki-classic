@@ -34,7 +34,8 @@ def make_request(data):
         'verify': verify
     }
     
-    headers = { 'X-Scrapername' : m_scrapername or '' }
+    headers = { 'X-Scrapername' : m_scrapername or '',
+    'Content-Type': 'application/json' }
     data = urllib.urlencode(data)
     url = 'http://%s:%s/' % (m_host,m_port,)
             
