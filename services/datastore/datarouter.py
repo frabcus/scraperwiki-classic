@@ -188,6 +188,8 @@ class DatarouterFactory( protocol.ServerFactory ):
     def __init__(self, is_http=False):
         self.instances = None
         self.is_http = is_http
+        if not is_http:
+            DatarouterProtocol.delimiter = '\n'
     
     
     def set_instances(self):
@@ -233,7 +235,6 @@ class DatarouterFactory( protocol.ServerFactory ):
 ###############################################################################
     
 # Set the maximum line length and the line delimiter
-DatarouterProtocol.delimiter = '\n'
 DatarouterProtocol.MAX_LENGTH = 262144 # HUGE buffer
 
 # Load the config file from the usual place.
