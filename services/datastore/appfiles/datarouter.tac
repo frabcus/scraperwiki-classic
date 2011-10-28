@@ -21,9 +21,9 @@ application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
 # attach the service to its parent application
 service = service.MultiService()
 
-dr_service1 = internet.TCPServer(9003, DatarouterFactory())
+dr_service1 = internet.TCPServer(9003, DatarouterFactory(is_http=False))
 dr_service1.setServiceParent( service )
-dr_service2 = internet.TCPServer(80, DatarouterFactory())
+dr_service2 = internet.TCPServer(80, DatarouterFactory(is_http=True))
 dr_service2.setServiceParent( service )
 
 
