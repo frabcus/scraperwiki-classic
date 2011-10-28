@@ -17,7 +17,7 @@ PIDFILE=$VARDIR/run/$NAME.pid
 LOGFILE=$VARDIR/log/scraperwiki/$NAME.log
 DAEMON=/bin/sh
 CONFIG=/var/www/scraperwiki/uml/uml.cfg
-DAEMON_ARGS="/var/www/scraperwiki/services/datastore/datarouter.tac"
+DAEMON_ARGS="/var/www/scraperwiki/services/datastore/appfiles/datarouter.tac"
 SCRIPTNAME=/etc/init.d/$NAME
 
 export PYTHONPATH="/var/www/scraperwiki/services/datastore:$PYTHONPATH"

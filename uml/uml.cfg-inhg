@@ -3,6 +3,7 @@ dbtype	= sqlite3
 resourcedir = /var/www/scraperwiki/resourcedir
 attachauthurl = http://localhost:8000/attachauth
 stores = 127.0.0.1:10000
+http_stores = 127.0.0.1:20000
 proxy_secret = your_secret_here
 
 [dispatcher]

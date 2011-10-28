@@ -121,7 +121,8 @@ class DatastoreProtocol(basic.LineReceiver):
                 secret_key = '%s%s' % (self.short_name, self.factory.secret,)
                 possibly = hashlib.sha256(secret_key).hexdigest()  
                 log.msg( 'Comparing %s == %s' % (possibly, self.headers['X-Scraper-Verified'],) , 
-                         logLevel=logging.DEBUG)                                                                                     
+                         logLevel=logging.DEBUG)      
+                                                                                                        
                 if not possibly == self.headers['X-Scraper-Verified']:
                     self.write_fail('Permission refused')
                     return
