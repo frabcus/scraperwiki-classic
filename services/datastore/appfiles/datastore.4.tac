@@ -19,11 +19,6 @@ application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
 # attach the service to its parent application
 service = service.MultiService()
 
-port = 10003
-ds_factory = DatastoreFactory()
-ds_service = internet.TCPServer(port, ds_factory)
-ds_service.setServiceParent( service )
-
 root = resource.Resource()
 root.putChild("", WebDatastoreResource())
 internet.TCPServer(20003, server.Site(root)).setServiceParent(application)
