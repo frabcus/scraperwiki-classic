@@ -40,6 +40,7 @@ class WebDatastoreResource(resource.Resource):
         Writes the response out to the client by streaming the output rather
         than building it in memory
         """
+        log.msg('Writing response')
         request.setResponseCode(http.OK)
         json.dump(data, request)
         request.finish()       
@@ -122,6 +123,7 @@ class WebDatastoreResource(resource.Resource):
         return form
                 
     def render_POST(self, request):
+        log.msg( "Received POST request")
         d = deferToThread( self.process, request)
         d.addCallback(self._write, request)
         d.addErrback(self._error, request)
