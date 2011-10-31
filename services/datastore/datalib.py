@@ -330,7 +330,7 @@ class SQLiteDatabase(Database):
         ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
         log.msg("permission to attach %s to %s response: %s" % (self.short_name, name, ares), logLevel=logging.INFO)
         if ares == "Yes":
-            return {"status":"attach succeeded"}
+            # pass
         elif ares == "DoesNotExist":
             return {"error":"Does Not Exist %s" % name}
         else:
