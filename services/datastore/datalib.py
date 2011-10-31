@@ -62,6 +62,9 @@ class SQLiteDatabase(Database):
         self.runID = runID
         self.attachables = attachables
         
+        print type(self.attachables)
+        print self.attachables
+        
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
@@ -84,8 +87,9 @@ class SQLiteDatabase(Database):
         
         # Before we do any of these we should check the attachables that we have by running 
         # self.sqliteattach(request.get("name"), request.get("asname"))
-        log.msg( self. attachables )
+        log.msg( self.attachables )
         for entry in self.attachables:
+            log.msg( entry )
             for k,v in entry:
                 self.sqliteattach(k, v)
         
