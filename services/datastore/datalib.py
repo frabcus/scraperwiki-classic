@@ -329,9 +329,7 @@ class SQLiteDatabase(Database):
         aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
         ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
         log.msg("permission to attach %s to %s response: %s" % (self.short_name, name, ares), logLevel=logging.INFO)
-        if ares == "Yes":
-            # pass
-        elif ares == "DoesNotExist":
+        if ares == "DoesNotExist":
             return {"error":"Does Not Exist %s" % name}
         else:
             return {"error":"no permission to attach to %s" % name}
