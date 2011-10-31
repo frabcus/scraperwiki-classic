@@ -286,11 +286,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Handle GET and POST requests.
         """
-        self.server.lock.acquire()
-        self.m_allowed = self.server.allowed[:]
-        self.m_blocked = self.server.blocked[:]
-        self.server.lock.release()
-
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
         #  protocol and the host.
         #
@@ -315,6 +310,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         remote = self.connection.getpeername()
         isLocal = remote[0].startswith('10.0.1') or remote[0] == '127.0.0.1'
+        ignore = remote[0] == config.get(varName, 'ignore_ip')
+        
         print "Is Local? %s" % str(isLocal)
         
         #  Path /Status returns status information.
@@ -400,7 +397,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 cbits[2] = self.headers['cookie']
             ctag = hashlib.sha1(string.join (cbits, '____')).hexdigest()
 
-        if ctag and cache_client and useCache:
+        
+        if ctag and cache_client and useCache and not ignore:
             cached = cache_client.get(ctag)
         else:
             cached = None
@@ -455,7 +453,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
                     fetched = self.getResponse(soc)
 
-                    if ctag and cache_client:
+                    if ctag and cache_client and not ignore:
                         if self.fetchedDiffers(fetched, cached):
                             cache_client.set(ctag, fetched, time=3600) # expire in an hour
                         else:
@@ -499,21 +497,22 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         else :
             failedmessage = 'Failed: (code missing)'
 
-        self.notify \
-            (   self.connection.getpeername()[0],
-                runid           = runID,
-                scraperid       = scraperID,
-                url             = self.path,
-                failedmessage   = failedmessage,
-                bytes           = bytes,
-                mimetype        = mimetype,
-                cacheid         = cacheid,
-                last_cacheid    = cached is not None or '',
-                cached          = cached is not None,
-                ddiffers        = ddiffers, 
-                fetchtime       = time.time() - starttime,
-                remote_ip       = remote[0]
-            )
+        if not ignore:
+            self.notify \
+                (   self.connection.getpeername()[0],
+                    runid           = runID,
+                    scraperid       = scraperID,
+                    url             = self.path,
+                    failedmessage   = failedmessage,
+                    bytes           = bytes,
+                    mimetype        = mimetype,
+                    cacheid         = cacheid,
+                    last_cacheid    = cached is not None or '',
+                    cached          = cached is not None,
+                    ddiffers        = ddiffers, 
+                    fetchtime       = time.time() - starttime,
+                    remote_ip       = remote[0]
+                )
 
         self.connection.sendall (page)
         self.connection.close()
@@ -594,10 +593,6 @@ class HTTPProxyServer \
     def __init__(self, server_address, HandlerClass):
         # Start a thread that will occassionally fetch the white/black list and make it available through
         # the properties here
-        self.allowed = []
-        self.blocked = []
-        self.lock = threading.Lock()
-                
         BaseHTTPServer.HTTPServer.__init__(self,server_address,HandlerClass)
 
    
