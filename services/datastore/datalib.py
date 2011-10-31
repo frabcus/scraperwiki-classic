@@ -87,11 +87,9 @@ class SQLiteDatabase(Database):
         
         # Before we do any of these we should check the attachables that we have by running 
         # self.sqliteattach(request.get("name"), request.get("asname"))
-        log.msg( self.attachables )
         if self.attachables:
             for entry in json.loads(self.attachables):
-                log.msg( entry )
-                for k,v in entry:
+                for k,v in entry.iteritems():
                     self.sqliteattach(k, v)
         
         if type(request) != dict:
