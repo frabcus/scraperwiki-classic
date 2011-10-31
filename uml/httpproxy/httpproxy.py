@@ -312,7 +312,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         remote = self.connection.getpeername()
         isLocal = remote[0].startswith('10.0.1') or remote[0] == '127.0.0.1'
-        ignore = ignored_ip in netloc # ignore if going to configed entry to ignore
+        ignore = ignored_ip in netloc # ignore if going to configured entry to ignore
         
         print "Is Local? %s" % str(isLocal)
         
