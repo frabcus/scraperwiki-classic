@@ -31,6 +31,7 @@ except : import simplejson as json
 
 global config
 global cache_client
+global ignored_ip
 
 USAGE       = " [--uid=#] [--gid=#] [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file] [--useCache] [--mode=H|S]"
 child       = None
@@ -45,6 +46,7 @@ mode        = None
 statusLock  = None
 statusInfo  = {}
 cache_client = None
+ignored_ip  = ''
 
 class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
@@ -310,7 +312,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         remote = self.connection.getpeername()
         isLocal = remote[0].startswith('10.0.1') or remote[0] == '127.0.0.1'
-        ignore = remote[0] == config.get(varName, 'ignore_ip')
+        ignore = ignored_ip in netloc # ignore if going to configed entry to ignore
         
         print "Is Local? %s" % str(isLocal)
         
@@ -759,5 +761,9 @@ if __name__ == '__main__' :
     cache_hosts = config.get(varName, 'cache')
     if cache_hosts:
         cache_client = memcache.Client( cache_hosts.split(',') )
+        
+    ignored_ip = config.get(varName, 'ignore_ip')
+    if not ignored_ip:
+        ignored_ip = '127.0.0.1'
 
     execute ()
