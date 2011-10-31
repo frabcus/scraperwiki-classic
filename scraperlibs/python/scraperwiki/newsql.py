@@ -183,7 +183,7 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
 
 def attach(name, asname=None, verbose=1):
     global attachlist
-    attachlist.append({"name":name, "asname":asname})
+    attachlist.append({"name":name, "asname":asname or name})
 #    result = scraperwiki.datastore.make_request({"maincommand":'sqlitecommand', "command":"attach", "name":name, "asname":asname})
 #    if "Error" in result:
 #        raise databaseexception(result)
