@@ -89,8 +89,7 @@ class SQLiteDatabase(Database):
         # self.sqliteattach(request.get("name"), request.get("asname"))
         if self.attachables:
             for entry in json.loads(self.attachables):
-                for k,v in entry.iteritems():
-                    self.sqliteattach(k, v)
+                self.sqliteattach( entry['name'], entry['asname'] )
         
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
