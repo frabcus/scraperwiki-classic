@@ -246,10 +246,11 @@ $(function()
                             $('#id_query').val("select * from `"+maxtablename+"` limit 10").keyup(); // same as change
                     }
                 }
-                else if (v && v.error)
+                else if (v && v.error) {
                     $('#listtables').html("<li>"+v.error+"</li>"); 
-                else
+                } else {
                     $('#listtables').html("<li>No tables</li>"); 
+                }
             }}); 
         }, 500); 
     }); 
