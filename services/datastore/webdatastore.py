@@ -84,7 +84,7 @@ class WebDatastoreResource(resource.Resource):
             scrapername = cgi.escape( request.args.get('scrapername', [''])[0] )
             runid = cgi.escape( request.args.get('runid', [''])[0] )            
             command = cgi.escape( request.args.get('command', [''])[0] )         
-            attachables = json.loads( cgi.escape(request.args.get('attachables', [])[0] ) )
+            attachables = cgi.escape(request.args.get('attachables', [])[0] )
             log.msg('Attachables are : %s' % attachables )
         
             if command == "":
