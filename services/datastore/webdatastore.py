@@ -124,6 +124,8 @@ class WebDatastoreResource(resource.Resource):
         return form
                 
     def render_POST(self, request):
+        self.attachauthurl = attach_auth_url
+
         log.msg( "Received POST request: %s" % str(request.args))
         
         d = deferToThread( self.process, request)
@@ -142,6 +144,7 @@ configfile = '/var/www/scraperwiki/uml/uml.cfg'
 config = ConfigParser.ConfigParser()
 config.readfp(open(configfile))
 g_secret = config.get("datarouter", 'proxy_secret')
+attach_auth_url = config.get("datarouter", 'attachauthurl')
 
 
 ###############################################################################
