@@ -295,9 +295,14 @@ class Code(models.Model):
         if settings.SPLITSCRAPERS_DIR:
             return os.path.join(settings.SPLITSCRAPERS_DIR, self.short_name)
 
-    @models.permalink
     def get_absolute_url(self):
-        return ('code_overview', [self.wiki_type, self.short_name])
+        from django.contrib.sites.models import Site
+        from django.core.urlresolvers import reverse        
+        
+        current_site = Site.objects.get_current()
+        r = reverse('code_overview', kwargs={'wiki_type':self.wiki_type, 'short_name':self.short_name})
+        url = 'https://%s%s' % (current_site.domain,r,)
+        return url
 
 
     # update scraper meta data (lines of code etc)    
