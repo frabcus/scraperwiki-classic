@@ -24,8 +24,8 @@ env.server_lookup = {
     ('webserver', 'dev'): ['yelland.scraperwiki.com'], 
     ('webserver', 'live'): ['rush.scraperwiki.com:7822'],
 
-    ('webstore', 'dev'): ['ewloe.scraperwiki.com'], 
-    ('webstore', 'live'): ['burbage.scraperwiki.com:7822'],
+    ('datastore', 'dev'): ['ewloe.scraperwiki.com'], 
+    ('datastore', 'live'): ['burbage.scraperwiki.com:7822'],
 
     ('firebox', 'dev'): ['kippax.scraperwiki.com'], 
     ('firebox', 'live'): ['horsell.scraperwiki.com:7822'],
@@ -38,7 +38,7 @@ env.server_lookup = {
 # do_server_lookup in turn uses the env.server_lookup dictionary above
 env.roledefs = {
     'webserver' : lambda: do_server_lookup('webserver'),
-    'webstore' : lambda: do_server_lookup('webstore'),
+    'datastore' : lambda: do_server_lookup('datastore'),
     'firebox' : lambda: do_server_lookup('firebox'),
     'screenshooter' : lambda: do_server_lookup('screenshooter')
 }
@@ -196,9 +196,9 @@ def screenshooter():
 
 
 @task
-@roles('webstore')
-def webstore(buildout='no', restart='no'): # default buildout to no until ready
-    '''Deploys webstore SQL database.
+@roles('datastore')
+def datastore(buildout='no', restart='no'): # default buildout to no until ready
+    '''Deploys datastore SQL database.
 
 restart=yes, restarts daemons
 buildout=no, stops it updating buildout which can be slow'''
@@ -211,7 +211,7 @@ buildout=no, stops it updating buildout which can be slow'''
         run_buildout()
     if restart:
         restart_daemon('dataproxy', 'dataproxy.py')
-        #restart_daemon('webstore', 'webstore/run_store.py') # XXX doesn't work yet
+        #restart_daemon('datastore', 'datastore') # XXX doesn't work yet, needs right hand part checking/changing
 
     update_crons()
     deploy_done()

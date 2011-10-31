@@ -33,7 +33,6 @@ var scripts_ip = [ ];
 var max_runs = 100;
 var dataproxy = '';
 var httpproxy;
-
 /******************************************************************************
 * Called to configure the executor, allowing it to determine whether we are
 * using LXC, or whether it is on a local dev machine.

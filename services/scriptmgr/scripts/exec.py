@@ -64,6 +64,7 @@ options, args = parser.parse_args()
 # file and assign the variables appropriately
 ##############################################################
 datastore, runid, scrapername, querystring = None, None, None, None
+http_stores = []
 
 pathname, _ = os.path.split(options.script)
 pathname = os.path.join( os.path.abspath(pathname), 'launch.json')
@@ -73,12 +74,11 @@ with open(pathname) as f:
     runid       = d['runid']
     scrapername = d['scrapername']
     querystring = d['querystring']
-    attachables = d.get('attachables', '')
-    
+    attachables = d.get('attachables', '')        
+        
 if querystring:
     os.environ['QUERY_STRING'] = querystring
     os.environ['URLQUERY'] = querystring   
-
 
 host, port = string.split(datastore, ':')
 

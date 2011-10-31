@@ -691,7 +691,7 @@
             "status": "ok", 
             "privacy_status": "public", 
             "description": "", 
-            "title": "Test Scraper", 
+            "title": "Test JSON Scraper", 
             "created_at": "2010-02-19 07:09:14", 
             "featured": 0, 
             "line_count": 0, 

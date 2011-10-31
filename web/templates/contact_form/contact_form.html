@@ -32,7 +32,7 @@
                 </p>
             </li>
             {% if request.user.is_authenticated %}
-                <input id="id_name" name="name" type="hidden" class="required" value="{{ request.user.username }}" />
+                <input id="id_name" name="name" type="hidden" class="required" value="{{ request.user.get_profile.name }}" />
                 <input id="id_email" name="email" type="hidden" value="{{ request.user.email }}" /> 
             {% else %}
                 <li>

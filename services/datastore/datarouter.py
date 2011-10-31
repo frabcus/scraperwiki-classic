@@ -181,18 +181,28 @@ class DatarouterFactory( protocol.ServerFactory ):
     protocol = DatarouterProtocol
     
     instances = []
-    last_used = 0
+    http_instances = []
+    last_used, last_used_http = 0, 0
+    
 
-    def __init__(self):
+    def __init__(self, is_http=False):
         self.instances = None
+        self.is_http = is_http
+        if not is_http:
+            DatarouterProtocol.delimiter = '\n'
     
     
     def set_instances(self):
         self.instances = []
+        self.http_instances = []
+        
         for l in [x.strip() for x in config.get( 'datarouter', 'stores' ).split(',')]:
             h,p = l.split(':')
             self.instances.append( (h,int(p),) )
-        print self.instances
+
+        for l in [x.strip() for x in config.get( 'datarouter', 'http_stores' ).split(',')]:
+            h,p = l.split(':')
+            self.http_instances.append( (h,int(p),) )
         
 
     def choose_instance( self ):
@@ -203,13 +213,20 @@ class DatarouterFactory( protocol.ServerFactory ):
         memcached style arrangement (not the crc32(name) modulo solution) - see
         continuum style routing.
         """
-        if not self.instances:
+        if not self.instances or not self.http_instances:
             self.set_instances()
             
-        if self.last_used >= len(self.instances):
-            self.last_used = 0
-        i = self.instances[self.last_used]
-        self.last_used += 1
+        if self.is_http:
+            if self.last_used_http >= len(self.http_instances):
+                self.last_used_http = 0
+            i = self.http_instances[self.last_used_http]
+            self.last_used_http += 1
+        else:
+            if self.last_used >= len(self.instances):
+                self.last_used = 0
+            i = self.instances[self.last_used]
+            self.last_used += 1
+            
         return i
     
     
@@ -218,7 +235,6 @@ class DatarouterFactory( protocol.ServerFactory ):
 ###############################################################################
     
 # Set the maximum line length and the line delimiter
-DatarouterProtocol.delimiter = '\n'
 DatarouterProtocol.MAX_LENGTH = 262144 # HUGE buffer
 
 # Load the config file from the usual place.
@@ -228,6 +244,6 @@ config.readfp(open(configfile))
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)    
-    df = DatarouterFactory()
-    reactor.listenTCP( 9003, df)
+    reactor.listenTCP( 9003, DatarouterFactory(is_http=False))
+    reactor.listenTCP( 80, DatarouterFactory(is_http=True))    
     reactor.run()

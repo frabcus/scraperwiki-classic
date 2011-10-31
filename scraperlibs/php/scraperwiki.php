@@ -183,7 +183,7 @@ class scraperwiki
          return floatval($svalue); 
       if ($vtype == "NULL")
          return null;
-      return $vtype; 
+      return $svalue; 
    }
 
 

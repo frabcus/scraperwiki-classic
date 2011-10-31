@@ -7,7 +7,6 @@ dataproxy still maintains a connection (per scraper run) and so forces commands
 in sequence.
 
 Things to check/do:
- - We use deferToThread() for sqlite, can this be optimised with twisted dbapi?
  - Can we better handle huge lines of content?
  - Remove the partial HTTP, either go full HTTP or remove it.
  
@@ -62,12 +61,19 @@ class DatastoreProtocol(basic.LineReceiver):
         TODO: A more optimal solution might be to find out if json.dumps can write the
               output straight to the stream?
         """
+        # TODO: Should write out HTTP response here, send the data and then close
+        # the connection. Can we do this based on source? The HTTP version should have 
+        # special headers we can use
+        if 'X-Scraper-Verified' in self.headers:
+            self.transport.write("HTTP/1.1 200 OK\r\n")
+            self.transport.write("Connection: close\r\n")
+            self.transport.write("\r\n\r\n")
+        
         json.dump( res, self.transport )
         self.transport.write('\n')
-        #result = json.dumps( res )            
-#        if result:
-#            log.msg( result[:200], logLevel=logging.DEBUG )
-#        self.sendLine( result + "\n" )
+        
+        if 'X-Scraper-Verified' in self.headers:
+            self.transport.loseConnection()
 
 
     def db_process_error(self, failure):
@@ -75,8 +81,18 @@ class DatastoreProtocol(basic.LineReceiver):
         A failed database action. This is likely to be an unhandled exception in
         the datalib so we really should return a valid response.
         """
+        if 'X-Scraper-Verified' in self.headers:
+            self.write_fail('Error')
         log.err( failure )
-        #self.sendLine( result + "\n" )
+        
+    
+    def write_fail(self, msg='Error'):
+        """
+        Writes a failure message
+        """
+        self.transport.write("HTTP/1.1 500 %s\r\n" % msg)
+        self.transport.write("Connection: close\r\n")
+        self.transport.loseConnection()
         
         
     def process(self, obj):
@@ -84,30 +100,45 @@ class DatastoreProtocol(basic.LineReceiver):
         Process the provided JSON obj (has already been converted to JSON)
         and make sure the response is sent with self.sendLine()
         """
+        import hashlib
+        
         if self.db is None:
-            # First pass through
-            firstmessage = obj
-            firstmessage["short_name"] = self.short_name
-            firstmessage["runID"]      = self.runID
-            firstmessage["dataauth"]   = self.dataauth
-            log.msg( 'Ready to send response of ' + str(firstmessage), logLevel=logging.DEBUG )
-            self.sendLine( json.dumps(firstmessage)  )
-            self.db = SQLiteDatabase(self, '/var/www/scraperwiki/resourcedir', self.short_name, self.dataauth, self.runID, self.attachables)            
-        else:
-            # Second and subsequent connections (when we have DB) we will
-            # defer to run in its own thread for a single activity on the db
-            # class.  The next request may well be on another thread, but 
-            # *currently* we force sequential access - this will need fixing 
-            # when we have zero shared state.
-            log.msg( 'Starting async call', logLevel=logging.DEBUG)                                                                     
-            d = deferToThread( self.db.process, obj )
-            d.addCallback( self.db_process_success )
-            d.addErrback( self.db_process_error )
+            self.db = SQLiteDatabase(self, '/var/www/scraperwiki/resourcedir', self.short_name, self.dataauth, self.runID, self.attachables)                        
+            
+            if not 'X-Scraper-Verified' in self.headers:
+                # First pass through when we are not through HTTP,
+                # TODO: Remove this code path
+                log.msg( 'Traditional connection, first request', logLevel=logging.DEBUG )
+                firstmessage = obj
+                firstmessage["short_name"] = self.short_name
+                firstmessage["runID"]      = self.runID
+                firstmessage["dataauth"]   = self.dataauth
+                log.msg( 'Ready to send response of ' + str(firstmessage), logLevel=logging.DEBUG )
+                self.sendLine( json.dumps(firstmessage) )
+                return
+            else:
+                # This will at some point be on the main code path
+                secret_key = '%s%s' % (self.short_name, self.factory.secret,)
+                possibly = hashlib.sha256(secret_key).hexdigest()  
+                log.msg( 'Comparing %s == %s' % (possibly, self.headers['X-Scraper-Verified'],) , 
+                         logLevel=logging.DEBUG)      
+                                                                                                        
+                if not possibly == self.headers['X-Scraper-Verified']:
+                    self.write_fail('Permission refused')
+                    return
+                    
+        # We will either get here on the second request of a connected socket because the db
+        # will be set, or because the firstmessage wasn't sent so we will process this as part 
+        # of the first request
+        log.msg( 'Starting async call', logLevel=logging.DEBUG)                                                                     
+        d = deferToThread( self.db.process, obj )
+        d.addCallback( self.db_process_success )
+        d.addErrback( self.db_process_error )
             
 
     def lineLengthExceeded(self, line):
         """
-        TODO: When more than 64k is sent, we should let the user know there 
+        TODO: When more than 256k is sent, we should let the user know there 
               was a problem
         """
         self.sendLine(  '{"error": "Buffer size exceeded, please send less data on each request"}'  )
@@ -124,28 +155,30 @@ class DatastoreProtocol(basic.LineReceiver):
         self.factory.connection_count += 1
         if not self.have_read_header and line.strip() == '':
             self.have_read_header = True
-            line = '{"status": "good"}'
+            if not 'X-Scraper-Verified' in self.headers:
+                line = '{"status": "good"}'
             log.msg( 'Finished reading headers', logLevel=logging.DEBUG)
                         
         if self.have_read_header:
             try:
-                log.msg( 'Starting process message', logLevel=logging.DEBUG)                                                
+                log.msg( 'Starting process message %s' % (line,), logLevel=logging.DEBUG)                                                
                 obj = json.loads(line)
                 self.process( obj )       
             except Exception, e:
-                print len(line)
+                log.msg('Failed: %s' % (line,))
                 log.err(e)
                 
         else:
-            log.msg( 'Parsing headers', logLevel=logging.DEBUG)
             if self.params is None:
                 if not self.parse_params(line):
                     self.sendLine('500 Failed')
                     self.transport.loseConnection()
                     return
             else:
+                log.msg( 'Parsing headers: %s' % (line,), logLevel=logging.DEBUG)                
                 k,v = line.split(':')
                 self.headers[k.strip()] = v.strip()
+                log.msg( '%s:%s' % (k,v,) )
 
             if 'short_name' in self.params:
                 self.attachauthurl = config.get("datarouter", 'attachauthurl')                
@@ -163,15 +196,18 @@ class DatastoreProtocol(basic.LineReceiver):
             if 'attachables' in self.params:
                 self.attachables = self.params['attachables']
             
+            
     def connectionMade(self):
         log.msg( 'Connection made',logLevel=logging.DEBUG)
+            
                             
     def connectionLost(self, reason):
         """
         Called when the connection was lost, we should clean up the DB here
         by closing the connection we have to it.
         """
-        print 'Connection lost'
+        log.msg( reason )
+        log.msg( 'Connection lost',logLevel=logging.DEBUG)
         if self.db:
             self.db.close()
             self.db = None
@@ -181,29 +217,41 @@ class DatastoreProtocol(basic.LineReceiver):
         """
         Parse the GET request and store the parameters we received.
         """
-        log.msg( 'Parsing parameters',logLevel=logging.DEBUG)
+        log.msg( 'Parsing parameters:%s' % (line,),logLevel=logging.DEBUG)
         self.params = {}        
-        m = re.match('GET /(.*) HTTP/(\d+).(\d+)', line)
+        m = re.match('(\w+) /(.*) HTTP/(\d+).(\d+)', line)
         if not m:
+            log.msg( 'Failed to match url for GET request',logLevel=logging.DEBUG)            
             return
             
-        qs = m.groups(0)[0]
+        qs = m.groups(0)[1]
+        log.msg( qs )
         if '?' in qs:
             self.action = qs[ :qs.find('?') ]            
             qs = qs[ qs.find('?')+1: ]
         else:
             self.action = qs
             qs = None
-    
+        log.msg( qs )
+        
         if qs:
             self.params.update( dict( [ p.split('=') for p in qs.split('&') ] ) )
             return True
+            
+        log.msg( 'Failed to parse query string from %s' % (line,),logLevel=logging.DEBUG)            
         return False
 
     
 class DatastoreFactory( protocol.ServerFactory ):
     protocol = DatastoreProtocol
     connection_count = 0
+    secret = None
+    
+    def __init__(self):
+        self.secret = config.get("datarouter", 'proxy_secret')
+        if not self.secret:
+            raise AssertionError('Configuration is incorrect, missing proxy_secret')
+    
     
 ###############################################################################
 # Init and run (locally)

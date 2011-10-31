@@ -94,6 +94,7 @@ File.open( File.dirname(options[:script]) +  "/launch.json","r") do |f|
   attachables = results['attachables']
 end
 
+ENV['REQUEST_METHOD'] = "GET"
 
 unless querystring.nil? || querystring == ''
      ENV['QUERY_STRING'] = querystring

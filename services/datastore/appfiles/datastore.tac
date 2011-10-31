@@ -4,26 +4,22 @@
 """
 This is the tac file for the datastore
 """
-
 from twisted.application import service, internet
 from twisted.python.log import ILogObserver, FileLogObserver
 from twisted.python.logfile import DailyLogFile
-import twisted.manhole.telnet
+from twisted.web import server, resource
 
 from datastore import DatastoreFactory
-from datarouter import DatarouterFactory
+from webdatastore import WebDatastoreResource
 
-application = service.Application("datastore_two")
-logfile = DailyLogFile("datastore2.log", "/var/log/scraperwiki/")
-application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
+application = service.Application("datastore")
 
 # attach the service to its parent application
 service = service.MultiService()
 
-port = 10001
-ds_factory = DatastoreFactory()
-ds_service = internet.TCPServer(port, ds_factory)
-ds_service.setServiceParent( service )
+root = resource.Resource()
+root.putChild("", WebDatastoreResource())
+internet.TCPServer(20000, server.Site(root)).setServiceParent(application)
 
 
 service.setServiceParent(application)

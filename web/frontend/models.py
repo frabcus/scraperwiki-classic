@@ -94,6 +94,7 @@ class MessageManager(models.Manager):
         messages = messages.filter(Q(finish__isnull=True) | Q(finish__gte=now))
         return messages.latest('id')
 
+
 class Message(models.Model):
     text = models.TextField()
     start = models.DateTimeField(blank=True, null=True)
@@ -108,6 +109,7 @@ class Message(models.Model):
             return "%s [Active]" % self.text
         else:
             return "%s [Inactive]" % self.text
+
 
 class DataEnquiry(models.Model):
     date_of_enquiry = models.DateTimeField(auto_now_add=True)

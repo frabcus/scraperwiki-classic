@@ -5,6 +5,9 @@ At the moment, this only tests some frontend.views
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.core import mail
+
+from captcha.models import CaptchaStore
 
 import frontend
 from codewiki.models import Scraper, Code
@@ -64,9 +67,27 @@ class FrontEndViewsDocumentationTests(TestCase):
         response = self.client.get('/help/', follow=True)
         self.assertEqual(response.redirect_chain, [('http://testserver/docs/', 301), ('http://testserver/docs/python/', 302)])
 
-    def test_contact_form(self):
+    def test_contact_form_with_captcha(self):
+        self.failUnlessEqual(CaptchaStore.objects.count(), 0)
         response = self.client.get(reverse('contact_form'))
         self.assertEqual(response.status_code, 200)
+        self.failUnlessEqual(CaptchaStore.objects.count(), 1)
+        captcha = CaptchaStore.objects.all()[0]
+
+        self.assertEquals(len(mail.outbox), 0)
+        response = self.client.post(reverse('contact_form'), {
+            'name': 'Mr. X Feedbacker', 'email': 'test_contact@django.scraperwiki.com',
+            'title': 'Just checking your form works', 'subject_dropdown': 'help', 'body': 'Thanks for your help & all :)',
+            'captcha_0': captcha.hashkey, 'captcha_1': captcha.response
+        })
+        print response.content
+        self.assertRedirects(response, reverse('contact_form_sent'), status_code = 302, target_status_code = 200)
+
+        # https://docs.djangoproject.com/en/dev/topics/email/#emailmessage-objects
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertEquals(mail.outbox[0].subject, '[ScraperWiki Feedback] [help] Just checking your form works')
+        self.assertEquals(mail.outbox[0].from_email, '"Mr. X Feedbacker" <test_contact@django.scraperwiki.com>')
+        self.assertEquals(mail.outbox[0].body, 'Thanks for your help & all :)\n')
 
     def test_live_tutorials(self):    
         # make some dummy tutorials

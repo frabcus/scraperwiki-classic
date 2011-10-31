@@ -35,7 +35,7 @@ urlpatterns = patterns('',
     url(r'^hello_world.html', direct_to_template, {'template': 'frontend/hello_world.html'}, name='help_hello_world'),
 
     # contact form
-    url(r'^contact/$', contact_form, {'form_class': frontend_forms.scraperContactForm}, name='contact_form'),
+    url(r'^contact/$', contact_form, {'form_class': frontend_forms.ScraperWikiContactForm}, name='contact_form'),
     url(r'^contact/sent/$', direct_to_template, {'template': 'contact_form/contact_form_sent.html'}, name='contact_form_sent'),
     
     # user's scrapers

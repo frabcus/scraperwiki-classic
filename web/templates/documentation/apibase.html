@@ -165,7 +165,7 @@ $(function()
                 data: { format:"jsondict", maxrows: 12, quietfields:"description", searchquery: request.term },
                 success: function(data) 
                 {
-                    response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
+                    response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name } })); 
                 }
             })
         }
@@ -225,8 +225,9 @@ $(function()
         {
             scraperlistcall = null; 
             var aName = $('#detail #id_name').val();
+            var apikey = $('.apikey_scraper #id_apikey').val();
             $('#listtables').html("<li>Loading...</li>"); 
-            $.ajax({url:$('#id_api_base').val()+"scraper/getinfo", dataType:"jsonp", data:{name:aName, quietfields:"code|runevents|userroles"}, error: function(jq, status) { alert(status); }, success:function(v) 
+            $.ajax({url:$('#id_api_base').val()+"scraper/getinfo", dataType:"jsonp", data:{name:aName, quietfields:"code|runevents|userroles", apikey:apikey}, error: function(jq, status) { alert(status); }, success:function(v) 
             { 
                 $('#listtables').empty(); 
                 if (v && v[0] && v[0].datasummary && v[0].datasummary.tables)
@@ -246,10 +247,11 @@ $(function()
                             $('#id_query').val("select * from `"+maxtablename+"` limit 10").keyup(); // same as change
                     }
                 }
-                else if (v && v.error)
+                else if (v && v.error) {
                     $('#listtables').html("<li>"+v.error+"</li>"); 
-                else
+                } else {
                     $('#listtables').html("<li>No tables</li>"); 
+                }
             }}); 
         }, 500); 
     }); 
