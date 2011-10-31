@@ -182,13 +182,13 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
 def attach(name, asname=None, verbose=1):
     global attachlist
     attachlist.append({"name":name, "asname":asname})
-    result = scraperwiki.datastore.make_request({"maincommand":'sqlitecommand', "command":"attach", "name":name, "asname":asname})
-    if "Error" in result:
-        raise databaseexception(result)
-    if "status" not in result:
-        raise Exception("possible signal timeout: "+str(result))
-        scraperwiki.dumpMessage({'message_type':'data', 'content': pdata})
-    return result
+#    result = scraperwiki.datastore.make_request({"maincommand":'sqlitecommand', "command":"attach", "name":name, "asname":asname})
+#    if "Error" in result:
+#        raise databaseexception(result)
+#    if "status" not in result:
+#        raise Exception("possible signal timeout: "+str(result))
+#        scraperwiki.dumpMessage({'message_type':'data', 'content': pdata})
+#    return result
 
 
 def commit(verbose=1):
