@@ -25,12 +25,12 @@ m_runid = None
 m_attachables = [ ]
 
 verify = ''
-def make_request(data):
+def make_request(data, attachlist):
     data = {
         'command': json.dumps(data),
         'scrapername': m_scrapername,
         'runid': m_runid,
-        'attachables': ','.join(m_attachables),
+        'attachables': json.dumps(attachlist),
         'verify': verify
     }
 
