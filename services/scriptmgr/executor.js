@@ -51,7 +51,7 @@ exports.init = function( settings ) {
 		httpproxy = settings.httpproxy;
 	};
 
-	secret = settings.secret or '';
+	secret = settings.secret || '';
 	
 	code_folder = settings.code_folder;
 	dataproxy = settings.dataproxy;
