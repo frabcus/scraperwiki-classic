@@ -16,6 +16,8 @@
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/code_object_comments/{{ scraper.short_name }}" />{% endblock %}
 
 {% block javascript %}
+    <script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.dataTables.min.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.snippet.min.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/codeoverview_new.js?{{settings.REVISION}}"></script>
@@ -77,6 +79,15 @@
 
 {% block content %}
 
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
     <input type="text" id="id_api_base" value="{{api_base}}" class="hide"/>
@@ -94,11 +105,18 @@
     <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
     <li class="share">
         <a><img src="{{ MEDIA_URL }}images/icons/share.png" width="16" height="16" alt="">Share</a>
-        <!-- <ul>
-                    <li class="facebook"><a href="http://www.facebook.com/sharer.php?u={{ scraper.get_absolute_url|urlencode }}&amp;t={{ scraper.title }}" target="blank">Facebook</a></li>
-                    <li class="twitter"><a href="https://twitter.com/share?url={{ scraper.get_absolute_url|urlencode }}&amp;via=scraperwiki&amp;text={{ scraper.title }}%3A">Twitter</a></li>
-                    <li class="google"><a href="https://m.google.com/app/plus/x/?v=compose&content={{ scraper.title }}%3A%20{{ scraper.get_absolute_url|urlencode }}&hideloc=1" onclick="window.open('https://m.google.com/app/plus/x/?v=compose&content={{ scraper.title }}%3A%20{{ scraper.get_absolute_url|urlencode }}&hideloc=1', 'gplusshare', 'width=450, height=300, left='+(screen.availWidth/2-225)+', top='+(screen.availHeight/2-150)+''); return false;">Google+</a></li>
-                </ul> -->
+        <div class="share_popover">
+            <div class="provider">
+                <div class="fb-like" data-send="false" data-layout="box_count" data-width="55" data-show-faces="true"></div>
+            </div>
+            <div class="provider">
+                <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" data-via="scraperwiki">Tweet</a>
+            </div>
+            <div class="provider">
+                <g:plusone size="tall"></g:plusone>
+            </div>
+            <span class="arrow"></span>
+        </div>
     </li>
     {% if user_owns_it or user.is_staff %}<li class="admin">
         <a>Admin</a>
@@ -171,7 +189,7 @@
             {% for schedule_option, schedule_text in schedule_options %}
                 <option value="{{schedule_option|safe}}" {% if scraper.scraper.run_interval == schedule_option %}selected="selected"{% endif %}>{{schedule_text|safe}}</option>
             {% endfor %}
-            </select> <input type="hidden" name="short_name" value="{{scraper.short_name}}" /><input type="submit" value="Save" /> <input type="button" value="Cancel" class="edit_schedule" />
+            </select> <input type="hidden" name="schedule_scraper" value="1" /> <input type="hidden" name="short_name" value="{{scraper.short_name}}" /><input type="submit" value="Save" /> <input type="button" value="Cancel" class="edit_schedule" />
         </form>
     </td>
     <td class="description">

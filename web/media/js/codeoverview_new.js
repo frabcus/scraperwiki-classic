@@ -686,6 +686,28 @@ $(function(){
 	
 	setup_collaboration_ui();
 	
+	$('li.share a').bind('click', function(){
+		var $a = $(this).addClass('hover');
+		var $p = $a.siblings('.share_popover');
+		if($p.is(':visible')){
+			$p.fadeOut(400);
+			$a.removeClass('hover');
+			$('html').unbind('click');
+		} else {
+			$p.fadeIn(150);
+			$('html').bind('click', function(e){
+				if( $(e.target).parents().index($a.parent()) == -1 ) {
+					if( $(e.target).parents().index($p) == -1 ) {
+						$p.filter(':visible').fadeOut(400);
+						$a.removeClass('hover');
+						$('html').unbind('click');
+					}
+				}
+			});
+		}
+		
+	});
+	
 });
 
 
