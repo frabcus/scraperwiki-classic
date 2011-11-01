@@ -13,7 +13,7 @@ class SW_DataStore
     
     include Singleton
 
-    attr_accessor :m_port, :m_host, :m_scrapername, :m_runid, :m_attachables
+    attr_accessor :m_port, :m_host, :m_scrapername, :m_runid, :m_attachables, :m_verification_key
 
     def initialize
       @m_socket = nil
@@ -22,6 +22,7 @@ class SW_DataStore
       @m_scrapername = ''
       @m_runid = ''
       @m_attachables = []
+      @verification_key = ''
     end
 
 
@@ -39,13 +40,20 @@ class SW_DataStore
             else
               sname = CGI::escape(@m_scrapername)
             end
+            
             if @m_runid == '' or @m_runid.nil?
               rid = ''
             else
               rid = CGI::escape(@m_runid)
             end
-            
-            getmsg = "GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n" % ['lxc', port, sname, rid]
+
+            if @m_verification_key == '' or @m_verification_key.nil?
+              verification_key = ''
+            else
+              verification_key = CGI::escape(@m_verification_key)
+            end
+
+            getmsg = "GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s&verify=%s HTTP/1.1\n\n" % ['lxc', port, sname, rid,verification_key]
             @m_socket.send(getmsg, 0)
             @m_socket.flush()
             
@@ -85,7 +93,7 @@ class SW_DataStore
 
     # function used to both initialize the settings and get an instance! 
     # we are creating object without the fields merely to access the static variables! 
-    def SW_DataStore.create(host=nil, port = nil, scrapername = '', runid = nil, attachables = nil, webstore_port = nil)
+    def SW_DataStore.create(host=nil, port = nil, scrapername = '', runid = nil, attachables = nil, verification_key = nil)
         instance = SW_DataStore.instance
         # so, it might be intended that the host and port are
         # set once, never to be changed, but this is ruby so
@@ -96,6 +104,7 @@ class SW_DataStore
           instance.m_scrapername = scrapername
           instance.m_runid = runid
           instance.m_attachables = attachables
+          instance.m_verification_key = verification_key
         elsif host && port
           raise "Can't change host and port once connection made"
         elsif !(instance.m_port) || !(instance.m_host)

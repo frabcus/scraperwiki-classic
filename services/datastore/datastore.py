@@ -57,33 +57,18 @@ class DatastoreProtocol(basic.LineReceiver):
         """
         Called on a successful database action, the data we are given is encoded and 
         then written as a line.  
-        
-        TODO: A more optimal solution might be to find out if json.dumps can write the
-              output straight to the stream?
         """
-        # TODO: Should write out HTTP response here, send the data and then close
-        # the connection. Can we do this based on source? The HTTP version should have 
-        # special headers we can use
-        if 'X-Scraper-Verified' in self.headers:
-            self.transport.write("HTTP/1.1 200 OK\r\n")
-            self.transport.write("Connection: close\r\n")
-            self.transport.write("\r\n\r\n")
-        
         json.dump( res, self.transport )
         self.transport.write('\n')
         
-        if 'X-Scraper-Verified' in self.headers:
-            self.transport.loseConnection()
-
 
     def db_process_error(self, failure):
         """
         A failed database action. This is likely to be an unhandled exception in
         the datalib so we really should return a valid response.
         """
-        if 'X-Scraper-Verified' in self.headers:
-            self.write_fail('Error')
         log.err( failure )
+        self.transport.write('{"error":"Internal Error"}\n')        
         
     
     def write_fail(self, msg='Error'):

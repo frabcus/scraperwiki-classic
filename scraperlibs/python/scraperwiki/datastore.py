@@ -57,7 +57,6 @@ def create(host, port, scrapername, runid, attachables, verification_key=None):
     m_runid = runid
     m_attachables = m_attachables
     m_verification_key = verification_key or ''
-    print 'x', m_verification_key
         
 
         # a \n delimits the end of the record.  you cannot read beyond it or it will hang

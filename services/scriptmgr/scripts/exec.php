@@ -81,7 +81,7 @@ for ($i = 0; $i < count($QUERY_STRING_a); $i++)
 
 
 $dsinfo = split (':', $datastore) ;
-SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid, $attachables);
+SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid, $attachables,$verification_key);
 
 // the following might be the only way to intercept syntax errors
 //$errors = array(); 

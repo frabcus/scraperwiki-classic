@@ -109,7 +109,7 @@ unless querystring.nil? || querystring == ''
 end
 
 host, port = datastore.split(':')
-SW_DataStore.create(host, port, scrapername, runid, attachables)
+SW_DataStore.create(host, port, scrapername, runid, attachables,verification_key)
 
 code = File.new(options[:script], 'r').read()
 begin
