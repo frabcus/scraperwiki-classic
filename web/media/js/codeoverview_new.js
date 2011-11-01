@@ -251,23 +251,22 @@ function htmlEscape(str) {
     return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function setupCodeOverview(short_name)
-{
+function setupCodeOverview(short_name){
     //about
-    $('#divAboutScraper').editable('admin/', {
+    $('#divAboutScraper').editable('../admin/', {
              indicator : 'Saving...',
              tooltip   : 'Click to edit...',
              cancel    : 'Cancel',
              submit    : 'Save',
              type      : 'textarea',
-             loadurl: 'raw_about_markup/',
+             loadurl: '../raw_about_markup/',
              onblur: 'ignore',
              event: 'dblclick',
              submitdata : {short_name: short_name},
              placeholder: ''
          });
 
-    $('#aEditAboutScraper,#aEditAboutScraperNew').click(
+    $('a.editdescription').click(
         function(){
              $('#divAboutScraper').dblclick();
              var oHint = $('<div id="divMarkupHint" class="content_footer"><p><strong>You can use Textile markup to style the description:</strong></p><ul><li>*bold* / _italic_ / @code@</li><li>* Bulleted list item / # Numbered list item</li><li>"A link":http://www.data.gov.uk</li><li>h1. Big header / h2. Normal header</li></ul></div>');
@@ -336,7 +335,7 @@ function setupCodeOverview(short_name)
 
 function setupScraperOverview(short_name)
 {
-    $('.data_tab').click(function(){
+/*    $('.data_tab').click(function(){
         // do nothing if already selected
         if ($(this).hasClass('selected')) 
             return;
@@ -355,7 +354,7 @@ function setupScraperOverview(short_name)
         $("#downloadcsvtable").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + short_name 
                                                 + "&query=select+*+from+`"+encodeURI(tablename)+"`"+"&apikey="+$('#id_apikey').val()); 
     }); 
-
+*/
     $('.sqlite_view_schema').click( function() 
     {
         $('#sqlite_schema').toggle(500); 
@@ -423,7 +422,8 @@ function setup_collaboration_ui(){
 			$(this).addClass('selected').parent().siblings().children('a').removeClass('selected');
 		}
 		$('#privacy_status form').hide();
-		$('#privacy_status>p, #privacy_status>h4, #show_privacy_choices').show();
+		$('#contributors .new_user_li, #contributors .error').remove();
+		$('#privacy_status>p, #privacy_status>h4, #show_privacy_choices, #contributors a.add_user').show();
 	});
 	
 	$('#show_privacy_choices').bind('click', function(){
@@ -433,15 +433,25 @@ function setup_collaboration_ui(){
 
     $('#saveprivacy').bind('click', function(){
 		$('input[name=privacy_status]:checked').hide().after('<img src="/media/images/load2.gif" width="16" height="16">').parents('tr').find('input, select').attr('disabled', true);
-		var sdata = { value: $('input[name=privacy_status]:checked').val() }
-		$.ajax({url:$("#adminprivacystatusurl").val(), type: 'POST', data:sdata, success:function(result){
-			if (result.substring(0, 6) == "Failed"){
-                alert(result); 
-            } else {
-				console.log('success');
-				reload_collaboration_ui('#privacy_status');
-			}
-		}});
+		if($('#current_vault_id').length){
+			$.getJSON('/vaults/' + $('#current_vault_id').val() + '/removescraper/' + $('#scrapershortname').val() + '/' + $('input[name=privacy_status]:checked').val(), function(data) {
+				if(data.status == 'ok'){
+					reload_collaboration_ui('#privacy_status');
+				} else {
+					alert('Scraper could not be removed from vault: ' + data.error);
+				}
+			});
+		} else {
+			var sdata = { value: $('input[name=privacy_status]:checked').val() }
+			$.ajax({url:$("#adminprivacystatusurl").val(), type: 'POST', data:sdata, success:function(result){
+				if (result.substring(0, 6) == "Failed"){
+	                alert(result); 
+	            } else {
+					console.log('success');
+					reload_collaboration_ui('#privacy_status');
+				}
+			}});
+		}
     }).hide();
 
 	//	Handle clicks on the "make this public" and "make this protected" paragraphs
@@ -465,7 +475,13 @@ function setup_collaboration_ui(){
 		} else {
 			$(this).val('Moving\u2026').attr('disabled','disabled').prev().attr('disabled','disabled');
 			$(this).parents('td').prev().find('input:radio').hide().after('<img src="/media/images/load2.gif" width="16" height="16">').parents('tr').find('input, select').attr('disabled', true);
-			reload_collaboration_ui('#privacy_status');
+			$.getJSON($(this).prev().val(), function(data) {
+				if(data.status == 'ok'){
+					reload_collaboration_ui('#privacy_status');
+				} else {
+					alert('Scraper could not be moved to vault: ' + data.error);
+				}
+			});
 		}
 	});
 	
@@ -610,11 +626,12 @@ $(function(){
 	    });
 	});
 	
+	$("#download_table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab:first .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+	
 	$('ul.data_tabs li').bind('click', function(){
 		var eq = $(this).index();
-		$('.datapreview:eq(' + eq + ')').css({position:'static'});
-		$('.datapreview').not(':eq(' + eq + ')').css({position:'absolute',left: '-9000px'});
 		if($(this).is('#more_tabs li')){
+			eq += $('#more_tabs').prevAll().length + 1;
 			$(this).addClass('selected');
 			$('#more_tabs').addClass('selected');
 			$('.data_tabs .selected').not($(this)).not('#more_tabs').removeClass('selected');
@@ -622,13 +639,19 @@ $(function(){
 			$(this).addClass('selected');
 			$('.data_tabs .selected').not($(this)).removeClass('selected');
 		}
-		
+		$('.datapreview:eq(' + eq + ')').css({position:'static'});
+		$('.datapreview').not(':eq(' + eq + ')').css({position:'absolute',left: '-9000px'});
+        $("#download_table_csv").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+	});
+	
+	$('ul.data_tabs li').each(function(){
+		$(this).attr('title', $(this).index() );
 	});
 
 
 	function make_more_link(){
         $('ul.data_tabs .clear').before(
-            $('<li id="more_tabs" title="Show more tabs"><span id="more_tabs_number">0</span> more &raquo;<ul></ul></li>')
+            $('<li id="more_tabs" title="Show more tabs" style="display:none"><span id="more_tabs_number">0</span> more &raquo;<ul></ul></li>')
         );
     }
 
@@ -644,7 +667,6 @@ $(function(){
     var hidden_tabs = 0;
 
 	$('.data_tab').not('#more_tabs, #more_tabs li').each(function(){
-		console.log($(this).text() + ' ' + $(this).outerWidth(true));
 		tabs_width += $(this).outerWidth(true);
 		if(tabs_width > table_width - more_link_width){
 			$(this).appendTo('#more_tabs ul');
@@ -653,6 +675,14 @@ $(function(){
 		}
 	});
 	
+	$('.edit_schedule').bind('click', function(e){
+		e.preventDefault();
+		if($('#edit_schedule').is(':hidden')){
+			$('#edit_schedule').show().prev().hide();
+		} else {
+			$('#edit_schedule').hide().prev().show();
+		}
+	});
 	
 	setup_collaboration_ui();
 	

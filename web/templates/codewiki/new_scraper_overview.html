@@ -46,7 +46,7 @@
 	    <span class="latestdomain">
 	    {% if latestdomain %}
 	        {% for d in latestdomain %}
-                <a href="{{ d.domain }}">{{ d.domain }}</a>
+                <a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>
             {% endfor %}
         {% else %}
             Hasn&rsquo;t run yet
@@ -79,11 +79,12 @@
 
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
-    <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
+    <input type="text" id="id_api_base" value="{{api_base}}" class="hide"/>
+    <input type="hidden" id="scrapershortname" value="{{scraper.short_name}}"/>
     {% if scraper.access_apikey %}
-        <input type="text" id="id_apikey" value="{{scraper.access_apikey}}" class="hide">
+        <input type="text" id="id_apikey" value="{{scraper.access_apikey}}" class="hide"/>
     {% else %}
-        <input type="text" id="id_apikey" value="" class="hide">
+        <input type="text" id="id_apikey" value="" class="hide"/>
     {% endif %}
 </fieldset>
 
@@ -121,7 +122,7 @@
     <tr>
     <td class="schedule">    
         {% if latestdomain %}
-            {% for d in latestdomain %}<a href="{{ d.domain }}" id="scraper_screenshot">{% screen_shot scraper %}</a>{% endfor %}
+            {% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank" id="scraper_screenshot">{% screen_shot scraper %}</a>{% endfor %}
         {% else %}
             <a href="#" id="scraper_screenshot"><img src="{{ MEDIA_URL }}images/screenshot_placeholder.png" alt="Run this scraper to generate a screenshot"></a>
         {% endif %}
@@ -137,33 +138,51 @@
             {% endif %}
         </h3>
         {% if scraper.last_runevent %}
-            <h4>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from {% for d in latestdomain %}<a href="{{ d.domain }}">{{ d.domain }}</a>{% endfor %}</h4>
+            <h4>Scraped: {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from {% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>{% endfor %}</h4>
         {% endif %}
         {% if scraper.last_runevent.exception_message %}
             <p class="exception">This scraper failed on its last run:<br/>{{ scraper.last_runevent.exception_message }}</p>
         {% endif %}
-        <h3 class="schedule"><strong>Schedule</strong></h3>
+        
         {% ifnotequal scraper.scraper.next_run.year 9999 %}
-        <h4>Runs: {{scraper.scraper.run_interval|schedule}}</h4>
-        <h4>Will next run:
-            {% ifequal scraper.scraper.next_run|timeuntil '0 minutes' %}
-                <abbr title="This scraper will be run at the soonest possible opportunity">ASAP</abbr>
-            {% else %}
-                <abbr title="{{scraper.scraper.next_run}}">in {{scraper.scraper.next_run|timeuntil}}</abbr>
-            {% endifequal %}
+        <h3 class="schedule"><strong>Schedule</strong> <a class="edit edit_schedule">Edit</a></h3>
+        <div>
+            <h4>Runs: <a href="#" class="edit_schedule">{{scraper.scraper.run_interval|schedule}}</a></h4>
+            <h4>Will next run:
+                {% ifequal scraper.scraper.next_run|timeuntil '0 minutes' %}
+                    <abbr title="This scraper will be run at the soonest possible opportunity">ASAP</abbr>
+                {% else %}
+                    <abbr title="{{scraper.scraper.next_run}}">in {{scraper.scraper.next_run|timeuntil}}</abbr>
+                {% endifequal %}
+            </h4>
+        </div>
         {% else %}
-        <h4>No schedule set: <a href="#">Run manually, now!</a></h4>
-        {% endifnotequal %}</h4>
+        <h3 class="schedule"><strong>No schedule set</strong></h3>
+        <form action="{% url scraper_schedule_scraper scraper.short_name %}" method="post" class="no_schedule">
+            {% csrf_token %}
+            <input type="hidden" name="schedule_scraper" value="1" />
+            <input type="button" class="edit_schedule" value="Edit schedule" />
+            <input type="submit" id="btnScheduleScraper" value="Run ASAP" />
+        </form>
+        {% endifnotequal %}
+        <form action="../admin/" method="post" id="edit_schedule" style="display: none">
+            {% csrf_token %}
+            <label for="select_schedule">Run:</label> <select id="select_schedule" name="value">
+            {% for schedule_option, schedule_text in schedule_options %}
+                <option value="{{schedule_option|safe}}" {% if scraper.scraper.run_interval == schedule_option %}selected="selected"{% endif %}>{{schedule_text|safe}}</option>
+            {% endfor %}
+            </select> <input type="hidden" name="short_name" value="{{scraper.short_name}}" /><input type="submit" value="Save" /> <input type="button" value="Cancel" class="edit_schedule" />
+        </form>
     </td>
     <td class="description">
-        <h3><strong>About this scraper</strong></h3>
+        <h3><strong>About this scraper</strong> <a class="edit edit_description">Edit</a></h3>
         <div id="divAboutScraper">
         {% if scraper.description %}
             {{ scraper.description_ashtml|safe }}
         {% else %}
             <p>This scraper has no description. {% if user.is_authenticated %}
                 {% if user_edits_it %}
-                    <br/><a href="#" id="aEditAboutScraperNew">Would you like to add one?</a>
+                    <br/><a href="#" class="editdescription">Would you like to add one?</a>
                 {% endif %}
             {% else %}
                 <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>
@@ -237,7 +256,7 @@
                                     <h4><label for="privacy_vault">{% if scraper.vault %}Keep in a Vault{% else %}Move to a Vault{% endif %}</label></h4>
                                     <p><label for="privacy_vault">Only vault members {% if scraper.vault %}can{% else %}will be able to{% endif %} <br/>see or edit this {{scraper.wiki_type}}.</label></p>
                                     <p><select id="move_to_vault">
-                                        <option></option>
+                                        {% if scraper.vault %}{% else %}<option></option>{% endif %}
                                     {% for vault in request.user.vault_membership.all %}
                                         <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
                                     {% endfor %}
@@ -246,6 +265,7 @@
                             </tr>
                             {% endif %}
                         </table>
+                        {% if scraper.vault.id %}<input type="hidden" id="current_vault_id" value="{{scraper.vault.id}}" />{% endif %}
                         <input type="button" value="Save" id="saveprivacy">
                     </form>
                 {% endif %}
@@ -333,9 +353,8 @@
         <li class="download">
             <a>Download</a>
             <ul>
-                <li><a href="#">This table as a CSV</a></li>
-                <li><a href="#">All tables as CSVs</a></li>
-                <li><a href="{% url export_sqlite scraper.short_name %}">All tables as SQLite</a></li>
+                <li id="download_table_csv"><a href="#">This table as a CSV</a></li>
+                <li id="download_all_sql"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">All tables as SQLite</a></li>
             </ul>
         </li>
         <li class="clear"></li>
@@ -362,7 +381,7 @@
         </table>
         <script type="text/javascript">
         $(document).ready(function() {
-            var datapreview_{{forloop.counter}} = $('#datapreview_{{forloop.counter}}').dataTable( {
+            $('#datapreview_{{forloop.counter}}').dataTable( {
                 "bProcessing": true,
                 "bServerSide": true,
 				"bJQueryUI": true,

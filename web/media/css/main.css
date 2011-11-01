@@ -2839,12 +2839,13 @@ a.btnClearDatastore_link {
 }
 
 #divAboutScraper textarea {
-	margin-bottom: 1em;
+	margin-bottom: 5px;
 	height: 15em!important;
 }
 
 #divMarkupHint {
 	padding-top: 1em;
+	margin-top: 10px;
 }
 
 body.choose_template #divContent h1 {
@@ -6200,6 +6201,9 @@ pre.snippet-textonly {
 .sh_vim{background:none; padding:0; margin:0; border:0 none;}.sh_vim .sh_sourceCode{background-color:#fff;color:#000;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_keyword{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_type{color:#0f0;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_string{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_regexp{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_specialchar{color:#f2f;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_comment{color:#00f;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_number{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_preproc{color:#f2f;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_function{color:#000;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_url{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_date{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_time{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_file{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_ip{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_name{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_variable{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_oldfile{color:#f2f;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_newfile{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_difflines{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_selector{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_property{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_value{color:#f00;font-weight:normal;font-style:normal;}
 
 /*-------- Snippet Base Styles ----------*/
+.snippet-text{
+	display: none;
+}
 .snippet-wrap {position:relative;}
 *:first-child+html .snippet-wrap {display:inline-block;}
 * html .snippet-wrap {display:inline-block;}
