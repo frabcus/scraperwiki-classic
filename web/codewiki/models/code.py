@@ -9,6 +9,9 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.db.models import Q
+from django.contrib.comments.signals import comment_was_posted
+from django.core.mail import send_mail
+
 import tagging
 import hashlib
 
@@ -561,6 +564,25 @@ class UserUserRole(models.Model):
 
 
 
+def comment_notification(**kwargs):
+    from django.template.loader import render_to_string
+    from django.conf import settings
+    
+    request = kwargs.pop('request')
+    comment = kwargs.pop('comment')
+    
+    poster = comment.user_name
+    user = scraper.owner()
+    scraper = comment.content_object
+    message = comment.comment
+
+    if request.user.get_profile().beta_user:    
+        rendered_msg = render_to_string('emails/new_comment.txt', locals() )
+        send_mail("[ScraperWiki] New comment - %s" % scraper.title, 
+                  rendered_message, 
+                  settings.FEEDBACK_EMAIL , 
+                  [user.email], 
+                  fail_silently=True)    
 
 
-
+comment_was_posted.connect(comment_notification)
