@@ -61,10 +61,7 @@ class SQLiteDatabase(Database):
         self.dataauth = dataauth
         self.runID = runID
         self.attachables = attachables
-        
-        print type(self.attachables)
-        print self.attachables
-        
+                
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
