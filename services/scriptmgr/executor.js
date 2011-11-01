@@ -20,8 +20,9 @@ var fs  = require('fs');
 var sys = require('sys');
 var spawn = require('child_process').spawn;
 var path  = require('path');
-var lxc = require( path.join(__dirname,'lxc') )
-var util = require( path.join(__dirname,'utils') )
+var lxc = require( path.join(__dirname,'lxc') );
+var util = require( path.join(__dirname,'utils') );
+var crypto = require('crypto');
 
 var use_lxc = true;
 var extra_path;
@@ -33,6 +34,8 @@ var scripts_ip = [ ];
 var max_runs = 100;
 var dataproxy = '';
 var httpproxy;
+var secret = '';
+
 /******************************************************************************
 * Called to configure the executor, allowing it to determine whether we are
 * using LXC, or whether it is on a local dev machine.
@@ -48,6 +51,8 @@ exports.init = function( settings ) {
 		httpproxy = settings.httpproxy;
 	};
 
+	secret = settings.secret or '';
+	
 	code_folder = settings.code_folder;
 	dataproxy = settings.dataproxy;
 	extra_path = settings.extra_path;
@@ -170,14 +175,21 @@ exports.run_script = function( http_request, http_response ) {
 		
 };
 
+function hashkey( name ) {
+	return crypto.createHash("sha256").update( name + secret ).digest("hex");
+}
+
+
 function writeLaunchFile( f, ds, runid, scrapername, querystring, attachables ) {
 	var launch = {
 		'datastore': ds,
 		'runid': runid,
 		'scrapername': scrapername || '',
 		'querystring': querystring || '',
-		'attachables': attachables || []
+		'attachables': attachables || [],
+		'verification_key': hashkey(scrapername || '')
 	}
+	
 	var data = JSON.stringify( launch );
 	fs.writeFileSync(f, data, encoding='utf8');
 }

@@ -65,6 +65,7 @@ options, args = parser.parse_args()
 ##############################################################
 datastore, runid, scrapername, querystring = None, None, None, None
 http_stores = []
+verification_key = None
 
 pathname, _ = os.path.split(options.script)
 pathname = os.path.join( os.path.abspath(pathname), 'launch.json')
@@ -75,7 +76,11 @@ with open(pathname) as f:
     scrapername = d['scrapername']
     querystring = d['querystring']
     attachables = d.get('attachables', '')        
-        
+    verification_key = d.get('verification_key', '')
+
+if verification_key:
+    os.environ['VERIFICATION_KEY'] = verification_key
+    
 if querystring:
     os.environ['QUERY_STRING'] = querystring
     os.environ['URLQUERY'] = querystring   

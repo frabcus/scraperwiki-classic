@@ -32,12 +32,16 @@ $scrapername = $launch['scrapername'];
 $runid 	     = $launch['runid'];
 $querystring = $launch['querystring'];
 $attachables = $launch['attachables'];
+$verification_key = $launch['verification_key'];
 
 if ( strlen($querystring) > 0 ) {
 	putenv("QUERY_STRING=" . $querystring);
 	putenv("URLQUERY=" . $querystring);
 }
 
+if ( strlen($verification_key) > 0 ) {
+	putenv('VERIFICATION_KEY='. $verification_key);
+}
 
 
 function shutdown(){
