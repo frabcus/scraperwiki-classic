@@ -199,6 +199,7 @@ class DatastoreProtocol(basic.LineReceiver):
             
     def connectionMade(self):
         log.msg( 'Connection made',logLevel=logging.DEBUG)
+        self.attachauthurl = attach_auth_url
             
                             
     def connectionLost(self, reason):
@@ -265,7 +266,7 @@ DatastoreProtocol.MAX_LENGTH = 262144 # HUGE buffer
 configfile = '/var/www/scraperwiki/uml/uml.cfg'
 config = ConfigParser.ConfigParser()
 config.readfp(open(configfile))
-
+attach_auth_url = config.get("datarouter", 'attachauthurl')
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)    
