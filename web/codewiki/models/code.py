@@ -576,13 +576,13 @@ def comment_notification(**kwargs):
     user = scraper.owner()    
     message = comment.comment
 
-    if request.user.get_profile().beta_user:    
-        rendered_msg = render_to_string('emails/new_comment.txt', locals() )
-        send_mail("[ScraperWiki] New comment - %s" % scraper.title, 
-                  rendered_msg, 
-                  settings.FEEDBACK_EMAIL , 
-                  [user.email], 
-                  fail_silently=True)    
+#    if request.user.get_profile().beta_user:    
+#        rendered_msg = render_to_string('emails/new_comment.txt', locals() )
+#        send_mail("[ScraperWiki] New comment - %s" % scraper.title, 
+#                  rendered_msg, 
+#                  settings.FEEDBACK_EMAIL , 
+#                  [user.email], 
+#                  fail_silently=True)    
 
 
 comment_was_posted.connect(comment_notification)
