@@ -3,5 +3,6 @@
 	"port"          : 2112, 
 	"scrapername"   : "test", 
 	"runid" 	    : "123",
-	"attachables"   : ""
+	"attachables"   : "",
+	"secret": "wombles"
 }

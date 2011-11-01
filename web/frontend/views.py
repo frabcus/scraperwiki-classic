@@ -527,7 +527,7 @@ def view_vault(request, username=None):
 
 
 @login_required
-def vault_scrapers_remove(request, vaultid, shortname):
+def vault_scrapers_remove(request, vaultid, shortname, newstatus):
     """
     Removes the scraper identified by shortname from the vault 
     identified by vaultid.  This can currently only be done by
@@ -551,9 +551,8 @@ def vault_scrapers_remove(request, vaultid, shortname):
     if scraper.vault != vault:
         return HttpResponse('{"status": "fail", "error":"The scraper is not in this vault"}', mimetype=mime)            
     
-    # TODO: Decide how we remove the scraper from the vault other than just 
-    # removing the vault propery
-    
+
+    scraper.privacy_status = newstatus
     scraper.vault = None
     scraper.save()
 

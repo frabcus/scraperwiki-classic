@@ -17,7 +17,10 @@ except Exception, e:
 
 
 def update_settings_for_name(settings,name):
-    pass
+    import hashlib
+    secret_key = '%s%s' % (name, settings.secret,)
+    settings['verification_key'] = hashlib.sha256(secret_key).hexdigest()  
+
 
 class DataStoreTester(unittest.TestCase):
     """
@@ -27,7 +30,7 @@ class DataStoreTester(unittest.TestCase):
         scraperwiki.logfd = sys.stdout
         self.settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
         self.settings['scrapername'], self.settings['runid'] = self.random_details()
-        self.settings = update_settings_for_name(self.settings,self.settings['scrapername'])
+        update_settings_for_name(self.settings,self.settings['scrapername'])
         scraperwiki.datastore.create( **self.settings )
         
     def random_details(self):
@@ -74,7 +77,7 @@ class BasicDataProxyTests( DataStoreTester ):
     def test_attach(self):
         settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
         settings['scrapername'], settings['runid'] = self.random_details()
-        settings = update_settings_for_name(settings,settings['scrapername'])        
+        update_settings_for_name(settings,settings['scrapername'])        
         attach_to = settings['scrapername']
         scraperwiki.datastore.create( **settings )
         # Save to the attachable database
@@ -83,7 +86,7 @@ class BasicDataProxyTests( DataStoreTester ):
 
         settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )                
         settings['scrapername'], settings['runid'] = self.random_details()
-        settings = update_settings_for_name(settings,settings['scrapername'])                
+        update_settings_for_name(settings,settings['scrapername'])                
         scraperwiki.datastore.create( **settings )
         # Now we can perform a query to test out the attach
         
