@@ -103,6 +103,9 @@ class DatastoreProtocol(basic.LineReceiver):
         import hashlib
         
         if self.db is None:
+            
+            
+            
             self.db = SQLiteDatabase(self, '/var/www/scraperwiki/resourcedir', self.short_name, self.dataauth, self.runID, self.attachables)                        
             
             if not 'X-Scraper-Verified' in self.headers:
