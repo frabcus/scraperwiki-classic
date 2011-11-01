@@ -104,31 +104,26 @@ class DatastoreProtocol(basic.LineReceiver):
         
         if self.db is None:
             
-            
-            
+            # Check verification key on first run
+            print 'Verification key is %s' % self.verification_key
+            secret_key = '%s%s' % (self.short_name, self.factory.secret,)
+            possibly = hashlib.sha256(secret_key).hexdigest()  
+            log.msg( 'Comparing %s == %s' % (possibly, self.verification_key,) , 
+                     logLevel=logging.DEBUG)      
+            if not possibly == self.verification_key:
+                self.sendLine('{"error": "Permission denied"}')
+                return
+
             self.db = SQLiteDatabase(self, '/var/www/scraperwiki/resourcedir', self.short_name, self.dataauth, self.runID, self.attachables)                        
             
-            if not 'X-Scraper-Verified' in self.headers:
-                # First pass through when we are not through HTTP,
-                # TODO: Remove this code path
-                log.msg( 'Traditional connection, first request', logLevel=logging.DEBUG )
-                firstmessage = obj
-                firstmessage["short_name"] = self.short_name
-                firstmessage["runID"]      = self.runID
-                firstmessage["dataauth"]   = self.dataauth
-                log.msg( 'Ready to send response of ' + str(firstmessage), logLevel=logging.DEBUG )
-                self.sendLine( json.dumps(firstmessage) )
-                return
-            else:
-                # This will at some point be on the main code path
-                secret_key = '%s%s' % (self.short_name, self.factory.secret,)
-                possibly = hashlib.sha256(secret_key).hexdigest()  
-                log.msg( 'Comparing %s == %s' % (possibly, self.headers['X-Scraper-Verified'],) , 
-                         logLevel=logging.DEBUG)      
-                                                                                                        
-                if not possibly == self.headers['X-Scraper-Verified']:
-                    self.write_fail('Permission refused')
-                    return
+            log.msg( 'Traditional connection, first request', logLevel=logging.DEBUG )
+            firstmessage = obj
+            firstmessage["short_name"] = self.short_name
+            firstmessage["runID"]      = self.runID
+            firstmessage["dataauth"]   = self.dataauth
+            log.msg( 'Ready to send response of ' + str(firstmessage), logLevel=logging.DEBUG )
+            self.sendLine( json.dumps(firstmessage) )
+            return
                     
         # We will either get here on the second request of a connected socket because the db
         # will be set, or because the firstmessage wasn't sent so we will process this as part 
@@ -182,6 +177,8 @@ class DatastoreProtocol(basic.LineReceiver):
                 k,v = line.split(':')
                 self.headers[k.strip()] = v.strip()
                 log.msg( '%s:%s' % (k,v,) )
+
+            self.verification_key = self.params['verify']
 
             if 'short_name' in self.params:
                 self.attachauthurl = config.get("datarouter", 'attachauthurl')                

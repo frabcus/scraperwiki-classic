@@ -85,6 +85,7 @@ if querystring:
 host, port = string.split(datastore, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
+
 scraperwiki.datastore.create(host, port, scrapername, runid, attachables, verification_key)
 
 resource.setrlimit(resource.RLIMIT_CPU, (80, 82,))

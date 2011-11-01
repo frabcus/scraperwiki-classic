@@ -44,7 +44,7 @@ def make_request(data, attachlist):
     
 
         # make everything global to the module for simplicity as opposed to half in and half out of a single class
-def create(host, port, scrapername, runid, attachables, webstore_port=0,verification_key=''):
+def create(host, port, scrapername, runid, attachables, verification_key=None):
     global m_host
     global m_port
     global m_scrapername
@@ -56,7 +56,8 @@ def create(host, port, scrapername, runid, attachables, webstore_port=0,verifica
     m_scrapername = scrapername
     m_runid = runid
     m_attachables = m_attachables
-    m_verification_key = verification_key
+    m_verification_key = verification_key or ''
+    print 'x', m_verification_key
         
 
         # a \n delimits the end of the record.  you cannot read beyond it or it will hang
@@ -79,6 +80,7 @@ def ensure_connected():
     global m_socket
     global m_scrapername
     global m_runid
+    global m_verification_key
     
     if not m_socket:
         m_socket = socket.socket()
@@ -96,7 +98,7 @@ def ensure_connected():
         m_socket.sendall('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         line = receiveoneline(m_socket)  # comes back with True, "Ok"
         res = json.loads(line)
-        assert res.get("status") == "good", res
+        #assert res.get("status") == "good", res
         
 
 def request(req):
