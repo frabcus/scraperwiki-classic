@@ -571,9 +571,9 @@ def comment_notification(**kwargs):
     request = kwargs.pop('request')
     comment = kwargs.pop('comment')
     
-    poster = comment.user_name
-    user = scraper.owner()
     scraper = comment.content_object
+    poster = comment.user_name    
+    user = scraper.owner()    
     message = comment.comment
 
     if request.user.get_profile().beta_user:    
