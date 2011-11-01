@@ -1015,7 +1015,9 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
     limit       = int( request.REQUEST.get('iDisplayLength', '10') )
     total_rows  = 0
     total_after_filter = 0
-    
+    sortbyidx = int( request.REQUEST.get('iSortCol_0','0') )
+    sortdir = request.REQUEST.get('sSortDir_0', 'asc')
+
     columns = []
     data = []
     
@@ -1038,8 +1040,8 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
         columns = [ "`%s`" % c for c in columns]
             
         # Build query and do the count for the same query
-        sorter = ''
-        query = 'select %s from `%s` limit %d offset %d' % (','.join(columns), table_name, limit, offset,)
+        sortby = "%s %s" % (columns[sortbyidx], sortdir,)
+        query = 'select %s from `%s` order by %s limit %d offset %d' % (','.join(columns), table_name, sortby, limit, offset,)
         sqlite_data = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery": query, "attachlist":"", "streamchunking": False, "data": ""})        
         # We need to now convert this to the aaData list of lists
         if 'error' in sqlite_data:

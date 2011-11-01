@@ -16,6 +16,9 @@ except Exception, e:
     sys.exit(0)
 
 
+def update_settings_for_name(settings,name):
+    pass
+
 class DataStoreTester(unittest.TestCase):
     """
     Create a datastore connection for the tests to use
@@ -24,6 +27,7 @@ class DataStoreTester(unittest.TestCase):
         scraperwiki.logfd = sys.stdout
         self.settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
         self.settings['scrapername'], self.settings['runid'] = self.random_details()
+        self.settings = update_settings_for_name(self.settings,self.settings['scrapername'])
         scraperwiki.datastore.create( **self.settings )
         
     def random_details(self):
@@ -70,14 +74,16 @@ class BasicDataProxyTests( DataStoreTester ):
     def test_attach(self):
         settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
         settings['scrapername'], settings['runid'] = self.random_details()
+        settings = update_settings_for_name(settings,settings['scrapername'])        
         attach_to = settings['scrapername']
         scraperwiki.datastore.create( **settings )
         # Save to the attachable database
         
         scraperwiki.datastore.close()
 
-        settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
+        settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )                
         settings['scrapername'], settings['runid'] = self.random_details()
+        settings = update_settings_for_name(settings,settings['scrapername'])                
         scraperwiki.datastore.create( **settings )
         # Now we can perform a query to test out the attach
         
