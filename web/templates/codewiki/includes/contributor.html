@@ -36,6 +36,7 @@
       {% ifnotequal scraper.privacy_status 'public' %}
         {% ifequal role 'editor' %}
           <input type="button" value="demote" class="demotebutton"/>
+          <a title="Remove this user from the list of editors" class="demotelink">Remove</a>
         {% endifequal %}
         {% ifequal role 'follow' %}
           <input type="button" value="promote" class="promotebutton"/>

@@ -248,21 +248,6 @@ function changeRoles(sdata, redirect_to_on_fail) {
 	); 	
 }
 
-function collaborationButtons(){
-	$('#privacy_status, #contributors').hide();
-	$('#collaboration ul.buttons a').bind('click', function(e){
-		e.preventDefault();
-		var href = $(this).attr('href');
-		if($(href).is(':visible')){
-			$('#privacy_status, #contributors').hide();
-			$('#collaboration ul.buttons a').removeClass('selected');
-		} else {
-			$(href).show().siblings('#privacy_status, #contributors').hide();
-			$(this).addClass('selected').parent().siblings().children('a').removeClass('selected');
-		}
-	});
-}
-
 function setupChangeEditorStatus()
 {
     // changing editor status

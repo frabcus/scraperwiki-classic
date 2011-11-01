@@ -2416,6 +2416,10 @@ div.tab_tools form {
 
 /* Scraper pages */
 
+#contributorslist .demotelink {
+	display: none;
+}
+
 #scraper_about .text_wiki {
 	border: none;
 	padding: 0;
@@ -4548,7 +4552,7 @@ span.historyexception {
 }
 
 .codepreviewer .outputlines {
-	margin-top: 0px;
+	margin: 0px;
 	padding-top: 0.4em;
 	font-family: monospace;
 	font-size: 10pt;
@@ -5202,14 +5206,16 @@ form#newpdfdoclink {
 
 .runpreviewer {
 	clear: right;
-	margin-left: 2em;
+	margin: 5px 0 0 0;
 	background-color: #FFF;
 	border: solid #727272 thin;
 }
 
 .runpreviewer pre.runpreview {
 	max-height: 20em;
-	overflow: auto
+	overflow: auto;
+	margin: 0;
+	padding: 5px;
 }
 
 .aprev {
@@ -6168,5 +6174,65 @@ form.fourohfourhint p {
 body.kpi tr.this_month {
 	color: #b0b0b0;
 }
+
+
+/* Snippet.js Syntax Highlighting (vim style) */
+
+#viewsource {
+	width: 880px;
+	height: 530px;
+	text-align: left;
+	padding: 10px;
+	background: #eee;
+	margin: 0;
+	font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+	font-size: 14px;
+	overflow: auto;
+}
+
+pre.snippet-textonly {
+	text-align: left;
+}
+
+/*---------- vim Styles ---------*/
+.sh_vim ol {color: #666;}
+.sh_vim li span {color: #000;}
+.sh_vim{background:none; padding:0; margin:0; border:0 none;}.sh_vim .sh_sourceCode{background-color:#fff;color:#000;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_keyword{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_type{color:#0f0;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_string{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_regexp{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_specialchar{color:#f2f;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_comment{color:#00f;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_number{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_preproc{color:#f2f;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_function{color:#000;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_url{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_date{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_time{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_file{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_ip{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_name{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_variable{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_oldfile{color:#f2f;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_newfile{color:#f00;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_difflines{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_selector{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_property{color:#B26818;font-weight:normal;font-style:normal;}.sh_vim .sh_sourceCode .sh_value{color:#f00;font-weight:normal;font-style:normal;}
+
+/*-------- Snippet Base Styles ----------*/
+.snippet-wrap {position:relative;}
+*:first-child+html .snippet-wrap {display:inline-block;}
+* html .snippet-wrap {display:inline-block;}
+.snippet-reveal{text-decoration:underline;}
+.snippet-wrap .snippet-menu, .snippet-wrap .snippet-hide {position:absolute; top:10px; right:15px; font-size:.9em;z-index:1;background-color:transparent;}
+.snippet-wrap .snippet-hide {top:auto; bottom:10px;}
+*:first-child+html .snippet-wrap .snippet-hide {bottom:25px;}
+* html .snippet-wrap .snippet-hide {bottom:25px;}
+.snippet-wrap .snippet-menu pre, .snippet-wrap .snippet-hide pre {background-color:transparent; margin:0; padding:0;}
+.snippet-wrap .snippet-menu a, .snippet-wrap .snippet-hide a {padding:0 5px; text-decoration:underline;}
+.snippet-wrap pre.sh_sourceCode{padding:1em;line-height:1.5em;overflow:auto;position:relative;}
+.snippet-wrap pre.snippet-textonly {padding:2em;}
+*:first-child+html .snippet-wrap pre.snippet-formatted {padding:2em 1em;}
+* html .snippet-wrap pre.snippet-formatted {padding:2em 1em;}
+.snippet-reveal pre.sh_sourceCode {padding:.5em 1em; text-align:right;}
+.snippet-wrap .snippet-num li{padding-left:1.5em;}
+.snippet-wrap .snippet-no-num{list-style:none; padding:.6em 1em; margin:0;}
+.snippet-wrap .snippet-no-num li {list-style:none; padding-left:0;}
+.snippet-wrap .snippet-num {margin:1em 0 1em 1em; padding-left:3em;}
+.snippet-wrap .snippet-num li {list-style:decimal-leading-zero outside none;}
+.snippet-wrap .snippet-no-num li.box {padding:0 6px; margin-left:-6px;}
+.snippet-wrap .snippet-num li.box {border:1px solid; list-style-position:inside; margin-left:-3em; padding-left:6px;}
+*:first-child+html .snippet-wrap .snippet-num li.box {margin-left:-2.4em;}
+* html .snippet-wrap .snippet-num li.box {margin-left:-2.4em;}
+.snippet-wrap li.box-top {border-width:1px 1px 0 !important;}
+.snippet-wrap li.box-bot {border-width:0 1px 1px !important;}
+.snippet-wrap li.box-mid {border-width:0 1px !important;}
+.snippet-wrap .snippet-num li .box-sp {width:18px; display:inline-block;}
+*:first-child+html .snippet-wrap .snippet-num li .box-sp {width:27px;}
+* html .snippet-wrap .snippet-num li .box-sp {width:27px;}
+.snippet-wrap .snippet-no-num li.box {border:1px solid;}
+.snippet-wrap .snippet-no-num li .box-sp {display:none;}
+
+
 
 
