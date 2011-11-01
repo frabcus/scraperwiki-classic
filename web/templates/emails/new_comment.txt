@@ -1,0 +1,9 @@
+Hi {{ user.username }},
+
+{{ poster }} has left a comment on your '{{ scraper.title }}' scraper:
+
+{{ message }}
+
+Cheers,
+
+The ScraperWiki team
