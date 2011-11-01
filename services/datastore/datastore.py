@@ -136,10 +136,10 @@ class DatastoreProtocol(basic.LineReceiver):
 
     def lineLengthExceeded(self, line):
         """
-        TODO: When more than 256k is sent, we should let the user know there 
-              was a problem
+        When more than 2M is sent, we should let the user know there was a problem
         """
-        self.sendLine(  '{"error": "Buffer size exceeded, please send less data on each request"}'  )
+        log.msg('LONGLINE:' + str(self.short_name) )
+        self.sendLine(  '{"error": "Buffer size exceeded, please contact feedback@scraperwiki.com if this is causing problems for you"}'  )
         
 
     def lineReceived(self, line):
@@ -260,7 +260,7 @@ class DatastoreFactory( protocol.ServerFactory ):
     
 # Set the maximum line length and the line delimiter
 DatastoreProtocol.delimiter = '\n'
-DatastoreProtocol.MAX_LENGTH = 262144 # HUGE buffer
+DatastoreProtocol.MAX_LENGTH = 2097152 # HUGE buffer
 
 # Load the config file from the usual place.
 configfile = '/var/www/scraperwiki/uml/uml.cfg'
