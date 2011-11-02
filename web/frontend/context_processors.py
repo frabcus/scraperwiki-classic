@@ -69,7 +69,10 @@ def template_settings(request):
     for setting in availible_settings:
         if setting in settings_dict:
             template_settings[setting] = settings_dict[setting]
-            
+    
+    from codewiki.models.code import MAGIC_RUN_INTERVAL
+    template_settings['MAGIC_RUN_INTERVAL'] = MAGIC_RUN_INTERVAL
+    
     return {'settings' : template_settings}
 
 # not used since design revamp in April 2011, commented out in global_settings.py too
