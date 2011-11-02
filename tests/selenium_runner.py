@@ -61,7 +61,12 @@ class _OurTextTestResult(unittest.TestResult):
     def pauseIfSetTo(self, err):
         if self.pause_on_failure:
             traceback.print_exc(err)
-            raw_input("press return to continue >>> ")
+            line = 'x'
+            while line != '':
+                line = raw_input("press return to continue, d to dump html source >>> ")
+                if line == 'd':
+                    html = SeleniumTest._selenium.get_html_source() # XXX bit of a hack for this to go cut straight through to our SeleniumTest, but not obvious what would be better and clearer
+                    print html
 
     def addError(self, test, err):
         unittest.TestResult.addError(self, test, err)
