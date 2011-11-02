@@ -101,8 +101,8 @@
 
 <ul class="toolbar">
     <li class="edit"><a href="{% url editor_edit scraper.wiki_type scraper.short_name %}"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Edit</a></li>
-    <li class="viewsource"><a href="/editor/raw/{{ scraper.short_name }}"><img src="{{ MEDIA_URL }}images/icons/eye2.png" width="16" height="16" alt="">View Source</a></li>
     <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
+    <li class="viewsource"><a href="/editor/raw/{{ scraper.short_name }}">View Source</a></li>
     <li class="share">
         <a><img src="{{ MEDIA_URL }}images/icons/share.png" width="16" height="16" alt="">Share</a>
         <div class="share_popover">
@@ -120,6 +120,15 @@
     </li>
     {% if user_owns_it or user.is_staff %}<li class="admin">
         <a>Admin</a>
+        <div class="admin_popover">
+            <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" id="delete_scraper">Delete {{scraper.wiki_type}}</a>
+            <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post" class="hide">
+                {% csrf_token %}    
+                <input type="hidden" name="delete_scraper" value="1" />
+                <input type="submit" id="btnDeleteScraper" value="Delete {{scraper.wiki_type}}" />
+              </form>
+            <span class="arrow"></span>
+        </div>
     </li>{% endif %}
     <li class="clear"></li>
 </ul>
@@ -367,13 +376,34 @@
 {% if sqlitedata %}
     <ul class="titlebar">
         <li class="first"><h3>This scraper&rsquo;s datastore</h3></li>
-        <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}#sqlite">Explore with API</a></li>
+        <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}#sqlite"><img src="{{ MEDIA_URL }}images/icons/hard_hat.png" width="16" height="16" alt="">Explore with API</a></li>
         <li class="download">
-            <a>Download</a>
-            <ul>
-                <li id="download_table_csv"><a href="#">This table as a CSV</a></li>
-                <li id="download_all_sql"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">All tables as SQLite</a></li>
-            </ul>
+            <a><img src="{{ MEDIA_URL }}images/icons/arrow_down.png" width="16" height="16" alt="">Download</a>
+            <div class="download_popover">
+                <h6>Download whole datastore&hellip;</h6>
+                <ul>
+                    <li class="database_sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow"><span class="icon"></span> As an SQLite database</a></li>
+                <!--  <li class="database_csv"><a href="#"><span class="icon"></span> As a folder of CSVs</a></li>
+                    <li class="database_json"><a href="#"><span class="icon"></span> As a folder of JSON files</a></li>
+                    <li class="database_excel"><a href="#"><span class="icon"></span> As an Excel file</a></li>  -->
+                </ul>
+                <h6>Download just <span>this table</span>&hellip;</h6>
+                <ul>
+                <!--  <li class="table_sqlite"><a href="#"><span class="icon"></span> As an SQLite table</a></li>  -->
+                    <li class="table_csv"><a href="#"><span class="icon"></span> As a CSV</a></li>
+                    <li class="table_json"><a href="#"><span class="icon"></span> As a JSON file</a></li>
+                <!--  <li class="table_excel"><a href="#"><span class="icon"></span> As an Excel table</a></li>  -->
+                </ul>
+                <span class="arrow"></span>
+            </div>
+        </li>
+        <li class="empty">
+            <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore">Clear data</a>
+            <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
+                {% csrf_token %}
+                <input type="hidden" name="delete_data" value="1" />
+                <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
+            </form>
         </li>
         <li class="clear"></li>
     </ul>
@@ -482,6 +512,26 @@
 
           {% ifequal itemfirst.type 'commit' %}
           <div class="history_edit">
+
+            <div class="history_view_changes">
+              {% ifnotequal itemfirst.prevrev null %}
+                <a class="hidechanges" title="Revs {{itemlast.rev}}:{{itemfirst.rev}}">Hide changes</a>
+                <a class="showchanges" title="Revs {{itemlast.rev}}:{{itemfirst.rev}}">Show changes</a>
+              {% else %}
+                <a class="hidechanges" title="Revs {{itemlast.rev}}:{{itemfirst.rev}}">Hide first version</a>
+                <a class="showchanges" title="Rev 0">Show first version</a>
+              {% endifnotequal %}
+
+              <span class="revlist hide">
+               {% for item in itemloggroup.list %}
+               <span class="revelem">
+                 <span class="rev">{{item.rev}}</span>
+                 <span class="ihistory_date">{{item.datetime|date:"H:i, j F Y" }}</span>
+                 <span class="prevrev">{{item.prevrev}}</span>
+               </span>
+               {% endfor %}
+              </span>
+            </div>
               {% if itemfirst.user %}{% show_gravatar itemfirst.user 'small' %}{% endif %}
               <span class="history_editor_info">
                 Edited by 
@@ -495,30 +545,10 @@
                 {% if user.is_authenticated %}
                     {% ifnotequal itemloggroup_list|first itemloggroup %}
                     <a class="rollbackchanges" title="Revert code to just after this change; to revision {{itemfirst.rev}}" 
-                       href="{% url editor_edit scraper.wiki_type scraper.short_name %}?rollback_rev={{itemfirst.rev}}">rollback</a>
+                       href="{% url editor_edit scraper.wiki_type scraper.short_name %}?rollback_rev={{itemfirst.rev}}">Rollback</a>
                     {% endifnotequal %}
                 {% endif %}
               </span>
-
-              <div class="history_view_changes">
-                {% ifnotequal itemfirst.prevrev null %}
-                  <a class="hidechanges" title="Revs {{itemlast.rev}}:{{itemfirst.rev}}">Hide changes</a>
-                  <a class="showchanges" title="Revs {{itemlast.rev}}:{{itemfirst.rev}}">Show changes</a>
-                {% else %}
-                  <a class="hidechanges" title="Revs {{itemlast.rev}}:{{itemfirst.rev}}">Hide first version</a>
-                  <a class="showchanges" title="Rev 0">Show first version</a>
-                {% endifnotequal %}
-
-                <span class="revlist hide">
-                 {% for item in itemloggroup.list %}
-                 <span class="revelem">
-                   <span class="rev">{{item.rev}}</span>
-                   <span class="ihistory_date">{{item.datetime|date:"H:i, j F Y" }}</span>
-                   <span class="prevrev">{{item.prevrev}}</span>
-                 </span>
-                 {% endfor %}
-                </span>
-              </div>
 
               <div class="codepreviewer"> 
                 <h3 class="loading">Loading...</h3>
@@ -534,6 +564,19 @@
           {% else %} 
 
           <div class="history_run_event" id="run_{{itemfirst.runevent.id}}">
+            <div class="history_view_changes">
+              <a class="hiderunevent">Hide details</a>
+              <a class="showrunevent">Show details</a>
+
+              <span class="runidlist hide">
+                {% for item in itemloggroup.list %}
+                <span class="runidelem">
+                   <span class="runid">{% if item.runevent.run_id %}{{item.runevent.run_id}}{% else %}{{item.runevent.id}}{% endif %}</span>
+                   <span class="history_date">{{ item.datetime|date:"H:i, j F Y" }}</span>
+               </span>
+               {% endfor %}
+             </span>
+            </div>
             {% ifnotequal itemfirst.runevent.pid -1 %}
                 <div class="history_ran_notfinished">
                   <span class="history_bold">Currently running</span>: -
@@ -553,19 +596,6 @@
                   ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
                   <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
             {% endif %}{% endifnotequal %}
-              <div class="history_view_changes">
-                <a class="hiderunevent">Hide Details</a>
-                <a class="showrunevent">Show Details</a>
-
-                <span class="runidlist hide">
-                  {% for item in itemloggroup.list %}
-                  <span class="runidelem">
-                     <span class="runid">{% if item.runevent.run_id %}{{item.runevent.run_id}}{% else %}{{item.runevent.id}}{% endif %}</span>
-                     <span class="history_date">{{ item.datetime|date:"H:i, j F Y" }}</span>
-                 </span>
-                 {% endfor %}
-               </span>
-              </div>
 
               <div class="runpreviewer">
                 <h3 class="loading">Loading...</h3>

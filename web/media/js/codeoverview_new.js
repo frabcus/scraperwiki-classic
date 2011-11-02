@@ -626,7 +626,8 @@ $(function(){
 	    });
 	});
 	
-	$("#download_table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab:first .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+    $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+    $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
 	
 	$('ul.data_tabs li').bind('click', function(){
 		var eq = $(this).index();
@@ -641,7 +642,8 @@ $(function(){
 		}
 		$('.datapreview:eq(' + eq + ')').css({position:'static'});
 		$('.datapreview').not(':eq(' + eq + ')').css({position:'absolute',left: '-9000px'});
-        $("#download_table_csv").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+        $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+        $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
 	});
 	
 	$('ul.data_tabs li').each(function(){
@@ -686,26 +688,33 @@ $(function(){
 	
 	setup_collaboration_ui();
 	
-	$('li.share a').bind('click', function(){
-		var $a = $(this).addClass('hover');
-		var $p = $a.siblings('.share_popover');
-		if($p.is(':visible')){
-			$p.fadeOut(400);
-			$a.removeClass('hover');
-			$('html').unbind('click');
-		} else {
-			$p.fadeIn(150);
-			$('html').bind('click', function(e){
-				if( $(e.target).parents().index($a.parent()) == -1 ) {
-					if( $(e.target).parents().index($p) == -1 ) {
-						$p.filter(':visible').fadeOut(400);
-						$a.removeClass('hover');
-						$('html').unbind('click');
-					}
-				}
-			});
-		}
-		
+	$('li.share a, li.admin a, li.download a').each(function(){
+		$(this).bind('click', function(){
+			var $a = $(this).addClass('hover');
+			var $p = $a.siblings('div');
+			if($p.is(':visible')){
+				$p.fadeOut(400);
+				$a.removeClass('hover');
+				$('html').unbind('click');
+			} else {
+				$p.fadeIn(150, function(){
+					$('html').bind('click', function(e){
+						if( $(e.target).parents().index($a.parent()) == -1 ) {
+							if( $(e.target).parents().index($p) == -1 ) {
+								$p.filter(':visible').fadeOut(400);
+								$a.removeClass('hover');
+								$('html').unbind('click');
+							}
+						}
+					});
+				});
+			}
+		});
+	});
+	
+	$('#delete_scraper, #empty_datastore').bind('click', function(e){
+		e.preventDefault();
+		$(this).next().children(':submit').trigger('click');
 	});
 	
 });
