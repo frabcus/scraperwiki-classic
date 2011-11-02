@@ -65,7 +65,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
 #   http://theglenbot.com/creating-a-custom-http403-exception-in-django/
 # Am using PermissionDenied and SuspiciousOperation as partial workaround meanwhile, see:
 #   http://groups.google.com/group/django-users/browse_thread/thread/8d3dda89858ff2ee
-def getscraperor404(request, short_name, action):
+def getscraperor404(request, short_name, action, do_check=True):
     try:
         scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
@@ -75,13 +75,14 @@ def getscraperor404(request, short_name, action):
         raise PermissionDenied
         
     # extra post conditions to make spoofing these calls a bit of a hassle
-    if action in ["changeadmin", "settags", "set_privacy_status", "change_attachables"]:
-        if not (request.method == 'POST' and request.is_ajax()):
-            raise SuspiciousOperation
+    if do_check:
+        if action in ["changeadmin", "settags", "set_privacy_status", "change_attachables"]:
+            if not (request.method == 'POST' and request.is_ajax()):
+                raise SuspiciousOperation
     
-    if action in ["schedule_scraper", "run_scraper", ]:
-        if request.POST.get(action, None) != '1':
-            raise SuspiciousOperation
+        if action in ["schedule_scraper", "run_scraper", ]:
+            if request.POST.get(action, None) != '1':
+                raise SuspiciousOperation
         
     return scraper
 
@@ -643,6 +644,19 @@ def view_admin(request, short_name):
     view.save()
     response.write(response_text)
     return response
+    
+    
+def scraper_set_run_interval(request, short_name, value):
+    try:
+        scraper = getscraperor404(request, short_name, "changeadmin", do_check=False)
+        scraper = scraper.scraper
+        scraper.run_interval = int(value)
+        scraper.save() # XXX need to save so template render gets new values, bad that it saves below also!
+    except Exception, e:
+        return HttpResponse('{"status":"error", "error":"Failed to update the schedule"}', mimetype='application/json')        
+        
+    return HttpResponse('{"status":"ok", "newvalue": "%s" }' % value, mimetype='application/json')
+
     
     
 def scraper_admin(request, short_name):

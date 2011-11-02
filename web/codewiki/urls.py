@@ -17,8 +17,11 @@ urlpatterns = patterns('',
         # up here because clashes with a scraper whose short name is 'run_event_json'
     url(r'^scrapers/run_event_json/(?P<run_id>[\w_\-\.\?]*)/?$', viewseditor.run_event_json, name='run_event_json'),  
 
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/set_interval/(?P<value>.*)/$',  views.scraper_set_run_interval,          name='set_run_interval'),    
     url(r'^views/(?P<short_name>[\w_\-\.]+)/admin/$',     views.view_admin,             name='view_admin'),    
     url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',  views.scraper_admin,          name='scraper_admin'),
+
+
     
     url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/settags$', 
                                                           views.scraper_admin_settags,  name='scraper_admin_settags'),
