@@ -203,6 +203,7 @@ class SeleniumTest(unittest.TestCase):
         s.type('id_nav_password', password)
         s.click('nav_login_submit')
         self.wait_for_page()
+        self.failUnless(s.is_text_present("Your dashboard")) # login failed - did you get username/password wrong on command line?
     
     def activate_users(self, userlist):
         """ 
