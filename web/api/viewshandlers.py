@@ -295,7 +295,7 @@ def scraper_search_handler(request):
         
         if request.META.get("HTTP_X_REAL_IP", "Not specified") in settings.INTERNAL_IPS:
             boverduescraperrequest = True
-        if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"]:
+        if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"] or '127.0.0.1' in settings.INTERNAL_IPS:
             boverduescraperrequest = True
     else:
         u = None
@@ -376,7 +376,7 @@ def scraper_search_handler(request):
         if boverduescraperrequest:
             res['overdue_proportion'] = float(scraper.overdue_proportion)
             vcsstatus = scraper.get_vcs_status(-1)
-            res['code'] = vcsstatus["code"]
+            res['code'] = vcsstatus.get("code", "#Code not previously saved")
             res["rev"] = vcsstatus.get("prevcommit", {}).get("rev", -1)
             res['guid'] = scraper.guid
             res["attachables"] = [ ascraper.short_name  for ascraper in scraper.attachable_scraperdatabases() ]

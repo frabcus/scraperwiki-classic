@@ -24,7 +24,7 @@ import base64
 import datetime
 import socket
 import urlparse
-
+import sys
 
 try:                import json
 except ImportError: import simplejson as json
@@ -723,11 +723,43 @@ def scraper_delete_data(request, short_name):
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
+
+def run_scraper(request, short_name):
+    """
+    Now setup to actually allow it to run even if it is not scheduled. We do this 
+    by setting the run_interval to be about every 32 years, which should make twister
+    panic and run it soon.  
+    
+    In future this needs moving to throwing a job onto a queue rather than depending on 
+    twister
+    """
+    from codewiki.models import Scraper
+    from codewiki.models.code import MAGIC_RUN_INTERVAL
+    
+    code = getscraperor404(request, short_name, "schedulescraper")
+    if code.wiki_type == "scraper":
+        # We can now conver the code object (sigh) into a scraper now that we know
+        # we have permission to access it.
+        scraper = Scraper.objects.get(short_name=short_name)
+        
+        if scraper.run_interval == -1:
+            scraper.run_interval = MAGIC_RUN_INTERVAL
+        scraper.last_run = None
+        scraper.save()
+        return HttpResponse('{"status":"ok"}', mimetype='application/json')
+    
+    return HttpResponse('{"status":"fail", "error": "Only scrapers can be scheduled to run"}',
+                         mimetype='application/json')
+
+
+
 def scraper_schedule_scraper(request, short_name):
+    from codewiki.models.code import MAGIC_RUN_INTERVAL
+    
     scraper = getscraperor404(request, short_name, "schedulescraper")
     if scraper.wiki_type == "scraper":
-        scraper.scraper.last_run = None
-        scraper.scraper.save()
+        scraper.last_run = None
+        scraper.save()
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 

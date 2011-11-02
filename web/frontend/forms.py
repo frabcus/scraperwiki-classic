@@ -51,6 +51,9 @@ class UserProfileForm(forms.ModelForm):
                                         choices = SCHEDULE_OPTIONS)
     bio = forms.CharField(label="A bit about you", widget=forms.Textarea(), required=False)
     email = forms.EmailField(label="Email Address")
+    email_on_comments = forms.BooleanField(required=False, 
+                                        label="Do you wish to receive email notifications when someone comments on your scrapers?", )    
+    
     
     def clean_email(self):
         email = self.cleaned_data['email']

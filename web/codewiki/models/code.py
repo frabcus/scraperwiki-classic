@@ -1,6 +1,6 @@
 import datetime
 import time
-import os
+import os, sys
 import re
 import urllib
 
@@ -66,6 +66,7 @@ EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "re
 STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let staff also do anything a creator / editor can, except save code is a bit rude (for now!)
 VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow" ])
 
+MAGIC_RUN_INTERVAL = 1000000000
 
 def scraper_search_query_unordered(user, query, apikey=None):
     if query:
@@ -565,6 +566,10 @@ class UserUserRole(models.Model):
 
 
 def comment_notification(**kwargs):
+    """
+    Allows us to notify the owner of the scraper should another user comment 
+    on it.  Disabled until we can agree on the format of the email.
+    """
     from django.template.loader import render_to_string
     from django.conf import settings
     
@@ -576,7 +581,7 @@ def comment_notification(**kwargs):
     user = scraper.owner()    
     message = comment.comment
 
-#    if request.user.get_profile().beta_user:    
+#    if request.user.get_profile().email_on_comments:    
 #        rendered_msg = render_to_string('emails/new_comment.txt', locals() )
 #        send_mail("[ScraperWiki] New comment - %s" % scraper.title, 
 #                  rendered_msg, 

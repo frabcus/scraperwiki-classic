@@ -144,7 +144,9 @@
     <a class="fix" href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Fix this {{ scraper.wiki_type }}</a>
 </div>
 {% endif %}
-
+		{% ifequal 1000000000 scraper.run_interval %}
+			Awaiting a run
+			{% endifequal %}
 <table class="about" cellspacing="0" cellpadding="0">
     <tr>
     <td class="schedule">    
@@ -171,6 +173,7 @@
             <p class="exception">This scraper failed on its last run:<br/>{{ scraper.last_runevent.exception_message }}</p>
         {% endif %}
         
+
         {% ifnotequal scraper.scraper.next_run.year 9999 %}
         <h3 class="schedule"><strong>Schedule</strong> <a class="edit edit_schedule">Edit</a></h3>
         <div>
@@ -184,8 +187,9 @@
             </h4>
         </div>
         {% else %}
+
         <h3 class="schedule"><strong>No schedule set</strong></h3>
-        <form action="{% url scraper_schedule_scraper scraper.short_name %}" method="post" class="no_schedule">
+        <form action="{% url run_scraper_now scraper.short_name %}" method="post" class="no_schedule">
             {% csrf_token %}
             <input type="hidden" name="schedule_scraper" value="1" />
             <input type="button" class="edit_schedule" value="Edit schedule" />

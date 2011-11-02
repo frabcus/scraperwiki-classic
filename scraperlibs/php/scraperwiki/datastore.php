@@ -83,10 +83,10 @@ class SW_DataStoreClass
    }
 
     // function used both to iniatialize the settings and get the object
-   static function create ($host = null, $port = null, $scrapername = null, $runid = null, $attachables = null, $webstore_port = null)
+   static function create ($host = null, $port = null, $scrapername = null, $runid = null, $attachables = null, $verification_key=null)
    {
       if (is_null(self::$m_ds))
-         self::$m_ds = new SW_DataStoreClass ($host, $port, $scrapername, $runid, $attachables);
+         self::$m_ds = new SW_DataStoreClass ($host, $port, $scrapername, $runid, $attachables,$verification_key );
       return self::$m_ds;
    }
 }

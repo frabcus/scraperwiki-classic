@@ -32,6 +32,10 @@ class UserProfile(models.Model):
     beta_user        = models.BooleanField( default=False )
     apikey           = models.CharField(max_length=64, null=True, blank=True)
     
+    # If someone comments on an item this user owns, this specifies whether they 
+    # should receive the email
+    email_on_comments= models.BooleanField( default=False )
+        
     objects = models.Manager()
     
     def regenerate_apikey(self):
