@@ -327,49 +327,11 @@
                 </ul>
                 {% if user_owns_it %}
                   {% if scraper.privacy_status == 'visible' %}
-                  <!--  <div id="addneweditor">
-                      <span class="hide">
-                        Username:
-                        <input type="text" class="text">
-                        <input type="button" value="Cancel" class="cancelbutton">
-                        <input type="button" value="Add" class="addbutton">
-                      </span>
-                      <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new editor
-                        <img id="contributors_loading" src="{{ MEDIA_URL }}images/load.gif" style="display: none">
-                      </a>
-                    </div> 
-                    <div id="contributorserror" style="display: none">
-                        None
-                    </div> -->
                     <a class="add_user" rel="{{ scraper.short_name }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add another editor</a>
                   {% endif %}
                 {% endif %}
         	</div>
         </div>
-        
-        
-        <!--
-        
-        <div id="divContributors">
-            {% if scraper.privacy_status == 'public' %}
-        	    <abbr title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public:</abbr>
-            {% endif %}
-        	{% if scraper.privacy_status == 'visible' %}
-        	    <abbr title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected:</abbr>
-            {% endif %}
-            {% if scraper.vault %}
-                <abbr title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault:</abbr>
-            {% endif %}
-            {% if scraper.privacy_status == 'private' %}
-        	    <abbr title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private:</abbr>
-        	{% endif %}
-        	{{ scraper.usercoderole_set.count }} {% if scraper.privacy_status == 'public' %}contributor{% else %}editor{% endif %}{{ scraper.usercoderole_set.count|pluralize }}
-        </div>
-        <div id="scraper_contributors">
-            {% include 'codewiki/includes/contributors.html' %}
-        </div>
-        
-        -->
     
     </td>
     </tr>
@@ -413,7 +375,9 @@
     <ul class="data_tabs">
         {% for sqltabledata in sqlitedata %}
           <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
-            <span class="tablename">{{sqltabledata.tablename}}</span> <i>{{sqltabledata.count}}  record{{sqltabledata.count|pluralize}}</i>
+            <span class="tablename">{{sqltabledata.tablename}}</span>
+            <i>{{sqltabledata.count}}  record{{sqltabledata.count|pluralize}}</i>
+            <a></a>
           </li>
         {% endfor %}
         <li class="clear"></li>
@@ -442,8 +406,30 @@
                 "bScrollCollapse": true,
                 "aoColumnDefs": [
                     { "sWidth": "10%", "aTargets": [ -1 ] }
-                    ]
+                    ],
+                "sDom": '<"H"<"#schema_{{forloop.counter}}">lfr>t<"F"ip>'
             } );
+            $('#schema_{{forloop.counter}}').addClass('schema').html('<a>Show schema</a><div>{{sqltabledata.sql}}<span class="arrow"></span></div>').children('a').bind('click', function(){
+    			var $a = $(this).text('Hide schema');
+    			var $p = $a.siblings('div');
+    			if($p.is(':visible')){
+    				$p.fadeOut(400);
+    				$a.text('Show schema');
+    				$('html').unbind('click');
+    			} else {
+    				$p.fadeIn(150, function(){
+    					$('html').bind('click', function(e){
+    						if( $(e.target).parents().index($a.parent()) == -1 ) {
+    							if( $(e.target).parents().index($p) == -1 ) {
+    								$p.filter(':visible').fadeOut(400);
+    								$a.text('Show schema');
+    								$('html').unbind('click');
+    							}
+    						}
+    					});
+    				});
+    			}
+    		});
         } );
         </script>
         </div>
