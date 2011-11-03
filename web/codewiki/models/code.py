@@ -572,22 +572,25 @@ def comment_notification(**kwargs):
     """
     from django.template.loader import render_to_string
     from django.conf import settings
+    from django.core.mail import EmailMultiAlternatives
     
     request = kwargs.pop('request')
     comment = kwargs.pop('comment')
     
     scraper = comment.content_object
-    poster = comment.user_name    
-    user = scraper.owner()    
+    owner = scraper.owner()    
     message = comment.comment
+    subject = "[ScraperWiki] New comment - %s" % scraper.title
 
-#    if request.user.get_profile().email_on_comments:    
-#        rendered_msg = render_to_string('emails/new_comment.txt', locals() )
-#        send_mail("[ScraperWiki] New comment - %s" % scraper.title, 
-#                  rendered_msg, 
-#                  settings.FEEDBACK_EMAIL , 
-#                  [user.email], 
-#                  fail_silently=True)    
-
+    if request.user == owner:
+        return
+        
+    if owner.get_profile().email_on_comments: 
+        text_content = render_to_string('emails/new_comment.txt', locals() )
+        html_content = render_to_string('emails/new_comment.html', locals() )
+        
+        msg = EmailMultiAlternatives(subject, text_content, settings.FEEDBACK_EMAIL, [owner.email])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=True)
 
 comment_was_posted.connect(comment_notification)

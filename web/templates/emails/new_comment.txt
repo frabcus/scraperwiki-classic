@@ -1,8 +1,10 @@
-Hi {{ user.username }},
+Hi {{ owner.username }},
 
-{{ poster }} has left a comment on your '{{ scraper.title }}' scraper:
+{{ request.user.username }} has left a comment on your '{{ scraper.title }}' scraper:
 
-{{ message }}
+"{{ message }}"
+
+Click here to view the message: {% scraper.get_absolute_url %}
 
 Cheers,
 

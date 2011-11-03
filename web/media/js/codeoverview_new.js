@@ -28,132 +28,6 @@ function reload_scraper_attachables(short_name, redirect)
     // original action: 
     //    document.location.reload(true);
 }
-
-
-
-
-function changeRoles(sdata, redirect_to_on_fail) {
-    $.ajax(
-		{
-			url:$("#admincontroleditors").val(), 
-			type: 'GET', 
-			data:sdata, 
-			success:function(result)
-        	{
-            	if (result.substring(0, 6) == "Failed")
-                	$('#contributorserror').text(result).show(300);
-            	else 
-                	reload_scraper_contributors(redirect_to_on_fail); 
-        	},
-        	error:function(jq, textStatus, errorThrown)
-        	{
-            	$('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
-        	}
-		}
-	); 	
-}
-
-function setupChangeEditorStatus()
-{
-    // changing editor status
-    $('#addneweditor a').live('click', function()
-    {
-        $('#addneweditor a').hide()
-        $('#addneweditor span').show(); 
-        $('#contributorserror').hide();
-    }); 
-    $('#addneweditor input.cancelbutton').live('click', function()
-    {
-        $('#addneweditor span').hide(); 
-        $('#addneweditor a').show()
-        $('#contributorserror').hide();
-    }); 
-    $('#addneweditor input.addbutton').live('click', function()
-    {
-        $('#contributorserror').hide();
-        var thisli = $(this).parents("li:first"); 
-        var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
-        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
-	        {
-           
-	            if (result.substring(0, 6) == "Failed") {
-	                $('#contributorserror').text(result).show(300);
-	            } else {
-	                reload_scraper_contributors(); 
-	                $('#addneweditor span').hide(); 
-	                $('#addneweditor a').show(); 
-	            }
-	        },
-	        error:function(jq, textStatus, errorThrown)
-	        {
-	            $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
-	        }
-        }); 
-    }); 
-
-    $('.detachbutton').live('click', function() 
-    {
-        $('#contributorserror').hide();
-        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
-		changeRoles( sdata, '/dashboard/' );
-    }); 
-
-    $('.demotebutton').live('click', function() 
-    {
-        $('#contributorserror').hide();
-        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
-		changeRoles( sdata );
-    }); 
-    $('.promotebutton').live('click', function() 
-    {
-        $('#contributorserror').hide();
-        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'editor' }; 
-		changeRoles( sdata );
-    }); 
-
-
-    if ($('#addneweditor input:text').length)
-        $('#addneweditor input:text').autocomplete(
-    {
-        minLength: 2,
-        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
-        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }, 
-        //select: function(event, ui) { rewriteapiurl(); },
-        source: function(request, response) 
-        {
-            var nolist = [ ]; 
-            $("ul#contributorslist li span").each(function(i, el) { nolist.push($(el).text()); }); 
-            $.ajax(
-            {
-                url: $('#id_api_base').val()+"scraper/usersearch",
-                dataType: "jsonp",
-                data: { format:"jsondict", maxrows:12, searchquery:request.term, nolist:nolist.join(" ") },
-                success: function(data) 
-                {
-                    response($.map(data, function(item) { return  { label: item.username, desc: item.profilename, value: item.username }})); 
-                }
-            })
-        },
-        focus: function(event, ui)  { $( "#addneweditor input:text" ).val(ui.item.label);  return false; }
-    })
-    .data( "autocomplete" )._renderItem = function(ul, item) 
-    {
-        return $( "<li></li>" )
-        .data( "item.autocomplete", item )
-        .append( '<a><strong>' + item.desc + '</strong><br/><span>' + item.label + '</span></a>' )
-        .appendTo(ul);
-    };
-
-
-    // Changing between public / protected(visible) / private
-
-    $('#hide_privacy_choices').live('click', function() 
-    {
-        $('#privacy_status form').hide();
-        $('#privacy_status>p, #show_privacy_choices').show();
-    });
-
-}
     
 function setupChangeAttachables(short_name)
 {
@@ -266,7 +140,7 @@ function setupCodeOverview(short_name){
              placeholder: ''
          });
 
-    $('a.editdescription').click(
+    $('a.edit_description').click(
         function(){
              $('#divAboutScraper').dblclick();
              var oHint = $('<div id="divMarkupHint" class="content_footer"><p><strong>You can use Textile markup to style the description:</strong></p><ul><li>*bold* / _italic_ / @code@</li><li>* Bulleted list item / # Numbered list item</li><li>"A link":http://www.data.gov.uk</li><li>h1. Big header / h2. Normal header</li></ul></div>');
@@ -333,28 +207,8 @@ function setupCodeOverview(short_name){
     $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
 }
 
-function setupScraperOverview(short_name)
-{
-/*    $('.data_tab').click(function(){
-        // do nothing if already selected
-        if ($(this).hasClass('selected')) 
-            return;
-        
-        // make tab selected
-        $('.data_tab').removeClass('selected'); // all
-        $(this).addClass('selected');
-    
-        // show and hide
-        $('.data_content').hide(); // all
-        var tab_content_name = $(this).attr('id').replace('data_tab', 'data_content');
-        var tablename = $(this).find("span.tablename").text(); 
-        $('#' + tab_content_name).show();
-    
-        $("#downloadcsvtable").show(); 
-        $("#downloadcsvtable").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + short_name 
-                                                + "&query=select+*+from+`"+encodeURI(tablename)+"`"+"&apikey="+$('#id_apikey').val()); 
-    }); 
-*/
+function setupScraperOverview(short_name){
+
     $('.sqlite_view_schema').click( function() 
     {
         $('#sqlite_schema').toggle(500); 
@@ -378,35 +232,9 @@ function setupScraperOverview(short_name)
         }); 
     }); 
 
-    $("#downloadcsvtable").hide(); 
     $('.sqlite_view_schema:last').hide(); 
     $('#sqlite_schema').hide(); 
-    $('#data_tab_1').click();
-
-  	//scheduler
-	if ($('#spnRunInterval').length > 0) {
-	  $('#spnRunInterval').editable('admin/', {
-	           indicator : 'Saving...',
-	           tooltip   : 'Click to edit...',
-	           cancel    : 'Cancel',
-	           submit    : 'Save',
-	           onblur: 'ignore',
-	           data   : $('#hidScheduleOptions').val().replace('PLACEHOLDER', $('#spnRunIntervalInner').attr('rawInterval')),
-	           type   : 'select',
-	           event: 'dblclick',
-	           placeholder: '',
-	           submitdata : {short_name: short_name}
-	       });
-	}
-
-	$('#aEditSchedule').click(
-	    function(){
-	         sCurrent = $('#spnRunIntervalInner').html().trim();               
-	         $('#spnRunInterval').dblclick();
-	         $('#spnRunInterval select').val(sCurrent);
-	         return false;
-	    }
-	);
+    $('#data_tab_1').trigger('click');
 }
 
 function setup_collaboration_ui(){
@@ -447,7 +275,6 @@ function setup_collaboration_ui(){
 				if (result.substring(0, 6) == "Failed"){
 	                alert(result); 
 	            } else {
-					console.log('success');
 					reload_collaboration_ui('#privacy_status');
 				}
 			}});
@@ -466,7 +293,6 @@ function setup_collaboration_ui(){
 			$(this).next().attr('disabled',false);
 			$(this).parents('td').prev().find('input:radio').attr('checked', true)
 		}
-		console.log($(this).val());
 	}).next().attr('disabled','disabled').bind('click', function(e){
 		e.preventDefault();
 		if($(this).is(':disabled')){
@@ -576,7 +402,6 @@ function setup_collaboration_ui(){
 }
 
 function reload_collaboration_ui(auto_enable_tab){
-
 	$("#collaboration").load(document.location + ' #collaboration>*', function(response, status, xhr){
 		if (status == "error") {
 			alert('There was an error refreshing the collaboration UI: ' + xhr.status + " " + xhr.statusText);
@@ -590,11 +415,57 @@ function reload_collaboration_ui(auto_enable_tab){
 			if(auto_enable_tab){
 				$(auto_enable_tab).show();
 				$('ul.buttons li').eq($(auto_enable_tab).index() - 1).children().addClass('selected');
-				console.log(auto_enable_tab + ' ' + $(auto_enable_tab).index());
 			}
+		}
+	});	
+}
+
+function setup_schedule_ui(){
+	$('#select_schedule').bind('change', function(){
+		$(this).next().attr('disabled', false);
+	}).next().attr('disabled', true).bind('click', function(){
+		$(this).val('Saving\u2026');
+		$.getJSON($(this).prev().val(), function(data) {
+			if(data.status == 'ok'){
+				reload_schedule_ui();
+			} else {
+				alert('New schedule could not be saved: ' + data.error);
+				$(this).val('Save');
+			}
+		});
+	});
+	
+	$('.edit_schedule').bind('click', function(e){
+		e.preventDefault();
+		if($('#edit_schedule').is(':hidden')){
+			$('#edit_schedule').show().prev().hide();
+			$(this).addClass('cancel').text('Cancel');
+		} else {
+			$('#edit_schedule').hide().prev().show();
+			$(this).removeClass('cancel').text('Edit');
 		}
 	});
 	
+	$('.schedule a.run').bind('click', function(e){
+		e.preventDefault();
+		$.getJSON($(this).attr('href'), function(data) {
+			if(data.status == 'ok'){
+				reload_schedule_ui();
+			} else {
+				alert('Could not run scraper: ' + data.error);
+			}
+		});
+	});
+}
+
+function reload_schedule_ui(){
+	$("td.schedule").load(document.location + ' td.schedule>*', function(response, status, xhr){
+		if (status == "error") {
+			alert('There was an error refreshing the schedule UI: ' + xhr.status + " " + xhr.statusText);
+		} else {
+			setup_schedule_ui();
+		}
+	});
 }
 
 $(function(){
@@ -677,16 +548,8 @@ $(function(){
 		}
 	});
 	
-	$('.edit_schedule').bind('click', function(e){
-		e.preventDefault();
-		if($('#edit_schedule').is(':hidden')){
-			$('#edit_schedule').show().prev().hide();
-		} else {
-			$('#edit_schedule').hide().prev().show();
-		}
-	});
-	
 	setup_collaboration_ui();
+	setup_schedule_ui();
 	
 	$('li.share a, li.admin a, li.download a').each(function(){
 		$(this).bind('click', function(){
@@ -718,8 +581,3 @@ $(function(){
 	});
 	
 });
-
-
-
-
-

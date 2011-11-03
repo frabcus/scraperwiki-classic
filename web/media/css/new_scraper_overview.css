@@ -486,25 +486,24 @@ td.description {
 	border-bottom: 1px solid #bbb;
 }
 
-table.about h3,
-table.about h4 {
-	font-size: 16px;
-	font-weight: normal;
-}
-
 table.about h3 {
+	font-size: 14px;
+	font-weight: normal;
 	color: #666;
-	font-size: 16px;
 	border-bottom: 1px solid #ccc;
 	padding-bottom: 3px;
-	margin-bottom: 5px;
+	margin: 25px 0 5px 0;
+	font-weight: normal;
+	text-transform: uppercase;
+}
+
+table.about h3.current_status,
+table.about h3.about_this_scraper {
 	margin-top: 0;
 }
 
-table.about h3 strong {
-	font-weight: normal;
-	text-transform: uppercase;
-	font-size: 14px;
+table.about h3.schedule {
+	clear: both;
 }
 
 table.about h3.schedule {
@@ -516,20 +515,39 @@ td.description h3 {
 	border-bottom-color: #bbb;
 }
 
-table.about h3 a.edit {
-	float: right;
-	font-size: 1em;
-	display: block;
-	width: 16px;
-	height: 16px;
-	text-indent: -9000px;
-	background: transparent url(../images/icons/edit.png) 0 0 no-repeat;
-	opacity: 0.5;
-	cursor: pointer;
+table.about p {
+	font-size: 14px;
+	line-height: 18px;
 }
 
-table.about h3 a.edit:hover {
-	opacity: 1;
+table.about a.edit {
+	float: right;
+	font-size: 14px;
+	line-height: 16px;
+	height: 16px;
+	padding-right: 22px;
+	background: transparent url(../images/icons/edit.png) top right no-repeat;
+	cursor: pointer;
+	font-weight: normal;
+	text-transform: none;
+	color: #926926;
+	margin-top: 1px;
+}
+
+table.about a.cancel {
+	background-image: url(../images/icons/cross.png);
+	color: #d55a57;
+}
+
+table.about a.run {
+	float: right;
+	font-size: 14px;
+	line-height: 16px;
+	height: 16px;
+	padding-right: 22px;
+	background: transparent url(../images/icons/cog_go.png) top right no-repeat;
+	cursor: pointer;
+	color: #347b0e;
 }
 
 #scraper_screenshot img {
@@ -537,7 +555,7 @@ table.about h3 a.edit:hover {
 	width: 150px;
 	height: 98px;
 	padding: 5px;
-	margin: -5px -5px 10px 10px;
+	margin: 25px -5px 10px 10px;
 	-webkit-box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
 	-moz-box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
 	box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
@@ -557,6 +575,33 @@ table.about h3 a.edit:hover {
 	-o-transform: rotate(0deg);
 	-ms-transform: rotate(0deg);
 	transform: rotate(0deg);	
+}
+
+table.about .fail {
+	float: right;
+	font-style: normal;
+	background-color: #f0c3c3;
+	color: #b10000;
+	padding: 3px 5px;
+	font-size: 10px;
+	line-height: 10px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	vertical-align: 1px;
+	margin-left: 2px;
+	cursor: help;
+	font-weight: bold;
+}
+
+table.about .running {
+	background: transparent url(../images/load2.gif) 0 0 no-repeat;
+	padding-left: 23px;
+	height: 16px;
+}
+
+#edit_schedule {
+	margin-top: -1px;
 }
 
 ul.buttons {
