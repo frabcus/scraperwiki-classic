@@ -150,6 +150,7 @@ class DataEnquiryForm(forms.ModelForm):
     visualisation = forms.CharField(required=False, widget=forms.Textarea, label='What visualisation do you need?')
     application = forms.CharField(required=False, widget=forms.Textarea, label='What application do you want built?')
     frequency = forms.ChoiceField(label='How often does the data need to be scraped?', choices=DataEnquiry.FREQUENCY_CHOICES)
+    why = forms.CharField(required=False, widget=forms.Textarea, label='Why do you want to liberate this data?')
 
     def clean(self):
         cleaned_data = self.cleaned_data

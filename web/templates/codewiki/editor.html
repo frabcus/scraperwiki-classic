@@ -152,9 +152,9 @@
           <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
         </a>
         {% if scraper.owner %}
-          {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %}
+          {% if scraper.owner.get_profile.name %}<a href="{% url profiles_profile_detail scraper.owner.username %}">{{scraper.owner.get_profile.name}}</a>{% else %}<a href="{% url profiles_profile_detail scraper.owner.username %}">{{scraper.owner.username}}</a>{% endif %}
         {% else %}
-          {% if request.user.get_profile.name %}{{ request.user.get_profile.name }}{% else %}{{request.user.username}}{% endif %}
+          {% if request.user.get_profile.name %}<a href="{% url profiles_profile_detail request.user.username %}">{{request.user.get_profile.name}}</a>{% else %}<a href="{% url profiles_profile_detail request.user.username %}">{{request.user.username}}</a>{% endif %}
         {% endif %}
         / 
         <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
