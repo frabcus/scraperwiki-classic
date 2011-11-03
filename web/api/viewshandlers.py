@@ -686,7 +686,7 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
     info['privacy_status'] = scraper.privacy_status
 
     if scraper.wiki_type == 'scraper':
-        info['last_run'] = scraper.scraper.last_run
+        info['last_run'] = scraper.scraper.last_run and scraper.scraper.last_run.isoformat() or ''
         info['run_interval'] = scraper.scraper.run_interval
 
     attachables = [ ]
