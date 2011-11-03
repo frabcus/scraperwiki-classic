@@ -2074,6 +2074,11 @@ body.api .right ul {
 	background-image: url(../images/icons/balloon_ellipsis.png);
 }
 
+#help_content #getting_help ul li.irc {
+	background-image: url(../images/icons/irc.png);
+}
+
+
 #help_content p.intro {
 	margin-top: 30px;
 	line-height: 1.2em;

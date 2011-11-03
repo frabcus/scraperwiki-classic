@@ -171,9 +171,9 @@ class TestScrapers(SeleniumTest):
 
     # searches specific markup currently used for the contributor list, to pull
     # out what status they have
-    def _find_contributor_status(s, hunt_for_user_name):
+    def _find_contributor_status(self, s, hunt_for_user_name):
         root = lxml.html.fromstring(s.get_html_source())
-        for el in root.cssselect("ul.contributorslist li"):
+        for el in root.cssselect("ul#contributorslist li"):
             user_name = el.cssselect("img")[0].tail.strip() # text of user name is just after first image (their profile photo)
             if len(el.cssselect("img.vault_owner_flash")) > 0: # they are marked with a diagonal flash image
                 status = 'owner'
@@ -195,7 +195,7 @@ class TestScrapers(SeleniumTest):
         s.open("/%ss/%s/" % (code_type, code_name))
         self.wait_for_page()
         s.click("xpath=//input[@class='detachbutton']")
-        self.failIf(s.is_text_present(editor['username'] + " (editor)"))
+        self.assertEqual(self._find_contributor_status(s, editor['username']), None)
         self.user_login(owner['username'], owner['password'])
         s.open("/%ss/%s/" % (code_type, code_name))
         self.wait_for_page()
@@ -255,7 +255,7 @@ class TestScrapers(SeleniumTest):
         # Demote existing editor        
         self.failUnless("int(s.get_xpath_count('//input[@class=\"demotebutton\"]')) == 1")
         s.click("xpath=//input[@class='demotebutton']")
-        self.failIf(s.is_text_present(editor['username'] + " (editor)"))
+        self.assertEqual(self._find_contributor_status(s, editor['username']), None)
         self._check_editor_permissions(code_name, code_type, owner, editor, privacy, False)
         # Check editor demoting self from scraper
         self.add_code_editor(editor['username'], "test %s_editor (editor)" % code_type)
@@ -269,7 +269,7 @@ class TestScrapers(SeleniumTest):
         s = self.selenium
         s.open("/%ss/" % code_type + code_name)
         self.wait_for_page()
-        self.assertEqual(self._find_contributor_status("test user"), "owner")
+        self.assertEqual(self._find_contributor_status(s, "test user"), "owner")
         # Set scraper protected and check editor permission changing
         self.set_code_privacy('protected', code_type)
         self._check_editors_list_changes(code_name, code_type, owner, editor, 'protected')
@@ -282,7 +282,7 @@ class TestScrapers(SeleniumTest):
         # Check added user stays as follower when setting scraper public
         self.add_code_editor(editor['username'], "test %s_editor (editor)" % code_type)
         self.set_code_privacy('public', code_type)
-        self.assertEqual(self._find_contributor_status("test %s_editor" % code_type), "editor")
+        self.assertEqual(self._find_contributor_status(s, "test %s_editor" % code_type), "editor")
         self.failUnless("int(s.get_xpath_count('//input[@class=\"demotebutton\"]')) == 0")
         
         
