@@ -51,21 +51,19 @@
                     {{ form.bio }}
                     {% field_errors form.bio %}
                 </p>
-                <p class="alert_explanation">ScraperWiki can email you if your scrapers stop working or if someone else edits them.</p>
+                <p class="alert_explanation">ScraperWiki can email you if your scrapers stop working or if someone else edits them:</p>
                 <p class="alerts">
                     <label for="id_alert_frequency">Alert frequency</label>
                     {{ form.alert_frequency }}
                     {% field_errors form.alert_frequency %}
                 </p>
 
-				<!-- 
-                <p class="alert_explanation">Would you like to receive emails when someone leaves a comment on your scrapers.</p>
+                <p class="alert_explanation">We can also email you when someone leaves a comment on your scrapers:</p>
 				<p class="alerts">
-                    <label for="id_email_on_comments">Notifications</label>					
+                    <label for="id_email_on_comments">Send me emails</label>					
 					{{ form.email_on_comments }}
-                    {% field_errors form.email_on_comments %}					
+                    {% field_errors form.email_on_comments %}		
 				</p>
-				-->
             </div>
 
             <br class="clear" />

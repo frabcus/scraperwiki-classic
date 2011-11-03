@@ -64,7 +64,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('bio', 'name')
+        fields = ('bio', 'name', 'email_on_comments')
 
     def save(self, *args, **kwargs):
         self.user.email = self.cleaned_data['email']
