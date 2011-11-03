@@ -133,7 +133,7 @@
     <li class="clear"></li>
 </ul>
 
-{% if scraper.is_sick_and_not_running %}
+{% if scraper.is_sick_and_not_running or scraper.last_runevent.exception_message %}
 <div class="sick">
     <h6>It looks like this scraper is broken!</h6>
     {% if scraper.last_runevent.exception_message %}
@@ -155,11 +155,15 @@
                 {% else %}
                 <a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run">Run now</a>
                 <p>
-                    Idle &ndash; next run {% ifequal scraper.scraper.next_run|timeuntil '0 minutes' %}
-                        <abbr title="This scraper is overdue and will be run as soon as possible">ASAP</abbr>
+                    {% if scraper.scraper.run_interval == -1 %}
+                        Idle &ndash; not scheduled to run
                     {% else %}
-                        <abbr title="{{scraper.scraper.next_run}}">in {{scraper.scraper.next_run|timeuntil}}</abbr>
-                    {% endifequal %}
+                        Idle &ndash; next run {% ifequal scraper.scraper.next_run|timeuntil '0 minutes' %}
+                            <abbr title="This scraper is overdue and will be run as soon as possible">ASAP</abbr>
+                        {% else %}
+                            <abbr title="{{scraper.scraper.next_run}}">in {{scraper.scraper.next_run|timeuntil}}</abbr>
+                        {% endifequal %}
+                    {% endif %}
                 </p>
                 {% endif %}
             {% else %}
@@ -183,7 +187,11 @@
         <h3 class="last_run">Last run{% if scraper.last_runevent.exception_message %} <em class="fail" title="This scraper generated the following error on its last run: {{scraper.last_runevent.exception_message}}">Failed!</em>{% endif %}</h3>
         {% if scraper.last_runevent %}
             <p><a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}">{{scraper.last_runevent.run_started|timesince}} ago</a></p>
-            <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from {% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>{% endfor %}</p>
+            {% if scraper.last_runevent.pages_scraped %}
+                <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from {% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>{% endfor %}</p>
+            {% else %}
+                <p>Did not scrape any pages</p>
+            {% endif %}
         {% else %}
             <p>Has not run yet</p>
         {% endif %}
@@ -435,31 +443,6 @@
         </div>
         {% endfor %}
     </div>
-    
-    <!--
-    {% for sqltabledata in sqlitedata %}
-        <div id="data_content_{{forloop.counter}}" class="data_content">
-            <table class="data" cellspacing="0" cellpadding="0">
-                <thead>
-                    <tr>{% for heading in sqltabledata.keys %}<th width="120">{{ heading }}</th>{% endfor %}</tr>
-                </thead>
-                <tbody>
-                    {% for row in sqltabledata.rows %}
-                        <tr class="row">{% for value in row %}<td>{% ifnotequal value None %}{{ value|truncatewords_html:30|urlizetrunc:30 }}{% endifnotequal %}</td>{% endfor %}</tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="content_footer">
-            <p>This datastore has a total of {{ total_record_count }} record{{ total_record_count|pluralize }} in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }} (<span><a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a><a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a></span>).</p>
-        </div>
-        <ul id="sqlite_schema" style="display: none">
-            {% for sqltabledata in sqlitedata %}
-                <li>{{sqltabledata.sql}}</li>
-            {% endfor %}
-        </ul>
-    {% endfor %}
-    -->
 {% else %}
     <ul class="titlebar">
         <li class="first"><h3>This scraper has no data yet</h3></li>
@@ -472,7 +455,7 @@
 <div class="history">
     <ul class="titlebar">
         <li class="first"><h3>This scraper&rsquo;s history</h3></li>
-        <li class="full_history"><a>Show full history</a></li>
+        <!-- <li class="full_history"><a>Show full history</a></li> -->
         <li class="clear"></li>
     </ul>
     <input type="hidden" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>
