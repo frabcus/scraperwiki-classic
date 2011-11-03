@@ -5431,6 +5431,16 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	color: #666;
 }
 
+#api_explorer #functions .selected .mask {
+	display: block; 
+	width: 10px; 
+	position: absolute; 
+	top: 0pt; 
+	right: -5px; 
+	height: 100%; 
+	background: #fff;
+}
+
 #api_explorer #intro {
 	text-align: center;
 }
@@ -5457,7 +5467,7 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	border: 1px solid #ccc;
 	background-color: #fff;
 	float: right;
-	width: 436px;
+	width: 435px;
 	padding: 20px;
 	min-height: 470px;
 }

@@ -87,7 +87,7 @@ $(function()
         
         $(this).parent().addClass('selected').siblings('.selected').removeClass('selected');
         e.preventDefault();
-    });
+    }).append('<span class="mask"></span>');
     if($('#functions').height() > $('#detail').height()){
         $('#detail').css('minHeight', $('#functions').height());
     }
