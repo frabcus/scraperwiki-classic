@@ -27,6 +27,26 @@ djangokey = config.get("twister", "djangokey")
 djangourl = config.get("twister", "djangourl")
 
 
+# Configuration for each node so that we can have a different set for each
+# type of run (scheduled or live).  Each will support a list of servers 
+# that fulfill that role (the list contains dicts that contain the settings)
+try:
+    node_config = {
+        "scheduled": [],
+        "live": []
+    }
+    node_names = (config.get("twister", "node_names") or '').split(',')
+    for n in node_names:
+        d = {
+            "name": n,
+            "host": config.get(n, 'host'),
+            "port": config.getint(n, 'port')
+        }
+        key = (config.getint(n,live) and 'live') or 'scheduled'
+        node_config[key].append( d )
+except:
+    # All needs testing and using to replace nodecontrollername
+    pass    
 
 nodecontrollername = "lxc001"
 nodecontrollerhost = config.get(nodecontrollername, 'host')

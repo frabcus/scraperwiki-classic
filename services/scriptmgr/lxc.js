@@ -28,17 +28,20 @@ var fstab_tpl  = '';
 * Initialise the LXC handling by storing some properties and caching some 
 * templates ( only until we have created the relevant config files ).
 ******************************************************************************/
-exports.init = function(count, lxc_root_folder) {
+exports.init = function(start, count, lxc_root_folder) {
 	root_folder = lxc_root_folder;
 	
 	config_tpl = fs.readFileSync( path.join(__dirname,'templates/config.tpl'), "utf-8");
 	fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");
 
-	for ( var idx in _.range(1, count + 1) ) {
-		var i = parseInt(idx) + 1;
+	console.log('Creating VMS from ' + start + ' to '+ ((start + count)));
+	var ids = _.range(start, (start + count) + 1);
+	for ( var idx in ids ) {
+		var i = parseInt(ids[idx]);
 		var name = 'vm' + i;
 	    vms[name] = create_vm(name);
 	}
+	console.log( vms );
 };
 
 

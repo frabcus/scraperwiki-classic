@@ -9,6 +9,7 @@ exports.settings =
 { 
 	devmode: false, /* set this to true to not use LXC, just spawn local scripts */
 	port: 9001, 
+	vm_start: 1,	
 	vm_count: 10, 
 	extra_path: '../../scraperlibs',
 	dataproxy: '127.0.0.1:9003',

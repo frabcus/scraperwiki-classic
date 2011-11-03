@@ -44,7 +44,7 @@ exports.init = function( settings ) {
 	use_lxc = ! settings.devmode;
 
 	if ( use_lxc ) {
-		lxc.init(settings.vm_count, settings.mount_folder);
+		lxc.init(settings.vm_start || 1, settings.vm_count, settings.mount_folder);
 	}
 
 	if ( settings.devmode ) {
