@@ -32,6 +32,7 @@
 {% endblock %}
 
 {% block header %}
+
 	<h2>
       <a href="{% if scraper.owner.username %}{% url profiles_profile_detail scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> / 
        {% if user.is_authenticated %}
@@ -180,7 +181,7 @@
         
         
         {% if latestdomain %}
-            {% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank" id="scraper_screenshot">{% screen_shot scraper %}</a>{% endfor %}
+            {% for d in latestdomain %}<a href="{% if url_screenshot %}{{ url_screenshot }}{% else %}{{ d.domain }}{% endif %}" target="_blank" id="scraper_screenshot">{% screen_shot scraper %}</a>{% endfor %}
         {% else %}
             <a href="#" id="scraper_screenshot"><img src="{{ MEDIA_URL }}images/screenshot_placeholder.png" alt="Run this scraper to generate a screenshot"></a>
         {% endif %}
@@ -417,7 +418,7 @@
                     ],
                 "sDom": '<"H"<"#schema_{{forloop.counter}}">lfr>t<"F"ip>'
             } );
-            $('#schema_{{forloop.counter}}').addClass('schema').html('<a>Show schema</a><div>{{sqltabledata.sql}}<span class="arrow"></span></div>').children('a').bind('click', function(){
+            $('#schema_{{forloop.counter}}').addClass('schema').html('<a>Show schema</a><div><span class="tableschema">{{sqltabledata.sql}}</span><span class="arrow"></span></div>').children('a').bind('click', function(){
     			var $a = $(this).text('Hide schema');
     			var $p = $a.siblings('div');
     			if($p.is(':visible')){
@@ -437,6 +438,11 @@
     					});
     				});
     			}
+    		}).next().children('.tableschema').each(function(){
+    		    str = $(this).text();
+    		    str = str.replace(/(CREATE \w+) `(\w+)`/g,'<span class="create">$1</span> `<span class="tablename">$2</span>`');
+    		    str = str.replace(/`([^`]+)` (\w+)/g, '`<span class="column">$1</span>` <span class="type">$2</span>');
+    		    $(this).html(str);
     		});
         } );
         </script>

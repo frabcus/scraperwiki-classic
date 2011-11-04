@@ -4405,6 +4405,34 @@ a.api_link:hover span {
 	background: #fee
 }
 
+#listtables {
+	color: #999;
+}
+
+#listtables b {
+	color: #424242;
+}
+
+.schema .create,
+#listtables .create {
+	color: #424242;
+}
+
+.schema .tablename,
+#listtables .tablename {
+	color: #be5f0e;
+}
+
+.schema .column,
+#listtables .column {
+	color: #285fbf;
+}
+
+.schema .type,
+#listtables .type {
+	color: #529109;
+}
+
 
 
 /* Programmer API */
