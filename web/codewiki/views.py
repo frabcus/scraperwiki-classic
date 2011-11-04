@@ -346,6 +346,15 @@ def code_overview(request, wiki_type, short_name):
 
 
 # Rewrite of the overview page by Zarino
+def full_history(request, wiki_type, short_name):
+    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
+    if resp: return resp
+    
+    ctx = { "scraper": scraper }
+    return render_to_response('codewiki/full_history.html', ctx, context_instance=RequestContext(request))
+    
+    
+# Rewrite of the overview page by Zarino
 def new_code_overview(request, wiki_type, short_name):
     from codewiki.models import ScraperRunEvent, DomainScrape
     
