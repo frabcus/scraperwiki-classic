@@ -51,22 +51,32 @@
                     {{ form.bio }}
                     {% field_errors form.bio %}
                 </p>
-                <p class="alert_explanation">ScraperWiki can email you if your scrapers stop working or if someone else edits them:</p>
-                <p class="alerts">
-                    <label for="id_alert_frequency">Alert frequency</label>
-                    {{ form.alert_frequency }}
-                    {% field_errors form.alert_frequency %}
-                </p>
-
-                <p class="alert_explanation">We can also email you when someone leaves a comment on your scrapers:</p>
-				<p class="alerts">
-                    <label for="id_email_on_comments">Send me emails</label>					
-					{{ form.email_on_comments }}
-                    {% field_errors form.email_on_comments %}		
-				</p>
-				
-				<h4>Features</h4>
-				{{ form.features }}
+                
+                <div id="alerts">
+                    <h4>Alerts</h4>
+                    
+                    <p class="alert_frequency">
+                        <label for="id_alert_frequency">Email me when my scrapers stop working or someone edits them:</label>
+                        {{ form.alert_frequency }}
+                        <br class="clear" />
+                        {% field_errors form.alert_frequency %}
+                    </p>
+                  
+                    <p class="email_on_comments">
+                        <label for="id_email_on_comments">Email me when someone comments on one of my scrapers:</label>
+                        {{ form.email_on_comments }}
+                        <br class="clear" />
+                        {% field_errors form.email_on_comments %}
+                    </p>
+                
+                </div>
+                
+                <div id="features">
+                    <h4>Features</h4>
+                    <p>We regularly test new features that could make ScraperWiki even better. You can use these checkboxes to opt in or out of our current feature trials.</p>
+                    {{ form.features }}
+                </div>
+                
             </div>
 
             <br class="clear" />

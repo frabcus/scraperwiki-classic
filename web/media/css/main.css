@@ -1234,44 +1234,111 @@ body.profiles h2.scrapersandviews {
 	padding-top: 15px;
 }
 
-body.profiles.edit #divContent label {
-	font-size: 14px;
-	color: #666;
+
+
+
+body.profiles.edit .profilebio {
+	width: 400px;
+	margin: 0;
 }
 
-body.profiles.edit p.name label,
-body.profiles.edit p.email label,
-body.profiles.edit p.alerts label {
-	display: inline-block;
-	width: 7.6em;
+body.profiles.edit p.name,
+body.profiles.edit p.email {
+	width: 200px;
+	float: left;
 }
 
 body.profiles.edit p.name input,
 body.profiles.edit p.email input {
-	padding: 2px 4px;
-	width: 19em;
+	width: 170px;
+	font-size: 14px;
+	line-height: 18px;
+	margin: 0;
 }
 
-body.profiles.edit p.bio label {
-	padding-bottom: 5px;
-	display: block;
+body.profiles.edit p.bio {
+	clear: both;
 }
 
 body.profiles.edit p.bio textarea {
-	width: 29em;
-	padding: 0.5em;
+	width: 370px;
+	height: 100px;
+	font-size: 14px;
+	line-height: 18px;
 }
 
-body.profiles.edit p.alert_explanation {
-	font-style: italic;
+body.profiles.edit label {
+	display: block;
+	font-size: 13px;
+	color: #666;
+	margin-bottom: 3px;
+}
+
+body.profiles.edit #alerts,
+body.profiles.edit #features {
+	border: 2px solid #F4F8FB;
+	width: 373px;
+	margin-bottom: 20px;
+}
+
+body.profiles.edit #alerts h4,
+body.profiles.edit #features h4 {
+	background-color: #F4F8FB;
+	padding: 5px 10px;
+	color: #39c;
 	font-size: 14px;
+	font-weight: normal;
+	text-transform: uppercase;
+}
+
+body.profiles.edit #alerts p,
+body.profiles.edit #features p {
+	margin: 10px;
+}
+
+body.profiles.edit #alerts select,
+body.profiles.edit #alerts input {
+	float: right;
+	margin-top: 5px;
+}
+
+body.profiles.edit #alerts label {
+	width: 200px;
+	float: left;
+}
+
+body.profiles.edit input#id_email_on_comments {
+	margin-right: 70px;
+	margin-top: 8px;
+}
+
+body.profiles.edit #features p {
+	
+	font-size: 13px;
 	color: #666;
 }
 
-body.profiles.edit small.error_hint {
-	margin-left: 8.3em;
-	padding-top: 0.5em;
-	display: inline-block;
+body.profiles.edit #features ul {
+	padding: 0;
+	margin: 10px;
+}
+
+body.profiles.edit #features li {
+	padding: 7px 0 7px 10px;
+	border-top: 2px solid #F4F8FB;
+}
+
+body.profiles.edit #features li:first-child {
+	border-top: none;
+}
+
+body.profiles.edit #features label {
+	margin: 0;
+}
+
+body.profiles.edit #features li input {
+	vertical-align: 1px;
+	margin-right: 5px;
 }
 
 
