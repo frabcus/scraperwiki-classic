@@ -113,7 +113,7 @@ def populate_itemlog(scraper, run_count=-1):
     
     # now obtain the run-events and sort together
     if scraper.wiki_type == 'scraper':
-        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started','pid')
+        runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started','pid')
         if run_count != -1:
             runevents = runevents[:run_count]
         seen = []
@@ -998,13 +998,16 @@ def attachauth(request):
             toscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
         except models.Code.DoesNotExist:
             return HttpResponse("Scraper does not exist: %s" % str([scrapername]))
-        
-    if not toscraper or not fromscraper:
-        return HttpResponse("Need a 'from' and a 'to' scraper")
 
+    if not toscraper:
+        return HttpResponse("Need a 'to' scraper")
+        
     if toscraper.privacy_status != 'private':
         # toscraper is public so anyone can read
         return HttpResponse("Yes")
+    
+    if not fromscraper:
+        return HttpResponse("Need a 'from' scraper if not accessing public scraper")
     
     # If toscraper is private then it MUST be in a vault. 
     if fromscraper.privacy_status != 'private':
