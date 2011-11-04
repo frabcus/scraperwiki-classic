@@ -1,8 +1,12 @@
+
+from django.forms.fields import MultipleChoiceField
+from django.forms.widgets import CheckboxSelectMultiple
+
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 from django import forms
-from frontend.models import UserProfile, DataEnquiry
+from frontend.models import UserProfile, DataEnquiry,Feature
 from contact_form.forms import ContactForm
 from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
@@ -53,7 +57,8 @@ class UserProfileForm(forms.ModelForm):
     email = forms.EmailField(label="Email Address")
     email_on_comments = forms.BooleanField(required=False, 
                                         label="Do you wish to receive email notifications when someone comments on your scrapers?", )    
-    
+    features = forms.ModelMultipleChoiceField(required=False,
+                        widget=CheckboxSelectMultiple, queryset=Feature.objects.filter(public=True))
     
     def clean_email(self):
         email = self.cleaned_data['email']
@@ -64,7 +69,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('bio', 'name', 'email_on_comments')
+        fields = ('bio', 'name', 'email_on_comments', 'features')
 
     def save(self, *args, **kwargs):
         self.user.email = self.cleaned_data['email']
