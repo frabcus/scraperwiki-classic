@@ -503,7 +503,7 @@ $(function(){
 	$('ul.data_tabs li').bind('click', function(){
 		var eq = $(this).index();
 		if($(this).is('#more_tabs li')){
-			eq += $('#more_tabs').prevAll().length + 1;
+			eq += $('#more_tabs').prevAll().length;
 			$(this).addClass('selected');
 			$('#more_tabs').addClass('selected');
 			$('.data_tabs .selected').not($(this)).not('#more_tabs').removeClass('selected');
@@ -574,6 +574,45 @@ $(function(){
 	$('#delete_scraper, #empty_datastore').bind('click', function(e){
 		e.preventDefault();
 		$(this).next().children(':submit').trigger('click');
+	});
+	
+	$('.full_history a').bind('click', function(e){
+		e.preventDefault();
+		if(!$(this).is('.disabled')){ 
+			$button = $(this).text('Loading\u2026');
+			$.ajax({
+				url: $button.attr('href'),
+				success: function(data) {
+					$('.history>div').empty().html(data).each(function(){
+						$(".cprev").hide();     // hide these ugly titles for now
+					    hideallshowhistrun(); 
+
+					    $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
+
+					    $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); }); 
+					    $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); }); 
+
+					    $(".history_edit .history_code_border .otherlinenumbers").click(previewchanges_showsidecode); 
+					    $(".history_edit .history_code_border .linenumbers").click(previewchanges_showsidecode); 
+
+					    $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); }); 
+					    $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); }); 
+
+					    // if they put # and the run_id in the URL, open up that one
+					    if (window.location.hash) {
+					        var hash_run_event = $(window.location.hash);
+					        if (hash_run_event.length != 0) {
+					            previewrunevent_show(hash_run_event);
+					        }
+					    }
+					});
+					$button.text('Showing full history').addClass('disabled');
+				},
+				error: function(request, status, error){
+					$button.text('Unable to load full history').addClass('disabled').css('cursor','help').attr('title',request.responseText)
+				}
+			});
+		}
 	});
 	
 });
