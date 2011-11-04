@@ -133,7 +133,7 @@ function setupCodeOverview(short_name){
              cancel    : 'Cancel',
              submit    : 'Save',
              type      : 'textarea',
-             loadurl: '../raw_about_markup/',
+             loadurl: 'raw_about_markup/',
              onblur: 'ignore',
              event: 'dblclick',
              submitdata : {short_name: short_name},
