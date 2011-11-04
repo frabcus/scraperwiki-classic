@@ -22,6 +22,12 @@ class Feature(models.Model):
     description = models.TextField(blank=True, null=True)
     public = models.BooleanField( default=True )
 
+    class Meta(object):
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
 
 class UserProfile(models.Model):
     """
@@ -42,7 +48,7 @@ class UserProfile(models.Model):
     beta_user        = models.BooleanField( default=False )
     apikey           = models.CharField(max_length=64, null=True, blank=True)
     
-    features         = models.ManyToManyField( "Feature", related_name='features' )
+    features         = models.ManyToManyField( "Feature", related_name='features', null=True, blank=True )
     
     # If someone comments on an item this user owns, this specifies whether they 
     # should receive the email
