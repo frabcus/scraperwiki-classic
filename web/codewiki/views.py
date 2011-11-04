@@ -516,6 +516,15 @@ def new_code_overview(request, wiki_type, short_name):
 
     context["itemlog"] = populate_itemlog(scraper)
             
+    context['url_screenshot'] = None
+    try:
+        for s in scraper.scraperrunevent_set.order_by('run_started')[:50]:
+            if s.first_url_scraped:
+                context['url_screenshot'] = s.first_url_scraped
+    except:
+        pass
+            
+            
     return render_to_response('codewiki/new_scraper_overview.html', context, context_instance=RequestContext(request))
 
 
