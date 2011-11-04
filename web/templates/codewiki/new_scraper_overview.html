@@ -203,7 +203,7 @@
 			{% ifnotequal scraper.scraper.run_interval 1000000000 %}
             	<p>Runs {{scraper.scraper.run_interval|schedule}}</p>			
 			{% else %}
-				<p>Not scheduled</p>
+				<p>No schedule set</p>
 			{% endifnotequal%}
         {% else %}
             <p>No schedule set</p>
