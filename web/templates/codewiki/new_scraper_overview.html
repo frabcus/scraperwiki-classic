@@ -387,7 +387,7 @@
         <li class="clear"></li>
     </ul>
     <ul class="data_tabs">
-        {% for sqltabledata in sqlitedata %}
+        {% for sqltabledata in sqlitedata|dictsort:"tablename" %}
           <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
             <span class="tablename">{{sqltabledata.tablename}}</span>
             <i>{{sqltabledata.count}}  record{{sqltabledata.count|pluralize}}</i>
