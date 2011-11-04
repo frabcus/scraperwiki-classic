@@ -200,7 +200,11 @@
         <h3 class="schedule">Schedule</h3>
         <a href="#edit_schedule" title="Edit this scraper&rsquo;s schedule" class="edit edit_schedule">Edit</a>
         {% ifnotequal scraper.scraper.next_run.year 9999 %}
-            <p>Runs {{scraper.scraper.run_interval|schedule}}</p>
+			{% ifnotequal scraper.scraper.run_interval 1000000000 %}
+            	<p>Runs {{scraper.scraper.run_interval|schedule}}</p>			
+			{% else %}
+				<p>Not scheduled</p>
+			{% endifnotequal%}
         {% else %}
             <p>No schedule set</p>
         {% endifnotequal %}
