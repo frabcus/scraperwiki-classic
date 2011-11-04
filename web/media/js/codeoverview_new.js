@@ -503,7 +503,7 @@ $(function(){
 	$('ul.data_tabs li').bind('click', function(){
 		var eq = $(this).index();
 		if($(this).is('#more_tabs li')){
-			eq += $('#more_tabs').prevAll().length + 1;
+			eq += $('#more_tabs').prevAll().length;
 			$(this).addClass('selected');
 			$('#more_tabs').addClass('selected');
 			$('.data_tabs .selected').not($(this)).not('#more_tabs').removeClass('selected');
@@ -609,7 +609,7 @@ $(function(){
 					$button.text('Showing full history').addClass('disabled');
 				},
 				error: function(request, status, error){
-					console.log('Unable to load full history: ' + request.responseText);
+					$button.text('Unable to load full history').addClass('disabled').css('cursor','help').attr('title',request.responseText)
 				}
 			});
 		}

@@ -920,11 +920,13 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e6e6e6', end
     z-index: 100;
     top: 24px;
     left: -1px;
-    width: 150px;
+    width: 180px;
     display: none;
     border-bottom: 1px solid #ccc;
     -moz-box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
 box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
+	max-height: 500px;
+	overflow: auto;
 }
 
 #more_tabs:hover ul {
