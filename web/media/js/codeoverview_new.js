@@ -576,4 +576,43 @@ $(function(){
 		$(this).next().children(':submit').trigger('click');
 	});
 	
+	$('.full_history a').bind('click', function(e){
+		e.preventDefault();
+		if(!$(this).is('.disabled')){ 
+			$button = $(this).text('Loading\u2026');
+			$.ajax({
+				url: $button.attr('href'),
+				success: function(data) {
+					$('.history>div').empty().html(data).each(function(){
+						$(".cprev").hide();     // hide these ugly titles for now
+					    hideallshowhistrun(); 
+
+					    $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
+
+					    $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); }); 
+					    $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); }); 
+
+					    $(".history_edit .history_code_border .otherlinenumbers").click(previewchanges_showsidecode); 
+					    $(".history_edit .history_code_border .linenumbers").click(previewchanges_showsidecode); 
+
+					    $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); }); 
+					    $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); }); 
+
+					    // if they put # and the run_id in the URL, open up that one
+					    if (window.location.hash) {
+					        var hash_run_event = $(window.location.hash);
+					        if (hash_run_event.length != 0) {
+					            previewrunevent_show(hash_run_event);
+					        }
+					    }
+					});
+					$button.text('Showing full history').addClass('disabled');
+				},
+				error: function(request, status, error){
+					console.log('Unable to load full history: ' + request.responseText);
+				}
+			});
+		}
+	});
+	
 });

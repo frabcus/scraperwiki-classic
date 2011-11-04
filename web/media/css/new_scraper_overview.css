@@ -202,6 +202,12 @@ ul.titlebar>li>a:hover {
 	color: #666;
 }
 
+ul.titlebar>li>a.disabled {
+	border-color: #ccc;
+	color: #aaa;
+	cursor: default;
+}
+
 ul.toolbar>li>a img,
 ul.titlebar>li>a img {
 	vertical-align: -2px;
