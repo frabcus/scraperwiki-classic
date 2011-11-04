@@ -178,6 +178,11 @@ def gitpush(request, wiki_type, short_name):
 
 
 def code_overview(request, wiki_type, short_name):
+    
+    if request.user.is_authenticated():
+        if request.user.get_profile().beta_user:
+            return new_code_overview(request, wiki_type,short_name)
+    
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if resp: return resp
     
