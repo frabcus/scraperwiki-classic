@@ -355,18 +355,7 @@ background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%);
     line-height: 14px;
 }
 
-.download_popover li {
-	position: relative;
-    padding: 6px 8px;
-    line-height: 24px;
-    border-top: 1px solid #aaa;
-    border-left: 1px solid #aaa;
-    border-right: 1px solid #aaa;
-    color: #333;
-    cursor: pointer;
-}
-
-.download_popover li:first-child {
+.download_popover li:first-child a {
     -moz-border-radius-topleft: 3px;
     -moz-border-radius-topright: 3px;
     -webkit-border-top-left-radius: 3px;
@@ -375,7 +364,7 @@ background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%);
 	border-top-right-radius: 3px;
 }
 
-.download_popover li:last-child {
+.download_popover li:last-child a {
     -moz-border-radius-bottomleft: 3px;
     -moz-border-radius-bottomright: 3px;
     -webkit-border-bottom-left-radius: 3px;
@@ -385,13 +374,19 @@ background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%);
     border-bottom: 1px solid #aaa;
 }
 
-.download_popover li:hover {
-    background-color: #F4F8FB;
-    color: #000;
+.download_popover li a {
+	display: block;
+	text-decoration: none;
+    padding: 6px 8px;
+    line-height: 24px;
+    border-top: 1px solid #aaa;
+    border-left: 1px solid #aaa;
+    border-right: 1px solid #aaa;
 }
 
-.download_popover li a {
-	text-decoration: none;
+.download_popover li a:hover {
+    background-color: #F4F8FB;
+    color: #047;
 }
 
 .download_popover h6 {
