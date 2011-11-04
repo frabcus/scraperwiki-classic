@@ -93,9 +93,14 @@ def comments(request, wiki_type, short_name):
     context = {'selected_tab':'comments', 'scraper':scraper }
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
-def populate_itemlog(scraper):
+def populate_itemlog(scraper, run_count=-1):
     itemlog = [ ]
-    for commitentry in scraper.get_commit_log("code"):
+    if run_count != -1:
+        log = scraper.get_commit_log("code")[:run_count]
+    else:
+        log = scraper.get_commit_log("code")
+        
+    for commitentry in log:
         item = { "type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"] }
         if "user" in commitentry:
             item["user"] = commitentry["user"]
@@ -109,6 +114,8 @@ def populate_itemlog(scraper):
     # now obtain the run-events and sort together
     if scraper.wiki_type == 'scraper':
         runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started','pid')
+        if run_count != -1:
+            runevents = runevents[:run_count]
         seen = []
         events = []
         for r in runevents:
@@ -514,13 +521,12 @@ def new_code_overview(request, wiki_type, short_name):
     except:
         context['domain_scrapes'] = []
 
-    context["itemlog"] = populate_itemlog(scraper)
+    context["itemlog"] = populate_itemlog(scraper, run_count=10)
             
     context['url_screenshot'] = None
     try:
-        for s in scraper.scraperrunevent_set.order_by('run_started')[:50]:
-            if s.first_url_scraped:
-                context['url_screenshot'] = s.first_url_scraped
+        s = scraper.scraperrunevent_set.filter(first_url_scraped__isnull=False).order_by('run_started')[0]
+        context['url_screenshot'] = s.first_url_scraped
     except:
         pass
             
