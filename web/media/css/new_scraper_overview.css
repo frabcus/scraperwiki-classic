@@ -90,7 +90,7 @@ ul.toolbar {
 }
 
 ul.titlebar {
-	margin: 0 0 20px 0;
+	margin: 0;
 }
 
 ul.toolbar>li {
@@ -202,7 +202,8 @@ ul.titlebar>li>a:hover {
 	color: #666;
 }
 
-ul.titlebar>li>a.disabled {
+ul.titlebar li a.disabled,
+ul.titlebar li a.disabled:hover {
 	border-color: #ccc;
 	color: #aaa;
 	cursor: default;
@@ -878,6 +879,10 @@ div.data_content {
 	max-height: 400px;
 }
 
+ul.data_tabs {
+	margin-top: 20px;
+}
+
 ul.data_tabs li {
 	font-size: 14px;
 	padding: 4px 8px 0 8px;
@@ -1140,6 +1145,7 @@ box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.3);
 .history_month {
 	border: 1px solid #ccc;
 	font-size: 14px;
+	margin: 20px 0 0 0;
 }
 
 .history_month b {
@@ -1212,6 +1218,9 @@ a.historyuser {
 	margin-left: 5px;
 }
 
+.chat .titlebar {
+	margin-bottom: 20px;
+}
 
 
 

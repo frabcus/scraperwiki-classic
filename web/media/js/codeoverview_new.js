@@ -127,7 +127,7 @@ function htmlEscape(str) {
 
 function setupCodeOverview(short_name){
     //about
-    $('#divAboutScraper').editable('../admin/', {
+    $('#divAboutScraper').editable('admin/', {
              indicator : 'Saving...',
              tooltip   : 'Click to edit...',
              cancel    : 'Cancel',

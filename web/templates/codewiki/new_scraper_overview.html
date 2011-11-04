@@ -398,7 +398,7 @@
     </ul>
     
     <div id="datapreviews">
-        {% for sqltabledata in sqlitedata %}
+        {% for sqltabledata in sqlitedata|dictsort:"tablename" %}
         <div class="datapreview">
         <table cellpadding="0" cellspacing="0" border="0" id="datapreview_{{forloop.counter}}">
         	<thead>
@@ -471,7 +471,7 @@
     </ul>
     
     <div>
-    {% history scraper.scraper 10 %}
+    {% history scraper.scraper user 10 %}
     </div>
     
 </div>
