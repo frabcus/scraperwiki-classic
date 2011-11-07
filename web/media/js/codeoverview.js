@@ -344,13 +344,13 @@ function setupChangeEditorStatus()
 
     $('#show_privacy_choices').live('click', function(){
         $('#privacy_status form').show();
-        $('#privacy_status>p, #show_privacy_choices').hide();
+        $('#privacy_status>p, #show_privacy_choices, #privacy_status>h4').hide();
     });
 
     $('#hide_privacy_choices').live('click', function() 
     {
         $('#privacy_status form').hide();
-        $('#privacy_status>p, #show_privacy_choices').show();
+        $('#privacy_status>p, #show_privacy_choices, #privacy_status>h4').show();
     }); 
 
     $('#saveprivacy').live('click', function() 
