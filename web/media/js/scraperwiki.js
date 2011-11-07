@@ -193,7 +193,8 @@ function newVaultCodeObject(id, wiki_type){
 }
 
 $(function()
-{ 
+{
+	
 	setupSearchBoxHint();
 	setupNavSearchBoxHint();
 
@@ -242,6 +243,7 @@ $(function()
 	        developer_hide();
 	    } else {
 	        developer_show();
+			_gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']);
 	    }
 	    return false;
 	});
@@ -251,17 +253,20 @@ $(function()
 	        requester_hide();
 	    } else {
 	        requester_show();
+			_gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']);
 	    }
 	    return false;
 	});
 	
 	$('#more_developer, #intro_developer').css('cursor', 'pointer').bind('click', function(){
 		developer_show();
+		_gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']);
 		return false;
 	});
 
 	$('#more_requester, #intro_requester').css('cursor', 'pointer').bind('click', function(){
 		requester_show();
+		_gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']);
 		return false;
 	});
 

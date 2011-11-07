@@ -455,8 +455,14 @@ def request_data(request):
     form = DataEnquiryForm(request.POST or None)
     if form.is_valid():
         form.save()
-        return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
+        return HttpResponseRedirect(reverse('request_data_thanks'))
     return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
+
+def request_data_thanks(request):
+    return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
+
+def pricing(request):
+    return render_to_response('frontend/pricing.html', context_instance = RequestContext(request))
 
 def test_error(request):
     raise Exception('failed in test_error')

@@ -7,8 +7,8 @@
 
 {% block header %}
 			<div id="frontpage_intro">
-			<a class="create editor_scraper" href="{% url choose_template 'scraper' %}">Create a scraper</a>
-            <a class="tour" href="{% url request_data %}">Request data</a>
+			<a class="create editor_scraper" href="{% url choose_template 'scraper' %}" onClick="_gaq.push(['_trackEvent', 'Homepage buttons', 'Create a scraper']);">Create a scraper</a>
+            <a class="tour" href="{% url request_data %}" onClick="_gaq.push(['_trackEvent', 'Homepage buttons', 'Request data']);">Request data</a>
 				<p>A community of programmers sifting <br/>information to give you the edge.</p>
 			</div>
 			<div id="frontpage_slider">
@@ -38,7 +38,7 @@
 							<td>Real-time coding, with a<br/> community of geeks</td>
 						</tr>
 					</table>
-					<p class="last"><a class="back" href="#intro_developer">&laquo; Go Back</a> or <a class="forward" href="{% url docs 'ruby' %}">Get started!</a></p>
+					<p class="last"><a class="back" href="#intro_developer">&laquo; Go Back</a> or <a class="forward" href="{% url docs 'ruby' %}" onClick="_gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - get started']);">Get started!</a></p>
 				</div>
 				<div id="more_requester_div">
 					<h3>Why people who need data love ScraperWiki</h3>
@@ -54,7 +54,7 @@
 							<td>Simply analyse, aggregate<br/>and visualise data.</td>
 						</tr>
 					</table>
-					<p class="last"><a class="back" href="#intro_requester">&laquo; Go Back</a> or <a class="forward" href="{% url request_data %}">Request data!</a></p>
+					<p class="last"><a class="back" href="#intro_requester">&laquo; Go Back</a> or <a class="forward" href="{% url request_data %}" onClick="_gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - request data']);">Request data!</a></p>
 				</div>
 			</div>
 {% endblock %}
@@ -79,10 +79,10 @@
 			
 			<div class="involved">
 			    <h2>Get involved</h2>
-			    <a id="new_scraper"class="editor_scraper" href="{% url choose_template 'scraper' %}"><strong>Create a new scraper</strong> <span>Start using our collaborative coding environment right now for free.</span></a>
-			    <a id="new_request" href="{% url request_data %}"><strong>Request a new scraper</strong> <span>Not a developer? No problem! Tell us what you want and we&rsquo;ll build it</span></a>
-			    <a id="fix_scraper" href="{% url get_involved %}#technical"><strong>Fix a broken scraper</strong> <span>Fancy a challenge? Try getting a broken scraper back onto its feet.</span></a>
-			    <a id="tag_scraper" href="{% url get_involved %}#nontechnical"><strong>Spring cleaning</strong> <span>Help us organise our scrapers and views by describing and tagging them.</span></a>
+			    <a id="new_scraper"class="editor_scraper" href="{% url choose_template 'scraper' %}" onClick="_gaq.push(['_trackEvent', 'Get Involved buttons', 'Create a new scraper']);"><strong>Create a new scraper</strong> <span>Start using our collaborative coding environment right now for free.</span></a>
+			    <a id="new_request" href="{% url request_data %}" onClick="_gaq.push(['_trackEvent', 'Get Involved buttons', 'Request a new scraper']);"><strong>Request a new scraper</strong> <span>Not a developer? No problem! Tell us what you want and we&rsquo;ll build it</span></a>
+			    <a id="fix_scraper" href="{% url get_involved %}#technical" onClick="_gaq.push(['_trackEvent', 'Get Involved buttons', 'Fix a broken scraper']);"><strong>Fix a broken scraper</strong> <span>Fancy a challenge? Try getting a broken scraper back onto its feet.</span></a>
+			    <a id="tag_scraper" href="{% url get_involved %}#nontechnical" onClick="_gaq.push(['_trackEvent', 'Get Involved buttons', 'Spring cleaning']);"><strong>Spring cleaning</strong> <span>Help us organise our scrapers and views by describing and tagging them.</span></a>
 			</div>
 			
 			<div class="tags">

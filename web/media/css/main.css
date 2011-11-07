@@ -3196,6 +3196,9 @@ body.contact form .postphone {
 	padding: 8px 12px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
+	text-align: center;
+	font-size: 14px;
+	font-weight: normal;
 }
 
 
@@ -4039,6 +4042,162 @@ div.feature img {
 	color: #fff;
 	padding-top: 0;
 }
+
+
+
+
+/* PRICING */
+
+
+
+body.pricing .column-left,
+body.pricing .column-right {
+	float: left;
+	width: 340px;
+	text-align: justify;
+	margin-left: 20px;
+	line-height: 22px;
+}
+
+body.pricing .column-right {
+	float: right;
+	margin-left: 0;
+	margin-right: 20px;
+}
+
+#pricing_chart {
+	margin: 20px 0 30px 20px;
+}
+
+#pricing_chart div.col {
+	float: left;
+	width: 174px;
+	font-size: 12px;
+	text-align: center;
+}
+
+#pricing_chart .footnote {
+	width: 174px;
+	text-align: center;
+	margin-left: 525px;
+	font-size: 11px;
+	color: #888;
+	line-height: 14px;
+}
+
+#pricing_chart #free {
+	background: #fff;
+	border: 2px dashed #f3e3a6;
+	border-right: none;
+	margin-top: 15px;
+}
+
+#pricing_chart #individual {
+	background: #f8f0d3;
+	border: 2px solid #f3e3a6;
+	border-right: none;
+	margin-top: 15px;
+}
+
+#pricing_chart #smallbusiness {
+	background: #f7e9b9;
+	border: 2px solid #f2dd96;
+	position: relative;
+	z-index: 20;
+	-webkit-box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
+	box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
+	width: 176px;
+}
+
+#pricing_chart #corporate {
+	background: #f2dd96;
+	border: 2px solid #efc95a;
+	border-left: none;
+	margin-top: 15px;
+}
+
+#pricing_chart h3 {
+	margin-top: 15px;
+	font-size: 17px;
+	line-height: 17px;
+}
+
+#pricing_chart p.price {
+	margin: 5px 0 20px 0;
+	font-size: 14px;
+	line-height: 14px;
+}
+
+#pricing_chart ul {
+	padding: 0;
+	color: #6a5926;
+}
+
+#pricing_chart ul em {
+	color: #e1865a;
+	font-style: normal;
+}
+
+#pricing_chart h4 {
+	color: #e1865a;
+	text-transform: uppercase;
+	margin: 0;
+}
+
+#pricing_chart p.limit {
+	margin: 3px 0 20px 0;
+	font-size: 13px;
+	line-height: 13px;
+}
+
+#pricing_chart #smallbusiness h3 {
+	margin-top: 25px;
+}
+
+#pricing_chart #smallbusiness p.price {
+	margin: 7px 0 25px 0;
+}
+
+#pricing_chart #smallbusiness li {
+	padding-bottom: 8px;
+}
+
+#pricing_chart #smallbusiness p.limit {
+	margin: 5px 0 25px 0;
+}
+
+body.pricing a#buy {
+	display: block;
+	background-color: #fbf9ed;
+	border: 2px solid #f7e9b9;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	color: #9b7461;
+	text-align: center;
+	padding: 10px;
+	margin: 0 20px;
+}
+
+body.pricing a#buy:hover {
+	text-decoration: none;
+	background-color: #faf5e7;
+	border-color: #f5e2b2;
+	color: #8f6b5a;
+}
+
+body.pricing a#buy em {
+	font-style: normal;
+	color: #e1865a;
+}
+
+body.pricing a#buy:hover em {
+	text-decoration: underline;
+} 
+
+
+
 
 /* LOGIN / SIGNUP PAGE */
 

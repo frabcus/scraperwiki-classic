@@ -1,0 +1,82 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Pricing{% endblock %}
+
+{% block header %}
+	<h2>ScraperWiki Pricing</h2>
+	<p>One great product, four simple price points</p>
+{% endblock %}
+
+{% block content %}
+
+<div class="column-left">
+    <p class="first">ScraperWiki is an online tool for data analysts, researchers and journalists. It makes the whole process of gathering information from diverse web sources and saving it into a uniform format, simple and collaborative.</p>
+</div>
+<div class="column-right">
+    <p>By default, the code and data you scrape are shared with the world. But now, with <strong>Vaults</strong>, you can benefit from increased security and privacy while also making the most of ScraperWiki’s collaborative model.</p>
+</div>
+<br class="clear" />
+<div id="pricing_chart">
+    
+    <div class="col" id="free">
+        <h3>No Vaults</h3>
+        <p class="price">(Free)</p>
+        <ul>
+            <li><em>No</em> private scrapers</li>
+            <li><em>No</em> schedule control</li>
+            <li>Unlimited collaborators</li>
+        </ul>
+    </div>
+    <div class="col" id="individual">
+        <h3>Individual</h3>
+        <p class="price">$9 a month</p>
+        <ul>
+            <li>Private scrapers</li>
+            <li>Schedule control</li>
+            <li>Unlimited collaborators</li>
+        </ul>
+        <h4>You can scrape</h4>
+        <p class="limit">20,000 pages/month</p>
+    </div>
+    <div class="col" id="smallbusiness">
+        <h3>Small Business</h3>
+        <p class="price">$29 a month</p>
+        <ul>
+            <li>Private scrapers</li>
+            <li>Schedule control</li>
+            <li>Unlimited collaborators</li>
+        </ul>
+        <h4>You can scrape</h4>
+        <p class="limit">100,000 pages/month</p>
+    </div>
+    <div class="col" id="corporate">
+        <h3>Corporate</h3>
+        <p class="price">from $299 a month</p>
+        <ul>
+            <li>Private scrapers</li>
+            <li>Schedule control</li>
+            <li>Unlimited collaborators</li>
+        </ul>
+        <h4>You can scrape</h4>
+        <p class="limit">500,000+ pages/month*</p>
+    </div>
+    <br class="clear" />
+    <p class="footnote">
+        * If you go over 500,000 you just pay $299 for each batch of 500,000 more pages you scrape.
+    </p>
+    
+</div>
+
+<a id="buy" href="/contact/">To order a Vault or find out more, <em>contact us here</em></a>
+
+
+{% endblock %}
+
+{% block run_script %}
+    {{block.super}}
+
+    $('#free').css('height',$('#individual').height());
+
+{% endblock %}
+
+

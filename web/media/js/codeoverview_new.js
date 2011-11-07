@@ -140,7 +140,7 @@ function setupCodeOverview(short_name){
              placeholder: ''
          });
 
-    $('a.edit_description').bind('click', function(e){
+    $('a.edit_description').live('click', function(e){
 		e.preventDefault();
         $('#divAboutScraper').dblclick();
         var oHint = $('<div id="divMarkupHint" class="content_footer"><p><strong>You can use Textile markup to style the description:</strong></p><ul><li>*bold* / _italic_ / @code@</li><li>* Bulleted list item / # Numbered list item</li><li>"A link":http://www.data.gov.uk</li><li>h1. Big header / h2. Normal header</li></ul></div>');
