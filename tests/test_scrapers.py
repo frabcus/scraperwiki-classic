@@ -274,11 +274,6 @@ class TestScrapers(SeleniumTest):
         self.set_code_privacy('protected', code_type)
         self._check_editors_list_changes(code_name, code_type, owner, editor, 'protected')
         
-        # Do the same for private scraper
-        if SeleniumTest._adminuser:
-            self.set_code_privacy('private', code_type, code_name, owner)
-            self._check_editors_list_changes(code_name, code_type, owner, editor, 'private')
-        
         # Check added user stays as follower when setting scraper public
         self.add_code_editor(editor['username'], "test %s_editor (editor)" % code_type)
         self.set_code_privacy('public', code_type)
