@@ -226,7 +226,7 @@
         {% else %}
             <p>This scraper has no description. {% if user.is_authenticated %}
                 {% if user_edits_it %}
-                    <br/><a href="#" class="editdescription">Would you like to add one?</a>
+                    <br/><a href="#" class="edit_description">Would you like to add one?</a>
                 {% endif %}
             {% else %}
                 <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>
@@ -257,7 +257,7 @@
             </ul>
         	<div id="privacy_status">
         	    {% if scraper.owner == request.user and request.user.vault_membership.count %}
-                    <a class="editlink" id="show_privacy_choices"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" /><span>Change</span></a>
+                    <a class="editlink" id="show_privacy_choices">Change</a>
                 {% endif %}
         	    {% if scraper.privacy_status == 'public' %}
         	        <h4>This {{scraper.wiki_type}} is public</h4>
@@ -376,14 +376,14 @@
                 <span class="arrow"></span>
             </div>
         </li>
-        <li class="empty">
+        {% if user_owns_it or user.is_staff %}<li class="empty">
             <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore">Clear data</a>
             <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
                 {% csrf_token %}
                 <input type="hidden" name="delete_data" value="1" />
                 <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
             </form>
-        </li>
+        </li>{% endif %}
         <li class="clear"></li>
     </ul>
     <ul class="data_tabs">
@@ -457,7 +457,7 @@
 {% else %}
     <ul class="titlebar">
         <li class="first"><h3>This scraper has no data yet</h3></li>
-        <li class="import"><a href="">Import Data</a></li>
+        <!-- <li class="import"><a href="">Import Data</a></li> -->
         <li class="clear"></li>
     </ul>
 {% endif %}
