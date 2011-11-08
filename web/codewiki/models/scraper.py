@@ -145,18 +145,9 @@ class Scraper (code.Code):
         if url:
             if url.endswith('robots.txt'):
                 url = url.replace('robots.txt', '')
+            return url
 
-            class HeadRequest(urllib2.Request):
-                def get_method(self):
-                    return "HEAD"
-
-            try:
-                urllib2.urlopen(HeadRequest(url))
-                return url
-            except:
-                pass
-
-            # send to the editor rather than to no longer existing code page
+        # show shot of the editor if there is no URL
         return '%s%s' % (url_prefix, reverse('editor_edit', args=[self.wiki_type, self.short_name]))
 
     class Meta:
