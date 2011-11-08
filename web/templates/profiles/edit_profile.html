@@ -70,12 +70,14 @@
                     </p>
                 
                 </div>
-                
+
+				{% if profile.possible_feature_count != 0 %}
                 <div id="features">
                     <h4>Features</h4>
                     <p>We regularly test new features that could make ScraperWiki even better. You can use these checkboxes to opt in or out of our current feature trials.</p>
                     {{ form.features }}
                 </div>
+				{% endif %}
                 
             </div>
 

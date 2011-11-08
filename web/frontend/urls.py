@@ -7,6 +7,7 @@ import frontend.views as frontend_views  # who thinks replacing dots with unders
 import frontend.forms as frontend_forms
 
 from django.views.generic.simple import direct_to_template
+from frontend.models import Feature
 
 urlpatterns = patterns('',
 
