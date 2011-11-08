@@ -381,7 +381,7 @@ def tags(request):
     all_tags = {}
     
     # trial code for filtering down by tags that you can't see
-    if True:
+    if False:
         user_visible_code_objects = scraper_search_query(request.user, None)
         code_objects = user_visible_code_objects.extra(
             tables=['tagging_taggeditem', "tagging_tag"],
