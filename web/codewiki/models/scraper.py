@@ -136,7 +136,7 @@ class Scraper (code.Code):
             return datetime.datetime.now() - datetime.timedelta(1, 0, 0)  # one day ago
         return self.last_run + datetime.timedelta(0, self.run_interval, 0)
 
-    def get_screenshot_url(self, url_prefix):
+    def get_screenshot_url(self, view_url_prefix = settings.VIEW_URL):
         try:
             url = self.scraperrunevent_set.latest('run_started').first_url_scraped
         except:
@@ -148,7 +148,7 @@ class Scraper (code.Code):
             return url
 
         # show shot of the editor if there is no URL
-        return '%s%s' % (url_prefix, reverse('editor_edit', args=[self.wiki_type, self.short_name]))
+        return '%s%s' % (view_url_prefix, reverse('editor_edit', args=[self.wiki_type, self.short_name]))
 
     class Meta:
         app_label = 'codewiki'
