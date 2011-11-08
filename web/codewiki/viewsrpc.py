@@ -6,6 +6,9 @@ from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail, mail_admins
 
+
+from codewiki.models.code import MAGIC_RUN_INTERVAL
+        
 import smtplib
 
 from django.conf import settings
@@ -19,6 +22,7 @@ import base64
 import cgi
 import ConfigParser
 import datetime
+import sys
 
 import logging
 logger = logging
@@ -197,6 +201,8 @@ def twistermakesrunevent(request):
         
 
 def Dtwistermakesrunevent(request):
+        
+    
     if request.POST.get("django_key") != config.get('twister', 'djangokey'):
         logger.error("twister wrong djangokey")
         return HttpResponse("no access")
@@ -233,10 +239,15 @@ def Dtwistermakesrunevent(request):
     event.exception_message = request.POST.get("exception_message", "")
     event.run_ended = datetime.datetime.now()   # last update time
 
+    
+
     # run finished case
     if request.POST.get("exitstatus"):
         event.pid = -1  # disable the running state of the event
-        
+                    
+        if event.scraper.run_interval == MAGIC_RUN_INTERVAL:
+            event.scraper.run_interval = -1
+                    
         event.scraper.status = request.POST.get("exitstatus") == "exceptionmessage" and "sick" or "ok"
         event.scraper.last_run = datetime.datetime.now()
         event.scraper.update_meta() # enable if views ever have metadata that needs updating each refresh

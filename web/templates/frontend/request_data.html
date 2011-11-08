@@ -5,11 +5,11 @@
 {% block javascript %}
 <script>
 var showinglookup = { 
-    private:'.urls, .columns, .frequency, .due_date, .first_name, .last_name, .email', 
-    viz:'.urls, .columns, .frequency, .due_date, .visualisation, .first_name, .last_name, .email, .telephone',
-    app:'.urls, .columns, .frequency, .due_date, .application, .first_name, .last_name, .email',
-    etl:'.first_name, .last_name, .email, .telephone, .company_name',
-    public:'.urls, .columns, .frequency, .due_date, .first_name, .last_name, .email, .broadcast'
+    private:'.urls, .columns, .frequency, .due_date, .first_name, .last_name, .email, .why', 
+    viz:'.urls, .columns, .frequency, .due_date, .visualisation, .first_name, .last_name, .email, .telephone, .why',
+    app:'.urls, .columns, .frequency, .due_date, .application, .first_name, .last_name, .email, .why',
+    etl:'.first_name, .last_name, .email, .telephone, .company_name, .why, .description',
+    public:'.urls, .columns, .frequency, .due_date, .first_name, .last_name, .email, .broadcast, .why'
 }
 
 $(function()
@@ -167,8 +167,12 @@ $(function()
         {{form.application}}
 	</li>
 	<li class="description">
-        {{form.name.label_tag}}
-        {{form.name}}
+        {{form.description.label_tag}}
+        {{form.description}}
+	</li>
+	<li class="why">
+        {{form.why.label_tag}}
+        {{form.why}}
 	</li>
 	<li class="first_name {% if form.first_name.errors %}error{% endif %}">
         {{form.first_name.label_tag}}

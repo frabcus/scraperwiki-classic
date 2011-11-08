@@ -24,7 +24,7 @@ import base64
 import datetime
 import socket
 import urlparse
-
+import sys
 
 try:                import json
 except ImportError: import simplejson as json
@@ -65,7 +65,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
 #   http://theglenbot.com/creating-a-custom-http403-exception-in-django/
 # Am using PermissionDenied and SuspiciousOperation as partial workaround meanwhile, see:
 #   http://groups.google.com/group/django-users/browse_thread/thread/8d3dda89858ff2ee
-def getscraperor404(request, short_name, action):
+def getscraperor404(request, short_name, action, do_check=True):
     try:
         scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
@@ -75,13 +75,14 @@ def getscraperor404(request, short_name, action):
         raise PermissionDenied
         
     # extra post conditions to make spoofing these calls a bit of a hassle
-    if action in ["changeadmin", "settags", "set_privacy_status", "change_attachables"]:
-        if not (request.method == 'POST' and request.is_ajax()):
-            raise SuspiciousOperation
+    if do_check:
+        if action in ["changeadmin", "settags", "set_privacy_status", "change_attachables"]:
+            if not (request.method == 'POST' and request.is_ajax()):
+                raise SuspiciousOperation
     
-    if action in ["schedule_scraper", "run_scraper", ]:
-        if request.POST.get(action, None) != '1':
-            raise SuspiciousOperation
+        if action in ["schedule_scraper", "run_scraper", ]:
+            if request.POST.get(action, None) != '1':
+                raise SuspiciousOperation
         
     return scraper
 
@@ -92,9 +93,14 @@ def comments(request, wiki_type, short_name):
     context = {'selected_tab':'comments', 'scraper':scraper }
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
-def populate_itemlog(scraper):
+def populate_itemlog(scraper, run_count=-1):
     itemlog = [ ]
-    for commitentry in scraper.get_commit_log("code"):
+    if run_count != -1:
+        log = scraper.get_commit_log("code")[:run_count]
+    else:
+        log = scraper.get_commit_log("code")
+        
+    for commitentry in log:
         item = { "type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"] }
         if "user" in commitentry:
             item["user"] = commitentry["user"]
@@ -107,7 +113,9 @@ def populate_itemlog(scraper):
     
     # now obtain the run-events and sort together
     if scraper.wiki_type == 'scraper':
-        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started','pid')
+        runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started','pid')
+        if run_count != -1:
+            runevents = runevents[:run_count]
         seen = []
         events = []
         for r in runevents:
@@ -170,6 +178,11 @@ def gitpush(request, wiki_type, short_name):
 
 
 def code_overview(request, wiki_type, short_name):
+    
+    if request.user.is_authenticated():
+        if request.user.get_profile().has_feature('New overview page'):
+            return new_code_overview(request, wiki_type,short_name)
+    
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if resp: return resp
     
@@ -337,6 +350,15 @@ def code_overview(request, wiki_type, short_name):
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
+# Rewrite of the overview page by Zarino
+def full_history(request, wiki_type, short_name):
+    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
+    if resp: return resp
+    
+    ctx = { "scraper": scraper }
+    return render_to_response('codewiki/full_history.html', ctx, context_instance=RequestContext(request))
+    
+    
 # Rewrite of the overview page by Zarino
 def new_code_overview(request, wiki_type, short_name):
     from codewiki.models import ScraperRunEvent, DomainScrape
@@ -513,7 +535,15 @@ def new_code_overview(request, wiki_type, short_name):
     except:
         context['domain_scrapes'] = []
 
-    context["itemlog"] = populate_itemlog(scraper)
+    context["itemlog"] = populate_itemlog(scraper, run_count=10)
+            
+    context['url_screenshot'] = None
+    try:
+        s = scraper.scraperrunevent_set.filter(first_url_scraped__isnull=False).order_by('run_started')[0]
+        context['url_screenshot'] = s.first_url_scraped
+    except:
+        pass
+            
             
     return render_to_response('codewiki/new_scraper_overview.html', context, context_instance=RequestContext(request))
 
@@ -645,6 +675,19 @@ def view_admin(request, short_name):
     return response
     
     
+def scraper_set_run_interval(request, short_name, value):
+    try:
+        scraper = getscraperor404(request, short_name, "changeadmin", do_check=False)
+        scraper = scraper.scraper
+        scraper.run_interval = int(value)
+        scraper.save() # XXX need to save so template render gets new values, bad that it saves below also!
+    except Exception, e:
+        return HttpResponse('{"status":"error", "error":"Failed to update the schedule"}', mimetype='application/json')        
+        
+    return HttpResponse('{"status":"ok", "newvalue": "%s" }' % value, mimetype='application/json')
+
+    
+    
 def scraper_admin(request, short_name):
     scraper = getscraperor404(request, short_name, "changeadmin")
     scraper = scraper.scraper
@@ -723,11 +766,43 @@ def scraper_delete_data(request, short_name):
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
+
+def run_scraper(request, short_name):
+    """
+    Now setup to actually allow it to run even if it is not scheduled. We do this 
+    by setting the run_interval to be about every 32 years, which should make twister
+    panic and run it soon.  
+    
+    In future this needs moving to throwing a job onto a queue rather than depending on 
+    twister
+    """
+    from codewiki.models import Scraper
+    from codewiki.models.code import MAGIC_RUN_INTERVAL
+    
+    code = getscraperor404(request, short_name, "schedulescraper")
+    if code.wiki_type == "scraper":
+        # We can now conver the code object (sigh) into a scraper now that we know
+        # we have permission to access it.
+        scraper = Scraper.objects.get(short_name=short_name)
+        
+        if scraper.run_interval == -1:
+            scraper.run_interval = MAGIC_RUN_INTERVAL
+        scraper.last_run = None
+        scraper.save()
+        return HttpResponse('{"status":"ok"}', mimetype='application/json')
+    
+    return HttpResponse('{"status":"fail", "error": "Only scrapers can be scheduled to run"}',
+                         mimetype='application/json')
+
+
+
 def scraper_schedule_scraper(request, short_name):
+    from codewiki.models.code import MAGIC_RUN_INTERVAL
+    
     scraper = getscraperor404(request, short_name, "schedulescraper")
     if scraper.wiki_type == "scraper":
-        scraper.scraper.last_run = None
-        scraper.scraper.save()
+        scraper.last_run = None
+        scraper.save()
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
@@ -923,13 +998,16 @@ def attachauth(request):
             toscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
         except models.Code.DoesNotExist:
             return HttpResponse("Scraper does not exist: %s" % str([scrapername]))
-        
-    if not toscraper or not fromscraper:
-        return HttpResponse("Need a 'from' and a 'to' scraper")
 
+    if not toscraper:
+        return HttpResponse("Need a 'to' scraper")
+        
     if toscraper.privacy_status != 'private':
         # toscraper is public so anyone can read
         return HttpResponse("Yes")
+    
+    if not fromscraper:
+        return HttpResponse("Need a 'from' scraper if not accessing public scraper")
     
     # If toscraper is private then it MUST be in a vault. 
     if fromscraper.privacy_status != 'private':
@@ -1015,7 +1093,9 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
     limit       = int( request.REQUEST.get('iDisplayLength', '10') )
     total_rows  = 0
     total_after_filter = 0
-    
+    sortbyidx = int( request.REQUEST.get('iSortCol_0','0') )
+    sortdir = request.REQUEST.get('sSortDir_0', 'asc')
+
     columns = []
     data = []
     
@@ -1038,8 +1118,8 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
         columns = [ "`%s`" % c for c in columns]
             
         # Build query and do the count for the same query
-        sorter = ''
-        query = 'select %s from `%s` limit %d offset %d' % (','.join(columns), table_name, limit, offset,)
+        sortby = "%s %s" % (columns[sortbyidx], sortdir,)
+        query = 'select %s from `%s` order by %s limit %d offset %d' % (','.join(columns), table_name, sortby, limit, offset,)
         sqlite_data = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery": query, "attachlist":"", "streamchunking": False, "data": ""})        
         # We need to now convert this to the aaData list of lists
         if 'error' in sqlite_data:

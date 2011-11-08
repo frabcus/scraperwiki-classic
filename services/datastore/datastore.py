@@ -57,33 +57,18 @@ class DatastoreProtocol(basic.LineReceiver):
         """
         Called on a successful database action, the data we are given is encoded and 
         then written as a line.  
-        
-        TODO: A more optimal solution might be to find out if json.dumps can write the
-              output straight to the stream?
         """
-        # TODO: Should write out HTTP response here, send the data and then close
-        # the connection. Can we do this based on source? The HTTP version should have 
-        # special headers we can use
-        if 'X-Scraper-Verified' in self.headers:
-            self.transport.write("HTTP/1.1 200 OK\r\n")
-            self.transport.write("Connection: close\r\n")
-            self.transport.write("\r\n\r\n")
-        
         json.dump( res, self.transport )
         self.transport.write('\n')
         
-        if 'X-Scraper-Verified' in self.headers:
-            self.transport.loseConnection()
-
 
     def db_process_error(self, failure):
         """
         A failed database action. This is likely to be an unhandled exception in
         the datalib so we really should return a valid response.
         """
-        if 'X-Scraper-Verified' in self.headers:
-            self.write_fail('Error')
         log.err( failure )
+        self.transport.write('{"error":"Internal Error"}\n')        
         
     
     def write_fail(self, msg='Error'):
@@ -103,29 +88,27 @@ class DatastoreProtocol(basic.LineReceiver):
         import hashlib
         
         if self.db is None:
+            
+            # Check verification key on first run
+            print 'Verification key is %s' % self.verification_key
+            secret_key = '%s%s' % (self.short_name, self.factory.secret,)
+            possibly = hashlib.sha256(secret_key).hexdigest()  
+            log.msg( 'Comparing %s == %s' % (possibly, self.verification_key,) , 
+                     logLevel=logging.DEBUG)      
+            if not possibly == self.verification_key:
+                self.sendLine('{"error": "Permission denied"}')
+                return
+
             self.db = SQLiteDatabase(self, '/var/www/scraperwiki/resourcedir', self.short_name, self.dataauth, self.runID, self.attachables)                        
             
-            if not 'X-Scraper-Verified' in self.headers:
-                # First pass through when we are not through HTTP,
-                # TODO: Remove this code path
-                log.msg( 'Traditional connection, first request', logLevel=logging.DEBUG )
-                firstmessage = obj
-                firstmessage["short_name"] = self.short_name
-                firstmessage["runID"]      = self.runID
-                firstmessage["dataauth"]   = self.dataauth
-                log.msg( 'Ready to send response of ' + str(firstmessage), logLevel=logging.DEBUG )
-                self.sendLine( json.dumps(firstmessage) )
-                return
-            else:
-                # This will at some point be on the main code path
-                secret_key = '%s%s' % (self.short_name, self.factory.secret,)
-                possibly = hashlib.sha256(secret_key).hexdigest()  
-                log.msg( 'Comparing %s == %s' % (possibly, self.headers['X-Scraper-Verified'],) , 
-                         logLevel=logging.DEBUG)      
-                                                                                                        
-                if not possibly == self.headers['X-Scraper-Verified']:
-                    self.write_fail('Permission refused')
-                    return
+            log.msg( 'Traditional connection, first request', logLevel=logging.DEBUG )
+            firstmessage = obj
+            firstmessage["short_name"] = self.short_name
+            firstmessage["runID"]      = self.runID
+            firstmessage["dataauth"]   = self.dataauth
+            log.msg( 'Ready to send response of ' + str(firstmessage), logLevel=logging.DEBUG )
+            self.sendLine( json.dumps(firstmessage) )
+            return
                     
         # We will either get here on the second request of a connected socket because the db
         # will be set, or because the firstmessage wasn't sent so we will process this as part 
@@ -138,10 +121,10 @@ class DatastoreProtocol(basic.LineReceiver):
 
     def lineLengthExceeded(self, line):
         """
-        TODO: When more than 256k is sent, we should let the user know there 
-              was a problem
+        When more than 2M is sent, we should let the user know there was a problem
         """
-        self.sendLine(  '{"error": "Buffer size exceeded, please send less data on each request"}'  )
+        log.msg('LONGLINE:' + str(self.short_name) )
+        self.sendLine(  '{"error": "Buffer size exceeded, please contact feedback@scraperwiki.com if this is causing problems for you"}'  )
         
 
     def lineReceived(self, line):
@@ -180,6 +163,8 @@ class DatastoreProtocol(basic.LineReceiver):
                 self.headers[k.strip()] = v.strip()
                 log.msg( '%s:%s' % (k,v,) )
 
+            self.verification_key = self.params['verify']
+
             if 'short_name' in self.params:
                 self.attachauthurl = config.get("datarouter", 'attachauthurl')                
                 self.short_name = self.params['short_name']
@@ -199,6 +184,7 @@ class DatastoreProtocol(basic.LineReceiver):
             
     def connectionMade(self):
         log.msg( 'Connection made',logLevel=logging.DEBUG)
+        self.attachauthurl = attach_auth_url
             
                             
     def connectionLost(self, reason):
@@ -259,13 +245,13 @@ class DatastoreFactory( protocol.ServerFactory ):
     
 # Set the maximum line length and the line delimiter
 DatastoreProtocol.delimiter = '\n'
-DatastoreProtocol.MAX_LENGTH = 262144 # HUGE buffer
+DatastoreProtocol.MAX_LENGTH = 2097152 # HUGE buffer
 
 # Load the config file from the usual place.
 configfile = '/var/www/scraperwiki/uml/uml.cfg'
 config = ConfigParser.ConfigParser()
 config.readfp(open(configfile))
-
+attach_auth_url = config.get("datarouter", 'attachauthurl')
 
 if __name__ == '__main__':
     log.startLogging(sys.stdout)    

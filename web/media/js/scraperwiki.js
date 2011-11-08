@@ -193,7 +193,8 @@ function newVaultCodeObject(id, wiki_type){
 }
 
 $(function()
-{ 
+{
+	
 	setupSearchBoxHint();
 	setupNavSearchBoxHint();
 
@@ -216,64 +217,71 @@ $(function()
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
 		$('#more_developer_div').fadeIn(500);
-		$('#blob_developer').animate({left: 760}, 1000, 'easeOutCubic').addClass('active');
+		$('#blob_developer').animate({left: 760}, 500, 'easeOutCubic').addClass('active');
 	}
 	
 	function developer_hide(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeIn(500);
 		$('#more_developer_div').fadeOut(500);
-		$('#blob_developer').animate({left: 310}, 1000, 'easeOutCubic').removeClass('active');
+		$('#blob_developer').animate({left: 310}, 500, 'easeOutCubic').removeClass('active');
 	}
 	
 	function requester_show(){
 		$('#intro_developer, #intro_requester, #blob_developer').fadeOut(500);
 		$('#more_requester_div').fadeIn(500);
-		$('#blob_requester').animate({left: 10}, 1000, 'easeOutCubic').addClass('active');
+		$('#blob_requester').animate({left: 10}, 500, 'easeOutCubic').addClass('active');
 	}
 	
 	function requester_hide(){
 		$('#intro_developer, #intro_requester, #blob_developer').fadeIn(500);
 		$('#more_requester_div').fadeOut(500);
-		$('#blob_requester').animate({left: 460}, 1000, 'easeOutCubic').removeClass('active');
+		$('#blob_requester').animate({left: 460}, 500, 'easeOutCubic').removeClass('active');
 	}
 	
-	$('#blob_developer').css('cursor', 'pointer').bind('click', function(){
+	$('#blob_developer').css('cursor', 'pointer').bind('click', function(e){
+		e.preventDefault();
 	    if($(this).is('.active')){
 	        developer_hide();
 	    } else {
 	        developer_show();
+			_gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']);
 	    }
-	    return false;
 	});
 	
-	$('#blob_requester').css('cursor', 'pointer').bind('click', function(){
+	$('#blob_requester').css('cursor', 'pointer').bind('click', function(e){
+		e.preventDefault();
 	    if($(this).is('.active')){
 	        requester_hide();
 	    } else {
 	        requester_show();
+			_gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']);
 	    }
-	    return false;
 	});
 	
-	$('#more_developer, #intro_developer').css('cursor', 'pointer').bind('click', function(){
+	$('#more_developer, #intro_developer').css('cursor', 'pointer').bind('click', function(e){
+		e.preventDefault();
 		developer_show();
-		return false;
+		_gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']);
 	});
 
-	$('#more_requester, #intro_requester').css('cursor', 'pointer').bind('click', function(){
+	$('#more_requester, #intro_requester').css('cursor', 'pointer').bind('click', function(e){
+		e.preventDefault();
 		requester_show();
-		return false;
+		_gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']);
 	});
 
-	
-	$('#more_developer_div .back').live('click', function(){
+	$('#more_developer_div .back').bind('click', function(e){
+		e.preventDefault();
 		developer_hide();
-		return false;
 	});	
-	$('#more_requester_div .back').live('click', function(){
+	
+	$('#more_requester_div .back').bind('click', function(e){
+		e.preventDefault();
 		requester_hide();
-		return false;
 	});
+	
+	
+	
 	
 	$('a.submit_link').each(function(){
 		id = $(this).siblings(':submit').attr('id');

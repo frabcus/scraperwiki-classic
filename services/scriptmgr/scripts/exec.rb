@@ -85,6 +85,8 @@ scrapername = nil
 querystring = nil
 runid = nil
 attachables = nil
+verification_key = nil
+
 File.open( File.dirname(options[:script]) +  "/launch.json","r") do |f|
   results = JSON.parse( f.read )
   datastore = results['datastore']
@@ -92,9 +94,14 @@ File.open( File.dirname(options[:script]) +  "/launch.json","r") do |f|
   querystring = results['querystring']
   scrapername = results['scrapername']
   attachables = results['attachables']
+  verification_key = results['verification_key']
 end
 
 ENV['REQUEST_METHOD'] = "GET"
+
+unless verification_key.nil? || verification_key == ''
+    ENV['VERIFICATION_KEY'] = verification_key
+end
 
 unless querystring.nil? || querystring == ''
      ENV['QUERY_STRING'] = querystring
@@ -102,7 +109,7 @@ unless querystring.nil? || querystring == ''
 end
 
 host, port = datastore.split(':')
-SW_DataStore.create(host, port, scrapername, runid, attachables)
+SW_DataStore.create(host, port, scrapername, runid, attachables,verification_key)
 
 code = File.new(options[:script], 'r').read()
 begin

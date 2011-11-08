@@ -203,39 +203,44 @@
             <p class="stats">Sifting information to give you the edge</p>
             <i id="shhhh" style="display:none">{% num_data_rows %}</i>
 			<dl>
-				<dt>About</dt>
+				<dt>Business</dt>
 				<dd>
 					<ul>
-						<li><a href="{% url about %}">About ScraperWiki</a></li>
+						<li><a href="{% url scraper_list %}scrapers">Browse data</a></li>
+						<li><a href="{% url request_data %}">Request data</a></li>
+						<li><a href="{% url pricing %}">Pricing</a></li>
+					</ul>
+				</dd>
+				<dt>Developers</dt>
+				<dd>
+					<ul>
+					    <li><a href="#" class="editor_scraper">Create new scraper</a> / <a href="#" class="editor_view">view</a></li>
+						<li><a href="{% url docsexternal %}">API</a></li>
+						<li><a href="{% url docsroot %}">Docs &amp; tutorials</a></li>	
+						<li><a href="{% url docs 'faq' %}">FAQ</a></li>
+						<li><a href="http://groups.google.com/group/scraperwiki">Discussion group</a></li>			                   			                 
+					</ul>
+				</dd>
+				<dt>ScraperWiki</dt>
+				<dd>
+					<ul>
+						<li><a href="{% url about %}">About us</a></li>
+						<li><a href="{% url contact_form %}">Contact us</a></li>
+						<li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
 						<li><a href="http://blog.scraperwiki.com">Blog</a></li>
 						<li><a href="http://twitter.com/scraperwiki">Twitter</a></li>
                         <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook">Facebook</a></li>
-						<li><a href="{% url terms %}">Terms &amp; conditions</a></li>
-						<li><a href="{% url privacy %}">Privacy policy</a></li>
 					</ul>
 				</dd>
-				<dt>Data</dt>
-				<dd>
-					<ul>
-                        <li><a href="{% url request_data %}">Business</a></li>
-						<li><a href="{% url scraper_list %}scrapers">Browse data</a></li>
-						<li><a href="{% url request_data %}">Request data</a></li>
-						<li><a href="#" class="editor_scraper">Create new scraper</a> / <a href="#" class="editor_view">view</a></li>		                 
-						<li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
-						<li><a href="{% url docsexternal %}">API</a></li>
-					</ul>
-				</dd>
-				<dt>Help &amp; support</dt>
-				<dd>
-					<ul>
-						<li><a href="{% url contact_form %}">Contact us</a></li>
-						<li><a href="{% url docsroot %}">Docs &amp; tutorials</a></li>	
-						<li><a href="{% url docs 'faq' %}">FAQ</a></li>							
-						<li><a href="http://groups.google.com/group/scraperwiki">Developers&rsquo; discussion group</a></li>			                   			                 
-					</ul>
+				<dt class="legal"></dt>
+				<dd class="legal">
+				    <ul>
+				        <li>&copy; ScraperWiki Ltd {% now "Y" %}</li>
+				        <li><a href="{% url terms %}">Terms &amp; conditions</a></li>
+				        <li><a href="{% url privacy %}">Privacy policy</a></li>
+				    </ul>
 				</dd>
 			</dl>
-			<div id="divCopyright">&copy; ScraperWiki Ltd</div>
 			<img src="{{ MEDIA_URL }}images/footer_tractor.png" width="140" height="90" alt="" />
 			{% endblock %}
 		</div>

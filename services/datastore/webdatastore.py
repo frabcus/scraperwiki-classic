@@ -84,7 +84,8 @@ class WebDatastoreResource(resource.Resource):
             scrapername = cgi.escape( request.args.get('scrapername', [''])[0] )
             runid = cgi.escape( request.args.get('runid', [''])[0] )            
             command = cgi.escape( request.args.get('command', [''])[0] )         
-            attachables = map( cgi.escape, request.args.get('attachables', []) )
+            attachables = cgi.escape(request.args.get('attachables', [])[0] )
+            log.msg('Attachables are : %s' % attachables )
         
             if command == "":
                 log.msg(  str(request.args) )
@@ -124,6 +125,8 @@ class WebDatastoreResource(resource.Resource):
         return form
                 
     def render_POST(self, request):
+        self.attachauthurl = attach_auth_url
+
         log.msg( "Received POST request: %s" % str(request.args))
         
         d = deferToThread( self.process, request)
@@ -142,6 +145,7 @@ configfile = '/var/www/scraperwiki/uml/uml.cfg'
 config = ConfigParser.ConfigParser()
 config.readfp(open(configfile))
 g_secret = config.get("datarouter", 'proxy_secret')
+attach_auth_url = config.get("datarouter", 'attachauthurl')
 
 
 ###############################################################################

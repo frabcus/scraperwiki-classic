@@ -52,7 +52,8 @@ def execute(sqlquery, data=None, verbose=1):
     global attachlist
     
     m = {"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist}
-    result = scraperwiki.datastore.make_request(m)
+    global attachlist
+    result = scraperwiki.datastore.make_request(m, attachlist)
     if "Error" in result:
         print 'Sent ', m
         raise databaseexception(result)
@@ -161,7 +162,8 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
             if ljdata.get("Error"):
                 raise databaseexception(ljdata)
             rjdata.append(ljdata)
-    result = scraperwiki.datastore.make_request({"maincommand":'save_sqlite', "unique_keys":unique_keys, "data":rjdata, "swdatatblname":table_name})
+    global attachlist
+    result = scraperwiki.datastore.make_request({"maincommand":'save_sqlite', "unique_keys":unique_keys, "data":rjdata, "swdatatblname":table_name}, attachlist)
 
     if "Error" in result:
         raise databaseexception(result)
@@ -181,18 +183,19 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
 
 def attach(name, asname=None, verbose=1):
     global attachlist
-    attachlist.append({"name":name, "asname":asname})
-    result = scraperwiki.datastore.make_request({"maincommand":'sqlitecommand', "command":"attach", "name":name, "asname":asname})
-    if "Error" in result:
-        raise databaseexception(result)
-    if "status" not in result:
-        raise Exception("possible signal timeout: "+str(result))
-        scraperwiki.dumpMessage({'message_type':'data', 'content': pdata})
-    return result
+    attachlist.append({"name":name, "asname":asname or name})
+#    result = scraperwiki.datastore.make_request({"maincommand":'sqlitecommand', "command":"attach", "name":name, "asname":asname})
+#    if "Error" in result:
+#        raise databaseexception(result)
+#    if "status" not in result:
+#        raise Exception("possible signal timeout: "+str(result))
+#        scraperwiki.dumpMessage({'message_type':'data', 'content': pdata})
+#    return result
 
 
 def commit(verbose=1):
-    result = scraperwiki.datastore.make_request({"maincommand":'sqlitecommand', "command":"commit"})
+    global attachlist
+    result = scraperwiki.datastore.make_request({"maincommand":'sqlitecommand', "command":"commit"},attachlist)
     if "Error" in result:
         raise databaseexception(result)
     if "status" not in result:

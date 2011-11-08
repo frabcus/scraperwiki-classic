@@ -73,7 +73,8 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
     'pagination.middleware.PaginationMiddleware',    
-    'middleware.csrfcookie.CsrfAlwaysSetCookieMiddleware'
+    'middleware.csrfcookie.CsrfAlwaysSetCookieMiddleware',
+    'api.middleware.CORSMiddleware'
 ]
 
 AUTHENTICATION_BACKENDS = [

@@ -61,7 +61,7 @@ class SQLiteDatabase(Database):
         self.dataauth = dataauth
         self.runID = runID
         self.attachables = attachables
-        
+                
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
@@ -81,6 +81,13 @@ class SQLiteDatabase(Database):
             pass
             
     def process(self, request):
+        
+        # Before we do any of these we should check the attachables that we have by running 
+        # self.sqliteattach(request.get("name"), request.get("asname"))
+        if self.attachables:
+            for entry in json.loads(self.attachables):
+                self.sqliteattach( entry['name'], entry['asname'] )
+        
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
@@ -315,21 +322,18 @@ class SQLiteDatabase(Database):
             self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
         
         log.msg("attachables: "+str(self.attachables), logLevel=logging.DEBUG)
-        if name not in self.attachables:
-            log.msg("requesting permission to attach %s to %s" % (self.short_name, name), logLevel=logging.INFO)
-            aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
-            ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
-            log.msg("permission to attach %s to %s response: %s" % (self.short_name, name, ares), logLevel=logging.INFO)
-            if ares == "Yes":
-                self.attachables.append(name)
-            elif ares == "DoesNotExist":
-                return {"error":"Does Not Exist %s" % name}
-            else:
-                return {"error":"no permission to attach to %s" % name}
+        log.msg("requesting permission to attach %s to %s" % (self.short_name, name), logLevel=logging.INFO)
+        aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
+        ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
+        log.msg("permission to attach %s to %s response: %s" % (self.short_name, name, ares), logLevel=logging.INFO)
+        if ares == "Yes":
+            log.msg('Connection allowed', logLevel=logging.DEBUG)
+        elif ares == "DoesNotExist":
+            return {"error":"Does Not Exist %s" % name}
+        else:
+            return {"error":"no permission to attach to %s" % name}
 
         attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
-        
-
         self.authorizer_func = authorizer_attaching
         try:
             self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))

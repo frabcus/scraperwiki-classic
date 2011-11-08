@@ -49,6 +49,17 @@ class DataEnquiryAdmin(admin.ModelAdmin):
     list_filter = ('category', 'broadcast' )
     ordering = ('-date_of_enquiry',)
 
+class FeaturesAdmin(admin.ModelAdmin):
+    list_display = ('name', 'short_description', 'public')
+    
+    def short_description(self, obj):
+        if len(obj.description) > 50:
+            return obj.description[:50] + '...'
+        return obj.description
+    
+    class Meta:
+        model = Feature
+
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'profile_name', 'email', 'scrapers', 'vaults', 'is_active', 'is_staff','is_beta_user','date_joined', 'last_login',)
     list_filter = ('is_active', 'is_staff', 'is_superuser',)
@@ -72,6 +83,9 @@ class CustomUserAdmin(UserAdmin):
         return obj.get_profile().name
 
     inlines = [UserProfileStack, UserUserRoleInlines, VaultInlines]
+
+
+admin.site.register(Feature, FeaturesAdmin)
 
 admin.site.register(Message, MessageAdmin)
 admin.site.register(DataEnquiry, DataEnquiryAdmin)

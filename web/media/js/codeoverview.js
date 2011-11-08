@@ -248,21 +248,6 @@ function changeRoles(sdata, redirect_to_on_fail) {
 	); 	
 }
 
-function collaborationButtons(){
-	$('#privacy_status, #contributors').hide();
-	$('#collaboration ul.buttons a').bind('click', function(e){
-		e.preventDefault();
-		var href = $(this).attr('href');
-		if($(href).is(':visible')){
-			$('#privacy_status, #contributors').hide();
-			$('#collaboration ul.buttons a').removeClass('selected');
-		} else {
-			$(href).show().siblings('#privacy_status, #contributors').hide();
-			$(this).addClass('selected').parent().siblings().children('a').removeClass('selected');
-		}
-	});
-}
-
 function setupChangeEditorStatus()
 {
     // changing editor status
@@ -359,13 +344,13 @@ function setupChangeEditorStatus()
 
     $('#show_privacy_choices').live('click', function(){
         $('#privacy_status form').show();
-        $('#privacy_status>p, #show_privacy_choices').hide();
+        $('#privacy_status>p, #show_privacy_choices, #privacy_status>h4').hide();
     });
 
     $('#hide_privacy_choices').live('click', function() 
     {
         $('#privacy_status form').hide();
-        $('#privacy_status>p, #show_privacy_choices').show();
+        $('#privacy_status>p, #show_privacy_choices, #privacy_status>h4').show();
     }); 
 
     $('#saveprivacy').live('click', function() 

@@ -22,6 +22,7 @@ urlpatterns = patterns('',
     url(r'^about/$', direct_to_template, {'template': 'frontend/about.html'}, name='about'),
     url(r'^tour/$', direct_to_template, {'template': 'frontend/tour.html'}, name='tour'),                                          
     url(r'^example_data/$', direct_to_template, {'template': 'frontend/example_data.html'}, name='api'),
+    url(r'^pricing/$', direct_to_template, {'template': 'frontend/pricing.html'}, name='pricing'),
 
 
     url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/(?P<language>python|php|ruby|javascript)/$','django.views.generic.simple.redirect_to', {'url': '/docs/%(language)s'},name='help'),
@@ -30,6 +31,7 @@ urlpatterns = patterns('',
     
     url(r'^get_involved/$',frontend_views.get_involved, name='get_involved'),
     url(r'^request_data/$',frontend_views.request_data, name='request_data'),
+    url(r'^request_data/thanks/$',frontend_views.request_data_thanks, name='request_data_thanks'),
     
     #hello world
     url(r'^hello_world.html', direct_to_template, {'template': 'frontend/hello_world.html'}, name='help_hello_world'),
@@ -42,7 +44,7 @@ urlpatterns = patterns('',
     url(r'^vaults/(?P<vaultid>\d+)/transfer/(?P<username>.*)/$', frontend_views.transfer_vault, name='transfer_vault'),                    
     url(r'^vaults/(?P<vaultid>\d+)/(?P<action>adduser|removeuser)/(?P<username>.*)/$', frontend_views.vault_users, name='vault_user'),        
     url(r'^vaults/(?P<vaultid>\d+)/addscraper/(?P<shortname>.*)/$', frontend_views.vault_scrapers_add, name='vault_scrapers_add'),            
-    url(r'^vaults/(?P<vaultid>\d+)/removescraper/(?P<shortname>.*)/$', frontend_views.vault_scrapers_remove, name='vault_scrapers_remove'),                
+    url(r'^vaults/(?P<vaultid>\d+)/removescraper/(?P<shortname>.*)/(?P<newstatus>public|visible)$', frontend_views.vault_scrapers_remove, name='vault_scrapers_remove'),                
     url(r'^vaults/$', frontend_views.view_vault, name='vault'),    
     
     url(r'^dashboard/(?P<page_number>\d+)?$', frontend_views.dashboard, name='dashboard'),

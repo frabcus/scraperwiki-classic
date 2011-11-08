@@ -157,7 +157,7 @@ class SeleniumTest(unittest.TestCase):
             s.click('show_privacy_choices')
             s.click('privacy_' + privacy)
             s.wait_for_condition(privacy_set, 10000)
-            self.failUnless(s.is_text_present("This %s is " % code_type + privacy))
+            self.failUnless(s.is_text_present("This %s is %s" % (code_type, privacy)))
         elif privacy == 'private':
             self.user_login(SeleniumTest._adminuser['username'], SeleniumTest._adminuser['password'])
             s.open(("/admin/codewiki/%s/?q=" % code_type) + code_name)
@@ -203,6 +203,7 @@ class SeleniumTest(unittest.TestCase):
         s.type('id_nav_password', password)
         s.click('nav_login_submit')
         self.wait_for_page()
+        self.failUnless(s.is_text_present("Your dashboard")) # login failed - did you get username/password wrong on command line?
     
     def activate_users(self, userlist):
         """ 

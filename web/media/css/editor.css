@@ -1,5 +1,4 @@
 /* @override 
-	http://media.redesign2.scraperwiki.com/css/editor.css?
 	http://localhost:8000/media/css/editor.css?
 */
 
@@ -75,6 +74,19 @@ div.page_tabs.small {
 div.page_tabs a.othertypingalert {
     background-color: #ffff87;
 }
+
+.title a {
+	color: #000;
+}
+
+.title a:hover {
+	color: #666;
+}
+
+#aCloseEditor {
+	text-decoration: none;
+}
+
 
 /* Code */
 

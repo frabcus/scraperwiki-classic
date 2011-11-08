@@ -455,8 +455,14 @@ def request_data(request):
     form = DataEnquiryForm(request.POST or None)
     if form.is_valid():
         form.save()
-        return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
+        return HttpResponseRedirect(reverse('request_data_thanks'))
     return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
+
+def request_data_thanks(request):
+    return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
+
+def pricing(request):
+    return render_to_response('frontend/pricing.html', context_instance = RequestContext(request))
 
 def test_error(request):
     raise Exception('failed in test_error')
@@ -527,7 +533,7 @@ def view_vault(request, username=None):
 
 
 @login_required
-def vault_scrapers_remove(request, vaultid, shortname):
+def vault_scrapers_remove(request, vaultid, shortname, newstatus):
     """
     Removes the scraper identified by shortname from the vault 
     identified by vaultid.  This can currently only be done by
@@ -551,9 +557,8 @@ def vault_scrapers_remove(request, vaultid, shortname):
     if scraper.vault != vault:
         return HttpResponse('{"status": "fail", "error":"The scraper is not in this vault"}', mimetype=mime)            
     
-    # TODO: Decide how we remove the scraper from the vault other than just 
-    # removing the vault propery
-    
+
+    scraper.privacy_status = newstatus
     scraper.vault = None
     scraper.save()
 

@@ -24,4 +24,7 @@ root.putChild("", WebDatastoreResource())
 internet.TCPServer(20002, server.Site(root)).setServiceParent(application)
 
 
+dsf = internet.TCPServer(10002, DatastoreFactory()) # create the service
+dsf.setServiceParent(service)
+
 service.setServiceParent(application)

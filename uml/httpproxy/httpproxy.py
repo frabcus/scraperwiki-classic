@@ -761,9 +761,10 @@ if __name__ == '__main__' :
     cache_hosts = config.get(varName, 'cache')
     if cache_hosts:
         cache_client = memcache.Client( cache_hosts.split(',') )
-        
-    ignored_ip = config.get(varName, 'ignore_ip')
-    if not ignored_ip:
+    
+    try:
+        ignored_ip = config.get(varName, 'ignore_ip')
+    except:
         ignored_ip = '127.0.0.1'
-
+        
     execute ()

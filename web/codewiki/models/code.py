@@ -1,6 +1,6 @@
 import datetime
 import time
-import os
+import os, sys
 import re
 import urllib
 
@@ -9,6 +9,9 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.db.models import Q
+from django.contrib.comments.signals import comment_was_posted
+from django.core.mail import send_mail
+
 import tagging
 import hashlib
 
@@ -63,6 +66,7 @@ EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "re
 STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let staff also do anything a creator / editor can, except save code is a bit rude (for now!)
 VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow" ])
 
+MAGIC_RUN_INTERVAL = 1000000000
 
 def scraper_search_query_unordered(user, query, apikey=None):
     if query:
@@ -561,6 +565,32 @@ class UserUserRole(models.Model):
 
 
 
+def comment_notification(**kwargs):
+    """
+    Allows us to notify the owner of the scraper should another user comment 
+    on it.  Disabled until we can agree on the format of the email.
+    """
+    from django.template.loader import render_to_string
+    from django.conf import settings
+    from django.core.mail import EmailMultiAlternatives
+    
+    request = kwargs.pop('request')
+    comment = kwargs.pop('comment')
+    
+    scraper = comment.content_object
+    owner = scraper.owner()    
+    message = comment.comment
+    subject = "[ScraperWiki] New comment - %s" % scraper.title
 
+    if request.user == owner:
+        return
+        
+    if owner.get_profile().email_on_comments: 
+        text_content = render_to_string('emails/new_comment.txt', locals() )
+        html_content = render_to_string('emails/new_comment.html', locals() )
+        
+        msg = EmailMultiAlternatives(subject, text_content, settings.FEEDBACK_EMAIL, [owner.email])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=True)
 
-
+comment_was_posted.connect(comment_notification)

@@ -87,7 +87,7 @@ $(function()
         
         $(this).parent().addClass('selected').siblings('.selected').removeClass('selected');
         e.preventDefault();
-    });
+    }).append('<span class="mask"></span>');
     if($('#functions').height() > $('#detail').height()){
         $('#detail').css('minHeight', $('#functions').height());
     }
@@ -237,7 +237,7 @@ $(function()
                     for (var tablename in v[0].datasummary.tables)
                     {
                         var table = v[0].datasummary.tables[tablename]; 
-                        $('#listtables').append('<li><b>'+tablename+'</b> [<em>'+table.count+' rows</em>] '+table.sql+'</li>'); 
+                        $('#listtables').append('<li><b>'+tablename+'</b> [<em>'+table.count+' rows</em>] '+table.sql.replace(/(CREATE \w+) `(\w+)`/g,'<span class="create">$1</span> `<span class="tablename">$2</span>`').replace(/`([^`]+)` (\w+)/g, '`<span class="column">$1</span>` <span class="type">$2</span>')+'</li>'); 
                         if ((table.count > maxtablecount) || (maxtablename == null))
                         {
                             maxtablename = tablename; 

@@ -12,6 +12,22 @@ from django.conf import settings
 
 from frontend import highrise
 
+class Feature(models.Model):
+    """
+    These models are used to denote whether a user has access to a specific
+    feature, i.e. whether they turned it off or not. Those features that do
+    not have the public flag set will not be visible on the user profile page.
+    """
+    name = models.CharField(max_length=32)
+    description = models.TextField(blank=True, null=True)
+    public = models.BooleanField( default=True )
+
+    class Meta(object):
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
 
 class UserProfile(models.Model):
     """
@@ -32,7 +48,21 @@ class UserProfile(models.Model):
     beta_user        = models.BooleanField( default=False )
     apikey           = models.CharField(max_length=64, null=True, blank=True)
     
+    features         = models.ManyToManyField( "Feature", related_name='features', null=True, blank=True )
+    
+    # If someone comments on an item this user owns, this specifies whether they 
+    # should receive the email
+    email_on_comments= models.BooleanField( default=False )
+        
     objects = models.Manager()
+    
+    def has_feature(self, fname):
+        """ 
+            Returns true if this profile has a feature connected with 
+            the specified name 
+        """
+        return self.features.filter(name=fname).count() > 0
+    
     
     def regenerate_apikey(self):
         import uuid

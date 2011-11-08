@@ -17,8 +17,11 @@ urlpatterns = patterns('',
         # up here because clashes with a scraper whose short name is 'run_event_json'
     url(r'^scrapers/run_event_json/(?P<run_id>[\w_\-\.\?]*)/?$', viewseditor.run_event_json, name='run_event_json'),  
 
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/set_interval/(?P<value>.*)/$',  views.scraper_set_run_interval,          name='set_run_interval'),    
     url(r'^views/(?P<short_name>[\w_\-\.]+)/admin/$',     views.view_admin,             name='view_admin'),    
     url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',  views.scraper_admin,          name='scraper_admin'),
+
+
     
     url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/settags$', 
                                                           views.scraper_admin_settags,  name='scraper_admin_settags'),
@@ -36,6 +39,9 @@ urlpatterns = patterns('',
     url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.\|]+)(?:/(?P<event_id>[\w_\-]+))?$',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
     url(r'^scraper-admin/twistermakesrunevent/$',         viewsrpc.twistermakesrunevent), 
+
+    url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-\.]+)/run/$', 
+                                                          views.run_scraper,name='run_scraper_now'),
         
     url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_schedule_scraper,name='scraper_schedule_scraper'),
@@ -44,11 +50,13 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/undelete-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_undelete_scraper, name='scraper_undelete_scraper'),
 
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/data/(?P<table_name>[\w_\-\.]+)/$', views.scraper_data_view,    name='scraper_data_view'),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/data/(?P<table_name>.*)/$', views.scraper_data_view,    name='scraper_data_view'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/new/$',          views.new_code_overview,    name='new_code_overview'),
                                                                       
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+\?name=.*)$', views.code_overview,    name='code_overview'),    
+
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/full/$',  views.full_history,  name='full_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/comments/$', views.comments,         name='scraper_comments'),
     

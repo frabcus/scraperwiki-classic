@@ -1,0 +1,11 @@
+Hi {{ owner.username }},
+
+{{ request.user.username }} has left a comment on your '{{ scraper.title }}' scraper:
+
+"{{ message }}"
+
+Click here to view the message: {% scraper.get_absolute_url %}
+
+Cheers,
+
+The ScraperWiki team

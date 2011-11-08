@@ -295,7 +295,7 @@ def scraper_search_handler(request):
         
         if request.META.get("HTTP_X_REAL_IP", "Not specified") in settings.INTERNAL_IPS:
             boverduescraperrequest = True
-        if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"]:
+        if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"] or '127.0.0.1' in settings.INTERNAL_IPS:
             boverduescraperrequest = True
     else:
         u = None
@@ -376,7 +376,7 @@ def scraper_search_handler(request):
         if boverduescraperrequest:
             res['overdue_proportion'] = float(scraper.overdue_proportion)
             vcsstatus = scraper.get_vcs_status(-1)
-            res['code'] = vcsstatus["code"]
+            res['code'] = vcsstatus.get("code", "#Code not previously saved")
             res["rev"] = vcsstatus.get("prevcommit", {}).get("rev", -1)
             res['guid'] = scraper.guid
             res["attachables"] = [ ascraper.short_name  for ascraper in scraper.attachable_scraperdatabases() ]
@@ -684,6 +684,10 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
     info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
     info['wiki_type']   = scraper.wiki_type
     info['privacy_status'] = scraper.privacy_status
+
+    if scraper.wiki_type == 'scraper':
+        info['last_run'] = scraper.scraper.last_run and scraper.scraper.last_run.isoformat() or ''
+        info['run_interval'] = scraper.scraper.run_interval
 
     attachables = [ ]
     for cp in CodePermission.objects.filter(code=scraper).all():
