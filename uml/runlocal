@@ -26,9 +26,9 @@ echo $NODE_PATH
 cd ../services/scriptmgr
 node ./scriptmgr.js &
 cd -
-./etc/local.d/dataproxy		restart
-./etc/local.d/ftpproxy		restart
-./etc/local.d/httpproxy		restart
-./etc/local.d/httpsproxy	restart
-./etc/local.d/twister		restart
-./etc/local.d/orbited		restart
+./etc/local.d/datastore		start
+./etc/local.d/ftpproxy		start
+./etc/local.d/httpproxy		start
+./etc/local.d/httpsproxy	start
+./etc/local.d/twister		start
+./etc/local.d/orbited		start
