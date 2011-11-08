@@ -2,15 +2,16 @@
 
 DESC="HTTPSProxy"
 NAME=httpsproxy
-CONFIG=/var/www/scraperwiki/uml/uml.cfg.local
+CONFIG=/var/www/scraperwiki/uml/uml.cfg
 DAEMON=/var/www/scraperwiki/uml/httpproxy/httpproxy.py
-DAEMON_ARGS="--daemon --subproc --varDir=/var --config=$CONFIG --mode=S"
+DAEMON_ARGS="--daemon --subproc --varDir=/var/www/scraperwiki/uml/var --config=$CONFIG --mode=S"
 PIDFILE=./var/run/$NAME.pid
 
 do_start()
 {
 	mkdir -p ./var/run
 	mkdir -p ./var/log
+	mkdir -p ./var/log/scraperwiki
 	$DAEMON $DAEMON_ARGS
 }
 
