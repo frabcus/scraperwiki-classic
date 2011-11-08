@@ -264,7 +264,7 @@ function execute(http_req, http_res, raw_request_data) {
 				};
 				
                 util.log.debug( 'spawning ' + exe + ' args '  + args);
-				e = spawn(exe, args, { env: environ });
+				e = spawn(exe, args, { env: environ,  setsid:true });
 				script.pid = e.pid;
 				script.ip = '127.0.0.1';
 				
@@ -377,7 +377,7 @@ function execute(http_req, http_res, raw_request_data) {
 			var cfgpath = '/mnt/' + rVM + '/config';
 
 			var args = [ '-n', rVM, '-f', cfgpath, "/home/startup/runscript", extension];
-	 		e = spawn('/usr/bin/lxc-execute', args );
+	 		e = spawn('/usr/bin/lxc-execute', args, {setsid:true} );
 			
 			// json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
 			

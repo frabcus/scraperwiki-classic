@@ -1,7 +1,8 @@
-import  settings
-import  socket
-import  struct
-import  urllib
+from django.conf import settings
+import socket
+import struct
+import urllib
+import hashlib
 
 try:
     import json
@@ -15,21 +16,30 @@ class DataStore(object):
         self.m_socket = socket.socket()
         self.m_socket.connect((settings.DATAPROXY_HOST, settings.DATAPROXY_PORT))
         
+        self.secret = hasattr(settings, 'DATASTORE_SECRET') and settings.DATASTORE_SECRET or ''
+        
         # Set receive timeout to be 20 seconds so that this failing doesn't cause us to 404 on the 
         # scraper overview page.
         # If this doesn't work out, change to using select() with a timeout (both individual and overall)
         self.m_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('LL', 20, 0))
         
-        data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("short_name", short_name) ]
+        secret_key = '%s%s' % (short_name, self.secret,)
+        data = [ ("uml", socket.gethostname()), 
+                 ("port", self.m_socket.getsockname()[1]), 
+                 ("short_name", short_name), 
+                 ('verify',hashlib.sha256(secret_key).hexdigest()) ]
         self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         
         res = self.receiveoneline()  # comes back with True, "Ok"
-        assert res.get("status") == "good", res
-
+        self.error = res.get('error', None)
 
     def request(self, req):
         assert type(req) == dict, req
         assert "maincommand" in req
+                    
+        if self.error:
+            return self.error
+                    
         self.m_socket.sendall(json.dumps(req) + '\n')
         return self.receiveoneline()
 
