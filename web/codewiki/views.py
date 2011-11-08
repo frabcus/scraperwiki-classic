@@ -90,6 +90,12 @@ def getscraperor404(request, short_name, action, do_check=True):
 def comments(request, wiki_type, short_name):
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
     if resp: return resp
+
+    if request.user.is_authenticated():
+        if request.user.get_profile().has_feature('New overview page'):
+            return HttpResponseRedirect(reverse('code_overview', kwargs={'wiki_type':wiki_type,'short_name':short_name}) + '#chat') 
+    
+    
     context = {'selected_tab':'comments', 'scraper':scraper }
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
