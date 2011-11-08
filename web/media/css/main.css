@@ -1411,10 +1411,18 @@ body.profiles.edit #features li input {
 	list-style-type: none;
 }
 
-#footer_inner #divCopyright {
-	color: #fff;
-	margin-left: 160px;
+#footer_inner .legal {
 	margin-top: 20px;
+	color: #D3E7F5;
+	font-weight: normal;
+}
+
+#footer_inner .legal a {
+	color: #D3E7F5;
+}
+
+#footer_inner .legal a:hover {
+	color: #fff;
 }
 
 #footer_inner img {
@@ -4189,12 +4197,20 @@ body.pricing a#buy:hover {
 
 body.pricing a#buy em {
 	font-style: normal;
-	color: #e1865a;
+	color: #fff;
+	display: inline-block;
+	padding: 2px 10px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	background-color: #e1865a;
+	border-bottom: 1px solid #b2ab86;
+	margin-bottom: -1px;
 }
 
 body.pricing a#buy:hover em {
-	text-decoration: underline;
-} 
+	background-color: #c36639;
+}
 
 
 
