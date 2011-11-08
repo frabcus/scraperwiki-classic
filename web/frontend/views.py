@@ -405,8 +405,8 @@ def tags(request):
 
     # old method that would show tags to scrapers that are private
     else:
-        scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True)
-        view_tags = Tag.objects.usage_for_model(View, counts=True)
+        scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
+        view_tags = Tag.objects.usage_for_model(View, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
         for tag in itertools.chain(scraper_tags, view_tags):
             existing = all_tags.get(tag.name, None)
             if existing:
