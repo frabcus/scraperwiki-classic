@@ -26,10 +26,9 @@
                 {{ form.subject_dropdown.label_tag }}
                 {{ form.subject_dropdown }}
                 {% field_errors form.subject_dropdown %}
-                <p id="requesting_data_tip" style="display: none">
-                <strong>You can also use the <a href="{% url request_data %}">full data request form</a>
-                    to request data.</strong>
-                </p>
+                <a id="requesting_data_tip" style="display: none" href="{% url request_data %}">
+                We have a special form that <br/>makes it dead easy to request&nbsp;data.<br/><strong>Click here to fill&nbsp;it&nbsp;out.</strong>
+                </a>
             </li>
             {% if request.user.is_authenticated %}
                 <input id="id_name" name="name" type="hidden" class="required" value="{{ request.user.get_profile.name }}" />
@@ -68,11 +67,11 @@
             </ul>
             <p class="last"><input type="submit" value="Send message" /></p>
             <img src="{{ MEDIA_URL }}images/postman.gif" id="postman" width="175" height="260" alt="" />
-            <p class="postphone">
-                <strong>Post and phone</strong>
-                <br><br>Scraperwiki, ic2<br>Liverpool Science Park<br>146 Brownlow Hill<br>Liverpool L3 5RF
-                <br><br>Tel: +44 208 1330541
-            </p>
+            <dl class="postphone">
+                <dd>Post and phone</dd>
+                <dt>Scraperwiki, ic2<br>Liverpool Science Park<br>146 Brownlow Hill<br>Liverpool L3 5RF</dt>
+                <dt>Tel: +44 208 1330541</dt>
+            </dl>
         </form>
         <br />
     </div>
@@ -83,11 +82,28 @@
     { 
         $("#id_subject_dropdown").change(function() { 
             if ($(this).val() == 'request') {
-                $("#requesting_data_tip").slideDown(250);
+                $("#requesting_data_tip:hidden").slideDown(250);
+                $('.form li').not(':first').add('p.last').slideUp(250);
             } else {
-                $("#requesting_data_tip").slideUp(250);
+                $("#requesting_data_tip:visible").slideUp(250);
+                $('.form li').not(':first').add('p.last').slideDown(250);
             }
-        }); 
+            if ($(this).val() == 'request') {
+                
+            }
+        });
+        
+        if(
+            window.location.hash === '#suggestion' ||
+            window.location.hash === '#request' ||
+            window.location.hash === '#vault' ||
+            window.location.hash === '#help' ||
+            window.location.hash === '#bug' ||
+            window.location.hash === '#other'
+        ) {
+            $('select').val(window.location.hash.replace('#','')).trigger('change')
+            $('#id_title').focus();
+        }
     }
     );
 {% endblock %}
