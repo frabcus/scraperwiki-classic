@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-#  Run the dispatcher, proxy, firebox and scriptmgr servers locally, .ie.,
-#  without using a real UML
+#  Run the datastore, proxy, twister, orbited and scriptmgr servers locally,
+#  i.e. without using a real LXC
 #
 [ -f uml.cfg ] || {
 	echo	"runlocal: uml.cfg not found"

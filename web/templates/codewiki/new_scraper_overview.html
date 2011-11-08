@@ -418,10 +418,13 @@
                 "sAjaxSource": '{% url scraper_data_view "scraper",scraper.short_name,sqltabledata.tablename %}',
                 "sScrollX": "100%",
                 "bScrollCollapse": true,
-                "aoColumnDefs": [
-                    { "sWidth": "10%", "aTargets": [ -1 ] }
-                    ],
-                "sDom": '<"H"<"#schema_{{forloop.counter}}">lfr>t<"F"ip>'
+                "sDom": '<"H"<"#schema_{{forloop.counter}}">lfr>t<"F"ip>',
+                "fnRowCallback": function( tr, array, iDisplayIndex, iDisplayIndexFull ) {
+                    $('td', tr).each(function(){
+                        $(this).html( $(this).html().replace(/((http|https|ftp):\/\/\S+)/g, '<a href="$1">$1</a> ') );
+                    });
+                    return tr;
+                }
             } );
             $('#schema_{{forloop.counter}}').addClass('schema').html('<a>Show schema</a><div><span class="tableschema">{{sqltabledata.sql}}</span><span class="arrow"></span></div>').children('a').bind('click', function(){
     			var $a = $(this).text('Hide schema');
@@ -537,6 +540,14 @@
 {% block jrun_script %}
 <script>
 {{block.super}}
+jQuery.fn.autolink = function () {
+    return this.each( function(){
+        var re = 
+/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g;
+        $(this).html( $(this).html().replace(re, '<a href="$1">$1</a> ') );
+    });
+}
+
 $(document).ready(function() 
 {
     setupCodeOverview('{{scraper.short_name}}');
