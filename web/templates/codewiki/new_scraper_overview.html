@@ -455,11 +455,22 @@
         {% endfor %}
     </div>
 {% else %}
-    <ul class="titlebar">
-        <li class="first"><h3>This scraper has no data yet</h3></li>
+        {% if sqliteconnectionerror %}
+            <ul class="titlebar">
+                <li class="first"><h3>
+                Sorry! The datastore isn't working right now
+                </h3>
+                </li>
+                <li class="clear"></li>
+            </ul>
+            <p>{{sqliteconnectionerror}}</p>
+        {% else %}
+            <ul class="titlebar">
+                <li class="first"><h3>This scraper has no data yet</h3></li>
+                <li class="clear"></li>
+            </ul>
+        {% endif %}
         <!-- <li class="import"><a href="">Import Data</a></li> -->
-        <li class="clear"></li>
-    </ul>
 {% endif %}
 </div>
 
