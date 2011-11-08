@@ -95,7 +95,8 @@ class DatastoreProtocol(basic.LineReceiver):
             possibly = hashlib.sha256(secret_key).hexdigest()  
             log.msg( 'Comparing %s == %s' % (possibly, self.verification_key,) , logLevel=logging.DEBUG)      
             if not possibly == self.verification_key:
-                log.msg( 'Failed: self.short_name is "%s" self.factory.secret is "%s"' % (self.short_name,self.factory.secret) , logLevel=logging.DEBUG)      
+                # XXX not sure we should log secret
+                # log.msg( 'Failed: self.short_name is "%s" self.factory.secret is "%s"' % (self.short_name,self.factory.secret) , logLevel=logging.DEBUG)      
                 self.sendLine('{"error": "Permission denied"}')
                 return
 
