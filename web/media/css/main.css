@@ -3130,6 +3130,10 @@ body.contact .content form {
 	position: relative;
 }
 
+body.contact .content form select {
+	width: 100%;
+}
+
 body.contact form ul label {
 	font-weight: normal;
 	float: none;
@@ -3199,14 +3203,53 @@ body.contact form .postphone {
 	color: #666;
 }
 
+body.contact form .postphone dd {
+	padding: 0;
+	margin: 0;
+	color: #39c;
+	font-weight: bold;
+}
+
+body.contact form .postphone dt {
+	margin-top: 10px;
+}
+
+
 #requesting_data_tip {
+	display: block;
+	padding: 15px;
+	margin-top: 10px;
 	background-color: #ffffd7;
-	padding: 8px 12px;
+	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	text-align: center;
 	font-size: 14px;
+	line-height: ;
 	font-weight: normal;
+	color: #806b50;
+}
+
+#requesting_data_tip:hover {
+	text-decoration: none;
+	color: #4f4231;
+}
+
+#requesting_data_tip strong {
+	display: inline-block;
+	font-weight: normal;
+	color: #fff;
+	padding: 2px 10px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	background-color: #e1865a;
+	border-bottom: 1px solid #b2ab86;
+	margin-top: 10px;
+}
+
+#requesting_data_tip:hover strong {
+	background-color: #c36639;
 }
 
 

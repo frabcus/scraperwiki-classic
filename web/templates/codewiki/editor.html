@@ -151,12 +151,14 @@
         <a id="aCloseEditor" href="{% url frontpage %}" title="Home">
           <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
         </a>
+        {% if not request.user.is_authenticated %}
         {% if scraper.owner %}
           {% if scraper.owner.get_profile.name %}<a href="{% url profiles_profile_detail scraper.owner.username %}">{{scraper.owner.get_profile.name}}</a>{% else %}<a href="{% url profiles_profile_detail scraper.owner.username %}">{{scraper.owner.username}}</a>{% endif %}
         {% else %}
           {% if request.user.get_profile.name %}<a href="{% url profiles_profile_detail request.user.username %}">{{request.user.get_profile.name}}</a>{% else %}<a href="{% url profiles_profile_detail request.user.username %}">{{request.user.username}}</a>{% endif %}
         {% endif %}
         / 
+        {% endif %}
         <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
       </div>
 

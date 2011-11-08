@@ -87,7 +87,7 @@ class ScraperWikiContactForm(ContactForm):
         if not request.user.is_authenticated():
             self.fields['captcha'] = CaptchaField()
         
-    subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request data'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
+    subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'I want you to scrape some data for me'),('vault','I want to buy a Vault'),('help', 'I need help using ScraperWiki'), ('bug', 'I want to report a bug'), ('other', 'Other')))
     title = forms.CharField(widget=forms.TextInput(), label=u'Subject')
     recipient_list = [settings.FEEDBACK_EMAIL]
 
