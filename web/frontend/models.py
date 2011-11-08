@@ -64,7 +64,7 @@ class UserProfile(models.Model):
         return self.features.filter(name=fname).count() > 0
     
     def possible_feature_count(self):
-        return Feature.objects.count()
+        return Feature.objects.filter(public=True).count()
     
     def regenerate_apikey(self):
         import uuid
