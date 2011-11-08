@@ -3,7 +3,7 @@
 # Provides:          ftpproxy
 # Required-Start:    $local_fs
 # Default-Start:     2
-# Short-Description: Start controller
+# Short-Description: Start ftpproxy
 ### END INIT INFO
 
 # Author: Mike Richardson <mike@quaking.demon.co.uk>

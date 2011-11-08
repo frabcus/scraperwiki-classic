@@ -3,7 +3,7 @@
 # Provides:          dataproxy
 # Required-Start:    $local_fs
 # Default-Start:     2
-# Short-Description: Start controller
+# Short-Description: Start dataproxy
 ### END INIT INFO
 
 # Author: Mike Richardson <mike@quaking.demon.co.uk>

@@ -3,7 +3,7 @@
 # Provides:          orbited
 # Required-Start:    $local_fs
 # Default-Start:     2
-# Short-Description: Start controller
+# Short-Description: Start orbited
 ### END INIT INFO
 
 # Author: Mike Richardson <mike@quaking.demon.co.uk>
