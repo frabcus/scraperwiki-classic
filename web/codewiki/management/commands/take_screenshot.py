@@ -17,7 +17,7 @@ class Command(BaseCommand):
         make_option('--run_views', dest='run_views', action="store_true",
                         help='Should the Views be run?'),
         make_option('--url_prefix', '-u', dest='url_prefix',
-                        help='First prat of URL which the views are running on, e.g. https://views.scraperwiki.com'),
+                        help='First part of URL which the views are running on, e.g. https://views.scraperwiki.com'),
         make_option('--verbose', dest='verbose', action="store_true",
                         help='Print lots'),
     )
