@@ -113,8 +113,7 @@ class TestScrapers(SeleniumTest):
         s.open('/%ss/%s/' % (code_type, code_name))
         self.wait_for_page('view the %s page so we can delete it' % code_type)                
         s.click('btnDeleteScraper')
-        s.get_confirmation()        
-        self.wait_for_page('delete the %s' % code_type)
+        self.wait_for_page('Your %s has been deleted' % code_type)
         
         if s.is_text_present('Exception Location'):
             print s.get_body_text()
