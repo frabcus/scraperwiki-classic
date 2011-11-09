@@ -32,6 +32,7 @@ except : import simplejson as json
 global config
 global cache_client
 global ignored_ip
+global large_file_folder
 
 USAGE       = " [--uid=#] [--gid=#] [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file] [--useCache] [--mode=H|S]"
 child       = None
@@ -402,6 +403,13 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         if ctag and cache_client and useCache and not ignore:
             cached = cache_client.get(ctag)
+            # Check large file store
+            if not cached and large_file_folder:
+                p = os.path.join(large_file_folder, ctag )
+                if os.path.exists(p):
+                    # Don't want to load the whole file into cached, will need 
+                    # to find an alternate way to send it to caller instead.
+                    pass
         else:
             cached = None
 
@@ -458,6 +466,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     if ctag and cache_client and not ignore:
                         if self.fetchedDiffers(fetched, cached):
                             cache_client.set(ctag, fetched, time=3600) # expire in an hour
+                            # TODO: Write to large file store if too large
                         else:
                             print '%s has changed between fetches' % (self.path,)
                             
@@ -761,6 +770,11 @@ if __name__ == '__main__' :
     cache_hosts = config.get(varName, 'cache')
     if cache_hosts:
         cache_client = memcache.Client( cache_hosts.split(',') )
+    
+    try:
+        large_file_folder = config.get(varnName,'large_file_folder')
+    except:
+        print "No large file support is configured, 'large_file_folder' is missing"
     
     try:
         ignored_ip = config.get(varName, 'ignore_ip')
