@@ -417,6 +417,7 @@
 				"sPaginationType": "full_numbers",
                 "sAjaxSource": '{% url scraper_data_view "scraper",scraper.short_name,sqltabledata.tablename %}',
                 "sScrollX": "100%",
+                "sScrollXInner": "100%",
                 "bScrollCollapse": true,
                 "sDom": '<"H"<"#schema_{{forloop.counter}}">lfr>t<"F"ip>',
                 "fnRowCallback": function( tr, array, iDisplayIndex, iDisplayIndexFull ) {
