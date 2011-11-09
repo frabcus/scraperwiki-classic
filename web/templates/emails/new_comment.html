@@ -3,7 +3,7 @@
 	<body lang="en" style="margin: 0; padding: 0">
 		<h1>Hi {{ owner.username }},</h1>
 
-        <p>{{ request.user.username }} has left a comment on your scraper <a href="{% scraper.get_absolute_url %}">'{{ scraper.title }}'</a>:</p>
+        <p>{{ request.user.username }} has left a comment on your scraper <a href="{{ scraper.get_absolute_url }}">'{{ scraper.title }}'</a>:</p>
 
         <blockquote>{{ message }}</blockquote>
 
