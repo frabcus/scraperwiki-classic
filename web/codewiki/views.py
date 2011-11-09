@@ -90,6 +90,12 @@ def getscraperor404(request, short_name, action, do_check=True):
 def comments(request, wiki_type, short_name):
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
     if resp: return resp
+
+    if request.user.is_authenticated():
+        if request.user.get_profile().has_feature('New overview page'):
+            return HttpResponseRedirect(reverse('code_overview', kwargs={'wiki_type':wiki_type,'short_name':short_name}) + '#chat') 
+    
+    
     context = {'selected_tab':'comments', 'scraper':scraper }
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
@@ -1054,21 +1060,6 @@ def webstore_attach_auth(request):
     return HttpResponse("{'attach':'Ok'}", mimetype=mime)
     
 
-def get_columns_from_sql(sql):
-    """
-    Pull the columns from the sql create statement, at least until we can get the datastore
-    to display useful metadata
-    # 'CREATE TABLE `swdata` (`id` integer)'}}
-    """    
-    import re
-    
-    m = re.match('.*\((.*)\).*', sql)
-    if not m:
-        return [ ]
-        
-    return [r.split('`')[1] for r in m.groups(0)[0].split(',')]
-
-
 def scraper_data_view(request, wiki_type, short_name, table_name):
     """
     DataTable ( http://www.datatables.net/usage/server-side ) implementation for the new scraper page
@@ -1111,7 +1102,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
             total_rows = table['count']
             total_after_filter = total_rows
             sql = table['sql']
-            columns = get_columns_from_sql( sql )
+            columns = table['keys']
         else:
             raise Http404()
         
@@ -1138,7 +1129,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
     results = {
         'iTotalRecords'        : total_rows,
         'iTotalDisplayRecords' : total_after_filter,
-        'sEcho'  : int( request.REQUEST['sEcho'] ), # Cast at suggestion of docs
+        'sEcho'  : int( request.REQUEST.get('sEcho','0') ), # Cast at suggestion of docs
         'aaData' : data
     }
     return HttpResponse( json.dumps(results) , mimetype=mime)

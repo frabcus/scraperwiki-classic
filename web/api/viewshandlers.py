@@ -1,6 +1,8 @@
 import urllib
 import urllib2
 
+from django.contrib.sites.models import Site
+
 from django.conf import settings
 from django.template import RequestContext, loader, Context
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
@@ -187,7 +189,10 @@ def out_rss2(dataproxy, scraper):
         rssitem = PyRSS2Gen.RSSItem(title=ddata["title"], link=ddata["link"], description=ddata["description"], guid=guid, pubDate=pubDate)
         items.append(rssitem)
 
+    current_site = Site.objects.get_current()
     link = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
+    link = 'https://%s%s' % (current_site.domain,link,)
+
     rss = PyRSS2Gen.RSS2(title=scraper.title, link=link, description=scraper.description_safepart(), lastBuildDate=datetime.datetime.now(), items=items)
 
     fout = StringIO()

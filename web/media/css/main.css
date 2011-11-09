@@ -1102,6 +1102,22 @@ body.profiles .profilesettings {
 	padding: 0 20px;
 }
 
+body.profiles.edit .profilesettings {
+	position: static;
+	margin-left: 163px;
+	width: 337px;
+	text-align: center;
+}
+
+body.profiles.edit .profilesettings p {
+	float: left;
+	margin: 20px 0;
+}
+
+body.profiles.edit .profilesettings p.save {
+	float: right;
+}
+
 body.profiles .profilepic img {
 	border: 4px solid #fff;
 	-webkit-box-shadow: 0px 2px 5px #ccc;

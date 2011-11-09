@@ -1,9 +1,9 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          httpproxy
+# Provides:          httpsproxy
 # Required-Start:    $local_fs
 # Default-Start:     2
-# Short-Description: Start controller
+# Short-Description: Start httpsproxy
 ### END INIT INFO
 
 # Author: Mike Richardson <mike@quaking.demon.co.uk>

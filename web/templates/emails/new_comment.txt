@@ -4,7 +4,7 @@ Hi {{ owner.username }},
 
 "{{ message }}"
 
-Click here to view the message: {% scraper.get_absolute_url %}
+Click here to view the message: {{ scraper.get_absolute_url }}
 
 Cheers,
 

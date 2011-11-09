@@ -6,13 +6,6 @@ stores = 127.0.0.1:10000
 http_stores = 127.0.0.1:20000
 proxy_secret = your_secret_here
 
-[dispatcher]
-host	= 127.0.0.1
-port	= 9000
-umllist	= lxc001
-confurl	= allwhite
-;path    = /scraperwiki/live/scrapers,/scraperwiki/live/scraperlibs
-
 [twister]
 port      = 9010
 djangokey = jshdowpabzsdofosiw976gbjksjdbfslkaoapwebnvdjflg
@@ -132,10 +125,10 @@ beta_only = 0
 
 
 [loggers]
-keys=root,dataproxy,controller,runner,dispatcher,twister,proxy
+keys=root,dataproxy,runner,twister,proxy
 
 [handlers]
-keys=consoleHandler,logfileHandlerWarnings,logfileHandlerEmail,logfileHandlerDataproxyDebug,logfileHandlerControllerDebug,logfileHandlerDispatcherDebug,logfileHandlerRunnerDebug,logfileHandlerTwisterDebug,logfileHandlerProxyDebug
+keys=consoleHandler,logfileHandlerWarnings,logfileHandlerEmail,logfileHandlerDataproxyDebug,logfileHandlerRunnerDebug,logfileHandlerTwisterDebug,logfileHandlerProxyDebug
 
 [formatters]
 keys=simpleFormatter
@@ -151,22 +144,10 @@ handlers=logfileHandlerDataproxyDebug,logfileHandlerWarnings
 qualname=dataproxy
 propagate=0
 
-[logger_controller]
-level=DEBUG
-handlers=logfileHandlerControllerDebug,logfileHandlerWarnings
-qualname=controller
-propagate=0
-
 [logger_runner]
 level=DEBUG
 handlers=logfileHandlerRunnerDebug,logfileHandlerWarnings
 qualname=runner
-propagate=0
-
-[logger_dispatcher]
-level=DEBUG
-handlers=logfileHandlerDispatcherDebug,logfileHandlerWarnings
-qualname=dispatcher
 propagate=0
 
 [logger_twister]
@@ -200,23 +181,11 @@ formatter=simpleFormatter
 args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 'ScraperWiki critical error in system')
 
 
-[handler_logfileHandlerControllerDebug]
-class=handlers.RotatingFileHandler
-level=DEBUG
-formatter=simpleFormatter
-args=('/var/log/scraperwiki/controller.log', "a", 10485760, 5)
-
 [handler_logfileHandlerDataproxyDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/dataproxy.log', "a", 10485760, 5)
-
-[handler_logfileHandlerDispatcherDebug]
-class=handlers.RotatingFileHandler
-level=DEBUG
-formatter=simpleFormatter
-args=('/var/log/scraperwiki/dispatcher.log', "a", 10485760, 5)
 
 [handler_logfileHandlerRunnerDebug]
 class=handlers.RotatingFileHandler

@@ -23,11 +23,6 @@
     <div class="content">
     	<form method="post">
         {% csrf_token %}
-            <div class="profilesettings">
-                <input type="hidden" name="success_url" value="/" />
-                <p class="save"><input type="submit" class="button" value="Save changes" /><a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/tick.png" width="16" height="16" alt="" /> Save Changes</a></p>
-                <p class="cancel"><a href="{% url profiles_profile_detail user.username %}"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Cancel Changes</a></p>
-            </div>
 
             <div class="profilepic">
                 <a href="http://en.gravatar.com" target="_blank">{% load gravatar %}
@@ -68,18 +63,38 @@
                         <br class="clear" />
                         {% field_errors form.email_on_comments %}
                     </p>
+                    
+                    {% comment %}
+
+                    <p class="messages">
+                        <label for="id_messages">Allow other users to send me messages: <span style="color: #999">(But don&rsquo;t show them my email address)</span></label>
+                        {{ form.messages }}
+                        <br class="clear" />
+                        {% field_errors form.messages %}
+                    </p>
+                    
+                    {% endcomment %}
                 
                 </div>
-                
+
+				{% if profile.possible_feature_count != 0 %}
                 <div id="features">
                     <h4>Features</h4>
                     <p>We regularly test new features that could make ScraperWiki even better. You can use these checkboxes to opt in or out of our current feature trials.</p>
                     {{ form.features }}
                 </div>
+				{% endif %}
                 
             </div>
 
             <br class="clear" />
+            
+            <div class="profilesettings">
+                <input type="hidden" name="success_url" value="/" />
+                <p class="cancel"><a href="{% url profiles_profile_detail user.username %}"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Cancel Changes</a></p>
+                <p class="save"><input type="submit" class="button" value="Save changes" /><a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/tick.png" width="16" height="16" alt="" /> Save Changes</a></p>
+                <br class="clear" />
+            </div>
             
             
     	</form>

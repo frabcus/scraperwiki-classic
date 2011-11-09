@@ -381,7 +381,7 @@ def tags(request):
     all_tags = {}
     
     # trial code for filtering down by tags that you can't see
-    if True:
+    if False:
         user_visible_code_objects = scraper_search_query(request.user, None)
         code_objects = user_visible_code_objects.extra(
             tables=['tagging_taggeditem', "tagging_tag"],
@@ -405,8 +405,8 @@ def tags(request):
 
     # old method that would show tags to scrapers that are private
     else:
-        scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True)
-        view_tags = Tag.objects.usage_for_model(View, counts=True)
+        scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
+        view_tags = Tag.objects.usage_for_model(View, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
         for tag in itertools.chain(scraper_tags, view_tags):
             existing = all_tags.get(tag.name, None)
             if existing:

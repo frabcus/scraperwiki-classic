@@ -47,6 +47,7 @@ CROPPER_IMG_DIR     = HOME_DIR + '/croppercache/img/'             # directory of
 
 SPLITSCRAPERS_DIR   = HOME_DIR + '/splitscrapers/'
 
+DATASTORE_SECRET= 'same_secret_as_uml.cfg'
 DATAPROXY_HOST  = 'localhost'	# Host running data proxy - see uml.cfg
 DATAPROXY_PORT  = 9003	# Dataproxy port - see uml.cfg
 
