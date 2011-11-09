@@ -239,9 +239,13 @@ class ScheduledRunMessageLoopHandler:
 
         if self.exceptionmessage:
             self.output = "%s\n\n*** Exception ***\n\n%s\n" % (self.output, "\n\n".join(self.exceptionmessage))
+            
         if self.completiondata:
             self.output = "%s\nEXECUTIONSTATUS: %s\n" % (self.output, self.completionmessage)
         else:
+            # We have no completiondata, so it looks like something bad happened at the node end. 
+            # Need to work out why there is no completion message because we got no 
+            # 'runcompleted' message
             self.output = "%s\nEXECUTIONSTATUS: [Run was interrupted]\n" % (self.output)
         
         self.updaterunobject(True)
