@@ -1250,7 +1250,58 @@ body.profiles h2.scrapersandviews {
 	padding-top: 15px;
 }
 
+#message_popup {
+	min-width: 400px;
+}
 
+#message_popup h1 {
+	font-size: 16px;
+	line-height: 16px;
+	background-color: #dadee5;
+	border-bottom: 1px solid #a5a5a5;
+	position: relative;
+	padding: 15px 25px 13px;
+	color: #717e8c;
+	text-transform: uppercase;
+	text-shadow: 0 1px 0 #fff;
+}
+
+#message_popup label {
+	display: none;
+}
+
+#message_popup textarea {
+	width: 90%;
+}
+
+#message_popup p {
+	margin-bottom: 0;
+}
+
+#message_popup p.last {
+	margin: 6px 0 15px 0;
+}
+
+#message_popup p.error {
+	margin: 0 0 10px 0;
+	width: 90%;
+	display: inline-block;
+	padding: 5px 3px;
+	color: #a73c23;
+	background-color: #f9d5d4;
+	font-size: 13px;
+}
+
+#message_popup p.success {
+	margin: 20px;
+	background-color: #bad9b3;
+	padding: 10px;
+	line-height: 18px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	color: #39732d;
+}
 
 
 body.profiles.edit .profilebio {
@@ -1323,7 +1374,8 @@ body.profiles.edit #alerts label {
 	float: left;
 }
 
-body.profiles.edit input#id_email_on_comments {
+body.profiles.edit input#id_email_on_comments,
+body.profiles.edit input#id_messages {
 	margin-right: 70px;
 	margin-top: 8px;
 }
@@ -5129,26 +5181,6 @@ ul#chooser li a.active em {
 	line-height: 18px;
 	font-size: 13px;
 }
-
-
-/* #template_popup li {
-	position: relative;
-	text-align: center;
-	font-size: 0.9em;
-}
-
-#template_popup li a {
-	font-size: 0.9em;
-	display: block;
-	text-decoration: none;
-}
-
-#template_popup img.lang_icon {
-	position: relative;
-	top: 4px;
-} */
-
-
 
 
 /* Blog latest */

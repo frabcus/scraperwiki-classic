@@ -9,7 +9,7 @@
 {% load comments %}
 {% load history %}
 
-{% block title %}NEW | {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
+{% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
 {% block css %}<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/new_scraper_overview.css" />
 <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-dataTables.css" />{% endblock %}
@@ -417,7 +417,7 @@
 				"sPaginationType": "full_numbers",
                 "sAjaxSource": '{% url scraper_data_view "scraper",scraper.short_name,sqltabledata.tablename %}',
                 "sScrollX": "100%",
-                "sScrollXInner": "100%",
+                "bStateSave": true,
                 "bScrollCollapse": true,
                 "sDom": '<"H"<"#schema_{{forloop.counter}}">lfr>t<"F"ip>',
                 "fnRowCallback": function( tr, array, iDisplayIndex, iDisplayIndexFull ) {
