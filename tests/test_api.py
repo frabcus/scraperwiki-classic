@@ -584,7 +584,6 @@ class TestApi(SeleniumTest):
         s.click("//div[@class='submit-row']/input[@value='Save']")
         self.wait_for_page()
         self.user_login(self.user_name, self.user_pass)
-        self.wait_for_page()
         return api_key
         
     
