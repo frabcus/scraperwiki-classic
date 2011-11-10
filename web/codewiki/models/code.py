@@ -4,6 +4,7 @@ import os, sys
 import re
 import urllib
 
+from django.template import RequestContext
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -586,8 +587,8 @@ def comment_notification(**kwargs):
         return
         
     if owner.get_profile().email_on_comments: 
-        text_content = render_to_string('emails/new_comment.txt', locals() )
-        html_content = render_to_string('emails/new_comment.html', locals() )
+        text_content = render_to_string('emails/new_comment.txt', locals(), context_instance=RequestContext(request) )
+        html_content = render_to_string('emails/new_comment.html', locals(),context_instance=RequestContext(request) )
         
         msg = EmailMultiAlternatives(subject, text_content, settings.FEEDBACK_EMAIL, [owner.email])
         msg.attach_alternative(html_content, "text/html")

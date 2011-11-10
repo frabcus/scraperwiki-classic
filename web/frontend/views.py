@@ -119,8 +119,8 @@ def user_message(request, username):
         reply_url = "https://%s%s#message" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
         
         if sending_user_profile.messages and receiving_user_profile.messages:
-            text_content = render_to_string('emails/new_message.txt', locals() )
-            html_content = render_to_string('emails/new_message.html', locals() )
+            text_content = render_to_string('emails/new_message.txt', locals(), context_instance=RequestContext(request) )
+            html_content = render_to_string('emails/new_message.html', locals(), context_instance=RequestContext(request) )
         
             msg = EmailMultiAlternatives(subject, text_content, settings.FEEDBACK_EMAIL, [receiving_user_profile.user.email])
             msg.attach_alternative(html_content, "text/html")
