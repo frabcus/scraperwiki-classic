@@ -61,6 +61,7 @@ class BasicDataProxyTests( DataStoreTester ):
     """
     
     def test_simple_create_and_check(self):
+        title('test_simple_create_and_check')
         # Check we can save and get the right count back
         scraperwiki.sqlite.save(['id'], {'id':1})
         x = scraperwiki.sqlite.execute('select count(*) from swdata')
@@ -68,6 +69,7 @@ class BasicDataProxyTests( DataStoreTester ):
         
         
     def test_simple_create_and_check_custom_table(self):
+        title('test_simple_create_and_check_custom_table')
         # Check we can save to a named table and get the right count back        
         scraperwiki.sqlite.save(['id'], {'id':1}, table_name='test table')
         x = scraperwiki.sqlite.execute('select count(*) from `test table`')
@@ -75,6 +77,7 @@ class BasicDataProxyTests( DataStoreTester ):
 
 
     def test_simple_create_and_check_custom_table_fail(self):
+        title('test_simple_create_and_check_custom_table_fail')
         # Check we can save to a named table and failed to get data back when 
         # we access swdata
         scraperwiki.sqlite.save(['id'], {'id':1}, table_name='test table')
@@ -88,23 +91,27 @@ class BasicDataProxyTests( DataStoreTester ):
         
 
     def test_attach(self):
+        title('test_attach')
         settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
         settings['scrapername'], settings['runid'] = self.random_details()
         update_settings_for_name(settings,settings['scrapername'])        
         attach_to = settings['scrapername']
         scraperwiki.datastore.create( **settings )
         # Save to the attachable database
-        
+        scraperwiki.sqlite.save(['id'], {'id':1}, table_name='test')
         scraperwiki.datastore.close()
 
         settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )                
         settings['scrapername'], settings['runid'] = self.random_details()
         update_settings_for_name(settings,settings['scrapername'])                
         scraperwiki.datastore.create( **settings )
-        # Now we can perform a query to test out the attach
+        print scraperwiki.sqlite.select('* from `%s`.test' % attach_to)
         
         
-
+def title(s):
+    print '\n%s' % s
+    print '-' * len(s)
+    
         
 
 if __name__ == '__main__':
