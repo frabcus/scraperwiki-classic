@@ -63,8 +63,6 @@
                         <br class="clear" />
                         {% field_errors form.email_on_comments %}
                     </p>
-                    
-                    {% if request.user.is_staff %}
 
                     <p class="messages">
                         <label for="id_messages" style="cursor:help" title="Don&rsquo;t worry, nobody will see your email address: Messages are sent from feedback@scraperwiki.com">I&rsquo;d like to send and receive messages via ScraperWiki:</span></label>
@@ -72,8 +70,6 @@
                         <br class="clear" />
                         {% field_errors form.messages %}
                     </p>
-                    
-                    {% endif %}
                 
                 </div>
 

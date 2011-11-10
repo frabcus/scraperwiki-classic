@@ -22,13 +22,13 @@
         {% ifequal profile.user user %}
         <div class="profilesettings">
             <p class="email"><span class="label">Registered email: </span> {{user.email}}</p>
-            <p class="edit"><a href="{% url profiles_edit_profile %}"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="" /> Edit&nbsp;your&nbsp;profile</a></p>
-            <p class="password"><a href="{% url auth_password_change %}"><img src="{{ MEDIA_URL }}images/icons/key.png" width="16" height="16" alt="" /> Change&nbsp;your&nbsp;password</a></p>
+            <p class="edit"><a href="{% url profiles_edit_profile %}" onClick="_gaq.push(['_trackEvent', 'Profile buttons', 'Edit profile']);"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="" /> Edit&nbsp;your&nbsp;profile</a></p>
+            <p class="password"><a href="{% url auth_password_change %}" onClick="_gaq.push(['_trackEvent', 'Profile buttons', 'Change password']);"><img src="{{ MEDIA_URL }}images/icons/key.png" width="16" height="16" alt="" /> Change&nbsp;your&nbsp;password</a></p>
         </div>
         {% else %}
             {% if request.user.is_authenticated and profile.messages and request.user.get_profile.messages %}
                 <div class="profilesettings">
-                    <p class="message"><a href="{% url user_message profile.user.username %}" id="compose_user_message"><img src="{{ MEDIA_URL }}images/icons/email.png" width="16" height="16" alt="" /> Send a message</a></p>
+                    <p class="message"><a href="{% url user_message profile.user.username %}" id="compose_user_message" onClick="_gaq.push(['_trackEvent', 'Profile buttons', 'Send message']);"><img src="{{ MEDIA_URL }}images/icons/email.png" width="16" height="16" alt="" /> Send a message</a></p>
                 </div>
             {% endif %}
         {% endifequal %}

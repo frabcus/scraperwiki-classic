@@ -343,8 +343,7 @@ class TestScrapers(SeleniumTest):
         self._add_comment(code_name, code_type)
 
         # privacy
-        if SeleniumTest._adminuser:
-            self.activate_users([owner['username'], editor['username']])
-            self.user_login(owner['username'], owner['password'])
-            self._check_code_privacy(code_name, code_type, owner, editor)
-                     
+        self.activate_users([owner['username'], editor['username']])
+        self.user_login(owner['username'], owner['password'])
+        self._check_code_privacy(code_name, code_type, owner, editor)
+

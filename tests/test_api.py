@@ -584,7 +584,6 @@ class TestApi(SeleniumTest):
         s.click("//div[@class='submit-row']/input[@value='Save']")
         self.wait_for_page()
         self.user_login(self.user_name, self.user_pass)
-        self.wait_for_page()
         return api_key
         
     
@@ -600,6 +599,7 @@ class TestApi(SeleniumTest):
         
         self.user_pass = str( uuid.uuid4() )[:18].replace('-', '_')
         self.user_name = self.create_user(name="test user", password = self.user_pass)
+        self.activate_users([self.user_name])
         
         self.populate_db_name = self.create_code("python", code_type='scraper', code_source=populate_db_code)
         
