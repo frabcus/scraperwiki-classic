@@ -5,7 +5,7 @@ ___________
 
 "{{ message }}"
 
-To reply, visit: {{ scraper.get_absolute_url }}#comments
+To reply, visit: {{ scraper.get_absolute_url }}#chat
 
 __________
 
