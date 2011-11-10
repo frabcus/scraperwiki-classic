@@ -12,7 +12,8 @@ from django.conf import settings
 from django.db.models import Q
 from django.contrib.comments.signals import comment_was_posted
 from django.core.mail import send_mail
-
+from django.contrib.sites.models import Site
+        
 import tagging
 import hashlib
 
@@ -585,6 +586,9 @@ def comment_notification(**kwargs):
 
     if request.user == owner:
         return
+        
+    site = Site.objects.get_current()
+    sender_profile_url = "https://%s%s" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":request.user.username}))
         
     if owner.get_profile().email_on_comments: 
         text_content = render_to_string('emails/new_comment.txt', locals(), context_instance=RequestContext(request) )
