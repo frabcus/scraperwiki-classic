@@ -117,7 +117,7 @@ def user_message(request, username):
 
         site = Site.objects.get_current()
         reply_url = "https://%s%s#message" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
-        
+        sender_profile_url = "https://%s%s" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
         if sending_user_profile.messages and receiving_user_profile.messages:
             text_content = render_to_string('emails/new_message.txt', locals(), context_instance=RequestContext(request) )
             html_content = render_to_string('emails/new_message.html', locals(), context_instance=RequestContext(request) )
