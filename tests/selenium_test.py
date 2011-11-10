@@ -170,7 +170,7 @@ class SeleniumTest(unittest.TestCase):
             self.user_login(owner['username'], owner['password'])
             s.open("/%ss/" % code_type + code_name)
             self.wait_for_page()
-            self.failUnless(s.is_text_present("This %s is private" % code_type))
+            self.failUnless(s.is_text_present("Sorry, this %s is private" % code_type))
         else:
             self.fail()
 
@@ -221,3 +221,4 @@ class SeleniumTest(unittest.TestCase):
             s.click("id_is_active")
             s.click("//div[@class='submit-row']/input[@value='Save']")
             self.wait_for_page()
+            self.failUnless(s.is_text_present("was changed successfully"))

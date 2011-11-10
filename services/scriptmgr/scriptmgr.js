@@ -78,7 +78,23 @@ process.on('uncaughtException', function (err) {
 http.createServer(function (req, res) {
 	// Decide whether we will accept the connection (from twister machine and 
 	// local dataproxy/httpproxy only)
-	
+	// allowed_ips: ["127.0.0.1"],	
+	if ( settings.allowed_ips ) {
+		var allowed = false;
+
+		for (x in settings.allowed_ips)
+		{
+			var ip = settings.allowed_ips[x];
+			allowed = req.connection.remoteAddress == ip;
+			if ( allowed )
+				break;
+		}
+
+		if ( ! allowed ) {
+			write_error(res, "Not allowed to connect from " + req.connection.remoteAddress );
+			return;
+		}
+	}
 	
 	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/'];
 	handler(req,res);
