@@ -15,11 +15,13 @@ except Exception, e:
     print e
     sys.exit(0)
 
+resource_dir = None
 
 def update_settings_for_name(settings,name):
     import hashlib
-    secret_key = '%s%s' % (name, settings.secret,)
+    secret_key = '%s%s' % (name, settings['secret'],)
     settings['verification_key'] = hashlib.sha256(secret_key).hexdigest()  
+    del settings['secret']
 
 
 class DataStoreTester(unittest.TestCase):
@@ -37,7 +39,18 @@ class DataStoreTester(unittest.TestCase):
         return 'x_' + str(uuid.uuid4()), str(uuid.uuid4()), 
         
     def tearDown(self):
-        print 'Should delete the resourcedir directory called %s' % self.settings['scrapername']
+        global resource_dir
+        if resource_dir:
+            p = os.path.join(resource_dir, self.settings['scrapername'])
+            print 'Going to delete %s because you said so' % p
+            try:
+                os.unlink( os.path.join(p, 'defaultdb.sqlite'))
+                os.rmdir( p )
+                print "It's gone"            
+            except:
+                pass
+        else:
+            print 'Should delete the resourcedir directory called %s' % self.settings['scrapername']
         scraperwiki.datastore.close()
         
         
@@ -95,4 +108,15 @@ class BasicDataProxyTests( DataStoreTester ):
         
 
 if __name__ == '__main__':
+    p = os.path.abspath(__file__)
+    p = os.path.abspath( os.path.join(p, '../../../resourcedir/') )
+    if os.path.exists(p):
+        resource_dir = p
+        print 'Your RESOURCEDIR is set to %s and created folders will be deleted from there.' % resource_dir
+        print 'Is this okay?'
+        s = raw_input('[y/N]--> ')
+        if not s or s.lower() != 'y':
+            sys.exit(0)
+        print '\nRunning tests'
+        print '=' * 13
     unittest.main()

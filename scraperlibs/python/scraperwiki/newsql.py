@@ -52,7 +52,6 @@ def execute(sqlquery, data=None, verbose=1):
     global attachlist
     
     m = {"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist}
-    global attachlist
     result = scraperwiki.datastore.make_request(m, attachlist)
     if "Error" in result:
         print 'Sent ', m

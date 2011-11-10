@@ -403,13 +403,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         if ctag and cache_client and useCache and not ignore:
             cached = cache_client.get(ctag)
-            # Check large file store
-            if not cached and large_file_folder:
-                p = os.path.join(large_file_folder, ctag )
-                if os.path.exists(p):
-                    # Don't want to load the whole file into cached, will need 
-                    # to find an alternate way to send it to caller instead.
-                    pass
+            # TODO: Check large file store
         else:
             cached = None
 
