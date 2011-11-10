@@ -13,7 +13,8 @@ from django.db.models import Q
 from django.contrib.comments.signals import comment_was_posted
 from django.core.mail import send_mail
 from django.contrib.sites.models import Site
-        
+from django.core.urlresolvers import reverse                
+
 import tagging
 import hashlib
 
