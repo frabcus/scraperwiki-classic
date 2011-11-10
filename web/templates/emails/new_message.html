@@ -1,7 +1,7 @@
 {% extends "emails/base_email.html"%}
 {% block content %}
     <h2 style="font-size: 22px; line-height: 26px; font-family: Helvetica, Arial, sans-serif; color: #666666; margin: 0px; font-weight: normal;">You have a new message from <a href="{% url profiles_profile_detail sending_user_profile.user.username %}" style="color: #111">{{ sending_user_profile.display_name }}</a>:</h2>
-    <blockquote style="font-size: 18px; line-height: 22px; font-family: Helvetica, Arial, sans-serif; color: #333333; background: #eeeeee; padding: 20px; margin: 20px 0 30px 0;">{{ body }}</blockquote>
+    <blockquote style="font-size: 18px; line-height: 22px; font-family: Helvetica, Arial, sans-serif; color: #333333; background: #eeeeee; padding: 20px; margin: 20px 0 30px 0;">{{ body|linebreaks }}</blockquote>
     <a href="{{ reply_url }}" style="padding: 8px 16px; background: #fbcb45; font-size: 20px; line-height: 22px; font-family: Helvetica, Arial, sans-serif; color: #000000; text-decoration: none; -webkit-border-radius: 50px; -moz-border-radius: 50px; border-radius: 50px;">Click here to reply</a>
 {% endblock %}
 {% block footer %}
