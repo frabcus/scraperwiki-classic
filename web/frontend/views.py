@@ -20,9 +20,9 @@ from tagging.models import Tag, TaggedItem
 
 from codewiki.models import UserUserRole, Code, UserCodeRole, Scraper, Vault, View, scraper_search_query, user_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
-from frontend.forms import CreateAccountForm
+from frontend.forms import CreateAccountForm, UserMessageForm
 from registration.backends import get_backend
-
+from frontend.models import UserProfile
 # find this in lib/python/site-packages/profiles
 from profiles import views as profile_views   
 
@@ -97,6 +97,43 @@ def profile_detail(request, username):
     extra_context['useruserrolemap'] = UserUserRole.useruserrolemap(profiled_user)
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
+
+def user_message(request, username):
+    """This is a view to return a form ready for the user to fill in
+    to email another user on the site."""
+    form = UserMessageForm(data=request.POST or None)
+    receiving_user = get_object_or_404(User, username=username)
+    if request.method == "POST" and form.is_valid():
+        #  send email
+        from django.template.loader import render_to_string
+        from django.conf import settings
+        from django.core.mail import EmailMultiAlternatives
+
+        sending_user_profile = get_object_or_404(UserProfile, user=request.user)
+        receiving_user_profile = get_object_or_404(UserProfile, user=receiving_user)
+        
+        subject = "[ScraperWiki] New message from %s" % sending_user_profile.display_name()
+        body = form.cleaned_data['body']
+
+        site = Site.objects.get_current()
+        reply_url = "https://%s%s#message" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
+        
+        if sending_user_profile.messages and receiving_user_profile.messages:
+            text_content = render_to_string('emails/new_message.txt', locals() )
+            html_content = render_to_string('emails/new_message.html', locals() )
+        
+            msg = EmailMultiAlternatives(subject, text_content, settings.FEEDBACK_EMAIL, [receiving_user_profile.user.email])
+            msg.attach_alternative(html_content, "text/html")
+            msg.send(fail_silently=True)
+        else:
+            return HttpResponse('{"status" : "fail", "error" : "Both you and the recipient must allow messages"}')
+            
+        return HttpResponse('{"status" : "ok"}')
+        
+    elif request.method == "POST":
+        return HttpResponse('{"status" : "fail", "error" : "Please fill in the message"}')
+        
+    return render_to_response('profiles/message.html', {'form':form, 'profile' : receiving_user}, context_instance = RequestContext(request))
 
 def edit_profile(request):
     form = UserProfileForm()

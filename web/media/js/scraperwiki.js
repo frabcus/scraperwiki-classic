@@ -192,6 +192,64 @@ function newVaultCodeObject(id, wiki_type){
     });
 }
 
+
+function newUserMessage(url){
+	
+	if(url == undefined){
+		alert('No message url specified');
+	} else {
+    
+    	$.get(url, function(data){
+	        $.modal('<div id="message_popup">'+data+'</div>', {
+	            overlayClose: true, 
+	            autoResize: true,
+	            overlayCss: { cursor:"auto" },
+				onOpen: function(dialog) {
+					dialog.data.show();
+					dialog.overlay.fadeIn(200);
+					dialog.container.fadeIn(200);
+				},
+				onShow: function(dialog){
+					$('#simplemodal-container').css('height', 'auto');
+					$('h1', dialog.data).append(' to ' + $('.profilebio h3').text());
+					$('textarea', dialog.data).focus();
+					$(':submit', dialog.data).bind('click', function(e){
+						e.preventDefault();
+					//	var action = location.href + '/message/';
+						var action = $('form', dialog.data).attr('action');
+						var data = $('form', dialog.data).serialize();
+						$.ajax({
+							type: 'POST',
+							url: action,
+							data: data,
+							success: function(data){
+								console.log(data);
+								if(data.status == 'ok'){
+									$('h1', dialog.data).after('<p class="success">Message sent!</p>');
+									$('form', dialog.data).remove();
+									var t = setTimeout(function(){
+										$('#simplemodal-overlay').trigger('click');
+									}, 1000);
+								} else {
+									$('p.last', dialog.data).before('<p class="error">' + data.error + '</p>');
+								}
+							},
+							dataType: 'json'
+						});
+					});
+				},
+				onClose: function(dialog) {
+					dialog.container.fadeOut(200);
+					dialog.overlay.fadeOut(200, function(){
+						$.modal.close();
+					});
+				}
+	        });
+	    });
+	}
+}
+
+
 $(function()
 {
 	
@@ -502,6 +560,15 @@ $(function()
 			$('#nav_outer').animate({marginTop:0}, 250);
 		}).appendTo('#alert_inner');
 		$('#nav_outer').css('margin-top', $('#alert_outer').outerHeight());
+	}
+	
+	$('#compose_user_message').bind('click', function(e){
+		e.preventDefault();
+		newUserMessage($(this).attr('href'));
+	});
+	
+	if($('#compose_user_message').length && window.location.hash == '#message'){
+		$('#compose_user_message').trigger('click');
 	}
 	
 	
