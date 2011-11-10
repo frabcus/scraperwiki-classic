@@ -1,11 +1,16 @@
-Hi {{ owner.username }},
+ScraperWiki
+___________
 
-{{ request.user.username }} has left a comment on your '{{ scraper.title }}' scraper:
+{{ request.user.username }} has left a comment on your scraper '{{ scraper.title }}':
 
 "{{ message }}"
 
-Click here to view the message: {{ scraper.get_absolute_url }}
+To reply, visit: {{ scraper.get_absolute_url }}#chat
 
-Cheers,
+__________
 
-The ScraperWiki team
+Don't care? You can edit your email preferences here:
+https://scraperwiki.com/profiles/edit
+
+
+

@@ -52,7 +52,8 @@ class UserProfile(models.Model):
     
     # If someone comments on an item this user owns, this specifies whether they 
     # should receive the email
-    email_on_comments= models.BooleanField( default=False )
+    email_on_comments = models.BooleanField( default=False )
+    messages = models.BooleanField( default=False )
         
     objects = models.Manager()
     

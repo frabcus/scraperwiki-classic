@@ -63,17 +63,13 @@
                         <br class="clear" />
                         {% field_errors form.email_on_comments %}
                     </p>
-                    
-                    {% comment %}
 
                     <p class="messages">
-                        <label for="id_messages">Allow other users to send me messages: <span style="color: #999">(But don&rsquo;t show them my email address)</span></label>
+                        <label for="id_messages" style="cursor:help" title="Don&rsquo;t worry, nobody will see your email address: Messages are sent from feedback@scraperwiki.com">I&rsquo;d like to send and receive messages via ScraperWiki:</span></label>
                         {{ form.messages }}
                         <br class="clear" />
                         {% field_errors form.messages %}
                     </p>
-                    
-                    {% endcomment %}
                 
                 </div>
 

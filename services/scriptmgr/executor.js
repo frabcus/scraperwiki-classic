@@ -165,7 +165,6 @@ exports.run_script = function( http_request, http_response ) {
 		if ( body == undefined || body.length == 0 || body.length != len ) {
 			r = {"error":"incoming message incomplete", "headers": http_request.headers , "lengths":  len.toString() };
 			http_response.end( JSON.stringify(r) );
-			util.log.warn('Incomplete incoming message in run command - no code?');			
 			return;
 		};
 
@@ -342,8 +341,10 @@ function execute(http_req, http_res, raw_request_data) {
 	     	}
 		}); // end of writefile
 	} else {
-		
-		// Use LXC to allocate us an instance and run with it
+		//
+		// We can clearly refactor this into something class-based and easier to understand.
+		// There is more in common with the previous branch than different.
+		//  
 		var res = lxc.exec( script, request_data.code );
 		if ( res == null ) {
 			var r = {"error": "No virtual machines available"}
@@ -353,6 +354,7 @@ function execute(http_req, http_res, raw_request_data) {
 		util.log.debug( 'Running on ' + res );		
 				
 		var extension = util.extension_for_language(script.language);
+		
 		var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
 		var rVM = res;
 		fs.writeFile(tmpfile, request_data.code, function(err) {

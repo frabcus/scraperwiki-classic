@@ -152,10 +152,14 @@ var exts = {
 }
 
 /******************************************************************************
-* Silly look up to get the extension for the language we are executing
+* Silly look up to get the extension for the language we are executing, not sure 
+* why we don't just export the exts dict (er I mean object)
 ******************************************************************************/
 exports.extension_for_language = function( lang ) {
-	return exts[lang];
+	if ( !lang ) 
+		return 'py';
+	
+	return exts[lang.toLowerCase()];
 };
 
 /******************************************************************************

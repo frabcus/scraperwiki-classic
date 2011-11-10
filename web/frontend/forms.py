@@ -57,6 +57,8 @@ class UserProfileForm(forms.ModelForm):
     email = forms.EmailField(label="Email Address")
     email_on_comments = forms.BooleanField(required=False, 
                                         label="Do you wish to receive email notifications when someone comments on your scrapers?", )    
+    messages = forms.BooleanField(required=False, 
+                                        label="Would you like to be able to send and receive messages through ScraperWiki?", )
     features = forms.ModelMultipleChoiceField(required=False,
                         widget=CheckboxSelectMultiple, queryset=Feature.objects.filter(public=True))
     
@@ -69,7 +71,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('bio', 'name', 'email_on_comments', 'features')
+        fields = ('bio', 'name', 'email_on_comments', 'messages', 'features')
 
     def save(self, *args, **kwargs):
         self.user.email = self.cleaned_data['email']
@@ -95,6 +97,9 @@ class ScraperWikiContactForm(ContactForm):
         return formataddr((self.cleaned_data['name'], self.cleaned_data['email']))
 
 
+class UserMessageForm(forms.Form):
+    body = forms.CharField(widget=forms.Textarea, label=_(u'Message'))
+    
 class SigninForm(forms.Form):
     user_or_email = forms.CharField(label=_(u'Username or email'))
     password = forms.CharField(label=_(u'Password'), widget=forms.PasswordInput())

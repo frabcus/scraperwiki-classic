@@ -4,6 +4,7 @@ import os, sys
 import re
 import urllib
 
+from django.template import RequestContext
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -11,6 +12,8 @@ from django.conf import settings
 from django.db.models import Q
 from django.contrib.comments.signals import comment_was_posted
 from django.core.mail import send_mail
+from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse                
 
 import tagging
 import hashlib
@@ -580,14 +583,17 @@ def comment_notification(**kwargs):
     scraper = comment.content_object
     owner = scraper.owner()    
     message = comment.comment
-    subject = "[ScraperWiki] New comment - %s" % scraper.title
+    subject = "[ScraperWiki] New comment on '%s'" % scraper.title
 
     if request.user == owner:
         return
         
+    site = Site.objects.get_current()
+    sender_profile_url = "https://%s%s" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":request.user.username}))
+        
     if owner.get_profile().email_on_comments: 
-        text_content = render_to_string('emails/new_comment.txt', locals() )
-        html_content = render_to_string('emails/new_comment.html', locals() )
+        text_content = render_to_string('emails/new_comment.txt', locals(), context_instance=RequestContext(request) )
+        html_content = render_to_string('emails/new_comment.html', locals(),context_instance=RequestContext(request) )
         
         msg = EmailMultiAlternatives(subject, text_content, settings.FEEDBACK_EMAIL, [owner.email])
         msg.attach_alternative(html_content, "text/html")
