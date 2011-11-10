@@ -165,7 +165,6 @@ exports.run_script = function( http_request, http_response ) {
 		if ( body == undefined || body.length == 0 || body.length != len ) {
 			r = {"error":"incoming message incomplete", "headers": http_request.headers , "lengths":  len.toString() };
 			http_response.end( JSON.stringify(r) );
-			util.log.warn('Incomplete incoming message in run command - no code?');			
 			return;
 		};
 
