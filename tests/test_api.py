@@ -83,7 +83,6 @@ class TestApi(SeleniumTest):
         self.user_api_key = self._set_api_key("user", self.user_name)
         self.scraper_api_key = self._set_api_key("scraper", self.populate_db_name)
         self.private_scraper_error["short_name"] = self.populate_db_name
-        self.activate_users([self.user_name])
         self.set_code_privacy("private", "scraper", self.populate_db_name, 
                             {'username':self.user_name, 'password':self.user_pass})
         self._datastore_privacy_test()
@@ -321,7 +320,6 @@ class TestApi(SeleniumTest):
         userinfo = json.loads(urllib2.urlopen(self.api_base + "scraper/getuserinfo?" + urllib.urlencode(params)).read())[0]
         self.failUnless(self.populate_db_name in userinfo['coderoles']['owner'])
         # Set privacy, create a new user and add them as an editor in preparation
-        self.activate_users([self.user_name])
         editorname = self.create_user()
         self.user_login(self.user_name, self.user_pass)
         s.open("/scrapers/" + self.populate_db_name)
