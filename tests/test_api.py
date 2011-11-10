@@ -599,8 +599,7 @@ class TestApi(SeleniumTest):
         
         self.user_pass = str( uuid.uuid4() )[:18].replace('-', '_')
         self.user_name = self.create_user(name="test user", password = self.user_pass)
-        if SeleniumTest._adminuser:
-            self.activate_users([self.user_name])
+        self.activate_users([self.user_name])
         
         self.populate_db_name = self.create_code("python", code_type='scraper', code_source=populate_db_code)
         
