@@ -353,6 +353,7 @@ function execute(http_req, http_res, raw_request_data) {
 		util.log.debug( 'Running on ' + res );		
 				
 		var extension = util.extension_for_language(script.language);
+		
 		var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
 		var rVM = res;
 		fs.writeFile(tmpfile, request_data.code, function(err) {
