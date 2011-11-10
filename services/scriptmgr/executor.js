@@ -342,8 +342,10 @@ function execute(http_req, http_res, raw_request_data) {
 	     	}
 		}); // end of writefile
 	} else {
-		
-		// Use LXC to allocate us an instance and run with it
+		//
+		// We can clearly refactor this into something class-based and easier to understand.
+		// There is more in common with the previous branch than different.
+		//  
 		var res = lxc.exec( script, request_data.code );
 		if ( res == null ) {
 			var r = {"error": "No virtual machines available"}
