@@ -3581,6 +3581,39 @@ div.scroll {
 
 /* Terms & conditions */
 
+#terms_change_notice {
+	background: #ffffd7;
+	padding: 1em 1em 0.6em 1em;
+	margin-bottom: 2em;
+}
+
+#new_terms_notice {
+	background: #eafede url(../images/icons/page_green.png) no-repeat 10px 50%;
+	padding: 0.8em 1em 0.8em 3em;
+	margin-bottom: 2em;
+}
+
+#terms_change_notice p {
+	margin: 0.4em 0;
+}
+
+#terms_change_notice h5 {
+	font-size: 1em;
+}
+
+#terms_change_notice a + a {
+	margin-left: 1em;
+}
+
+#terms_change_notice a img {
+	vertical-align: -0.15em;
+	margin-right: 0.4em;
+}
+
+body.login #divSignupTerms #terms_change_notice {
+	display: none;
+}
+
 dl.terms {
 	padding: 0;
 	margin: 0;
