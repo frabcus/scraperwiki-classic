@@ -6,22 +6,44 @@ import uuid
 import os, sys
 import unittest
 import json
+sys.path.append(os.path.abspath( os.path.join(os.path.abspath(__file__), '../../../scraperlibs/python/')))
 try:
     import scraperwiki
 except Exception, e:
-    print '*' * 80
+    print '*' * 80    
     print '* Make sure the folder containing scraperlibs/python is in your $PYTHONPATH'
+    print '* Suggest:',  os.path.abspath( os.path.join(os.path.abspath(__file__), '../../../scraperlibs/python/'))
     print '*' * 80
     print e
     sys.exit(0)
 
 resource_dir = None
 
+def title(s):
+    print '\n%s' % s
+    print '-' * len(s)
+
+def cleanup(name):
+    p = os.path.join(resource_dir,name)
+    try:
+        os.unlink( os.path.join(p, 'defaultdb.sqlite'))
+        os.rmdir( p )
+    except:
+        pass    
+
 def update_settings_for_name(settings,name):
     import hashlib
     secret_key = '%s%s' % (name, settings['secret'],)
     settings['verification_key'] = hashlib.sha256(secret_key).hexdigest()  
     del settings['secret']
+
+
+##############################################################################
+#
+# Tests - Start of the tests, all should extend DataStoreTester so that setUp
+# and tearDown happen correctly.
+#        
+##############################################################################
 
 
 class DataStoreTester(unittest.TestCase):
@@ -41,14 +63,7 @@ class DataStoreTester(unittest.TestCase):
     def tearDown(self):
         global resource_dir
         if resource_dir:
-            p = os.path.join(resource_dir, self.settings['scrapername'])
-            print 'Going to delete %s because you said so' % p
-            try:
-                os.unlink( os.path.join(p, 'defaultdb.sqlite'))
-                os.rmdir( p )
-                print "It's gone"            
-            except:
-                pass
+            cleanup(self.settings['scrapername'])
         else:
             print 'Should delete the resourcedir directory called %s' % self.settings['scrapername']
         scraperwiki.datastore.close()
@@ -57,7 +72,7 @@ class DataStoreTester(unittest.TestCase):
         
 class BasicDataProxyTests( DataStoreTester ):
     """
-    
+    Basic tests that the data proxy is working and allowing us to query data
     """
     
     def test_simple_create_and_check(self):
@@ -90,37 +105,70 @@ class BasicDataProxyTests( DataStoreTester ):
             pass # We expect an error so we can ignore it
         
 
-    def test_attach(self):
+    def test_attach_denied(self):
         title('test_attach')
         settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
         settings['scrapername'], settings['runid'] = self.random_details()
         update_settings_for_name(settings,settings['scrapername'])        
         attach_to = settings['scrapername']
         scraperwiki.datastore.create( **settings )
-        # Save to the attachable database
-        scraperwiki.sqlite.save(['id'], {'id':1}, table_name='test')
+        print scraperwiki.sqlite.save(['id'], {'id':1}, table_name='test')
         scraperwiki.datastore.close()
 
         settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )                
         settings['scrapername'], settings['runid'] = self.random_details()
-        update_settings_for_name(settings,settings['scrapername'])                
+        update_settings_for_name(settings,settings['scrapername'])       
         scraperwiki.datastore.create( **settings )
-        print scraperwiki.sqlite.select('* from `%s`.test' % attach_to)
+        try:
+            scraperwiki.sqlite.attach(attach_to,attach_to)         
+            scraperwiki.sqlite.select('* from `%s`.test' % attach_to)
+        except Exception, e:
+            # We expect to fail here so if we succeeded then we should fail
+            self.fail(e)
+        cleanup(attach_to)
+
+    def test_create_download_sqlite(self):
+        import base64
+        
+        title('test_create_download_sqlite')
+        scraperwiki.sqlite.save(['id'], {'id':1}, table_name='test table')
+        initsqlitedata = scraperwiki.datastore.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "seek":0, "length":0})
+        if "filesize" not in initsqlitedata:
+            print str(initsqlitedata)
+            return
+        filesize = initsqlitedata['filesize']         
+        size = 0
+        memblock=100000
+        for offset in range(0, filesize, memblock):
+            sqlitedata = scraperwiki.datastore.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "seek":offset, "length":memblock})
+            content = sqlitedata.get("content")
+            if sqlitedata.get("encoding") == "base64":
+                content = base64.decodestring(content)            
+            print len(content), sqlitedata.get("length")
+            self.failUnless( len(content) == sqlitedata.get("length") )
         
         
-def title(s):
-    print '\n%s' % s
-    print '-' * len(s)
-    
+    def test_create_download_csv(self):
+        pass
+
         
+##############################################################################
+#
+# Main - see if we can guess where the resourcedir is and warn the user, so 
+# they can check as we will be deleting folders. May be better to check that
+# we are running in dev.
+#        
+##############################################################################
 
 if __name__ == '__main__':
     p = os.path.abspath(__file__)
     p = os.path.abspath( os.path.join(p, '../../../resourcedir/') )
     if os.path.exists(p):
         resource_dir = p
-        print 'Your RESOURCEDIR is set to %s and created folders will be deleted from there.' % resource_dir
-        print 'Is this okay?'
+        print ''
+        print '*' * 80
+        print 'Guessed that resourcedir is %s \nand created folders will be deleted from there.' % resource_dir
+        print '\nIs this okay?'
         s = raw_input('[y/N]--> ')
         if not s or s.lower() != 'y':
             sys.exit(0)
