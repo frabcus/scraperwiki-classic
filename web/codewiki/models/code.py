@@ -583,7 +583,7 @@ def comment_notification(**kwargs):
     scraper = comment.content_object
     owner = scraper.owner()    
     message = comment.comment
-    subject = "[ScraperWiki] New comment on '%s'" % scraper.title
+    subject = "New comment on '%s'" % scraper.title
 
     if request.user == owner:
         return

@@ -112,7 +112,7 @@ def user_message(request, username):
         sending_user_profile = get_object_or_404(UserProfile, user=request.user)
         receiving_user_profile = get_object_or_404(UserProfile, user=receiving_user)
         
-        subject = "[ScraperWiki] New message from %s" % sending_user_profile.display_name()
+        subject = "New message from %s" % sending_user_profile.display_name()
         body = form.cleaned_data['body']
 
         site = Site.objects.get_current()
