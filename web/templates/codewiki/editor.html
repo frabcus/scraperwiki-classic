@@ -147,6 +147,13 @@
 
     {# Header #}
     <div class="editor_header">
+        {% if scraper.short_name %}
+            <a id="back_to_overview" href="{% url code_overview scraper.wiki_type scraper.short_name %}"><img src="{{MEDIA_URL}}images/icons/back_arrow.png" width="16" height="16" alt="" />Back to {{scraper.wiki_type}} overview</a>
+        {% else %}
+            {% if fork %}
+                <a id="back_to_overview" href="{% url code_overview scraper.wiki_type fork %}"><img src="{{MEDIA_URL}}images/icons/back_arrow.png" width="16" height="16" alt="" />Back to original {{scraper.wiki_type}}</a>
+            {% endif %}
+        {% endif %}
       <div class="title">
         <a id="aCloseEditor" href="{% url frontpage %}" title="Home">
           <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
@@ -160,14 +167,6 @@
         / 
         {% endif %}
         <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
-      </div>
-
-      <div class="page_tabs small">
-        {% if scraper.id %}
-          {% include 'codewiki/includes/tabs.html' %}
-        {% else %}
-          {% include 'codewiki/includes/cancel_button.html' %}
-        {% endif %}
       </div>
     </div>
 

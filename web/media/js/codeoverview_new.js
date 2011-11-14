@@ -614,4 +614,33 @@ $(function(){
 		}
 	});
 	
+	
+	
+	$('.new_tag a').bind('click', function(e){
+		e.preventDefault();
+		$(this).parent().hide().next().show().find('input').focus();
+	});
+	
+	$('li.new_tag_box input').bind('keyup', function(e){
+		if(e.which == 13){
+			var new_tag = $(this).val();
+			// save the new tag via ajax here
+			$(this).val('').parent().hide();
+			$('.new_tag').show().before('<li><a href="/tags/' + encodeURIComponent(new_tag) + '">' + new_tag + '</a><a class="remove" title="Remove this tag">&times;</a></li>');
+		}
+	});
+	
+	$('div.tags a.remove').live('click', function(e){
+		e.preventDefault();
+		// remove the tag via ajax here
+		$(this).parent().remove();
+	});
+	
+	$('div.network .titlebar .tag a').bind('click', function(e){
+		e.preventDefault();
+		$('div.tags').show().find('.new_tag a').trigger('click');
+	});
+	
+	
+	
 });

@@ -64,15 +64,16 @@ body {
 	color: #000;
 }
 
-div.page_tabs.small {
-	font-size: 0.8em;
-	position: absolute;
-	bottom: 0px;
-	right: 0px;
+#back_to_overview {
+	float: right;
+	padding: 6px 12px 6px 6px;
+	font-size: 14px;
+	line-height: 16px;
 }
 
-div.page_tabs a.othertypingalert {
-    background-color: #ffff87;
+#back_to_overview img {
+	vertical-align: -3px;
+	margin-right: 5px;
 }
 
 .title a {

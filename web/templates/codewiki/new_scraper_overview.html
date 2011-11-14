@@ -9,6 +9,7 @@
 {% load gravatar %}
 {% load comments %}
 {% load history %}
+{% load forking %}
 
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
@@ -220,7 +221,7 @@
         </p>    
     </td>
     <td class="description">
-        <h3 class="about_this_scraper">About this scraper <a class="edit edit_description">Edit</a></h3>
+        <h3 class="about_this_scraper">About this scraper {% if user_edits_it or user.is_staff %}<a class="edit edit_description">Edit</a>{% endif %}</h3>
         <div id="divAboutScraper">
         {% if scraper.description %}
             {{ scraper.description_ashtml|safe }}
@@ -477,6 +478,66 @@
         {% endif %}
         <!-- <li class="import"><a href="">Import Data</a></li> -->
 {% endif %}
+</div>
+
+<div class="network">
+    <ul class="titlebar">
+        <li class="first"><h3>{% if related_views or scraper.forked_from or forked_to_total or scraper_tags %}This scraper in context{% else %}This scraper is lonely{% endif %}</h3></li>
+        {% if user_owns_it or user.is_staff %}<li class="tag"><a href="#tags" title="Use tags to organise and group similar scrapers"><img src="{{ MEDIA_URL }}images/icons/tag.png" width="16" height="16" alt="">Tag</a></li>{% endif %}
+        <li class="view"><a href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise</a></li>
+        <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
+        <li class="clear"></li>
+    </ul>
+    
+    <div class="tags"{% if not scraper_tags %} style="display:none"{% endif %}>
+        <h4>Tags:</h4>
+        <ul>
+        {% for tag in scraper_tags %}
+            <li><a href="{% url single_tag tag|urlencode %}">{{tag}}</a><a href="#" class="remove" title="Remove this tag">&times;</a></li>
+        {% endfor %}
+        <li class="new_tag">
+            <a title="Add a new tag">+</a>
+        </li>
+        <li class="new_tag_box" style="display:none">
+            <input type="text" title="Press Enter or Return to save" />
+        </li>
+        </ul>
+    </div>
+
+    {% if scraper.forked_from %}
+    <div class="forked_from">
+        <h4>Based&nbsp;on:</h4>
+        <ul>
+            <li><a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{ scraper.forked_from.owner.get_profile.name }} / {{ scraper.forked_from.title }}</a></li>
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if forked_to_total %}
+    <div class="forked_to">
+        <h4>Copied&nbsp;to:</h4>
+        <ul>
+        {% for s in forked_to %}
+            <li><a href="{% url code_overview s.wiki_type s.short_name %}">{{ s.owner.get_profile.name }} / {{ s.title }}</a></li>
+        {% endfor %}
+        {% if forked_to_total > forked_to|length %}
+            <li class="more"><a href="/browse/{{scraper.wiki_type}}s/?forked_from={{scraper.short_name}}" title="Click to show all {{scraper.wiki_type}}s based on this one">&hellip;and {{forked_to_remainder}} more</a></li>
+        {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if related_views %}
+    <div class="views">
+        <h4>Views&nbsp;using this&nbsp;data:</h4>
+        <ul>
+        {% for v in related_views %}
+            <li><a href="{% url code_overview v.wiki_type v.short_name %}">{{ v.owner.get_profile.name }} / {{ v.title }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
 </div>
 
 <div class="history">
