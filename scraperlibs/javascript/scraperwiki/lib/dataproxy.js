@@ -11,13 +11,14 @@ exports.DataProxyClient =  DataProxyClient = function() {
 
 DataProxyClient.prototype.__proto__ = EventEmitter.prototype;
 
-DataProxyClient.prototype.init = function(host, port,scrapername,runid) {
+DataProxyClient.prototype.init = function(host, port,scrapername,runid,verification_key) {
 	this.host = host;
 	this.port = port;
 	this.scrapername = scrapername;
 	this.runid = runid;
 	this.attachables = [];
 	this.connected = false;
+	this.verification_key = verification_key;
 }
 
 DataProxyClient.prototype.ensureConnected = function( callback ) {
@@ -43,6 +44,7 @@ DataProxyClient.prototype.ensureConnected = function( callback ) {
         data["vscrapername"] = me.scrapername;
         data["vrunid"] = me.runid
         data["attachables"] = me.attachables.join(" ")
+		data["verification_key"] = me.verification_key
 
 		// naughty semi-http request.... sigh
 		var msg = "GET /?" + qs.stringify(data) + "HTTP/1.1\r\n\r\n";
@@ -73,9 +75,10 @@ DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
 }
 
 function internal_save(indices,data,verbose, callback) {
+	/*
 	console.log( 'internal save ');
 	callback( 'status' );
-	/*
+	
     if unique_keys != None and type(unique_keys) not in [ list, tuple ]:
         raise databaseexception({ "error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) })
 
