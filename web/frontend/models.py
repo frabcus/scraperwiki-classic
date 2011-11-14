@@ -158,6 +158,7 @@ class DataEnquiry(models.Model):
     application = models.TextField(null=True, blank=True)
     company_name = models.CharField(max_length=128, null=True, blank=True)
     broadcast = models.BooleanField()
+    why = models.TextField(null=True, blank=True)
 
     FREQUENCY_CHOICES = (
       ('once', 'Once only'),
