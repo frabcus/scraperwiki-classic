@@ -326,29 +326,6 @@ def code_overview(request, wiki_type, short_name):
     if wiki_type == 'scraper':
         forked_from_this = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private')
         
-        
-    # unfinished CKAN integration
-    if False and dataproxy and request.user.is_staff:
-        try:
-            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":"ckan_datastore", "asname":"src"})
-            ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
-            attachlist = [{"name":"ckan_datastore", "asname":"src"}]
-            lsqlitedata = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery":ckansqlite, "data":(scraper.short_name,), "attachlist":attachlist})
-        except socket.error, e:
-            lsqlitedata = None
-
-        if lsqlitedata:
-            if lsqlitedata.get("data"):
-                context['ckanresource'] = dict(zip(lsqlitedata["keys"], lsqlitedata["data"][0]))
-                
-            if context.get('sqlitedata') and "ckanresource" not in context:
-                ckanparams = {"name": scraper.short_name,
-                              "title": scraper.title.encode('utf-8'),
-                              "url": settings.MAIN_URL+reverse('code_overview', args=[scraper.wiki_type, short_name])}
-                ckanparams["resources_url"] = settings.MAIN_URL+reverse('export_sqlite', args=[scraper.short_name])
-                ckanparams["resources_format"] = "Sqlite"
-                ckanparams["resources_description"] = "Scraped data"
-                context["ckansubmit"] = "http://ckan.net/package/new?%s" % urllib.urlencode(ckanparams)
 
     if dataproxy:
         dataproxy.close()
