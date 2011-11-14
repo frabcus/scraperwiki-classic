@@ -422,10 +422,9 @@ function execute(http_req, http_res, raw_request_data) {
 				var exitError;
 				if ( code == 137 ) {
 					// Check signal var to double-check what signal killed us
-					exitError = "The script was killed, it may have exceeded it's allocated memory";
-					// TODO: Find the best way to return this to the client
+					var exitError = "The script was killed, it may have exceeded the memory limit";
 					if ( local_script.response.jsonbuffer )
-						local_script.response.jsonbuffer.push('Memory limit exceeded')
+						local_script.response.jsonbuffer.push(exitError)
 				}
 
 				var endTime = new Date();
