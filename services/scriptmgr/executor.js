@@ -417,6 +417,15 @@ function execute(http_req, http_res, raw_request_data) {
 				else 
 				    util.log.debug('child process exited with code ' + code);					
 
+				// If code is 137 then it is probably an out of memory error which LXC has decided
+				// to just kill it
+				var exitError;
+				if ( code == 137 ) {
+					// Check signal var to double-check what signal killed us
+					exitError = "The script was killed, it may have exceeded it's allocated memory";
+					// TODO: Find the best way to return this to the client
+				}
+
 				var endTime = new Date();
 				elapsed = (endTime - startTime) / 1000;
 				util.log.debug('Elapsed' + elapsed );
@@ -427,7 +436,7 @@ function execute(http_req, http_res, raw_request_data) {
 					util.log.debug('We still have something left in the buffer');
 					util.log.debug( local_script.response.jsonbuffer );
 				
-					var left = local_script.response.jsonbuffer.join("");
+					var left = local_script.response.jsonbuffer.join("");						
 					if ( left && left.length > 0 ) {
 						// reset the buffer for the final run
 						local_script.response.jsonbuffer = [];
@@ -449,7 +458,7 @@ function execute(http_req, http_res, raw_request_data) {
 	               'elapsed_seconds' : elapsed };
             	result.exit_status = code;
 
-				if ( local_script&& local_script.response ) {
+				if ( local_script && local_script.response ) {
 					local_script.response.end( JSON.stringify( result ) + "\n" );
 					util.log.debug('Have just written end message to the vm ' + local_script.vm );
 				} else { 
