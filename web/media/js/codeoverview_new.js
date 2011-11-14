@@ -630,12 +630,14 @@ $(function(){
 		}
 	});
 	
-	$('div.tags a.remove').live('click', function(){
+	$('div.tags a.remove').live('click', function(e){
+		e.preventDefault();
 		// remove the tag via ajax here
 		$(this).parent().remove();
 	});
 	
-	$('div.network .titlebar .tag a').bind('click', function(){
+	$('div.network .titlebar .tag a').bind('click', function(e){
+		e.preventDefault();
 		$('div.tags').show().find('.new_tag a').trigger('click');
 	});
 	
