@@ -219,6 +219,11 @@ ul.titlebar>li>a img {
 	margin-right: 5px;
 }
 
+.network .view a img,
+.network .tag a img {
+	vertical-align: -3px;
+}
+
 li.share, li.admin {
 	position: relative;
 }
@@ -493,6 +498,7 @@ td.description {
 	border-top: 1px solid #f0f4f6;
 	background-color: #e0e8ed;
 	border-bottom: 1px solid #b0c4d1;
+	word-wrap: break-word;
 }
 
 table.about h3 {
@@ -522,6 +528,10 @@ table.about h3.schedule {
 
 td.description h3 {
 	border-bottom-color: #a9bec9;
+}
+
+td.description p {
+	max-width: 360px;
 }
 
 table.about p {
@@ -862,7 +872,7 @@ body.scraper .ui-autocomplete .ui-menu-item a {
 
 /* DATA, HISTORY & CHAT */
 
-div.data, div.history, div.chat {
+div.data, div.history, div.network, div.chat {
 	padding: 20px;
 	border-bottom: 1px solid #eee;
 }
@@ -1138,6 +1148,96 @@ div.dataTables_processing {
 box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.3);
 	z-index: 10;
 }
+
+.network div.tags,
+.network div.forked_from,
+.network div.forked_to,
+.network div.views {
+	display: table-row;
+}
+
+.network h4 {
+	display: table-cell;
+	font-size: 14px;
+	float: left;
+	color: #43758f;
+	padding: 17px 0 0 0;
+}
+
+.network div ul {
+	display: table-cell;
+	vertical-align: middle;
+	padding: 15px 0 0 15px;
+}
+
+.network div li {
+	float: left;
+	font-size: 13px;
+	line-height: 16px;
+	position: relative;
+}
+
+.network div.tags a,
+.network div.forked_from a,
+.network div.forked_to a,
+.network div.views a {
+	background-color: #ebeff2;
+	padding: 3px 5px 2px 5px;
+	margin-right: 5px;
+	display: block;
+	margin-bottom: 3px;
+}
+
+.network div.forked_to .more a {
+	background-color: transparent;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.network div.tags a {
+	padding-right: 20px;
+}
+
+.network div.tags .remove {
+	padding: 0;
+	margin: 0;
+	background: transparent;
+	position: absolute;
+	top: 0px;
+	right: 5px;
+	width: 18px;
+	height: 22px;
+	line-height: 20px;
+	font-size: 16px;
+	text-align: center;
+	font-weight: bold;
+	opacity: 0.6;
+	text-shadow: 0 1px 0 #fff;
+	cursor: pointer;
+}
+
+.network div.tags .new_tag a {
+	padding-right: 6px;
+	font-weight: bold;
+	font-size: 16px;
+	line-height: 14px;
+	padding-bottom: 4px;
+	cursor: pointer;
+	opacity: 0.7;
+	text-shadow: 0 1px 0 #fff;
+}
+
+.network div.tags .remove:hover,
+.network div.tags .new_tag a:hover {
+	opacity: 1;
+	text-decoration: none;
+}
+
+
+
+
+
+
 
 .history_month {
 	border: 1px solid #ccc;

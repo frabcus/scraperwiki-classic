@@ -256,7 +256,7 @@ $(function()
 	setupSearchBoxHint();
 	setupNavSearchBoxHint();
 
-    $('a.editor_view').click(function()  { 
+    $('a.editor_view, div.network .view a').click(function()  { 
 		var m = $(this).attr('href').match(/\?sourcescraper=(\w+)/);
 		if ( m ) {
 	 		newCodeObject('view', m[1]);  

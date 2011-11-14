@@ -3737,6 +3737,7 @@ ul.scraper_list .description {
 	color: #666;
 	width: 50%;
 	margin-left: 130px;
+	word-wrap: break-word;
 }
 
 ul.scraper_list table {
