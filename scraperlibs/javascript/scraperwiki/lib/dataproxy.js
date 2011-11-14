@@ -74,6 +74,20 @@ DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
 	});
 }
 
+
+DataProxyClient.prototype.request = function(req) {
+    this.ensure_connected();
+
+	this.connection.write( JSON.stringify(req) + "\n", function(){
+		console.log('Wrote data');
+	});	
+
+//    line = receiveoneline(m_socket)
+//    if not line:
+//        return {"error":"blank returned from dataproxy"}
+//    return json.loads(line)
+}
+
 function internal_save(indices,data,verbose, callback) {
 	/*
 	console.log( 'internal save ');
