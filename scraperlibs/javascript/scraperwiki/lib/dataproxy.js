@@ -27,7 +27,6 @@ DataProxyClient.prototype.ensureConnected = function( callback ) {
 		return;
 	}
 	
-	console.log('Creating a new connection');
 	this.connection = net.createConnection(this.port, this.host);
 	this.connection.setEncoding( 'utf8');
 	
@@ -44,13 +43,11 @@ DataProxyClient.prototype.ensureConnected = function( callback ) {
         data["vscrapername"] = me.scrapername;
         data["vrunid"] = me.runid
         data["attachables"] = me.attachables.join(" ")
-		data["verification_key"] = me.verification_key
+		data["verify"] = me.verification_key
 
 		// naughty semi-http request.... sigh
-		var msg = "GET /?" + qs.stringify(data) + "HTTP/1.1\r\n\r\n";
-		me.connection.write( msg, function(){
-			console.log('Wrote data');
-		});
+		var msg = "GET /?" + qs.stringify(data) + " HTTP/1.1\r\n\r\n";
+		me.connection.write( msg);
 	});	
 }
 
@@ -61,15 +58,13 @@ DataProxyClient.prototype.close = function() {
 	}
 }
 	
-DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
-	if ( verbose == null ) verbose = 2;
+DataProxyClient.prototype.save = function(indices, data, callback) {
 	var self = this;
 	this.ensureConnected(function(ok){
 		if ( ok ) {
-			internal_save(indices,data,verbose, function(result){
+			internal_save(indices,data, function(result){
 				callback( result );	
 			});
-			
 		}
 	});
 }
@@ -78,9 +73,7 @@ DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
 DataProxyClient.prototype.request = function(req) {
     this.ensure_connected();
 
-	this.connection.write( JSON.stringify(req) + "\n", function(){
-		console.log('Wrote data');
-	});	
+	this.connection.write( JSON.stringify(req) + "\n", function(){ });	
 
 //    line = receiveoneline(m_socket)
 //    if not line:
@@ -88,11 +81,13 @@ DataProxyClient.prototype.request = function(req) {
 //    return json.loads(line)
 }
 
-function internal_save(indices,data,verbose, callback) {
-	/*
+function internal_save(indices,data, callback) {
+
 	console.log( 'internal save ');
 	callback( 'status' );
 	
+	
+	/*	
     if unique_keys != None and type(unique_keys) not in [ list, tuple ]:
         raise databaseexception({ "error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) })
 

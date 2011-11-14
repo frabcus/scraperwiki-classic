@@ -404,6 +404,7 @@ class Code(models.Model):
         
         if action in STAFF_ACTIONS:
             return user.is_staff
+            
         if user.is_staff and action in STAFF_EXTRA_ACTIONS:  
             return True
         
@@ -413,6 +414,7 @@ class Code(models.Model):
         if action in EDITOR_ACTIONS:
             if self.privacy_status == "public":
                 return user.is_authenticated()
+                
             return "editor" in roles or "owner" in roles
         
         if action in VISIBLE_ACTIONS:

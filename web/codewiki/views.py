@@ -57,6 +57,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
     # Only a valid user can undo, and delete the scraper + data ...    
     if not scraper.actionauthorized(request.user, action):
         return None,HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, action), context_instance=RequestContext(request)))
+        
     return scraper, None
 
 
@@ -813,6 +814,7 @@ def raw_about_markup(request, wiki_type, short_name):
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, None, "getrawdescription")
     if resp:
         return HttpResponse("sorry, you do not have permission to edit the description of this scraper", mimetype='text/plain')
+
     return HttpResponse(scraper.description, mimetype='text/x-web-textile')
 
 
