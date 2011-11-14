@@ -504,9 +504,8 @@ def new_code_overview(request, wiki_type, short_name):
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
 
-    context['forked_to'] = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private')[:5]
+    context['forked_to'] = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').order_by('-created_at')[:5]
     context['forked_to_total'] = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').count()
-    
     
     # unfinished CKAN integration
     if False and dataproxy and request.user.is_staff:
