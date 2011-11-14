@@ -73,7 +73,7 @@ def template_settings(request):
     from codewiki.models.code import MAGIC_RUN_INTERVAL
     template_settings['MAGIC_RUN_INTERVAL'] = MAGIC_RUN_INTERVAL
     
-    return {'settings' : template_settings, 'MEDIA_URL' = settings.MEDIA_URL}
+    return {'settings' : template_settings, 'MEDIA_URL' : settings.MEDIA_URL}
 
 # not used since design revamp in April 2011, commented out in global_settings.py too
 # def site_messages(request):
