@@ -17,7 +17,12 @@
 var _    = require('underscore')._;
 var qs  = require('querystring');
 var fs  = require('fs');
-var sys = require('sys');
+// depending on version we should include sys or util, keep both having the same
+// name
+var sysname;
+if ( process.versions.node.indexOf('0.6') == 0 ) { sysname = 'util'; } else { sysname = 'sys'; }
+var	sys = require(sysname);
+
 var spawn = require('child_process').spawn;
 var path  = require('path');
 var lxc = require( path.join(__dirname,'lxc') );
