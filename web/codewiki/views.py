@@ -1003,6 +1003,11 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
     from django.utils.html import escape
     mime = 'application/json'    
     
+    def local_escape(s):
+        if not s:
+            return ""
+        return escape(s)
+    
     if not wiki_type == 'scraper':
         # 415 - Unsupported Media Type
         # The entity of the request is in a format not supported by the requested resource
@@ -1053,8 +1058,8 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
             # Log the error
             data = [ ]
         else:
-            # For each row map each item against escape
-            data = map( lambda b: map(escape, b or "Missing"), sqlite_data['data'])
+            # For each row map each item in that row against escape
+            data = map( lambda b: map(local_escape, b), sqlite_data['data'])
     except Exception, e:
         print e
     finally:
