@@ -71,7 +71,7 @@
 
 <div class="content full" id="scraper_views">
 {% if related_scrapers %}            
-    <h3>Scrapers used in the making of this view</h3>
+    <h2>Scrapers used in the making of this view</h2>
     <ul>
         {% for related_scraper in related_scrapers %}
             <a href="{% url profiles_profile_detail related_scraper.owner.username %}">{% if related_scraper.owner.get_profile.name %}{{ related_scraper.owner.get_profile.name }}{% else %}{{related_scraper.owner.username}}{% endif %}</a> /

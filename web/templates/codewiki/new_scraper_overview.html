@@ -489,6 +489,8 @@
         <li class="clear"></li>
     </ul>
     
+    <input type="hidden" id="adminsettagurl" value="{% url scraper_admin_settags scraper.short_name %}"/>
+    
     <div class="tags"{% if not scraper_tags %} style="display:none"{% endif %}>
         <h4>Tags:</h4>
         <ul>
@@ -500,6 +502,7 @@
         </li>
         <li class="new_tag_box" style="display:none">
             <input type="text" title="Press Enter or Return to save" />
+            <a class="hide" title="Cancel new tag">&times;</a>
         </li>
         </ul>
     </div>
