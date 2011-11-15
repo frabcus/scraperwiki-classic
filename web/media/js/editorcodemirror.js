@@ -72,6 +72,23 @@ function setupCodeEditor()
         return;
     }
 
+    if ($("#codemirrorversion").val().substr(0, 1) == "2")
+    {
+        writeToChat("Using Codemirror 2 !!!"); 
+        codemirroroptions = {
+            mode: {name: "python", version: 2, singleLineStringErrors: false},
+            lineNumbers: true,
+            indentUnit: 4,
+            indentUnit: indentUnits[scraperlanguage],
+            readOnly: expectedreadonly, 
+            tabMode: "shift",
+            lineWrapping: true, 
+            matchBrackets: true
+        };
+        codeeditor = CodeMirror.fromTextArea(document.getElementById("id_code"), codemirroroptions); 
+        return; 
+    }
+
     // codemirror
     parsers['python'] = ['../contrib/python/js/parsepython.js'];
     parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
