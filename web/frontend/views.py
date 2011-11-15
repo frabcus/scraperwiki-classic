@@ -112,7 +112,7 @@ def user_message(request, username):
         sending_user_profile = get_object_or_404(UserProfile, user=request.user)
         receiving_user_profile = get_object_or_404(UserProfile, user=receiving_user)
         
-        subject = "[ScraperWiki] New message from %s" % sending_user_profile.display_name()
+        subject = "New message from %s" % sending_user_profile.display_name()
         body = form.cleaned_data['body']
 
         site = Site.objects.get_current()
@@ -238,12 +238,27 @@ def help(request, mode=None, language=None):
 
 def browse_wiki_type(request, wiki_type=None, page_number=1):
     special_filter = request.GET.get('filter', None)
-    return browse(request, page_number, wiki_type, special_filter)
+    ff = request.GET.get('forked_from', None)
+    return browse(request, page_number, wiki_type, special_filter,ff)
 
-def browse(request, page_number=1, wiki_type=None, special_filter=None):
+def browse(request, page_number=1, wiki_type=None, special_filter=None, ff=None):
     all_code_objects = scraper_search_query(request.user, None).select_related('owner','owner__userprofile_set')
+
     if wiki_type:
         all_code_objects = all_code_objects.filter(wiki_type=wiki_type) 
+
+    # One last check because this is a slightly convoluted way of building this page.
+    if not ff:
+        ff = request.GET.get('forked_from', None)
+        
+    if ff:
+        from codewiki.models import Scraper
+        try:
+            s = Scraper.objects.get(short_name=ff)
+            if s and not s.privacy_status == 'private' and not s.privacy_status == 'deleted':
+                all_code_objects = all_code_objects.filter(forked_from=s)
+        except Scraper.DoesNotExist:
+            raise
 
     #extra filters (broken scraper lists etc)
     if special_filter == 'sick':
@@ -258,13 +273,13 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None):
             all_code_objects = TaggedItem.objects.get_no_tags(View.objects.exclude(privacy_status="deleted").order_by('-created_at') )
 
 
-    # filter out scrapers that have no records
-    if not special_filter:
+    # filter out scrapers that have no records unless we are looking at the forked_from list
+    if not ff and not special_filter:
         all_code_objects = all_code_objects.exclude(wiki_type='scraper', scraper__record_count=0)
     
     
     # Number of results to show from settings
-    paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
+    paginator = Paginator(all_code_objects, 2) #settings.SCRAPERS_PER_PAGE)
 
     try:
         page = int(page_number)
@@ -284,7 +299,7 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None):
 
     form = SearchForm()
 
-    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter, 'language': 'python'}
+    dictionary = { "ff": ff, "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter, 'language': 'python'}
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 

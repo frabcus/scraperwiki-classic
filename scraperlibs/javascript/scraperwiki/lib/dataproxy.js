@@ -11,13 +11,14 @@ exports.DataProxyClient =  DataProxyClient = function() {
 
 DataProxyClient.prototype.__proto__ = EventEmitter.prototype;
 
-DataProxyClient.prototype.init = function(host, port,scrapername,runid) {
+DataProxyClient.prototype.init = function(host, port,scrapername,runid,verification_key) {
 	this.host = host;
 	this.port = port;
 	this.scrapername = scrapername;
 	this.runid = runid;
 	this.attachables = [];
 	this.connected = false;
+	this.verification_key = verification_key;
 }
 
 DataProxyClient.prototype.ensureConnected = function( callback ) {
@@ -26,7 +27,6 @@ DataProxyClient.prototype.ensureConnected = function( callback ) {
 		return;
 	}
 	
-	console.log('Creating a new connection');
 	this.connection = net.createConnection(this.port, this.host);
 	this.connection.setEncoding( 'utf8');
 	
@@ -43,12 +43,11 @@ DataProxyClient.prototype.ensureConnected = function( callback ) {
         data["vscrapername"] = me.scrapername;
         data["vrunid"] = me.runid
         data["attachables"] = me.attachables.join(" ")
+		data["verify"] = me.verification_key
 
 		// naughty semi-http request.... sigh
-		var msg = "GET /?" + qs.stringify(data) + "HTTP/1.1\r\n\r\n";
-		me.connection.write( msg, function(){
-			console.log('Wrote data');
-		});
+		var msg = "GET /?" + qs.stringify(data) + " HTTP/1.1\r\n\r\n";
+		me.connection.write( msg);
 	});	
 }
 
@@ -59,23 +58,36 @@ DataProxyClient.prototype.close = function() {
 	}
 }
 	
-DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
-	if ( verbose == null ) verbose = 2;
+DataProxyClient.prototype.save = function(indices, data, callback) {
 	var self = this;
 	this.ensureConnected(function(ok){
 		if ( ok ) {
-			internal_save(indices,data,verbose, function(result){
+			internal_save(indices,data, function(result){
 				callback( result );	
 			});
-			
 		}
 	});
 }
 
-function internal_save(indices,data,verbose, callback) {
+
+DataProxyClient.prototype.request = function(req) {
+    this.ensure_connected();
+
+	this.connection.write( JSON.stringify(req) + "\n", function(){ });	
+
+//    line = receiveoneline(m_socket)
+//    if not line:
+//        return {"error":"blank returned from dataproxy"}
+//    return json.loads(line)
+}
+
+function internal_save(indices,data, callback) {
+
 	console.log( 'internal save ');
 	callback( 'status' );
-	/*
+	
+	
+	/*	
     if unique_keys != None and type(unique_keys) not in [ list, tuple ]:
         raise databaseexception({ "error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) })
 

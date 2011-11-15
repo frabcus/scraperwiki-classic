@@ -1,20 +1,27 @@
-#!/usr/bin/env node
+#!/usr/local/bin/node
 
 var fs = require('fs');
+var path = require('path');
 
 var script = '/home/scriptrunner/script.js';
-// if not exist then try /tmp/script.js
+if ( ! path.existsSync(script) )
+	script = '/tmp/script.js'
 
-var launch = JSON.parse( fs.readFileSync('launch.json', 'utf-8') );
+var launch_path = '/home/scriptrunner/launch.json';
+if ( ! path.existsSync(launch_path) )
+	launch_path = '/tmp/launch.json';
+
+var launch = JSON.parse( fs.readFileSync(launch_path, 'utf-8') );
 var datastore = launch['datastore'];
 var runid = launch['runid'];
 var scrapername = launch['scrapername'];
 var querystring = launch['querystring'];
 var attachables = launch['attachables'];
+var verification_key = launch['verification_key']
 
 var sw = require('scraperwiki');
 var parts = datastore.split(':');
-sw.sqlite.init(parts[0], parts[1], scrapername, runid);
+sw.sqlite.init(parts[0], parts[1], scrapername, runid,verification_key);
 
 process.on('SIGXCPU', function () {
 	throw 'ScraperWiki CPU time exceeded';

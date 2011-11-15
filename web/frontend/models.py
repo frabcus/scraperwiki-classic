@@ -158,6 +158,7 @@ class DataEnquiry(models.Model):
     application = models.TextField(null=True, blank=True)
     company_name = models.CharField(max_length=128, null=True, blank=True)
     broadcast = models.BooleanField()
+    why = models.TextField(null=True, blank=True)
 
     FREQUENCY_CHOICES = (
       ('once', 'Once only'),
@@ -187,31 +188,54 @@ class DataEnquiry(models.Model):
     def email_message(self):
         msg =  u"""
             Category: %s
-            First Name: %s
-            Last Name: %s
-            Your email address: %s
-            Your telephone number: %s
-            Your company name: %s
-            At which URL(s) can we find the data currently?: %s
-            What information do you want scraped?: %s
-            When do you need it by?: %s
-            How often does the data need to be scraped?: %s
-            What are your ETL needs?: %s
-            What visualisation do you need?: %s
-            What application do you want built?: %s
+            -----
+            Name: %s %s
+            Email address: %s
+            Telephone number: %s
+            Company name: %s
+            -----
+            At which URL(s) can we find the data currently?
+            > %s
+            
+            What information do you want scraped?
+            > %s
+            
+            When do you need it by?
+            > %s
+            
+            How often does the data need to be scraped?
+            > %s
+            
+            What are your ETL needs?
+            > %s
+            
+            What visualisation do you need?
+            > %s
+            
+            What application do you want built?
+            > %s
+            
+            Why do you want to liberate this data?
+            > %s
+            
+            Are you happy for this to be broadcasted on Twitter/Facebook?
+            > %s
+            
         """ % (self.category,
                self.first_name,
                self.last_name,
                self.email,
-               self.telephone,
-               self.company_name,
-               self.urls,
-               self.columns,
-               self.due_date or '',
-               self.frequency,
-               self.description,
-               self.visualisation,
-               self.application)
+               self.telephone or '(not specified)',
+               self.company_name or '(not specified)',
+               self.urls or '(not specified)',
+               self.columns or '(not specified)',
+               self.due_date or '(none)',
+               self.frequency or '(not specified)',
+               self.description or '(not specified)',
+               self.visualisation or '(not specified)',
+               self.application or '(not specified)',
+               self.why or '(not specified)',
+               self.broadcast or '(not specified)')
 
         return msg.encode('utf-8')
 
