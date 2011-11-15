@@ -1194,12 +1194,12 @@ box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.3);
 	padding-right: 0;
 }
 
-.network div.tags a {
+.network div.tags .editable a {
 	padding-right: 20px;
 }
 
-.network div.tags .remove,
-.network div.tags .hide {
+.network div.tags a.remove,
+.network div.tags a.hide {
 	padding: 0;
 	margin: 0;
 	background: transparent;
