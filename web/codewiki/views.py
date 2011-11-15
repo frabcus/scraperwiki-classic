@@ -1054,7 +1054,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
             data = [ ]
         else:
             # For each row map each item against escape
-            data = map( lambda b: map(escape,b or ""), sqlite_data['data'])
+            data = map( lambda b: map(escape, b or "Missing"), sqlite_data['data'])
     except Exception, e:
         print e
     finally:
