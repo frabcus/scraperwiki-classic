@@ -877,6 +877,11 @@ div.data, div.history, div.network, div.chat {
 	border-bottom: 1px solid #eee;
 }
 
+div.chat {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
 div.data {
 	background: transparent url(../images/tiny_shadow.gif) 0 0 repeat-x;
 }
@@ -1355,6 +1360,66 @@ a.historyuser {
 .chat .titlebar {
 	margin-bottom: 20px;
 }
+
+form.add_comment {
+	border: none;
+	background-color: #ebeff2;
+	border: 1px solid #afcde0;
+	padding: 10px 10px 8px 10px
+}
+
+form.add_comment img {
+	padding: 5px;
+	-webkit-box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
+	-moz-box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
+	box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
+	border: 1px solid #aaa;
+	background-color: white;
+	-webkit-backface-visibility: hidden;
+}
+
+form.add_comment #id_comment {
+	height: 40px;
+	width: 595px;
+	font-size: 14px;
+	padding: 5px;
+}
+
+form.add_comment #id_submit {
+	margin-top: 15px;
+}
+
+div.user_comment {
+	border-bottom: 1px solid #eee;
+	padding: 0 10px 10px 75px;
+	position: relative;
+	min-height: 45px;
+	font-size: 15px;
+	line-height: 20px;
+}
+
+div.user_comment .gravatar {
+	position: absolute;
+	top: 0;
+	left: 15px;
+	border: 1px solid #ccc;
+}
+
+div.user_comment p {
+	margin-bottom: 10px;
+}
+
+div.user_comment small {
+	color: #666;
+	line-height: 12px;
+	font-size: 12px;
+	display: block;
+}
+
+
+
+
+
 
 
 
