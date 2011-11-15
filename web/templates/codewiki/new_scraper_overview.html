@@ -483,24 +483,29 @@
 <div class="network">
     <ul class="titlebar">
         <li class="first"><h3>{% if related_views or scraper.forked_from or forked_to_total or scraper_tags %}This scraper in context{% else %}This scraper is lonely{% endif %}</h3></li>
-        {% if user_owns_it or user.is_staff %}<li class="tag"><a href="#tags" title="Use tags to organise and group similar scrapers"><img src="{{ MEDIA_URL }}images/icons/tag.png" width="16" height="16" alt="">Tag</a></li>{% endif %}
+        {% if user_edits_it or user.is_staff %}<li class="tag"><a href="#tags" title="Use tags to organise and group similar scrapers"><img src="{{ MEDIA_URL }}images/icons/tag.png" width="16" height="16" alt="">Tag</a></li>{% endif %}
         <li class="view"><a href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise</a></li>
         <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
         <li class="clear"></li>
     </ul>
     
+    <input type="hidden" id="adminsettagurl" value="{% url scraper_admin_settags scraper.short_name %}"/>
+    
     <div class="tags"{% if not scraper_tags %} style="display:none"{% endif %}>
         <h4>Tags:</h4>
         <ul>
         {% for tag in scraper_tags %}
-            <li><a href="{% url single_tag tag|urlencode %}">{{tag}}</a><a href="#" class="remove" title="Remove this tag">&times;</a></li>
+            <li{% if user_edits_it or user.is_staff %} class="editable"{% endif %}><a href="{% url single_tag tag|urlencode %}">{{tag}}</a>{% if user_edits_it or user.is_staff %}<a href="#" class="remove" title="Remove this tag">&times;</a>{% endif %}</li>
         {% endfor %}
+        {% if user_edits_it or user.is_staff %}
         <li class="new_tag">
             <a title="Add a new tag">+</a>
         </li>
         <li class="new_tag_box" style="display:none">
             <input type="text" title="Press Enter or Return to save" />
+            <a class="hide" title="Cancel new tag">&times;</a>
         </li>
+        {% endif %}
         </ul>
     </div>
 

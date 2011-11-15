@@ -279,7 +279,7 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None, ff=None)
     
     
     # Number of results to show from settings
-    paginator = Paginator(all_code_objects, 2) #settings.SCRAPERS_PER_PAGE)
+    paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
 
     try:
         page = int(page_number)

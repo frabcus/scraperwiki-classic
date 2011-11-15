@@ -1,6 +1,7 @@
 var jsdom = require('jsdom');
 var request = require('request');
 var dp = require('./dataproxy');
+var fs = require('fs');
 
 exports.version = '1.0.0';
 exports.sqlite = new DataProxyClient();

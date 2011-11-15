@@ -176,34 +176,6 @@ function setupCodeOverview(short_name){
 		$('#hCodeTitle').dblclick();
 		return false;
     });
-
-    // this is complex because editable div is not what you see (it's a comma separated field)
-    $('#divEditTags').editable($("#adminsettagurl").val(), 
-    {
-        indicator : 'Saving...', tooltip:'Click to edit...', cancel:'Cancel', submit:'Save tags',
-        onblur: 'ignore', event:'dblclick', placeholder:'',
-        onedit: function() 
-        {
-            var tags = [ ]; 
-            $("#divScraperTags ul.tags li a").each(function(i, el) { tags.push($(el).text()); }); 
-            $(this).text(tags.join(", ")); 
-        },
-        onreset: function() { $('#divEditTagsControls').hide(); },
-        callback: function(lis) 
-        {
-            $('#divScraperTags ul.tags').html(lis); 
-            $('#divEditTagsControls').hide(); 
-            $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
-        }
-    }); 
-    $('#aEditTags,#aEditTagsFromEmpty').click(function()
-    {
-        $('#divEditTags').dblclick();
-        $('#divEditTagsControls').show();
-        return false;
-    });
-    $('#divEditTagsControls').hide();
-    $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
 }
 
 function setupScraperOverview(short_name){
@@ -621,26 +593,60 @@ $(function(){
 		$(this).parent().hide().next().show().find('input').focus();
 	});
 	
-	$('li.new_tag_box input').bind('keyup', function(e){
-		if(e.which == 13){
+	$('li.new_tag_box input').bind('keyup', function(event){
+		var key = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
+		if(key == 13){
 			var new_tag = $(this).val();
-			// save the new tag via ajax here
-			$(this).val('').parent().hide();
-			$('.new_tag').show().before('<li><a href="/tags/' + encodeURIComponent(new_tag) + '">' + new_tag + '</a><a class="remove" title="Remove this tag">&times;</a></li>');
+			var tags = [ ]; 
+	        $("div.tags ul li").not('.new_tag, .new_tag_box').each(function(i, el) { 
+				tags.push($(el).children('a:first').text());
+			});
+			tags.push(new_tag);
+			$.ajax({
+				type: 'POST',
+				url: $("#adminsettagurl").val(),
+				data: {value: tags.join(",") + ','},
+				success: function(data){
+					$('li.new_tag_box input').val('').parent().hide().prev().show().before('<li class="editable"><a href="/tags/' + encodeURIComponent(new_tag) + '">' + new_tag + '</a><a class="remove" title="Remove this tag">&times;</a></li>');
+				}, error: function(){
+					alert('Sorry, your tag could not be added. Please try again later.');
+				},
+				dataType: 'html',
+				cache: false
+			});
 		}
+	}).bind('focus', function(){
+		$(this).parent().addClass('focus');
+	}).bind('blur', function(){
+		$(this).parent().removeClass('focus');
+	}).next('.hide').bind('click', function(){
+		$(this).prev().val('').parent().hide().prev().show();
 	});
 	
 	$('div.tags a.remove').live('click', function(e){
 		e.preventDefault();
-		// remove the tag via ajax here
-		$(this).parent().remove();
+		$old_tag = $(this).parent();
+		var tags = [ ]; 
+        $("div.tags ul li").not('.new_tag, .new_tag_box').not($old_tag).each(function(i, el) { 
+			tags.push($(el).children('a:first').text());
+		});
+		$.ajax({
+			type: 'POST',
+			url: $("#adminsettagurl").val(),
+			data: {value: tags.join(", ")},
+			success: function(data){
+				$old_tag.remove();
+			}, error: function(){
+				alert('Sorry, your tag could not be removed. Please try again later.');
+			},
+			dataType: 'html',
+			cache: false
+		});
 	});
 	
 	$('div.network .titlebar .tag a').bind('click', function(e){
 		e.preventDefault();
 		$('div.tags').show().find('.new_tag a').trigger('click');
 	});
-	
-	
 	
 });
