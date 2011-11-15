@@ -560,15 +560,14 @@
 
 <div class="chat" id="chat">
     <ul class="titlebar">
-        <li class="first"><h3>This scraper&rsquo;s chat</h3></li>
+        <li class="first"><h3>{% if comment_list %}This scraper&rsquo;s chat{% else %}This scraper has no chat&hellip; yet{% endif %}</h3></li>
         <li class="clear"></li>
     </ul>
         {% if user.is_authenticated %}
-
             {% get_comment_form for scraper as form %}
         <p>Add a comment or question about this scraper or the data it produces</p>
         <form action="{% comment_form_target %}" method="post" class="add_comment">
-            <input type="hidden" name="next" value="{% url new_code_overview scraper.wiki_type scraper.short_name %}#chat" />    
+            <input type="hidden" name="next" value="{% url code_overview scraper.wiki_type scraper.short_name %}#chat" />    
            {% show_gravatar user 'medium' %}
            <div>
             	<textarea name="comment" id="id_comment" rows="3"></textarea>
