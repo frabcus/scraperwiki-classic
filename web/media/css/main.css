@@ -348,7 +348,6 @@ body.frontpage #nav_inner li.frontpage {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9e3a7', endColorstr='#fbcb45',GradientType=0 );
 	background: linear-gradient(top, #f9e3a7 0%,#fbcb45 100%);
 	text-shadow: #fe9 0 1px 0;
-	filter: dropshadow(color=#ffee99, offx=0, offy=1);
 }
 
 div.editor .alert_outer {
@@ -661,7 +660,6 @@ body.search .tag_suggestion .yes {
 	padding: 20px 0 0 10px;
 	color: #fff;
 	text-shadow: 0px 1px 5px #325a78;
-	filter: dropshadow(color=#325a78, offx=0, offy=1);
 	font-weight: bold;
 	font-size: 22px;
 	line-height: 26px;
@@ -771,7 +769,6 @@ body.search .tag_suggestion .yes {
 	text-decoration: none;
 	font-size: 20px;
 	text-shadow: 0px 0px 5px #3399cc;
-	filter: dropshadow(color=#3399cc, offx=0, offy=0);
 }
 
 #frontpage_slider #more_developer:hover,
@@ -808,7 +805,6 @@ body.search .tag_suggestion .yes {
 	margin-top: 30px;
 	color: #BEDEEF;
 	text-shadow: 0px 0px 5px #3399cc;
-	filter: dropshadow(color=#3399cc, offx=0, offy=0);
 }
 
 #frontpage_slider .last a {
@@ -1433,7 +1429,6 @@ body.profiles.edit #features li input {
 	background: transparent url(../images/footer_logo.png) no-repeat 8px 1px;
 	color: #fff;
 	text-shadow: 0px 1px 5px #325a78;
-	filter: dropshadow(color=#325a78, offx=0, offy=1);
 	margin: 0 0 60px 10px;
 }
 
