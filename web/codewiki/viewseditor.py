@@ -281,6 +281,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context["codemirrorversion"] = request.GET.get('codemirrorversion')
     else:
         context["codemirrorversion"] = settings.CODEMIRROR_VERSION
+    context["codemirrorversion_main"] = context["codemirrorversion"][:1]   # 1 or 2
+
         # should have really been tied in with codemirrorversion.  values can be plain,none or another editor when we have one
     context["texteditor"] = request.GET.get("texteditor", "codemirror")
 
