@@ -593,24 +593,21 @@ $(function(){
 		$(this).parent().hide().next().show().find('input').focus();
 	});
 	
-	$('li.new_tag_box input').bind('keyup', function(e){
-		if(e.which == 13){
+	$('li.new_tag_box input').bind('keyup', function(event){
+		var key = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
+		if(key == 13){
 			var new_tag = $(this).val();
 			var tags = [ ]; 
 	        $("div.tags ul li").not('.new_tag, .new_tag_box').each(function(i, el) { 
 				tags.push($(el).children('a:first').text());
-				console.log($(el).children('a:first').text());
 			});
 			tags.push(new_tag);
-			console.log(tags);
-			console.log(tags.join(", "));
 			$.ajax({
 				type: 'POST',
 				url: $("#adminsettagurl").val(),
 				data: {value: tags.join(",") + ','},
 				success: function(data){
 					$('li.new_tag_box input').val('').parent().hide().prev().show().before('<li class="editable"><a href="/tags/' + encodeURIComponent(new_tag) + '">' + new_tag + '</a><a class="remove" title="Remove this tag">&times;</a></li>');
-					console.log(data);
 				}, error: function(){
 					alert('Sorry, your tag could not be added. Please try again later.');
 				},
@@ -633,7 +630,6 @@ $(function(){
         $("div.tags ul li").not('.new_tag, .new_tag_box').not($old_tag).each(function(i, el) { 
 			tags.push($(el).children('a:first').text());
 		});
-		console.log(tags);
 		$.ajax({
 			type: 'POST',
 			url: $("#adminsettagurl").val(),
