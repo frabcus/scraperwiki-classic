@@ -593,8 +593,12 @@ $(function(){
 		$(this).parent().hide().next().show().find('input').focus();
 	});
 	
-	$('li.new_tag_box input').bind('keyup', function(e){
-		if(e.which == 13){
+	$('li.new_tag_box input').bind('keyup', function(event){
+		console.log('keyCode: ' + event.keyCode);
+		console.log('which: ' + event.which);
+		console.log('charCode: ' + event.charCode);
+		var key = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
+		if(key == 13){
 			var new_tag = $(this).val();
 			var tags = [ ]; 
 	        $("div.tags ul li").not('.new_tag, .new_tag_box').each(function(i, el) { 
