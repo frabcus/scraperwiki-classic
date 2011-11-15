@@ -102,15 +102,16 @@ def stream_rows(dataproxy, format):
 def out_csvhtml(dataproxy, short_name, format):
     strea = stream_rows(dataproxy, format)
     if format == "csv":
-        mimetype = 'text/csv'
+        mimetype = 'text/csv; charset=utf-8'
     else:
-        mimetype = 'text/html'
+        mimetype = 'text/html; charset=utf-8'
         
     response = HttpResponse(mimetype=mimetype)  # used to take strea
     #response = HttpResponse(strea, mimetype='text/csv')  # when streamchunking was tried
     
     if format == "csv":
         response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
+        
     for s in strea:
         response.write(s)
 
