@@ -559,18 +559,18 @@
 </div>
 
 <div class="chat" id="chat">
+    {% get_comment_list for scraper as comment_list %}
     <ul class="titlebar">
-        <li class="first"><h3>{% if comment_list %}This scraper&rsquo;s chat{% else %}This scraper has no chat&hellip; yet{% endif %}</h3></li>
+        <li class="first"><h3>{% if comment_list %}This {{scraper.wiki_type}}&rsquo;s chat{% else %}This {{scraper.wiki_type}} has no chat&hellip; yet{% endif %}</h3></li>
         <li class="clear"></li>
     </ul>
         {% if user.is_authenticated %}
             {% get_comment_form for scraper as form %}
-        <p>Add a comment or question about this scraper or the data it produces</p>
         <form action="{% comment_form_target %}" method="post" class="add_comment">
-            <input type="hidden" name="next" value="{% url code_overview scraper.wiki_type scraper.short_name %}#chat" />    
+            <input type="hidden" name="next" value="{% url code_overview scraper.wiki_type scraper.short_name %}#chat" />
            {% show_gravatar user 'medium' %}
            <div>
-            	<textarea name="comment" id="id_comment" rows="3"></textarea>
+            	<textarea name="comment" id="id_comment" rows="3">Make a comment or ask a question about this scraper</textarea>
                 {% csrf_token %}
             	{{ form.content_type }} 
             	{{ form.object_pk }} 
@@ -580,23 +580,20 @@
             </div>
         </form>
         {% endif %}
-    {% get_comment_list for scraper as comment_list %}
 
     {% if comment_list %}
       {% for comment in comment_list reversed %} 
         <div class="user_comment">  
 
             <p id="comment_{{ comment.id }}">
-                {% show_gravatar comment.user 'small' %} 
+                {% show_gravatar comment.user 'medium' %} 
                 {{ comment.comment|escape|urlizetrunc:"100"|linebreaks }}
             </p>
             <small>
-                Added by <a href="{% url profiles_profile_detail comment.user.username %}">{{ comment.name|escape }}</a> at {{ comment.submit_date|timesince }} ago
+                Added by <a href="{% url profiles_profile_detail comment.user.username %}">{{ comment.name|escape }}</a>, {{ comment.submit_date|timesince }} ago
             </small>
         </div>
      {% endfor %}
-    {% else %}
-        <p>This {{scraper.wiki_type}} has no comments yet.</p>
     {% endif %}
 </div>
 
