@@ -96,9 +96,9 @@ def comments(request, wiki_type, short_name):
         if request.user.get_profile().has_feature('New overview page'):
             return HttpResponseRedirect(reverse('code_overview', kwargs={'wiki_type':wiki_type,'short_name':short_name}) + '#chat') 
     
-    
     context = {'selected_tab':'comments', 'scraper':scraper }
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
+
 
 def populate_itemlog(scraper, run_count=-1):
     itemlog = [ ]
