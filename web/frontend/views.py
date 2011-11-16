@@ -23,6 +23,8 @@ from django.db.models import Q
 from frontend.forms import CreateAccountForm, UserMessageForm
 from registration.backends import get_backend
 from frontend.models import UserProfile
+from codewiki.models import Scraper
+        
 # find this in lib/python/site-packages/profiles
 from profiles import views as profile_views   
 
@@ -252,13 +254,13 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None, ff=None)
         ff = request.GET.get('forked_from', None)
         
     if ff:
-        from codewiki.models import Scraper
         try:
             s = Scraper.objects.get(short_name=ff)
             if s and not s.privacy_status == 'private' and not s.privacy_status == 'deleted':
                 all_code_objects = all_code_objects.filter(forked_from=s)
         except Scraper.DoesNotExist:
-            raise
+            # Just ignore the forked_from if the scraper does not exist
+            pass
 
     #extra filters (broken scraper lists etc)
     if special_filter == 'sick':
