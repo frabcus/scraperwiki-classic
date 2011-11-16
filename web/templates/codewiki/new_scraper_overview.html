@@ -258,7 +258,7 @@
         	    <li class="clear"></li>
             </ul>
         	<div id="privacy_status">
-        	    {% if scraper.owner == request.user and request.user.vault_membership.count %}
+        	    {% if scraper.owner == request.user %}
                     <a class="editlink" id="show_privacy_choices">Change</a>
                 {% endif %}
         	    {% if scraper.privacy_status == 'public' %}
