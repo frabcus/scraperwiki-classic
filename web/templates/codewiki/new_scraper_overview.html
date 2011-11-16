@@ -104,9 +104,9 @@
 </fieldset>
 
 <ul class="toolbar">
-    <li class="edit"><a href="{% url editor_edit scraper.wiki_type scraper.short_name %}"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Edit</a></li>
-    <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
-    <li class="viewsource"><a href="/editor/raw/{{ scraper.short_name }}">View Source</a></li>
+    <li class="edit"><a href="{% url editor_edit scraper.wiki_type scraper.short_name %}" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Edit</a></li>
+    <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
+    <li class="viewsource"><a href="/editor/raw/{{ scraper.short_name }}" rel="nofollow">View Source</a></li>
     <li class="share">
         <a><img src="{{ MEDIA_URL }}images/icons/share.png" width="16" height="16" alt="">Share</a>
         <div class="share_popover">
@@ -114,7 +114,7 @@
                 <div class="fb-like" data-send="false" data-layout="box_count" data-width="55" data-show-faces="true"></div>
             </div>
             <div class="provider">
-                <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" data-via="scraperwiki">Tweet</a>
+                <a href="https://twitter.com/share" class="twitter-share-button" data-count="vertical" data-via="scraperwiki" rel="nofollow">Tweet</a>
             </div>
             <div class="provider">
                 <g:plusone size="tall"></g:plusone>
@@ -125,7 +125,7 @@
     {% if user_owns_it or user.is_staff %}<li class="admin">
         <a>Admin</a>
         <div class="admin_popover">
-            <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" id="delete_scraper">Delete {{scraper.wiki_type}}</a>
+            <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" id="delete_scraper" rel="nofollow">Delete {{scraper.wiki_type}}</a>
             <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post" class="hide">
                 {% csrf_token %}    
                 <input type="hidden" name="delete_scraper" value="1" />
@@ -145,7 +145,7 @@
     {% else %}
     <p>We&rsquo;re not quite sure what&rsquo;s wrong with it. Could you take a look?</p>
     {% endif %}
-    <a class="fix" href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Fix this {{ scraper.wiki_type }}</a>
+    <a class="fix" href="{% url editor_edit scraper.wiki_type scraper.short_name %}" rel="nofollow">Fix this {{ scraper.wiki_type }}</a>
 </div>
 {% endif %}
 <table class="about" cellspacing="0" cellpadding="0">
@@ -157,7 +157,7 @@
                 {% if scraper.scraper.run_interval == MAGIC_RUN_INTERVAL %}
                     <p><span class="running">Will run as soon as possible&hellip;</span></p>
                 {% else %}
-                <a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run">Run now</a>
+                <a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run" rel="nofollow">Run now</a>
                 <p>
                     {% if scraper.scraper.run_interval == -1 %}
                         Idle &ndash; not scheduled to run
@@ -172,7 +172,7 @@
                 {% endif %}
             {% else %}
                 {% if scraper.scraper.run_interval == -1 %}
-                <a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run">Run now</a>
+                <a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run" rel="nofollow">Run now</a>
                 <p>
                     Idle &ndash; not scheduled to run
                 </p>
@@ -184,15 +184,15 @@
         
         
         {% if latestdomain %}
-            {% for d in latestdomain %}<a href="{% if url_screenshot %}{{ url_screenshot }}{% else %}{{ d.domain }}{% endif %}" target="_blank" id="scraper_screenshot">{% screen_shot scraper %}</a>{% endfor %}
+            {% for d in latestdomain %}<a href="{% if url_screenshot %}{{ url_screenshot }}{% else %}{{ d.domain }}{% endif %}" target="_blank" id="scraper_screenshot" rel="nofollow">{% screen_shot scraper %}</a>{% endfor %}
         {% else %}
-            <a href="#" id="scraper_screenshot"><img src="{{ MEDIA_URL }}images/screenshot_placeholder.png" alt="Run this scraper to generate a screenshot"></a>
+            <a href="#" id="scraper_screenshot" rel="nofollow"><img src="{{ MEDIA_URL }}images/screenshot_placeholder.png" alt="Run this scraper to generate a screenshot"></a>
         {% endif %}
         <h3 class="last_run">Last run{% if scraper.last_runevent.exception_message %} <em class="fail" title="This scraper generated the following error on its last run: {{scraper.last_runevent.exception_message}}">Failed!</em>{% endif %}</h3>
         {% if scraper.last_runevent %}
-            <p><a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}">{{scraper.last_runevent.run_started|timesince}} ago</a></p>
+            <p><a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}" rel="nofollow">{{scraper.last_runevent.run_started|timesince}} ago</a></p>
             {% if scraper.last_runevent.pages_scraped %}
-                <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from {% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>{% endfor %}</p>
+                <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from {% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank" rel="nofollow">{{ d.domain }}</a>{% endfor %}</p>
             {% else %}
                 <p>Did not scrape any pages</p>
             {% endif %}
@@ -201,7 +201,7 @@
         {% endif %}
         
         <h3 class="schedule">Schedule</h3>
-        <a href="#edit_schedule" title="Edit this scraper&rsquo;s schedule" class="edit edit_schedule">Edit</a>
+        <a href="#edit_schedule" title="Edit this scraper&rsquo;s schedule" class="edit edit_schedule" rel="nofollow">Edit</a>
         {% ifnotequal scraper.scraper.next_run.year 9999 %}
 			{% ifnotequal scraper.scraper.run_interval 1000000000 %}
             	<p>Runs {{scraper.scraper.run_interval|schedule}}</p>			
@@ -228,7 +228,7 @@
         {% else %}
             <p>This scraper has no description. {% if user.is_authenticated %}
                 {% if user_edits_it %}
-                    <br/><a href="#" class="edit_description">Would you like to add one?</a>
+                    <br/><a href="#" class="edit_description" rel="nofollow">Would you like to add one?</a>
                 {% endif %}
             {% else %}
                 <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>
@@ -242,19 +242,19 @@
         <div id="collaboration">
             <ul class="buttons">
                 {% if scraper.privacy_status == 'public' %}
-                    <li><a href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone"><img src="{{ MEDIA_URL }}images/icons/shield-public.png" width="16" height="16" />Public</a></li>
+                    <li><a href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/shield-public.png" width="16" height="16" />Public</a></li>
                 {% endif %}
         	    {% if scraper.privacy_status == 'visible' %}
-        	        <li><a href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors"><img src="{{ MEDIA_URL }}images/icons/shield-protected.png" width="16" height="16" />Protected</a></li>
+        	        <li><a href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/shield-protected.png" width="16" height="16" />Protected</a></li>
                 {% endif %}
                 {% if scraper.privacy_status == 'private' %}
                     {% if scraper.vault %}
-                    <li><a href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;"><img src="{{ MEDIA_URL }}images/icons/shield-private.png" width="16" height="16" />In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</a></li>
+                    <li><a href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/shield-private.png" width="16" height="16" />In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</a></li>
                     {% else %}
-        	        <li><a href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors"><img src="{{ MEDIA_URL }}images/icons/shield-private.png" width="16" height="16" />Private</a></li>
+        	        <li><a href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/shield-private.png" width="16" height="16" />Private</a></li>
         	        {% endif %}
         	    {% endif %}
-        	    <li><a href="#contributors">{{ scraper.usercoderole_set.count }} {% if scraper.privacy_status == 'public' %}contributor{% else %}editor{% endif %}{{ scraper.usercoderole_set.count|pluralize }}</a></li>
+        	    <li><a href="#contributors" rel="nofollow">{{ scraper.usercoderole_set.count }} {% if scraper.privacy_status == 'public' %}contributor{% else %}editor{% endif %}{{ scraper.usercoderole_set.count|pluralize }}</a></li>
         	    <li class="clear"></li>
             </ul>
         	<div id="privacy_status">
@@ -379,7 +379,7 @@
             </div>
         </li>
         {% if user_owns_it or user.is_staff %}<li class="empty">
-            <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore">Clear data</a>
+            <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore" rel="nofollow">Clear data</a>
             <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
                 {% csrf_token %}
                 <input type="hidden" name="delete_data" value="1" />
@@ -484,8 +484,8 @@
     <ul class="titlebar">
         <li class="first"><h3>{% if related_views or scraper.forked_from or forked_to_total or scraper_tags %}This scraper in context{% else %}This scraper is lonely{% endif %}</h3></li>
         {% if user_edits_it or user.is_staff %}<li class="tag"><a href="#tags" title="Use tags to organise and group similar scrapers"><img src="{{ MEDIA_URL }}images/icons/tag.png" width="16" height="16" alt="">Tag</a></li>{% endif %}
-        <li class="view"><a href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise</a></li>
-        <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
+        <li class="view"><a href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise</a></li>
+        <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
         <li class="clear"></li>
     </ul>
     
@@ -548,7 +548,7 @@
 <div class="history">
     <ul class="titlebar">
         <li class="first"><h3>This scraper&rsquo;s history</h3></li>
-        <li class="full_history"><a href="{% url full_history scraper.wiki_type, scraper.short_name %}">Show full history</a></li>
+        <li class="full_history"><a href="{% url full_history scraper.wiki_type, scraper.short_name %}" rel="nofollow">Show full history</a></li>
         <li class="clear"></li>
     </ul>
     
