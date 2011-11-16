@@ -1006,7 +1006,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
     mime = 'application/json'    
     
     def local_escape(s):
-        if not s:
+        if s is None:
             return ""
         return escape(s)
     
