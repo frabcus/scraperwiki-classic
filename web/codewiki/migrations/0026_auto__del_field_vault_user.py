@@ -14,7 +14,6 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
         # Adding field 'Vault.user'
         db.add_column('codewiki_vault', 'user', self.gf('django.db.models.fields.related.OneToOneField')(default=None, to=orm['auth.User'], unique=True), keep_default=False)
 
