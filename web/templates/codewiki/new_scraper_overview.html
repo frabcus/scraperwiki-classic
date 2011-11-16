@@ -279,7 +279,7 @@
             	    {% endif %}
                 {% endif %}
         	    
-        	    {% if scraper.owner == request.user and request.user.vault_membership.count %}
+        	    {% if scraper.owner == request.user %}
                     <form id="privacy_status_form">
                         <!--<a class="cancel" id="hide_privacy_choices"><img src="{{ MEDIA_URL }}images/icons/cancel.png" width="16" height="16" /><span>Cancel</span></a>-->
                         <table cellspacing="0" cellpadding="0">
@@ -295,7 +295,7 @@
                                 /></td>
                                 <td><h4><label for="privacy_protected">{% if scraper.privacy_status == 'visible' %}Keep as Protected{% else %}Change to Protected{% endif %}</label></h4><p><label for="privacy_protected">Everyone {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} see this {{scraper.wiki_type}}, but only selected contributors {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} edit it.</label></p></td>
                             </tr>
-                            {% if scraper.owner == request.user and request.user.vault_membership.count %}
+                            {% if request.user.vault_membership.count %}
                             <tr>
                                 <td class="radio"><input type="radio" name="privacy_status" value="vault" id="privacy_vault" {% if scraper.vault %}checked="checked"{% endif %} /></td>
                                 <td>
