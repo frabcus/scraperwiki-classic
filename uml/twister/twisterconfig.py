@@ -43,8 +43,9 @@ try:
             "host": config.get(node, 'host'),
             "port": config.getint(node, 'port')
         }
-        key = (config.getint(n,live) and 'live') or 'scheduled'
-        node_config[key].append( d )
+        for k in ['live','scheduled']:
+            if config.getint(node,k) == 1:            
+                node_config[k].append( d )
 except:
     # All needs testing and using to replace nodecontrollername
     pass    
