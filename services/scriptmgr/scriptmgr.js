@@ -82,7 +82,7 @@ http.createServer(function (req, res) {
 	if ( settings.allowed_ips ) {
 		var allowed = false;
 
-		for (x in settings.allowed_ips)
+        for (x in settings.allowed_ips)
 		{
 			var ip = settings.allowed_ips[x];
 			allowed = req.connection.remoteAddress == ip;

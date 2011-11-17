@@ -2,12 +2,19 @@ from django.utils.log import getLogger
 import sys
 import os
 import logging.handlers
+from django.core.exceptions import PermissionDenied
 
 logger = getLogger('django.request')
 
 class ExceptionLoggingMiddleware(object):
+
     def process_exception(self, request, exception):
         import traceback
+        
+        if exception == PermissionDenied:
+            # Don't need to know about PermissionDenied errors
+            return None
+            
         logger.error('ExceptionLoggingMiddleware caught: ' + str(exception), exc_info=sys.exc_info())
         return None
 
