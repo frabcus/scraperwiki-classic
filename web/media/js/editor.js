@@ -645,7 +645,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             window.open($('#fork_url_action').val()); 
             return false;
         });
-        $('.editor_controls #btnForkNow').val('fork' + (wiki_type == 'scraper' ? ' scraper' : '')); 
+        $('.editor_controls #btnForkNow').val('copy' + (wiki_type == 'scraper' ? ' scraper' : '')); 
 
         // the watch button
         $('.editor_controls #btnWatch').live('click', function()

@@ -191,7 +191,7 @@ body {
 	color: #fff;
 }
 .editor_controls .fork, #meta_form .button.fork {
-	background-image: url(../images/icons/fork.png);
+	background-image: url(../images/icons/arrow_copy.png);
 	border-color: #2680c6;
 	background-color: #6fb1e6;
 	color: #fff;
