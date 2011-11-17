@@ -11,7 +11,8 @@ class ExceptionLoggingMiddleware(object):
     def process_exception(self, request, exception):
         import traceback
         
-        if isinstance(exception,PermissionDenied):
+        # We are not interested in being emailed with no exception
+        if not exception:
             return None
             
         logger.error('ExceptionLoggingMiddleware caught: ' + str(exception), exc_info=sys.exc_info())
