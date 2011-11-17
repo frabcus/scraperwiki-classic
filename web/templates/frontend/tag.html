@@ -4,7 +4,7 @@
 
 {% block header %}
 	<h2><a href="/tags/">Browse by tag</a>{%if tag%} / <a href="{% url single_tag tag.name %}">{{tag.name}}{% endif %}</a></h2>
-		<p>Showing all scrapers and requests tagged with &lsquo;{{tag_string}}&rsquo;</p>
+		<p>Showing all {{ scrapers.count }} scrapers and requests tagged with &lsquo;{{tag_string}}&rsquo;</p>
 {% endblock %}
 
 {% block tabs %}
