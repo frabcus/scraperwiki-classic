@@ -91,6 +91,12 @@ SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1], $scrapername, $runid, $attach
 // refer to http://php.net/manual/en/function.set-error-handler.php
 function errorHandler($errno, $errstr, $errfile, $errline)
 {
+    // if error has been surpressed with an @
+    // see: http://php.net/manual/en/function.set-error-handler.php
+    if (error_reporting() == 0) {
+        return;
+    }
+
     global $script; 
     $etb = errorParserStack($errno, $errstr, $script); 
     scraperwiki::sw_dumpMessage($etb); 
