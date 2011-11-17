@@ -11,8 +11,7 @@ class ExceptionLoggingMiddleware(object):
     def process_exception(self, request, exception):
         import traceback
         
-        if exception == PermissionDenied:
-            # Don't need to know about PermissionDenied errors
+        if isinstance(exception,PermissionDenied):
             return None
             
         logger.error('ExceptionLoggingMiddleware caught: ' + str(exception), exc_info=sys.exc_info())
