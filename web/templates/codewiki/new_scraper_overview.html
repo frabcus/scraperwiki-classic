@@ -357,7 +357,7 @@
 {% if sqlitedata %}
     <ul class="titlebar">
         <li class="first"><h3>This scraper&rsquo;s datastore</h3></li>
-        <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}#sqlite"><img src="{{ MEDIA_URL }}images/icons/hard_hat.png" width="16" height="16" alt="">Explore with API</a></li>
+        <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}{% if scraper.access_apikey %}&apikey_scraper={{scraper.access_apikey}}{% endif %}#sqlite"><img src="{{ MEDIA_URL }}images/icons/hard_hat.png" width="16" height="16" alt="">Explore with API</a></li>
         <li class="download">
             <a><img src="{{ MEDIA_URL }}images/icons/arrow_down.png" width="16" height="16" alt="">Download</a>
             <div class="download_popover">
