@@ -28,6 +28,7 @@
            <li><a href="#viewsbanner">When do views show a "powered by ScraperWiki" banner?</a></li>
            <li><a href="#files">Can I save files, and if so where?</a></li>
            <li><a href="#commands">Wow, I can run arbitary commands!</a></li>
+           <li><a href="#attach">Can I read from the datastore of another scraper?</a></li>
      </ul>
      <h2>Licensing questions</h2>
      <ul>
@@ -280,6 +281,19 @@ print urllib.urlopen(url).read()
                which spawns a bash shell script and sed.</p>
                <p>There are some <a href="/docs/shared/shared_libraries/">shared binaries</a>
                which you can use from any language in that way.</p> 
+           </dd>
+
+           <dt id="attach">Can I read from the datastore of another scraper?</dt>
+           <dd>
+                <p>Each scraper can only write to its own datastore, so you can
+                tell the provenance of any data, including what code wrote it.
+                </p>
+                <p>You can, however, read from other datastores by attaching to them first.
+                See the {% doc_link_full 'LANG_view_guide' language %} for a simple example,
+                full documentation in the {% doc_link_full 'LANG_datastore_guide' language %}.
+                </p> 
+                <p>It's possible to attach to lots of datastores, and use SQL to select
+                from all of them as if one.</p>
            </dd>
 
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
