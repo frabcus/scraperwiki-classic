@@ -513,7 +513,7 @@
     <div class="forked_from">
         <h4>Based&nbsp;on:</h4>
         <ul>
-            <li><a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{ scraper.forked_from.owner.get_profile.name }} / {{ scraper.forked_from.title }}</a></li>
+            <li><a href="{% url profiles_profile_detail scraper.forked_from.owner.username %}">{{ scraper.forked_from.owner.get_profile.name }}</a> / <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{ scraper.forked_from.title }}</a></li>
         </ul>
     </div>
     {% endif %}
@@ -523,7 +523,7 @@
         <h4>Copied&nbsp;to:</h4>
         <ul>
         {% for s in forked_to %}
-            <li><a href="{% url code_overview s.wiki_type s.short_name %}">{{ s.owner.get_profile.name }} / {{ s.title }}</a></li>
+            <li><a href="{% url profiles_profile_detail s.owner.username %}">{{ s.owner.get_profile.name }}</a> / <a href="{% url code_overview s.wiki_type s.short_name %}">{{ s.title }}</a></li>
         {% endfor %}
         {% if forked_to_total > forked_to|length %}
             <li class="more"><a href="/browse/{{scraper.wiki_type}}s/?forked_from={{scraper.short_name}}" title="Click to show all {{scraper.wiki_type}}s based on this one">&hellip;and {{forked_to_remainder}} more</a></li>
@@ -537,7 +537,7 @@
         <h4>Views&nbsp;using this&nbsp;data:</h4>
         <ul>
         {% for v in related_views %}
-            <li><a href="{% url code_overview v.wiki_type v.short_name %}">{{ v.owner.get_profile.name }} / {{ v.title }}</a></li>
+            <li><a href="{% url profiles_profile_detail v.owner.username %}">{{ v.owner.get_profile.name }}</a> / <a href="{% url code_overview v.wiki_type v.short_name %}">{{ v.title }}</a></li>
         {% endfor %}
         </ul>
     </div>
