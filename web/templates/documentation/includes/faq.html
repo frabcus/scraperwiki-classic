@@ -18,6 +18,7 @@
      <h2>Technical detail questions</h2>
      <ul>
            <li><a href="#clear_datastore">I made a column or a table I don't need, how do I remove it?</a></li>
+           <li><a href="#logging">How do I log progress of my scraper?</a></li>
            <li><a href="#view_parameters">How do I get query parameters in my view?</a></li>
            <li><a href="#cpu_limit">What is the CPU limit, and what do I do if my scraper reaches it?</a></li>
            <li><a href="#memory_limit">What is the limit on memory use?</a></li>
@@ -160,6 +161,17 @@
                 </p>
            </dd>
 
+           <dt id="logging">How do I log progress of my scraper?</dt>
+           <dd>
+               <p>Just by printing! Use print or puts according to the language you're using.
+                You can write to stdout or stderr.
+               </p>
+               
+               <p>The output is displayed in the console as the scraper runs in the editor, and
+               a selectively cropped version is stored in the history for scheduled runs. 
+               </p>
+           </dd>
+ 
            <dt id="view_parameters">How do I get query parameters in my view?</dt>
            <dd>
 				<p>Getting the query string is done the same way in each language, via the environment variable, but depending on your chosen language the code required might be different</p>
