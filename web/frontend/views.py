@@ -435,6 +435,7 @@ def tags(request):
     all_tags = {}
     
     # trial code for filtering down by tags that you can't see
+    """
     if False:
         user_visible_code_objects = scraper_search_query(request.user, None)
         code_objects = user_visible_code_objects.extra(
@@ -455,19 +456,29 @@ def tags(request):
             tag = Tag.objects.get(name=tag_name)
             tag.count = count
             all_tags[tag.name] = tag
-
-
-    # old method that would show tags to scrapers that are private
-    else:
-        scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
-        view_tags = Tag.objects.usage_for_model(View, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
-        for tag in itertools.chain(scraper_tags, view_tags):
-            existing = all_tags.get(tag.name, None)
-            if existing:
-                existing.count += tag.count
-            else:
-                all_tags[tag.name] = tag
-
+    """
+    def update_tags(t):
+        existing = all_tags.get(tag.name, None)
+        if existing:
+            existing.count += tag.count
+        else:
+            all_tags[tag.name] = tag
+        
+    scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
+    view_tags = Tag.objects.usage_for_model(View, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
+    for tag in itertools.chain(scraper_tags, view_tags):
+        update_tags(tag)
+    
+    # Use UserCodeRole objects to get code objects that are private but 
+    # accessible to this user and then use update_tags to update the 
+    # dictionary
+    if request.user.is_authenticated():
+        privatescraper_ids = [u.code.id for u in UserCodeRole.objects.filter(code__privacy_status='private', user=request.user)]
+        qs = Code.objects.filter(pk__in=privatescraper_ids)
+        extra_tags = Tag.objects.usage_for_queryset(qs, counts=True)
+        for tag in extra_tags:
+            update_tags(tag)
+        
     tags = calculate_cloud(all_tags.values(), steps=4, distribution=LOGARITHMIC)
 
     return render_to_response('frontend/tags.html', {'tags':tags}, context_instance=RequestContext(request))

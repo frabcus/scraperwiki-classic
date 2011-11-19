@@ -115,7 +115,7 @@ def populate_itemlog(scraper, run_count=-1):
         if itemlog:
             item["prevrev"] = itemlog[-1]["rev"]
         item["groupkey"] = "commit|||"+ str(item['earliesteditor'])
-        itemlog.append(item)
+        itemlog.append(item) 
     itemlog.reverse()
     
     # now obtain the run-events and sort together
