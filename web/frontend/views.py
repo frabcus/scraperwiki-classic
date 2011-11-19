@@ -432,7 +432,7 @@ def tags(request):
     all_tags = {}
     
     # trial code for filtering down by tags that you can't see
-    def update_tags(t):
+    def update_tags(tag):
         existing = all_tags.get(tag.name, None)
         if existing:
             existing.count += tag.count
