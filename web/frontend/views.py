@@ -429,34 +429,9 @@ def stats(request):
     
 
 def tags(request):
-    # would be good to limit this only to scrapers/views that this user has right to see (user_visible_code_objects; not the private ones), however 
-    # the construction of the function tagging.models._get_usage() is a complex SQL query with group by 
-    # that is not available in the django ORM.  
     all_tags = {}
     
     # trial code for filtering down by tags that you can't see
-    """
-    if False:
-        user_visible_code_objects = scraper_search_query(request.user, None)
-        code_objects = user_visible_code_objects.extra(
-            tables=['tagging_taggeditem', "tagging_tag"],
-            where=['codewiki_code.id = tagging_taggeditem.object_id', 'tagging_taggeditem.tag_id = tagging_tag.id'], 
-            select={"tag_name":"tagging_tag.name"})
-        #print code_objects.query
-        # This query needs to be annotated with a count(*) and a GROUP BY tagging_taggeditem.tag_id
-
-        # sum through all the tags on all the objects
-        lalltags = { }
-        for x in code_objects:
-            lalltags[x.tag_name] = lalltags.get(x.tag_name, 0)+1
-
-        # convert above dict to format required by calculate_cloud
-        # though you should be able to inline this function and change tags.html to avoid the need for <type Tag> objects
-        for tag_name, count in lalltags.items():
-            tag = Tag.objects.get(name=tag_name)
-            tag.count = count
-            all_tags[tag.name] = tag
-    """
     def update_tags(t):
         existing = all_tags.get(tag.name, None)
         if existing:
