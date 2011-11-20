@@ -431,7 +431,7 @@ def stats(request):
 def tags(request):
     all_tags = {}
     
-    # trial code for filtering down by tags that you can't see
+    # Want 2.7 for the collections.Counter :(
     def update_tags(tag):
         existing = all_tags.get(tag.name, None)
         if existing:
