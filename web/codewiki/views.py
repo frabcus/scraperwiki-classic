@@ -191,7 +191,8 @@ def code_overview(request, wiki_type, short_name):
            (wiki_type == 'view' and request.user.get_profile().has_feature('New view page')):
             return new_code_overview(request, wiki_type,short_name)
     else:
-        return new_code_overview(request, wiki_type,short_name)
+        if wiki_type == 'scraper':
+            return new_code_overview(request, wiki_type,short_name)
                     
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if resp: return resp
