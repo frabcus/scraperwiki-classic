@@ -678,7 +678,6 @@ body.views #scraper_screenshot img {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
-	opacity: 0.8;
 }
 
 #scraper_screenshot:hover {
