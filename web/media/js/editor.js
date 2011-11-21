@@ -540,7 +540,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         //clear the tabs
         clearOutput();
-        writeToConsole('Starting run ... ' + (isstaff ? " [on "+lxc+"]" : "")); 
+        writeToConsole('Starting run ... ' + (isstaff ? " ["+lxc+"]" : "")); 
         writeToChat('<i>' + lchatname + ' runs scraper</i>'); 
 
         //unbind run button
