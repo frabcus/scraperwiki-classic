@@ -12,8 +12,8 @@ from twisted.internet.defer import Deferred
 from twisted.internet.error import ConnectionRefusedError, ConnectionDone
 
 from twisterconfig import logger
-from twisterconfig import nodecontrollername, nodecontrollerhost, nodecontrollerport
-from twisterconfig import jstime
+#from twisterconfig import nodecontrollername, nodecontrollerhost, nodecontrollerport, choose_controller
+from twisterconfig import choose_controller, jstime
 from twisterscheduledruns import ScheduledRunMessageLoopHandler
 
 
@@ -142,7 +142,7 @@ clientcreator = protocol.ClientCreator(reactor, ControllerConnectionProtocol)
 
 # this is the new way that totally bypasses the old dispatcher.  
 # we reuse the spawnRunner class only for its user defined functions, not its processprotocol functions!
-def MakeRunner(scrapername, guid, language, urlquery, username, code, client, beta_user, attachables, rev, bmakerunobject, agent):
+def MakeRunner(scrapername, guid, language, urlquery, username, code, client, beta_user, attachables, rev, bmakerunobject, agent, scheduled):
     srunner = spawnRunner(client, code)  # reuse this class and its functions
 
     jdata = { }
@@ -169,7 +169,9 @@ def MakeRunner(scrapername, guid, language, urlquery, username, code, client, be
         srunner.runobjectmaker = ScheduledRunMessageLoopHandler(client, username, agent,  jdata["runid"],rev)
         logger.info("Making run object on %s client# %d" % (scrapername, client.clientnumber))
 
-    deferred = clientcreator.connectTCP(nodecontrollerhost, nodecontrollerport)
+    nodename, nodehost, nodeport = choose_controller('scheduled' and scheduled or 'live')
+    
+    deferred = clientcreator.connectTCP(nodehost, nodeport)
     deferred.addCallbacks(srunner.gotcontrollerconnectionprotocol, srunner.controllerconnectionrequestFailure)
 
     return srunner

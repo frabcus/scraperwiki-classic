@@ -442,7 +442,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         attachables = parsed_data.get('attachables', [])
         rev = parsed_data.get('rev', '')
         bmakerunobject =  parsed_data.get('bmakerunobject', False)
-        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, beta_user, attachables, rev, bmakerunobject, agent)
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, beta_user, attachables, rev, bmakerunobject, agent, False)
         self.factory.runidclientmap[self.processrunning.jdata["runid"]] = self
         self.factory.notifyMonitoringClients(self)
         
@@ -673,7 +673,7 @@ class RunnerFactory(protocol.ServerFactory):
             logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
             beta_user = scraperoverdue.get("beta_user", False)
             attachables = scraperoverdue.get('attachables', [])
-            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, beta_user, attachables, sclient.originalrev, True, agent)
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, beta_user, attachables, sclient.originalrev, True, agent, True)
             self.runidclientmap[sclient.processrunning.jdata["runid"]] = sclient
             self.notifyMonitoringClients(sclient)
 

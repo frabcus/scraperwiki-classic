@@ -27,8 +27,12 @@ djangokey = config.get("twister", "djangokey")
 djangourl = config.get("twister", "djangourl")
 
 
+stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)  
+logger = logging.getLogger('twister')
+
+
 # Configuration for each node so that we can have a different set for each
-# type of run (scheduled or live).  Each will support a list of servers 
+# type of run ('scheduled' or 'live').  Each will support a list of servers 
 # that fulfill that role (the list contains dicts that contain the settings)
 node_config = {
     "scheduled": [],
@@ -47,8 +51,13 @@ try:
             if config.getint(node,k) == 1:            
                 node_config[k].append( d )
 except:
-    # All needs testing and using to replace nodecontrollername
-    pass    
+    # Either a configuration error or we are running locally with a dodgy 
+    # uml.cfg file.
+    logger.warning('Unable to load node_names and settings from config, assuming local')
+    localhost = {"name": "local", "host": "localhost", "port": 9001 }
+    node_config['scheduled'].append( localhost )
+    node_config['live'].append( localhost )    
+    
 
 def choose_controller(deliver_to='scheduled'):
     """
@@ -62,11 +71,7 @@ def choose_controller(deliver_to='scheduled'):
     return c['name'], c['host'], c['port']
 
 
-nodecontrollername = "lxc001"
-nodecontrollerhost = config.get(nodecontrollername, 'host')
-nodecontrollerport = config.getint(nodecontrollername, 'via')
+#nodecontrollername = "lxc001"
+#nodecontrollerhost = config.get(nodecontrollername, 'host')
+#nodecontrollerport = config.getint(nodecontrollername, 'via')
 
-    # primarily to pick up syntax errors
-stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)  
-
-logger = logging.getLogger('twister')
