@@ -11,9 +11,7 @@ from twisted.internet.defer import succeed, Deferred
 from twisted.internet.defer import Deferred
 from twisted.internet.error import ConnectionRefusedError, ConnectionDone
 
-from twisterconfig import logger
-#from twisterconfig import nodecontrollername, nodecontrollerhost, nodecontrollerport, choose_controller
-from twisterconfig import choose_controller, jstime
+from twisterconfig import logger, choose_controller, jstime
 from twisterscheduledruns import ScheduledRunMessageLoopHandler
 
 
@@ -51,7 +49,7 @@ class spawnRunner(protocol.ProcessProtocol):
         controllerconnection.transport.write("\r\n")
         controllerconnection.transport.write(sdata)
 
-    # messages from the UML
+    # messages from the LXC
     def outReceived(self, data):
         logger.debug("spawnrunner received for client# %d %s" % (self.client.clientnumber, data[:180]))
             # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
