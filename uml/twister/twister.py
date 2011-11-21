@@ -37,7 +37,6 @@ from twisted.internet.error import ConnectionDone, ConnectionRefusedError
 
 from twisterconfig import poptions, config, stdoutlog, djangokey, djangourl, logging, logger, jstime
 from twisterrunner import MakeRunner
-from proxycallbacks import ClientUpdater
 
 agent = Agent(reactor)
 
