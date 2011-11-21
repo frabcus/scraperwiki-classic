@@ -187,7 +187,7 @@ def gitpush(request, wiki_type, short_name):
 def code_overview(request, wiki_type, short_name):
     
     if request.user.is_authenticated():
-        if (wiki_type == 'scraper' and request.user.get_profile().has_feature('New overview page')) or
+        if (wiki_type == 'scraper' and request.user.get_profile().has_feature('New overview page')) or \
            (wiki_type == 'view' and request.user.get_profile().has_feature('New view page')):
             return new_code_overview(request, wiki_type,short_name)
     else:
