@@ -403,7 +403,7 @@ def new_code_overview(request, wiki_type, short_name):
             code = scraper.saved_code()
             if re.match('<div\s+class="inline">', code):
                 context["htmlcode"] = code
-        return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
+        return render_to_response('codewiki/new_view_overview.html', context, context_instance=RequestContext(request))
 
     #
     # (else) scraper type section
