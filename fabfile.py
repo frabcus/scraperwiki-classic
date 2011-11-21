@@ -73,7 +73,7 @@ def parse_bool(s):
 
 def do_server_lookup(task):
     if not 'flock' in env:
-            raise Exception("specify which flock (e.g. dev/live) first")
+        raise Exception("specify which flock (e.g. dev/live) first")
     hosts = env.server_lookup[(task, env.flock)]
     print "server_lookup: deploying '%s' on flock '%s', hosts: %s" % (task, env.flock, hosts)
     env.task = task
