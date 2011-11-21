@@ -40,6 +40,10 @@ h3 {
 	width: 24px;
 }
 
+#header_inner p span.html:before {
+	background-position: -64px -1px;
+}
+
 #header_inner p span.latestdomain:before {
 	background-position: 0 -16px;
 }
