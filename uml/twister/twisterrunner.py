@@ -169,7 +169,11 @@ def MakeRunner(scrapername, guid, language, urlquery, username, code, client, be
         srunner.runobjectmaker = ScheduledRunMessageLoopHandler(client, username, agent,  jdata["runid"],rev)
         logger.info("Making run object on %s client# %d" % (scrapername, client.clientnumber))
 
-    nodename, nodehost, nodeport = choose_controller('scheduled' and scheduled or 'live')
+    
+    s = 'live'
+    if scheduled:
+        s = 'live'
+    nodename, nodehost, nodeport = choose_controller( s )
     
     deferred = clientcreator.connectTCP(nodehost, nodeport)
     deferred.addCallbacks(srunner.gotcontrollerconnectionprotocol, srunner.controllerconnectionrequestFailure)
