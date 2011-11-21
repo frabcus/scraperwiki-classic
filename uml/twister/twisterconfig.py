@@ -26,14 +26,13 @@ config.readfp(open(poptions.config))
 djangokey = config.get("twister", "djangokey")
 djangourl = config.get("twister", "djangourl")
 
-
 stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)  
 logger = logging.getLogger('twister')
 
 
-# Configuration for each node so that we can have a different set for each
-# type of run ('scheduled' or 'live').  Each will support a list of servers 
-# that fulfill that role (the list contains dicts that contain the settings)
+# To provide the start of a path to scalability we will now start routing
+# requests to a random server from a list, that list decided based on 
+# whether it is a live in-editor run or a scheduled one.  
 node_config = {
     "scheduled": [],
     "live": []
@@ -61,17 +60,11 @@ except:
 
 def choose_controller(deliver_to='scheduled'):
     """
-    Choose a controller to send the request to based on the 
-    type of execution we want, scheduled or live.
+    Choose a controller to send the request to based on the type of execution 
+    we want, scheduled or live and randomly chosen from the list.
     """
     from random import choice
     c = choice( node_config[deliver_to] )
     if not c:
         return None, None, None
     return c['name'], c['host'], c['port']
-
-
-#nodecontrollername = "lxc001"
-#nodecontrollerhost = config.get(nodecontrollername, 'host')
-#nodecontrollerport = config.getint(nodecontrollername, 'via')
-

@@ -3,11 +3,10 @@
 "exec" "python" "-O" "$0" "$@"
 
 """
-This script is the interface between the UML/firebox set up and the frontend Orbited TCP socket.  
+This script is the interface between the LXC set up and the frontend Orbited TCP socket.  
 
 There is one client object (class RunnerProtocol) per editor window
 These recieve and send all messages between the browser and the UML
-An instance of a scraper running in the UML is spawnRunner
 
 The RunnerFactory organizes lists of these clients and manages their states
 There is one UserEditorsOnOneScraper per user per scraper to handle one user opening multiple windows onto the same scraper
