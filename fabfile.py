@@ -28,7 +28,7 @@ env.server_lookup = {
     ('datastore', 'live'): ['burbage.scraperwiki.com:7822'],
 
     ('firebox', 'dev'): ['kippax.scraperwiki.com'], 
-    ('firebox', 'live'): ['matfen.scraperwiki.com:7822'],
+    ('firebox', 'live'): ['matfen.scraperwiki.com:7822', 'horsell.scraperwiki.com:7822'],
 
     ('screenshooter', 'live'): ['kippax.scraperwiki.com'], # bit nasty that this is a dev server!
 }
