@@ -378,13 +378,15 @@ $(function()
 				if( $(e.target).parents().index($a) == -1 ) {
 					if( $(e.target).parents().index($p) == -1 ) {
 						if( $(e.target).parents().index($('.ui-autocomplete')) == -1 ) {
-							// they didn't click on the users link or the popover or the autocomplete
-							$p.filter(':visible').fadeOut(400, function(){
-								$p.find('li.new_user_li, li.error').remove();
-								$p.find('a.add_user').show();
-							});
-							$a.removeClass('hover');
-							$('html').unbind('click');
+							if($(e.target).not('[class*="ui-"]').length){
+								// they didn't click on the users link or the popover or the autocomplete
+								$p.filter(':visible').fadeOut(400, function(){
+									$p.find('li.new_user_li, li.error').remove();
+									$p.find('a.add_user').show();
+								});
+								$a.removeClass('hover');
+								$('html').unbind('click');
+							}
 						}
 					}
 				}
@@ -438,7 +440,7 @@ $(function()
 			},
 			select: function( event, ui ) {
 				// submit the name
-				$(this).next('a').trigger('click');
+	//			$(this).next('a').trigger('click');
 			}
 		});
 	
@@ -460,10 +462,6 @@ $(function()
 		});
 		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input).append(confirm);
 		$(this).slideUp(250).prev().append(li).children(':last').slideDown(250).find('#username').focus();
-	});
-	
-	$('.vault h4').live('click', function(){
-		console.log('foo');
 	});
 	
 	$('body.vaults a.user_delete').live('click', function(e){
