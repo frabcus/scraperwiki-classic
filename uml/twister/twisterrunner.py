@@ -174,7 +174,7 @@ def MakeRunner(scrapername, guid, language, urlquery, username, code, client, be
     if scheduled:
         s = 'live'
     nodename, nodehost, nodeport = choose_controller( s )
-    
+    logger.debug('Running code on %s:%s ()' % (nodehost,str(nodeport),nodename,) )
     deferred = clientcreator.connectTCP(nodehost, nodeport)
     deferred.addCallbacks(srunner.gotcontrollerconnectionprotocol, srunner.controllerconnectionrequestFailure)
 
