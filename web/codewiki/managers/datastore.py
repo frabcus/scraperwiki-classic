@@ -48,7 +48,6 @@ class DataStore(object):
             try:
                 # Try and flush some data but bear in mind that the proxy may have already 
                 # closed the connection for us - as it does tend to do from time to time
-                #self.m_socket.send('.\n')
                 self.m_socket.close()
             except:
                 pass

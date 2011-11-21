@@ -13,8 +13,8 @@ urlpatterns = patterns('',
 
     # profiles
     url(r'^profiles/edit/$', profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm}, name='profiles_edit_profile'),
-    url(r'^profiles/(?P<username>\w+)/$', frontend_views.profile_detail, name='profiles_profile_detail'),
-    url(r'^profiles/(?P<username>\w+)/message/$', frontend_views.user_message, name='user_message'),
+    url(r'^profiles/(?P<username>.*)/message/$', frontend_views.user_message, name='user_message'),
+    url(r'^profiles/(?P<username>.*)/$', frontend_views.profile_detail, name='profiles_profile_detail'),
     #url(r'^profiles/', include('profiles.urls')), 
 
     url(r'^login/$',frontend_views.login, name='login'),
