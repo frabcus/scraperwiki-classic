@@ -9,7 +9,6 @@
 {% load gravatar %}
 {% load comments %}
 {% load history %}
-{% load forking %}
 
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
