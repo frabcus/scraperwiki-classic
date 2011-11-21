@@ -80,7 +80,7 @@ class spawnRunner(protocol.ProcessProtocol):
                     self.httpheaders.append((mheader.group(1), mheader.group(2)))
                 continue
 
-            logger.info("Recevied and will write: "+str([line]))
+            logger.info("Received and will write: "+str([line]))
             self.client.writeall(line)
             if self.runobjectmaker:
                 self.runobjectmaker.receiveline(line)
