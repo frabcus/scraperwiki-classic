@@ -193,6 +193,8 @@ def code_overview(request, wiki_type, short_name):
     else:
         if wiki_type == 'scraper':
             return new_code_overview(request, wiki_type,short_name)
+          
+    # Unless explicitly requested users will get the old overview for views.
                     
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if resp: return resp
