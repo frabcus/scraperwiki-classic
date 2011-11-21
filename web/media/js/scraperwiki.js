@@ -93,8 +93,9 @@ function setupNavSearchBoxHint(){
 function newCodeObject(wiki_type, sourcescraper)
 {
     url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
-	if ( sourcescraper ) 
+	if ( sourcescraper ) {
 		url += "&sourcescraper=" + sourcescraper;
+        }
     
     $.get(url, function(data){
         $.modal('<div id="template_popup">'+data+'</div>', {
@@ -252,20 +253,19 @@ function newUserMessage(url){
 
 $(function()
 {
-	
-	setupSearchBoxHint();
-	setupNavSearchBoxHint();
+    setupSearchBoxHint();
+    setupNavSearchBoxHint();
 
-    $('a.editor_view, div.network .view a').click(function()  { 
-		var m = $(this).attr('href').match(/\?sourcescraper=(\w+)/);
-		if ( m ) {
-	 		newCodeObject('view', m[1]);  
-		} else {
-	 		newCodeObject('view');  			
-		}
-		return false; 
-	}); 
-	
+    $('a.editor_view, div.network .view a').click(function() {
+        var m = $(this).attr('href').match(/\?sourcescraper=(.*?)(?:&|$)/);
+        if ( m ) {
+            newCodeObject('view', m[1]);  
+        } else {
+            newCodeObject('view');  			
+        }
+        return false; 
+    }); 
+
     $('a.editor_scraper').click(function()  {  newCodeObject('scraper');  return false; });
 	$('a.add_to_vault').bind('click', function(e){ 
 		e.preventDefault();

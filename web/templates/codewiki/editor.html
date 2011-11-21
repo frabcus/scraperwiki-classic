@@ -145,16 +145,16 @@
     </div>
 
     <div id="protected_warning" class="alert_outer" style="display:none;" >
-        This {{scraper.wiki_type}} is protected: You can only watch other people editing. <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">Fork to edit this {{scraper.wiki_type}} yourself</a>
+        This {{scraper.wiki_type}} is protected: You can only watch other people editing. <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">Make my own copy of this scraper</a>
     </div>
 
     <div id="login_warning" class="alert_outer" style="display:none;" >
-        You are in read-only mode. <a href="{% url login %}{% if scraper.short_name %}?next={% url editor_edit scraper.wiki_type scraper.short_name %}{% endif %}">Sign in to edit this {{scraper.wiki_type}}</a> <a class="secondary" href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">Fork as a guest</a>
+        You are in read-only mode. <a href="{% url login %}{% if scraper.short_name %}?next={% url editor_edit scraper.wiki_type scraper.short_name %}{% endif %}">Sign in to edit this {{scraper.wiki_type}}</a> <a class="secondary" href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">Copy as a guest</a>
     </div>
 
     <div id="rollback_warning" class="alert_outer" style="display:none;" >
         <strong>Warning:</strong> You are viewing an earlier version of this {{scraper.wiki_type}}.
-        If you save, the newest version will be overwritten.
+        If you save, the newest version will be overwritten!
     </div>
 
 
@@ -226,7 +226,7 @@
                 <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
             {% endif %} -->
             <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save" title="Save this {{scraper.wiki_type}} (Ctrl + S, Cmd + S)"/>
-            <input type="button" id="btnForkNow" class="fork button" name="action" value="Fork" title="Fork this {{scraper.wiki_type}}"/>
+            <input type="button" id="btnForkNow" class="fork button" name="action" value="Copy" title="Copy this {{scraper.wiki_type}}"/>
         </div>
     </div>
 
@@ -245,7 +245,7 @@
 	                    <a href="#" title="Pages you are scraping">Sources</a>
 	                </li>
 	            {% endifnotequal %}
-                <li class="chat">
+                <li class="chat" style='display:none;'>
                     <a href="#" title="Communicate to others">Chat</a>
                 </li>
             </ul>

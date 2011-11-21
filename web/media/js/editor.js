@@ -540,7 +540,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         //clear the tabs
         clearOutput();
-        writeToConsole('Starting run ... ' + (isstaff ? " [on "+lxc+"]" : "")); 
+        writeToConsole('Starting run ... ' + (isstaff ? " ["+lxc+"]" : "")); 
         writeToChat('<i>' + lchatname + ' runs scraper</i>'); 
 
         //unbind run button
@@ -645,7 +645,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             window.open($('#fork_url_action').val()); 
             return false;
         });
-        $('.editor_controls #btnForkNow').val('fork' + (wiki_type == 'scraper' ? ' scraper' : '')); 
+        $('.editor_controls #btnForkNow').val('copy' + (wiki_type == 'scraper' ? ' scraper' : '')); 
 
         // the watch button
         $('.editor_controls #btnWatch').live('click', function()

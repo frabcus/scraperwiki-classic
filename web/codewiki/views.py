@@ -115,7 +115,7 @@ def populate_itemlog(scraper, run_count=-1):
         if itemlog:
             item["prevrev"] = itemlog[-1]["rev"]
         item["groupkey"] = "commit|||"+ str(item['earliesteditor'])
-        itemlog.append(item)
+        itemlog.append(item) 
     itemlog.reverse()
     
     # now obtain the run-events and sort together
@@ -187,10 +187,12 @@ def gitpush(request, wiki_type, short_name):
 def code_overview(request, wiki_type, short_name):
     
     if request.user.is_authenticated():
-        if request.user.get_profile().has_feature('New overview page'):
+        if (wiki_type == 'scraper' and request.user.get_profile().has_feature('New overview page')) or \
+           (wiki_type == 'view' and request.user.get_profile().has_feature('New view page')):
             return new_code_overview(request, wiki_type,short_name)
     else:
-        return new_code_overview(request, wiki_type,short_name)
+        if wiki_type == 'scraper':
+            return new_code_overview(request, wiki_type,short_name)
                     
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if resp: return resp
@@ -403,7 +405,7 @@ def new_code_overview(request, wiki_type, short_name):
             code = scraper.saved_code()
             if re.match('<div\s+class="inline">', code):
                 context["htmlcode"] = code
-        return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
+        return render_to_response('codewiki/new_view_overview.html', context, context_instance=RequestContext(request))
 
     #
     # (else) scraper type section

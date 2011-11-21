@@ -429,45 +429,31 @@ def stats(request):
     
 
 def tags(request):
-    # would be good to limit this only to scrapers/views that this user has right to see (user_visible_code_objects; not the private ones), however 
-    # the construction of the function tagging.models._get_usage() is a complex SQL query with group by 
-    # that is not available in the django ORM.  
     all_tags = {}
     
-    # trial code for filtering down by tags that you can't see
-    if False:
-        user_visible_code_objects = scraper_search_query(request.user, None)
-        code_objects = user_visible_code_objects.extra(
-            tables=['tagging_taggeditem', "tagging_tag"],
-            where=['codewiki_code.id = tagging_taggeditem.object_id', 'tagging_taggeditem.tag_id = tagging_tag.id'], 
-            select={"tag_name":"tagging_tag.name"})
-        #print code_objects.query
-        # This query needs to be annotated with a count(*) and a GROUP BY tagging_taggeditem.tag_id
-
-        # sum through all the tags on all the objects
-        lalltags = { }
-        for x in code_objects:
-            lalltags[x.tag_name] = lalltags.get(x.tag_name, 0)+1
-
-        # convert above dict to format required by calculate_cloud
-        # though you should be able to inline this function and change tags.html to avoid the need for <type Tag> objects
-        for tag_name, count in lalltags.items():
-            tag = Tag.objects.get(name=tag_name)
-            tag.count = count
+    # Want 2.7 for the collections.Counter :(
+    def update_tags(tag):
+        existing = all_tags.get(tag.name, None)
+        if existing:
+            existing.count += tag.count
+        else:
             all_tags[tag.name] = tag
-
-
-    # old method that would show tags to scrapers that are private
-    else:
-        scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
-        view_tags = Tag.objects.usage_for_model(View, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
-        for tag in itertools.chain(scraper_tags, view_tags):
-            existing = all_tags.get(tag.name, None)
-            if existing:
-                existing.count += tag.count
-            else:
-                all_tags[tag.name] = tag
-
+        
+    scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
+    view_tags = Tag.objects.usage_for_model(View, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
+    for tag in itertools.chain(scraper_tags, view_tags):
+        update_tags(tag)
+    
+    # Use UserCodeRole objects to get code objects that are private but 
+    # accessible to this user and then use update_tags to update the 
+    # dictionary
+    if request.user.is_authenticated():
+        privatescraper_ids = [u.code.id for u in UserCodeRole.objects.filter(code__privacy_status='private', user=request.user)]
+        qs = Code.objects.filter(pk__in=privatescraper_ids)
+        extra_tags = Tag.objects.usage_for_queryset(qs, counts=True)
+        for tag in extra_tags:
+            update_tags(tag)
+        
     tags = calculate_cloud(all_tags.values(), steps=4, distribution=LOGARITHMIC)
 
     return render_to_response('frontend/tags.html', {'tags':tags}, context_instance=RequestContext(request))

@@ -3,11 +3,10 @@
 "exec" "python" "-O" "$0" "$@"
 
 """
-This script is the interface between the UML/firebox set up and the frontend Orbited TCP socket.  
+This script is the interface between the LXC set up and the frontend Orbited TCP socket.  
 
 There is one client object (class RunnerProtocol) per editor window
 These recieve and send all messages between the browser and the UML
-An instance of a scraper running in the UML is spawnRunner
 
 The RunnerFactory organizes lists of these clients and manages their states
 There is one UserEditorsOnOneScraper per user per scraper to handle one user opening multiple windows onto the same scraper
@@ -37,7 +36,6 @@ from twisted.internet.error import ConnectionDone, ConnectionRefusedError
 
 from twisterconfig import poptions, config, stdoutlog, djangokey, djangourl, logging, logger, jstime
 from twisterrunner import MakeRunner
-from proxycallbacks import ClientUpdater
 
 agent = Agent(reactor)
 
@@ -442,7 +440,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         attachables = parsed_data.get('attachables', [])
         rev = parsed_data.get('rev', '')
         bmakerunobject =  parsed_data.get('bmakerunobject', False)
-        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, beta_user, attachables, rev, bmakerunobject, agent)
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, beta_user, attachables, rev, bmakerunobject, agent, False)
         self.factory.runidclientmap[self.processrunning.jdata["runid"]] = self
         self.factory.notifyMonitoringClients(self)
         
@@ -673,7 +671,7 @@ class RunnerFactory(protocol.ServerFactory):
             logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
             beta_user = scraperoverdue.get("beta_user", False)
             attachables = scraperoverdue.get('attachables', [])
-            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, beta_user, attachables, sclient.originalrev, True, agent)
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, beta_user, attachables, sclient.originalrev, True, agent, True)
             self.runidclientmap[sclient.processrunning.jdata["runid"]] = sclient
             self.notifyMonitoringClients(sclient)
 

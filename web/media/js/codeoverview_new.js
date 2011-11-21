@@ -468,6 +468,32 @@ $(function(){
 	    });
 	});
 	
+	$('li.share .embed a').bind('click', function(e){
+		e.preventDefault();
+		$(this).parents('.share_popover').fadeOut(400).prev().removeClass('hover');
+		$('html').unbind('click');
+        $('#add_view_to_site').modal({
+            overlayClose: true, 
+            autoResize: true,
+            overlayCss: { cursor:"auto" },
+			onShow: function(dialog){
+				$('#simplemodal-container').css('height', 'auto');
+				$("pre", dialog.data).snippet('html', {style:"vim", clipboard: "/media/js/ZeroClipboard.swf"});
+			},
+			onOpen: function(dialog) {
+				dialog.data.show();
+				dialog.overlay.fadeIn(200);
+				dialog.container.fadeIn(200);
+			},
+			onClose: function(dialog) {
+				dialog.container.fadeOut(200);
+				dialog.overlay.fadeOut(200, function(){
+					$.modal.close();
+				});
+			}
+        });
+	});
+	
     $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
     $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
 	
