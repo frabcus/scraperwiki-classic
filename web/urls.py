@@ -18,7 +18,7 @@ from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.contrib import admin
 admin.autodiscover()
 
-# Need to move this somewhere more useful.
+# Need to move this somewhere more useful and try to make it less hacky
 from django.contrib.auth.models import User
 User._meta.ordering = ['username']
 
