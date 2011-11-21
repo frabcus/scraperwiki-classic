@@ -80,7 +80,7 @@ class spawnRunner(protocol.ProcessProtocol):
                     self.httpheaders.append((mheader.group(1), mheader.group(2)))
                 continue
 
-            logger.info("Recevied and will write: "+str([line]))
+            logger.info("Received and will write: "+str([line]))
             self.client.writeall(line)
             if self.runobjectmaker:
                 self.runobjectmaker.receiveline(line)
@@ -169,13 +169,9 @@ def MakeRunner(scrapername, guid, language, urlquery, username, code, client, be
         srunner.runobjectmaker = ScheduledRunMessageLoopHandler(client, username, agent,  jdata["runid"],rev)
         logger.info("Making run object on %s client# %d" % (scrapername, client.clientnumber))
 
-    
-    s = 'live'
-    if scheduled:
-        s = 'live'
-        
-    nodename, nodehost, nodeport = choose_controller( s )
-    logger.info('Running code on %s:%s (%s/%s)' % (nodehost,str(nodeport),nodename,s) )
+    target = 'scheduled' if scheduled else 'live'
+    nodename, nodehost, nodeport = choose_controller( target )
+    logger.info('Running code on %s:%s (%s/%s)' % (nodehost,str(nodeport),nodename,target) )
     
     deferred = clientcreator.connectTCP(nodehost, nodeport)
     deferred.addCallbacks(srunner.gotcontrollerconnectionprotocol, srunner.controllerconnectionrequestFailure)

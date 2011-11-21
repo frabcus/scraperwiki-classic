@@ -202,7 +202,6 @@ def twistermakesrunevent(request):
 
 def Dtwistermakesrunevent(request):
         
-    
     if request.POST.get("django_key") != config.get('twister', 'djangokey'):
         logger.error("twister wrong djangokey")
         return HttpResponse("no access")
