@@ -6300,7 +6300,8 @@ body.vaults .new_user_li #username {
 	margin-left: 5px;
 }
 
-body.vaults .vault_header .vault_users_popover .new_user_li a {
+body.vaults .vault_header .vault_users_popover .new_user_li a,
+body.vaults .vault_header .vault_users_popover .new_user_li a:hover {
 	float: right;
 	background-color: #bad9b3;
 	padding: 1px 5px;
@@ -6312,6 +6313,7 @@ body.vaults .vault_header .vault_users_popover .new_user_li a {
 	border: 1px solid #5c9e4f;
 	margin-top: 2px;
 	color: #39732d;
+	cursor: pointer;
 }
 
 body.vaults .vault_header .vault_users_popover li.error {
