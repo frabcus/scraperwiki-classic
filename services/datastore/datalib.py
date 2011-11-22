@@ -26,13 +26,21 @@ class TimeoutException(Exception):
     pass 
 
 def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
-    #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)
+    log.msg("authorizer_readonly: %s, %s, %s, %s, %s" % (action_code, tname, cname, sql_location, trigger))
+
     readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library.  codes: http://www.sqlite.org/c3ref/c_alter_table.html
     if action_code in readonlyops:
         return sqlite3.SQLITE_OK
+
     if action_code == sqlite3.SQLITE_PRAGMA:
-        if tname in ["table_info", "index_list", "index_info"]:
+        if tname in ["table_info", "index_list", "index_info", "page_size"]:
             return sqlite3.SQLITE_OK
+
+    # SQLite FTS (full text search) requires this permission even when reading, and
+    # this doesn't let ordinary queries alter sqlite_master because of PRAGMA writable_schema
+    if action_code == sqlite3.SQLITE_UPDATE and tname == "sqlite_master":
+        return sqlite3.SQLITE_OK
+
     return sqlite3.SQLITE_DENY
 
 def authorizer_attaching(action_code, tname, cname, sql_location, trigger):
@@ -228,7 +236,7 @@ class SQLiteDatabase(Database):
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 total_rows += int(tables[name]["count"])
         except sqlite3.Error, e:
-            return {"error":"sqlite3.Error: "+str(e)}
+            return {"error":"datasummary: sqlite3.Error: "+str(e)}
         
         result = {"tables":tables, 'total_rows': total_rows }
         if self.short_name:
@@ -304,11 +312,11 @@ class SQLiteDatabase(Database):
         except sqlite3.Error, e:
             print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             log.err( e )
-            return {"error":"sqlite3.Error: %s" % str(e)}
+            return {"error":"sqliteexecute: sqlite3.Error: %s" % str(e)}
         except ValueError, ve:
             print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             log.err( ve )            
-            return {"error":"sqlite3.Error: %s" % str(ve)}
+            return {"error":"sqliteexecute: ValueError: %s" % str(ve)}
         except TimeoutException,tout:
             print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
             log.err( ve )
@@ -339,7 +347,7 @@ class SQLiteDatabase(Database):
             self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))
         except sqlite3.Error, e:
             log.err(e)
-            return {"error":"sqlite3.Error: "+str(e)}
+            return {"error":"sqliteattach: sqlite3.Error: "+str(e)}
         return {"status":"attach succeeded"}
 
 

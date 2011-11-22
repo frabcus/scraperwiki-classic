@@ -443,8 +443,11 @@ def new_code_overview(request, wiki_type, short_name):
                     pass # just leave 'sqlitedata' not in context
                 else:
                     context['sqliteconnectionerror'] = sqlitedata['status']
+            elif 'error' in sqlitedata:
+                context['sqliteconnectionerror'] = sqlitedata['error']
             else:
                 context['sqliteconnectionerror'] = 'Response with unexpected format'
+                logger.error("Response with unexpected format:" + str(sqlitedata))
 
             # success, have good data
         else:
@@ -815,6 +818,9 @@ def choose_template(request, wiki_type):
     context["sourcescraper"] = request.GET.get('sourcescraper', '')
     
     vault = request.GET.get('vault', None)
+    
+    context['vault_membership_count'] = request.user.vault_membership.exclude(user__id=request.user.id).count()
+    context['vault_membership']  = request.user.vault_membership.all().exclude(user__id=request.user.id)
     
     # Specify which template we want
     if request.user.is_authenticated() and request.user.vault_membership.count() > 0 and vault:

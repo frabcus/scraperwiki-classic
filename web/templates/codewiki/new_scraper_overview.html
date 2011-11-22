@@ -490,7 +490,7 @@
     <ul class="titlebar">
         <li class="first"><h3>{% if related_views or scraper.forked_from or forked_to_total or scraper_tags %}This scraper in context{% else %}This scraper is lonely{% endif %}</h3></li>
         {% if user_edits_it or user.is_staff %}<li class="tag"><a href="#tags" title="Use tags to organise and group similar scrapers"><img src="{{ MEDIA_URL }}images/icons/tag.png" width="16" height="16" alt="">Tag</a></li>{% endif %}
-        <li class="view"><a href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise</a></li>
+        <li class="view"><a data-wiki_type="view" data-sourcescraper="{{scraper.short_name}}" href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise</a></li>
         <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
         <li class="clear"></li>
     </ul>
