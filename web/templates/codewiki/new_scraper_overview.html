@@ -12,6 +12,13 @@
 
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
+{% block meta %}
+    <meta property="og:title" content="{{ scraper.title }}" />
+    <meta property="og:description" content="{{ scraper.description }}" />
+    <meta property="og:image" content="INSERT_SCREENSHOT_HERE" />
+    <meta property="og:site_name" content="ScraperWiki" />
+{% endblock %}
+
 {% block css %}<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/new_scraper_overview.css" />
 <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-dataTables.css" />{% endblock %}
 
