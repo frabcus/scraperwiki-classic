@@ -580,7 +580,7 @@ def vault_scrapers_remove(request, vaultid, shortname, newstatus):
     if not request.is_ajax():
         return HttpResponseForbidden('This page cannot be called directly')
     
-    scraper = get_object_or_404( Scraper, short_name=shortname )
+    code = get_object_or_404( Code, short_name=shortname )
     vault   = get_object_or_404( Vault, pk=vaultid )
     mime = 'application/json'
     
@@ -588,13 +588,13 @@ def vault_scrapers_remove(request, vaultid, shortname, newstatus):
     if vault.user != request.user:
         return HttpResponse('{"status": "fail", "error":"You do not own this vault"}', mimetype=mime)            
     
-    if scraper.vault != vault:
-        return HttpResponse('{"status": "fail", "error":"The scraper is not in this vault"}', mimetype=mime)            
+    if code.vault != vault:
+        return HttpResponse('{"status": "fail", "error":"This item is not in this vault"}', mimetype=mime)            
     
 
-    scraper.privacy_status = newstatus
-    scraper.vault = None
-    scraper.save()
+    code.privacy_status = newstatus
+    code.vault = None
+    code.save()
 
     return HttpResponse('{"status": "ok"}', mimetype=mime)                    
 
@@ -616,23 +616,23 @@ def vault_scrapers_add(request, vaultid, shortname):
     if not request.is_ajax():
         return HttpResponseForbidden('This page cannot be called directly')
     
-    scraper = get_object_or_404( Scraper, short_name=shortname )
+    code = get_object_or_404( Code, short_name=shortname )
     vault   = get_object_or_404( Vault, pk=vaultid )
     mime = 'application/json'
     
-    if not scraper.owner() == request.user:
+    if not code.owner() == request.user:
         # Only the scraper owner can add it to a vault
-        return HttpResponse('{"status": "fail", "error":"You cannot move this scraper to your own vault"}', mimetype=mime)            
+        return HttpResponse('{"status": "fail", "error":"You cannot move this item to your own vault"}', mimetype=mime)            
             
     # Must be a member of the vault
     if not request.user in vault.members.all():
         return HttpResponse('{"status": "fail", "error":"You are not a member of this vault"}', mimetype=mime)            
             
     # Old owner is now editor and the new owner should be the vault owner.
-    scraper.privacy_status = 'private'
-    scraper.vault = vault
-    scraper.generate_apikey()
-    scraper.save()
+    code.privacy_status = 'private'
+    code.vault = vault
+    code.generate_apikey()
+    code.save()
     
     vault.update_access_rights()
                 
