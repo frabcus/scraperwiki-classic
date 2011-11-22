@@ -304,11 +304,11 @@ class SQLiteDatabase(Database):
         except sqlite3.Error, e:
             print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             log.err( e )
-            return {"error":"sqlite3.Error: %s" % str(e)}
+            return {"error":"sqliteexecute: sqlite3.Error: %s" % str(e)}
         except ValueError, ve:
             print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             log.err( ve )            
-            return {"error":"sqlite3.Error: %s" % str(ve)}
+            return {"error":"sqliteexecute: ValueError: %s" % str(ve)}
         except TimeoutException,tout:
             print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
             log.err( ve )
@@ -339,7 +339,7 @@ class SQLiteDatabase(Database):
             self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))
         except sqlite3.Error, e:
             log.err(e)
-            return {"error":"sqlite3.Error: "+str(e)}
+            return {"error":"sqliteattach: sqlite3.Error: "+str(e)}
         return {"status":"attach succeeded"}
 
 
