@@ -25,6 +25,9 @@ import datetime
 import socket
 import urlparse
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 try:                import json
 except ImportError: import simplejson as json
@@ -284,6 +287,7 @@ def code_overview(request, wiki_type, short_name):
                     context['sqliteconnectionerror'] = sqlitedata['status']
             else:
                 context['sqliteconnectionerror'] = 'Response with unexpected format'
+                logger.error("Response with unexpected format:" + str(sqlitedata))
 
             # success, have good data
         else:
@@ -1063,6 +1067,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
         if 'error' in sqlite_data:
             # Log the error
             data = [ ]
+            logger.error("Error in scraper_data_view: " + str(sqlite_data))
         else:
             # For each row map each item in that row against escape
             data = map( lambda b: map(local_escape, b), sqlite_data['data'])
