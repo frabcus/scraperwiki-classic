@@ -209,7 +209,7 @@ class SQLiteDatabase(Database):
         total_rows = 0
         tables = { }
         try:
-            for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):          
+            for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table' or type='view'")):
                 tables[name] = {"sql":sql}
                 if limit != -1:
                     self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, (limit,))
