@@ -443,8 +443,11 @@ def new_code_overview(request, wiki_type, short_name):
                     pass # just leave 'sqlitedata' not in context
                 else:
                     context['sqliteconnectionerror'] = sqlitedata['status']
+            elif 'error' in sqlitedata:
+                context['sqliteconnectionerror'] = sqlitedata['error']
             else:
                 context['sqliteconnectionerror'] = 'Response with unexpected format'
+                logger.error("Response with unexpected format:" + str(sqlitedata))
 
             # success, have good data
         else:
