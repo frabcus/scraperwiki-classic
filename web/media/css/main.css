@@ -6358,18 +6358,22 @@ body.vaults .vault_contents.empty h5 {
 	right: 0
 }
 
-body.vaults .vault_contents h5 a {
+body.vaults .vault_contents span.add_to_vault {
 	float: right;
-	color: #5d7ea6;
-	cursor: pointer;
+	color: #7e98b8;
 }
 
-body.vaults .vault_contents h5 a img {
+body.vaults .vault_contents .add_to_vault img {
 	vertical-align: -3px;
 }
 
-body.vaults .vault_contents h5 a:hover {
-	text-decoration: none;
+body.vaults .vault_contents .add_to_vault a {
+	cursor: pointer;
+	color: #4d719d;
+}
+
+body.vaults .vault_contents .add_to_vault a:hover {
+	text-decoration: underline;
 	color: #599e4d;
 }
 

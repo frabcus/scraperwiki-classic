@@ -144,8 +144,8 @@
                 {% endif %}
                 <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse</a></li>
                 <li>
-                    <a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a> /
-                    <a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">view</a>
+                    <a data-wiki_type="scraper" href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a> /
+                    <a data-wiki_type="view" href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">view</a>
                 </li>
                 <li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
                 <li><a href="{% url request_data %}">Request data</a></li>
@@ -214,7 +214,7 @@
 				<dt>Developers</dt>
 				<dd>
 					<ul>
-					    <li><a href="#" class="editor_scraper">Create new scraper</a> / <a href="#" class="editor_view">view</a></li>
+					    <li><a data-wiki_type="scraper" href="#" class="editor_scraper">Create new scraper</a> / <a data-wiki_type="view" href="#" class="editor_view">view</a></li>
 						<li><a href="{% url docsexternal %}">API</a></li>
 						<li><a href="{% url docsroot %}">Docs &amp; tutorials</a></li>	
 						<li><a href="{% url docs 'faq' %}">FAQ</a></li>
