@@ -20,9 +20,9 @@ class Vault(models.Model):
     # distinct from the owner (self.user) of the vault.
     members = models.ManyToManyField(User, related_name='vault_membership')
 
-    def code_objects(self):
+    def get_code_objects(self):
         from codewiki.models import UserCodeRole, Code                
-        return Code.objects.filter(vault=self).exclude(privacy_status='deleted')
+        return Code.objects.filter(vault=self).exclude(privacy_status='deleted').all()
 
     def add_user_rights(self, user ):
         """
@@ -33,7 +33,7 @@ class Vault(models.Model):
         role = 'editor'
         if user == self.user:
             role = 'owner'
-        for code_object in self.code_objects().all():
+        for code_object in self.get_code_objects():
             UserCodeRole(code=code_object, user=user,role='editor').save()
             
         
@@ -43,7 +43,7 @@ class Vault(models.Model):
         the code objects.
         """
         from codewiki.models import UserCodeRole, Code                
-        for code_object in self.code_objects().all():
+        for code_object in self.get_code_objects():
             UserCodeRole.objects.filter(code=code_object, user=user).all().delete()
         
         
@@ -53,7 +53,7 @@ class Vault(models.Model):
         are correct.
         """
         from codewiki.models import UserCodeRole, Code                
-        for code_object in self.code_objects().all():
+        for code_object in self.get_code_objects():
             UserCodeRole.objects.filter(code=code_object).all().delete()
             users = list(self.members.all())
             try:
