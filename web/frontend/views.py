@@ -577,8 +577,8 @@ def vault_scrapers_remove(request, vaultid, shortname, newstatus):
     Will set the vault property of the scraper to None but does
     not touch the editorship/ownership which must be done elsewhere.
     """
-    if not request.is_ajax():
-        return HttpResponseForbidden('This page cannot be called directly')
+#    if not request.is_ajax():
+#        return HttpResponseForbidden('This page cannot be called directly')
     
     code = get_object_or_404( Code, short_name=shortname )
     vault   = get_object_or_404( Vault, pk=vaultid )
@@ -590,8 +590,8 @@ def vault_scrapers_remove(request, vaultid, shortname, newstatus):
     
     if code.vault != vault:
         return HttpResponse('{"status": "fail", "error":"This item is not in this vault"}', mimetype=mime)            
-    
 
+    
     code.privacy_status = newstatus
     code.vault = None
     code.save()
@@ -613,8 +613,8 @@ def vault_scrapers_add(request, vaultid, shortname):
     the original owner is demoted to an editor, and the vault owner
     is set as owner (or promoted if they were an editor previously).
     """
-    if not request.is_ajax():
-        return HttpResponseForbidden('This page cannot be called directly')
+#    if not request.is_ajax():
+#        return HttpResponseForbidden('This page cannot be called directly')
     
     code = get_object_or_404( Code, short_name=shortname )
     vault   = get_object_or_404( Vault, pk=vaultid )
