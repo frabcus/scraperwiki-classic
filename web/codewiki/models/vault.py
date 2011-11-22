@@ -33,7 +33,7 @@ class Vault(models.Model):
         role = 'editor'
         if user == self.user:
             role = 'owner'
-        for code_object in self.code_objects():
+        for code_object in self.code_objects().all():
             UserCodeRole(code=code_object, user=user,role='editor').save()
             
         
@@ -43,7 +43,7 @@ class Vault(models.Model):
         the code objects.
         """
         from codewiki.models import UserCodeRole, Scraper                
-        for code_object in self.code_objects():
+        for code_object in self.code_objects().all():
             UserCodeRole.objects.filter(code=code_object, user=user).all().delete()
         
         
@@ -53,7 +53,7 @@ class Vault(models.Model):
         are correct.
         """
         from codewiki.models import UserCodeRole, Scraper                
-        for code_object in self.code_objects():
+        for code_object in self.code_objects().all():
             UserCodeRole.objects.filter(code=code_object).all().delete()
             users = list(self.members.all())
             try:
