@@ -22,7 +22,7 @@ class Vault(models.Model):
 
     def get_code_objects(self):
         from codewiki.models import UserCodeRole, Code                
-        return Code.objects.filter(vault=self).exclude(privacy_status='deleted').all()
+        return Code.objects.filter(vault=self).exclude(privacy_status='deleted')
 
     def add_user_rights(self, user ):
         """
