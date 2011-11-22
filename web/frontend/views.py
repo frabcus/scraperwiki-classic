@@ -72,8 +72,6 @@ def dashboard(request, page_number=1):
 
     try:    page = int(page_number)
     except (ValueError, TypeError):   page = 1
-
-    # If page request (9999) is out of range, deliver last page of results.
     try:     
         owned_or_edited_code_objects_pagenated = paginator.page(page)
     except (EmptyPage, InvalidPage):
@@ -84,10 +82,8 @@ def dashboard(request, page_number=1):
     return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
 
 
-# this goes through an unhelpfully located one-file app called 'profile' 
-# located at scraperwiki/lib/python/site-packages/profiles   The templates are in web/templates/profiles
-# It would help to copy the sourcecode into the main site to make it easier to find and maintain
 def profile_detail(request, username):
+    # The templates for this view are in templates/profiles/
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
     
@@ -101,8 +97,10 @@ def profile_detail(request, username):
 
 
 def user_message(request, username):
-    """This is a view to return a form ready for the user to fill in
-    to email another user on the site."""
+    """
+        This is a view to return a form ready for the user to send an 
+        email message to another user on the site.
+    """
     form = UserMessageForm(data=request.POST or None)
     receiving_user = get_object_or_404(User, username=username)
     if request.method == "POST" and form.is_valid():
