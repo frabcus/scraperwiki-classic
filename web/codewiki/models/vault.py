@@ -21,7 +21,7 @@ class Vault(models.Model):
     members = models.ManyToManyField(User, related_name='vault_membership')
 
     def code_objects(self):
-        from codewiki.models import UserCodeRole, Scraper                
+        from codewiki.models import UserCodeRole, Code                
         return Code.objects.filter(vault=self).exclude(privacy_status='deleted')
 
     def add_user_rights(self, user ):
@@ -29,7 +29,7 @@ class Vault(models.Model):
         A new user has been added to the vault, make sure they can access all of 
         the code objects.
         """
-        from codewiki.models import UserCodeRole, Scraper        
+        from codewiki.models import UserCodeRole, Code        
         role = 'editor'
         if user == self.user:
             role = 'owner'
@@ -42,7 +42,7 @@ class Vault(models.Model):
         A user has been removed from the vault, make sure they can access none of 
         the code objects.
         """
-        from codewiki.models import UserCodeRole, Scraper                
+        from codewiki.models import UserCodeRole, Code                
         for code_object in self.code_objects().all():
             UserCodeRole.objects.filter(code=code_object, user=user).all().delete()
         
@@ -52,7 +52,7 @@ class Vault(models.Model):
         A code_object has been added to the vault, make sure the UserCodeRoles
         are correct.
         """
-        from codewiki.models import UserCodeRole, Scraper                
+        from codewiki.models import UserCodeRole, Code                
         for code_object in self.code_objects().all():
             UserCodeRole.objects.filter(code=code_object).all().delete()
             users = list(self.members.all())
