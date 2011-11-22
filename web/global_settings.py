@@ -228,7 +228,7 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'simple': {
-            'format' : '%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s'
+            'format' : '%(asctime)s %(name)s %(filename)s:%(lineno)s %(levelname)s: %(message)s'
         }
     },
     'handlers': {
@@ -257,8 +257,9 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        # Might as well log any errors anywhere else in Django
-        'django': {
+        # Might as well log any errors anywhere else in Django 
+        # (so use empty string for name here to catch anything)
+        '': {
             'handlers': ['logfile'],
             'level': DEBUG and 'DEBUG' or 'ERROR',
             'propagate': False,
