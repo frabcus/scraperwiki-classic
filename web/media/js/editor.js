@@ -117,6 +117,16 @@ $(document).ready(function()
         addHotkey('ctrl+p', popupPreview); 
     };
 
+	//	Disable the backspace key on the Editor page
+	//	I know! Naughty. 
+	//	But users keep pressing delete without realising no input is focussed,
+	//	causing them to lose all their changes. Which makes me sad :-(
+	$(document).keydown(function(e) { 
+		if (e.keyCode === 8) { 
+			var element = e.target.nodeName.toLowerCase();
+			if (element != 'input' && element != 'textarea') { return false; }
+		}
+	});
 
     //Setup Menu
     function setupMenu()

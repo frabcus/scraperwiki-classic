@@ -28,7 +28,7 @@ env.server_lookup = {
     ('datastore', 'live'): ['burbage.scraperwiki.com:7822'],
 
     ('firebox', 'dev'): ['kippax.scraperwiki.com'], 
-    ('firebox', 'live'): ['horsell.scraperwiki.com:7822'],
+    ('firebox', 'live'): ['matfen.scraperwiki.com:7822', 'horsell.scraperwiki.com:7822'],
 
     ('screenshooter', 'live'): ['kippax.scraperwiki.com'], # bit nasty that this is a dev server!
 }
@@ -73,7 +73,7 @@ def parse_bool(s):
 
 def do_server_lookup(task):
     if not 'flock' in env:
-            raise Exception("specify which flock (e.g. dev/live) first")
+        raise Exception("specify which flock (e.g. dev/live) first")
     hosts = env.server_lookup[(task, env.flock)]
     print "server_lookup: deploying '%s' on flock '%s', hosts: %s" % (task, env.flock, hosts)
     env.task = task

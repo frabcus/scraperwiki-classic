@@ -327,6 +327,15 @@ class Code(models.Model):
         filename = self.get_screenshot_filename(size)
         return os.path.join(settings.SCREENSHOT_DIR, size, filename)
 
+    def screenshot_url(self, size='medium'):
+        from django.conf import settings        
+        
+        if self.has_screenshot(size):
+            url = settings.MEDIA_URL + 'screenshots/' + size + '/' + self.get_screenshot_filename(size=size)
+        else:
+            url = settings.MEDIA_URL + 'images/testcard_' + size + '.png'
+        return url
+        
     def has_screenshot(self, size='medium'):
         has =  os.path.exists(self.get_screenshot_filepath(size))
         if has and not self.has_screen_shot:

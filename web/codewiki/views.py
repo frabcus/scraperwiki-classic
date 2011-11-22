@@ -25,6 +25,9 @@ import datetime
 import socket
 import urlparse
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 try:                import json
 except ImportError: import simplejson as json
@@ -282,8 +285,11 @@ def code_overview(request, wiki_type, short_name):
                     pass # just leave 'sqlitedata' not in context
                 else:
                     context['sqliteconnectionerror'] = sqlitedata['status']
+            elif 'error' in sqlitedata:
+                context['sqliteconnectionerror'] = sqlitedata['error']
             else:
                 context['sqliteconnectionerror'] = 'Response with unexpected format'
+                logger.error("Response with unexpected format:" + str(sqlitedata))
 
             # success, have good data
         else:
@@ -437,8 +443,11 @@ def new_code_overview(request, wiki_type, short_name):
                     pass # just leave 'sqlitedata' not in context
                 else:
                     context['sqliteconnectionerror'] = sqlitedata['status']
+            elif 'error' in sqlitedata:
+                context['sqliteconnectionerror'] = sqlitedata['error']
             else:
                 context['sqliteconnectionerror'] = 'Response with unexpected format'
+                logger.error("Response with unexpected format:" + str(sqlitedata))
 
             # success, have good data
         else:
@@ -810,6 +819,9 @@ def choose_template(request, wiki_type):
     
     vault = request.GET.get('vault', None)
     
+    context['vault_membership_count'] = request.user.vault_membership.exclude(user__id=request.user.id).count()
+    context['vault_membership']  = request.user.vault_membership.all().exclude(user__id=request.user.id)
+    
     # Specify which template we want
     if request.user.is_authenticated() and request.user.vault_membership.count() > 0 and vault:
         tpl = 'codewiki/includes/add_to_vault.html'
@@ -1063,6 +1075,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
         if 'error' in sqlite_data:
             # Log the error
             data = [ ]
+            logger.error("Error in scraper_data_view: " + str(sqlite_data))
         else:
             # For each row map each item in that row against escape
             data = map( lambda b: map(local_escape, b), sqlite_data['data'])

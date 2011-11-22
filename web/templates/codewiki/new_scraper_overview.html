@@ -12,6 +12,13 @@
 
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
+{% block meta %}
+    <meta property="og:title" content="{{ scraper.title }}" />
+    <meta property="og:description" content="{{ scraper.description }}" />
+    <meta property="og:image" content="{{ scraper.screenshot_url }}" />
+    <meta property="og:site_name" content="ScraperWiki" />
+{% endblock %}
+
 {% block css %}<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/new_scraper_overview.css" />
 <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-dataTables.css" />{% endblock %}
 
@@ -303,7 +310,7 @@
                                     <p><select id="move_to_vault">
                                         {% if scraper.vault %}{% else %}<option></option>{% endif %}
                                     {% for vault in request.user.vault_membership.all %}
-                                        <option value="/vaults/{{vault.id}}/addscraper/{{scraper.short_name}}/" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
+                                        <option  value="{% url vault_scrapers_add vault.id, scraper.short_name %}" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
                                     {% endfor %}
                                     </select> <input type="button" value="&rarr; Move!"/></p>
                                 </td>
@@ -483,7 +490,7 @@
     <ul class="titlebar">
         <li class="first"><h3>{% if related_views or scraper.forked_from or forked_to_total or scraper_tags %}This scraper in context{% else %}This scraper is lonely{% endif %}</h3></li>
         {% if user_edits_it or user.is_staff %}<li class="tag"><a href="#tags" title="Use tags to organise and group similar scrapers"><img src="{{ MEDIA_URL }}images/icons/tag.png" width="16" height="16" alt="">Tag</a></li>{% endif %}
-        <li class="view"><a href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise</a></li>
+        <li class="view"><a data-wiki_type="view" data-sourcescraper="{{scraper.short_name}}" href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise</a></li>
         <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
         <li class="clear"></li>
     </ul>

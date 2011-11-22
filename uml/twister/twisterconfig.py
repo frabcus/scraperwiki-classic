@@ -30,9 +30,11 @@ stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)
 logger = logging.getLogger('twister')
 
 
-# To provide the start of a path to scalability we will now start routing
+# Rather than only allowing a single server we'll start sending 
 # requests to a random server from a list, that list decided based on 
-# whether it is a live in-editor run or a scheduled one.  
+# whether it is a live in-editor run or a scheduled one.  At some point
+# it might be useful to have it check on error and possibly redirect so
+# that the LXC boxes can be taken down individually.
 node_config = {
     "scheduled": [],
     "live": []

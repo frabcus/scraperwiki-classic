@@ -89,110 +89,93 @@ function setupNavSearchBoxHint(){
     $('#navSearch input:text').blur();
 }
 
-
-function newCodeObject(wiki_type, sourcescraper)
-{
-    url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
-	if ( sourcescraper ) {
-		url += "&sourcescraper=" + sourcescraper;
-        }
-    
-    $.get(url, function(data){
-        $.modal('<div id="template_popup">'+data+'</div>', {
-            overlayClose: true, 
-            autoResize: true,
-            overlayCss: { cursor:"auto" },
-			onOpen: function(dialog) {
-				dialog.data.show();
-				dialog.overlay.fadeIn(200);
-				dialog.container.fadeIn(200);
-			},
-			onShow: function(dialog){
-				$('#simplemodal-container').css('height', 'auto');
-				$('#chooser_vaults h2', dialog.data).bind('click', function(e){
-					if($(this).next().is(':visible')){
-						$(this).children('input').attr('checked', false);
-						$(this).nextAll('p').slideUp(250);
-					} else {
-						$(this).children('input').attr('checked', true);
-						$(this).nextAll('p').slideDown(250);
-						$('#chooser_name_box').focus();
-					}
-				});
-				$('li a', dialog.data).bind('click', function(e){
-					if( ! $('#chooser_vaults h2 input').is(":visible")  ) 
-						return;
-
-					if ( ! $('#chooser_vaults h2 input').is(":checked") ) 
-						return;
-						
-					e.preventDefault();
-					if($('#chooser_vaults h2 input', dialog.data).is(':checked')){
-						if($('#chooser_name_box', dialog.data).val() == ''){
-							$('span.warning', dialog.data).remove();
-							text = $('label', dialog.data).attr('title');
-							$('p', dialog.data).eq(0).addClass('error').append('<span class="warning"><span></span>' + text + '</span>');
-							$('#chooser_name_box', dialog.data).bind('keyup', function(){
-								$('p.error', dialog.data).removeClass('error').children('span').remove();
-								$(this).unbind('keyup');
-							})
+function newCodeObject($a){
+	if($a){	
+		url = '/' + $a.data('wiki_type') + 's/new/choose_template/?ajax=1';
+		if ( $a.data('sourcescraper') ) {
+			url += "&sourcescraper=" + $a.data('sourcescraper');
+		}
+		
+		/*	
+			NOTE:
+			This actually causes a problem, if someone tries to create a new View
+			(with a sourcescraper attribute) and then ALSO tries to save it into
+			a vault. They end up being taken to a url like:
+			/views/new/php?sourcescraper=ORIGINAL_SCRAPER/tovault/VAULT_ID/?name=NEW_VIEW
+			which doesn't work. The View isn't created in the vault. Instead, it's
+			created publically, and the sourcescraper name is taken to be:
+			"ORIGINAL_SCRAPER/tovault/VAULT_ID/?name=NEW_VIEW"
+			D'oh!!
+		*/
+		
+		$.get(url, function(data){
+	        $.modal('<div id="template_popup">'+data+'</div>', {
+	            overlayClose: true, 
+	            autoResize: true,
+	            overlayCss: { cursor:"auto" },
+				onOpen: function(dialog) {
+					dialog.data.show();
+					dialog.overlay.fadeIn(200);
+					dialog.container.fadeIn(200);
+				},
+				onShow: function(dialog){
+					$('#simplemodal-container').css('height', 'auto');
+					$('#chooser_vaults h2', dialog.data).bind('click', function(e){
+						if($(this).next().is(':visible')){
+							$(this).children('input').attr('checked', false);
+							$(this).nextAll('p').slideUp(250);
 						} else {
-							$(this).addClass('active');
-							location.href = $(this).attr('href') + '/tovault/' + $('#chooser_vault').val() + '/?name=' + $('#chooser_name_box').val();
+							$(this).children('input').attr('checked', true);
+							$(this).nextAll('p').slideDown(250, function(){
+								$('#chooser_name_box').focus();
+							});
 						}
+					});
+					if($a.data('vault_id')){
+						console.log($a.data('vault_id'));
+						$('#chooser_vaults h2', dialog.data).trigger('click');
+						$('select option[value$="/' + $a.data('vault_id') + '/"]', dialog.data).attr('selected', 'selected');
 					}
-				});
-			},
-			onClose: function(dialog) {
-				dialog.container.fadeOut(200);
-				dialog.overlay.fadeOut(200, function(){
-					$.modal.close();
-				});
-			}
-        });
-    });
-}
+					$('li a', dialog.data).bind('click', function(e){
+						if( ! $('#chooser_vaults h2 input').is(":visible")  ) {
+							return;
+						}
 
-function newVaultCodeObject(id, wiki_type){
-	if(!wiki_type){ wiki_type = 'scraper'; }
-	var url = '/' + wiki_type + 's/new/choose_template/?ajax=1&vault=' + id;
-    $.get(url, function(data){
-        $.modal('<div id="template_popup">' + data + '</div>', {
-            overlayClose: true, 
-            autoResize: true,
-            overlayCss: { cursor:"auto" },
-			onShow: function(dialog){
-				$('li a', dialog.data).bind('click', function(e){
-					e.preventDefault();
-					if($('input', dialog.data).val() == ''){
-						$('span.warning', dialog.data).remove();
-						text = $('label', dialog.data).attr('title');
-						$('p', dialog.data).addClass('error').append('<span class="warning"><span></span>' + text + '</span>');
-						$('input', dialog.data).bind('keyup', function(){
-							$('p', dialog.data).removeClass('error').children('span').remove();
-							$(this).unbind('keyup');
-						})
-					} else {
-						$(this).addClass('active');
-						location.href = $(this).attr('href').split("new_scraper").join( encodeURI( $('input', dialog.data).val() ) );
-					}
-				});
-			},
-			onOpen: function(dialog) {
-				dialog.data.show();
-				dialog.overlay.fadeIn(200);
-				dialog.container.fadeIn(200);
-			},
-			onClose: function(dialog) {
-				dialog.container.fadeOut(200);
-				dialog.overlay.fadeOut(200, function(){
-					$.modal.close();
-				});
-			}
-        });
-    });
-}
+						if ( ! $('#chooser_vaults h2 input').is(":checked") ) {
+							return;
+						}
 
+						e.preventDefault();
+						if($('#chooser_vaults h2 input', dialog.data).is(':checked')){
+							if($('#chooser_name_box', dialog.data).val() == ''){
+								$('span.warning', dialog.data).remove();
+								text = $('label', dialog.data).attr('title');
+								$('p', dialog.data).eq(0).addClass('error').append('<span class="warning"><span></span>' + text + '</span>');
+								$('#chooser_name_box', dialog.data).bind('keyup', function(){
+									$('p.error', dialog.data).removeClass('error').children('span').remove();
+									$(this).unbind('keyup');
+								})
+							} else {
+								$(this).addClass('active');
+								location.href = $('#chooser_vault').val().replace('/python/', '/' + $(this).attr('href').replace(/.*\//, '') + '/') + '?name=' + encodeURIComponent($('#chooser_name_box').val());
+							}
+						}
+					});
+				},
+				onClose: function(dialog) {
+					dialog.container.fadeOut(200);
+					dialog.overlay.fadeOut(200, function(){
+						$.modal.close();
+					});
+				}
+	        });
+	    });		
+		
+		
+	} else {
+		alert('no anchor element provided');
+	}
+}
 
 function newUserMessage(url){
 	
@@ -256,21 +239,10 @@ $(function()
     setupSearchBoxHint();
     setupNavSearchBoxHint();
 
-    $('a.editor_view, div.network .view a').click(function() {
-        var m = $(this).attr('href').match(/\?sourcescraper=(.*?)(?:&|$)/);
-        if ( m ) {
-            newCodeObject('view', m[1]);  
-        } else {
-            newCodeObject('view');  			
-        }
-        return false; 
-    }); 
-
-    $('a.editor_scraper').click(function()  {  newCodeObject('scraper');  return false; });
-	$('a.add_to_vault').bind('click', function(e){ 
+    $('a.editor_view, div.network .view a, a.editor_scraper, .add_to_vault a').click(function(e) {
 		e.preventDefault();
-		newVaultCodeObject( $(this).attr('rel'), 'scraper');
-	});
+		newCodeObject($(this));
+    });
 	
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
@@ -399,23 +371,6 @@ $(function()
 			// handle Enter/Return key as a click on the Add button
 			if((e.keyCode || e.which) == 13){
 				$(this).next('a').trigger('click');
-/*				closure.parents('ul').children('.error').slideUp(150);
-				var username = closure.val();
-				var vault_id = closure.parents('div').find('a.add_user').attr('rel');
-				var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
-				$.getJSON(url, function(data) {
-					if(data.status == 'ok'){
-						closure.parents('ul').next('a').slideDown(150);
-						closure.updateUserCount(1).parent().before( data.fragment ).remove();
-					} else if(data.status == 'fail'){
-						if(data.error == 'User is already a member of this vault'){
-							closure.parents('ul').next('a').slideDown(150);
-							closure.parent().remove();
-						} else {
-							closure.parents('ul').append('<li class="error">' + data.error + '</li>');
-						}
-					}
-				});*/
 			}
 		}).autocomplete({
 			minLength: 2,
@@ -439,8 +394,8 @@ $(function()
 				});
 			},
 			select: function( event, ui ) {
-				// submit the name
-	//			$(this).next('a').trigger('click');
+				//	submit the name
+				//	$(this).next('a').trigger('click');
 			}
 		});
 	
@@ -492,9 +447,9 @@ $(function()
 		    var $el = $(this);
 			var number_of_users = Number($el.parents('.vault_header').find('.vault_users_popover li').not('.new_user_li').length) + increment;
 			if(number_of_users == 1){
-				x_users = '1 user';
+				x_users = '1 member';
 			} else {
-				x_users = number_of_users + ' users';
+				x_users = number_of_users + ' members';
 			}
 			$el.parents('.vault_header').find('.x_users').text(x_users);
 		});
