@@ -228,7 +228,7 @@ class SQLiteDatabase(Database):
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 total_rows += int(tables[name]["count"])
         except sqlite3.Error, e:
-            return {"error":"sqlite3.Error: "+str(e)}
+            return {"error":"datasummary: sqlite3.Error: "+str(e)}
         
         result = {"tables":tables, 'total_rows': total_rows }
         if self.short_name:
