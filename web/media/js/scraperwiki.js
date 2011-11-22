@@ -271,6 +271,10 @@ $(function()
 		e.preventDefault();
 		newVaultCodeObject( $(this).attr('rel'), 'scraper');
 	});
+	$('a.add_view_to_vault').bind('click', function(e){ 
+		e.preventDefault();
+		newVaultCodeObject( $(this).attr('rel'), 'view');
+	});	
 	
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
