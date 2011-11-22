@@ -115,8 +115,13 @@ class spawnRunner(protocol.ProcessProtocol):
         reason.trap(ConnectionDone)  # denotes that we have handled this correctly
 
     def controllerconnectionrequestFailure(self, failure):
+        # TODO: Allow us to retry on a different host if it failed.
+        # Unfortunately it is here that we need to retry the connection on a different
+        # host. Maybe that we should just mark the current connection as failed but
+        # need to make sure the connection is still there.
+        
         if failure.type == ConnectionRefusedError:
-            sreason = "Connection to node-controller refused.  (Maybe it's not running)"
+            sreason = "Connection to node-controller refused."
         else:
             sreason = "controllerconnectionrequest failure received: "+str(failure)
         logger.info("controllerconnectionrequest failure received: "+sreason)
