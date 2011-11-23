@@ -24,7 +24,7 @@ env.server_lookup = {
     ('webserver', 'dev'): ['yelland.scraperwiki.com'], 
     ('webserver', 'live'): ['rush.scraperwiki.com:7822'],
 
-    ('datastore', 'dev'): ['ewloe.scraperwiki.com'], 
+    ('datastore', 'dev'): ['kippax.scraperwiki.com'], 
     ('datastore', 'live'): ['burbage.scraperwiki.com:7822'],
 
     ('firebox', 'dev'): ['kippax.scraperwiki.com'], 
