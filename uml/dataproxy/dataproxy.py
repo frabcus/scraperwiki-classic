@@ -114,6 +114,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
             params = dict(cgi.parse_qsl(query))
+            verification_key = params['verify']
 
             dataauth = None
             attachables = params.get('attachables', '').split()
@@ -152,12 +153,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             # Copied from services/datastore/dataproxy.py
             # Check verification key on first run.
             self.logger.debug(
-              'Verification key is %s' % self.verification_key)
+              'Verification key is %s' % verification_key)
             secret_key = '%s%s' % (self.short_name, dataproxy_secret,)
             possibly = hashlib.sha256(secret_key).hexdigest()  
             self.logger.debug(
-              'Comparing %s == %s' % (possibly, self.verification_key,) )
-            if possibly != self.verification_key:
+              'Comparing %s == %s' % (possibly, verification_key,) )
+            if possibly != verification_key:
                 # XXX not sure we should log secret
                 # log.msg( 'Failed: self.short_name is "%s" self.factory.secret is "%s"' % (self.short_name,self.factory.secret) , logLevel=logging.DEBUG)      
                 firstmessage = {"error": "Permission denied"}
