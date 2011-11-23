@@ -181,7 +181,7 @@ function newUserMessage(url){
 	if(url == undefined){
 		alert('No message url specified');
 	} else {
-    	if (_gaq) _gaq.push(['_trackEvent', 'Profile buttons', 'Send Message']);
+//    	if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Profile buttons', 'Send Message']); }
     	$.get(url, function(data){
 	        $.modal('<div id="message_popup">'+data+'</div>', {
 	            overlayClose: true, 
@@ -207,7 +207,7 @@ function newUserMessage(url){
 							data: data,
 							success: function(data){
 								if(data.status == 'ok'){
-									if (_gaq) _gaq.push(['_trackEvent', 'Profile buttons', 'Send Message (message sent!)']);
+									if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Profile buttons', 'Send Message (message sent!)']); }
 									$('h1', dialog.data).after('<p class="success">Message sent!</p>');
 									$('form', dialog.data).remove();
 									var t = setTimeout(function(){
@@ -273,7 +273,7 @@ $(function()
 	        developer_hide();
 	    } else {
 	        developer_show();
-			if (_gaq) _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']);
+			if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
 	    }
 	});
 	
@@ -283,20 +283,20 @@ $(function()
 	        requester_hide();
 	    } else {
 	        requester_show();
-			if (_gaq) _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']);
+			if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']); }
 	    }
 	});
 	
 	$('#more_developer, #intro_developer').css('cursor', 'pointer').bind('click', function(e){
 		e.preventDefault();
 		developer_show();
-		if (_gaq) _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']);
+		if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
 	});
 
 	$('#more_requester, #intro_requester').css('cursor', 'pointer').bind('click', function(e){
 		e.preventDefault();
 		requester_show();
-		if (_gaq) _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']);
+		if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']); }
 	});
 
 	$('#more_developer_div .back').bind('click', function(e){
