@@ -154,13 +154,13 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             # Check verification key on first run.
             self.logger.debug(
               'Verification key is %s' % verification_key)
-            secret_key = '%s%s' % (self.short_name, dataproxy_secret,)
+            secret_key = '%s%s' % (short_name, dataproxy_secret,)
             possibly = hashlib.sha256(secret_key).hexdigest()  
             self.logger.debug(
               'Comparing %s == %s' % (possibly, verification_key,) )
             if possibly != verification_key:
                 # XXX not sure we should log secret
-                # log.msg( 'Failed: self.short_name is "%s" self.factory.secret is "%s"' % (self.short_name,self.factory.secret) , logLevel=logging.DEBUG)      
+                # log.msg( 'Failed: short_name is "%s" self.factory.secret is "%s"' % (short_name,self.factory.secret) , logLevel=logging.DEBUG)      
                 firstmessage = {"error": "Permission denied"}
 
             if path == '' or path is None :
