@@ -3770,9 +3770,29 @@ ul.scraper_list table td.link {
 
 div.pagination {
 	margin-top: 20px;
-	color: #666;
+	color: #9fcceb;
 	font-size: 14px;
 	text-align: center;
+}
+
+div.pagination a {
+	padding: 5px 8px;
+	display: inline-block;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+div.pagination a:hover {
+	text-decoration: none;
+	background-color: #F4F8FB;
+	color: #06a;
+}
+
+div.pagination a.current {
+	background: #dfeaf2;
+	color: #06a;
+	cursor: default;
 }
 
 
@@ -6164,7 +6184,7 @@ body.vaults .vault_users_popover {
 	display: none;
 	position: absolute;
 	z-index: 100;
-	width: 250px;
+	width: 300px;
     top: 34px;
     padding: 10px;
     -webkit-border-radius: 5px;
@@ -6201,7 +6221,7 @@ body.vaults .vault_users_popover ul {
 
 body.vaults .vault_users_popover li {
 	position: relative;
-    padding: 8px 8px;
+    padding: 8px 32px 8px 8px;
     line-height: 24px;
     border-top: 1px solid #aaa;
     border-left: 1px solid #aaa;
@@ -6255,13 +6275,15 @@ body.vaults img.vault_owner_flash {
 
 body.vaults .vault_header .vault_users_popover a.user_delete,
 body.vaults .vault_header .vault_users_popover a.user_delete:hover {
+	position: absolute;
+	top: 50%;
+	right: 10px;
 	display: block;
-	float: right;
 	text-indent: -9000px;
-	background: transparent url(../images/icons/delete.png) 0 0 no-repeat;
-	width: 16px;
-	height: 16px;
-	margin-top: 5px;
+	background: transparent url(../images/icons/delete.png) 2px 2px no-repeat;
+	width: 20px;
+	height: 20px;
+	margin-top: -10px;
 	opacity: 0.6;
 }
 
@@ -6287,6 +6309,7 @@ body.vaults .vault_header a.add_user img {
 
 body.vaults .vault_header .vault_users_popover .new_user_li {
 	cursor: default;
+	padding-right: 10px;
 }
 
 body.vaults .new_user_li label {
@@ -6296,7 +6319,7 @@ body.vaults .new_user_li label {
 
 body.vaults .new_user_li #username {
 	line-height: 16px;
-	width: 110px;
+	width: 155px;
 	margin-left: 5px;
 }
 

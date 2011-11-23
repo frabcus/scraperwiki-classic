@@ -1,5 +1,4 @@
-##!/bin/sh -
-"exec" "python" "-O" "$0" "$@"
+#!/usr/bin/env python
 
 import BaseHTTPServer
 import SocketServer

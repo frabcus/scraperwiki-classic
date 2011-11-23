@@ -227,7 +227,7 @@ class SQLiteDatabase(Database):
                             row = []                           
                             for c in r:
                                 if type(c) == buffer:
-                                    row.append( unicode(c) )
+                                    row.append( str(c).decode('ascii', 'replace') ) # in FTS3 _segments table this is just binary stuff, need to ignore bad chars
                                 else:
                                     row.append(c)
                             rows.append(row)
