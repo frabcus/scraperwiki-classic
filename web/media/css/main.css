@@ -3770,9 +3770,29 @@ ul.scraper_list table td.link {
 
 div.pagination {
 	margin-top: 20px;
-	color: #666;
+	color: #9fcceb;
 	font-size: 14px;
 	text-align: center;
+}
+
+div.pagination a {
+	padding: 5px 8px;
+	display: inline-block;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+div.pagination a:hover {
+	text-decoration: none;
+	background-color: #F4F8FB;
+	color: #06a;
+}
+
+div.pagination a.current {
+	background: #dfeaf2;
+	color: #06a;
+	cursor: default;
 }
 
 
