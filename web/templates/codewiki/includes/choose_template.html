@@ -17,6 +17,7 @@
     <li><a href="{% url editor wiki_type language %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}}{% if version %} <em>v {{ version }}</em>{% endif %}</a></li>
     {% endfor %}
 </ul>
+
 {% if user_vaults.count or vault_membership %}
 <div id="chooser_vaults">
     <h2><input type="checkbox" /> Save this in a vault&hellip;</h2>
