@@ -28,6 +28,7 @@ try:
 except:
     import simplejson as json
 
+logger = logging.getLogger('dataproxy')
 
 class TimeoutException(Exception): 
     pass 
@@ -82,7 +83,7 @@ class SQLiteDatabase(Database):
         self.authorizer_func = None  
         self.sqlitesaveinfo = { }  # tablename -> info
 
-        self.logger = logging.getLogger('dataproxy')
+        
 
         if self.short_name:
             self.scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
@@ -131,7 +132,7 @@ class SQLiteDatabase(Database):
 
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
-            self.logger.debug(json.dumps(res))
+            logger.debug(json.dumps(res))
 
         return res
 
@@ -190,7 +191,7 @@ class SQLiteDatabase(Database):
         
         
         def progress_handler():
-            self.logger.debug("progress on %s" % self.runID)
+            logger.debug("progress on %s" % self.runID)
             
         
         if not self.m_sqlitedbconn:
@@ -202,7 +203,7 @@ class SQLiteDatabase(Database):
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
                 print 'Connecting to %s' % scrapersqlitefile 
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile, check_same_thread=False)
-                self.logger.debug('Connected to %s' % scrapersqlitefile)                
+                logger.debug('Connected to %s' % scrapersqlitefile)                
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:", check_same_thread=False)   # draft scrapers make a local version
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
@@ -217,10 +218,10 @@ class SQLiteDatabase(Database):
                 
     def datasummary(self, limit):
         if not self.establishconnection(False):
-            self.logger.warning( 'Failed to connect to sqlite database for summary %s' % (self.short_name or 'draft'))
+            logger.warning( 'Failed to connect to sqlite database for summary %s' % (self.short_name or 'draft'))
             return {"status":"No sqlite database"} # don't change this return string, is a structured one
 
-        self.logger.debug('Performing datasummary for %s' % self.short_name)                
+        logger.debug('Performing datasummary for %s' % self.short_name)                
                         
         self.authorizer_func = authorizer_readonly
         total_rows = 0
@@ -315,7 +316,7 @@ class SQLiteDatabase(Database):
                 if len(odata) < streamchunking:
                     break
                 arg["moredata"] = True
-                self.logger.debug("midchunk %s %d" % (self.short_name, len(odata),))
+                logger.debug("midchunk %s %d" % (self.short_name, len(odata),))
                 self.dataproxy.connection.sendall(json.dumps(arg)+'\n')
             return arg
         except sqlite3.Error, e:
@@ -333,18 +334,18 @@ class SQLiteDatabase(Database):
 
 
     def sqliteattach(self, name, asname):
-        self.logger.debug("attach to %s  %s as %s" % (self.short_name, name, asname))
+        logger.debug("attach to %s  %s as %s" % (self.short_name, name, asname))
         self.establishconnection(True)
         if self.authorizer_func == authorizer_writemain:
             self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
         
-        self.logger.debug("attachables: "+str(self.attachables))
-        self.logger.info("requesting permission to attach %s to %s" % (self.short_name, name))
+        logger.debug("attachables: "+str(self.attachables))
+        logger.info("requesting permission to attach %s to %s" % (self.short_name, name))
         aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
         ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
-        self.logger.info("permission to attach %s to %s response: %s" % (self.short_name, name, ares))
+        logger.info("permission to attach %s to %s response: %s" % (self.short_name, name, ares))
         if ares == "Yes":
-            self.logger.debug('Connection allowed')
+            logger.debug('Connection allowed')
         elif ares == "DoesNotExist":
             return {"error":"Does Not Exist %s" % name}
         else:
@@ -421,7 +422,7 @@ class SqliteSaveInfo:
     def sqliteexecute(self, sqlquery, data=None):
         res = self.database.sqliteexecute(sqlquery, data, None, None)
         if "error" in res:
-            self.logger.warning("%s  %s" % (self.database.short_name, str(res)))
+            logger.warning("%s  %s" % (self.database.short_name, str(res)))
         return res
     
     def rebuildinfo(self):
@@ -507,7 +508,7 @@ class SqliteSaveInfo:
             if "error" in lres:  
                 if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
                     return lres
-                self.logger.info("%s:  %s" % (self.database.short_name, str(lres)))
+                logger.info("%s:  %s" % (self.database.short_name, str(lres)))
             res["droppedindex"] = idxname
         return res
             
