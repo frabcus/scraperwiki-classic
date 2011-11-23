@@ -132,7 +132,6 @@ function newCodeObject($a){
 						}
 					});
 					if($a.data('vault_id')){
-						console.log($a.data('vault_id'));
 						$('#chooser_vaults h2', dialog.data).trigger('click');
 						$('select option[value$="/' + $a.data('vault_id') + '/"]', dialog.data).attr('selected', 'selected');
 					}
@@ -182,7 +181,7 @@ function newUserMessage(url){
 	if(url == undefined){
 		alert('No message url specified');
 	} else {
-    
+    	_gaq.push(['_trackEvent', 'Profile buttons', 'Send Message']);
     	$.get(url, function(data){
 	        $.modal('<div id="message_popup">'+data+'</div>', {
 	            overlayClose: true, 
@@ -207,8 +206,8 @@ function newUserMessage(url){
 							url: action,
 							data: data,
 							success: function(data){
-								console.log(data);
 								if(data.status == 'ok'){
+									_gaq.push(['_trackEvent', 'Profile buttons', 'Send Message (message sent!)']);
 									$('h1', dialog.data).after('<p class="success">Message sent!</p>');
 									$('form', dialog.data).remove();
 									var t = setTimeout(function(){
@@ -406,7 +405,6 @@ $(function()
 			var vault_id = closure.parents('div').find('a.add_user').attr('rel');
 			var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
 			$.getJSON(url, function(data) {
-				console.log(data);
 				if(data.status == 'ok'){
 					closure.autocomplete("close").parents('ul').next('a').slideDown(150);
 					closure.updateUserCount(1).parent().before( data.fragment ).remove();
