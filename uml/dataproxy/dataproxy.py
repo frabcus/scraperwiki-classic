@@ -36,6 +36,7 @@ except:
 configfile = '/var/www/scraperwiki/uml/uml.cfg'
 config = ConfigParser.ConfigParser()
 config.readfp(open(configfile))
+dataproxy_secret = config.get('dataproxy', 'dataproxy_secret')
 
 parser = optparse.OptionParser()
 parser.add_option("--setuid", action="store_true")
@@ -148,6 +149,19 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     firstmessage["error"] = "Mismatching scrapername from ident"
                     firstmessage["status"] = "bad: mismatching scrapername from ident"
             
+            # Copied from services/datastore/dataproxy.py
+            # Check verification key on first run.
+            self.logger.debug(
+              'Verification key is %s' % self.verification_key)
+            secret_key = '%s%s' % (self.short_name, dataproxy_secret,)
+            possibly = hashlib.sha256(secret_key).hexdigest()  
+            self.logger.debug(
+              'Comparing %s == %s' % (possibly, self.verification_key,) )
+            if possibly != self.verification_key:
+                # XXX not sure we should log secret
+                # log.msg( 'Failed: self.short_name is "%s" self.factory.secret is "%s"' % (self.short_name,self.factory.secret) , logLevel=logging.DEBUG)      
+                firstmessage = {"error": "Permission denied"}
+
             if path == '' or path is None :
                 path = '/'
 
