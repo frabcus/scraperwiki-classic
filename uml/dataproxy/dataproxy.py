@@ -105,7 +105,6 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if sres:
             self.logger.debug(sres[:200])
         self.connection.sendall(sres+'\n')
-            
 
 
         # this morphs into the long running two-way connection

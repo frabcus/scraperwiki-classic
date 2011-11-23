@@ -16,6 +16,13 @@ import sys
 import logging
 import urllib
 
+import logging
+import logging.config
+try:
+    import cloghandler
+except:
+    pass
+
 try:
     import json
 except:
@@ -74,6 +81,8 @@ class SQLiteDatabase(Database):
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
         self.sqlitesaveinfo = { }  # tablename -> info
+
+        self.logger = logging.getLogger('dataproxy')
 
         if self.short_name:
             self.scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
