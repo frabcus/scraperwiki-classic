@@ -1,7 +1,10 @@
-#!/usr/bin/python -W ignore::DeprecationWarning
+#!/usr/bin/env python -W ignore::DeprecationWarning
+
 
 import  sys
+print sys.version
 import  os
+print os.environ
 import  socket
 import  signal
 import  string

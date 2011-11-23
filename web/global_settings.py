@@ -122,7 +122,7 @@ INSTALLED_APPS = [
     'django.contrib.comments',
     'django.contrib.markup',
     'registration',
-    'south',
+    # 'south',
     'profiles',
     'django.contrib.humanize',
     'django.contrib.messages',

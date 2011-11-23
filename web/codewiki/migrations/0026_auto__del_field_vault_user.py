@@ -8,8 +8,10 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Remove the foreign key constraint first because South won't do this (don't know why).
-        db.delete_foreign_key('codewiki_vault', 'user_id')
+        # Override foreign key checks because South doesn't seem to know
+        # how to drop this otherwise (and drj and ross didn't work out a
+        # better way).
+        db.execute('set foreign_key_checks=0')
         db.delete_column('codewiki_vault', 'user_id')
 
 
