@@ -436,7 +436,7 @@
                     return tr;
                 }
             } );
-            $('#schema_{{forloop.counter}}').addClass('schema').html('<a>Show schema</a><div><span class="tableschema">{{sqltabledata.sql}}</span><span class="arrow"></span></div>').children('a').bind('click', function(){
+            $('#schema_{{forloop.counter}}').addClass('schema').html('<a>Show schema</a><div><span class="tableschema">{{sqltabledata.sql|escapejs}}</span><span class="arrow"></span></div>').children('a').bind('click', function(){
     			var $a = $(this).text('Hide schema');
     			var $p = $a.siblings('div');
     			if($p.is(':visible')){

@@ -94,7 +94,8 @@ exports.env_for_language = function( lang, extra_path ) {
 	var ep = path.join(__dirname, extra_path);
 	ep = path.join(ep, lang);
 	if ( lang == 'python' ) {
-		return {PYTHONPATH: ep, PYTHONUNBUFFERED: 'true'};
+		return {PYTHONPATH: process.env.PYTHONPATH + ':' + ep,
+                        PYTHONUNBUFFERED: 'true'};
 	} else if ( lang == 'ruby') {
 		ep = path.join(ep, "scraperwiki/lib");
 		return { RUBYLIB: ep + ":" + process.env.RUBYLIB };		
