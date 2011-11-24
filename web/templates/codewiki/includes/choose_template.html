@@ -5,7 +5,7 @@
     <li><a href="{% url editor wiki_type language %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}}{% if version %} <em>v {{ version }}</em>{% endif %}</a></li>
     {% endfor %}
     {% if wiki_type = 'scraper' %}
-        <li class="javascript"><a><img src="{{MEDIA_URL}}/images/icons/javascript.png" alt="JavaScript"/> JavaScript <em>node.js</em></a></li>
+        <li class="javascript"><a{% if request.user.is_authenticated %} data-userid="{{ request.user.id }}"{% endif %}><img src="{{MEDIA_URL}}/images/icons/javascript.png" alt="JavaScript"/> JavaScript <em>node.js</em></a></li>
     {% endif %}
 </ul>
 
