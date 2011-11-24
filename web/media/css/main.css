@@ -5106,6 +5106,7 @@ ul#chooser li a {
 	border-top: 1px solid #aaa;
 	padding: 10px;
 	color: #666;
+	cursor: pointer;
 }
 
 ul#chooser li a:hover {
@@ -5126,7 +5127,8 @@ ul#chooser li a.active {
 	color: #444;
 }
 
-ul#chooser li:first-child a {
+ul#chooser li:first-child a,
+ul#chooser li.first a {
 	border-top: none;
 }
 
@@ -5240,6 +5242,62 @@ ul#chooser li a.active em {
 	width: 12em;
 	line-height: 18px;
 	font-size: 13px;
+}
+
+#template_popup #javascript {
+	margin: 15px 15px 20px 15px;
+	font-size: 14px;
+	color: #555;
+	line-height: 18px;
+}
+
+#template_popup #javascript p {
+	margin: 10px 0;
+}
+
+#template_popup #i_heart_javascript,
+#template_popup #javascript_meh {
+	display: inline-block;
+	line-height: 20px;
+	background-color: #defebd;
+	padding: 3px 10px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	border: 1px solid #8ed14b;
+	color: #468c08;
+	vertical-align: top;
+	cursor: pointer;
+	margin-top: 5px;
+}
+
+#template_popup #i_heart_javascript:hover {
+	background-color: #d7fd7e;
+	border: 1px solid #89c61a;
+	color: #568313;
+	text-decoration: none;
+}
+
+#template_popup #i_heart_javascript.smiley {
+	background-image: url(../images/icons/smiley.png);
+	background-position: 8px 50%;
+	background-repeat: no-repeat;
+	padding-left: 30px;
+}
+
+#template_popup #javascript_meh {
+	margin-right: 15px;
+	font-size: 12px;
+	background-color: #eff2f7;
+	border: 1px solid #c2c5cb;
+	color: #6e7073;
+}
+
+#template_popup #javascript_meh:hover {
+	text-decoration: none;
+	background-color: #e0e8f7;
+	border: 1px solid #a4abb9;
+	color: #545f6f;
 }
 
 

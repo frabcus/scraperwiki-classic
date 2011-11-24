@@ -135,7 +135,7 @@ function newCodeObject($a){
 						$('#chooser_vaults h2', dialog.data).trigger('click');
 						$('select option[value$="/' + $a.data('vault_id') + '/"]', dialog.data).attr('selected', 'selected');
 					}
-					$('li a', dialog.data).bind('click', function(e){
+					$('li a[href]', dialog.data).bind('click', function(e){
 						if( ! $('#chooser_vaults h2 input').is(":visible")  ) {
 							return;
 						}
@@ -160,6 +160,25 @@ function newCodeObject($a){
 							}
 						}
 					});
+					function hide_javascript_crap(){
+						$('li.javascript').removeClass('first').siblings().slideDown(200);
+						$('#chooser_vaults', dialog.data).slideDown(200);
+						$('#javascript', dialog.data).slideUp(200);
+					}
+					$('li.javascript a', dialog.data).bind('click', function(e){
+						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Curious']); }
+						$(this).parent().addClass('first').prevAll().slideUp(200);
+						$('#chooser_vaults', dialog.data).slideUp(200);
+						$('#javascript', dialog.data).slideDown(200);
+					});
+					$('#javascript_meh', dialog.data).bind('click', function(e){
+						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Javascript, Meh']); }
+						hide_javascript_crap();
+					});
+					$('#i_heart_javascript').bind('click', function(e){
+						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'I HEART JAVASCRIPT!']); }
+						$(this).html('Thanks!').addClass('smiley').animate({opacity:1}, 1000, hide_javascript_crap);
+					});
 				},
 				onClose: function(dialog) {
 					dialog.container.fadeOut(200);
@@ -181,7 +200,7 @@ function newUserMessage(url){
 	if(url == undefined){
 		alert('No message url specified');
 	} else {
-//    	if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Profile buttons', 'Send Message']); }
+//    	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Profile buttons', 'Send Message']); }
     	$.get(url, function(data){
 	        $.modal('<div id="message_popup">'+data+'</div>', {
 	            overlayClose: true, 
@@ -207,7 +226,7 @@ function newUserMessage(url){
 							data: data,
 							success: function(data){
 								if(data.status == 'ok'){
-									if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Profile buttons', 'Send Message (message sent!)']); }
+									if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Profile buttons', 'Send Message (message sent!)']); }
 									$('h1', dialog.data).after('<p class="success">Message sent!</p>');
 									$('form', dialog.data).remove();
 									var t = setTimeout(function(){
@@ -273,7 +292,7 @@ $(function()
 	        developer_hide();
 	    } else {
 	        developer_show();
-			if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
+			if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
 	    }
 	});
 	
@@ -283,20 +302,20 @@ $(function()
 	        requester_hide();
 	    } else {
 	        requester_show();
-			if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']); }
+			if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']); }
 	    }
 	});
 	
 	$('#more_developer, #intro_developer').css('cursor', 'pointer').bind('click', function(e){
 		e.preventDefault();
 		developer_show();
-		if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
+		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
 	});
 
 	$('#more_requester, #intro_requester').css('cursor', 'pointer').bind('click', function(e){
 		e.preventDefault();
 		requester_show();
-		if (typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']); }
+		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']); }
 	});
 
 	$('#more_developer_div .back').bind('click', function(e){
