@@ -359,10 +359,11 @@ function execute(http_req, http_res, raw_request_data) {
         util.log.debug( 'Running on ' + res );      
                 
 /* 
-        fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");            
-     	var ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString() }
-    	var fs_compiled = _.template( fstab_tpl );
-    	var fstab = fs_compiled( ctx );
+        var fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");            
+ 	    var ctx = {'name': res, 'scrapername':  script.scraper_name || "" }
+	    var fs_compiled = _.template( fstab_tpl );
+	    var fstab = fs_compiled( ctx );
+	    write fstab to /mnt/{{res}}/fstab
 */	
             
         var extension = util.extension_for_language(script.language);
