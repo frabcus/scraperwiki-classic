@@ -44,7 +44,7 @@
         {% endif %}
 
         {% if scrapers %}
-			{% autopaginate scrapers 10 %}
+			{% autopaginate scrapers 20 %}
             <ul class="scraper_list">				
                 {% for code in scrapers %}
                     {% include 'frontend/includes/code_object_line.html' %}

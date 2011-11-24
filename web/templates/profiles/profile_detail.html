@@ -80,7 +80,7 @@
 
 
      {% if owned_code_objects %}
-	  {% autopaginate owned_code_objects 10 %}	
+	  {% autopaginate owned_code_objects 20 %}	
       <h2 class="scrapersandviews">Scrapers and views ({{ paginator.count }})</h2>    	
       <ul class="scraper_list">
         {% for code in owned_code_objects %}
