@@ -23,13 +23,13 @@ sys.path.append('web')
 DEBUG = True
 
 TIME_ZONE = 'Europe/London'
-LANGUAGE_CODE = 'en-uk'
+LANGUAGE_CODE = 'en_GB'
 
 SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = True
+USE_I18N = False
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -159,7 +159,7 @@ SCRAPER_LIBS_DIR = join(HOME_DIR, "scraperlibs")
 SEND_BROKEN_LINK_EMAILS = DEBUG == False
 
 #pagingation
-SCRAPERS_PER_PAGE = 60
+SCRAPERS_PER_PAGE = 50
 
 #API
 MAX_API_ITEMS = 500

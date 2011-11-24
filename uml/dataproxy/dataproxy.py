@@ -1,23 +1,23 @@
-##!/bin/sh -
-"exec" "python" "-O" "$0" "$@"
+#!/usr/bin/env python
 
 import BaseHTTPServer
+import ConfigParser
 import SocketServer
-import urllib
-import urlparse
 import cgi
-import signal
+import datalib
+import datetime
+import grp
+import hashlib
+import optparse
 import os
+import pwd
+import signal
+import socket
 import sys
 import time
-import ConfigParser
-import datetime
-import optparse
-import grp
-import pwd
-import datalib
-import socket
 import traceback
+import urllib
+import urlparse
 
 import logging
 import logging.config
@@ -37,6 +37,7 @@ except:
 configfile = '/var/www/scraperwiki/uml/uml.cfg'
 config = ConfigParser.ConfigParser()
 config.readfp(open(configfile))
+dataproxy_secret = config.get('dataproxy', 'dataproxy_secret')
 
 parser = optparse.OptionParser()
 parser.add_option("--setuid", action="store_true")
@@ -104,7 +105,6 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if sres:
             self.logger.debug(sres[:200])
         self.connection.sendall(sres+'\n')
-            
 
 
         # this morphs into the long running two-way connection
@@ -114,6 +114,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
             params = dict(cgi.parse_qsl(query))
+            verification_key = params['verify']
 
             dataauth = None
             attachables = params.get('attachables', '').split()
@@ -149,6 +150,19 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     firstmessage["error"] = "Mismatching scrapername from ident"
                     firstmessage["status"] = "bad: mismatching scrapername from ident"
             
+            # Copied from services/datastore/dataproxy.py
+            # Check verification key on first run.
+            self.logger.debug(
+              'Verification key is %s' % verification_key)
+            secret_key = '%s%s' % (short_name, dataproxy_secret,)
+            possibly = hashlib.sha256(secret_key).hexdigest()  
+            self.logger.debug(
+              'Comparing %s == %s' % (possibly, verification_key,) )
+            if possibly != verification_key:
+                # XXX not sure we should log secret
+                # log.msg( 'Failed: short_name is "%s" self.factory.secret is "%s"' % (short_name,self.factory.secret) , logLevel=logging.DEBUG)      
+                firstmessage = {"error": "Permission denied"}
+
             if path == '' or path is None :
                 path = '/'
 

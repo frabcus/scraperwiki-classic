@@ -1,22 +1,20 @@
 {% load screen_shot %}
 <h1>Create a new {{wiki_type}}</h1>
-<!-- <ul class="views small">
-  {% for language, display_language in languages %}
-  <li>
-    <a href="{% url editor wiki_type language %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}" class="screenshot">
-      <br/>
-    <img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/>
-      <br/>
-    {{display_language}} {{wiki_type}}
-    </a>                
-  </li>
-  {% endfor %}
-</ul> -->
 <ul id="chooser">
     {% for language, display_language, version in languages %}
     <li><a href="{% url editor wiki_type language %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}"><img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/> {{display_language}}{% if version %} <em>v {{ version }}</em>{% endif %}</a></li>
     {% endfor %}
+    {% if wiki_type = 'scraper' %}
+        <li class="javascript"><a><img src="{{MEDIA_URL}}/images/icons/javascript.png" alt="JavaScript"/> JavaScript <em>node.js</em></a></li>
+    {% endif %}
 </ul>
+
+<div id="javascript" style="display:none">
+    <p>We&rsquo;re currently <a href="https://bitbucket.org/ScraperWiki/scraperwiki/issue/92/" title="Comment on this ticket in our bug tracker!" target="_blank">evaluating demand for&nbsp;javascript&nbsp;scrapers</a>. Would they be useful&nbsp;to&nbsp;you?</p>
+    <a id="javascript_meh">&larr; Meh, take me back</a>
+    <a id="i_heart_javascript">I &hearts; JavaScript</a>
+</div>
+
 {% if user_vaults.count or vault_membership %}
 <div id="chooser_vaults">
     <h2><input type="checkbox" /> Save this in a vault&hellip;</h2>

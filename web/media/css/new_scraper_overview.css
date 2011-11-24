@@ -17,11 +17,13 @@ h3 {
 	color: #164259;
 }
 
-#header_inner p span {
+#header_inner p span,
+#header_inner p .privacystatus {
 	margin-right: 20px;
 }
 
-#header_inner p span:before {
+#header_inner p span:before,
+#header_inner p .privacystatus:before {
 	content: ".";
 	display: inline-block;
 	width: 16px;
@@ -52,22 +54,22 @@ h3 {
 	background-position: -16px -16px;
 }
 
-#header_inner p span.public:before {
+#header_inner p a.public:before {
 	background-position: 0 -32px;
 	margin-right: 7px;
 }
 
-#header_inner p span.visible:before {
+#header_inner p a.visible:before {
 	background-position: -16px -32px;
 	margin-right: 7px;
 }
 
-#header_inner p span.private:before {
+#header_inner p a.private:before {
 	background-position: -32px -32px;
 	margin-right: 7px;
 }
 
-#header_inner p span.visualises:before {
+#header_inner p a.visualises:before {
 	background-position: -32px -16px;
 }
 
@@ -80,8 +82,9 @@ h3 {
 	text-decoration: underline;
 }
 
-span.privacystatus {
+#header_inner a.privacystatus {
 	cursor: help;
+	text-decoration: none;
 }
 
 

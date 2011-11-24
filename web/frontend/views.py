@@ -5,7 +5,6 @@ from django.contrib import auth
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from frontend.forms import SigninForm, UserProfileForm, SearchForm, ResendActivationEmailForm, DataEnquiryForm
-from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.template import RequestContext
@@ -64,20 +63,8 @@ def frontpage(request, public_profile_field=None):
 def dashboard(request, page_number=1):
     user = request.user
     owned_or_edited_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=user)
-    #scrapers_all.filter((Q(usercoderole__user=user) & Q(usercoderole__role='owner')) | (Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
-    # v difficult to sort by owner and then editor status
-        #owned_or_edited_code_objects = owned_or_edited_code_objects.order_by('usercoderole__role', '-created_at')
-    
-    paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
-
-    try:    page = int(page_number)
-    except (ValueError, TypeError):   page = 1
-    try:     
-        owned_or_edited_code_objects_pagenated = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        owned_or_edited_code_objects_pagenated = paginator.page(paginator.num_pages)
-    
-    context = {'owned_or_edited_code_objects_pagenated': owned_or_edited_code_objects_pagenated, 
+        
+    context = {'object_list': owned_or_edited_code_objects,
                'language':'python' }
     return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
 
@@ -277,29 +264,9 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None, ff=None)
     if not ff and not special_filter:
         all_code_objects = all_code_objects.exclude(wiki_type='scraper', scraper__record_count=0)
     
-    
-    # Number of results to show from settings
-    paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
-
-    try:
-        page = int(page_number)
-    except (ValueError, TypeError):
-        page = 1
-
-    if page == 1:
-        featured_scrapers = Code.objects.filter(privacy_status="public", featured=True).order_by('-created_at')
-    else:
-        featured_scrapers = None
-
-    # If page request (9999) is out of range, deliver last page of results.
-    try:
-        scrapers = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        scrapers = paginator.page(paginator.num_pages)
-
     form = SearchForm()
 
-    dictionary = { "ff": ff, "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter, 'language': 'python'}
+    dictionary = { "ff": ff, "scrapers": all_code_objects, 'wiki_type':wiki_type, "form": form, 'special_filter': special_filter, 'language': 'python'}
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 
@@ -314,15 +281,17 @@ def search_urls(request, partial):
     """
     from codewiki.models import DomainScrape
     from urlparse import urlparse
+    from django.db.models import Q
 
     url = urlparse(partial)
-    dsqs = DomainScrape.objects.filter(scraper_run_event__scraper__privacy_status__in=['public','protected'],
-                                       domain='%s://%s' % (url.scheme,url.netloc,) ).distinct('scraper_run_event__scraper')
+    q = Q(scraper_run_event__scraper__privacy_status__in=['public','protected'])
+    q = q & (Q(domain__istartswith='http://%s' % (url.netloc,)) | Q(domain__istartswith='https://%s' % (url.netloc,)))
+    dsqs = DomainScrape.objects.filter(q).distinct('scraper_run_event__scraper')
     
     ctx = {
         'form'     : SearchForm(initial={'q': partial}),
         'scrapers_num_results'    : dsqs.count(),
-        'scrapers' : [ d.scraper for d in dsqs.all().distinct() ],
+        'scrapers' : [ d.scraper_run_event.scraper for d in dsqs.all().distinct() ],
     }
     
     # TODO: We need a template for url search results

@@ -210,15 +210,15 @@ function setupScraperOverview(short_name){
 
 function setup_collaboration_ui(){
 	$('#privacy_status, #contributors').hide();
-	$('#collaboration ul.buttons a').bind('click', function(e){
+	$('#collaboration ul.buttons a, #header_inner a.privacystatus').bind('click', function(e){
 		e.preventDefault();
 		var href = $(this).attr('href');
 		if($(href).is(':visible')){
 			$('#privacy_status, #contributors').hide();
-			$(this).removeClass('selected');
+			$('#collaboration ul.buttons a[href="' + href + '"]').removeClass('selected');
 		} else {
 			$(href).show().siblings('#privacy_status, #contributors').hide();
-			$(this).addClass('selected').parent().siblings().children('a').removeClass('selected');
+			$('#collaboration ul.buttons a[href="' + href + '"]').addClass('selected').parent().siblings().children('a').removeClass('selected');
 		}
 		$('#privacy_status form').hide();
 		$('#contributors .new_user_li, #contributors .error').remove();

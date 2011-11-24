@@ -13,8 +13,9 @@
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
 {% block meta %}
+    <meta name="description" content="{% if scraper.description %}{{ scraper.description }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
     <meta property="og:title" content="{{ scraper.title }}" />
-    <meta property="og:description" content="{{ scraper.description }}" />
+    <meta property="og:description" content="{% if scraper.description %}{{ scraper.description }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
     <meta property="og:image" content="{{ scraper.screenshot_url }}" />
     <meta property="og:site_name" content="ScraperWiki" />
 {% endblock %}
@@ -71,16 +72,16 @@
         {% endif %}
         </span> 
         {% if scraper.privacy_status == 'public' %}
-    	    <span class="privacystatus public" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
+    	    <a class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</a>
         {% endif %}
     	{% if scraper.privacy_status == 'visible' %}
-    	    <span class="privacystatus visible" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected</span>
+    	    <a class="privacystatus visible" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected</a>
         {% endif %}
         {% if scraper.vault %}
-            <span class="privacystatus private" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</span>
+            <a class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</a>
         {% else %}
             {% if scraper.privacy_status == 'private' %}
-    	    <span class="privacystatus private" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</span>
+    	    <a class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</a>
     	    {% endif %}
     	{% endif %} 
     </p>

@@ -4,6 +4,7 @@
 
 {% block header %}
 	<h2>Search results by url for <form id="frmSearchResults" class="inline_form" action="/search/" method="POST">
+		{% csrf_token %}   
         {{ form.q }}
         <input type="submit" value="Go" />
     </form></h2>
