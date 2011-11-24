@@ -176,15 +176,36 @@
  
            <dt id="view_parameters">How do I get query parameters in my view?</dt>
            <dd>
-				<p>Getting the query string is done the same way in each language, via the environment variable, but depending on your chosen language the code required might be different</p>
-				<p>In a <strong>Python view</strong> you can use the GET function in <a href='/docs/python/python_help_documentation/'>scraperwiki.utils</a></p>
-				
+                  <p>Getting the query string is done the
+                  same way in each language, via the
+                  environment variable following the CGI standard; this
+                  means that the typical ways of accessing the CGI
+                  paramaeters will work (this will vary accordind to
+                  your chosen language).</p>
+
+                  <p>In a <strong>Python view</strong> you
+                  can use the <var>cgi</var> module:</p>
+
+<code>import cgi
+import os
+
+paramdict = dict(cgi.parse_qsl(os.getenv("QUERY_STRING", "")))
+</code>
+
+                  <p>
+                  See also a slightly longer example that
+                  <a
+                  href="https://scraperwiki.com/views/echo/edit/">echoes the CGI
+                  parameters</a>.</p>
+
 				<p>With a <strong>Ruby view</strong> you can use:
 					<code>require 'cgi'
 param_dict = CGI::parse( ENV['QUERY_STRING'] )
 </code></p>				
 				
-				<p><strong>PHP views</strong> can get access to the query using parse_str
+				<p><strong>PHP views</strong> can get
+                                access to the query using
+                                <var>parse_str</var>:
 					<code>parse_str( $_ENV["QUERY_STRING"], $output);
 print_r($output);
 </code></p>								
@@ -314,7 +335,13 @@ print urllib.urlopen(url).read()
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
 
            <dd>
-               <p>All scraping code hosted on ScraperWiki is licensed under the <a href="http://www.gnu.org/licenses/gpl-3.0.txt">GNU General Public License</a>. By adding your scraper to ScraperWiki you are releasing it under the same licence. For more information please see our <a href="/terms_and_conditions/">terms and conditions</a>.
+               <p>You do. However, for public code, you have agree to
+               license it for others to use under the
+               <a href="http://www.gnu.org/licenses/gpl-3.0.txt">GNU General Public License</a>. 
+               That does not apply inside a <a href="{% url pricing %}">private vault</a>.
+
+               For more information please see our <a href="/terms_and_conditions/">terms and conditions</a>.
+
                </p>
            </dd>
 
