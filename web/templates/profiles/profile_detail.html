@@ -8,9 +8,8 @@
 {% block header %}
 	<h2>{{profile.display_name}}&rsquo;s profile</h2>
 	<p>{{profile.user.username}}{% ifequal profile.user.username user.username %} {% if owned_code_objects %}
-	    {% autopaginate owned_code_objects %}
 	    &bull;
-	    {{ paginator.count }}
+	    {{ owned_code_objects.count }}
 	    {% ifequal paginator.count 1 %}scraper or view{% else %}scrapers and views{% endifequal %}
 	{% endif %}{% endifequal %}</p>
 {% endblock %}
@@ -81,7 +80,7 @@
 
 
      {% if owned_code_objects %}
-	  {% autopaginate owned_code_objects %}	
+	  {% autopaginate owned_code_objects 10 %}	
       <h2 class="scrapersandviews">Scrapers and views ({{ paginator.count }})</h2>    	
       <ul class="scraper_list">
         {% for code in owned_code_objects %}
