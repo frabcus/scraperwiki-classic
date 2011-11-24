@@ -1,4 +1,6 @@
 {% extends "frontend/base.html" %}
+{% load pagination_tags %}
+
 {% block title %}Find datasets{% endblock %}
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/latest_code_objects_by_search_term/{{ query }}" />{% endblock %}
 
@@ -42,11 +44,14 @@
         {% endif %}
 
         {% if scrapers %}
-            <ul class="scraper_list">
+			{% autopaginate scrapers 10 %}
+            <ul class="scraper_list">				
                 {% for code in scrapers %}
                     {% include 'frontend/includes/code_object_line.html' %}
                 {% endfor %}
             </ul>
+
+			{% paginate %}
         {% else %}
         <p>No scrapers match &lsquo;{{ query }}&rsquo;, would you like to <a href="/browse/">browse</a>?</p>
         {% endif %}

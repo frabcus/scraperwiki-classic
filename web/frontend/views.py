@@ -78,6 +78,7 @@ def dashboard(request, page_number=1):
         owned_or_edited_code_objects_pagenated = paginator.page(paginator.num_pages)
     
     context = {'owned_or_edited_code_objects_pagenated': owned_or_edited_code_objects_pagenated, 
+               'object_list': owned_or_edited_code_objects,
                'language':'python' }
     return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
 

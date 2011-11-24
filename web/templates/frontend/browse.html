@@ -41,56 +41,9 @@
           {% endfor %}
         </ul>
 
-		{% autopaginate scrapers.object_list 5 %}
+		{% autopaginate scrapers.object_list 10 %}
 		{% paginate %}
 		
-        <div class="pagination">
-        <span class="step_links">
-            {% if scrapers.has_previous %}
-              {% if wiki_type %}
-                <a href="{% url scraper_list_wiki_type wiki_type scrapers.previous_page_number %}{%if ff %}?forked_from={{ff}}{%endif%}" class="previous">&laquo; Previous</a>
-              {% else %}
-                <a href="{% url scraper_list scrapers.previous_page_number %}{% if special_filter %}?filter={{special_filter}}{% endif %}" class="previous">&laquo; Previous</a>
-              {% endif %}
-            {% endif %}
-            
-            {% if wiki_type %}
-                {% for pagenum in scrapers.paginator.page_range %}
-                    {% if pagenum > scrapers.number|add:"-5" and pagenum < scrapers.number|add:"5" %}
-                    <a href="{% url scraper_list_wiki_type wiki_type pagenum %}{% if special_filter %}?filter={{special_filter}}{% endif %}{%if ff %}?forked_from={{ff}}{%endif%}"{% if pagenum = scrapers.number %} class="current"{% endif %}>{{pagenum}}</a>
-                    {% else %}
-                        {% if pagenum = 1 %}
-                            <a href="{% url scraper_list_wiki_type wiki_type pagenum %}{% if special_filter %}?filter={{special_filter}}{% endif %}{%if ff %}?forked_from={{ff}}{%endif%}"{% if pagenum = scrapers.number %} class="current"{% endif %}>{{pagenum}}</a> &hellip;
-                        {% endif %}
-                        {% if pagenum = scrapers.paginator.num_pages %}
-                            &hellip; <a href="{% url scraper_list_wiki_type wiki_type pagenum %}{% if special_filter %}?filter={{special_filter}}{% endif %}{%if ff %}?forked_from={{ff}}{%endif%}"{% if pagenum = scrapers.number %} class="current"{% endif %}>{{pagenum}}</a> 
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                {% for pagenum in scrapers.paginator.page_range %}
-                    {% if pagenum > scrapers.number|add:"-5" and pagenum < scrapers.number|add:"5" %}
-                    <a href="{% url scraper_list pagenum %}{% if special_filter %}?filter={{special_filter}}{% endif %}{%if ff %}?forked_from={{ff}}{%endif%}"{% if pagenum = scrapers.number %} class="current"{% endif %}>{{pagenum}}</a>
-                    {% else %}
-                        {% if pagenum = 1 %}
-                            <a href="{% url scraper_list pagenum %}{% if special_filter %}?filter={{special_filter}}{% endif %}{%if ff %}?forked_from={{ff}}{%endif%}"{% if pagenum = scrapers.number %} class="current"{% endif %}>{{pagenum}}</a> &hellip;
-                        {% endif %}
-                        {% if pagenum = scrapers.paginator.num_pages %}
-                            &hellip; <a href="{% url scraper_list pagenum %}{% if special_filter %}?filter={{special_filter}}{% endif %}{%if ff %}?forked_from={{ff}}{%endif%}"{% if pagenum = scrapers.number %} class="current"{% endif %}>{{pagenum}}</a> 
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-    
-            {% if scrapers.has_next %}
-              {% if wiki_type %}
-                <a href="{% url scraper_list_wiki_type wiki_type scrapers.next_page_number %}{% if special_filter %}?filter={{special_filter}}{% endif %}{%if ff %}?forked_from={{ff}}{%endif%}" class="next">Next &raquo;</a>
-              {% else %}
-                <a href="{% url scraper_list scrapers.next_page_number %}{% if special_filter %}?filter={{special_filter}}{% endif %}" class="next">Next &raquo;</a>
-              {% endif %}
-            {% endif %}
-        </span>
-        </div>
 
     </div>
 {% endblock %}
