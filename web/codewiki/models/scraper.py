@@ -52,14 +52,15 @@ def scrapers_overdue():
     """
     scrapers = Scraper.objects.exclude(privacy_status="deleted")
     scrapers = scrapers.filter(run_interval__gt=0)
+    
     qselect = {}
     qselect["secondsto_nextrun"] = "IF(run_interval>0, IF(last_run is not null, TIMESTAMPDIFF(SECOND, NOW(), DATE_ADD(last_run, INTERVAL run_interval SECOND)), 0), 99999)"
     qselect["overdue_proportion"] = "IF(run_interval>0, IF(last_run is not null, TIMESTAMPDIFF(SECOND, NOW(), DATE_ADD(last_run, INTERVAL run_interval SECOND))/run_interval, -1.0), 1.0)"
     qwhere = ["(last_run is null or DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW())"]
-        # uncomment this line if you want everything to be overdue
-    #qwhere = [ ]  
+    
     scrapers = scrapers.extra(select=qselect, where=qwhere)
     scrapers = scrapers.order_by('overdue_proportion')
+    
     return scrapers
 
 
@@ -68,20 +69,9 @@ class Scraper (code.Code):
     record_count = models.IntegerField(default=0)        
     run_interval = models.IntegerField(default=-1)  # in seconds, we are defaulting to disabled
 
-
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)
         self.wiki_type = 'scraper'
-
-    def clean(self):
-        if self.run_interval == 'draft' and self.pub_date is not None:
-            found = False
-            for schedule_option in SCHEDULE_OPTIONS:
-                if schedule_option[0] == self.run_interval:
-                    found = True
-            if not found:
-                raise ValidationError('Invalid run interval')
-
 
     # It would be good to kill this function off and move its functionality into being properties of the database
     # for now it represents some kind of caching of the size of the datastore

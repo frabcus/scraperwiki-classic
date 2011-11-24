@@ -281,15 +281,17 @@ def search_urls(request, partial):
     """
     from codewiki.models import DomainScrape
     from urlparse import urlparse
+    from django.db.models import Q
 
     url = urlparse(partial)
-    dsqs = DomainScrape.objects.filter(scraper_run_event__scraper__privacy_status__in=['public','protected'],
-                                       domain='%s://%s' % (url.scheme,url.netloc,) ).distinct('scraper_run_event__scraper')
+    q = Q(scraper_run_event__scraper__privacy_status__in=['public','protected'])
+    q = q & (Q(domain__istartswith='http://%s' % (url.netloc,)) | Q(domain__istartswith='https://%s' % (url.netloc,)))
+    dsqs = DomainScrape.objects.filter(q).distinct('scraper_run_event__scraper')
     
     ctx = {
         'form'     : SearchForm(initial={'q': partial}),
         'scrapers_num_results'    : dsqs.count(),
-        'scrapers' : [ d.scraper for d in dsqs.all().distinct() ],
+        'scrapers' : [ d.scraper_run_event.scraper for d in dsqs.all().distinct() ],
     }
     
     # TODO: We need a template for url search results
