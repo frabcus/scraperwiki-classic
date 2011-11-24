@@ -360,6 +360,9 @@ function execute(http_req, http_res, raw_request_data) {
                 
         var extension = util.extension_for_language(script.language);
         
+        // /var/www/scraperwiki/resourcedir/<%= scrapername >/
+        // instead of 
+        // lxc.code_folder(res)
         var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
         var rVM = res;
         fs.writeFile(tmpfile, request_data.code, function(err) {
