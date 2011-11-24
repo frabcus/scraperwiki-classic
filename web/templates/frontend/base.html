@@ -64,12 +64,12 @@
 	<div id="nav_outer">
 		<div id="nav_inner">
 			{% block nav %}
-			<h1><a href="{% url frontpage %}">ScraperWiki</a></h1>
+			<h1><a href="{% url frontpage %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Home: logo']); }">ScraperWiki</a></h1>
 			<ul>
-				<li class="frontpage"><a href="{% url frontpage %}">Home</a></li>
-				<li class="about"><a href="{% url about %}">About</a></li>
-				<li class="about"><a href="{% url scraper_list %}scrapers">Browse</a></li>
-				<li class="blog"><a href="http://blog.scraperwiki.com">Blog</a></li>
+				<li class="frontpage"><a href="{% url frontpage %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Home: Home']); }">Home</a></li>
+				<li class="about"><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'About']); }">About</a></li>
+				<li class="about"><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Browse']); }">Browse</a></li>
+				<li class="blog"><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Blog']); }">Blog</a></li>
 				{% if user.is_authenticated %}
 				<li class="user loggedin">
 					<a href="{% url profiles_profile_detail user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
@@ -138,24 +138,24 @@
 		<div id="divMenu">
               <ul class="main_menu">
 				{% if user.is_authenticated %}
-                <li><a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard">Your dashboard</a></li>
+                <li><a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Dashboard']); }">Your dashboard</a></li>
                 {% endif %}
-                <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse</a></li>
+                <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Browse']); }">Browse</a></li>
                 <li>
-                    <a data-wiki_type="scraper" href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a> /
-                    <a data-wiki_type="view" href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">view</a>
+                    <a data-wiki_type="scraper" href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'New scraper']); }">New scraper</a> /
+                    <a data-wiki_type="view" href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'New view']); }">view</a>
                 </li>
-                <li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
-                <li><a href="{% url request_data %}">Request data</a></li>
-                <li><a href="{% url docsroot %}">Documentation</a></li>
+                <li><a href="{% url get_involved %}" title="Get involved" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Get involved']); }">Get involved!</a></li>
+                <li><a href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Request data']); }">Request data</a></li>
+                <li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Documentation']); }">Documentation</a></li>
               </ul>
 
               <ul class="sub_menu"> 
-                 <li><a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog"><span class="unimportant">Read our</span> blog</a></li>
-                 <li><a href="http://groups.google.com/group/scraperwiki" title="Google groups"><span class="unimportant">Join our</span> email list</a></li>
-                 <li><a href="{% url contact_form %}" title="Feedback form"><span class="unimportant">Send us</span> Feedback</a></li>
-                 <li><a href="http://twitter.com/scraperwiki" title="Follow us on Twitter"><span class="unimportant">Follow us on</span> Twitter</a></li>
-                 <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook"><span class="unimportant">Find on</span> Facebook</a></li>
+                 <li><a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Read our blog']); }"><span class="unimportant">Read our</span> blog</a></li>
+                 <li><a href="http://groups.google.com/group/scraperwiki" title="Google groups" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Join our email list']); }"><span class="unimportant">Join our</span> email list</a></li>
+                 <li><a href="{% url contact_form %}" title="Feedback form"><span class="unimportant" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Send us feedback']); }">Send us</span> Feedback</a></li>
+                 <li><a href="http://twitter.com/scraperwiki" title="Follow us on Twitter" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Twitter']); }"><span class="unimportant">Follow us on</span> Twitter</a></li>
+                 <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Facebook']); }"><span class="unimportant">Find on</span> Facebook</a></li>
               </ul>
 
               {% if user.is_staff %}
@@ -204,38 +204,38 @@
 				<dt>Business</dt>
 				<dd>
 					<ul>
-						<li><a href="{% url scraper_list %}scrapers">Browse data</a></li>
-						<li><a href="{% url request_data %}">Request data</a></li>
-						<li><a href="{% url pricing %}">Pricing</a></li>
+						<li><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Browse data']); }">Browse data</a></li>
+						<li><a href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Request data']); }">Request data</a></li>
+						<li><a href="{% url pricing %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Pricing']); }">Pricing</a></li>
 					</ul>
 				</dd>
 				<dt>Developers</dt>
 				<dd>
 					<ul>
-					    <li><a data-wiki_type="scraper" href="#" class="editor_scraper">Create new scraper</a> / <a data-wiki_type="view" href="#" class="editor_view">view</a></li>
-						<li><a href="{% url docsexternal %}">API</a></li>
-						<li><a href="{% url docsroot %}">Docs &amp; tutorials</a></li>	
-						<li><a href="{% url docs 'faq' %}">FAQ</a></li>
-						<li><a href="http://groups.google.com/group/scraperwiki">Discussion group</a></li>			                   			                 
+					    <li><a data-wiki_type="scraper" href="#" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new scraper']); }">Create new scraper</a> / <a data-wiki_type="view" href="#" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new view']); }">view</a></li>
+						<li><a href="{% url docsexternal %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'API']); }">API</a></li>
+						<li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Docs &amp; tutorials']); }">Docs &amp; tutorials</a></li>	
+						<li><a href="{% url docs 'faq' %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'FAQ']); }">FAQ</a></li>
+						<li><a href="http://groups.google.com/group/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Discussion group']); }">Discussion group</a></li>			                   			                 
 					</ul>
 				</dd>
 				<dt>ScraperWiki</dt>
 				<dd>
 					<ul>
-						<li><a href="{% url about %}">About us</a></li>
-						<li><a href="{% url contact_form %}">Contact us</a></li>
-						<li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
-						<li><a href="http://blog.scraperwiki.com">Blog</a></li>
-						<li><a href="http://twitter.com/scraperwiki">Twitter</a></li>
-                        <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook">Facebook</a></li>
+						<li><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'About']); }">About us</a></li>
+						<li><a href="{% url contact_form %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Contact us']); }">Contact us</a></li>
+						<li><a href="{% url get_involved %}" title="Get involved" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Get involved']); }">Get involved!</a></li>
+						<li><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Blog']); }">Blog</a></li>
+						<li><a href="http://twitter.com/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Twitter']); }">Twitter</a></li>
+                        <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Facebook']); }">Facebook</a></li>
 					</ul>
 				</dd>
 				<dt class="legal"></dt>
 				<dd class="legal">
 				    <ul>
 				        <li>&copy; ScraperWiki Ltd {% now "Y" %}</li>
-				        <li><a href="{% url terms %}">Terms &amp; conditions</a></li>
-				        <li><a href="{% url privacy %}">Privacy policy</a></li>
+				        <li><a href="{% url terms %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Terms &amp; Conditions']); }">Terms &amp; conditions</a></li>
+				        <li><a href="{% url privacy %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Privacy policy']); }">Privacy policy</a></li>
 				    </ul>
 				</dd>
 			</dl>

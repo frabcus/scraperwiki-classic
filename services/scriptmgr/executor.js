@@ -309,7 +309,7 @@ function execute(http_req, http_res, raw_request_data) {
                     util.log.debug('child process removed from script list');                   
 
                     var endTime = new Date();
-                    elapsed = (endTime - startTime) / 1000;
+                    var elapsed = (endTime - startTime) / 1000;
 
                 // If we have something left in the buffer we really should flush it about
                 // now. Suspect this will only be PHP
@@ -358,8 +358,19 @@ function execute(http_req, http_res, raw_request_data) {
         }
         util.log.debug( 'Running on ' + res );      
                 
+/* 
+        var fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");            
+ 	    var ctx = {'name': res, 'scrapername':  script.scraper_name || "" }
+	    var fs_compiled = _.template( fstab_tpl );
+	    var fstab = fs_compiled( ctx );
+	    write fstab to /mnt/{{res}}/fstab
+*/	
+            
         var extension = util.extension_for_language(script.language);
         
+        // /var/www/scraperwiki/resourcedir/<%= scrapername >/
+        // instead of 
+        // lxc.code_folder(res)
         var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
         var rVM = res;
         fs.writeFile(tmpfile, request_data.code, function(err) {
@@ -428,7 +439,7 @@ function execute(http_req, http_res, raw_request_data) {
                 }
 
                 var endTime = new Date();
-                elapsed = (endTime - startTime) / 1000;
+                var elapsed = (endTime - startTime) / 1000;
                 util.log.debug('Elapsed' + elapsed );
 
                 // If we have something left in the buffer we really should flush it about
