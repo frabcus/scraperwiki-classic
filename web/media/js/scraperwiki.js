@@ -173,10 +173,12 @@ function newCodeObject($a){
 						$('#javascript', dialog.data).slideDown(200);
 					});
 					$('#javascript_meh', dialog.data).bind('click', function(e){
+						var userid = $('li.javascript a', dialog.data).data('userid') || '';
 						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Javascript, Meh', userid]); }
 						hide_javascript_crap();
 					});
 					$('#i_heart_javascript').bind('click', function(e){
+						var userid = $('li.javascript a', dialog.data).data('userid') || '';
 						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'I HEART JAVASCRIPT!', userid]); }
 						$(this).unbind('click').html('Thanks!').addClass('smiley').animate({opacity:1}, 2000, hide_javascript_crap);
 					});
