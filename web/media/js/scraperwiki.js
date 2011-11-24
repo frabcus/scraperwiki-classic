@@ -166,17 +166,20 @@ function newCodeObject($a){
 						$('#javascript', dialog.data).slideUp(200);
 					}
 					$('li.javascript a', dialog.data).bind('click', function(e){
-						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Curious']); }
+						var userid = $(this).data('userid') || '';
+						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Curious', userid]); }
 						$(this).parent().addClass('first').prevAll().slideUp(200);
 						$('#chooser_vaults', dialog.data).slideUp(200);
 						$('#javascript', dialog.data).slideDown(200);
 					});
 					$('#javascript_meh', dialog.data).bind('click', function(e){
-						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Javascript, Meh']); }
+						var userid = $('li.javascript a', dialog.data).data('userid') || '';
+						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Javascript, Meh', userid]); }
 						hide_javascript_crap();
 					});
 					$('#i_heart_javascript').bind('click', function(e){
-						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'I HEART JAVASCRIPT!']); }
+						var userid = $('li.javascript a', dialog.data).data('userid') || '';
+						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'I HEART JAVASCRIPT!', userid]); }
 						$(this).unbind('click').html('Thanks!').addClass('smiley').animate({opacity:1}, 2000, hide_javascript_crap);
 					});
 				},
