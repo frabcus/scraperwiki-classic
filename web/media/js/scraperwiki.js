@@ -167,7 +167,6 @@ function newCodeObject($a){
 					}
 					$('li.javascript a', dialog.data).bind('click', function(e){
 						var userid = $(this).data('userid') || '';
-						console.log(userid);
 						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Curious', userid]); }
 						$(this).parent().addClass('first').prevAll().slideUp(200);
 						$('#chooser_vaults', dialog.data).slideUp(200);
