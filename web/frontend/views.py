@@ -5,7 +5,6 @@ from django.contrib import auth
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from frontend.forms import SigninForm, UserProfileForm, SearchForm, ResendActivationEmailForm, DataEnquiryForm
-from django.core.paginator import InvalidPage, EmptyPage
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.template import RequestContext
