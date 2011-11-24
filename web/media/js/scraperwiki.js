@@ -177,7 +177,7 @@ function newCodeObject($a){
 					});
 					$('#i_heart_javascript').bind('click', function(e){
 						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'I HEART JAVASCRIPT!']); }
-						$(this).html('Thanks!').addClass('smiley').animate({opacity:1}, 1000, hide_javascript_crap);
+						$(this).unbind('click').html('Thanks!').addClass('smiley').animate({opacity:1}, 2000, hide_javascript_crap);
 					});
 				},
 				onClose: function(dialog) {
