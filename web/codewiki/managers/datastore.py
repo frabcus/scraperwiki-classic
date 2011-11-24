@@ -90,7 +90,7 @@ class DataStore(object):
         try:
             ret = json.loads(self.receiveonelinenj())
         except ValueError, e:
-            raise Exception( e.message )
+            ret = {'error': e.message}
         assert "moredata" not in ret
         return ret
     
