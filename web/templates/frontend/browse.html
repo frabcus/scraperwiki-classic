@@ -1,4 +1,5 @@
 {% extends "frontend/base.html" %}
+{% load pagination_tags %}
 
 {% block title %}Browse{% endblock %}
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/all_code_objects/" />{% endblock %}
@@ -40,6 +41,9 @@
           {% endfor %}
         </ul>
 
+		{% autopaginate scrapers.object_list 5 %}
+		{% paginate %}
+		
         <div class="pagination">
         <span class="step_links">
             {% if scrapers.has_previous %}
