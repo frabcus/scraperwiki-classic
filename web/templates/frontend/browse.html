@@ -34,14 +34,14 @@
     </div>
 
     <div class="content">
+		{% autopaginate scrapers 2 %}
 
         <ul class="scraper_list">
-          {% for code in scrapers.object_list %}
+          {% for code in scrapers %}
             {% include 'frontend/includes/code_object_line.html' %}
           {% endfor %}
         </ul>
 
-		{% autopaginate scrapers.object_list 10 %}
 		{% paginate %}
 		
 

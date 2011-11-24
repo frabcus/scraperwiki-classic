@@ -6,9 +6,6 @@
 {% block header %}
 	<h2>Your dashboard</h2>
 	<p>Scrapers and views you own or have edited
-	{% ifnotequal owned_or_edited_code_objects_pagenated.paginator.num_pages 1 %} 
-	    &bull; page {{ owned_or_edited_code_objects_pagenated.number }} of {{ owned_or_edited_code_objects_pagenated.paginator.num_pages }}
-	{% endifnotequal %}
 	<!--Go to <a href="{% url profiles_profile_detail user.username %}">your profile page</a>.--></p>
 {% endblock %}
 

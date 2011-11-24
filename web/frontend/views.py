@@ -5,7 +5,7 @@ from django.contrib import auth
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from frontend.forms import SigninForm, UserProfileForm, SearchForm, ResendActivationEmailForm, DataEnquiryForm
-from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.core.paginator import InvalidPage, EmptyPage
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.template import RequestContext
@@ -64,21 +64,8 @@ def frontpage(request, public_profile_field=None):
 def dashboard(request, page_number=1):
     user = request.user
     owned_or_edited_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=user)
-    #scrapers_all.filter((Q(usercoderole__user=user) & Q(usercoderole__role='owner')) | (Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
-    # v difficult to sort by owner and then editor status
-        #owned_or_edited_code_objects = owned_or_edited_code_objects.order_by('usercoderole__role', '-created_at')
-    
-    paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
-
-    try:    page = int(page_number)
-    except (ValueError, TypeError):   page = 1
-    try:     
-        owned_or_edited_code_objects_pagenated = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        owned_or_edited_code_objects_pagenated = paginator.page(paginator.num_pages)
-    
-    context = {'owned_or_edited_code_objects_pagenated': owned_or_edited_code_objects_pagenated, 
-               'object_list': owned_or_edited_code_objects,
+        
+    context = {'object_list': owned_or_edited_code_objects,
                'language':'python' }
     return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
 
@@ -278,29 +265,9 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None, ff=None)
     if not ff and not special_filter:
         all_code_objects = all_code_objects.exclude(wiki_type='scraper', scraper__record_count=0)
     
-    
-    # Number of results to show from settings
-    paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
-
-    try:
-        page = int(page_number)
-    except (ValueError, TypeError):
-        page = 1
-
-    if page == 1:
-        featured_scrapers = Code.objects.filter(privacy_status="public", featured=True).order_by('-created_at')
-    else:
-        featured_scrapers = None
-
-    # If page request (9999) is out of range, deliver last page of results.
-    try:
-        scrapers = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        scrapers = paginator.page(paginator.num_pages)
-
     form = SearchForm()
 
-    dictionary = { "ff": ff, "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter, 'language': 'python'}
+    dictionary = { "ff": ff, "scrapers": all_code_objects, 'wiki_type':wiki_type, "form": form, 'special_filter': special_filter, 'language': 'python'}
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 
