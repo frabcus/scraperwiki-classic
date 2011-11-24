@@ -309,7 +309,7 @@ function execute(http_req, http_res, raw_request_data) {
                     util.log.debug('child process removed from script list');                   
 
                     var endTime = new Date();
-                    elapsed = (endTime - startTime) / 1000;
+                    var elapsed = (endTime - startTime) / 1000;
 
                 // If we have something left in the buffer we really should flush it about
                 // now. Suspect this will only be PHP
@@ -439,7 +439,7 @@ function execute(http_req, http_res, raw_request_data) {
                 }
 
                 var endTime = new Date();
-                elapsed = (endTime - startTime) / 1000;
+                var elapsed = (endTime - startTime) / 1000;
                 util.log.debug('Elapsed' + elapsed );
 
                 // If we have something left in the buffer we really should flush it about
