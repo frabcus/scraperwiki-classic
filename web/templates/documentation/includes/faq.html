@@ -29,6 +29,7 @@
            <li><a href="#files">Can I save files, and if so where?</a></li>
            <li><a href="#commands">Wow, I can run arbitary commands!</a></li>
            <li><a href="#attach">Can I read from the datastore of another scraper?</a></li>
+           <li><a href="#import">Can I import code from another scraper?</a></li>
      </ul>
      <h2>Licensing questions</h2>
      <ul>
@@ -295,6 +296,20 @@ print urllib.urlopen(url).read()
                 <p>It's possible to attach to lots of datastores, and use SQL to select
                 from all of them as if one.</p>
            </dd>
+
+           <dt id="import">Can I import code from another scraper?</a></dt>
+           <dd>
+                <p>We have a feature than can, at best, be described as
+                experimental (and only works in Python).
+                Instead of <tt>import amodule</tt> you can use:
+                <code>amodule = <a
+                href="https://scraperwiki.com/docs/python/python_help_documentation/">scraperwiki.utils.swimport</a>("<var>some-other-scraper</var>")</code>
+
+                <p>If you would like this to be more convenient (or even
+                better, if you have a patch to make <tt>import foo</tt>
+                work), then please <a
+                href="https://scraperwiki.com/contact/">get in
+                touch</a>.</p>
 
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
 
