@@ -361,6 +361,7 @@ function execute(http_req, http_res, raw_request_data) {
         }
         util.log.debug( 'Running on ' + res );      
                 
+/*                
         // Write out a new FSTAB for this run using the template, so that we can later 
         // add/modify the fstab template.
  	    var ctx = {'name': res, 'scrapername':  script.scraper_name || "__public__" }
@@ -370,7 +371,8 @@ function execute(http_req, http_res, raw_request_data) {
 	    var f = fs.openSync('/mnt/' + res + '/fstab', 'w');
 	    fs.writeSync(f, fstab);
 	    fs.closeSync( f );
-            
+*/
+
         var extension = util.extension_for_language(script.language);
         
         // /var/www/scraperwiki/resourcedir/<%= scrapername >/
