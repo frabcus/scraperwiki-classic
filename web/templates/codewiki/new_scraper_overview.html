@@ -302,6 +302,14 @@
                                 /></td>
                                 <td><h4><label for="privacy_protected">{% if scraper.privacy_status == 'visible' %}Keep as Protected{% else %}Change to Protected{% endif %}</label></h4><p><label for="privacy_protected">Everyone {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} see this {{scraper.wiki_type}}, but only selected contributors {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} edit it.</label></p></td>
                             </tr>
+                            {% if scraper.privacy_status == 'private' or user.is_staff %}
+                            <tr>
+                                <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" 
+                                {% ifequal scraper.privacy_status 'private' %} checked="checked" {% endifequal %}
+                                /></td>
+                                <td><h4><label for="privacy_private">{% if scraper.privacy_status == 'private' %}Keep as Private{% else %}Change to Private{% endif %} <span style="color:#999; font-weight: normal">({% if user.is_staff %}staff-only{% else %}deprecated{% endif %})</span></label></h4><p><label for="privacy_private">Only selected contributors {% if scraper.privacy_status == 'private' %}can{% else %}will be able to{% endif %} see or edit this {{scraper.wiki_type}}.</label></p></td>
+                            </tr>
+                            {% endif %}
                             {% if request.user.vault_membership.count %}
                             <tr>
                                 <td class="radio"><input type="radio" name="privacy_status" value="vault" id="privacy_vault" {% if scraper.vault %}checked="checked"{% endif %} /></td>
@@ -349,7 +357,7 @@
                     {% endwith %}
                 </ul>
                 {% if user_owns_it %}
-                  {% if scraper.privacy_status == 'visible' %}
+                  {% if scraper.privacy_status == 'visible' or scraper.privacy_status == 'private' %}
                     <a class="add_user" rel="{{ scraper.short_name }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add another editor</a>
                   {% endif %}
                 {% endif %}

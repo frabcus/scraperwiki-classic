@@ -253,7 +253,7 @@ function setup_collaboration_ui(){
     }).hide();
 
 	//	Handle clicks on the "make this public" and "make this protected" paragraphs
-	$('#privacy_public, #privacy_protected').bind('change', function(){
+	$('#privacy_public, #privacy_protected, #privacy_private').bind('change', function(){
 		$('#saveprivacy').trigger('click');
 	});
 	
