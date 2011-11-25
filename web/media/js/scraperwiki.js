@@ -260,7 +260,7 @@ $(function()
     setupSearchBoxHint();
     setupNavSearchBoxHint();
 
-    $('a.editor_view, div.network .view a, a.editor_scraper, .add_to_vault a').click(function(e) {
+    $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
 		e.preventDefault();
 		newCodeObject($(this));
     });
