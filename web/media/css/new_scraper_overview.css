@@ -592,6 +592,11 @@ table.about p {
 	line-height: 18px;
 }
 
+#divAboutScraper ul li {
+	list-style-type: disc;
+	margin-left: 40px;
+}
+
 table.about a.edit {
 	float: right;
 	font-size: 14px;
