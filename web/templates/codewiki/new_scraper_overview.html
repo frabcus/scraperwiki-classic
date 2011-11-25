@@ -66,7 +66,7 @@
         {% endif %}
         </span> <span class="totalrows">
         {% if sqlitedata %}
-            {{ total_record_count }} record{{ total_record_count|pluralize }}
+            {{ total_record_count|intcomma }} record{{ total_record_count|pluralize }}
         {% else %}
             No data yet
         {% endif %}

@@ -6238,7 +6238,8 @@ body.vaults .vault_header .shineyshiney {
 	margin: 0 2px;
 }
 
-body.vaults .vault_users_popover {
+body.vaults .vault_users_popover,
+body.vaults .vault_usage_popover {
 	display: none;
 	position: absolute;
 	z-index: 100;
@@ -6253,9 +6254,11 @@ body.vaults .vault_users_popover {
     -moz-box-shadow: 0px 3px 15px 0px rgba(0, 0, 0, 0.5);
     box-shadow: 0px 3px 15px 0px rgba(0, 0, 0, 0.5);
     border: 1px solid #aaa;
+    color: #333;
 }
 
-body.vaults .vault_users_popover .arrow {
+body.vaults .vault_users_popover .arrow,
+body.vaults .vault_usage_popover .arrow {
     width: 22px;
     height: 9px;
     position: absolute;
@@ -6430,32 +6433,166 @@ body.vaults .vault_contents h5 {
 	font-weight: normal;
 	text-transform: uppercase;
 	padding: 7px 10px 6px 10px;
+	position: relative;
 }
 
 body.vaults .vault_contents.empty h5 {
 	position: absolute;
 	top: 0;
 	left: 0;
-	right: 0
+	right: 0;
 }
 
-body.vaults .vault_contents span.add_to_vault {
+body.vaults .usage {
 	float: right;
-	color: #7e98b8;
-}
-
-body.vaults .vault_contents .add_to_vault img {
-	vertical-align: -3px;
-}
-
-body.vaults .vault_contents .add_to_vault a {
+	height: 14px;
 	cursor: pointer;
-	color: #4d719d;
+	/* Temporarily disable usage div */
+	display: none;
 }
 
-body.vaults .vault_contents .add_to_vault a:hover {
-	text-decoration: underline;
-	color: #599e4d;
+body.vaults .usage .key {
+	vertical-align: top;
+}
+
+body.vaults .usage img {
+	position: relative;
+	top: -1px;
+}
+
+body.vaults .progressbar {
+	display: inline-block;
+	position: relative;
+	width: 150px;
+	padding: 2px 2px;
+	margin: 0 0 0 3px;
+	background-color: #dfe6ed;
+	height: 8px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	vertical-align: top;
+	border: 1px solid #c0ccd7;
+}
+
+body.vaults .progressbar strong {
+	display: inline-block;
+	height: 8px;
+	background-color: #85a0c3;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	vertical-align: top;
+}
+
+body.vaults .usage:hover .key,
+body.vaults .usage.hover .key {
+	color: #335c8e;
+}
+
+body.vaults .usage:hover .progressbar,
+body.vaults .usage.hover .progressbar {
+	background-color: #d4dee8;
+	border-color: #abbdcc;
+}
+
+body.vaults .usage:hover .progressbar strong,
+body.vaults .usage.hover .progressbar strong {
+	background-color: #4a78b4;
+}
+
+body.vaults .warning .key {
+	color: #b2595a;
+}
+
+body.vaults .warning:hover .key,
+body.vaults .warning.hover .key {
+	color: #983032;
+}
+
+body.vaults .warning .progressbar {
+	border-color: #d7b0b0;
+	background-color: #eddfdf;
+}
+
+body.vaults .warning:hover .progressbar, body.vaults .warning.hover .progressbar {
+	border-color: #c98f8f;
+	background-color: #ead3d3;
+}
+
+body.vaults .warning .progressbar strong {
+	background-color: #d17676;
+}
+
+body.vaults .warning:hover .progressbar strong,
+body.vaults .warning.hover .progressbar strong {
+	background-color: #c24646;
+}
+
+body.vaults .vault_usage_popover {
+	width: 240px;
+	top: 25px;
+	text-transform: none;
+	text-align: left;
+	font-size: 13px;
+}
+
+body.vaults .vault_usage_popover h4 {
+	color: #666;
+	text-align: center;
+	margin: 2px 0 7px 0;
+	font-weight: normal;
+}
+
+body.vaults .vault_usage_popover p {
+	padding: 5px 0;
+	border-bottom: 1px solid #ccc;
+}
+
+body.vaults .vault_usage_popover p.warning {
+	color: #983032;
+}
+
+body.vaults .vault_usage_popover p.last,
+body.vaults .vault_usage_popover p.advice {
+	border-bottom: none;
+}
+
+body.vaults .vault_usage_popover p small {
+	font-size: 1em;
+	float: right;
+	color: #999;
+}
+
+body.vaults .vault_usage_popover p.warning small {
+	color: #b38283;
+}
+
+body.vaults .vault_usage_popover .advice {
+	padding-bottom: 0;
+	text-align: center;
+}
+
+body.vaults .vault_usage_popover .advice a {
+	display: inline-block;
+	padding: 2px 10px 1px 10px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	border-bottom: 1px solid #e69087;
+	margin-bottom: -1px;
+	color: #810c00;
+	cursor: pointer;
+	background-color: #efb2ab;
+	line-height: 16px;
+	margin: 5px 2px 2px 0;
+}
+
+body.vaults .vault_usage_popover .advice a:hover {
+	text-decoration: none;
+	background-color: #f99f94;
+	border-bottom-color: #e76f62;
+	color: #5f0800;
 }
 
 body.vaults .vault_contents li.code_object_line {
@@ -6472,6 +6609,45 @@ body.vaults .vault_contents li.code_object_line h3 {
 body.vaults .vault_contents li.code_object_line p.description {
 	margin: 5px 0 0 130px;
 	color: #999;
+}
+
+body.vaults li.new_object_line {
+	padding: 10px;
+	text-align: center;
+	min-height: 0;
+	color: #666;
+}
+
+body.vaults li.new_object_line a,
+body.vaults .empty_vault a {
+	display: inline-block;
+	padding: 2px 10px 1px 10px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	border-bottom: 1px solid #98bd90;
+	margin-bottom: -1px;
+	color: #39732d;
+	cursor: pointer;
+	background-color: #cfe6ca;
+	line-height: 19px;
+	margin: 0 2px;
+}
+
+body.vaults li.new_object_line a:hover,
+body.vaults .empty_vault a:hover {
+	text-decoration: none;
+	color: #1b4d11;
+	background-color: #aee1a2;
+	border-bottom-color: #85af7c;
+}
+
+body.vaults li.new_object_line div {
+	border: 3px dashed #ddd;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	padding: 20px 0;
 }
 
 body.vaults .vault_footer {
@@ -6491,7 +6667,6 @@ body.vaults .vault_footer {
 	background: -webkit-linear-gradient(top, #e8e8e8 0%,#cccccc 100%);
 	background: -o-linear-gradient(top, #e8e8e8 0%,#cccccc 100%);
 	background: -ms-linear-gradient(top, #e8e8e8 0%,#cccccc 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8e8e8', endColorstr='#cccccc',GradientType=0 );
 	background: linear-gradient(top, #e8e8e8 0%,#cccccc 100%);
 	text-align: left;
 	padding: 7px 12px;
