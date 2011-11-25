@@ -91,6 +91,7 @@ function setupNavSearchBoxHint(){
 
 function newCodeObject($a){
 	if($a){	
+		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'New Code Object', $a.data('wiki_type')]); }
 		url = '/' + $a.data('wiki_type') + 's/new/choose_template/?ajax=1';
 		if ( $a.data('sourcescraper') ) {
 			url += "&sourcescraper=" + $a.data('sourcescraper');
