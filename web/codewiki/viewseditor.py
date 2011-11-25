@@ -609,7 +609,7 @@ def add_to_vault(request, wiki_type, language, id):
     Create a new scraper with the specific type and language, put it in the vault (if
     the current user is allowed and then we're done)
     """
-    from codewiki.models import Vault, Scraper, UserCodeRole
+    from codewiki.models import Vault, Scraper, View, UserCodeRole
     
     name = request.GET.get('name', None)
     
@@ -620,7 +620,10 @@ def add_to_vault(request, wiki_type, language, id):
     if not request.user in vault.members.all():
         return HttpResponseForbidden("You cannot access this vault")             
 
-    scraper = Scraper()
+    if wiki_type == 'scraper':
+        scraper = Scraper()
+    else:
+        scraper = View()
     scraper.title = name
     scraper.language = language
     scraper.privacy_status = 'private'
