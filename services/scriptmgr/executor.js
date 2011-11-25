@@ -366,6 +366,7 @@ function execute(http_req, http_res, raw_request_data) {
  	    var ctx = {'name': res, 'scrapername':  script.scraper_name || "__public__" }
 	    var fs_compiled = _.template( fstab_tpl );
 	    var fstab = fs_compiled( ctx );
+        util.log.debug('Writing fstab to ' + '/mnt/' + res + '/fstab')
 	    var f = fs.openSync('/mnt/' + res + '/fstab', 'w');
 	    fs.writeSync(f, fstab);
 	    fs.closeSync( f );
