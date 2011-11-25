@@ -125,7 +125,8 @@ exports.dumpError = function(err) {
 * Empty all files (and created folders) within a specific directory
 ******************************************************************************/
 exports.cleanup = function(filep) {
-	removeDirForce(filep);
+
+	//removeDirForce(filep);
 	logger.debug('Cleanup up folder ' + filep);
 }
 

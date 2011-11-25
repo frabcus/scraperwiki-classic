@@ -103,7 +103,7 @@ function create_vm ( name ) {
 	num = parseInt( name.substring(2) );
 	
 	// TODO: Fix me
-	var ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString() }
+	var ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString(), "scrapername": "__public__" }
 
 
 	var compiled = _.template( config_tpl );

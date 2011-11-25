@@ -91,6 +91,7 @@ function setupNavSearchBoxHint(){
 
 function newCodeObject($a){
 	if($a){	
+		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'New Code Object', $a.data('wiki_type')]); }
 		url = '/' + $a.data('wiki_type') + 's/new/choose_template/?ajax=1';
 		if ( $a.data('sourcescraper') ) {
 			url += "&sourcescraper=" + $a.data('sourcescraper');
@@ -260,7 +261,7 @@ $(function()
     setupSearchBoxHint();
     setupNavSearchBoxHint();
 
-    $('a.editor_view, div.network .view a, a.editor_scraper, .add_to_vault a').click(function(e) {
+    $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
 		e.preventDefault();
 		newCodeObject($(this));
     });
@@ -345,7 +346,38 @@ $(function()
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
 	
 	
-		
+	
+	$('div.vault_usage_popover').each(function(i,el){
+		//	This centres the Usage Popover underneath the Usage progressbar
+		var popo = $(this);
+		var prog = $(this).prevAll('.usage').children('.progressbar');
+		var anchor = prog.position().left + (0.5 * prog.outerWidth());
+		popo.css('left', anchor - (popo.outerWidth() / 2) );
+	});
+	
+	$('body.vaults .usage').bind('click', function(e){
+		var $a = $(this).addClass('hover');
+		var $p = $a.siblings('div.vault_usage_popover');
+		if($p.is(':visible')){
+			$p.fadeOut(400);
+			$a.removeClass('hover');
+			$('html').unbind('click');
+		} else {
+			$p.fadeIn(150);
+			$('html').bind('click', function(e){
+				if( $(e.target).parents().index($a) == -1 ) {
+					if( $(e.target).parents().index($p) == -1 ) {
+						$p.filter(':visible').fadeOut(400);
+						$a.removeClass('hover');
+						$('html').unbind('click');
+					}
+				}
+			});
+		}
+	});
+	
+	
+	
 	
 	$('div.vault_users_popover').each(function(i,el){
 		//	This centres the Users Popover underneath the Users toolbar button

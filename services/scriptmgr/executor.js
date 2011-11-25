@@ -40,6 +40,7 @@ var max_runs = 100;
 var dataproxy = '';
 var httpproxy;
 var secret = '';
+var fstab_tpl;
 
 /******************************************************************************
 * Called to configure the executor, allowing it to determine whether we are
@@ -62,6 +63,8 @@ exports.init = function( settings ) {
     dataproxy = settings.dataproxy;
     extra_path = settings.extra_path;
     max_runs = settings.vm_count;
+    
+    fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");                
 }
 
 
@@ -358,14 +361,18 @@ function execute(http_req, http_res, raw_request_data) {
         }
         util.log.debug( 'Running on ' + res );      
                 
-/* 
-        var fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");            
- 	    var ctx = {'name': res, 'scrapername':  script.scraper_name || "" }
+/*                
+        // Write out a new FSTAB for this run using the template, so that we can later 
+        // add/modify the fstab template.
+ 	    var ctx = {'name': res, 'scrapername':  script.scraper_name || "__public__" }
 	    var fs_compiled = _.template( fstab_tpl );
 	    var fstab = fs_compiled( ctx );
-	    write fstab to /mnt/{{res}}/fstab
-*/	
-            
+        util.log.debug('Writing fstab to ' + '/mnt/' + res + '/fstab')
+	    var f = fs.openSync('/mnt/' + res + '/fstab', 'w');
+	    fs.writeSync(f, fstab);
+	    fs.closeSync( f );
+*/
+
         var extension = util.extension_for_language(script.language);
         
         // /var/www/scraperwiki/resourcedir/<%= scrapername >/
