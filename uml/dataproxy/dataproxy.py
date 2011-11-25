@@ -190,11 +190,14 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             while True:
                 try:
-                    srec = self.connection.recv(255)
+                    # Docs suggest smallish power of 2 like 4096, so we'll try 2048 to be different
+                    srec = self.connection.recv(2048)
+                    if not srec:
+                        break
                 except socket.error:
                     self.logger.warning("connection to from uml recv error: "+str([runID, short_name]))
                     break
-                
+                    
                 ssrec = srec.split("\n")  # multiple strings if a "\n" exists
                 sbuffer.append(ssrec.pop(0))
                 while ssrec:

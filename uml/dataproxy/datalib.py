@@ -273,13 +273,13 @@ class SQLiteDatabase(Database):
                 timeout_len = 180
             
             # If the query hasn't run in timeout_len seconds then we'll timeout
-            #signal.signal(signal.SIGALRM, timeout_handler)                
-            #signal.alarm(timeout_len)  # should use set_progress_handler !!!!
+            signal.signal(signal.SIGALRM, timeout_handler)                
+            signal.alarm(timeout_len)  # should use set_progress_handler !!!!
             if data:
                 self.m_sqlitedbcursor.execute(sqlquery, data)  # handle "(?,?,?)", (val, val, val)
             else:
                 self.m_sqlitedbcursor.execute(sqlquery)
-            #signal.alarm(0)
+            signal.alarm(0)
 
             #INSERT/UPDATE/DELETE/REPLACE), and commits transactions implicitly before a non-DML, non-query statement (i. e. anything other than SELECT
             #check that only SELECT has a legitimate return state
