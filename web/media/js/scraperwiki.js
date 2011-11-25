@@ -149,14 +149,14 @@ function newCodeObject($a){
 							if($('#chooser_name_box', dialog.data).val() == ''){
 								$('span.warning', dialog.data).remove();
 								text = $('label', dialog.data).attr('title');
-								$('p', dialog.data).eq(0).addClass('error').append('<span class="warning"><span></span>' + text + '</span>');
+								$('#chooser_vaults p', dialog.data).eq(0).addClass('error').append('<span class="warning"><span></span>' + text + '</span>');
 								$('#chooser_name_box', dialog.data).bind('keyup', function(){
-									$('p.error', dialog.data).removeClass('error').children('span').remove();
+									$('#chooser_vaults p.error', dialog.data).removeClass('error').children('span').remove();
 									$(this).unbind('keyup');
 								})
 							} else {
 								$(this).addClass('active');
-								location.href = $('#chooser_vault').val().replace('/python/', '/' + $(this).attr('href').replace(/.*\//, '') + '/') + '?name=' + encodeURIComponent($('#chooser_name_box').val());
+								location.href = $('#chooser_vault').val().replace('/python/', '/' + $(this).attr('href').replace(/.*\//, '') + '/') + '?name=' + encodeURIComponent($('#chooser_name_box').val());								
 							}
 						}
 					});

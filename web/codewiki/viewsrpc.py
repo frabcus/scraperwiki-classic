@@ -91,8 +91,10 @@ def rpcexecute(request, short_name, revision=None):
         scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':"Sorry, this view does not exist"}, context_instance=RequestContext(request)))
-    if not scraper.actionauthorized(request.user, "rpcexecute"):
-        return HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "rpcexecute"), context_instance=RequestContext(request)))
+    
+    if scraper.wiki_type == 'scraper':
+        if not scraper.actionauthorized(request.user, "rpcexecute"):
+            return HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "rpcexecute"), context_instance=RequestContext(request)))
     
     if revision:
         try: 
