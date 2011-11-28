@@ -44,8 +44,6 @@ uid         = None
 gid         = None
 allowAll    = False
 mode        = None
-statusLock  = None
-statusInfo  = {}
 cache_client = None
 ignored_ip  = ''
 allowed_ips = []
@@ -131,26 +129,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  (reply)
         self.connection.send  ('\r\n' )
 
-    def sendStatus (self) :
-
-        """
-        Send status information.
-        """
-
-        #  Gather up the status information. Since we need to lock the status
-        #  structure for the duration, do this up front to make it as quick
-        #  as possible.
-        #
-        status = []
-        statusLock.acquire()
-        try    :
-            for key, value in statusInfo.items() :
-                status.append (string.join([ '%s=%s' % (k,v) for k, v in value.items()], ';'))
-        except :
-            pass
-        statusLock.release()
-
-        self.sendReply  (string.join(status, '\n'))
 
     def sendPage (self, id) :
         """
@@ -320,16 +298,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.send_error (400, "IP Address not allowed")
             return            
             
-        
-        print "Is Local? %s" % str(isLocal)
-        
-        #  Path /Status returns status information.
-        #
-        if path == '/Status'  :
-            self.sendStatus ()
-            self.connection.close()
-            return
-
         if path == '/Page' :
             self.sendPage   (query)
             self.connection.close()
@@ -343,12 +311,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if scheme not in [ 'http', 'https' ] or fragment or not netloc :
             self.send_error (400, "Malformed URL %s" % self.path)
             return
-
-        if runID is not None :
-            statusLock.acquire ()
-            try    : statusInfo[runID] = { 'runID' : runID, 'scraperID' : scraperID, 'path' : self.path }
-            except : pass
-            statusLock.release ()
 
         ctag     = None
         content  = None
@@ -527,12 +489,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.connection.sendall (page)
         self.connection.close()
-
-        if runID is not None :
-            statusLock.acquire ()
-            try    : del statusInfo[runID]
-            except : pass
-            statusLock.release ()
 
 
     def getResponse (self, soc, idle = 0x7ffffff) :
@@ -764,8 +720,6 @@ if __name__ == '__main__' :
             sys.stdout.flush()
     
             os.wait()
-
-    statusLock = threading.Lock()
 
     config = ConfigParser.ConfigParser()
     config.readfp (open(confnam))
