@@ -114,7 +114,7 @@ $(function(){
           legend: { position: "nw" }
         });
 
-  $.plot($("#datastore_graph"), [
+/*  $.plot($("#datastore_graph"), [
         {
             data: datastore_record_count,
             label: 'Datastore Record Count',
@@ -128,7 +128,7 @@ $(function(){
           legend: { position: "nw" }
         });
 
-  $('.legend').css('left', '30px');
+  $('.legend').css('left', '30px'); */
 
 });
 </script>
@@ -146,7 +146,7 @@ $(function(){
 <p id="totals_graph" style="height:200px"></p>
 <p id="new_graph" style="height:200px"></p>
 <p id="active_graph" style="height:200px"></p>
-<p id="datastore_graph" style="height:200px"></p>
+<!-- <p id="datastore_graph" style="height:200px"></p> -->
 
 <table class="data">
     <th>
@@ -155,7 +155,7 @@ $(function(){
        <th>Users</th>
        <th>Active Coders</th>
        <th>Longtime<br>Active Coders</th>
-       <th>Datastore<br>Record Count</th>
+       <!-- <th>Datastore<br>Record Count</th> -->
     </th>
 
     {% for year in data reversed %}
@@ -172,7 +172,7 @@ $(function(){
                <td> {{month.total_users|intcomma}} ({{ month.this_months_users|plusminus_int|intcomma }}) </td>
                <td> {{month.active_coders|intcomma}} ({{ month.delta_active_coders|plusminus_int|intcomma }}) </td>
                <td> {{month.longtime_active_coders|intcomma}} ({{ month.delta_longtime_active_coders|plusminus_int|intcomma }}) </td>
-               <td> {{month.datastore_record_count|intcomma}} ({{ month.delta_datastore_record_count|plusminus_int|intcomma }}) </td>
+               <!--               <td> {{month.datastore_record_count|intcomma}} ({{ month.delta_datastore_record_count|plusminus_int|intcomma }}) </td> -->
            </tr>
         {% endfor %}
     {% endfor %}
