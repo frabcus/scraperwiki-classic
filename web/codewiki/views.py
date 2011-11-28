@@ -346,7 +346,7 @@ def code_overview(request, wiki_type, short_name):
 def scraper_admin_settags(request, short_name):
     scraper = getscraperor404(request, short_name, "settags")
     scraper.settags(request.POST.get('value', ''))  # splitting is in the library
-    return render_to_response('codewiki/includes/tagslist.html', { "scraper_tags":scraper.gettags() })
+    return HttpResponse("Successfully set new tags")
 
 def scraper_admin_privacystatus(request, short_name):
     scraper = getscraperor404(request, short_name, "set_privacy_status")
