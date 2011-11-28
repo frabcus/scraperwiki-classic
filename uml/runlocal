@@ -18,7 +18,6 @@ rm	-rf	./var/run
 mkdir 	-p 	./var/log
 mkdir 	-p 	./var/run
 
-#./etc/local.d/controller	restart
 export NODE_PATH=`cd ../lib/node_modules;pwd`
 echo -n 'Have set NODE_PATH to '
 echo $NODE_PATH
