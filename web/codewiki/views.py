@@ -346,7 +346,7 @@ def code_overview(request, wiki_type, short_name):
 def scraper_admin_settags(request, short_name):
     scraper = getscraperor404(request, short_name, "settags")
     scraper.settags(request.POST.get('value', ''))  # splitting is in the library
-    return render_to_response('codewiki/includes/tagslist.html', { "scraper_tags":scraper.gettags() })
+    return HttpResponse("Successfully set new tags")
 
 def scraper_admin_privacystatus(request, short_name):
     scraper = getscraperor404(request, short_name, "set_privacy_status")
@@ -662,11 +662,6 @@ def choose_template(request, wiki_type):
         context['vault_membership_count'] = None
         context['vault_membership']  = None
         
-    # Specify which template we want
-    # Don't think this is required any more
-    # if request.user.is_authenticated() and request.user.vault_membership.count() > 0 and vault:
-    #   tpl = 'codewiki/includes/add_to_vault.html'
-    # else:
     tpl = 'codewiki/includes/choose_template.html'
         
     vers =  models.code.SCRAPER_LANGUAGES_V        

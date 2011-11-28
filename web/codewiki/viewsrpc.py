@@ -8,6 +8,7 @@ from django.core.mail import send_mail, mail_admins
 
 
 from codewiki.models.code import MAGIC_RUN_INTERVAL
+from codewiki.models.vault import VaultRecord
         
 import smtplib
 
@@ -87,6 +88,8 @@ def scraperwikitag(scraper, html, panepresent):
 
 
 def rpcexecute(request, short_name, revision=None):
+    apikey = request.GET.get('apikey', None)
+
     try:
         scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
@@ -95,6 +98,10 @@ def rpcexecute(request, short_name, revision=None):
     if scraper.wiki_type == 'scraper':
         if not scraper.actionauthorized(request.user, "rpcexecute"):
             return HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "rpcexecute"), context_instance=RequestContext(request)))
+
+    if not scraper.api_actionauthorized(apikey):
+        return HttpResponseForbidden(render_to_string('404.html', 
+            {'heading': 'Not authorized', 'body': 'API key required to access this view'}, context_instance=RequestContext(request)))
     
     if revision:
         try: 
@@ -240,7 +247,8 @@ def Dtwistermakesrunevent(request):
     event.exception_message = request.POST.get("exception_message", "")
     event.run_ended = datetime.datetime.now()   # last update time
 
-    
+    if event.scraper.vault:
+        VaultRecord.update(vault=event.scraper.vault, count=event.pages_scraped )
 
     # run finished case
     if request.POST.get("exitstatus"):

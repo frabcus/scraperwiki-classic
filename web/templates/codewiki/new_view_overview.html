@@ -153,7 +153,7 @@
 <table class="about" cellspacing="0" cellpadding="0">
     <tr>
     <td class="schedule">
-        <a href="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}" id="scraper_screenshot" rel="nofollow">
+        <a href="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}?{% if scraper.access_apikey %}apikey={{scraper.access_apikey}}{% endif %}" id="scraper_screenshot" rel="nofollow">
               {% screen_shot scraper 'large' %} <span class="tooltip">Open this View</span>
         </a>
     </td>
@@ -438,7 +438,7 @@
 $(document).ready(function() 
 {
     setupCodeOverview('{{scraper.short_name}}');
-    setupScraperOverview('{{scraper.short_name}}');
+    $('#data_tab_1').trigger('click');
     //  Disabling attachables for now
     //  setupChangeAttachables('{{scraper.short_name}}');
 });
