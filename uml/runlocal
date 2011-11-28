@@ -26,7 +26,7 @@ echo $NODE_PATH
 cd ../services/scriptmgr
 node ./scriptmgr.js &
 cd -
-./etc/local.d/datastore		start
+./etc/local.d/dataproxy		start
 ./etc/local.d/ftpproxy		start
 ./etc/local.d/httpproxy		start
 ./etc/local.d/httpsproxy	start
