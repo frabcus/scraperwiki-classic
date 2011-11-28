@@ -151,6 +151,10 @@ class Code(models.Model):
             self.created_at = datetime.datetime.today()  
 
     def save(self, *args, **kwargs):
+        # Check type and apikey and generate one if necessary
+        if self.privacy_status == "private" and not self.access_apikey:
+            self.generate_apikey()
+
         if not self.short_name:
             self._buildfromfirsttitle()
 
@@ -537,44 +541,7 @@ class UserCodeRole(models.Model):
 
 
 class UserUserRole(models.Model):
-    user    = models.ForeignKey(User, related_name='useruserrole_set')
-    other   = models.ForeignKey(User, related_name='rev_useruserrole_set')
-    role    = models.CharField(max_length=100)   # ['on_team_of']
-
-    @staticmethod
-    def put_on_team(user, organisation):
-        u, created = UserUserRole.objects.get_or_create(user=user, other=organisation, role="on_team_of") 
-
-    @staticmethod
-    def remove_from_team(user, organisation):
-        UserUserRole.objects.filter(user=user, other=organisation, role="on_team_of").delete()
-
-    # uses lists of users rather than useruserroles so that you can test containment easily
-    @staticmethod
-    def useruserrolemap(user):
-        result = { "on_team_of":[], "has_on_team":[] }
-        for useruserrole in user.useruserrole_set.all():
-            role = useruserrole.role
-            if role not in result:
-                result[role] = [ ]
-            result[role].append(useruserrole.other)
-        for useruserrole in user.rev_useruserrole_set.all():
-            role = useruserrole.role
-            # reverse direction of names
-            if role == "on_team_of":
-                role = "has_on_team";
-            else:
-                assert(False)
-            if role not in result:
-                result[role] = [ ]
-            result[role].append(useruserrole.user)
-        return result
- 
-    def __unicode__(self):
-        return "User: %s -> Other: %s (%s)" % (self.user, self.user, self.role)
-
-    class Meta:
-        app_label = 'codewiki'
+    pass
 
 
 

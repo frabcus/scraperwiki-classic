@@ -662,11 +662,6 @@ def choose_template(request, wiki_type):
         context['vault_membership_count'] = None
         context['vault_membership']  = None
         
-    # Specify which template we want
-    # Don't think this is required any more
-    # if request.user.is_authenticated() and request.user.vault_membership.count() > 0 and vault:
-    #   tpl = 'codewiki/includes/add_to_vault.html'
-    # else:
     tpl = 'codewiki/includes/choose_template.html'
         
     vers =  models.code.SCRAPER_LANGUAGES_V        
