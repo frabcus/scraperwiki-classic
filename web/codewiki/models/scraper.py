@@ -99,19 +99,12 @@ class Scraper (code.Code):
             except:
                 pass
 
-    # Without checking the privacy status, this method will regenerate
-    # the api key for this scrapers access key and might be called via 
-    # the front-end
-    def regenerate_access_key(self):
-        import uuid
-        self.access_apikey = str( uuid.uuid4() )
-
     def save(self, *args, **kwargs):
         self.wiki_type = 'scraper'
 
         # Check type and apikey and generate one if necessary
         if self.privacy_status == "private" and not self.access_apikey:
-            self.regenerate_access_key()
+            self.generate_apikey()
        
         super(Scraper, self).save(*args, **kwargs)
 
