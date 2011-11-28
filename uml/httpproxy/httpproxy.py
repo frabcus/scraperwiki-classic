@@ -787,6 +787,7 @@ if __name__ == '__main__' :
     # List of machine IPs that are allowed to connect to this machine
     try:
         allowed_ips = [ x.replace("'", "").strip() for x in config.get('security', 'allowed_ips').split(',')]
+        logger.info("Allowed IPs set to " % (allowed_ips,))                
     except:
         logger.warning("Due to missing settings we are only allowing the local machine (and 10.* addresses)")        
         allowed_ips = ['127.0.0.1']
