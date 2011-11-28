@@ -334,8 +334,8 @@ class TestScrapers(SeleniumTest):
 
         # edit tags
         s.click('css=.tag a')
-        s.type('css=#divEditTags input', "great,testy,rabbit")
-        s.click("//div[@id='divEditTags']//button[text()='Save tags']")
+        s.type('css=.new_tag_box input', "great,testy,rabbit")
+        s.key_down('css=.new_tag_box input', "\\13");
         time.sleep(1) # XXX how to wait just until the JS has run?
         self.failUnless(s.is_text_present("rabbit"))
 
