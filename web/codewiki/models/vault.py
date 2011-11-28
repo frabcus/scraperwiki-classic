@@ -5,8 +5,15 @@ from datetime import datetime
 
 PLAN_TYPES = (
     ('individual', 'Individual'),
+    ('small_business', 'Small Business'),
     ('corporate', 'Corporate'),    
 )
+
+PLAN_PAGE_REQUESTS = {
+    'individual':     20000,
+    'small_business': 100000,
+    'corporate':      2000000000,    
+}
 
 # Multiple instances per user are now allowed
 class Vault(models.Model):
@@ -66,8 +73,10 @@ class Vault(models.Model):
             for u in users:
                 UserCodeRole(code=code_object, user=u,role='editor').save()
 
+
     def percentage_this_month(self):
-        return 0
+        return int(float(1.0 * float(self.records_this_month()) / float(self.records_allowed())) * 100)
+
 
     def records_this_month(self):
         dt = datetime.now()
@@ -78,6 +87,10 @@ class Vault(models.Model):
             return 0
 
 
+    def records_allowed(self):
+        return PLAN_PAGE_REQUESTS[self.plan]
+
+        
     def __unicode__(self):
         return "%s' %s vault (created on %s)" % (self.user.username, self.plan, self.name)
 
