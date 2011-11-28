@@ -232,17 +232,16 @@ def sqlite_handler(request):
         u = request.user
         
     if scraper.privacy_status != "private":
-        s = scraper
+        s = scraper # XX why this only when not private? FAI
         kd = short_name
     else:
         # When private we MUST have an apikey and it should match
-        if not all([ scraper.access_apikey, apikey, scraper.access_apikey == apikey] ):
+        if not scraper.api_actionauthorized(apikey):
             result = json.dumps({'error':"Invalid API Key", "short_name":short_name})
             if request.GET.get("callback"):
                 result = "%s(%s)" % (request.GET.get("callback"), result)
             return HttpResponse(result)
             
-    
     APIMetric.record( "sqlite", key_data=kd,  user=u, code_object=s )
     
     dataproxy = DataStore(request.GET.get('name'))
@@ -534,13 +533,13 @@ def runevent_handler(request):
     
     # Check accessibility if this scraper is private using 
     # apikey
-    if scraper.privacy_status == 'private':
+    if not scraper.api_actionauthorized(apikey):
+        result = json.dumps({'error':"Invalid API Key", "short_name":short_name})
+        if request.GET.get("callback"):
+            result = "%s(%s)" % (request.GET.get("callback"), result)
+        return HttpResponse(result)
+    if scraper.privacy_status == 'private': # XXX not sure why we do this, do metrics not work with private? FAI
         kd,s = '', None
-        if not all([ scraper.access_apikey, apikey, scraper.access_apikey == apikey ]):
-            result = json.dumps({'error':"Invalid API Key", "short_name":short_name})
-            if request.GET.get("callback"):
-                result = "%s(%s)" % (request.GET.get("callback"), result)
-            return HttpResponse(result)
 
     u = None
     if request.user.is_authenticated():
@@ -657,7 +656,7 @@ def scraperinfo_handler(request):
         # Check accessibility if this scraper is private using 
         # apikey
         if hasattr(scraper, "privacy_status") and scraper.privacy_status == 'private':            
-            if not all([scraper.access_apikey, apikey, scraper.access_apikey == apikey]):
+            if not scraper.api_actionauthorized(apikey):
                 scraper = u'Invalid API Key'
             
         if type(scraper) in [str, unicode]:

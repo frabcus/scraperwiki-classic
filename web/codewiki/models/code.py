@@ -410,7 +410,7 @@ class Code(models.Model):
         if self.privacy_status == "deleted":
             return False
             
-            # extra type control condition
+        # extra type control condition
         if action == "rpcexecute" and self.wiki_type != "view":
             return False
         
@@ -437,7 +437,6 @@ class Code(models.Model):
         assert False, ("unknown action", action)
         return True
 
-
     def authorizationfailedmessage(self, user, action):
         if self.privacy_status == "deleted":
             return {'heading': 'Deleted', 'body': "Sorry this %s has been deleted" % self.wiki_type}
@@ -456,6 +455,11 @@ class Code(models.Model):
             if self.privacy_status == "private":
                 return {'heading': 'Not authorized', 'body': "Sorry, this %s is private" % self.wiki_type}
         return {'heading': "unknown", "body":"unknown"}
+
+    def api_actionauthorized(self, apikey):
+        if self.privacy_status == 'private':
+            return all([ self.access_apikey, apikey, self.access_apikey == apikey ])
+        return True
 
     
     # tags have been unhelpfully attached to the scraper and view classes rather than the base code class
