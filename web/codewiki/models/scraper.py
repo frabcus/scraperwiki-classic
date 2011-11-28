@@ -99,10 +99,6 @@ class Scraper (code.Code):
             except:
                 pass
 
-    def save(self, *args, **kwargs):
-        self.wiki_type = 'scraper'
-        super(Scraper, self).save(*args, **kwargs)
-
     def content_type(self):
         return ContentType.objects.get(app_label="codewiki", model="Scraper")
 
