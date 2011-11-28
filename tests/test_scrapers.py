@@ -322,7 +322,7 @@ class TestScrapers(SeleniumTest):
         s.open("/logout")
         owner['username'] = self.create_user(password=owner['password'])
         code_name = self.create_code("python", code_type, self._load_data("python", code_type), '')
-        s.click('link=' + code_type.capitalize())
+        s.click('link=Back to ' + code_type + ' overview')
         self.wait_for_page()
 
         # edit description
