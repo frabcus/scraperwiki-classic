@@ -39,6 +39,7 @@
 	      var _gaq = _gaq || [];
 	      _gaq.push(['_setAccount', 'UA-21451224-1']);
           _gaq.push(['_setDomainName', 'none']);
+          _gaq.push(['_setCustomVar', 1, 'Registered User', '{% if user.is_authenticated %}True{% else %}False{% endif %}', 2]);
 	      _gaq.push(['_trackPageview']);
 
 	      (function() {
