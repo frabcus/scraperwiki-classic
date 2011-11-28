@@ -66,6 +66,8 @@ class Vault(models.Model):
             for u in users:
                 UserCodeRole(code=code_object, user=u,role='editor').save()
 
+    def percentage_this_month(self):
+        return 0
 
     def records_this_month(self):
         dt = datetime.now()
