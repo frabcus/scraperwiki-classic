@@ -1,11 +1,18 @@
+#!/usr/bin/env python
+# ScraperWiki Limited
+# David Jones, 2011-11-28
+
 """
 Tests for the dataproxy/datastore/whatever that can test the common edge cases
 and should exercise the python library at the same time.
 """
-import uuid
-import os, sys
-import unittest
+
 import json
+import os
+import sys
+import uuid
+import unittest
+
 sys.path.append(os.path.abspath( os.path.join(os.path.abspath(__file__), '../../../scraperlibs/python/')))
 try:
     import scraperwiki
