@@ -75,10 +75,17 @@ class Vault(models.Model):
 
 
     def percentage_this_month(self):
+        """
+        The percent of pages (using records retrieved and records allowed) fetched this month.
+        The value MAY be more than 100%
+        """
         return int(float(1.0 * float(self.records_this_month()) / float(self.records_allowed())) * 100)
 
 
     def records_this_month(self):
+        """
+        The number of pages retrieved this month by scrapers in this vault.
+        """
         dt = datetime.now()
         try:
             v = self.records.get( year=dt.year, month=dt.month )
@@ -88,6 +95,10 @@ class Vault(models.Model):
 
 
     def records_allowed(self):
+        """
+        The number of pages that this vault is allowed to scrape, across all scrapers
+        in each month.
+        """
         return PLAN_PAGE_REQUESTS[self.plan]
 
         
@@ -100,7 +111,10 @@ class Vault(models.Model):
 
 
 class VaultRecord(models.Model):
-    
+    """
+    Records a counter against a pages scraped. This could be extended to also log
+    API calls should that be necessary/
+    """
     vault  = models.ForeignKey(Vault, related_name='records')
     year   = models.IntegerField(default=0)    
     month  = models.IntegerField(default=0)        
