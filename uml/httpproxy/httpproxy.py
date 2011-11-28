@@ -49,7 +49,6 @@ ignored_ip  = ''
 allowed_ips = []
 
 class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
-
     """
     Proxy handler class. Overrides the base handler to implement
     filtering and proxying.

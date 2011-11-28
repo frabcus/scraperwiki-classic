@@ -1,6 +1,7 @@
 from django.db import models
+from django.db.models import F
 from django.contrib.auth.models import User
-
+from datetime import datetime
 
 PLAN_TYPES = (
     ('individual', 'Individual'),
@@ -66,6 +67,14 @@ class Vault(models.Model):
                 UserCodeRole(code=code_object, user=u,role='editor').save()
 
 
+    def records_this_month(self):
+        dt = datetime.now()
+        try:
+            v = self.records.get( year=dt.year, month=dt.month )
+            return v.count
+        except:
+            return 0
+
 
     def __unicode__(self):
         return "%s' %s vault (created on %s)" % (self.user.username, self.plan, self.name)
@@ -75,3 +84,27 @@ class Vault(models.Model):
         ordering = ['-name']
 
 
+class VaultRecord(models.Model):
+    
+    vault  = models.ForeignKey(Vault, related_name='records')
+    year   = models.IntegerField(default=0)    
+    month  = models.IntegerField(default=0)        
+    count  = models.IntegerField(default=0)        
+    
+    @staticmethod
+    def update(vault, count):
+        dt = datetime.now()
+        affected = VaultRecord.objects.filter(vault=vault, year=dt.year, month=dt.month ).update(count=F('count') + 1)
+        if affected == 0:
+            VaultRecord(vault=vault, year=dt.year, month=dt.month, count=count).save()
+        
+    class Meta:
+        app_label = 'codewiki'
+        
+        
+        
+        
+        
+
+        
+    
