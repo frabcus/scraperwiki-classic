@@ -7,7 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail, mail_admins
 
 
-from codewiki.models.code import MAGIC_RUN_INTERVAL, VaultRecord
+from codewiki.models.code import MAGIC_RUN_INTERVAL
+from codewiki.models.vault import VaultRecord
         
 import smtplib
 
