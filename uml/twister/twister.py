@@ -34,7 +34,7 @@ from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed, Deferred
 from twisted.internet.error import ConnectionDone, ConnectionRefusedError
 
-from twisterconfig import poptions, config, stdoutlog, djangokey, djangourl, logging, logger, jstime
+from twisterconfig import allowed_ips, poptions, config, stdoutlog, djangokey, djangourl, logging, logger, jstime
 from twisterrunner import MakeRunner
 
 agent = Agent(reactor)
@@ -65,9 +65,15 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         logger.info("connection client# %d" % self.factory.clientcount)
         
         # this returns localhost and is unable to distinguish between orbited or django source
-        #socket = self.transport.getHandle()
-        #logger.info("socket  %s %s" % (socket.getpeername(), type(socket.getpeername())))
-        
+        try:
+            socket = self.transport.getHandle()
+            if not socket.getpeername()[0] in allowed_ips:
+                logger.info('Refused connection from %s' % (socket.getpeername()[0],))                
+                self.transport.loseConnection()
+                return
+        except Exception, e:
+            raise e
+            
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand
     
@@ -855,13 +861,14 @@ class RunnerFactory(protocol.ServerFactory):
             
     
     def clientConnectionLost(self, client):
-        self.clients.remove(client)  # main list
-        logger.debug("removing %s client# %d" % (client.clienttype, client.clientnumber))
+        if client in self.clients:
+            self.clients.remove(client)  # main list
+            logger.debug("removing %s client# %d" % (client.clienttype, client.clientnumber))
         
             # connection open but nothing else happened
         if client.clienttype == None:
-            self.connectedclients.remove(client)
-        
+            if client in self.connectedclients:
+                self.connectedclients.remove(client)
         elif client.clienttype == "stimulate_run":
             if client in self.stimulate_runclients:
                 self.stimulate_runclients.remove(client)

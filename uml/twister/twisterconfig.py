@@ -29,6 +29,15 @@ djangourl = config.get("twister", "djangourl")
 stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)  
 logger = logging.getLogger('twister')
 
+# List of machine IPs that are allowed to connect to this machine
+allowed_ips = []
+
+try:
+    allowed_ips = [ x.replace("'", "").strip() for x in config.get('security', 'allowed_ips').split(',')]
+except:
+    logger.warning("Only allowing local connections, bad settings")        
+    allowed_ips = ['127.0.0.1']
+
 
 # Rather than only allowing a single server we'll start sending 
 # requests to a random server from a list, that list decided based on 
