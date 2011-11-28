@@ -51,11 +51,11 @@ urlpatterns = patterns('',
                                                           views.scraper_undelete_scraper, name='scraper_undelete_scraper'),
 
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/data/(?P<table_name>.*)/$', views.scraper_data_view,    name='scraper_data_view'),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/new/$',          views.new_code_overview,    name='new_code_overview'),
-                                                                      
+
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/new/$',      lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type,short_name])) ),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+\?name=.*)$', views.code_overview,    name='code_overview'),    
-
+    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/full/$',  views.full_history,  name='full_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/comments/$', views.comments,         name='scraper_comments'),

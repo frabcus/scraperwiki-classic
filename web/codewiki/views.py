@@ -94,13 +94,7 @@ def getscraperor404(request, short_name, action, do_check=True):
 def comments(request, wiki_type, short_name):
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
     if resp: return resp
-
-    if request.user.is_authenticated():
-        if request.user.get_profile().has_feature('New overview page'):
-            return HttpResponseRedirect(reverse('code_overview', kwargs={'wiki_type':wiki_type,'short_name':short_name}) + '#chat') 
-    
-    context = {'selected_tab':'comments', 'scraper':scraper }
-    return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
+    return HttpResponseRedirect(reverse('code_overview', kwargs={'wiki_type':wiki_type,'short_name':short_name}) + '#chat') 
 
 
 def populate_itemlog(scraper, run_count=-1):
@@ -187,163 +181,6 @@ def gitpush(request, wiki_type, short_name):
     return HttpResponse("OK")
 
 
-def code_overview(request, wiki_type, short_name):
-    
-    if request.user.is_authenticated():
-        if (wiki_type == 'scraper' and request.user.get_profile().has_feature('New overview page')) or \
-           (wiki_type == 'view' and request.user.get_profile().has_feature('New view page')):
-            return new_code_overview(request, wiki_type,short_name)
-    else:
-        if wiki_type == 'scraper':
-            return new_code_overview(request, wiki_type,short_name)
-          
-    # Unless explicitly requested users will get the old overview for views.
-                    
-    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
-    if resp: return resp
-    
-    alert_test = request.GET.get('alert', '')
-    if alert_test:
-        from frontend.utilities.messages import send_message        
-        if alert_test == '1':
-            actions = [
-                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),            
-            ]
-            level = 'info'
-        elif alert_test == '2':
-            actions =  [ 
-                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
-            ]
-            level = 'warning'
-        elif alert_test == '3':
-            actions =  [ 
-                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
-            ]
-            level = 'error'
-        else:
-            actions = []
-            
-        send_message( request,{
-            "message": "This is an example " + level + " alert",
-            "level"  :  level,
-            "actions":  actions,
-        })        
-    
-    context = {'selected_tab':'overview', 'scraper':scraper }
-    context["scraper_tags"] = scraper.gettags()
-    context["userrolemap"] = scraper.userrolemap()
-    
-    # if {% if a in b %} worked we wouldn't need these two
-    context["user_owns_it"] = (request.user in context["userrolemap"]["owner"])
-    context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
-    
-    context["PRIVACY_STATUSES"] = PRIVACY_STATUSES_UI[0:2]  
-    if request.user.is_staff:
-        context["PRIVACY_STATUSES"] = PRIVACY_STATUSES_UI[0:3]  
-    context["privacy_status_name"] = dict(PRIVACY_STATUSES_UI).get(scraper.privacy_status)
-
-    context["api_base"] = "%s/api/1.0/" % settings.API_URL
-    
-    if request.user.is_staff:
-        context["descriptionfromcode"] = MakeDescriptionFromCode(scraper.language, scraper.saved_code())
-        
-    # view tpe
-    if wiki_type == 'view':
-        context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
-        if scraper.language == 'html':
-            code = scraper.saved_code()
-            if re.match('<div\s+class="inline">', code):
-                context["htmlcode"] = code
-        return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
-
-    #
-    # (else) scraper type section
-    #
-    assert wiki_type == 'scraper'
-
-    context["schedule_options"] = models.SCHEDULE_OPTIONS
-    context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
-
-    previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWSQL__", scraper.description)
-    previewrssfeeds = re.findall("(?s)__BEGINPREVIEWRSS__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWRSS__", scraper.description)
-    
-        # there's a good case for having this load through the api by ajax
-        # instead of inlining it and slowing down the page load considerably
-    dataproxy = None
-    try:
-        dataproxy = DataStore(scraper.short_name)
-        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":10})
-        if not sqlitedata:
-            context['sqliteconnectionerror'] = 'No content in response'
-        elif type(sqlitedata) in [str, unicode]:
-            context['sqliteconnectionerror'] = sqlitedata
-        elif 'tables' not in sqlitedata:
-            if 'status' in sqlitedata:
-                if sqlitedata['status'] == 'No sqlite database':
-                    pass # just leave 'sqlitedata' not in context
-                else:
-                    context['sqliteconnectionerror'] = sqlitedata['status']
-            elif 'error' in sqlitedata:
-                context['sqliteconnectionerror'] = sqlitedata['error']
-            else:
-                context['sqliteconnectionerror'] = 'Response with unexpected format'
-                logger.error("Response with unexpected format:" + str(sqlitedata))
-
-            # success, have good data
-        else:
-            total_rows = 0
-            context['sqlitedata'] = [ ]
-            for sqltablename, sqltabledata in sqlitedata['tables'].items():
-                sqltabledata["tablename"] = sqltablename
-                context['sqlitedata'].append(sqltabledata)
-                try:
-                    total_rows += int( sqltabledata['count'] )
-                except:
-                    pass
-             
-            context['total_record_count'] = total_rows
-            try:
-                beta_user = request.user.get_profile().beta_user
-            except frontend.models.UserProfile.DoesNotExist:
-                beta_user = False
-            except AttributeError:  # happens with AnonymousUser which has no get_profile function!
-                beta_user = False
-                
-            # add in the user defined sql tables.  
-            # the hazard is if you put in a very large request then it will time out before 
-            # your page gets generated, so we must protect against this type of thing
-            if beta_user:
-                for utabnum, previewsqltable in reversed(list(enumerate(previewsqltables))):
-                    lsqlitedata = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery":previewsqltable, "data":[]})
-                    if "keys" in lsqlitedata:   # otherwise 'error' is in the result
-                        context['sqlitedata'].insert(0, {"tablename":"user_defined_%d"%(utabnum+1), "keys":lsqlitedata["keys"], "rows":lsqlitedata["data"], "sql":previewsqltable})
-
-            # make rssuserfeeds
-            if beta_user and previewrssfeeds:
-                apiurl = urlparse.urljoin(settings.API_URL, reverse('api:method_sqlite'))
-                context["rssuserfeeds"] = [ ]
-                for previewrssfeed in previewrssfeeds:
-                    apqs = { "format":"rss2", "name":scraper.short_name, "query":previewrssfeed }
-                    context["rssuserfeeds"].append("%s?%s" % (apiurl, urllib.urlencode(apqs)))
-
-        # which domains have been scraped
-        context["domainscrapes"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:10]
-
-
-    except socket.error, e:
-        context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
-        
-    forked_from_this = None
-    if wiki_type == 'scraper':
-        forked_from_this = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private')
-        
-
-    if dataproxy:
-        dataproxy.close()
-
-    return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
 # Rewrite of the overview page by Zarino
@@ -355,8 +192,7 @@ def full_history(request, wiki_type, short_name):
     return render_to_response('codewiki/full_history.html', ctx, context_instance=RequestContext(request))
     
     
-# Rewrite of the overview page by Zarino
-def new_code_overview(request, wiki_type, short_name):
+def code_overview(request, wiki_type, short_name):
     from codewiki.models import ScraperRunEvent, DomainScrape
     
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")

@@ -268,6 +268,10 @@ def Dtwistermakesrunevent(request):
             domainscrape.save()
 
 
+    #####
+    # We should remove this block below and do alert emails a different way. 
+    #####
+    
     # Send email if this is an email scraper
     if request.POST.get("exitstatus"):
         logger.info('Checking if this is an email scraper')

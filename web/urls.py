@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import *
 
-# please use "import <something> as local_name" as this removes issues of name collision.
 import frontend.views as frontend_views
 import codewiki.views
 import codewiki.viewsuml
