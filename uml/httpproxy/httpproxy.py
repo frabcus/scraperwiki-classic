@@ -48,6 +48,7 @@ statusLock  = None
 statusInfo  = {}
 cache_client = None
 ignored_ip  = ''
+allowed_ips = []
 
 class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
@@ -314,6 +315,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         remote = self.connection.getpeername()
         isLocal = remote[0].startswith('10.0.1') or remote[0] == '127.0.0.1'
         ignore = ignored_ip in netloc # ignore if going to configured entry to ignore
+        
+        if not ignore and not allowed_ip(remote[0]):
+            self.send_error (400, "IP Address not allowed")
+            return            
+            
         
         print "Is Local? %s" % str(isLocal)
         
@@ -647,6 +653,9 @@ def sigTerm (signum, frame) :
     sys.exit (1)
 
 
+def allowed_ip( ip_address ):
+    return ip_address.startswith('10.0') or ip_address in allowed_ips
+
 if __name__ == '__main__' :
 
     subproc = False
@@ -774,5 +783,14 @@ if __name__ == '__main__' :
         ignored_ip = config.get(varName, 'ignore_ip')
     except:
         ignored_ip = '127.0.0.1'
+        
+    # List of machine IPs that are allowed to connect to this machine
+    try:
+        allowed_ips = [ x.replace("'", "").strip() for x in config.get('security', 'allowed_ips').split(',')]
+    except:
+        logger.warning("Due to missing settings we are only allowing the local machine (and 10.* addresses)")        
+        allowed_ips = ['127.0.0.1']
+
+        
         
     execute ()
