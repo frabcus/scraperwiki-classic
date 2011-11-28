@@ -1,5 +1,5 @@
 from frontend.models import *
-from codewiki.models import UserUserRole, Vault, UserCodeRole
+from codewiki.models import Vault, UserCodeRole
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -13,11 +13,6 @@ class UserProfileStack(admin.StackedInline):
 
     fk_name = 'user'
     max_num = 1
-    extra = 0
-
-class UserUserRoleInlines(admin.TabularInline):
-    model = UserUserRole
-    fk_name = 'user'
     extra = 0
 
 class VaultInlines(admin.StackedInline):
@@ -82,7 +77,7 @@ class CustomUserAdmin(UserAdmin):
     def profile_name(self, obj):
         return obj.get_profile().name
 
-    inlines = [UserProfileStack, UserUserRoleInlines, VaultInlines]
+    inlines = [UserProfileStack, VaultInlines]
 
 
 admin.site.register(Feature, FeaturesAdmin)
