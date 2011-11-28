@@ -101,11 +101,6 @@ class Scraper (code.Code):
 
     def save(self, *args, **kwargs):
         self.wiki_type = 'scraper'
-
-        # Check type and apikey and generate one if necessary
-        if self.privacy_status == "private" and not self.access_apikey:
-            self.generate_apikey()
-       
         super(Scraper, self).save(*args, **kwargs)
 
     def content_type(self):

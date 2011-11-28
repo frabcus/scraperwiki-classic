@@ -151,6 +151,10 @@ class Code(models.Model):
             self.created_at = datetime.datetime.today()  
 
     def save(self, *args, **kwargs):
+        # Check type and apikey and generate one if necessary
+        if self.privacy_status == "private" and not self.access_apikey:
+            self.generate_apikey()
+
         if not self.short_name:
             self._buildfromfirsttitle()
 
