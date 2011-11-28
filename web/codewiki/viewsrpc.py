@@ -8,6 +8,7 @@ from django.core.mail import send_mail, mail_admins
 
 
 from codewiki.models.code import MAGIC_RUN_INTERVAL
+from codewiki.models.vault import VaultRecord
         
 import smtplib
 
@@ -240,7 +241,8 @@ def Dtwistermakesrunevent(request):
     event.exception_message = request.POST.get("exception_message", "")
     event.run_ended = datetime.datetime.now()   # last update time
 
-    
+    if event.scraper.vault:
+        VaultRecord.update(vault=event.scraper.vault, count=event.pages_scraped )
 
     # run finished case
     if request.POST.get("exitstatus"):

@@ -46,13 +46,13 @@
                 <!-- This vault contains {{ vault.get_code_objects.count }} scraper{{ vault.get_code_objects.count|pluralize }}: -->
                 {{ vault.plan }} plan
                 <span class="usage">
-                    <span class="key">25% used</span>
-                    <span class="progressbar"><strong style="width: 25%"></strong></span>
+                    <span class="key">{{ vault.percentage_this_month }}% used</span>
+                    <span class="progressbar"><strong style="width: {{ vault.percentage_this_month }}%"></strong></span>
                     <img src="{{ MEDIA_URL }}images/icons/help.png" width="16" height="16" alt="?" />
                 </span>   
                 <div class="vault_usage_popover">
         		    <h4>This month, you have used:</h4>
-        		    <p><strong>5,000 page</strong> requests <small>of 20,000</small></p>
+        		    <p><strong>{{ vault.records_this_month }} page</strong> requests <small>of {{ vault.records_allowed }}</small></p>
         		    <p class="last"><strong>500</strong> API calls <small>of 2000</small></p>
                     <span class="arrow"></span>
                 </div>
@@ -72,13 +72,13 @@
     	        <!-- This vault contains no scrapers -->
     	        {{ vault.plan }} plan
                 <span class="usage">
-                    <span class="key">0% used</span>
+                    <span class="key">{{ vault.percentage_this_month }}% used</span>
                     <span class="progressbar"></span>
                     <img src="{{ MEDIA_URL }}images/icons/help.png" width="16" height="16" alt="?" />
                 </span>  
                 <div class="vault_usage_popover">
         		    <h4>This month, you have used:</h4>
-        		    <p><strong>0 page</strong> requests <small>of 20,000</small></p>
+        		    <p><strong>{{ vault.records_this_month }} page</strong> requests <small>of {{ vault.records_allowed }}</small></p>
         		    <p class="last"><strong>0</strong> API calls <small>of 2000</small></p>
                     <span class="arrow"></span>
                 </div>
@@ -136,13 +136,13 @@
                 <!-- This vault contains {{ vault.get_code_objects.count }} scraper{{ vault.get_code_objects.count|pluralize }}: -->
                 {{ vault.plan }} plan
                 <span class="usage warning">
-                    <span class="key">100% used</span>
-                    <span class="progressbar"><strong style="width: 100%"></strong></span>
+                    <span class="key">{{ vault.percentage_this_month  }}% used</span>
+                    <span class="progressbar"><strong style="width: {{ vault.percentage_this_month }}%"></strong></span>
                     <img src="{{ MEDIA_URL }}images/icons/exclamation.png" width="16" height="16" alt="!" />
                 </span>  
                 <div class="vault_usage_popover">
         		    <h4>This month, you have used:</h4>
-        		    <p class="warning"><strong>20,000 page</strong> requests <small>of 20,000</small></p>
+        		    <p class="warning"><strong>{{ vault.records_this_month }} page</strong> requests <small>of {{ vault.records_allowed }}</small></p>
         		    <p class="last"><strong>500</strong> API calls <small>of 2000</small></p>
         		    <p class="advice"><a href="#">Upgrade your plan</a> to scrape more</p>
                     <span class="arrow"></span>
@@ -163,13 +163,13 @@
     	        <!-- This vault contains no scrapers -->
     	        {{ vault.plan }} plan
                 <span class="usage">
-                    <span class="key">0% used</span>
+                    <span class="key">{{ vault.percentage_this_month }}% used</span>
                     <span class="progressbar"></span>
                     <img src="{{ MEDIA_URL }}images/icons/help.png" width="16" height="16" alt="?" />
                 </span>  
                 <div class="vault_usage_popover">
         		    <h4>This month, you have used:</h4>
-        		    <p><strong>0 page</strong> requests <small>of 20,000</small></p>
+        		    <p><strong>{{ vault.records_this_month }} page</strong> requests <small>of {{ vault.records_allowed }}</small></p>
         		    <p class="last"><strong>0</strong> API calls <small>of 2000</small></p>
                     <span class="arrow"></span>
                 </div>
