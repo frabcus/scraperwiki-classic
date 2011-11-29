@@ -1,4 +1,4 @@
-from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent, CodePermission, Vault
+from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent, CodePermission, Vault, VaultRecord
 from django.contrib.auth.models import User
 from django.contrib import admin
 from django.db import models
@@ -58,6 +58,9 @@ class ScraperAdmin(CodeAdmin):
 class ViewAdmin(CodeAdmin):
     actions = [mark_featured, mark_unfeatured]
 
+class VaultRecordInline(admin.TabularInline):
+    model = VaultRecord
+
 class VaultAdmin(admin.ModelAdmin):
     """
     Administration for a vault object, not sure yet whether we should hide
@@ -73,6 +76,7 @@ class VaultAdmin(admin.ModelAdmin):
     list_filter = ('plan', 'created_at')
     search_fields = ('name',)
     raw_id_fields = ('user',)
+    inlines = (VaultRecordInline,)
 
 
 class ScraperRunEventAdmin(admin.ModelAdmin):
