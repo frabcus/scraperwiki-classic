@@ -1,5 +1,4 @@
 /* @override 
-	http://scraperwiki.local:8000/media/css/main.css?
 	http://localhost:8000/media/css/main.css?
 */
 
@@ -37,10 +36,6 @@ a {
 
 a:hover {
 	text-decoration: underline;
-}
-
-span.faux_link {
-	color: #ccc;
 }
 
 a.more_link {

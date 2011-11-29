@@ -1,6 +1,6 @@
 /* @override 
-	http://localhost:8000/media/css/new_scraper_overview.css
-	https://devmedia.scraperwiki.com/css/new_scraper_overview.css
+	http://localhost:8000/media/css/code_overview.css
+	https://devmedia.scraperwiki.com/css/code_overview.css
 */
 
 #divContent {
@@ -8,7 +8,7 @@
 	width: 788px;
 }
 
-ul, ul li, p, h1, h2, h3, h4, h5 {
+ul, ul li, p {
 	padding: 0;
 	margin: 0;
 }
