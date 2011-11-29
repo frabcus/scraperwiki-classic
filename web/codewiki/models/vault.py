@@ -79,15 +79,13 @@ class Vault(models.Model):
         The percent of pages (using records retrieved and records allowed) fetched this month.
         The value MAY be more than 100%
         """
-        # return int(float(1.0 * float(self.records_this_month()) / float(self.records_allowed())) * 100)
-        return 91
+        return int(float(1.0 * float(self.records_this_month()) / float(self.records_allowed())) * 100)
 
 
     def records_this_month(self):
         """
         The number of pages retrieved this month by scrapers in this vault.
         """
-        return 17980
         dt = datetime.now()
         try:
             v = self.records.get( year=dt.year, month=dt.month )
