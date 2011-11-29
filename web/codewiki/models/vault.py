@@ -12,7 +12,7 @@ PLAN_TYPES = (
 PLAN_PAGE_REQUESTS = {
     'individual':     20000,
     'small_business': 100000,
-    'corporate':      2000000000,    
+    'corporate':      2000000,    
 }
 
 # Multiple instances per user are now allowed
