@@ -79,7 +79,8 @@ class Vault(models.Model):
         The percent of pages (using records retrieved and records allowed) fetched this month.
         The value MAY be more than 100%
         """
-        return int(float(1.0 * float(self.records_this_month()) / float(self.records_allowed())) * 100)
+        pct = int(float(1.0 * float(self.records_this_month()) / float(self.records_allowed())) * 100)
+        return min(pct, 100)
 
 
     def records_this_month(self):
