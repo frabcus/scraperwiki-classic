@@ -26,7 +26,7 @@ def getExceptionTraceback(e, code, code_filename)
     lbacktrace = e.backtrace.reverse
     #File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(lbacktrace)) }
 
-    exceptiondescription = e.to_s
+    exceptiondescription = e.inspect
     
     stackdump = []
     for l in lbacktrace
