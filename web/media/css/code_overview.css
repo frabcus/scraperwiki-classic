@@ -1271,6 +1271,13 @@ box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.3);
 	z-index: 10;
 }
 
+.sqliteconnectionerror {
+	margin-top: 5px;
+	background: transparent url(../images/icons/exclamation_2.png) 2px 0 no-repeat;
+	padding-left: 25px;
+	color: #666;
+}
+
 .network div.tags,
 .network div.forked_from,
 .network div.forked_to,
