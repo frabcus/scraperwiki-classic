@@ -18,6 +18,7 @@
 {% block content %}
     <div class="content">
         {% if users %}
+            <h4 class="search_section first">Users:</h4>
             <ul class="user_list">
                 {% for other_user in users %}
                     {% include 'frontend/includes/user_line.html' %}
@@ -28,7 +29,7 @@
         {% endif %}
 
         {% if tags %}
-            <div class="tag_suggestion">
+            <div class="tag_suggestion{% if not users %} first{% endif %}">
                 {% if tags|length_is:"1" %}
                     <a  href="{% url single_tag tags.0.name %}" class="yes">Yes! Show me</a>
                     <h4>Are you looking for all scrapers <em>tagged</em> with 
@@ -39,11 +40,11 @@
                         <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a>
                     {% endfor %}
                 {% endif %}
-
             </div>
         {% endif %}
 
         {% if scrapers %}
+            <h4 class="search_section{% if not users and not tags %} first{% endif %}">Scrapers and views:</h4>
 			{% autopaginate scrapers 20 %}
             <ul class="scraper_list">				
                 {% for code in scrapers %}
@@ -52,8 +53,11 @@
             </ul>
 
 			{% paginate %}
-        {% else %}
-        <p>No scrapers match &lsquo;{{ query }}&rsquo;, would you like to <a href="/browse/">browse</a>?</p>
+        {% endif %}
+        
+        {% if not users and not tags and not scrapers %}
+            <p class="no_results">No scrapers, views, users or tags match &lsquo;{{ query }}&rsquo;.</p>
+            <p class="no_results">Would you like to <a href="/browse/">browse</a> intead?</p>
         {% endif %}
         
 

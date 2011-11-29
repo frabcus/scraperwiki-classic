@@ -1,11 +1,18 @@
+#!/usr/bin/env python
+# ScraperWiki Limited
+# David Jones, 2011-11-28
+
 """
 Tests for the dataproxy/datastore/whatever that can test the common edge cases
 and should exercise the python library at the same time.
 """
-import uuid
-import os, sys
-import unittest
+
 import json
+import os
+import sys
+import uuid
+import unittest
+
 sys.path.append(os.path.abspath( os.path.join(os.path.abspath(__file__), '../../../scraperlibs/python/')))
 try:
     import scraperwiki
@@ -45,6 +52,15 @@ def update_settings_for_name(settings,name):
 #        
 ##############################################################################
 
+def our_settings():
+    """Return a JSON object (that is, a dict) of the settings used for
+    the test.  These are stored in the file "dev_test_settings.json".
+    """
+
+    return json.load(
+      open(os.path.join(os.path.dirname(__file__),
+                        "dev_test_settings.json")))
+
 
 class DataStoreTester(unittest.TestCase):
     """
@@ -52,7 +68,7 @@ class DataStoreTester(unittest.TestCase):
     """
     def setUp(self):
         scraperwiki.logfd = sys.stdout
-        self.settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
+        self.settings = our_settings()
         self.settings['scrapername'], self.settings['runid'] = self.random_details()
         update_settings_for_name(self.settings,self.settings['scrapername'])
         scraperwiki.datastore.create( **self.settings )
@@ -107,7 +123,7 @@ class BasicDataProxyTests( DataStoreTester ):
 
     def test_attach_denied(self):
         title('test_attach')
-        settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )        
+        settings = our_settings()
         settings['scrapername'], settings['runid'] = self.random_details()
         update_settings_for_name(settings,settings['scrapername'])        
         attach_to = settings['scrapername']
@@ -115,10 +131,11 @@ class BasicDataProxyTests( DataStoreTester ):
         print scraperwiki.sqlite.save(['id'], {'id':1}, table_name='test')
         scraperwiki.datastore.close()
 
-        settings = json.loads( open( os.path.join(os.path.dirname( __file__ ), "dev_test_settings.json") ).read() )                
+        settings = our_settings()
         settings['scrapername'], settings['runid'] = self.random_details()
         update_settings_for_name(settings,settings['scrapername'])       
         scraperwiki.datastore.create( **settings )
+        scraperwiki.sqlite.save(['id'], {'id':1}, table_name='test')
         try:
             scraperwiki.sqlite.attach(attach_to,attach_to)         
             scraperwiki.sqlite.select('* from `%s`.test' % attach_to)

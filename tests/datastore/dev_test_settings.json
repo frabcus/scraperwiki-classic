@@ -4,5 +4,5 @@
 	"scrapername"   : "test", 
 	"runid" 	    : "123",
 	"attachables"   : "",
-	"secret"		: "wombles"
+	"secret"		: "your_secret_here"
 }

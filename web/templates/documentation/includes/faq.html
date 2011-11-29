@@ -320,8 +320,11 @@ print urllib.urlopen(url).read()
 
            <dt id="import">Can I import code from another scraper?</a></dt>
            <dd>
-                <p>We have a feature than can, at best, be described as
-                experimental (and only works in Python).
+                <p><strong>In PHP</strong> you can pass a URL to
+                <var>require</var>:</p>
+                <code>require("http://some-url-to/some.php");</code>
+                <p><strong>In Python</strong> we have a feature than can,
+                at best, be described as experimental.
                 Instead of <tt>import amodule</tt> you can use:
                 <code>amodule = <a
                 href="https://scraperwiki.com/docs/python/python_help_documentation/">scraperwiki.utils.swimport</a>("<var>some-other-scraper</var>")</code>

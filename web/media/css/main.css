@@ -1,5 +1,4 @@
 /* @override 
-	http://scraperwiki.local:8000/media/css/main.css?
 	http://localhost:8000/media/css/main.css?
 */
 
@@ -37,10 +36,6 @@ a {
 
 a:hover {
 	text-decoration: underline;
-}
-
-span.faux_link {
-	color: #ccc;
 }
 
 a.more_link {
@@ -631,9 +626,10 @@ body.search #header_inner:hover form #id_q {
 
 body.search .tag_suggestion {
 	background-color: #F4F8FB;
-	padding: 10px 15px;
+	padding: 5px 8px;
 	line-height: 20px;
 	color: #456;
+	margin-top: 30px;
 }
 
 body.search .tag_suggestion h4 {
@@ -642,7 +638,8 @@ body.search .tag_suggestion h4 {
 }
 
 body.search .tag_suggestion .single_tag {
-	margin: 0 5px;
+	margin: 0 3px;
+	padding: 2px 6px 1px 6px;
 }
 
 body.search .tag_suggestion .yes {
@@ -650,6 +647,34 @@ body.search .tag_suggestion .yes {
 	background: transparent url(../images/icons/forward_arrow.png) 100% 70% no-repeat;
 	padding-right: 20px;
 	font-size: 14px;
+}
+
+body.search .search_section {
+	padding: 5px 8px;
+	margin-bottom: 5px;
+	background-color: #F4F8FB;
+	margin-top: 30px;
+	color: #456;
+}
+
+body.search .search_section.first,
+body.search .tag_suggestion.first {
+	margin-top: 0;
+}
+
+body.search .user_list {
+	padding-left: 8px;
+}
+
+body.search .code_object_line {
+	padding-left: 8px;
+}
+
+body.search .no_results {
+	text-align: center;
+	font-size: 18px;
+	margin: 10px;
+	color: #333;
 }
 
 
@@ -3675,13 +3700,14 @@ ul.user_list {
 
 ul.user_list li {
     float: left;
-    padding-right: 25px;
-    line-height: 38px;
+    line-height: 30px;
+    padding: 8px 25px 0 0;
 }
 
 ul.user_list li.clear {
     float: none;
     clear: both;
+    padding: 0;
 }
 
 ul.user_list li .gravatar {
@@ -6447,8 +6473,6 @@ body.vaults .usage {
 	float: right;
 	height: 14px;
 	cursor: pointer;
-	/* Temporarily disable usage div */
-	display: none;
 }
 
 body.vaults .usage .key {

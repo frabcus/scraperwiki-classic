@@ -68,7 +68,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except:
             host = None
 
-        self.logger.debug(str({"uml":vm_ctr, "host":host}))
+        logger.debug(str({"uml":vm_ctr, "host":host}))
         self.attachauthurl = config.get("dataproxy", 'attachauthurl')
 
         rem       = self.connection.getpeername()
@@ -76,12 +76,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         
         if host and (rem[0].startswith(add) or rem[0].startswith('10.0.1') or vm_ctr == 'lxc'):
             # No need to do the ident, we will return a non-existent runID,short_name for now
-            self.logger.debug('We are using LXC so use parameters for ident')
-            self.logger.debug( "%s -> %s" % (params.get('vrunid'), params.get("vscrapername",''),) )
+            logger.debug('We are using LXC so use parameters for ident')
+            logger.debug( "%s -> %s" % (params.get('vrunid'), params.get("vscrapername",''),) )
             return params.get('vrunid'), params.get("vscrapername", '')            
 
                 # should be using cgi.parse_qs(query) technology here                
-        self.logger.debug("LIDENT: %s" % (lident,) )                                
+        logger.debug("LIDENT: %s" % (lident,) )
         for line in lident.split('\n'):
             if line:
                 key, value = line.split('=',1)
@@ -93,25 +93,23 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return runID, short_name
 
     def process(self, db, request):
-        self.logger.debug(str(("request", request))[:100])
+        logger.debug(str(("request", request))[:100])
 
         sres = ''
         try:
             res = db.process(request)
             sres = json.dumps(res)            
         except Exception, edb:
-            self.logger.warning( str(edb) )
+            logger.warning( str(edb) )
 
         if sres:
-            self.logger.debug(sres[:200])
+            logger.debug(sres[:200])
         self.connection.sendall(sres+'\n')
 
 
         # this morphs into the long running two-way connection
     def do_GET (self) :
         try:
-            self.logger = logging.getLogger('dataproxy')
-
             (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
             params = dict(cgi.parse_qsl(query))
             verification_key = params['verify']
@@ -138,7 +136,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     dataauth = "writable"
 
-                self.logger.debug( '.%s.' % [short_name])
+                logger.debug( '.%s.' % [short_name])
                     # send back identification so we can compare against it (sometimes it doesn't quite work out)
                 firstmessage["short_name"] = short_name
                 firstmessage["runID"] = runID
@@ -146,18 +144,16 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
                 # run verification of the names against what we identified
                 if runID != params.get('vrunid') or short_name != params.get("vscrapername", ''):
-                    self.logger.error("Mismatching scrapername %s" % str([runID, short_name, params.get('vrunid'), params.get("vscrapername", '')]))
+                    logger.error("Mismatching scrapername %s" % str([runID, short_name, params.get('vrunid'), params.get("vscrapername", '')]))
                     firstmessage["error"] = "Mismatching scrapername from ident"
                     firstmessage["status"] = "bad: mismatching scrapername from ident"
             
             # Copied from services/datastore/dataproxy.py
             # Check verification key on first run.
-            self.logger.debug(
-              'Verification key is %s' % verification_key)
+            logger.debug('Verification key is %s' % verification_key)
             secret_key = '%s%s' % (short_name, dataproxy_secret,)
             possibly = hashlib.sha256(secret_key).hexdigest()  
-            self.logger.debug(
-              'Comparing %s == %s' % (possibly, verification_key,) )
+            logger.debug('Comparing %s == %s' % (possibly, verification_key,) )
             if possibly != verification_key:
                 # XXX not sure we should log secret
                 # log.msg( 'Failed: short_name is "%s" self.factory.secret is "%s"' % (short_name,self.factory.secret) , logLevel=logging.DEBUG)      
@@ -171,16 +167,16 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             # consolidate sending back to trap socket errors
             try:
-                self.logger.debug( firstmessage )
+                logger.debug( firstmessage )
                 self.connection.sendall(json.dumps(firstmessage)+'\n')
             except socket.error:
-                self.logger.warning("connection to dataproxy socket.error: "+str(firstmessage))
+                logger.warning("connection to dataproxy socket.error: "+str(firstmessage))
             if "error" in firstmessage:
-                self.logger.warning("connection to dataproxy refused error: "+str(firstmessage["error"]))
+                logger.warning("connection to dataproxy refused error: "+str(firstmessage["error"]))
                 self.connection.close()
                 return
             
-            self.logger.debug("connection made to dataproxy for %s %s - %s" % (dataauth, short_name, runID))
+            logger.debug("connection made to dataproxy for %s %s - %s" % (dataauth, short_name, runID))
             db = datalib.SQLiteDatabase(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID, attachables)
 
                     # enter the loop that now waits for single requests (delimited by \n) 
@@ -195,7 +191,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     if not srec:
                         break
                 except socket.error:
-                    self.logger.warning("connection to from uml recv error: "+str([runID, short_name]))
+                    logger.warning("connection to from uml recv error: "+str([runID, short_name]))
                     break
                     
                 ssrec = srec.split("\n")  # multiple strings if a "\n" exists
@@ -212,17 +208,17 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         try:
                             self.process(db, request)
                         except socket.error:
-                            self.logger.warning("connection sending to uml socket.error: "+str([runID, short_name]))
+                            logger.warning("connection sending to uml socket.error: "+str([runID, short_name]))
                             srec = ""  # break out of loop
                     sbuffer = [ ssrec.pop(0) ]  # next one in
                 if not srec:
                     break
-            self.logger.debug("ending connection %s - %s" % (short_name, runID))
+            logger.debug("ending connection %s - %s" % (short_name, runID))
             self.connection.close()
             if db:
                 db.close()
         except:
-            self.logger.error("do_GET uncaught exception: %s" % traceback.format_exc())
+            logger.error("do_GET uncaught exception: %s" % traceback.format_exc())
 
 
     do_HEAD   = do_GET
@@ -233,6 +229,22 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 class ProxyHTTPServer(SocketServer.ForkingMixIn, BaseHTTPServer.HTTPServer):
     pass
+
+
+def syslog_addr():
+    """(Mostly for local development) return the address for the syslog
+    daemon; passed as the *address* argument to SysLogHandler.
+    """
+
+    # See
+    # http://chris.improbable.org/2008/04/17/python-os-x-caution-loggings-syslog-handler-is/
+    if sys.platform == "darwin":
+        # Apple made 10.5 more secure by disabling network syslog:
+        address = "/var/run/syslog"
+    else:
+        address = ('localhost', 514)
+    return address
+
 
 if __name__ == '__main__':
 
@@ -268,7 +280,10 @@ if __name__ == '__main__':
     httpd = ProxyHTTPServer(('', port), ProxyHandler)
     httpd.max_children = 160
     sa = httpd.socket.getsockname()
+
     logger = logging.getLogger('dataproxy')
-    logger.info(str(("Serving HTTP on", sa[0], "port", sa[1], "...")))
+
+    logger.info("Serving HTTP on %s port %s" %(sa[0], sa[1]))
+
     httpd.serve_forever()
 

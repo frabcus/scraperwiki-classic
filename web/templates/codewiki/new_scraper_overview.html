@@ -20,7 +20,7 @@
     <meta property="og:site_name" content="ScraperWiki" />
 {% endblock %}
 
-{% block css %}<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/new_scraper_overview.css" />
+{% block css %}<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/code_overview.css" />
 <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-dataTables.css" />{% endblock %}
 
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/code_object_comments/{{ scraper.short_name }}" />{% endblock %}
@@ -484,7 +484,7 @@
                 </li>
                 <li class="clear"></li>
             </ul>
-            <p>{{sqliteconnectionerror}}</p>
+            <p class="sqliteconnectionerror">{{sqliteconnectionerror}}</p>
         {% else %}
             <ul class="titlebar">
                 <li class="first"><h3>This scraper has no data yet</h3></li>
