@@ -110,8 +110,6 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # this morphs into the long running two-way connection
     def do_GET (self) :
         try:
-            self.logger = logging.getLogger('dataproxy')
-
             (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
             params = dict(cgi.parse_qsl(query))
             verification_key = params['verify']
@@ -234,6 +232,22 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 class ProxyHTTPServer(SocketServer.ForkingMixIn, BaseHTTPServer.HTTPServer):
     pass
 
+
+def syslog_addr():
+    """(Mostly for local development) return the address for the syslog
+    daemon; passed as the *address* argument to SysLogHandler.
+    """
+
+    # See
+    # http://chris.improbable.org/2008/04/17/python-os-x-caution-loggings-syslog-handler-is/
+    if sys.platform == "darwin":
+        # Apple made 10.5 more secure by disabling network syslog:
+        address = "/var/run/syslog"
+    else:
+        address = ('localhost', 514)
+    return address
+
+
 if __name__ == '__main__':
 
     # daemon mode
@@ -263,12 +277,20 @@ if __name__ == '__main__':
 
     logging.config.fileConfig(configfile)
 
+    syslogh = logging.handlers.SysLogHandler(address=syslog_addr())
+    syslogh.setFormatter(logging.Formatter(
+      "dataproxy %(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s"))
+
     port = config.getint('dataproxy', 'port')
     ProxyHandler.protocol_version = "HTTP/1.0"
     httpd = ProxyHTTPServer(('', port), ProxyHandler)
     httpd.max_children = 160
     sa = httpd.socket.getsockname()
+
     logger = logging.getLogger('dataproxy')
-    logger.info(str(("Serving HTTP on", sa[0], "port", sa[1], "...")))
+    logger.addHandler(syslogh)
+    logger.info("Serving HTTP on %s port %s" %(sa[0], sa[1]))
+    logger.warning("Remove this dataproxy warning")
+
     httpd.serve_forever()
 
