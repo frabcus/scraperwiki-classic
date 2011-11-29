@@ -1,5 +1,4 @@
 /* @override 
-	http://scraperwiki.local:8000/media/css/main.css?
 	http://localhost:8000/media/css/main.css?
 */
 
@@ -37,10 +36,6 @@ a {
 
 a:hover {
 	text-decoration: underline;
-}
-
-span.faux_link {
-	color: #ccc;
 }
 
 a.more_link {
@@ -6447,8 +6442,6 @@ body.vaults .usage {
 	float: right;
 	height: 14px;
 	cursor: pointer;
-	/* Temporarily disable usage div */
-	display: none;
 }
 
 body.vaults .usage .key {
