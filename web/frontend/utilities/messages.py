@@ -7,7 +7,6 @@ from django.template.loader import render_to_string
 # from frontend.utilities.messages import send_message
 # send_message ( request, {
 #        "message": "Your data has been deleted",
-#        "template": "datastore_deleted",
 #        "level"  : "info",
 #        "actions": 
 #            [ 

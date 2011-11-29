@@ -203,6 +203,7 @@ def code_overview(request, wiki_type, short_name):
         from frontend.utilities.messages import send_message        
         if alert_test == '1':
             actions = [
+                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
                 ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),            
             ]
             level = 'info'
@@ -548,7 +549,7 @@ def scraper_delete_data(request, short_name):
         
     send_message( request, {
         "message": "Your data has been deleted",
-        "level"  : "info",
+        "level"  : "warning",
         "actions": 
             [ 
                 ("Undo?", reverse('scraper_undo_delete_data', args=[short_name]), False,)
@@ -611,7 +612,7 @@ def scraper_delete_scraper(request, wiki_type, short_name):
     
     send_message( request, {
         "message": "Your %s has been deleted" % wiki_type,
-        "level"  : "info",
+        "level"  : "warning",
         "actions": 
             [ 
                 ("Undo?", reverse('scraper_undelete_scraper', args=[wiki_type, short_name]), False,)
