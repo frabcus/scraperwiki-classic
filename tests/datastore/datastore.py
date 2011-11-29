@@ -135,6 +135,7 @@ class BasicDataProxyTests( DataStoreTester ):
         settings['scrapername'], settings['runid'] = self.random_details()
         update_settings_for_name(settings,settings['scrapername'])       
         scraperwiki.datastore.create( **settings )
+        scraperwiki.sqlite.save(['id'], {'id':1}, table_name='test')
         try:
             scraperwiki.sqlite.attach(attach_to,attach_to)         
             scraperwiki.sqlite.select('* from `%s`.test' % attach_to)
