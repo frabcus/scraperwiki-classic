@@ -213,7 +213,7 @@ function handleNotify(req,res) {
 	}
 	
 	// todo: check the scraper name against the one provided????
-	script = exec.get_details( arg );		
+	var script = exec.get_details( arg );		
 	if ( script ) {
 		delete urlObj.query.runid;
 		s = JSON.stringify( urlObj.query );
@@ -242,6 +242,6 @@ function handleUrlError(req,res) {
 function write_error(res, msg, headers) {
 	util.log.warn( msg );
 		
-	r = {"error": msg, "headers": headers || '' , "lengths":  -1 };
+	var r = {"error": msg, "headers": headers || '' , "lengths":  -1 };
 	res.end( JSON.stringify(r) );
 }
