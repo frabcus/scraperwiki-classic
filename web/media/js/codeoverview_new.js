@@ -178,36 +178,6 @@ function setupCodeOverview(short_name){
     });
 }
 
-function setupScraperOverview(short_name){
-
-    $('.sqlite_view_schema').click( function() 
-    {
-        $('#sqlite_schema').toggle(500); 
-        $('.sqlite_view_schema').toggle(); 
-    });
-    
-    $("#popupinteractivesqlite").click(function() 
-    {
-        var url = "{{settings.VIEW_URL}}{% url rpcexecute 'quickcheck_datastore' %}?src="+decodeURIComponent(short_name); 
-        $.modal('<iframe width="100%" height="100%" src='+url+'></iframe>', 
-        {
-            overlayClose: true,
-            containerCss: { borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
-            overlayCss: { cursor:"auto" }, 
-            onShow: function() 
-            {
-                $('.simplemodal-wrap').css("overflow", "hidden"); 
-                $('.simplemodal-wrap iframe').width($('.simplemodal-wrap').width()-2); 
-                $('.simplemodal-wrap iframe').height($('.simplemodal-wrap').height()-2); 
-            }
-        }); 
-    }); 
-
-    $('.sqlite_view_schema:last').hide(); 
-    $('#sqlite_schema').hide(); 
-    $('#data_tab_1').trigger('click');
-}
-
 function setup_collaboration_ui(){
 	$('#privacy_status, #contributors').hide();
 	$('#collaboration ul.buttons a, #header_inner a.privacystatus').bind('click', function(e){

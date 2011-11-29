@@ -1,11 +1,19 @@
 from django.db import models
+from django.db.models import F
 from django.contrib.auth.models import User
-
+from datetime import datetime
 
 PLAN_TYPES = (
     ('individual', 'Individual'),
+    ('small_business', 'Small Business'),
     ('corporate', 'Corporate'),    
 )
+
+PLAN_PAGE_REQUESTS = {
+    'individual':     20000,
+    'small_business': 100000,
+    'corporate':      2000000000,    
+}
 
 # Multiple instances per user are now allowed
 class Vault(models.Model):
@@ -66,7 +74,34 @@ class Vault(models.Model):
                 UserCodeRole(code=code_object, user=u,role='editor').save()
 
 
+    def percentage_this_month(self):
+        """
+        The percent of pages (using records retrieved and records allowed) fetched this month.
+        The value MAY be more than 100%
+        """
+        return int(float(1.0 * float(self.records_this_month()) / float(self.records_allowed())) * 100)
 
+
+    def records_this_month(self):
+        """
+        The number of pages retrieved this month by scrapers in this vault.
+        """
+        dt = datetime.now()
+        try:
+            v = self.records.get( year=dt.year, month=dt.month )
+            return v.count
+        except:
+            return 0
+
+
+    def records_allowed(self):
+        """
+        The number of pages that this vault is allowed to scrape, across all scrapers
+        in each month.
+        """
+        return PLAN_PAGE_REQUESTS[self.plan]
+
+        
     def __unicode__(self):
         return "%s' %s vault (created on %s)" % (self.user.username, self.plan, self.name)
 
@@ -75,3 +110,30 @@ class Vault(models.Model):
         ordering = ['-name']
 
 
+class VaultRecord(models.Model):
+    """
+    Records a counter against a pages scraped. This could be extended to also log
+    API calls should that be necessary/
+    """
+    vault  = models.ForeignKey(Vault, related_name='records')
+    year   = models.IntegerField(default=0)    
+    month  = models.IntegerField(default=0)        
+    count  = models.IntegerField(default=0)        
+    
+    @staticmethod
+    def update(vault, count):
+        dt = datetime.now()
+        affected = VaultRecord.objects.filter(vault=vault, year=dt.year, month=dt.month ).update(count=F('count') + 1)
+        if affected == 0:
+            VaultRecord(vault=vault, year=dt.year, month=dt.month, count=count).save()
+        
+    class Meta:
+        app_label = 'codewiki'
+        
+        
+        
+        
+        
+
+        
+    

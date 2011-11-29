@@ -633,8 +633,7 @@ def add_to_vault(request, wiki_type, language, id):
     
     # Make sure we update the access rights
     vault.update_access_rights()
-    scraper.commit_code(blankstartupcode['scraper'][language], "Created", request.user)
-    
+    scraper.commit_code(blankstartupcode[wiki_type][language], "Created", request.user)
     
     response_url = reverse('editor_edit', kwargs={'wiki_type': wiki_type, 'short_name' : scraper.short_name})
     return HttpResponseRedirect(response_url)

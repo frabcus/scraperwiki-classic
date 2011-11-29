@@ -322,20 +322,20 @@ class TestScrapers(SeleniumTest):
         s.open("/logout")
         owner['username'] = self.create_user(password=owner['password'])
         code_name = self.create_code("python", code_type, self._load_data("python", code_type), '')
-        s.click('link=' + code_type.capitalize())
+        s.click('link=Back to ' + code_type + ' overview')
         self.wait_for_page()
 
         # edit description
-        s.click('css=#aEditAboutScraper')
+        s.click('css=.edit_description')
         s.type('css=#divAboutScraper textarea', "This is a changed description")
         s.click("//div[@id='divAboutScraper']//button[text()='Save']")
         time.sleep(1) # XXX how to wait just until the JS has run?
         self.failUnless(s.is_text_present("This is a changed description"))
 
         # edit tags
-        s.click('css=#aEditTags')
-        s.type('css=#divEditTags input', "great,testy,rabbit")
-        s.click("//div[@id='divEditTags']//button[text()='Save tags']")
+        s.click('css=.tag a')
+        s.type('css=.new_tag_box input', "great,testy,rabbit")
+        s.key_down('css=.new_tag_box input', "\\13");
         time.sleep(1) # XXX how to wait just until the JS has run?
         self.failUnless(s.is_text_present("rabbit"))
 
