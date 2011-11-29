@@ -345,6 +345,21 @@ body.frontpage #nav_inner li.frontpage {
 	text-shadow: #fe9 0 1px 0;
 }
 
+#alert_outer.info,
+.alert_outer.info {
+	background: #d6e7f9;
+background: -moz-linear-gradient(top,  #d6e7f9 0%, #a7cbef 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d6e7f9), color-stop(100%,#a7cbef));
+background: -webkit-linear-gradient(top,  #d6e7f9 0%,#a7cbef 100%);
+background: -o-linear-gradient(top,  #d6e7f9 0%,#a7cbef 100%);
+background: -ms-linear-gradient(top,  #d6e7f9 0%,#a7cbef 100%);
+background: linear-gradient(top,  #d6e7f9 0%,#a7cbef 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d6e7f9', endColorstr='#a7cbef',GradientType=0 );
+	color: #202f45;
+	border-bottom-color: #6a97be;
+	text-shadow: #cfeffe 0 1px 0;
+}
+
 div.editor .alert_outer {
 	position: static;
 	font-size: 14px;
@@ -372,6 +387,12 @@ div.editor .alert_outer {
 	background: linear-gradient(top, rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0.1) 51%,rgba(255,255,255,0) 100%);
 }
 
+#alert_outer.info a,
+.alert_outer.info a {
+	color: #202f45;
+	border-color: #6399cd;
+}
+
 #alert_outer a:hover,
 .alert_outer a:hover {
 	text-decoration: none;
@@ -385,6 +406,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50%,rgba(255,255,255,0.4) 51%,rgba(255,255,255,0.2) 100%);
 }
 
+#alert_outer.info a:hover,
+.alert_outer.info a:hover {
+	border-color: #70acdd;
+}
+
 #alert_outer a.secondary,
 .alert_outer a.secondary {
 	background-color: #edc339;
@@ -393,10 +419,23 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	border-color: #d1aa6a;
 }
 
+#alert_outer.info a.secondary,
+.alert_outer.info a.secondary {
+	background-color: #afc4d8;
+	color: #425a6b;
+	border-color: #869fc1;
+}
+
 #alert_outer a.secondary:hover,
 .alert_outer a.secondary:hover {
 	color: #411;
 	border-color: #ca8e29;
+}
+
+#alert_outer.info a.secondary:hover,
+.alert_outer.info a.secondary:hover {
+	color: #202f45;
+	border-color: #70acdd;
 }
 
 #alert_inner,
@@ -409,7 +448,8 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	width: 920px;
 }
 
-a#alert_close {
+#alert_outer a#alert_close,
+.alert_outer a#alert_close {
 	display: block;
 	position: absolute;
 	width: 20px;
@@ -427,8 +467,14 @@ a#alert_close {
 	box-shadow: none;
 }
 
-a#alert_close:hover {
-	background: transparent url(../images/alert_close.gif) -20px 0 no-repeat;
+#alert_outer a#alert_close:hover,
+.alert_outer a#alert_close:hover {
+	background-position: -20px 0;
+}
+
+#alert_outer.info a#alert_close,
+.alert_outer.info a#alert_close {
+	background-image: url(../images/alert_close_info.gif);
 }
 
 
@@ -626,9 +672,10 @@ body.search #header_inner:hover form #id_q {
 
 body.search .tag_suggestion {
 	background-color: #F4F8FB;
-	padding: 10px 15px;
+	padding: 5px 8px;
 	line-height: 20px;
 	color: #456;
+	margin-top: 30px;
 }
 
 body.search .tag_suggestion h4 {
@@ -637,7 +684,8 @@ body.search .tag_suggestion h4 {
 }
 
 body.search .tag_suggestion .single_tag {
-	margin: 0 5px;
+	margin: 0 3px;
+	padding: 2px 6px 1px 6px;
 }
 
 body.search .tag_suggestion .yes {
@@ -645,6 +693,34 @@ body.search .tag_suggestion .yes {
 	background: transparent url(../images/icons/forward_arrow.png) 100% 70% no-repeat;
 	padding-right: 20px;
 	font-size: 14px;
+}
+
+body.search .search_section {
+	padding: 5px 8px;
+	margin-bottom: 5px;
+	background-color: #F4F8FB;
+	margin-top: 30px;
+	color: #456;
+}
+
+body.search .search_section.first,
+body.search .tag_suggestion.first {
+	margin-top: 0;
+}
+
+body.search .user_list {
+	padding-left: 8px;
+}
+
+body.search .code_object_line {
+	padding-left: 8px;
+}
+
+body.search .no_results {
+	text-align: center;
+	font-size: 18px;
+	margin: 10px;
+	color: #333;
 }
 
 
@@ -3670,13 +3746,14 @@ ul.user_list {
 
 ul.user_list li {
     float: left;
-    padding-right: 25px;
-    line-height: 38px;
+    line-height: 30px;
+    padding: 8px 25px 0 0;
 }
 
 ul.user_list li.clear {
     float: none;
     clear: both;
+    padding: 0;
 }
 
 ul.user_list li .gravatar {
