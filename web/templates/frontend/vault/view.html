@@ -1,5 +1,6 @@
 {% extends "frontend/base.html" %}
 {% load gravatar %}
+{% load humanize %}
 
 {% block title %}Your vaults{% endblock %}
 
@@ -45,15 +46,20 @@
             <h5>
                 <!-- This vault contains {{ vault.get_code_objects.count }} scraper{{ vault.get_code_objects.count|pluralize }}: -->
                 {{ vault.plan }} plan
-                <span class="usage">
-                    <span class="key">{{ vault.percentage_this_month }}% used</span>
+                <span class="usage{% if vault.percentage_this_month > 90 %} warning{% endif %}">
+                    <span class="key">{{ vault.percentage_this_month  }}% used</span>
                     <span class="progressbar"><strong style="width: {{ vault.percentage_this_month }}%"></strong></span>
-                    <img src="{{ MEDIA_URL }}images/icons/help.png" width="16" height="16" alt="?" />
-                </span>   
+                    <img src="{{ MEDIA_URL }}images/icons/{% if vault.percentage_this_month > 90 %}exclamation{% else %}help{% endif %}.png" width="16" height="16" />
+                </span>  
                 <div class="vault_usage_popover">
         		    <h4>This month, you have used:</h4>
-        		    <p><strong>{{ vault.records_this_month }} page</strong> requests <small>of {{ vault.records_allowed }}</small></p>
-        		    <p class="last"><strong>500</strong> API calls <small>of 2000</small></p>
+        		    <p{% if vault.percentage_this_month > 90 %} class="warning"{% endif %}><strong>{{ vault.records_this_month|intcomma }} page requests</strong> <small>of {{ vault.records_allowed|intcomma }}</small></p>
+        		    <p class="last"><strong>0</strong> API calls <small>of 2000</small></p>
+        		    {% if vault.percentage_this_month > 99 %}
+        		    <p class="advice"><a href="#">Upgrade your plan</a> to scrape more</p>
+        		    {% else %}{% if vault.percentage_this_month > 90 %}
+        		    <p class="advice">You might want to <a href="#">Upgrade</a> soon</p>
+        		    {% endif %}{% endif %}
                     <span class="arrow"></span>
                 </div>
             </h5>
@@ -71,15 +77,20 @@
     	    <h5>
     	        <!-- This vault contains no scrapers -->
     	        {{ vault.plan }} plan
-                <span class="usage">
-                    <span class="key">{{ vault.percentage_this_month }}% used</span>
-                    <span class="progressbar"></span>
-                    <img src="{{ MEDIA_URL }}images/icons/help.png" width="16" height="16" alt="?" />
+                <span class="usage{% if vault.percentage_this_month > 90 %} warning{% endif %}">
+                    <span class="key">{{ vault.percentage_this_month  }}% used</span>
+                    <span class="progressbar"><strong style="width: {{ vault.percentage_this_month }}%"></strong></span>
+                    <img src="{{ MEDIA_URL }}images/icons/{% if vault.percentage_this_month > 90 %}exclamation{% else %}help{% endif %}.png" width="16" height="16" />
                 </span>  
                 <div class="vault_usage_popover">
         		    <h4>This month, you have used:</h4>
-        		    <p><strong>{{ vault.records_this_month }} page</strong> requests <small>of {{ vault.records_allowed }}</small></p>
+        		    <p{% if vault.percentage_this_month > 90 %} class="warning"{% endif %}><strong>{{ vault.records_this_month|intcomma }} page requests</strong> <small>of {{ vault.records_allowed|intcomma }}</small></p>
         		    <p class="last"><strong>0</strong> API calls <small>of 2000</small></p>
+        		    {% if vault.percentage_this_month > 99 %}
+        		    <p class="advice"><a href="#">Upgrade your plan</a> to scrape more</p>
+        		    {% else %}{% if vault.percentage_this_month > 90 %}
+        		    <p class="advice">You might want to <a href="#">Upgrade</a> soon</p>
+        		    {% endif %}{% endif %}
                     <span class="arrow"></span>
                 </div>
     	    </h5>
@@ -133,18 +144,21 @@
         <div class="vault_contents{% if vault.get_code_objects.count == 0 %} empty{% endif %}">
     	{% if vault.get_code_objects.count > 0 %}
             <h5>
-                <!-- This vault contains {{ vault.get_code_objects.count }} scraper{{ vault.get_code_objects.count|pluralize }}: -->
                 {{ vault.plan }} plan
-                <span class="usage warning">
+                <span class="usage{% if vault.percentage_this_month > 90 %} warning{% endif %}">
                     <span class="key">{{ vault.percentage_this_month  }}% used</span>
                     <span class="progressbar"><strong style="width: {{ vault.percentage_this_month }}%"></strong></span>
-                    <img src="{{ MEDIA_URL }}images/icons/exclamation.png" width="16" height="16" alt="!" />
+                    <img src="{{ MEDIA_URL }}images/icons/{% if vault.percentage_this_month > 90 %}exclamation{% else %}help{% endif %}.png" width="16" height="16" />
                 </span>  
                 <div class="vault_usage_popover">
         		    <h4>This month, you have used:</h4>
-        		    <p class="warning"><strong>{{ vault.records_this_month }} page</strong> requests <small>of {{ vault.records_allowed }}</small></p>
-        		    <p class="last"><strong>500</strong> API calls <small>of 2000</small></p>
+        		    <p{% if vault.percentage_this_month > 90 %} class="warning"{% endif %}><strong>{{ vault.records_this_month|intcomma }} page requests</strong> <small>of {{ vault.records_allowed|intcomma }}</small></p>
+        		    <p class="last"><strong>0</strong> API calls <small>of 2000</small></p>
+        		    {% if vault.percentage_this_month > 99 %}
         		    <p class="advice"><a href="#">Upgrade your plan</a> to scrape more</p>
+        		    {% else %}{% if vault.percentage_this_month > 90 %}
+        		    <p class="advice">You might want to <a href="#">Upgrade</a> soon</p>
+        		    {% endif %}{% endif %}
                     <span class="arrow"></span>
                 </div>
             </h5>
@@ -162,15 +176,20 @@
     	    <h5>
     	        <!-- This vault contains no scrapers -->
     	        {{ vault.plan }} plan
-                <span class="usage">
-                    <span class="key">{{ vault.percentage_this_month }}% used</span>
-                    <span class="progressbar"></span>
-                    <img src="{{ MEDIA_URL }}images/icons/help.png" width="16" height="16" alt="?" />
+                <span class="usage{% if vault.percentage_this_month > 90 %} warning{% endif %}">
+                    <span class="key">{{ vault.percentage_this_month  }}% used</span>
+                    <span class="progressbar"><strong style="width: {{ vault.percentage_this_month }}%"></strong></span>
+                    <img src="{{ MEDIA_URL }}images/icons/{% if vault.percentage_this_month > 90 %}exclamation{% else %}help{% endif %}.png" width="16" height="16" />
                 </span>  
                 <div class="vault_usage_popover">
         		    <h4>This month, you have used:</h4>
-        		    <p><strong>{{ vault.records_this_month }} page</strong> requests <small>of {{ vault.records_allowed }}</small></p>
+        		    <p{% if vault.percentage_this_month > 90 %} class="warning"{% endif %}><strong>{{ vault.records_this_month|intcomma }} page requests</strong> <small>of {{ vault.records_allowed|intcomma }}</small></p>
         		    <p class="last"><strong>0</strong> API calls <small>of 2000</small></p>
+        		    {% if vault.percentage_this_month > 99 %}
+        		    <p class="advice"><a href="#">Upgrade your plan</a> to scrape more</p>
+        		    {% else %}{% if vault.percentage_this_month > 90 %}
+        		    <p class="advice">You might want to <a href="#">Upgrade</a> soon</p>
+        		    {% endif %}{% endif %}
                     <span class="arrow"></span>
                 </div>
     	    </h5>

@@ -6447,8 +6447,6 @@ body.vaults .usage {
 	float: right;
 	height: 14px;
 	cursor: pointer;
-	/* Temporarily disable usage div */
-	display: none;
 }
 
 body.vaults .usage .key {
