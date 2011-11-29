@@ -22,6 +22,11 @@ import urlparse
 import logging
 import logging.config
 try:
+    import cloghandler
+except:
+    pass
+
+try:
     import json
 except:
     import simplejson as json
@@ -270,10 +275,6 @@ if __name__ == '__main__':
 
     logging.config.fileConfig(configfile)
 
-    syslogh = logging.handlers.SysLogHandler(address=syslog_addr())
-    syslogh.setFormatter(logging.Formatter(
-      "dataproxy %(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s"))
-
     port = config.getint('dataproxy', 'port')
     ProxyHandler.protocol_version = "HTTP/1.0"
     httpd = ProxyHTTPServer(('', port), ProxyHandler)
@@ -281,9 +282,8 @@ if __name__ == '__main__':
     sa = httpd.socket.getsockname()
 
     logger = logging.getLogger('dataproxy')
-    logger.addHandler(syslogh)
+
     logger.info("Serving HTTP on %s port %s" %(sa[0], sa[1]))
-    logger.warning("Remove this dataproxy warning")
 
     httpd.serve_forever()
 
