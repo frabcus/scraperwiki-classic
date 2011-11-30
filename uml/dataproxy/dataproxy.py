@@ -98,17 +98,18 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         sres = ''
         try:
             res = db.process(request)
-            sres = json.dumps(res)            
+            sres = json.dump(res, self.connection)            
         except Exception, edb:
             _, _, st = sys.exc_info()
             sres = json.dumps( {"error": "dataproxy.process: %s" % str(edb), "stacktrace": str(st)} )
             logger.warning( str(edb) )
             logger.error( st )
 
-        if sres:
-            logger.debug(sres[:200])
+#        if sres:
+#            # What did we just stream
+#            logger.debug(sres[:200])
             
-        self.connection.sendall(sres+'\n')
+#        self.connection.sendall(sres+'\n')
 
 
         # this morphs into the long running two-way connection
