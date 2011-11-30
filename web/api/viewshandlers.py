@@ -134,7 +134,7 @@ def out_json(dataproxy, callback, short_name, format):
     
     if not result:
         dataproxy.close()
-        return HttpResponse("Error: A timeout occurred retrieving data from the dataproxy")        
+        return HttpResponse("Error: Dataproxy responded with an invalid response")        
         
     if format == "jsondict":
         try:
