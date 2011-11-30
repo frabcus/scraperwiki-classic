@@ -95,15 +95,14 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def process(self, db, request):
         logger.debug(str(("request", request))[:100])
 
-        sres = ''
         try:
             res = db.process(request)
-            sres = json.dump(res, self.wfile)            
+            json.dump(res, self.wfile)            
         except Exception, edb:
             _, _, st = sys.exc_info()
-            sres = json.dumps( {"error": "dataproxy.process: %s" % str(edb), "stacktrace": str(st)} )
             logger.warning( str(edb) )
             logger.error( st )
+            json.dump({"error": "dataproxy.process: %s" % str(edb), "stacktrace": str(st)}, self.wfile)            
 
 #        if sres:
 #            # What did we just stream
