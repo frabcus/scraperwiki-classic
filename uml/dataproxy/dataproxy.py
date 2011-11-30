@@ -104,6 +104,8 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             logger.error( st )
             json.dump({"error": "dataproxy.process: %s" % str(edb), "stacktrace": str(st)}, self.wfile)            
 
+        self.wfile.write('\n')
+        
 #        if sres:
 #            # What did we just stream
 #            logger.debug(sres[:200])
