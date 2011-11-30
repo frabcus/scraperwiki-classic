@@ -15,6 +15,7 @@ import re
 import sys
 import logging
 import urllib
+import traceback
 
 import logging
 import logging.config
@@ -229,20 +230,13 @@ class SQLiteDatabase(Database):
         try:
             for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table' or type='view'")):
                 tables[name] = {"sql":sql}
-                if limit != -1:
-                    self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, (limit,))
-                    if limit != 0:
-                        rows = []
-                        for r in self.m_sqlitedbcursor:
-                            row = []                           
-                            for c in r:
-                                if type(c) == buffer:
-                                    row.append( str(c).decode('ascii', 'replace') ) # in FTS3 _segments table this is just binary stuff, need to ignore bad chars
-                                else:
-                                    row.append(c)
-                            rows.append(row)
-                        tables[name]["rows"] = rows
-                    tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
+
+                cols = []
+                self.m_sqlitedbcursor.execute("PRAGMA table_info(`%s`);" % name)
+                for r in self.m_sqlitedbcursor:
+                    cols.append( r[1] )
+                    
+                tables[name]["keys"] = cols
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 total_rows += int(tables[name]["count"])
         except sqlite3.Error, e:
