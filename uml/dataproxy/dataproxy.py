@@ -18,6 +18,7 @@ import time
 import traceback
 import urllib
 import urlparse
+import traceback
 
 import logging
 import logging.config
@@ -99,21 +100,15 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             res = db.process(request)
             json.dump(res, self.wfile)            
         except Exception, edb:
-            _, _, st = sys.exc_info()
             logger.warning( str(edb) )
+            st = traceback.format_exc()
             logger.error( st )
-            json.dump({"error": "dataproxy.process: %s" % str(edb), "stacktrace": str(st)}, self.wfile)            
+            json.dump({"error": "dataproxy.process: %s" % str(edb), "stacktrace": st}, self.wfile)            
 
         self.wfile.write('\n')
-        
-#        if sres:
-#            # What did we just stream
-#            logger.debug(sres[:200])
-            
-#        self.connection.sendall(sres+'\n')
+    
 
-
-        # this morphs into the long running two-way connection
+    # this morphs into the long running two-way connection  
     def do_GET (self) :
         try:
             (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
