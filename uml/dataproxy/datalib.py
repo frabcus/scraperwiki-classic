@@ -233,12 +233,12 @@ class SQLiteDatabase(Database):
 
                 cols = []
                 self.m_sqlitedbcursor.execute("PRAGMA table_info(`%s`);" % name)
-                for r in self.m_sqlitedbcursor:
-                    cols.append( r[1] )
-                    
-                tables[name]["keys"] = cols
+
+                # We can optimise the count by doing all tables in sub-selects, but suspect it is a micro-optimisation
+                tables[name]["keys"] = [ r[1] for r in self.m_sqlitedbcursor]
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 total_rows += int(tables[name]["count"])
+                
         except sqlite3.Error, e:
             return {"error":"datasummary: sqlite3.Error: "+str(e)}
         
