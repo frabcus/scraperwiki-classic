@@ -402,8 +402,10 @@ function execute(http_req, http_res, raw_request_data) {
             var cfgpath = '/mnt/' + rVM + '/config';
 
             var args = [ '-n', rVM, '-f', cfgpath, "/home/startup/runscript", extension];
-            var e = spawn('/usr/bin/lxc-execute', args);
-            
+            var e = spawn(
+              '/var/www/scraperwiki/services/scriptmgr/cleanfd.py',
+              ['/usr/bin/lxc-execute'].concat(args));
+
             // json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
             
             script.vm = rVM;
