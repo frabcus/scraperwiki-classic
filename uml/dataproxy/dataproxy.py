@@ -100,10 +100,14 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             res = db.process(request)
             sres = json.dumps(res)            
         except Exception, edb:
+            _, _, st = sys.exc_info()
+            sres = json.dumps( {"error": "dataproxy.process: %s" % str(edb), "stacktrace": str(st)} )
             logger.warning( str(edb) )
+            logger.error( st )
 
         if sres:
             logger.debug(sres[:200])
+            
         self.connection.sendall(sres+'\n')
 
 
