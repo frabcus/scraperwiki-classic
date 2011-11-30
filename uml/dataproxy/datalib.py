@@ -202,7 +202,7 @@ class SQLiteDatabase(Database):
                         return False
                     os.mkdir(self.scraperresourcedir)
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
-                print 'Connecting to %s' % scrapersqlitefile 
+                #print 'Connecting to %s' % scrapersqlitefile 
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile, check_same_thread=False)
                 logger.debug('Connected to %s' % scrapersqlitefile)                
             else:
@@ -252,7 +252,7 @@ class SQLiteDatabase(Database):
     
     
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
-        print "XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50])
+        #print "XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50])
 
         def timeout_handler(signum, frame):
             raise TimeoutException()
@@ -314,15 +314,15 @@ class SQLiteDatabase(Database):
                 self.dataproxy.connection.sendall(json.dumps(arg)+'\n')
             return arg
         except sqlite3.Error, e:
-            print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
+            #print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             log.err( e )
             return {"error":"sqliteexecute: sqlite3.Error: %s" % str(e)}
         except ValueError, ve:
-            print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
+            #print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
             log.err( ve )            
             return {"error":"sqliteexecute: ValueError: %s" % str(ve)}
         except TimeoutException,tout:
-            print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
+            #print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
             log.err( ve )
             return { "error" : "Query timeout: %s" % str(tout) }
 
