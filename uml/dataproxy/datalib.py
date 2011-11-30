@@ -15,7 +15,7 @@ import re
 import sys
 import logging
 import urllib
-import stacktrace
+import traceback
 
 import logging
 import logging.config
@@ -237,7 +237,7 @@ class SQLiteDatabase(Database):
                     cols.append( r[1] )
                     
                 tables[name]["keys"] = cols
-                tables[name]["count"] = -1 # list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
+                tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 total_rows += int(tables[name]["count"])
         except sqlite3.Error, e:
             return {"error":"datasummary: sqlite3.Error: "+str(e)}
