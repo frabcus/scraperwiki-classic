@@ -1,0 +1,186 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Events{% endblock %}
+
+{% block meta %}
+    <meta name="description" content="ScraperWiki event with Columbia University" />
+{% endblock %}
+
+{% block javascript %}
+<script src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyAfPeP-x7UtzNcoqQ7ZfuILBlCaEH8h2Ak&sensor=false"
+type="text/javascript"></script>
+<script type="text/javascript">
+  function createMap() {
+    var latlng = new google.maps.LatLng(40.807443, -73.963544);
+    var myOptions = {
+      zoom: 16,
+      center: latlng,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    var map = new google.maps.Map(document.getElementById("googlemap"), myOptions);
+    var marker = new google.maps.Marker({
+        map:map,
+        animation: google.maps.Animation.DROP,
+        position: latlng
+      });
+  }
+</script>
+{% endblock %}
+
+{% block header %}
+	<h2>Columbia University <em>Journalism Data Camp</em></h2>
+	<h3>on New York Data and Accountability</h3>
+	<p>Three streams, two days, one unmissable opportunity. </p>
+	<p class="links">
+	    <a href="#description" class="findoutmore">Find out more</a>
+	    <a href="#tickets" class="reserveaspace">Reserve a space</a>
+	</p>
+{% endblock %}
+
+{% block content_outer %}
+<div id="page_outer">
+	<div id="page_inner">
+        <div id="event_sidebar">
+            <h4>When?</h4>
+            <div class="module">
+                <p>09:00&ndash;18:00 Friday 4th Feb 2011</p>
+                <p>09:00&ndash;18:00 Saturday 5th Feb 2011</p>
+            </div>
+            <h4>Where?</h4>
+            <div class="module">
+                <div id="googlemap" style="width: 268px; height: 250px; margin: 5px 0"></div>
+                <p class="address">School of Journalism,<br/><strong>Columbia University</strong>,<br/>2950 Broadway (at 116th Street),<br/>New York, NY 10027</p>
+            </div>
+            <h4>How much?</h4>
+            <div class="module">
+                <p>The data derby is free, but there&rsquo;s a $5 deposit for each ticket.</p>
+                <p>When you arrive, you can choose to either have your $5 back, or to get a bag of ScraperWiki goodies instead.</p>
+            </div>
+            <h4 class="association">In association with</h4>
+            <div class="module">
+                <p>Logos here</p>
+            </div>    
+        </div>
+        <div id="event_details">
+            <div id="description">
+                <p class="first">Some really persuasive copy goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam bibendum euismod est id lobortis. Aliquam erat volutpat. Nullam ac lacus vitae nulla commodo ultrices. Proin auctor convallis quam id pulvinar. Etiam nisi neque, fermentum ut faucibus sed, eleifend a elit. Phasellus pretium iaculis ultricies.</p>
+                <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt. In augue lacus, porta eu placerat eget, tempus eu odio. Etiam eu diam dui, a auctor eros. In quis neque urna. Integer id gravida lacus. Curabitur cursus malesuada consectetur. Aenean viverra sodales augue, ut placerat elit molestie et.</p>
+            </div>
+            <div id="schedule">
+                <ul id="schedule_tabs">
+                    <li>See what&rsquo;s on:</li>
+                    <li><a href="#day1"><strong>Day 1</strong> Friday 4th Feb</a></li>
+                    <li><a href="#day2"><strong>Day 2</strong> Saturday 5th Feb</a></li>
+                </ul>
+                <table id="day1" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <th>Steam 1</th>
+                        <th>Stream 2</th>
+                        <th>Stream 3</th>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><span class="time">09:30&ndash;10:00:</span> Introductory plenary</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            The ScraperWacky Races
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                        <td>
+                            Liberate the Data
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                        <td>
+                            Become a Python Scraping&nbsp;Pro!
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><span class="time">13:00&ndash;14:00:</span> Lunch</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            The ScraperWacky Races
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                        <td>
+                            Liberate the Data
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                        <td>
+                            Become a Ruby Scraping&nbsp;Pro!
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><span class="time">17:00&ndash;17:30:</span> Day 1 wrap-up</td>
+                    </tr>
+                </table>
+                <table id="day2" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <th>Steam 1</th>
+                        <th>Stream 2</th>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><span class="time">09:30&ndash;10:00:</span> Something something</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            The ScraperWacky Races
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                        <td>
+                            Liberate the Data
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><span class="time">13:00&ndash;14:00:</span> Lunch</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            The ScraperWacky Races
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                        <td>
+                            Liberate the Data
+                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><span class="time">17:00&ndash;17:30:</span> Day 2 wrap-up</td>
+                    </tr>
+                </table>
+            </div>
+            <div id="tickets">
+                <p>Eventbrite widget goes here</p>
+            </div>
+        </div>
+        <br class="clear" />
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block run_script %}
+    {{block.super}}
+    
+    createMap();
+    
+    $('#schedule_tabs li a').bind('click', function(e){
+        e.preventDefault();
+        $(this).parent().addClass('current').siblings().removeClass('current');
+        $($(this).attr('href')).show().siblings('table').hide();
+    }).eq(0).trigger('click');
+    
+    $('.links a').bind('click', function(e){
+        e.preventDefault();
+        var target = $($(this).attr('href'));
+        $('html, body').animate({
+            scrollTop: target.offset().top - 50
+        }, 1000, 'swing');
+    });
+    
+{% endblock %}
+

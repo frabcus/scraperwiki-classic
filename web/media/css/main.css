@@ -4666,6 +4666,215 @@ dl.faq dd {
 	padding-bottom: 1.3em;
 }
 
+
+
+
+/* EVENTS */
+
+body.events #header_inner {
+	background: transparent url(../images/event_columbia_2012.png) 100% 100% no-repeat;
+	padding: 25px 0;
+}
+
+body.events #header_inner h2,
+body.events #header_inner p {
+	margin: 0;
+}
+
+body.events #header_inner h2,
+body.events #header_inner h3 {
+	font-size: 28px;
+	margin: 0;
+}
+
+body.events #header_inner p {
+	font-size: 18px;
+	line-height: 18px;
+	margin-top: 15px;
+	color: #f2f8fc;
+	font-weight: normal;
+}
+
+body.events #header_inner p.links {
+	margin-top: 20px;
+}
+
+body.events #header_inner em {
+	font-style: normal;
+	color: #fbebbf;
+}
+
+body.events #header_inner a {
+	display: inline-block;
+	line-height: 18px;
+	font-size: 18px;
+	text-decoration: none;
+	padding: 5px 15px 7px 15px;
+	margin-right: 15px;
+	color: #725122;
+	background-color: #fbe4a5;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	-webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+	box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+	font-weight: normal;
+	background-image: -moz-linear-gradient(top,  rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.5)), color-stop(100%,rgba(255,255,255,0)));
+	background-image: -webkit-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+	background-image: -o-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+	background-image: -ms-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+	background-image: linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+}
+
+body.events #header_inner a:hover {
+	color: #a14e1d;
+	background-color: #ffeebf;
+}
+
+body.events #header_inner .findoutmore {
+	background-color: #ddedf6;
+	color: #317fa5;
+}
+
+body.events #header_inner .findoutmore:hover {
+	background-color: #eaf7ff;
+	color: #0082d8;
+}
+
+body.events #page_inner {
+	padding-top: 25px;
+}
+
+body.events #event_sidebar {
+	float: right;
+	width: 290px;
+}
+
+body.events #event_details {
+	float: left;
+	width: 630px;
+	line-height: 21px;
+}
+
+body.events #event_sidebar h4 {
+	background-color: #c3d8e5;
+	padding: 5px 10px;
+	font-weight: normal;
+	text-transform: uppercase;
+	line-height: 16px;
+	font-size: 14px;
+}
+
+body.events #event_sidebar p {
+	margin: 0;
+	padding: 5px 0;
+	line-height: 20px;
+}
+
+body.events #event_sidebar .module {
+	padding: 5px 10px;
+	background-color: #ebf3f8;
+	border: 1px solid #c3d8e5;
+	border-top: 0;
+}
+
+body.events #event_sidebar h4.association {
+	margin-top: 20px;
+}
+
+body.events #description p.first {
+	margin-top: 0;
+}
+
+body.events #schedule_tabs {
+	padding: 0;
+	text-align: right;
+	margin-bottom: 0;
+	margin-top: 30px;
+	font-size: 14px;
+}
+
+body.events #schedule_tabs li {
+	display: inline-block;
+	padding: 0;
+	color: #39c;
+	zoom: 1;
+	*display:inline;
+}
+
+
+body.events #schedule_tabs li:first-child {
+	margin-right: 5px;
+	float: left;
+	font-weight: bold;
+	font-size: 18px;
+	margin: 1px 5px;
+}
+
+body.events #schedule_tabs a {
+	display: inline-block;
+	padding: 5px 10px;
+	color: #666;
+	border: 1px solid #fff;
+	border-bottom: 0;
+}
+
+body.events #schedule_tabs a:hover {
+	text-decoration: none;
+	background-color: #f3f3f3;
+	border-color: #f3f3f3;
+	color: #333;
+}
+
+body.events #schedule_tabs .current a {
+	background-color: #eee;
+	border-color: #ddd;
+	color: #333;
+}
+
+body.events #schedule_tabs a strong {
+	margin-right: 0.3em;
+}
+
+body.events th,
+body.events td {
+	border: 1px solid #ddd;
+	border-collapse: collapse;
+	padding: 5px 10px;
+	font-size: 14px;
+	line-height: 18px;
+	vertical-align: top;
+}
+
+body.events th {
+	background-color: #eee;
+}
+
+body.events th.day {
+	text-align: center;
+}
+
+body.events table .time {
+	color: #999;
+}
+
+body.events td p {
+	font-size: 12px;
+	color: #666;
+}
+
+body.events #tickets {
+	background-color: #fff4d8;
+	margin-top: 30px;
+	text-align: center;
+	line-height: 400px;
+}	
+
+
+
+
 /* Gravatar image */
 
 .gravatar.small {

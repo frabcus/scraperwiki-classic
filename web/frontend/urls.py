@@ -64,5 +64,8 @@ urlpatterns = patterns('',
     url(r'^browse/(?P<page_number>\d+)?$', frontend_views.browse, name='scraper_list'),    
     url(r'^browse/(?P<wiki_type>scraper|view)s/(?P<page_number>\d+)?$', frontend_views.browse_wiki_type, name='scraper_list_wiki_type'),
     url(r'^tags/$', frontend_views.tags, name='all_tags'),    
-    url(r'^tags/(?P<tag>[^/]+)$', frontend_views.tag, name='single_tag'),                       
+    url(r'^tags/(?P<tag>[^/]+)$', frontend_views.tag, name='single_tag'),  
+    
+    #events    
+    url(r'^events/$', frontend_views.events, name='events'),                   
 )

@@ -67,10 +67,11 @@
 			{% block nav %}
 			<h1><a href="{% url frontpage %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Home: logo']); }">ScraperWiki</a></h1>
 			<ul>
-				<li class="frontpage"><a href="{% url frontpage %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Home: Home']); }">Home</a></li>
+				<!-- <li class="frontpage"><a href="{% url frontpage %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Home: Home']); }">Home</a></li> -->
 				<li class="about"><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'About']); }">About</a></li>
 				<li class="about"><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Browse']); }">Browse</a></li>
 				<li class="blog"><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Blog']); }">Blog</a></li>
+				{% if debug %}<li class="events"><a href="{% url events %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Events']); }">Events</a></li>{% endif %}
 				{% if user.is_authenticated %}
 				<li class="user loggedin">
 					<a href="{% url profiles_profile_detail user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
