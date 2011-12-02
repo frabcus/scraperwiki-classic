@@ -29,10 +29,11 @@ type="text/javascript"></script>
 
 {% block header %}
 	<h2>Columbia University <em>Journalism Data Camp</em></h2>
-	<h3>on New York Data and Accountability</h3>
-	<p>Three streams, two days, one unmissable opportunity. </p>
+	<!-- <h3>on New York Data and Accountability</h3> -->
+	<p class="deets"><span class="when">February 4th &amp; 5th</span> <span class="price">Free Entry</span> <span class="twitter">#jdcny</span></p>
+	<p>Three streams, two days, one goal: opening up New York&rsquo;s data.</p>
 	<p class="links">
-	    <a href="#description" class="findoutmore">Find out more</a>
+	    <a href="#streams" class="findoutmore">Find out more</a>
 	    <a href="#tickets" class="reserveaspace">Reserve a space</a>
 	</p>
 {% endblock %}
@@ -51,107 +52,43 @@ type="text/javascript"></script>
                 <div id="googlemap" style="width: 268px; height: 250px; margin: 5px 0"></div>
                 <p class="address">School of Journalism,<br/><strong>Columbia University</strong>,<br/>2950 Broadway (at 116th Street),<br/>New York, NY 10027</p>
             </div>
-            <h4>How much?</h4>
-            <div class="module">
-                <p>The data derby is free, but there&rsquo;s a $5 deposit for each ticket.</p>
-                <p>When you arrive, you can choose to either have your $5 back, or to get a bag of ScraperWiki goodies instead.</p>
-            </div>
             <h4 class="association">In association with</h4>
             <div class="module">
-                <p>Logos here</p>
+                <p><a href="http://www.columbia.edu/"><img src="{{MEDIA_URL}}images/event_columbia_logo.gif" width="268" height="42" /></p>
+                <p><a href="http://www.knightfoundation.org/"><img src="{{MEDIA_URL}}images/event_knight_logo.gif" width="268" height="35" /></a></p>
             </div>    
         </div>
         <div id="event_details">
+            <h3 class="description">Why we need you</h3>
             <div id="description">
-                <p class="first">Some really persuasive copy goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam bibendum euismod est id lobortis. Aliquam erat volutpat. Nullam ac lacus vitae nulla commodo ultrices. Proin auctor convallis quam id pulvinar. Etiam nisi neque, fermentum ut faucibus sed, eleifend a elit. Phasellus pretium iaculis ultricies.</p>
-                <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt. In augue lacus, porta eu placerat eget, tempus eu odio. Etiam eu diam dui, a auctor eros. In quis neque urna. Integer id gravida lacus. Curabitur cursus malesuada consectetur. Aenean viverra sodales augue, ut placerat elit molestie et.</p>
+                <p class="first">There are mountains of New York data out there, but someone needs to liberate and make sense of it if we&rsquo;re to hold businesses and governments to account.</p>
+                <p>Columbia University School of Journalism, together with ScraperWiki and the Knight Foundation, are planning a two day event at the beginning of February 2012, to do just that. We need journalists, students, computer scientists, programmers, statisticians and public officials to come liberate some data.</p>
+                <p class="last"><img src="{{MEDIA_URL}}images/event_big_arrow.gif" width="45" height="65" alt="" />All you need is enthusiasm and a laptop &ndash; we supply the food and drink, wifi and scraping expertise. <b>Entry is free</b> but space is limited, so check out the three streams below, and reserve a ticket before they&rsquo;re gone.</p>
             </div>
-            <div id="schedule">
-                <ul id="schedule_tabs">
-                    <li>See what&rsquo;s on:</li>
-                    <li><a href="#day1"><strong>Day 1</strong> Friday 4th Feb</a></li>
-                    <li><a href="#day2"><strong>Day 2</strong> Saturday 5th Feb</a></li>
-                </ul>
-                <table id="day1" cellspacing="0" cellpadding="0">
-                    <tr>
-                        <th>Steam 1</th>
-                        <th>Stream 2</th>
-                        <th>Stream 3</th>
-                    </tr>
-                    <tr>
-                        <td colspan="3"><span class="time">09:30&ndash;10:00:</span> Introductory plenary</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            The ScraperWacky Races
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                        <td>
-                            Liberate the Data
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                        <td>
-                            Become a Python Scraping&nbsp;Pro!
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3"><span class="time">13:00&ndash;14:00:</span> Lunch</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            The ScraperWacky Races
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                        <td>
-                            Liberate the Data
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                        <td>
-                            Become a Ruby Scraping&nbsp;Pro!
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3"><span class="time">17:00&ndash;17:30:</span> Day 1 wrap-up</td>
-                    </tr>
-                </table>
-                <table id="day2" cellspacing="0" cellpadding="0">
-                    <tr>
-                        <th>Steam 1</th>
-                        <th>Stream 2</th>
-                    </tr>
-                    <tr>
-                        <td colspan="2"><span class="time">09:30&ndash;10:00:</span> Something something</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            The ScraperWacky Races
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                        <td>
-                            Liberate the Data
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2"><span class="time">13:00&ndash;14:00:</span> Lunch</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            The ScraperWacky Races
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                        <td>
-                            Liberate the Data
-                            <p>Aliquam imperdiet blandit leo, sit amet lobortis tortor sodales et. Pellentesque eget est ligula, ut cursus dolor. Praesent rutrum pellentesque orci nec tincidunt.</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2"><span class="time">17:00&ndash;17:30:</span> Day 2 wrap-up</td>
-                    </tr>
-                </table>
+            <h3 class="streams">Pick a stream</h3>
+            <div id="streams">
+                <div class="stream">
+                    <h4><span class="stream a">Stream A:</span> The ScraperWacky Races</h4>
+                    <img src="{{MEDIA_URL}}images/event_race_tractor.gif" width="156" height="128" alt="" style="float: right; margin: 0 0 10px 10px" />
+                    <p>Take a data story from concept to execution in 12 hours. We&rsquo;ll show you and your teammates how to identify stories, create hypotheses, and then gather, clean, analyse and visualise the data you need. The best stories, applications or visualisations at the end of Saturday will win prizes.</p>
+                    <p>This stream&rsquo;s perfect for journalists with or without programming experience, or anyone who wants to dive deep into the production of a data story.</p>
+                </div>
+                <hr/>
+                <div class="stream">
+                    <h4><span class="stream b">Stream B:</span> Liberate the Data</h4>
+                    <p>We want to open up more data, and you&rsquo;re the people to do it! This stream is the place for experienced Python, PHP or Ruby coders to pick up some high-level scraping skills and then try them out liberating data.</p>
+                    <p>We&rsquo;ll have a list of inaccessible datasets on hand, ready for you to explore. And, of course, the best liberators will be getting prizes at the end of Saturday!</p>
+                </div>
+                <hr/>
+                <div class="stream">
+                    <h4><span class="stream c">Stream C:</span> Learn to Scrape</h4>
+                    <img src="{{MEDIA_URL}}images/event_blobby_developer.gif" width="80" height="128" alt="" style="float:left; margin: 15px 15px 10px 0" />
+                    <p>If you already have some basic Python or Ruby skills, but want to know more about scraping, this is the stream for you.</p>
+                    <p>We&rsquo;ll be holding two 3-hour tutorial sessions: one in Python on Friday morning, and one in Ruby  on Friday afternoon.</p>
+                    <p>By the end of Friday you&rsquo;ll have all the scraping knowledge you need to join a race team in <span class="stream a">Stream A</span> or liberate some data in <span class="stream b">Stream B</span> on Saturday.</p>
+                </div>
             </div>
+            <h3 class="tickets">Reserve your place</h3>
             <div id="tickets">
                 <p>Eventbrite widget goes here</p>
             </div>
@@ -168,19 +105,35 @@ type="text/javascript"></script>
     
     createMap();
     
-    $('#schedule_tabs li a').bind('click', function(e){
-        e.preventDefault();
-        $(this).parent().addClass('current').siblings().removeClass('current');
-        $($(this).attr('href')).show().siblings('table').hide();
-    }).eq(0).trigger('click');
-    
     $('.links a').bind('click', function(e){
         e.preventDefault();
         var target = $($(this).attr('href'));
-        $('html, body').animate({
-            scrollTop: target.offset().top - 50
-        }, 1000, 'swing');
+//        if(target.is(':visible')){
+//            $('html, body').animate({
+//                scrollTop: target.offset().top - 50
+//            }, 500, 'swing');
+//        } else {
+            target.slideDown(function(){
+//                $('html, body').animate({
+//                    scrollTop: target.offset().top - 50
+//                }, 500, 'swing');
+            }).prev().addClass('active').siblings('.active').removeClass('active').next().slideUp();          
+//        }
     });
+    
+    $('#streams, #tickets').hide();
+    
+    $('h3.description').addClass('active');
+    
+    $('h3.description, h3.streams, h3.tickets').bind('click', function(){
+        if($(this).next().is(':visible')){
+            $(this).removeClass('active').next().slideUp();
+        } else {
+            $(this).addClass('active').next().slideDown();
+            $(this).siblings('.active').removeClass('active');
+            $('#description, #streams, #tickets').not($(this).next()).slideUp();
+        }
+    }).css('cursor', 'pointer');
     
 {% endblock %}
 
