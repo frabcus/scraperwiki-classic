@@ -4768,6 +4768,10 @@ body.events #header_inner .findoutmore {
 	color: #317fa5;
 }
 
+body.events #header_inner a em {
+	color: #b18c58;
+}
+
 body.events #header_inner .findoutmore:hover {
 	background-color: #eaf7ff;
 	color: #0082d8;
@@ -4786,6 +4790,7 @@ body.events #event_details {
 	float: left;
 	width: 630px;
 	line-height: 21px;
+	padding-bottom: 40px;
 }
 
 body.events #event_sidebar h4 {
@@ -4812,6 +4817,10 @@ body.events #event_sidebar .module {
 
 body.events #event_sidebar h4.association {
 	margin-top: 20px;
+}
+
+body.events #event_sidebar .address a {
+	color: #1766b0;
 }
 
 body.events #description p.first {
