@@ -323,7 +323,7 @@ class SQLiteDatabase(Database):
             return {"error":"sqliteexecute: ValueError: %s" % str(ve)}
         except TimeoutException,tout:
             #print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
-            log.err( ve )
+            log.err( tout )
             return { "error" : "Query timeout: %s" % str(tout) }
 
 

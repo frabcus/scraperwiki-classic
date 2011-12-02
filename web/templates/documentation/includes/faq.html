@@ -29,6 +29,7 @@
            <li><a href="#files">Can I save files, and if so where?</a></li>
            <li><a href="#commands">Wow, I can run arbitary commands!</a></li>
            <li><a href="#attach">Can I read from the datastore of another scraper?</a></li>
+           <li><a href="#slow_datastore">The datastore is slow and/or timing out, what should I do?</a></li>
            <li><a href="#import">Can I import code from another scraper?</a></li>
      </ul>
      <h2>Licensing questions</h2>
@@ -316,6 +317,29 @@ print urllib.urlopen(url).read()
                 </p> 
                 <p>It's possible to attach to lots of datastores, and use SQL to select
                 from all of them as if one.</p>
+           </dd>
+
+
+           <dt id="slow_datastore">The datastore is slow and/or timing out, what should I do?</dt>
+           <dd>
+               <p>Here are a few things you can do.</p>
+               <ol>
+                   <li> It is faster to save lots of rows in groups. Instead
+                    of passing a dictionary/hash to the save command, pass a list of dictionaries/hashes.
+                    See "for greater speed" in the {% doc_link_full 'LANG_datastore_guide' language %}.
+                   </li>
+                   <li> Make appropriate indices to speed up your queries. 
+                   For example, in Python, this created the index for a 
+                    <a href="https://scraperwiki.com/scrapers/roadaccidents_1/">road accidents</a> scraper.
+
+                    <code>scraperwiki.sqlite.execute('''
+    CREATE INDEX IF NOT EXISTS casualty_type_manual_index 
+    ON casualties (Casualty_Type)''')</code>
+                    The datastore normally times out after 30 seconds, but 
+                    CREATE INDEX commands have up to 3 minutes.
+
+                   </li>
+                </ol>
            </dd>
 
            <dt id="import">Can I import code from another scraper?</a></dt>
