@@ -28,6 +28,7 @@ type="text/javascript"></script>
 {% endblock %}
 
 {% block header %}
+{% if debug %}
 	<h2>ScraperWiki <em>Journalism Data Camp</em> NY</h2>
 	<!-- <h3>on New York Data and Accountability</h3> -->
 	<p class="deets"><span class="when">February 4th &amp; 5th</span> <span class="price">Hosted by Columbia University</span> <span class="twitter">#jdcny</span></p>
@@ -36,9 +37,11 @@ type="text/javascript"></script>
 	    <a href="#streams" class="findoutmore">Find out more</a>
 	    <a href="#tickets" class="reserveaspace">Sign up <em>&ndash; free</em></a>
 	</p>
+{% endif %}
 {% endblock %}
 
 {% block content_outer %}
+{% if debug %}
 <div id="page_outer">
 	<div id="page_inner">
         <div id="event_sidebar">
@@ -95,7 +98,7 @@ type="text/javascript"></script>
         <br class="clear" />
     </div>
 </div>
-
+{% endif %}
 {% endblock %}
 
 
