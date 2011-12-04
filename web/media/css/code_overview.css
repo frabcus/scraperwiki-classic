@@ -597,6 +597,10 @@ table.about p {
 	margin-left: 40px;
 }
 
+#divAboutScraper p {
+	margin-bottom: 10px;
+}
+
 table.about a.edit {
 	float: right;
 	font-size: 14px;

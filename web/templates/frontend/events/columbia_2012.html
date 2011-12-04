@@ -28,17 +28,20 @@ type="text/javascript"></script>
 {% endblock %}
 
 {% block header %}
-	<h2>Columbia University <em>Journalism Data Camp</em></h2>
+{% if debug %}
+	<h2>ScraperWiki <em>Journalism Data Camp</em> NY</h2>
 	<!-- <h3>on New York Data and Accountability</h3> -->
-	<p class="deets"><span class="when">February 4th &amp; 5th</span> <span class="price">Free Entry</span> <span class="twitter">#jdcny</span></p>
+	<p class="deets"><span class="when">February 4th &amp; 5th</span> <span class="price">Hosted by Columbia University</span> <span class="twitter">#jdcny</span></p>
 	<p>Three streams, two days, one goal: opening up New York&rsquo;s data.</p>
 	<p class="links">
 	    <a href="#streams" class="findoutmore">Find out more</a>
 	    <a href="#tickets" class="reserveaspace">Sign up <em>&ndash; free</em></a>
 	</p>
+{% endif %}
 {% endblock %}
 
 {% block content_outer %}
+{% if debug %}
 <div id="page_outer">
 	<div id="page_inner">
         <div id="event_sidebar">
@@ -61,30 +64,29 @@ type="text/javascript"></script>
         <div id="event_details">
             <h3 class="description">Why we need you</h3>
             <div id="description">
-                <p class="first">There are mountains of New York data out there, but someone needs to liberate and make sense of it if we&rsquo;re to hold businesses and governments to account.</p>
-                <p>Columbia University School of Journalism, together with ScraperWiki and the Knight Foundation, are planning a two day event at the beginning of February 2012, to do just that. We need journalists, students, computer scientists, programmers, statisticians and public officials to come liberate some data.</p>
-                <p class="last"><img src="{{MEDIA_URL}}images/event_big_arrow.gif" width="45" height="65" alt="" />All you need is enthusiasm and a laptop &ndash; we supply the food, drink and wifi. <b>Entry is free</b> but space is limited, so check out the three streams below, and reserve a ticket before they&rsquo;re gone.</p>
+                <p class="first">The web is littered with dirty great piles of data, which the people in charge don&rsquo;t want you to find. We need someone to dig it up and hold them to account.</p>
+                <p>ScraperWiki, together with Columbia University School of Journalism and the Knight Foundation, are doing just that. We need journalists, students, computer scientists, programmers, statisticians and public officials to dig up the data and&nbsp;the&nbsp;dirt!</p>
+                <p class="last"><img src="{{MEDIA_URL}}images/event_big_arrow.gif" width="45" height="65" alt="" />All you need is enthusiasm and a laptop &ndash; we supply the food, drink and wifi. <b>Entry is free</b> but space is limited. We&rsquo;ve got something for everyone, so check out the three streams below, and reserve a ticket before they go.</p>
             </div>
             <h3 class="streams">Pick a stream</h3>
             <div id="streams">
                 <div class="stream">
-                    <h4><span class="stream a">Stream A:</span> The ScraperWacky Races</h4>
+                    <h4><span class="stream a">Stream A:</span> ScraperWiki Data Derby</h4>
                     <img src="{{MEDIA_URL}}images/event_race_tractor.gif" width="156" height="128" alt="" style="float: right; margin: 0 0 10px 10px" />
-                    <p>Take a data story from concept to execution in 12 hours. You and your teammates will identify stories, create hypotheses, and then gather, clean, analyse and visualise the data you need. The best stories, applications or visualisations at the end of Saturday will win prizes.</p>
-                    <p>This stream&rsquo;s perfect for journalists with or without programming experience, or anyone who wants to dive deep into the production of a data story.</p>
+                    <p>Use data to uncover facts and drive your story home. Work in teams to identify stories, create hypotheses, and then gather, clean, analyse and visualise the data you need. Those that cross the finishing line will win prizes.</p>
+                    <p>This stream&rsquo;s perfect for journalists <strong>with or without programming experience</strong>, or anyone who wants to dive deep into the production of a data story.</p>
                 </div>
                 <hr/>
                 <div class="stream">
                     <h4><span class="stream b">Stream B:</span> Liberate the Data</h4>
-                    <p>We want to open up more data, and you&rsquo;re the people to do it! This stream is the place for experienced Python, PHP or Ruby coders to pick up some high-level scraping skills and then try them out liberating data.</p>
-                    <p>We&rsquo;ll have a list of inaccessible datasets on hand, ready for you to explore. And, of course, the best liberators will be getting prizes at the end of Saturday!</p>
+                    <p>We want to open up more data, and you&rsquo;re the people to do it! This stream is the place for <strong>experienced Python, PHP or Ruby coders</strong>. Come drive our digger, pick up some high-level scraping skills and try them out by liberating data for the Data Derby.</p>
+                    <p>We&rsquo;ll have a list of inaccessible datasets on hand, ready for you to explore. And, of course, the best liberators will be getting prizes!</p>
                 </div>
                 <hr/>
                 <div class="stream">
                     <h4><span class="stream c">Stream C:</span> Learn to Scrape</h4>
                     <img src="{{MEDIA_URL}}images/event_blobby_developer.gif" width="80" height="128" alt="" style="float:left; margin: 15px 15px 10px 0" />
-                    <p>If you already have some basic Python or Ruby skills, but want to know more about scraping, this is the stream for you.</p>
-                    <p>We&rsquo;ll be holding two 3-hour tutorial sessions: one in Python on Friday morning, and one in Ruby  on Friday afternoon.</p>
+                    <p>If you already have some <strong>basic Python or Ruby skills</strong>, but want to know more about scraping, this is the stream for you. We&rsquo;ll be holding two tutorial sessions: one in Python on Friday morning, and one in Ruby  on Friday afternoon.</p>
                     <p>By the end of Friday you&rsquo;ll have all the scraping knowledge you need to join a race team in <span class="stream a">Stream A</span> or liberate some data in <span class="stream b">Stream B</span> on Saturday.</p>
                 </div>
             </div>
@@ -96,7 +98,7 @@ type="text/javascript"></script>
         <br class="clear" />
     </div>
 </div>
-
+{% endif %}
 {% endblock %}
 
 
