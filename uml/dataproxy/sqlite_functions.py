@@ -6,22 +6,18 @@
 """
 import math
 
-def distance_on_unit_sphere(lat1, long1, lat2, long2):
+def distance_on_spherical_earth(lat1, long1, lat2, long2):
     """
         This Public Domain code taken from 
         http://www.johndcook.com/python_longitude_latitude.html
         
         The following code returns the distance between to locations based on
-        each point's longitude and latitude. The distance returned is relative 
-        to Earth's radius. To get the distance in miles, multiply by 3960. To 
-        get the distance in kilometers, multiply by 6373.
+        each point's longitude and latitude in kilometres.
 
         Latitude is measured in degrees north of the equator; southern locations 
         have negative latitude. Similarly, longitude is measured in degrees east 
         of the Prime Meridian. A location 10 west of the Prime Meridian, for 
         example, could be expressed as either 350 east or as -10 east.    
-        
-        Returns value in KM
     """
     try:
         lat1 = float(lat1)
@@ -57,11 +53,11 @@ def distance_on_unit_sphere(lat1, long1, lat2, long2):
 
     # Remember to multiply arc by the radius of the earth 
     # in your favorite set of units to get length.
-    return arc * float(6373)
+    return arc * float(6371)
 
 if __name__ == '__main__':
     # Simple test
-    print distance_on_unit_sphere(51.885, 0.235, 49.008, 2.549)
-    print distance_on_unit_sphere('51.885', '0.235', '49.008', '2.549')
-    print distance_on_unit_sphere('51.885', '0.235', 'hello', 0)    
+    print distance_on_spherical_earth(51.885, 0.235, 49.008, 2.549)
+    print distance_on_spherical_earth('51.885', '0.235', '49.008', '2.549')
+    print distance_on_spherical_earth('51.885', '0.235', 'hello', 0)    
     
