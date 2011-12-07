@@ -109,6 +109,7 @@
 <input type="hidden" id="fork_url_action"   value="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}"/>
 <input type="hidden" id="username"          value="{{ request.user.username }}"/>
 <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
+<input type="hidden" id="scraper_owners"    value="{{ scraper.owner.username }}"/>
 <input type="hidden" id="beta_user"         value="{% if request.user.get_profile.beta_user %}yes{% endif %}"/>
 <input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
 <input type="hidden" id="savecode_authorized" value="{{ savecode_authorized }}"/>

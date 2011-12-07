@@ -15,6 +15,7 @@ $(document).ready(function()
     var isstaff = $('#isstaff').val(); 
     var beta_user = $('#beta_user').val(); 
     scraperlanguage = $('#scraperlanguage').val(); 
+    var scraper_owners = ( $('#scraper_owners').val().length != 0 ? $('#scraper_owners').val().split(';') : [] );
     var run_type = $('#code_running_mode').val();
     codemirror_url = $('#codemirror_url').val();
     var wiki_type = $('#id_wiki_type').val(); 
@@ -230,9 +231,20 @@ $(document).ready(function()
               writeToChat("<i>saved in another window</i>", data.chatname);  
           } else if (data.message_type == "requestededitcontrol") {
 
-// this should popup something if there has been no activity for a while with a count-down timer that eventually sets the editinguser down and
-// self-demotes to autoload with the right value of iselectednexteditor selected
-writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit control but you have last typed " + (new Date() - lasttypetime)/1000 + " seconds ago"); 
+			// this should popup something if there has been no activity for a while with a count-down timer that eventually sets the editinguser down and
+			// self-demotes to autoload with the right value of iselectednexteditor selected
+			// writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit control but you have last typed " + (new Date() - lasttypetime)/1000 + " seconds ago"); 
+			
+			var lasttypeseconds = (new Date() - lasttypetime)/1000;
+			
+			if( scraper_owners.indexOf(data.username) == -1 && lasttypeseconds < 60 ){
+				data = {"command":'chat', "guid":guid, "text":"Sorry, " + data.username + ", you cannot steal control from " + chatname};
+                sendjson(data);
+			} else {
+				iselectednexteditor = loggedineditors.indexOf(data.username);
+				changeAutomode('autoload');
+				writeToChat("<b>requestededitcontrol: " + data.username + " stole editor control");
+			}			
 
           } else if (data.message_type == "giveselrange") {
               //writeToChat("<b>selrange: "+data.chatname+" has made a select range: "+$.toJSON(data.selrange)+"</b>"); 
@@ -468,13 +480,17 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         {
             $('.editor_controls #watch_button_area').toggle((loggedineditors.length != 1));
 
-            if (loggedineditors.length >= 2)
-                setwatcherstatusmultieditinguser(); // sets links to call self
-            else
+            if (loggedineditors.length >= 2){
+				// Next relinquish will default to previous editor
+				if (automode == 'autoload'){
+					iselectednexteditor = loggedineditors.length -1; 
+				}
+		        setwatcherstatusmultieditinguser(); // sets links to call self
+            } else {
                 $('#watcherstatus').html(""); 
-
-            if (automode == 'autoload')
-            {
+			}
+			
+            if (automode == 'autoload'){
                 setCodeMirrorReadOnly(false);
                 changeAutomode('autosave'); 
                 $('.editor_controls #run').attr('disabled', false);
