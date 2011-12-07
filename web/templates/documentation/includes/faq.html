@@ -328,6 +328,11 @@ print urllib.urlopen(url).read()
                     of passing a dictionary/hash to the save command, pass a list of dictionaries/hashes.
                     See "for greater speed" in the {% doc_link_full 'LANG_datastore_guide' language %}.
                    </li>
+                   <li> When saving, specify "verbose = 0" as a parameter to the
+                   save_sqlite function. This turns off logging to the Data tab
+                   in the editor, and in some cases can make it ten times faster
+                   while developing. See {% doc_link_full 'LANG_help_documentation' language %}.
+                   </li>
                    <li> Make appropriate indices to speed up your queries. 
                    For example, in Python, this created the index for a 
                     <a href="https://scraperwiki.com/scrapers/roadaccidents_1/">road accidents</a> scraper.
