@@ -1,23 +1,29 @@
+#!/usr/bin/env python
+# utils.py
+# David Jones, ScraperWiki Limited
+
 from __future__ import with_statement
-__doc__ = """ScraperWiki Utils - to be replaced by proper urllib over-riding"""
+
+"""ScraperWiki Utils, see
+https://scraperwiki.com/docs/python/python_help_documentation/
+"""
+
 __version__ = "ScraperWiki_0.0.1"
 
-import urllib2
+import cgi
+import datetime
+import imp
+import os
+import sys
+import tempfile
+import traceback
 import urllib
-import cookielib
+import urllib2
 
 try:
   import json
 except:
   import simplejson as json
-
-import os
-import sys
-import traceback
-import datetime
-import tempfile
-import imp
-import cgi
 
 import scraperwiki   # in order to get dumpMessage function
     
@@ -43,6 +49,17 @@ def httpresponseheader(headerkey, headervalue):
     # Messages of this type are picked up and specially interpreted by
     # viewsrpc.rpcexecute
     scraperwiki.dumpMessage({'message_type': 'httpresponseheader', 'headerkey': headerkey, 'headervalue': headervalue})
+
+def httpstatuscode(statuscode):
+    """Experimental and Internal.  Sets the HTTP Status Code to be
+    *statuscode* which should be an int.
+    """
+
+    # Messages of this type are picked up and specially interpreted by
+    # viewsrpc.rpcexecute
+    scraperwiki.dumpMessage(
+      {'message_type': 'httpstatuscode', 'statuscode': statuscode})
+
 
 # to be deprecated if possible
 def GET():
