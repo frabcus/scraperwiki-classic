@@ -317,13 +317,35 @@ function writeToSqliteData(command, val1, lval2)
     $('.editor_output div.tabs li.data').addClass('new');
 }
 
-function writeToChat(seMessage, sechatname) 
+/* function writeToChat(seMessage, sechatname) 
 {
     if ( typeof console == 'object' ) { 
         var msg = (sechatname ? sechatname + ": " : "") + seMessage;
         console.log ( msg );
     }
+} */
+
+function writeToChat(seMessage, sechatname){
+    while ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) 
+        $('#output_chat table.output_content tbody').children(':first').remove();
+
+    var oRow = $('<tr><td>' + (sechatname ? sechatname + ": " : "") + seMessage + '</td></tr>');
+    $('#output_chat table.output_content').append(oRow);
+    setTabScrollPosition('chat', 'bottom'); 
+    $('.editor_output div.tabs li.chat').addClass('new');
+
+    if (sechatname && (sechatname != chatname)){
+            // currently highlights when there is more than a minute gap.  But could be longer
+        if ((chatpeopletimes[sechatname] == undefined) || ((servernowtime.getTime() - chatpeopletimes[sechatname].getTime())/1000 > 60))
+        {
+            chatpeopletimes[sechatname] = servernowtime; 
+            if (sTabCurrent != 'chat')
+                $('.editor_output div.tabs li.chat').addClass('chatalert');
+        }
+     }
 }
+
+
 
 //show tab
 function showTab(sTab)
