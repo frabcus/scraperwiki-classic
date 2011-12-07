@@ -65,7 +65,7 @@ class SeleniumTest(unittest.TestCase):
             if "Timed out" in str(e):
                 print str(e) + ", trying again"
             else:
-                raise e
+                raise
         
         if hit_limit:
             try:
