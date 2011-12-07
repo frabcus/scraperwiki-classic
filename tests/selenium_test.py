@@ -53,7 +53,7 @@ class SeleniumTest(unittest.TestCase):
                 s.click("djHideToolBarButton")
         
         
-    def wait_for_page(self, doing=None):
+    def wait_for_page(self):
         hit_limit = True
         # DO NOT call anything else (even for debugging, e.g. self.selenium.get_location) at this point as:
         # "Running any other Selenium command after turns the flag to false."
@@ -69,10 +69,7 @@ class SeleniumTest(unittest.TestCase):
                 self.selenium.wait_for_page_to_load('30000')
                 hit_limit = False
             except:
-                if not doing:
-                    msg = 'It took longer than 60 seconds to visit %s, it may have failed' % self.selenium.get_location()
-                else:
-                    msg = 'It took longer than 60 seconds to: %s' % doing
+                msg = 'It took longer than 60 seconds to visit page, it may have failed'
                 self.fail(msg=msg)
 
         if self._verbosity > 1:

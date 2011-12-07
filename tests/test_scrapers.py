@@ -58,7 +58,7 @@ class TestScrapers(SeleniumTest):
         s = self.selenium
               
         s.click('link=Discussion (0)')    
-        self.wait_for_page('visiting discussion')
+        self.wait_for_page()
         comment = 'A test comment'
 
         s.type('id_comment', comment)
@@ -69,7 +69,7 @@ class TestScrapers(SeleniumTest):
         self.failUnless(s.is_text_present("Discussion (1)"))        
 
         s.open('/%ss/%s/' % (code_type, code_name))        
-        self.wait_for_page('view the scraper page')        
+        self.wait_for_page()        
         
         
     def _check_dashboard_count(self, count=2):
@@ -80,7 +80,7 @@ class TestScrapers(SeleniumTest):
         s = self.selenium
                 
         s.click('link=Your dashboard')
-        self.wait_for_page('visit dashboard')
+        self.wait_for_page()
         
         scraper_count = int(s.get_xpath_count('//li[@class="code_object_line"]'))    
         self.failUnless( count == scraper_count, msg='There are %s items instead of %s' % (scraper_count,count,) )
@@ -90,10 +90,10 @@ class TestScrapers(SeleniumTest):
         s = self.selenium     
                 
         s.open('/scrapers/%s/' % scraper_name)        
-        self.wait_for_page('view the scraper page to check we cleared the data')  
+        self.wait_for_page()  
         # Clear the datastore
         s.click('btnClearDatastore')
-        self.wait_for_page('clear the datastore')
+        self.wait_for_page()
         self.failUnless(s.is_text_present( 'Your data has been deleted' ))
         self.failIf(s.is_text_present( 'This dataset has a total of' ))
         # Recover the datastore
@@ -103,7 +103,7 @@ class TestScrapers(SeleniumTest):
         self.failUnless(s.is_text_present( 'This dataset has a total of' ))
         # Delete it again
         s.click('btnClearDatastore')
-        self.wait_for_page('clear the datastore')
+        self.wait_for_page()
         self.failUnless(s.is_text_present( 'Your data has been deleted' ))
         self.failIf(s.is_text_present( 'This dataset has a total of' ))
 
