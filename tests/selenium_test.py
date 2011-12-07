@@ -61,15 +61,18 @@ class SeleniumTest(unittest.TestCase):
         try:
             self.selenium.wait_for_page_to_load('30000')
             hit_limit = False
-        except:
-            print 'Failed to load page in first 30 seconds, adding another 30'
+        except Exception, e:
+            if "Timed out" in str(e):
+                print str(e) + ", trying again"
+            else:
+                raise e
         
         if hit_limit:
             try:
                 self.selenium.wait_for_page_to_load('30000')
                 hit_limit = False
-            except:
-                msg = 'It took longer than 60 seconds to visit page, it may have failed'
+            except Exception, e:
+                msg = 'Error on second attempt to load page: %s' % (str(e))
                 self.fail(msg=msg)
 
         if self._verbosity > 1:
