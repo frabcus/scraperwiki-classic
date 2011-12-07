@@ -36,8 +36,12 @@ def log(message=""):
 
 
 def httpresponseheader(headerkey, headervalue):
-    ''' eg httpresponseheader('Content-Type', 'text/plain') '''
+    '''Set (certain) HTTP Response Header.  For example
+    scraperwiki.utils.httpresponseheader('Content-Type', 'text/plain')
+    '''
 
+    # Messages of this type are picked up and specially interpreted by
+    # viewsrpc.rpcexecute
     scraperwiki.dumpMessage({'message_type': 'httpresponseheader', 'headerkey': headerkey, 'headervalue': headervalue})
 
 # to be deprecated if possible
