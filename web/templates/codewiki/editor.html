@@ -109,6 +109,7 @@
 <input type="hidden" id="fork_url_action"   value="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}"/>
 <input type="hidden" id="username"          value="{{ request.user.username }}"/>
 <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
+<input type="hidden" id="scraper_owners"    value="{{ scraper.owner.username }}"/>
 <input type="hidden" id="beta_user"         value="{% if request.user.get_profile.beta_user %}yes{% endif %}"/>
 <input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
 <input type="hidden" id="savecode_authorized" value="{{ savecode_authorized }}"/>
@@ -153,8 +154,15 @@
     </div>
 
     <div id="rollback_warning" class="alert_outer" style="display:none;" >
-        <strong>Warning:</strong> You are viewing an earlier version of this {{scraper.wiki_type}}.
-        If you save, the newest version will be overwritten!
+        <div class="alert_inner">
+            <strong>Warning:</strong> You are viewing an earlier version of this {{scraper.wiki_type}}. If you save, the newest version will be overwritten!
+        </div>
+    </div>
+
+    <div id="watcher_alert" class="alert_outer" style="display:none;" >
+        <div class="alert_inner">
+            <span class="editor_name">XXXX</span> is currently editing this scraper. <a>Steal control</a>
+        </div>
     </div>
 
 
@@ -201,6 +209,7 @@
         {% ifequal scraper.wiki_type 'scraper' %}{% ifequal scraper.language 'javascript' %}
             <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R, Cmd + R)" disabled />
         {% endifequal %}{% endifequal %}
+        <input type="button" value="I want to edit" id="btnEdit" class="button" style="display:none" />
 
         {# used to be a dropdown select option #}
         <input type="hidden" id="automode" class="staff" value="{% if scraper.id %}autosave{% else %}draft{% endif %}"/>
@@ -213,9 +222,9 @@
         <img id="running_annimation" src="{{MEDIA_URL}}/images/running.gif"/>
 
         <!--<input type="button" id="btnWatch" class="watch button" name="action" value="Watch" title="Give up editing; watches someone else editing instead"/> -->
-        <span id="watch_button_area" style="display:none">You are editing (<a id="btnWatch">relinquish</a>), </span>
+        <span id="watch_button_area" style="display:none">You are editing,</span>
         <span id="watcherstatus"></span>
-
+        <input type="button" value="Relinquish" id="btnWatch" style="margin-left: 7px; display:none" />
         <div class="right">
             <span id="idlastrev" >
             </span>

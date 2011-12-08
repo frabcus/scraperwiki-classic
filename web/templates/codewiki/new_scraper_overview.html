@@ -478,12 +478,32 @@
 {% else %}
         {% if sqliteconnectionerror %}
             <ul class="titlebar">
-                <li class="first"><h3>
-                Sorry! The datastore isn't working right now
-                </h3>
+                <li class="first"><h3>Sorry! The datastore isn't working right now</h3></li>
+                <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}{% if scraper.access_apikey %}&apikey_scraper={{scraper.access_apikey}}{% endif %}#sqlite"><img src="{{ MEDIA_URL }}images/icons/hard_hat.png" width="16" height="16" alt="">Explore with API</a></li>
+                <li class="download">
+                    <a><img src="{{ MEDIA_URL }}images/icons/arrow_down.png" width="16" height="16" alt="">Download</a>
+                    <div class="download_popover">
+                        <h6>Download whole datastore&hellip;</h6>
+                        <ul>
+                            <li class="database_sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow"><span class="icon"></span> As an SQLite database</a></li>
+                        <!--  <li class="database_csv"><a href="#"><span class="icon"></span> As a folder of CSVs</a></li>
+                            <li class="database_json"><a href="#"><span class="icon"></span> As a folder of JSON files</a></li>
+                            <li class="database_excel"><a href="#"><span class="icon"></span> As an Excel file</a></li>  -->
+                        </ul>
+                        <span class="arrow"></span>
+                    </div>
                 </li>
+                {% if user_owns_it or user.is_staff %}<li class="empty">
+                    <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore" rel="nofollow">Clear data</a>
+                    <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_data" value="1" />
+                        <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
+                    </form>
+                </li>{% endif %}
                 <li class="clear"></li>
             </ul>
+            
             <p class="sqliteconnectionerror">{{sqliteconnectionerror}}</p>
         {% else %}
             <ul class="titlebar">
