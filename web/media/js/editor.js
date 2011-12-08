@@ -399,8 +399,8 @@ $(document).ready(function()
         var selectednexteditor = loggedineditors[iselectednexteditor]; 
         wstatus = '<a href="'+ $('input#userprofileurl').val().replace(/XXX/g, selectednexteditor) +'" target="_blank">'+selectednexteditor+'</a>'; 
         if (loggedineditors.length >= 3)
-            wstatus += ' (<a class="plusone">+' + (loggedineditors.length-2) + '</a>)'; 
-        wstatus += ' <a class="plusoneselect" title="Click to cycle through other watchers">is</a> watching'; 
+            wstatus += ' (<a class="plusone" title="Click to cycle through other watchers">+' + (loggedineditors.length-2) + '</a>)'; 
+        wstatus += ' <a class="plusoneselect">is</a> watching'; 
         $('#watcherstatus').html(wstatus); 
         if (loggedineditors.length >= 3)
             $('#watcherstatus .plusone').click(function() { 

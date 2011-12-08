@@ -144,15 +144,23 @@ body {
 	background-position: 4px 49%;
 	padding: 4px 6px 4px 24px;
 	border: solid 1px #9f9f9f;
-	color: #444;
+	color: #555;
 	font-weight: bold;
 	text-transform: uppercase;
 	font-family: Helvetica, Arial, sans-serif;
 	display: inline-block;
 }
 
+.editor_controls input:hover {
+	background-color: #ddd;
+	border-color: #999;
+	color: #444;
+	cursor: pointer;
+}
+
 .editor_controls input:active {
-	color: #2680c6;
+	position: relative;
+	top: 1px;
 }
 
 .editor_controls .save, #meta_form .save {
@@ -173,6 +181,8 @@ body {
 	background-color: #ddd;
 	border-color: #ccc;
 	color: #999;
+	cursor: default;
+	position: static;
 }
 
 .editor_controls #reload {
@@ -261,10 +271,18 @@ body {
 	text-transform: none;
 	font-size: 13px;
 	line-height: 13px;
+	text-decoration: none;
 }
 
-.helplink a {
+.helplink:hover {	
+	background-color: #e58639;
+	border-color: #b86114;
 	text-decoration: none;
+}
+
+.helplink:active {
+	position: relative;
+	top: 1px;
 }
 
 #meta_form {
