@@ -511,9 +511,9 @@ $(document).ready(function()
 			$('#btnEdit').show();
             $('#watcherstatus').html('<a href="'+$('input#userprofileurl').val().replace(/XXX/g, editingusername)+'" target="_blank">'+editingusername+'</a> <a class="plusoneselect">is</a> <a class="plusoneediting">editing</a>');
             if (username){
-                $('#watcherstatus .plusoneediting, #btnEdit').click(function() { sendjson({"command":'requesteditcontrol', "user":username}); });
+                $('#watcherstatus .plusoneediting, #btnEdit').bind('click', function() { sendjson({"command":'requesteditcontrol', "user":username}); });
 			}
-            $('#watcherstatus .plusoneselect').click(transmitSelection); 
+            $('#watcherstatus .plusoneselect').bind('click', transmitSelection); 
 
             if (automode != 'autoload'){
                 $('.editor_controls #watch_button_area').hide();
