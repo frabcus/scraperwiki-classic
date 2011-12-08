@@ -385,6 +385,7 @@ div.editor .alert_outer {
 	background: -ms-linear-gradient(top, rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0.1) 51%,rgba(255,255,255,0) 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ccffffff', endColorstr='#00ffffff',GradientType=0 );
 	background: linear-gradient(top, rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0.1) 51%,rgba(255,255,255,0) 100%);
+	cursor: pointer;
 }
 
 #alert_outer.info a,
@@ -446,6 +447,7 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	text-align: center;
 	font-weight: normal;
 	width: 920px;
+	margin: 0 auto;
 }
 
 #alert_outer a#alert_close,
