@@ -5,6 +5,7 @@ from urlparse import urlparse
 import urllib2
 from BeautifulSoup import BeautifulSoup
 import lxml.html
+from selenium.webdriver.common.keys import Keys
 
 class TestScrapers(SeleniumTest):
     """
@@ -334,8 +335,8 @@ class TestScrapers(SeleniumTest):
 
         # edit tags
         s.click('css=.tag a')
-        s.type('css=.new_tag_box input', "great,testy,rabbit")
-        s.key_down('css=.new_tag_box input', "\\13");
+        s.type('css=.new_tag_box input', "rabbit")
+        s.key_press_native(10)
         time.sleep(1) # XXX how to wait just until the JS has run?
         self.failUnless(s.is_text_present("rabbit"))
 
