@@ -132,7 +132,7 @@ class TestRegistration(SeleniumTest):
 
 
     def test_dupe_email(self):
-        expected = 'This email address is already in use. Please supply a different email address. '
+        expected = 'This email address is already in use. Please supply a different email address.'
         s = self.selenium
 
         email = 'se_test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
