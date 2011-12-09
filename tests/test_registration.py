@@ -188,7 +188,7 @@ class TestRegistration(SeleniumTest):
 
         s.click('register')
         self.wait_for_page()
-        self.failUnless(s.is_text_present("You must agree to the ScraperWiki terms and conditions "), 
+        self.failUnless(s.is_text_present("You must agree to the ScraperWiki terms and conditions"), 
                         msg='Site is not complaining that user did not accept terms')
 
     def test_login_no_details(self):
