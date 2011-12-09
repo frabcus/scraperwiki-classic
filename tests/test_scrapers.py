@@ -58,8 +58,8 @@ class TestScrapers(SeleniumTest):
     def _add_comment(self, code_name, code_type):
         s = self.selenium
               
-        s.click('link=Discussion (0)')    
-        self.wait_for_page()
+        self.failUnless(s.is_text_present('This scraper has no chat'))
+
         comment = 'A test comment'
 
         s.type('id_comment', comment)
@@ -67,11 +67,8 @@ class TestScrapers(SeleniumTest):
         self.wait_for_page()
 
         self.failUnless(s.is_text_present(comment))
-        self.failUnless(s.is_text_present("Discussion (1)"))        
+        self.failUnless(s.is_text_present("regexp:This\s+scraper's\s+chat"))
 
-        s.open('/%ss/%s/' % (code_type, code_name))        
-        self.wait_for_page()        
-        
         
     def _check_dashboard_count(self, count=2):
         """ 
