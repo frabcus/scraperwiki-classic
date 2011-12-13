@@ -52,5 +52,3 @@ syntax: regexp
 ^selenium/webdriver/ie/win32/IEDriver.dll$
 ^selenium/webdriver/ie/x64/IEDriver.dll$
 ^services/scriptmgr/appsettings.scriptmgr.js$
-^services/switchboard/appsettings.switchboard.js$
-^services/datastore/appfiles/config.xml$
