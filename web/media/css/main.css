@@ -4927,13 +4927,6 @@ body.events #streams hr {
 body.events #tickets {
 	margin-left: 45px;
 	margin-top: 10px;
-	background-color: #fff4d8;
-	text-align: center;
-	line-height: 400px;
-}
-
-body.events #tickets p {
-	margin-top: 0;
 }
 
 #liberatesomedata {
