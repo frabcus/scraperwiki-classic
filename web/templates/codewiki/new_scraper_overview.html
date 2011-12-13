@@ -64,13 +64,10 @@
         {% else %}
             Hasn&rsquo;t run yet
         {% endif %}
-        </span> <span class="totalrows">
-        {% if sqlitedata %}
-            {{ total_record_count|intcomma }} record{{ total_record_count|pluralize }}
-        {% else %}
-            No data yet
-        {% endif %}
-        </span> 
+      </span> <span class="totalrows"></span>
+        <script type="text/javascript">
+          setTotalRowCount( '{{settings.API_URL}}', '{{scraper.short_name}}' );
+        </script>
         {% if scraper.privacy_status == 'public' %}
     	    <a class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</a>
         {% endif %}

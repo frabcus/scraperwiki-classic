@@ -654,3 +654,28 @@ $(function(){
 	}).css('color', '#666');
 	
 });
+
+function setTotalRowCount(api_url, scraper_name){
+  var url;
+
+  url = api_url + "/api/1.0/datastore/sqlite?format=jsondict&name="+scraper_name+"&query=SELECT%20name%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
+
+  jQuery.get(url, function(data) {
+    var count_url, tables;
+    tables = (_.map(data, function(d) {
+        return "(SELECT COUNT(*) FROM " + d.name + ")";
+      })).join('+');
+    count_url = api_url + "/api/1.0/datastore/sqlite?format=jsondict&name="+scraper_name+"&query=SELECT%20" + (encodeURIComponent(tables)) + "%20AS%20total_rows";
+    return jQuery.get(count_url, function(resp) {
+        $('span.totalrows').text(resp[0].total_rows);
+        $('span.totalrows').digits();
+        $('span.totalrows').append(resp[0].total_rows > 0 ? ' records' : ' record')
+     });
+  });
+}
+
+$.fn.digits = function(){ 
+    return this.each(function(){ 
+            $(this).text( $(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") ); 
+        })
+}
