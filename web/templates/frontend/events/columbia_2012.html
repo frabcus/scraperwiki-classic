@@ -41,7 +41,6 @@ type="text/javascript"></script>
 {% endblock %}
 
 {% block content_outer %}
-{% if debug %}
 <div id="page_outer">
 	<div id="page_inner">
         <div id="event_sidebar">
@@ -100,7 +99,6 @@ type="text/javascript"></script>
         <br class="clear" />
     </div>
 </div>
-{% endif %}
 {% endblock %}
 
 
@@ -112,17 +110,17 @@ type="text/javascript"></script>
     $('.links a').bind('click', function(e){
         e.preventDefault();
         var target = $($(this).attr('href'));
-//        if(target.is(':visible')){
-//            $('html, body').animate({
-//                scrollTop: target.offset().top - 50
-//            }, 500, 'swing');
-//        } else {
+        if(target.is(':visible')){
+            $('html, body').animate({
+                scrollTop: target.offset().top - 80
+            }, 500, 'swing');
+        } else {
             target.slideDown(function(){
-//                $('html, body').animate({
-//                    scrollTop: target.offset().top - 50
-//                }, 500, 'swing');
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 80
+                }, 500, 'swing');
             }).prev().addClass('active').siblings('.active').removeClass('active').next().slideUp();          
-//        }
+        }
     });
     
     $('#streams, #tickets').hide();

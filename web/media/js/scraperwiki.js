@@ -575,32 +575,36 @@ $(function()
 				div.append('<ul></ul>');
 				
 				function populate_list(data){
-					$('ul', div).empty();
-					$.map(data, function(val, i){
-						var li = $('<li>');
-						li.append('<span class="place">#' + (i+1) + '</span>');
-						li.append('<a href="' + val.url + '" class="url">' + val.url.replace(/https?:\/\//i, "") + '</strong>');
-						li.append('<span class="why">' + val.why + '</span>');
-						$('<span class="vote" title="Vote for this">Vote</span>').bind('click', function(){
-							$(this).addClass('loading').unbind('click');
-							$.ajax({
-								url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/?vote=' + encodeURIComponent(val.url),
-								dataType: 'jsonp',
-								success: function(data){
-									populate_list(data);
-								}
-							});
-						}).appendTo(li);
-						$('ul', div).append(li);
-					});	
+					if(data.length){
+						$('ul', div).empty();
+						$.map(data, function(val, i){
+							var li = $('<li>');
+							li.append('<span class="place">#' + (i+1) + '</span>');
+							li.append('<a href="' + val.url + '" class="url">' + val.url.replace(/https?:\/\//i, "") + '</strong>');
+							li.append('<span class="why">' + val.why + '</span>');
+							$('<span class="vote" title="Vote for this">Vote</span>').bind('click', function(){
+								$(this).addClass('loading').unbind('click');
+								$.ajax({
+									url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/?vote=' + encodeURIComponent(val.url),
+									dataType: 'jsonp',
+									success: function(data){
+										populate_list(data);
+									}
+								});
+							}).appendTo(li);
+							$('ul', div).append(li);
+						});	
+					} else {
+						$('ul', div).html('<li><span class="place">?</span> <span class="url">No suggestions yet</span> <span class="why">Why not suggest a dataset below?</span></li>');
+					}
 				}
 				
 				populate_list(data);	
 				
 				var form = $('<form>');
 				
-				$('<h2 class="suggest">Or suggest something new&hellip;</h2>').appendTo(form);
-				$('<p class="url"><label for="url">Where can we find the data?</label><input type="text" id="url" /></p>').appendTo(form);
+				$('<h2 class="suggest">&hellip;Or suggest something new</h2>').appendTo(form);
+				$('<p class="url"><label for="url">At what URL can we find the data?</label><input type="text" id="url" /></p>').appendTo(form);
 				$('<p class="why"><label for="why">Why do you want it liberated?</label><input type="text" id="why" /></p>').appendTo(form);
 				$('<p class="submit"><input type="submit" value="Liberate this data!" /></p>').bind('click', function(e){
 					e.preventDefault();
