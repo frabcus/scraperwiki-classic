@@ -41,6 +41,8 @@ class UserWithNameBackend(DefaultBackend):
         user = super(UserWithNameBackend, self).register(request, **kwargs)
         profile = user.get_profile()
         profile.name = kwargs['name']
+        profile.email_on_comments = 1
+        profile.messages = 1
         profile.save()
 
         create_emailer_for_user(user)
