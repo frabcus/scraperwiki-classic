@@ -9,6 +9,7 @@
 
 var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
 var outputMaxItems = 400;
+// *sTabCurrent* is generally to the class name of the currently shown tab.
 var sTabCurrent = ''; 
 var sChatTabMessage = 'Chat'; 
 
@@ -221,6 +222,7 @@ function writeToConsole(sMessage, sMessageType, iLine)
     //append to console
     $('#output_console div.output_content').append(oConsoleItem);
     $('.editor_output div.tabs li.console').addClass('new');
+	incrementTabNumber('console');
 
     setTabScrollPosition('console', 'bottom'); 
 };
@@ -270,6 +272,7 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
 
     $('#output_sources div.output_content').append('<span class="output_item">' + smessage.join(" ") + '</span>')
     $('.editor_output div.tabs li.sources').addClass('new');
+	incrementTabNumber('sources');
     
     if (cacheid != undefined)  
         $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid, lmimetype); return false; }); 
@@ -294,27 +297,31 @@ function writeToData(aRowData)
     $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
     setTabScrollPosition('data', 'bottom'); 
     $('.editor_output div.tabs li.data').addClass('new');
+	incrementTabNumber('data');
 }
 
 function writeToSqliteData(command, val1, lval2) 
 {
-    while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) 
+    while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems){
         $('#output_data table.output_content tbody').children(':first').remove();
-
+	}
+	
     var row = [ ]; 
     row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
-    if (val1)
-        row.push('<td>'+cgiescape(val1)+'</td>'); 
-    if (lval2)
-    {
-        for (var i = 0; i < lval2.length; i++)
-            row.push('<td>'+cgiescape(lval2[i])+'</td>'); 
+    if (val1){
+        row.push('<td>'+cgiescape(val1)+'</td>');
+	}
+    if (lval2){
+        for (var i = 0; i < lval2.length; i++){
+            row.push('<td>'+cgiescape(lval2[i])+'</td>');
+		}
     }
     row.push('</tr>'); 
 
     $('#output_data table.output_content').append($(row.join("")));  
     setTabScrollPosition('data', 'bottom'); 
     $('.editor_output div.tabs li.data').addClass('new');
+	incrementTabNumber('data');
 }
 
 /* function writeToChat(seMessage, sechatname) 
@@ -331,23 +338,27 @@ function writeToChat(seMessage, sechatname){
 
     var oRow = $('<tr><td>' + (sechatname ? sechatname + ": " : "") + seMessage + '</td></tr>');
     $('#output_chat table.output_content').append(oRow);
-    setTabScrollPosition('chat', 'bottom'); 
-    $('.editor_output div.tabs li.chat').addClass('new');
+    setTabScrollPosition('chat', 'bottom');
+	$('.editor_output div.tabs li.chat').addClass('new');
+	incrementTabNumber('chat');
 
     if (sechatname && (sechatname != chatname)){
-            // currently highlights when there is more than a minute gap.  But could be longer
-        if ((chatpeopletimes[sechatname] == undefined) || ((servernowtime.getTime() - chatpeopletimes[sechatname].getTime())/1000 > 60))
-        {
+       	// Currently highlights when there is more than a minute gap.
+        if(
+			(chatpeopletimes[sechatname] == undefined) || 
+			((servernowtime.getTime() - chatpeopletimes[sechatname].getTime())/1000 > 60)
+		){
             chatpeopletimes[sechatname] = servernowtime; 
-            if (sTabCurrent != 'chat')
+            if (sTabCurrent != 'chat'){
                 $('.editor_output div.tabs li.chat').addClass('chatalert');
+			}
         }
      }
 }
 
 
 
-//show tab
+// *sTab* is the class of the li for the tab to show.
 function showTab(sTab)
 {
     setTabScrollPosition(sTabCurrent, 'hide'); 
@@ -361,9 +372,13 @@ function showTab(sTab)
     $('.editor_output div.tabs ul').children().removeClass('selected');
     $('.editor_output div.tabs li.' + sTab).addClass('selected');
     $('.editor_output div.tabs li.' + sTab).removeClass('new');
-    if (sTab == 'chat')
+    if (sTab == 'chat'){
         $('.editor_output div.tabs li.chat').removeClass('chatalert');
-    
+	}
+    $('.editor_output div.tabs li.' + sTab + ' a').each(function(){
+		$(this).text($(this).text().replace(/ \(\d+\)/g, ''));
+	});
+
     setTabScrollPosition(sTab, 'show'); 
 }
 
@@ -392,6 +407,15 @@ function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blocked
     }
 
     writeToConsole(exceptiondescription, 'exceptiondump'); 
+}
+
+//  Increments the number displayed at the top of the tab
+function incrementTabNumber(tab){
+	if(sTabCurrent != tab) {
+		var $a = $('.editor_output div.tabs li.' + tab + ' a');
+		var num = Number( $a.text().replace(/\D/g, '') );
+		$a.text($a.text().replace(/( \(\d+\))|$/, ' (' + (num + 1) + ')'));
+	}
 }
 
 
