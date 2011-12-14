@@ -24,8 +24,8 @@ DATABASES = {
         'USER'       : '',
         'PASSWORD'   : '',
     }
-
 }
+
 URL_ROOT            = '/'           # prefix for URLs to run not at top level of domain
 
 # Ways of speeding up tests.

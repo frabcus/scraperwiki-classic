@@ -1,7 +1,9 @@
-import unittest
 import atexit
+import time
+import unittest
+import uuid
+
 from selenium import selenium
-import uuid, time
 
 # XXX make this a static member
 def SeleniumTest_atexit():
