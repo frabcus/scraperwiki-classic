@@ -646,7 +646,11 @@ $(function(){
 	});
 	
 	$('#id_comment').bind('focus', function(){
-		$(this).val('').css('color', '#000');
+		if($(this).val() == 'Make a comment or ask a question about this scraper'){
+			$(this).val('').css('color', '#000');
+		} else {
+			$(this).css('color', '#000');
+		}
 	}).bind('blur', function(){
 		if($(this).val() == ''){
 			$(this).val('Make a comment or ask a question about this scraper').css('color','#666');
