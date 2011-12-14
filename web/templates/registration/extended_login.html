@@ -79,7 +79,6 @@
        	<div id="divSignupTerms">
            	<h4>Terms and conditions <a href="{% url terms %}" target="_new">Open in a new window</a></h4>
             <div class="scroll">
-                <div id="new_terms_notice"><strong>These are our new T&amp;Cs.</strong> Effective for new users from 6PM (GMT) on Friday 11th November</div>
                {% include 'shared/terms_and_conditions_2.html' %}
             </div>
             <ul>
@@ -99,12 +98,13 @@
 	        <li{% if registration_form.username.errors %} class="error"{% endif %}>
     	    {{ registration_form.username.label_tag }}
     	    {{ registration_form.username }}
-    	    {% field_errors registration_form.username %}        	        
+    	    {% field_errors registration_form.username %}
     	    </li>
 	        <li{% if registration_form.email.errors %} class="error"{% endif %}>
     	    {{ registration_form.email.label_tag }}
     	    {{ registration_form.email }}
-                {% field_errors registration_form.email %}        	    
+                {% field_errors registration_form.email %} 
+                <span class="tip">(We&rsquo;ll use this to find your <a href="http://en.gravatar.com/" target="_blank">Gravatar</a> if you&nbsp;have&nbsp;one)</span>       	    
 	        </li>
 	        <li{% if registration_form.password1.errors %} class="error"{% endif %}>
         	    {{ registration_form.password1.label_tag }}
@@ -118,9 +118,25 @@
         	</li>
     	</ul>
         <p class="last">
-		    <input type="submit" name="register" value="Create your account" />
+		    <input type="submit" name="register" value="Create my account" />
 		</p>
 	</form>
 	
 </div>
+{% endblock %}
+
+{% block run_script %}
+$(function(){
+    $('#id_name').bind('keyup', function(){
+		var username = $(this).val();
+		var username = username.toLowerCase().replace(/\W/g, '');
+		$('#id_username').val(username);
+	});
+	
+	$('#id_username').bind('keyup', function(){
+		$(this).unbind('keyup');
+		$('#id_name').unbind('keyup');
+	}); 
+});
+
 {% endblock %}

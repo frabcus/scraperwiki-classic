@@ -4474,7 +4474,7 @@ body.login #divContent .login {
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	padding: 20px 20px 20px 20px;
-	margin-bottom: 40px;
+	margin: 10px 0 40px 0;
 }
 
 body.login #divContent .login div.last {
@@ -4557,7 +4557,7 @@ body.login div.signup:hover {
 
 body.login .signup #divSignupTerms {
 	float: right;
-	width: 320px;
+	width: 310px;
 }
 
 body.login .signup h3 {
@@ -4588,7 +4588,7 @@ body.login .signup #divSignupTerms .scroll ul {
 }
 
 body.login #divSignupTerms div.scroll {
-	height: 180px;
+	height: 220px;
 	font-size: 0.7em;
 	margin-top: 10px;
 	clear: right;
@@ -4612,13 +4612,30 @@ body.login .signup .form label {
 	font-size: 14px;
 	line-height: 18px;
 	float: none;
-	margin: 0;
+	margin: 0 0 1px 0;
 }
 
 body.login .signup .form input {
-	width: 250px;
-	font-size: 12px;
+	width: 270px;
+	font-size: 13px;
 	margin-bottom: 12px;
+	padding: 3px 4px;
+}
+
+body.login .signup .form #id_email {
+	margin-bottom: 5px;
+}
+
+body.login .signup .form .tip {
+	font-size: 11px;
+	color: #999;
+	display: block;
+	width: 280px;
+	margin-bottom: 12px;
+}
+
+body.login .signup .form .tip a {
+	color: #666;
 }
 
 body.login #divContent .signup .last {
@@ -4639,7 +4656,6 @@ body.login #divContent .error_hint {
 body.login #divContent .login .error_hint {
 	margin-left: 180px;
 }
-
 
 body.login #divErrors {
 	margin-bottom: 20px;
