@@ -1,7 +1,9 @@
-import unittest
 import atexit
+import time
+import unittest
+import uuid
+
 from selenium import selenium
-import uuid, time
 
 # XXX make this a static member
 def SeleniumTest_atexit():
@@ -127,7 +129,8 @@ class SeleniumTest(unittest.TestCase):
         s.click('//a[@class="editor_%s"]' % code_type)        
         time.sleep(1)
         link_name = { "python":"Python", "ruby":"Ruby", "php":"PHP" }[language]
-        s.click("//a[text()=' %s ']" % link_name )
+        s.click("link=*%s*" % link_name )
+        time.sleep(1)
         self.wait_for_page()
     
         # Prompt and wait for save button to activate

@@ -132,7 +132,7 @@ class TestRegistration(SeleniumTest):
 
 
     def test_dupe_email(self):
-        expected = 'This email address is already in use. Please supply a different email address. '
+        expected = 'This email address is already in use. Please supply a different email address.'
         s = self.selenium
 
         email = 'se_test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
@@ -188,7 +188,7 @@ class TestRegistration(SeleniumTest):
 
         s.click('register')
         self.wait_for_page()
-        self.failUnless(s.is_text_present("You must agree to the ScraperWiki terms and conditions "), 
+        self.failUnless(s.is_text_present("You must agree to the ScraperWiki terms and conditions"), 
                         msg='Site is not complaining that user did not accept terms')
 
     def test_login_no_details(self):

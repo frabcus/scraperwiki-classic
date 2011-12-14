@@ -8,8 +8,10 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
+        # (Removed the removal of the foregin key.  Chris got me to change MySQL to ISAM, which doesn't
+        # need the foreign key contrstraint to be dropped).
         # Remove the foreign key constraint first because South won't do this (don't know why).
-        db.delete_foreign_key('codewiki_vault', 'user_id')
+        # db.delete_foreign_key('codewiki_vault', 'user_id')
         db.delete_column('codewiki_vault', 'user_id')
 
 

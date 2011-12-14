@@ -1319,11 +1319,13 @@ body.profiles h2.scrapersandviews {
 	padding-top: 15px;
 }
 
-#message_popup {
+#message_popup,
+#liberate_popup {
 	min-width: 400px;
 }
 
-#message_popup h1 {
+#message_popup h1,
+#liberate_popup h1 {
 	font-size: 16px;
 	line-height: 16px;
 	background-color: #dadee5;
@@ -4472,7 +4474,7 @@ body.login #divContent .login {
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	padding: 20px 20px 20px 20px;
-	margin-bottom: 40px;
+	margin: 10px 0 40px 0;
 }
 
 body.login #divContent .login div.last {
@@ -4555,7 +4557,7 @@ body.login div.signup:hover {
 
 body.login .signup #divSignupTerms {
 	float: right;
-	width: 320px;
+	width: 310px;
 }
 
 body.login .signup h3 {
@@ -4586,7 +4588,7 @@ body.login .signup #divSignupTerms .scroll ul {
 }
 
 body.login #divSignupTerms div.scroll {
-	height: 180px;
+	height: 220px;
 	font-size: 0.7em;
 	margin-top: 10px;
 	clear: right;
@@ -4610,13 +4612,30 @@ body.login .signup .form label {
 	font-size: 14px;
 	line-height: 18px;
 	float: none;
-	margin: 0;
+	margin: 0 0 1px 0;
 }
 
 body.login .signup .form input {
-	width: 250px;
-	font-size: 12px;
+	width: 270px;
+	font-size: 13px;
 	margin-bottom: 12px;
+	padding: 3px 4px;
+}
+
+body.login .signup .form #id_email {
+	margin-bottom: 5px;
+}
+
+body.login .signup .form .tip {
+	font-size: 11px;
+	color: #999;
+	display: block;
+	width: 280px;
+	margin-bottom: 12px;
+}
+
+body.login .signup .form .tip a {
+	color: #666;
 }
 
 body.login #divContent .signup .last {
@@ -4637,7 +4656,6 @@ body.login #divContent .error_hint {
 body.login #divContent .login .error_hint {
 	margin-left: 180px;
 }
-
 
 body.login #divErrors {
 	margin-bottom: 20px;
@@ -4925,13 +4943,173 @@ body.events #streams hr {
 body.events #tickets {
 	margin-left: 45px;
 	margin-top: 10px;
-	background-color: #fff4d8;
-	text-align: center;
-	line-height: 400px;
 }
 
-body.events #tickets p {
+#liberatesomedata {
+	float: right;
+	cursor: pointer;
+	background-color: #c7ecbd;
+	color: #0b6403;
+	text-align: center;
+	padding: 12px 20px;
+	margin-left: 20px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	-webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+	box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+	font-weight: normal;
+	background-image: -moz-linear-gradient(top,  rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.5)), color-stop(100%,rgba(255,255,255,0)));
+	background-image: -webkit-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+	background-image: -o-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+	background-image: -ms-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+	background-image: linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+}
+
+#liberatesomedata:hover {
+	text-decoration: none;
+	background-color: #acd9a0;
+}
+
+#liberatesomedata:active {
+	position: relative;
+	top: 1px;
+}
+
+#liberate_popup {
+	width: 420px;
+}
+
+#liberate_popup h1 {
+	text-align: center;
+}
+
+#liberate_popup h2 {
+	font-size: 16px;
+	margin: 15px 20px 10px 20px;
+	color: #333;
+}
+
+#liberate_popup ul {
+	padding: 0;
+	margin: 10px 20px;
+	border: 1px solid #ccc;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	max-height: 200px;
+	overflow: auto;
+	text-align: left;
+}
+
+#liberate_popup li:first-child {
+	border-top: none;
+}
+
+#liberate_popup li {
+	position: relative;
+	border-top: 1px solid #ccc;
+	padding: 10px 45px;
+}
+
+#liberate_popup form {
+	margin: 20px;
+	border: 1px solid #ccc;
+	background-color: #f6f6f6;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+#liberate_popup form h2 {
+	margin: 0;
+	padding: 10px;
+	cursor: pointer;
+}
+
+#liberate_popup form p {
+	display: none;
+	margin: 10px;
+}
+
+#liberate_popup p.url {
 	margin-top: 0;
+}
+
+#liberate_popup p.submit {
+	text-align: center;
+}
+
+#liberate_popup form label {
+	display: block;
+	padding-bottom: 5px;
+	font-size: 14px;
+}
+
+#liberate_popup form input {
+	width: 300px;
+	padding: 3px 5px;
+}
+
+#liberate_popup p.submit input {
+	width: auto;
+	text-align: center;
+}
+
+#liberate_popup a.url {
+	display: block;
+	width: 270px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+#liberate_popup span.why {
+	display: block;
+	font-size: 13px;
+	margin-top: 2px;
+}
+
+#liberate_popup span.vote {
+	display: block;
+	width: 24px;
+	height: 24px;
+	position: absolute;
+	top: 50%;
+	right: 10px;
+	margin-top: -12px;
+	cursor: pointer;
+	text-indent: -9000px;
+	background: #fff url(../images/event_vote.gif) 0 0 no-repeat;
+}
+
+#liberate_popup span.vote:hover {
+	background-position: 0 -24px;
+}
+
+#liberate_popup span.vote:active {
+	margin-top: -11px;
+}
+
+#liberate_popup span.vote.loading {
+	background-position: 0 -48px;
+}
+
+#liberate_popup span.place {
+	display: block;
+	height: 24px;
+	width: 40px;
+	position: absolute;
+	top: 50%;
+	left: 00px;
+	margin-top: -12px;
+	font-size: 20px;
+	line-height: 24px;
+	font-weight: bold;
+	color: #999;
+	text-align: center;
 }
 
 

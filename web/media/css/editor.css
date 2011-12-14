@@ -349,7 +349,7 @@ span.hiddenfields {
 .editor_output div.tabs ul li {
 	float: left;
 	list-style-type: none;
-	padding: 0.3em 0.8em;
+	padding: 0;
 	margin: 0 0.3em;
 	border: solid 1px #9a9a9a;
 	border-bottom: none;
@@ -372,6 +372,8 @@ span.hiddenfields {
 }
 
 .editor_output div.tabs ul li a {
+	display: block;
+	padding: 0.3em 0.8em;
 	text-decoration: none;
 	color: #000;
 }

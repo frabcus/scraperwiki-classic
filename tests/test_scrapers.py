@@ -5,6 +5,7 @@ from urlparse import urlparse
 import urllib2
 from BeautifulSoup import BeautifulSoup
 import lxml.html
+from selenium.webdriver.common.keys import Keys
 
 class TestScrapers(SeleniumTest):
     """
@@ -57,8 +58,8 @@ class TestScrapers(SeleniumTest):
     def _add_comment(self, code_name, code_type):
         s = self.selenium
               
-        s.click('link=Discussion (0)')    
-        self.wait_for_page()
+        self.failUnless(s.is_text_present('This scraper has no chat'))
+
         comment = 'A test comment'
 
         s.type('id_comment', comment)
@@ -66,11 +67,8 @@ class TestScrapers(SeleniumTest):
         self.wait_for_page()
 
         self.failUnless(s.is_text_present(comment))
-        self.failUnless(s.is_text_present("Discussion (1)"))        
+        self.failUnless(s.is_text_present("regexp:This\s+scraper's\s+chat"))
 
-        s.open('/%ss/%s/' % (code_type, code_name))        
-        self.wait_for_page()        
-        
         
     def _check_dashboard_count(self, count=2):
         """ 
@@ -334,8 +332,8 @@ class TestScrapers(SeleniumTest):
 
         # edit tags
         s.click('css=.tag a')
-        s.type('css=.new_tag_box input', "great,testy,rabbit")
-        s.key_down('css=.new_tag_box input', "\\13");
+        s.type('css=.new_tag_box input', "rabbit")
+        s.key_press_native(10)
         time.sleep(1) # XXX how to wait just until the JS has run?
         self.failUnless(s.is_text_present("rabbit"))
 
