@@ -35,25 +35,6 @@ $(document).ajaxSend(function(event, xhr, settings) {
     }
 });
 
-function setupSearchBoxHint()
-{
-    $('#divSidebarSearch input:text').focus(function() {
-        if ($('#divSidebarSearch input:submit').attr('disabled')) {
-            $(this).val('');
-            $(this).removeClass('hint');
-            $('#divSidebarSearch input:submit').removeAttr('disabled'); 
-        }
-    });
-    $('#divSidebarSearch input:text').blur(function() {
-        if(!$('#divSidebarSearch input:submit').attr('disabled') && ($(this).val() == '')) {
-            $(this).val('Search');
-            $(this).addClass('hint');
-            $('#divSidebarSearch input:submit').attr('disabled', 'disabled'); 
-        }
-    });
-    $('#divSidebarSearch input:text').blur();
-}
-
 
 function setupNavSearchBoxHint(){
     $('#navSearch input:text').focus(function() {
