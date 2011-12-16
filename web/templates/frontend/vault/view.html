@@ -211,3 +211,13 @@
 
 
 {% endblock %}
+
+{% block run_script %}
+$(function(){
+   $('span.progressbar strong').each(function(){
+       if($(this).width() < 10){
+           $(this).width(8);
+       }
+   });
+});
+{% endblock %}
