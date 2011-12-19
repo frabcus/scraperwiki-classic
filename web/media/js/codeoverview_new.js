@@ -410,8 +410,12 @@ function reload_schedule_ui(){
 }
 
 $(function(){
-		
-	$('li.viewsource a').bind('click', function(e){
+    // globals 
+    api_url = $('#id_api_base').val();
+    short_name = $('#scrapershortname').val();
+    data_tables = [];
+    setupDataPreviews();	
+    $('li.viewsource a').bind('click', function(e){
 		e.preventDefault();
 		var url = $(this).attr('href');
 		$.get(url, function(data){
@@ -654,3 +658,177 @@ $(function(){
 	}).css('color', '#666');
 	
 });
+
+function getTableNames(callback){
+  var url;
+  url = api_url + "datastore/sqlite?format=jsondict&name="+short_name+"&query=SELECT%20name, sql%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
+  
+  $.get(url)
+  .success(function(data) {
+    var count_url, tables;
+    if (data.length) {
+        tables = _.reduce(_.map(data, function(d) {
+            var t = {}
+            t[d.name] = d.sql;
+            return t;
+          }), function(dict, x) {
+              var k = _.keys(x)[0];
+              dict[k] = x[k];
+              return dict;
+          }, {});
+        callback(tables);
+    } else {
+        setDataPreviewWarning("This scraper has no data");
+        $('#header_inner span.totalrows').text("No data");
+    }
+  })
+  .error(function() {
+      setDataPreviewWarning("Sorry, we couldn\u2019t connect to the datastore");
+      $('#header_inner span.totalrows').hide();
+  });
+}
+
+function setDataPreviewWarning(text) {
+    $('.data h3').text(text).parent().siblings('.download, .empty').hide();
+    $('ul.data_tabs, #datapreviews').hide();
+}
+
+function getTableColumnNames(table_name, callback){
+  qry = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20"+table_name+"%20LIMIT%201"
+  jQuery.get(qry, function(data) {
+    callback(data.keys);
+  });
+ 
+}
+
+function getTableRowCounts(tables, callback){
+    var count_url;
+    sub_queries = (_.map(tables, function(d) {
+        return "(SELECT COUNT(*) FROM " + d + ") AS "+d;
+      })).join(',');
+    count_url = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20" + (encodeURIComponent(sub_queries));
+    return jQuery.get(count_url, function(resp) {
+        var zipped = _.zip(resp.keys, resp.data[0]);
+        callback(_.map(zipped, function(z){
+            return {name: z[0], count: z[1]};
+        }));
+     });
+}
+
+function setTotalRowCount(tables){
+    values = _.map(tables, function(t){
+        return t.count;
+    });
+    total_rows = _.reduce(values, function(m, v){
+        return m + v;
+    }, 0);
+    $('span.totalrows').text(total_rows);
+    $('span.totalrows').digits();
+    $('span.totalrows').append(total_rows > 0 ? ' records' : ' record')
+}
+
+$.fn.digits = function(){ 
+    return this.each(function(){ 
+        $(this).text( $(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") ); 
+    })
+}
+
+function setDataPreview(table_name, table_schema){
+   getTableColumnNames( table_name, 
+                        function(column_names){
+     // get template
+                        $('#datapreviews').append(ich.data_preview({table_name: table_name,
+                           column_names: column_names}));
+
+
+    var dt = $('#datapreviews #data_preview_'+table_name+' table').dataTable( {
+        "bProcessing": true,
+        "bServerSide": true,
+        "bDeferRender": true,
+       	"bJQueryUI": true,
+        "sPaginationType": "full_numbers", 
+        "sAjaxSource": "/scrapers/"+short_name+"/data/"+table_name,
+        "sScrollX": "100%",
+        "bStateSave": true,
+        "bScrollCollapse": true,
+        "sDom": '<"H"<"#schema_'+table_name+'">lfr>t<"F"ip>',
+        "fnRowCallback": function( tr, array, iDisplayIndex, iDisplayIndexFull ) {
+            $('td', tr).each(function(){
+                $(this).html( $(this).html().replace(/((http|https|ftp):\/\/\S+)/g, '<a href="$1">$1</a> ') );
+            });
+            return tr;
+        }
+    }).bind('sort', function() {
+        dt.fnAdjustColumnSizing();
+      });
+    schema_html = ich.data_preview_schema({sql: table_schema});
+    schema_html = highlightSql(schema_html);
+    $('#schema_'+table_name).addClass('schema').html(schema_html).children('a').bind('click', schemaClick);
+    $('#datapreviews>div').first().show();              
+    data_tables.push(dt); 
+   });
+}
+
+function schemaClick(){
+  var $a = $(this).text('Hide schema');
+  var $p = $a.siblings('div');
+  if($p.is(':visible'))
+  {
+    $p.fadeOut(400);
+    $a.text('Show schema');
+    $('html').unbind('click');
+  }
+  else
+  {
+    $p.fadeIn(150, function(){
+				$('html').bind('click', function(e){
+					if( $(e.target).parents().index($a.parent()) == -1 ) {
+						if( $(e.target).parents().index($p) == -1 ) {
+							$p.filter(':visible').fadeOut(400);
+							$a.text('Show schema');
+							$('html').unbind('click');
+						}
+					}
+				});
+			});
+		}
+	}
+
+function highlightSql(html) {
+  schema = html.find('.tableschema');
+  sql = schema.text();
+  sql = sql.replace(/(CREATE \w+) `(\w+)`/g,
+      '<span class="create">$1</span> `<span class="tablename">$2</span>`');
+  sql = sql.replace(/`([^`]+)` (\w+)/g,
+      '`<span class="column">$1</span>` <span class="type">$2</span>');
+  schema.html(sql);
+  return html;
+}
+
+function setupDataPreviews() {  
+     var tab_src = $('#data-tab-template').html();
+     getTableNames(
+       function(tables){
+         var table_names = _.keys(tables);
+         getTableRowCounts( table_names, function(r){
+           setTotalRowCount(r);
+           var tab_context = {tables: r}
+           $('.data_tabs').html(ich.overview_data_tabs(tab_context));
+
+           _.each(table_names, function (tn) {
+               setDataPreview(tn, tables[tn]);
+            });
+
+           $('.data_tab').first().addClass('selected');
+
+           $('.data_tab').click(function(e){
+             $('.data_tab').removeClass('selected');
+             $(this).addClass('selected');
+             table_name = $(this).attr('id').replace('data_tab_', '');
+             var dp_div = $('#data_preview_'+table_name);
+             dp_div.show().siblings().hide();
+             data_tables[dp_div.index()].fnAdjustColumnSizing();
+           });
+         }); 
+       });
+}
