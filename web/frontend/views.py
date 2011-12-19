@@ -389,8 +389,18 @@ def get_involved(request):
         return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
 
 
-def events(request):
-     return render_to_response('frontend/events/columbia_2012.html', {}, context_instance=RequestContext(request))
+
+def events(request, e=''):
+    names = ['jdcny']
+    if e in names:
+        url = 'frontend/events/%s.html' % e
+        data = {}
+    else:
+        url = 'frontend/events/index.html'
+        data = names
+    return render_to_response(url, data, context_instance=RequestContext(request))
+
+
 
 @login_required
 def stats(request):

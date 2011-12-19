@@ -225,7 +225,7 @@ function newUserMessage(url){
 
 $(function()
 {
-    setupSearchBoxHint();
+	
     setupNavSearchBoxHint();
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {

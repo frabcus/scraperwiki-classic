@@ -54,7 +54,7 @@
 </head>
 
 {% load body_class %}
-<body {%  body_class request %}>
+<body class="{%  body_class request %}{% block body_class_extra %}{% endblock %}">
 
 {% if messages %}
 	{% for message in messages %}

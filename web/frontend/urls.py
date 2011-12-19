@@ -66,6 +66,6 @@ urlpatterns = patterns('',
     url(r'^tags/$', frontend_views.tags, name='all_tags'),    
     url(r'^tags/(?P<tag>[^/]+)$', frontend_views.tag, name='single_tag'),  
     
-    #events    
-    url(r'^events/$', frontend_views.events, name='events'),                   
+    #events
+    url(r'^events/(?P<e>[^/]+)?/?$', frontend_views.events, name='events'),
 )
