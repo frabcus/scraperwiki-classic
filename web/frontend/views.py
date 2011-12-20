@@ -391,7 +391,7 @@ def get_involved(request):
 
 
 def events(request, e=''):
-    names = ['jdcny','nicar']
+    names = ['jdcny','ltdmo']
     if e in names:
         url = 'frontend/events/%s.html' % e
         data = {}
