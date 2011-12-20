@@ -111,7 +111,7 @@
 				<li class="search">
 					<form id="navSearch" action="/search/" method="post">
                         {% csrf_token %}
-		            	<input type="text" id="nav_search_q" name="q"/>
+		            	<input type="text" id="nav_search_q" name="q" value="{% block searchbox %}{% endblock %}"/>
 		            	<input type="submit" id="nav_search_go" value="Go" />
 					</form>
 				</li>

@@ -4,6 +4,8 @@
 {% block title %}Find datasets{% endblock %}
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/latest_code_objects_by_search_term/{{ query }}" />{% endblock %}
 
+{% block searchbox %}{{ query }}{% endblock %}
+
 {% block header %}
 	<h2>Search results for <form id="frmSearchResults" class="inline_form" action="/search/" method="POST">
         {% csrf_token %}        
