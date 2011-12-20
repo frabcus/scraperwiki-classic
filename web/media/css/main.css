@@ -4787,7 +4787,8 @@ body.events h3.description {
 	margin-top: 0;
 }
 
-body.events h3.streams {
+body.events h3.streams,
+body.events.nicar h3.tickets {
 	background-position: 5px -40px;
 }
 

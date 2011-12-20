@@ -544,10 +544,10 @@ $(function()
 	}
 	
 	
-	$('#liberatesomedata').bind('click', function(){
-		
+	$('#liberatesomedata').bind('click', function(e){
+		e.preventDefault();
 		$.ajax({
-			url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/',
+			url: $(this).attr('href'),
 			dataType: 'jsonp',
 			success: function(data){
 				var div = $('<div id="liberate_popup">');
