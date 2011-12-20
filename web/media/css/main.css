@@ -649,6 +649,7 @@ body.search #header_inner form input {
 	-webkit-transition: opacity 0.3s linear;
 	-moz-transition: opacity 0.3s linear;
 	-o-transition: opacity 0.3s linear;
+	font-size: 32px;
 }
 
 body.search #header_inner:hover form input {
@@ -656,14 +657,14 @@ body.search #header_inner:hover form input {
 }
 
 body.search #header_inner form #id_q {
-	line-height: 30px;
 	font-size: 24px;
-	padding: 0 6px;
+	padding: 2px 12px;
 	height: 30px;
-	margin: 0 0 0 3px;
+	line-height: 30px;
+	margin: 0 0 2px 3px;
 	outline: none;
 	background-color: transparent;
-	border: 1px solid #9DCEE7;
+	border: 2px solid #9DCEE7;
 	color: #fff;
 	position: relative;
 	top: -2px;
@@ -672,6 +673,9 @@ body.search #header_inner form #id_q {
 	-webkit-transition: border-color 0.3s linear;
 	-moz-transition: border-color 0.3s linear;
 	-o-transition: border-color 0.3s linear;
+	-webkit-border-radius: 40px;
+	-moz-border-radius: 40px;
+	border-radius: 40px;
 }
 
 body.search #header_inner form #id_q:focus,
