@@ -307,8 +307,12 @@ body.frontpage #nav_inner li.frontpage {
 	background: transparent;
 	padding: 0;
 	font-size: 13px;
-	color: #666;
+	color: #000;
 	outline: none;
+}
+
+#nav_search_q.hint {
+	color: #666;
 }
 
 #nav_search_go {

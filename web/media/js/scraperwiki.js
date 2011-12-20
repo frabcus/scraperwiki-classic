@@ -37,23 +37,23 @@ $(document).ajaxSend(function(event, xhr, settings) {
 
 
 function setupNavSearchBoxHint(){
-    $('#navSearch input:text').focus(function() {
-        if ($('#navSearch input:submit').attr('disabled')) {
+    $('#nav_search_q').bind('focus', function() {
+        if ($(this).val() == 'Search datasets') {
             $(this).val('');
             $(this).removeClass('hint');
-            $('#navSearch input:submit').removeAttr('disabled'); 
         }
 		$('#navSearch').addClass('focus');
-    });
-    $('#navSearch input:text').blur(function() {
-        if(!$('#navSearch input:submit').attr('disabled') && ($(this).val() == '')) {
+    }).bind('blur', function() {
+        if($(this).val() == '') {
             $(this).val('Search datasets');
             $(this).addClass('hint');
-            $('#navSearch input:submit').attr('disabled', 'disabled'); 
         }
 		$('#navSearch').removeClass('focus');
     });
-    $('#navSearch input:text').blur();
+	if($('#nav_search_q').val() == ''){
+		$('#nav_search_q').val('Search datasets').addClass('hint');
+		$('#navSearch').removeClass('focus');
+	}
 }
 
 function newCodeObject($a){
