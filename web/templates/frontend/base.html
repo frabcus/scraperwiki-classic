@@ -54,13 +54,21 @@
 </head>
 
 {% load body_class %}
-<body {%  body_class request %}>
+<body class="{%  body_class request %}{% block body_class_extra %}{% endblock %}">
 
 {% if messages %}
 	{% for message in messages %}
 		{{ message|safe }}
 	{% endfor %}
 {% endif %}
+    <noscript>
+        <div id="alert_outer" class="error">
+        	<div id="alert_inner">
+        	    Oh no! You need to enable Javascript to use ScraperWiki.
+                <a href="http://support.google.com/bin/answer.py?hl=en&mp;answer=23852">Find out how</a>
+            </div>
+        </div>
+    </noscript>
 	
 	{% block nav_outer %}
 	<div id="nav_outer">
@@ -111,7 +119,7 @@
 				<li class="search">
 					<form id="navSearch" action="/search/" method="post">
                         {% csrf_token %}
-		            	<input type="text" id="nav_search_q" name="q"/>
+		            	<input type="text" id="nav_search_q" name="q" value="{% block searchbox %}{% endblock %}"/>
 		            	<input type="submit" id="nav_search_go" value="Go" />
 					</form>
 				</li>

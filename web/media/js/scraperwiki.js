@@ -35,44 +35,25 @@ $(document).ajaxSend(function(event, xhr, settings) {
     }
 });
 
-function setupSearchBoxHint()
-{
-    $('#divSidebarSearch input:text').focus(function() {
-        if ($('#divSidebarSearch input:submit').attr('disabled')) {
-            $(this).val('');
-            $(this).removeClass('hint');
-            $('#divSidebarSearch input:submit').removeAttr('disabled'); 
-        }
-    });
-    $('#divSidebarSearch input:text').blur(function() {
-        if(!$('#divSidebarSearch input:submit').attr('disabled') && ($(this).val() == '')) {
-            $(this).val('Search');
-            $(this).addClass('hint');
-            $('#divSidebarSearch input:submit').attr('disabled', 'disabled'); 
-        }
-    });
-    $('#divSidebarSearch input:text').blur();
-}
-
 
 function setupNavSearchBoxHint(){
-    $('#navSearch input:text').focus(function() {
-        if ($('#navSearch input:submit').attr('disabled')) {
+    $('#nav_search_q').bind('focus', function() {
+        if ($(this).val() == 'Search datasets') {
             $(this).val('');
             $(this).removeClass('hint');
-            $('#navSearch input:submit').removeAttr('disabled'); 
         }
 		$('#navSearch').addClass('focus');
-    });
-    $('#navSearch input:text').blur(function() {
-        if(!$('#navSearch input:submit').attr('disabled') && ($(this).val() == '')) {
+    }).bind('blur', function() {
+        if($(this).val() == '') {
             $(this).val('Search datasets');
             $(this).addClass('hint');
-            $('#navSearch input:submit').attr('disabled', 'disabled'); 
         }
 		$('#navSearch').removeClass('focus');
     });
-    $('#navSearch input:text').blur();
+	if($('#nav_search_q').val() == ''){
+		$('#nav_search_q').val('Search datasets').addClass('hint');
+		$('#navSearch').removeClass('focus');
+	}
 }
 
 function newCodeObject($a){
@@ -244,7 +225,7 @@ function newUserMessage(url){
 
 $(function()
 {
-    setupSearchBoxHint();
+	
     setupNavSearchBoxHint();
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
@@ -563,10 +544,10 @@ $(function()
 	}
 	
 	
-	$('#liberatesomedata').bind('click', function(){
-		
+	$('#liberatesomedata').bind('click', function(e){
+		e.preventDefault();
 		$.ajax({
-			url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/',
+			url: $(this).attr('href'),
 			dataType: 'jsonp',
 			success: function(data){
 				var div = $('<div id="liberate_popup">');
