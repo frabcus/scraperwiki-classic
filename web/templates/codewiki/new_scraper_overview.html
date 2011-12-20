@@ -13,7 +13,7 @@
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
 {% block meta %}
-    <meta name="description" content="{% if scraper.description %}{{ scraper.description }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
+    <meta name="description" content="{% if scraper.description_safepart %}{{ scraper.description_safepart }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
     <meta property="og:title" content="{{ scraper.title }}" />
     <meta property="og:description" content="{% if scraper.description_safepart %}{{ scraper.description_safepart }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
     <meta property="og:image" content="{{ scraper.screenshot_url }}" />
