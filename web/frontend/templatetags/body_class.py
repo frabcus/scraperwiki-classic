@@ -8,7 +8,7 @@ register = template.Library()
 @register.simple_tag
 def body_class(request):
     if request.path == '/':
-        return 'class="frontpage"'
+        return 'frontpage'
     else:
         classes = ' '.join(request.path[1:].split('/')).strip()
-        return 'class="%s"' % escape(classes)
+        return escape(classes)

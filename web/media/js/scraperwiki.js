@@ -35,44 +35,25 @@ $(document).ajaxSend(function(event, xhr, settings) {
     }
 });
 
-function setupSearchBoxHint()
-{
-    $('#divSidebarSearch input:text').focus(function() {
-        if ($('#divSidebarSearch input:submit').attr('disabled')) {
-            $(this).val('');
-            $(this).removeClass('hint');
-            $('#divSidebarSearch input:submit').removeAttr('disabled'); 
-        }
-    });
-    $('#divSidebarSearch input:text').blur(function() {
-        if(!$('#divSidebarSearch input:submit').attr('disabled') && ($(this).val() == '')) {
-            $(this).val('Search');
-            $(this).addClass('hint');
-            $('#divSidebarSearch input:submit').attr('disabled', 'disabled'); 
-        }
-    });
-    $('#divSidebarSearch input:text').blur();
-}
-
 
 function setupNavSearchBoxHint(){
-    $('#navSearch input:text').focus(function() {
-        if ($('#navSearch input:submit').attr('disabled')) {
+    $('#nav_search_q').bind('focus', function() {
+        if ($(this).val() == 'Search datasets') {
             $(this).val('');
             $(this).removeClass('hint');
-            $('#navSearch input:submit').removeAttr('disabled'); 
         }
 		$('#navSearch').addClass('focus');
-    });
-    $('#navSearch input:text').blur(function() {
-        if(!$('#navSearch input:submit').attr('disabled') && ($(this).val() == '')) {
+    }).bind('blur', function() {
+        if($(this).val() == '') {
             $(this).val('Search datasets');
             $(this).addClass('hint');
-            $('#navSearch input:submit').attr('disabled', 'disabled'); 
         }
 		$('#navSearch').removeClass('focus');
     });
-    $('#navSearch input:text').blur();
+	if($('#nav_search_q').val() == ''){
+		$('#nav_search_q').val('Search datasets').addClass('hint');
+		$('#navSearch').removeClass('focus');
+	}
 }
 
 function newCodeObject($a){
@@ -244,7 +225,7 @@ function newUserMessage(url){
 
 $(function()
 {
-    setupSearchBoxHint();
+	
     setupNavSearchBoxHint();
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
@@ -561,6 +542,108 @@ $(function()
 	if($('#compose_user_message').length && window.location.hash == '#message'){
 		$('#compose_user_message').trigger('click');
 	}
+	
+	
+	$('#liberatesomedata').bind('click', function(e){
+		e.preventDefault();
+		$.ajax({
+			url: $(this).attr('href'),
+			dataType: 'jsonp',
+			success: function(data){
+				var div = $('<div id="liberate_popup">');
+				div.append('<h1>Liberate some data!</h1>');
+				div.append('<h2 class="vote">Vote for other people&rsquo;s suggestions&hellip;</h2>');
+				div.append('<ul></ul>');
+				
+				function populate_list(data){
+					if(data.length){
+						$('ul', div).empty();
+						$.map(data, function(val, i){
+							var li = $('<li>');
+							li.append('<span class="place">#' + (i+1) + '</span>');
+							li.append('<a href="' + val.url + '" class="url">' + val.url.replace(/https?:\/\//i, "") + '</strong>');
+							li.append('<span class="why">' + val.why + '</span>');
+							$('<span class="vote" title="Vote for this">Vote</span>').bind('click', function(){
+								$(this).addClass('loading').unbind('click');
+								$.ajax({
+									url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/?vote=' + encodeURIComponent(val.url),
+									dataType: 'jsonp',
+									success: function(data){
+										populate_list(data);
+									}
+								});
+							}).appendTo(li);
+							$('ul', div).append(li);
+						});	
+					} else {
+						$('ul', div).html('<li><span class="place">?</span> <span class="url">No suggestions yet</span> <span class="why">Why not suggest a dataset below?</span></li>');
+					}
+				}
+				
+				populate_list(data);	
+				
+				var form = $('<form>');
+				
+				$('<h2 class="suggest">&hellip;Or suggest something new</h2>').appendTo(form);
+				$('<p class="url"><label for="url">At what URL can we find the data?</label><input type="text" id="url" /></p>').appendTo(form);
+				$('<p class="why"><label for="why">Why do you want it liberated?</label><input type="text" id="why" /></p>').appendTo(form);
+				$('<p class="submit"><input type="submit" value="Liberate this data!" /></p>').bind('click', function(e){
+					e.preventDefault();
+					$.ajax({
+						url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/?add=' + encodeURIComponent($('#url').val()) + '&why=' + encodeURIComponent($('#why').val()),
+						dataType: 'jsonp',
+						success: function(data){
+							populate_list(data);
+							$('#why, #url').val('');
+							$('h2.suggest').nextAll('p').animate({"height": "hide", "marginTop": "hide", "marginBottom": "hide", "paddingTop": "hide", "paddingBottom": "hide"},{
+							duration: 250,
+							step: function(now, fx) {
+							    $.modal.setPosition();
+							}});
+						}
+					});
+				}).appendTo(form);
+				div.append(form);
+				
+				
+				$.modal(div, {
+		            overlayClose: true, 
+		            autoResize: true,
+		            overlayCss: { cursor:"auto" },
+					onOpen: function(dialog) {
+						dialog.data.show();
+						dialog.overlay.fadeIn(200);
+						dialog.container.fadeIn(200);
+					},
+					onShow: function(dialog){
+						$('#simplemodal-container').css('height', 'auto');
+						$('h2.suggest', dialog.data).bind('click', function(){
+							if($(this).next().is(':visible')){
+								$(this).nextAll('p').animate({"height": "hide", "marginTop": "hide", "marginBottom": "hide", "paddingTop": "hide", "paddingBottom": "hide"},{
+								duration: 250,
+								step: function(now, fx) {
+								    $.modal.setPosition();
+								}});
+							} else {
+								$(this).nextAll('p').animate({"height": "show", "marginTop": "show", "marginBottom": "show", "paddingTop": "show", "paddingBottom": "show"},{
+								duration: 250,
+								step: function(now, fx) {
+								    $.modal.setPosition();
+								}});
+							}
+						});
+					},
+					onClose: function(dialog) {
+						dialog.container.fadeOut(200);
+						dialog.overlay.fadeOut(200, function(){
+							$.modal.close();
+						});
+					}
+		        });	
+			}
+		});
+		
+	});
 	
 	
 });

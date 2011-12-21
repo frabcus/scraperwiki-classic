@@ -13,9 +13,9 @@
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
 {% block meta %}
-    <meta name="description" content="{% if scraper.description %}{{ scraper.description }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
+    <meta name="description" content="{% if scraper.description_safepart %}{{ scraper.description_safepart }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
     <meta property="og:title" content="{{ scraper.title }}" />
-    <meta property="og:description" content="{% if scraper.description %}{{ scraper.description }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
+    <meta property="og:description" content="{% if scraper.description_safepart %}{{ scraper.description_safepart }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
     <meta property="og:image" content="{{ scraper.screenshot_url }}" />
     <meta property="og:site_name" content="ScraperWiki" />
 {% endblock %}
@@ -164,7 +164,7 @@
                 {% if scraper.scraper.run_interval == MAGIC_RUN_INTERVAL %}
                     <p><span class="running">Will run as soon as possible&hellip;</span></p>
                 {% else %}
-                <a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run" rel="nofollow">Run now</a>
+                {% if user_owns_it or user_edits_it or user.is_staff %}<a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run" rel="nofollow">Run now</a>{% endif %}
                 <p>
                     {% if scraper.scraper.run_interval == -1 %}
                         Idle &ndash; not scheduled to run
@@ -179,7 +179,7 @@
                 {% endif %}
             {% else %}
                 {% if scraper.scraper.run_interval == -1 %}
-                <a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run" rel="nofollow">Run now</a>
+                {% if user_owns_it or user_edits_it or user.is_staff %}<a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run" rel="nofollow">Run now</a>{% endif %}
                 <p>
                     Idle &ndash; not scheduled to run
                 </p>
@@ -208,7 +208,7 @@
         {% endif %}
         
         <h3 class="schedule">Schedule</h3>
-        <a href="#edit_schedule" title="Edit this scraper&rsquo;s schedule" class="edit edit_schedule" rel="nofollow">Edit</a>
+        {% if user_owns_it or user_edits_it or user.is_staff %}<a href="#edit_schedule" title="Edit this scraper&rsquo;s schedule" class="edit edit_schedule" rel="nofollow">Edit</a>{% endif %}
         {% ifnotequal scraper.scraper.next_run.year 9999 %}
 			{% ifnotequal scraper.scraper.run_interval 1000000000 %}
             	<p>Runs {{scraper.scraper.run_interval|schedule}}</p>			

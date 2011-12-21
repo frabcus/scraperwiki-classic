@@ -54,13 +54,21 @@
 </head>
 
 {% load body_class %}
-<body {%  body_class request %}>
+<body class="{%  body_class request %}{% block body_class_extra %}{% endblock %}">
 
 {% if messages %}
 	{% for message in messages %}
 		{{ message|safe }}
 	{% endfor %}
 {% endif %}
+    <noscript>
+        <div id="alert_outer" class="error">
+        	<div id="alert_inner">
+        	    Oh no! You need to enable Javascript to use ScraperWiki.
+                <a href="http://support.google.com/bin/answer.py?hl=en&mp;answer=23852">Find out how</a>
+            </div>
+        </div>
+    </noscript>
 	
 	{% block nav_outer %}
 	<div id="nav_outer">
@@ -72,7 +80,7 @@
 				<li class="about"><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'About']); }">About</a></li>
 				<li class="about"><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Browse']); }">Browse</a></li>
 				<li class="blog"><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Blog']); }">Blog</a></li>
-				{% if debug %}<li class="events"><a href="{% url events %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Events']); }">Events</a></li>{% endif %}
+				<li class="events"><a href="{% url events %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Events']); }">Events</a></li>
 				{% if user.is_authenticated %}
 				<li class="user loggedin">
 					<a href="{% url profiles_profile_detail user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
@@ -111,7 +119,7 @@
 				<li class="search">
 					<form id="navSearch" action="/search/" method="post">
                         {% csrf_token %}
-		            	<input type="text" id="nav_search_q" name="q"/>
+		            	<input type="text" id="nav_search_q" name="q" value="{% block searchbox %}{% endblock %}"/>
 		            	<input type="submit" id="nav_search_go" value="Go" />
 					</form>
 				</li>
