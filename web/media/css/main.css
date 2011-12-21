@@ -4777,6 +4777,7 @@ body.events h3.tickets {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
+	cursor: pointer;
 }
 
 body.events h3.description:hover,
@@ -4789,6 +4790,7 @@ body.events h3.description.active,
 body.events h3.streams.active,
 body.events h3.tickets.active {
 	background-color: transparent;
+	cursor: default;
 }
 
 body.events h3.description {
@@ -4796,12 +4798,28 @@ body.events h3.description {
 }
 
 body.events h3.streams,
-body.events.nicar h3.tickets {
+body.events.ltdmo h3.tickets {
 	background-position: 5px -40px;
 }
 
 body.events h3.tickets {
 	background-position: 5px -80px;
+}
+
+body.events h3 .hint {
+	font-size: 13px;
+	font-weight: normal;
+	float: right;
+	color: #c0dbe9;
+	margin-right: 10px;
+}
+
+body.events h3:hover .hint {
+	color: #9ccae1;
+}
+
+body.events h3.active .hint {
+	display: none;
 }
 
 body.events #description {
@@ -5209,7 +5227,7 @@ body.event #event_sidebar h4 {
 
 body.event #event_sidebar p {
 	margin: 0;
-	padding: 5px 0;
+	padding: 4px 0;
 	line-height: 20px;
 }
 
@@ -5218,18 +5236,43 @@ body.event #event_sidebar .module {
 	background-color: #ebf3f8;
 	border: 1px solid #c3d8e5;
 	border-top: 0;
+	font-size: 14px;
 }
 
-body.event #event_sidebar h4.when {
+body.event #event_sidebar h4.who {
 	margin-top: 20px;
 }
 
-body.event #event_sidebar .address a {
+body.event #event_sidebar .address a,
+#guestlist {
 	color: #1766b0;
 }
 
+#guestlist {
+	display: block;
+	line-height: 16px;
+	padding: 7px 5px 5px 5px;
+	margin-left: -5px;
+	margin-right: -5px;
+	font-size: 16px;
+}
 
+#guestlist:hover {
+	text-decoration: none;
+	color: #9f4018;
+}
 
+#guestlist span {
+	display: inline-block;
+	width: 71px;
+	height: 24px;
+	text-indent: -9000px;
+	background: transparent url(../images/eventbrite_logo_71x24.png) 0 0 no-repeat;
+	margin-bottom: -50px;
+	position: relative;
+	top: -5px;
+	margin-left: 5px;
+}
 
 
 
