@@ -50,6 +50,10 @@ type="text/javascript"></script>
                 <p><a href="http://www.columbia.edu/" target="_blank"><img src="{{MEDIA_URL}}images/event_columbia_logo.gif" width="268" height="42" /></p>
                 <p><a href="http://www.knightfoundation.org/" target="_blank"><img src="{{MEDIA_URL}}images/event_knight_logo.gif" width="268" height="35" /></a></p>
             </div>
+            <h4 class="who">Who&rsquo;s coming?</h4>
+            <div class="module">
+                <a href="http://jdcny.eventbrite.com/" id="guestlist">See the guestlist on<span> Eventbrite</span></a>
+            </div>
             <h4 class="when">When?</h4>
             <div class="module">
                 <p>09:00&ndash;18:00 Friday 4th Feb 2011</p>
@@ -62,13 +66,13 @@ type="text/javascript"></script>
             </div>  
         </div>
         <div id="event_details">
-            <h3 class="description">Why we need you</h3>
+            <h3 class="description">Why we need you <span class="hint">Click to find out more</span></h3>
             <div id="description">
                 <p class="first">There are mountains of documents and websites out there that contain essential data about New York, but someone needs to liberate and analyze it to keep businesses and government accountable.</p>
                 <p>ScraperWiki, together with the Tow Center at Columbia University School of Journalism and the Knight Foundation, are doing just that. We need journalists, students, computer scientists, programmers, statisticians and public officials to dig up the&nbsp;data!</p>
                 <p class="last"><img src="{{MEDIA_URL}}images/event_big_arrow.gif" width="45" height="65" alt="" />All you need is enthusiasm and a laptop &ndash; we supply the food, drink and wifi. <b>Entry is free</b> but space is limited. We&rsquo;ve got something for everyone, so check out the three streams below, and reserve a ticket before&nbsp;they&nbsp;go.</p>
             </div>
-            <h3 class="streams">Pick a stream</h3>
+            <h3 class="streams">Pick a stream <span class="hint">Click to see the streams</span></h3>
             <div id="streams">
                 <div class="stream">
                     <h4><span class="stream a">Stream A:</span> Journalism Data Derby</h4>
@@ -91,7 +95,7 @@ type="text/javascript"></script>
                     <p>By the end of Friday you&rsquo;ll have all the knowledge you need to come back on Saturday and join a race team in <span class="stream a">Stream&nbsp;A</span> or liberate some data in <span class="stream b">Stream&nbsp;B.</span></p>
                 </div>
             </div>
-            <h3 class="tickets">Sign up with Eventbrite</h3>
+            <h3 class="tickets">Sign up with Eventbrite <span class="hint">Click to reserve a ticket</span></h3>
             <div id="tickets">
                 <div style="width:100%; text-align:left;" ><iframe  src="http://www.eventbrite.com/tickets-external?eid=2586650742&ref=etckt" frameborder="0" height="380" width="100%" vspace="0" hspace="0" marginheight="5" marginwidth="5" scrolling="auto" allowtransparency="true"></iframe><div style="font-family:Helvetica, Arial; font-size:10px; padding:5px 0 5px; margin:2px; width:100%; text-align:left;" ><a style="color:#ddd; text-decoration:none;" target="_blank" href="http://www.eventbrite.com/r/etckt" >Online Ticketing</a><span style="color:#ddd;" > for </span><a style="color:#ddd; text-decoration:none;" target="_blank" href="http://jdcny.eventbrite.com?ref=etckt" >ScraperWiki/Tow Center Journalism Data Camp NY #jdcny</a><span style="color:#ddd;" > powered by </span><a style="color:#ddd; text-decoration:none;" target="_blank" href="http://www.eventbrite.com?ref=etckt" >Eventbrite</a></div></div>
             </div>
@@ -128,14 +132,12 @@ type="text/javascript"></script>
     $('h3.description').addClass('active');
     
     $('h3.description, h3.streams, h3.tickets').bind('click', function(){
-        if($(this).next().is(':visible')){
-            $(this).removeClass('active').next().slideUp();
-        } else {
+        if( ! $(this).next().is(':visible')){
             $(this).addClass('active').next().slideDown();
             $(this).siblings('.active').removeClass('active');
             $('#description, #streams, #tickets').not($(this).next()).slideUp();
         }
-    }).css('cursor', 'pointer');
+    });
     
 {% endblock %}
 
