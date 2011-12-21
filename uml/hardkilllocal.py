@@ -1,8 +1,10 @@
-#!/bin/sh -
-"exec" "python" "-O" "$0" "$@"
+#!/usr/bin/env python
+#
+"""hardkilllocal.py
 
-# Find all lost processes in the system and kill them.  
-# Necessary when killlocal might have hit errors during execution
+Find all lost processes in the system and kill them.  
+Necessary when killlocal might have hit errors during execution.
+"""
 
 import os
 
@@ -21,5 +23,4 @@ while killed_count > 0:
                 #print "    missing"
 
 print "... all killed"
-
 

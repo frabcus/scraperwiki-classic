@@ -6,7 +6,8 @@
 # Short-Description: Start httpsproxy
 ### END INIT INFO
 
-# Author: Mike Richardson <mike@quaking.demon.co.uk>
+# Chris Blower
+# Was: Mike Richardson <mike@quaking.demon.co.uk>
 #
 
 # Do NOT "set -e"
@@ -20,7 +21,7 @@ DESC="HTTPSProxy"
 NAME=httpsproxy
 CONFIG=/var/www/scraperwiki/uml/uml.cfg
 DAEMON=/usr/bin/python
-DAEMON_ARGS="/var/www/scraperwiki/uml/httpproxy/httpproxy.py --daemon --subproc --uid=$NOBODY --gid=$NOGROUP --config=$CONFIG --useCache --mode=S"
+DAEMON_ARGS="/var/www/scraperwiki/uml/httpproxy/httpproxy.py --daemon --subproc --uid=$NOBODY --gid=$NOGROUP --config=$CONFIG --mode=S"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
