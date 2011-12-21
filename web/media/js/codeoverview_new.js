@@ -471,52 +471,55 @@ $(function(){
     $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
     $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
 	
-	$('ul.data_tabs li').bind('click', function(){
-		var eq = $(this).index();
-		if($(this).is('#more_tabs li')){
-			eq += $('#more_tabs').prevAll().length;
-			$(this).addClass('selected');
-			$('#more_tabs').addClass('selected');
-			$('.data_tabs .selected').not($(this)).not('#more_tabs').removeClass('selected');
-		} else {
-			$(this).addClass('selected');
-			$('.data_tabs .selected').not($(this)).removeClass('selected');
-		}
-		$('.datapreview:eq(' + eq + ')').css({position:'static'});
-		$('.datapreview').not(':eq(' + eq + ')').css({position:'absolute',left: '-9000px'});
-        $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
-        $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
-	});
+	function setupTabFolding(){
+		$('ul.data_tabs li').bind('click', function(){
+			var eq = $(this).index();
+			if($(this).is('#more_tabs li')){
+				eq += $('#more_tabs').prevAll().length;
+				$(this).addClass('selected');
+				$('#more_tabs').addClass('selected');
+				$('.data_tabs .selected').not($(this)).not('#more_tabs').removeClass('selected');
+			} else {
+				$(this).addClass('selected');
+				$('.data_tabs .selected').not($(this)).removeClass('selected');
+			}
+			$('.datapreview:eq(' + eq + ')').css({position:'static'});
+			$('.datapreview').not(':eq(' + eq + ')').css({position:'absolute',left: '-9000px'});
+	        $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+	        $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+		});
 
+		function make_more_link(){
+	        $('ul.data_tabs .clear').before(
+	            $('<li id="more_tabs" title="Show more tabs" style="display:none"><span id="more_tabs_number">0</span> more &raquo;<ul></ul></li>')
+	        );
+	    }
 
-	function make_more_link(){
-        $('ul.data_tabs .clear').before(
-            $('<li id="more_tabs" title="Show more tabs" style="display:none"><span id="more_tabs_number">0</span> more &raquo;<ul></ul></li>')
-        );
-    }
+	    function update_more_link(int){
+	        $('#more_tabs').show().find('#more_tabs_number').text(int);
+	    }
 
-    function update_more_link(int){
-        $('#more_tabs').show().find('#more_tabs_number').text(int);
-    }
+	    make_more_link();
 
-    make_more_link();
+		var table_width = 748;
+	    var tabs_width = 0;
+	    var more_link_width = $('#more_tabs').outerWidth() + 10;
+	    var hidden_tabs = 0;
 
-	var table_width = 748;
-    var tabs_width = 0;
-    var more_link_width = $('#more_tabs').outerWidth() + 10;
-    var hidden_tabs = 0;
-
-	$('.data_tab').not('#more_tabs, #more_tabs li').each(function(){
-		tabs_width += $(this).outerWidth(true);
-		if(tabs_width > table_width - more_link_width){
-			$(this).appendTo('#more_tabs ul');
-			hidden_tabs++;
-            update_more_link(hidden_tabs);
-		}
-	});
+		$('.data_tab').not('#more_tabs, #more_tabs li').each(function(){
+			tabs_width += $(this).outerWidth(true);
+			if(tabs_width > table_width - more_link_width){
+				$(this).appendTo('#more_tabs ul');
+				hidden_tabs++;
+	            update_more_link(hidden_tabs);
+			}
+		});
+	}
+	
 	
 	setup_collaboration_ui();
 	setup_schedule_ui();
+	setupTabFolding();
 	
 	$('li.share a, li.admin a, li.download a').each(function(){
 		$(this).bind('click', function(){
@@ -814,6 +817,8 @@ function setupDataPreviews() {
            setTotalRowCount(r);
            var tab_context = {tables: r}
            $('.data_tabs').html(ich.overview_data_tabs(tab_context));
+
+		    // need to run the tab folding function here
 
            _.each(table_names, function (tn) {
                setDataPreview(tn, tables[tn]);
