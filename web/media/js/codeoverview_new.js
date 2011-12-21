@@ -694,7 +694,7 @@ function setDataPreviewWarning(text) {
 }
 
 function getTableColumnNames(table_name, callback){
-  qry = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20"+table_name+"%20LIMIT%201"
+  qry = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
   jQuery.get(qry, function(data) {
     callback(data.keys);
   });
@@ -704,7 +704,7 @@ function getTableColumnNames(table_name, callback){
 function getTableRowCounts(tables, callback){
     var count_url;
     sub_queries = (_.map(tables, function(d) {
-        return "(SELECT COUNT(*) FROM " + d + ") AS "+d;
+        return "(SELECT COUNT(*) FROM [" + d + "]) AS '"+ d + "'";
       })).join(',');
     count_url = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20" + (encodeURIComponent(sub_queries));
     return jQuery.get(count_url, function(resp) {
