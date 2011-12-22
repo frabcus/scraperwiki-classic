@@ -549,7 +549,12 @@ function setupTabClicks(){
 		if( ! $(this).is('.selected')){
 			$('.data_tab.selected').removeClass('selected');
 			$(this).addClass('selected');
-			if($(this).is('#more_tabs li')){ $('#more_tabs').addClass('selected'); }
+			if($(this).is('#more_tabs li')){
+				$('#more_tabs').addClass('selected');
+			} else {
+				$('#more_tabs').removeClass('selected');
+			}
+			
 			var table_name = $(this).attr('id').replace('data_tab_', '');
 			var $dp_div = $('#data_preview_'+table_name);
 			$dp_div.removeClass('hidden').siblings().addClass('hidden');
