@@ -277,5 +277,4 @@ LOGGING = {
 # Javascript templating
 INSTALLED_APPS += ['icanhaz']
 ICANHAZ_DIRS = [SCRAPERWIKI_DIR + 'templates/codewiki/js/']
-print ICANHAZ_DIRS
 

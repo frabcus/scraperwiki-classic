@@ -1,129 +1,24 @@
-/*
+/* GENERAL FUNCTIONS */
 
-function reload_scraper_attachables(short_name, redirect)
-{
-    $('#attachables_loading').show();
-    $.ajax(
-        {
-            url:document.location,
-            cache: false,
-            type: 'GET', 
-            success:function(htmlpage){
-                $("#scraper_attachables").html($(htmlpage).find("#scraper_attachables").html())
-                $("#header_inner").html($(htmlpage).find("#header_inner").html())
-                setupChangeAttachables(short_name); 
-                $('#attachables_loading').hide();
-            },
-            error: function(jq, textStatus, errorThrown){
-                if ( redirect ) {
-                    window.location.href = redirect;
-                    return false;
-                }
-
-                alert( textStatus );
-                alert( errorThrown );
-            }
-        });
-
-    // original action: 
-    //    document.location.reload(true);
-}
-    
-function setupChangeAttachables(short_name)
-{
-    // adding and removing attachables
-    $('#addnewattachable a').click(function()
-    {
-        $('#addnewattachable a').hide()
-        $('#addnewattachable span').show(); 
-        $('attachableserror').hide();
-    }); 
-    $('#addnewattachable input.cancelbutton').click(function()
-    {
-        $('#addnewattachable span').hide(); 
-        $('#addnewattachable a').show()
-        $('attachableserror').hide();
-    }); 
-    $('#addnewattachable input.addbutton').click(function()
-    {
-        $('#attachablesserror').hide();
-        var sdata = { attachable:$('#addnewattachable input:text').val(), action:'add' }; 
-        $.ajax({url:$("#admincontrolattachables").val(), type: 'POST', data:sdata, success:function(result)
-        {
-           
-            if (result.substring(0, 6) == "Failed") {
-                $('#attachableserror').text(result).show(300);
-            } else {
-                reload_scraper_attachables(); 
-                $('#addnewattachable span').hide(); 
-                $('#addnewattachable a').show(); 
-            }
-        },
-        error:function(jq, textStatus, errorThrown)
-        {
-            $('#attachableserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300); 
-        }}); 
-    }); 
-
-    $('#databaseattachablelist .removebutton').click(function() 
-    {
-        $('#attachableserror').hide();
-        var sdata = { attachable:$(this).parents("li:first").find("span").text(), action:'remove' }; 
-        $.ajax({url:$("#admincontrolattachables").val(), type: 'POST', data:sdata, success:function(result)
-        {
-           
-            if (result.substring(0, 6) == "Failed") {
-                $('#attachableserror').text(result).show(300);
-            } else {
-                reload_scraper_attachables(); 
-                $('#addnewattachable span').hide(); 
-                $('#addnewattachable a').show(); 
-            }
-        },
-        error:function(jq, textStatus, errorThrown)
-        {
-            $('#attachableserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300); 
-        }}); 
-    }); 
-    
-    if ($('#addnewattachable input:text').length)
-        $('#addnewattachable input:text').autocomplete(
-    {
-        minLength: 2,
-        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
-        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }, 
-        //select: function(event, ui) { rewriteapiurl(); },
-        source: function(request, response) 
-        {
-            var nolist = [ short_name ]; 
-            $("ul#databaseattachablelist li span").each(function(i, el) { nolist.push($(el).text()); }); 
-            $.ajax(
-            {
-                url: $('#id_api_base').val()+"scraper/search",
-                dataType: "jsonp",
-                data: { format:"jsondict", maxrows: 12, searchquery: request.term, quietfields:'description', nolist:nolist.join(" ") },
-                success: function(data) 
-                {
-                    response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
-                }
-            })
-        },
-        focus: function(event, ui)  { $( "#detail #id_name" ).val(ui.item.label);  return false; }
-    }) 
-    .data( "autocomplete" )._renderItem = function(ul, item) 
-    {
-        return $( "<li></li>" )
-        .data( "item.autocomplete", item )
-        .append( '<a><strong>' + item.desc + '</strong><br/><span>' + item.label + '</span></a>' )
-        .appendTo(ul);
-    };
+$.fn.digits = function(){ 
+    return this.each(function(){ 
+        $(this).text( $(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") ); 
+    })
 }
 
-*/
+function pluralise(thing,number,plural){
+	if(plural == null){ plural = thing + 's'; }
+    return (number == 1 ? thing : plural);
+}
 
 function htmlEscape(str) {
     return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+
+
+
+/* SETUP FUNCTIONS */
 
 function setupCodeOverview(short_name){
     //about
@@ -178,7 +73,7 @@ function setupCodeOverview(short_name){
     });
 }
 
-function setup_collaboration_ui(){
+function setupCollaborationUI(){
 	$('#privacy_status, #contributors').hide();
 	$('#collaboration ul.buttons a, #header_inner a.privacystatus').bind('click', function(e){
 		e.preventDefault();
@@ -205,7 +100,7 @@ function setup_collaboration_ui(){
 		if($('#current_vault_id').length){
 			$.getJSON('/vaults/' + $('#current_vault_id').val() + '/removescraper/' + $('#scrapershortname').val() + '/' + $('input[name=privacy_status]:checked').val(), function(data) {
 				if(data.status == 'ok'){
-					reload_collaboration_ui('#privacy_status');
+					reloadCollaborationUI('#privacy_status');
 				} else {
 					alert('Scraper could not be removed from vault: ' + data.error);
 				}
@@ -216,7 +111,7 @@ function setup_collaboration_ui(){
 				if (result.substring(0, 6) == "Failed"){
 	                alert(result); 
 	            } else {
-					reload_collaboration_ui('#privacy_status');
+					reloadCollaborationUI('#privacy_status');
 				}
 			}});
 		}
@@ -244,7 +139,7 @@ function setup_collaboration_ui(){
 			$(this).parents('td').prev().find('input:radio').hide().after('<img src="/media/images/load2.gif" width="16" height="16">').parents('tr').find('input, select').attr('disabled', true);
 			$.getJSON($(this).prev().val(), function(data) {
 				if(data.status == 'ok'){
-					reload_collaboration_ui('#privacy_status');
+					reloadCollaborationUI('#privacy_status');
 				} else {
 					alert('Scraper could not be moved to vault: ' + data.error);
 				}
@@ -299,7 +194,7 @@ function setup_collaboration_ui(){
 						$('#collaboration .buttons li:eq(1) img').remove();
 		                $u.autocomplete("close").parents('ul').append('<li class="error">' + result + '</li>');
 		            } else {
-						reload_collaboration_ui('#contributors');
+						reloadCollaborationUI('#contributors');
 		            }
 		        },
 		        error:function(jq, textStatus, errorThrown)
@@ -329,7 +224,7 @@ function setup_collaboration_ui(){
 					$('#collaboration .buttons li:eq(1) img').remove();
 	                $u.autocomplete("close").parents('ul').append('<li class="error">' + result + '</li>');
 	            } else {
-					reload_collaboration_ui('#contributors');
+					reloadCollaborationUI('#contributors');
 	            }
 	        },
 	        error:function(jq, textStatus, errorThrown)
@@ -342,7 +237,7 @@ function setup_collaboration_ui(){
 	
 }
 
-function reload_collaboration_ui(auto_enable_tab){
+function reloadCollaborationUI(auto_enable_tab){
 	$("#collaboration").load(document.location + ' #collaboration>*', function(response, status, xhr){
 		if (status == "error") {
 			alert('There was an error refreshing the collaboration UI: ' + xhr.status + " " + xhr.statusText);
@@ -352,7 +247,7 @@ function reload_collaboration_ui(auto_enable_tab){
 					alert('There was an error refreshing the collaboration UI: ' + xhr.status + " " + xhr.statusText);
 				}
 			});
-			setup_collaboration_ui();
+			setupCollaborationUI();
 			if(auto_enable_tab){
 				$(auto_enable_tab).show();
 				$('ul.buttons li').eq($(auto_enable_tab).index() - 1).children().addClass('selected');
@@ -361,14 +256,14 @@ function reload_collaboration_ui(auto_enable_tab){
 	});	
 }
 
-function setup_schedule_ui(){
+function setupScheduleUI(){
 	$('#select_schedule').bind('change', function(){
 		$(this).next().attr('disabled', false);
 	}).next().attr('disabled', true).bind('click', function(){
 		$(this).val('Saving\u2026');
 		$.getJSON($(this).prev().val(), function(data) {
 			if(data.status == 'ok'){
-				reload_schedule_ui();
+				reloadScheduleUI();
 			} else {
 				alert('New schedule could not be saved: ' + data.error);
 				$(this).val('Save');
@@ -391,7 +286,7 @@ function setup_schedule_ui(){
 		e.preventDefault();
 		$.getJSON($(this).attr('href'), function(data) {
 			if(data.status == 'ok'){
-				reload_schedule_ui();
+				reloadScheduleUI();
 			} else {
 				alert('Could not run scraper: ' + data.error);
 			}
@@ -399,22 +294,31 @@ function setup_schedule_ui(){
 	});
 }
 
-function reload_schedule_ui(){
+function reloadScheduleUI(){
 	$("td.schedule").load(document.location + ' td.schedule>*', function(response, status, xhr){
 		if (status == "error") {
 			alert('There was an error refreshing the schedule UI: ' + xhr.status + " " + xhr.statusText);
 		} else {
-			setup_schedule_ui();
+			setupScheduleUI();
 		}
 	});
 }
+
+
+
+
+/* ONREADY FUNCTIONS */
 
 $(function(){
     // globals 
     api_url = $('#id_api_base').val();
     short_name = $('#scrapershortname').val();
     data_tables = [];
+
     setupDataPreviews();	
+	setupCollaborationUI();
+	setupScheduleUI();	
+	
     $('li.viewsource a').bind('click', function(e){
 		e.preventDefault();
 		var url = $(this).attr('href');
@@ -470,56 +374,6 @@ $(function(){
 	
     $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
     $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
-	
-	function setupTabFolding(){
-		$('ul.data_tabs li').bind('click', function(){
-			var eq = $(this).index();
-			if($(this).is('#more_tabs li')){
-				eq += $('#more_tabs').prevAll().length;
-				$(this).addClass('selected');
-				$('#more_tabs').addClass('selected');
-				$('.data_tabs .selected').not($(this)).not('#more_tabs').removeClass('selected');
-			} else {
-				$(this).addClass('selected');
-				$('.data_tabs .selected').not($(this)).removeClass('selected');
-			}
-			$('.datapreview:eq(' + eq + ')').css({position:'static'});
-			$('.datapreview').not(':eq(' + eq + ')').css({position:'absolute',left: '-9000px'});
-	        $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
-	        $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
-		});
-
-		function make_more_link(){
-	        $('ul.data_tabs .clear').before(
-	            $('<li id="more_tabs" title="Show more tabs" style="display:none"><span id="more_tabs_number">0</span> more &raquo;<ul></ul></li>')
-	        );
-	    }
-
-	    function update_more_link(int){
-	        $('#more_tabs').show().find('#more_tabs_number').text(int);
-	    }
-
-	    make_more_link();
-
-		var table_width = 748;
-	    var tabs_width = 0;
-	    var more_link_width = $('#more_tabs').outerWidth() + 10;
-	    var hidden_tabs = 0;
-
-		$('.data_tab').not('#more_tabs, #more_tabs li').each(function(){
-			tabs_width += $(this).outerWidth(true);
-			if(tabs_width > table_width - more_link_width){
-				$(this).appendTo('#more_tabs ul');
-				hidden_tabs++;
-	            update_more_link(hidden_tabs);
-			}
-		});
-	}
-	
-	
-	setup_collaboration_ui();
-	setup_schedule_ui();
-	setupTabFolding();
 	
 	$('li.share a, li.admin a, li.download a').each(function(){
 		$(this).bind('click', function(){
@@ -662,6 +516,50 @@ $(function(){
 	
 });
 
+function setupTabFolding(){
+	
+	function make_more_link(){
+        $('ul.data_tabs .clear').before(
+            $('<li id="more_tabs" title="Show more tabs" style="display:none"><span id="more_tabs_number">0</span> more &raquo;<ul></ul></li>')
+        );
+    }
+    function update_more_link(int){
+        $('#more_tabs').show().find('#more_tabs_number').text(int);
+    }
+
+    make_more_link();
+
+	var table_width = 748;
+    var tabs_width = 0;
+    var more_link_width = $('#more_tabs').outerWidth() + 10;
+    var hidden_tabs = 0;
+
+	$('.data_tab').not('#more_tabs, #more_tabs li').each(function(){
+		tabs_width += $(this).outerWidth(true);
+		if(tabs_width > table_width - more_link_width){
+			$(this).appendTo('#more_tabs ul');
+			hidden_tabs++;
+            update_more_link(hidden_tabs);
+		}
+	});
+}
+
+function setupTabClicks(){
+	$('li.data_tab').live('click', function(){
+		if( ! $(this).is('.selected')){
+			$('.data_tab.selected').removeClass('selected');
+			$(this).addClass('selected');
+			if($(this).is('#more_tabs li')){ $('#more_tabs').addClass('selected'); }
+			var table_name = $(this).attr('id').replace('data_tab_', '');
+			var $dp_div = $('#data_preview_'+table_name);
+			$dp_div.removeClass('hidden').siblings().addClass('hidden');
+		
+	        $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+	        $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+		}
+	}).eq(0).addClass('selected');	
+}
+
 function getTableNames(callback){
   var url;
   url = api_url + "datastore/sqlite?format=jsondict&name="+short_name+"&query=SELECT%20name, sql%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
@@ -730,12 +628,6 @@ function setTotalRowCount(tables){
     $('span.totalrows').append(total_rows > 0 ? ' records' : ' record')
 }
 
-$.fn.digits = function(){ 
-    return this.each(function(){ 
-        $(this).text( $(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") ); 
-    })
-}
-
 function setDataPreview(table_name, table_schema){
    getTableColumnNames( table_name, 
                         function(column_names){
@@ -761,13 +653,11 @@ function setDataPreview(table_name, table_schema){
             });
             return tr;
         }
-    }).bind('sort', function() {
-        dt.fnAdjustColumnSizing();
-      });
+    });
     schema_html = ich.data_preview_schema({sql: table_schema});
     schema_html = highlightSql(schema_html);
     $('#schema_'+table_name).addClass('schema').html(schema_html).children('a').bind('click', schemaClick);
-    $('#datapreviews>div').first().show();              
+    $('#datapreviews>div').first().siblings().addClass('hidden');              
     data_tables.push(dt); 
    });
 }
@@ -798,42 +688,36 @@ function schemaClick(){
 	}
 
 function highlightSql(html) {
-  schema = html.find('.tableschema');
-  sql = schema.text();
-  sql = sql.replace(/(CREATE \w+) `(\w+)`/g,
-      '<span class="create">$1</span> `<span class="tablename">$2</span>`');
-  sql = sql.replace(/`([^`]+)` (\w+)/g,
-      '`<span class="column">$1</span>` <span class="type">$2</span>');
-  schema.html(sql);
-  return html;
+	schema = html.find('.tableschema');
+	sql = schema.text();
+	sql = sql.replace(/(CREATE \w+) `(\w+)`/g,
+		  '<span class="create">$1</span> `<span class="tablename">$2</span>`');
+	sql = sql.replace(/`([^`]+)` (\w+)/g,
+          '`<span class="column">$1</span>` <span class="type">$2</span>');
+	schema.html(sql);
+	return html;
 }
 
 function setupDataPreviews() {  
-     var tab_src = $('#data-tab-template').html();
-     getTableNames(
-       function(tables){
-         var table_names = _.keys(tables);
-         getTableRowCounts( table_names, function(r){
-           setTotalRowCount(r);
-           var tab_context = {tables: r}
-           $('.data_tabs').html(ich.overview_data_tabs(tab_context));
-
-		    // need to run the tab folding function here
-
-           _.each(table_names, function (tn) {
-               setDataPreview(tn, tables[tn]);
-            });
-
-           $('.data_tab').first().addClass('selected');
-
-           $('.data_tab').click(function(e){
-             $('.data_tab').removeClass('selected');
-             $(this).addClass('selected');
-             table_name = $(this).attr('id').replace('data_tab_', '');
-             var dp_div = $('#data_preview_'+table_name);
-             dp_div.show().siblings().hide();
-             data_tables[dp_div.index()].fnAdjustColumnSizing();
-           });
-         }); 
-       });
+	var tab_src = $('#data-tab-template').html();
+	getTableNames(
+		function(tables){
+			var table_names = _.keys(tables);
+			getTableRowCounts( table_names, function(r){
+				setTotalRowCount(r);
+				var tab_context = {tables: r}
+				$('.data_tabs').html(ich.overview_data_tabs(tab_context)).find('i').each(function(i){
+					$(this).append(' ' + pluralise('record', $(this).text()));
+					//	only runs after the last tab has been finished
+					if(i == $('.data_tab').length - 1){
+						setupTabFolding();
+						setupTabClicks();
+					}
+				});
+				_.each(table_names, function(tn){
+					setDataPreview(tn, tables[tn]);
+				});
+			}); 
+		}
+	);
 }
