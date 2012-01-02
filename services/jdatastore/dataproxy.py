@@ -159,7 +159,7 @@ class DatastoreProtocol(protocol.Protocol):
 
     # incoming to this connection
     def dataReceived(self, srec):
-        logger.info("rec: "+str([srec]))
+        logger.info("rec: "+str([srec])[:200])
         self.sbufferclient.append(srec)
         while self.clienttype in ["justconnected", "httpget_headers", "dataproxy_socketmode"]:
             ssrec = self.sbufferclient[-1].split("\n", 1)  # multiple strings if a "\n" exists (\r precedes \n)

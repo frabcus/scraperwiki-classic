@@ -77,7 +77,7 @@ class SQLiteDatabase(object):
         self.totalprogressticks = 0
         
         self.timeout_tickslimit = 300    # about 2 minutes
-        self.timeout_secondslimit = 280  # real time
+        self.timeout_secondslimit = 180  # real time
 
     def close(self):
         logger.warning("calling close ")
@@ -106,8 +106,8 @@ class SQLiteDatabase(object):
             elif request["command"] == "datasummary":
                 res = self.datasummary(request.get("limit", 10))
             elif request["command"] == "attach":
-                Dattachrequests.append(request)
-                res = {"status":"attach function call no longer necessary"}
+                self.Dattached.append(request)
+                res = {"status":"attach dataproxy request no longer necessary"}
             elif request["command"] == "commit":
                 res = {"status":"commit not necessary as autocommit is enabled"}
                 
@@ -260,10 +260,11 @@ class SQLiteDatabase(object):
         except sqlite3.Error, e:
             logger.error(e)
             return {"error":"sqliteattach: sqlite3.Error: "+str(e)}
+        logger.debug('attach complete')
         
-        if req["name"] not in self.attached:
-             self.attached[req["name"]] = [ ]
-        self.attached[req["name"]].append(req["asname"])
+        if name not in self.attached:
+             self.attached[name] = [ ]
+        self.attached[name].append(asname)
         return {"status":"attach succeeded"}
 
     def updateattached(self, attachlist):
