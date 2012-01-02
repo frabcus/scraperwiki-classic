@@ -3,28 +3,22 @@ from twisted.python import log
 import ConfigParser
 import hashlib
 import types
-import os
-import string
-import time
-import datetime
+import os, string, re, sys
+import time, datetime
 import sqlite3
-import signal
 import base64
 import shutil
-import re
-import sys
 import logging
 import urllib
 import traceback
 import json
 
 logger = None  # filled in by dataproxy
+ninstructions_progresshandler = 1000000  # about 0.4secs on Julian's laptop
 
-class TimeoutException(Exception): 
-    pass 
 
 def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
-    logger.debug("authorizer_readonly: %s, %s, %s, %s, %s" % (action_code, tname, cname, sql_location, trigger))
+    #logger.debug("authorizer_readonly: %s, %s, %s, %s, %s" % (action_code, tname, cname, sql_location, trigger))
 
     readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library.  codes: http://www.sqlite.org/c3ref/c_alter_table.html
     if action_code in readonlyops:
@@ -54,11 +48,8 @@ def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
     return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
     
 
-class Database(object):
-    def process(self):
-        raise NotImplementedError
 
-class SQLiteDatabase(Database):
+class SQLiteDatabase(object):
 
     def __init__(self, ldataproxy, resourcedir, short_name, dataauth, runID, attachables):
         self.dataproxy = ldataproxy  # this is just to give access to self.dataproxy.connection.send()
@@ -66,36 +57,39 @@ class SQLiteDatabase(Database):
         self.short_name = short_name
         self.dataauth = dataauth
         self.runID = runID
-        self.attachables = attachables
+        
+            # the set of known allowable attaches (which saves us calling back)
+        self.attachables = attachables   # (not referred to yet)
+        self.attached = { } # name => [ asname1, ... ]
+        self.Dattached = [ ] # attached function calls (for debug purposes)
                 
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
         self.sqlitesaveinfo = { }  # tablename -> info
 
-        
-
         if self.short_name:
             self.scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
 
+        self.cstate = ''
+        self.etimestate = time.time()
+        self.progressticks = 0
+        self.totalprogressticks = 0
+        
+        self.timeout_tickslimit = 300    # about 2 minutes
+        self.timeout_secondslimit = 280  # real time
 
     def close(self):
+        logger.warning("calling close ")
         try:
             if self.m_sqlitedbcursor:
                 self.m_sqlitedbcursor.close()
             if self.m_sqlitedbconn:
                 self.m_sqlitedbconn.close()
-        except:
-            pass
+        except Exception, e:
+            logger.warning("close error: "+str(e))
             
     def process(self, request):
-        
-        # Before we do any of these we should check the attachables that we have by running 
-        # self.sqliteattach(request.get("name"), request.get("asname"))
-        if self.attachables:
-            for entry in json.loads(self.attachables):
-                self.sqliteattach( entry['name'], entry['asname'] )
-        
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
@@ -112,10 +106,11 @@ class SQLiteDatabase(Database):
             elif request["command"] == "datasummary":
                 res = self.datasummary(request.get("limit", 10))
             elif request["command"] == "attach":
-                res = self.sqliteattach(request.get("name"), request.get("asname"))
+                Dattachrequests.append(request)
+                res = {"status":"attach function call no longer necessary"}
             elif request["command"] == "commit":
-                res = self.sqlitecommit()
-
+                res = {"status":"commit not necessary as autocommit is enabled"}
+                
                 # in the case of stream chunking there is one sendall in a loop in this function
         elif request["maincommand"] == "sqliteexecute":
             res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
@@ -145,6 +140,8 @@ class SQLiteDatabase(Database):
     
             # To do this properly would need to ensure file doesn't change during this process
     def downloadsqlitefile(self, seek, length):
+        self.cstate, self.etimestate = 'downloadsqlitefile', time.time()
+
         scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
         lscrapersqlitefile = os.path.join(self.short_name, "defaultdb.sqlite")
         if not os.path.isfile(scrapersqlitefile):
@@ -179,11 +176,6 @@ class SQLiteDatabase(Database):
         else:
             self.authorizer_func = authorizer_writemain
         
-        
-        def progress_handler():
-            logger.debug("progress on %s" % self.runID)
-            
-        
         if not self.m_sqlitedbconn:
             if self.short_name:
                 if not os.path.isdir(self.scraperresourcedir):
@@ -191,22 +183,23 @@ class SQLiteDatabase(Database):
                         return False
                     os.mkdir(self.scraperresourcedir)
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
-                #print 'Connecting to %s' % scrapersqlitefile 
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile, check_same_thread=False)
-                logger.debug('Connected to %s' % scrapersqlitefile)                
+                logger.debug('Connected to %s' % (scrapersqlitefile))
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:", check_same_thread=False)   # draft scrapers make a local version
+            if self.authorizer_func == authorizer_writemain:
+                self.m_sqlitedbconn.isolation_level = None   # autocommit!
+                
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
-#            try:
-#                self.m_sqlitedbconn.set_progress_handler(progress_handler, 1000000)  # can be order of 0.4secs 
-#            except AttributeError:
-#                pass  # must be python version 2.6
+            if ninstructions_progresshandler:
+                self.m_sqlitedbconn.set_progress_handler(self.progress_handler, ninstructions_progresshandler)   
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
              
         return True
                 
                 
     def datasummary(self, limit):
+        self.cstate, self.etimestate = 'datasummary', time.time()
         if not self.establishconnection(False):
             logger.warning( 'Failed to connect to sqlite database for summary %s' % (self.short_name or 'draft'))
             return {"status":"No sqlite database"} # don't change this return string, is a structured one
@@ -238,34 +231,87 @@ class SQLiteDatabase(Database):
                 result["filesize"] = os.path.getsize(scrapersqlitefile)
                  
         return result
-    
-    
-    def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
-        #print "XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50])
 
-        def timeout_handler(signum, frame):
-            raise TimeoutException()
 
-        timeout_len = 30
-
+    def sqliteattach(self, name, asname):
+        logger.debug("attach to %s  %s as %s" % (self.short_name, name, asname))
         self.establishconnection(True)
+        if self.authorizer_func == authorizer_writemain:
+            self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
+        
+        logger.debug("attachables: "+str(self.attachables))
+        logger.info("requesting permission to attach %s to %s" % (self.short_name, name))
+        
+        aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
+        ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
+        logger.info("permission to attach %s to %s response: %s" % (self.short_name, name, ares))
+        
+        if ares == "Yes":
+            logger.debug('Connection allowed')
+        elif ares == "DoesNotExist":
+            return {"error":"Does Not Exist %s" % name}
+        else:
+            return {"error":"no permission to attach to %s" % name}
+
+        attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
+        self.authorizer_func = authorizer_attaching
         try:
-            # In the absence of a user toolkit for managing the database we will manually tweak
-            # the timeout for creating indices
-            #if 'create index' in sqlquery.lower():
-            #    timeout_len = 180
+            self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))
+        except sqlite3.Error, e:
+            logger.error(e)
+            return {"error":"sqliteattach: sqlite3.Error: "+str(e)}
+        
+        if req["name"] not in self.attached:
+             self.attached[req["name"]] = [ ]
+        self.attached[req["name"]].append(req["asname"])
+        return {"status":"attach succeeded"}
+
+    def updateattached(self, attachlist):
+        for req in attachlist:
+            if req["asname"] not in self.attached.get(req["name"], []):
+                ares = self.sqliteattach(req["name"], req["asname"])
+                if "error" in ares:
+                    return ares
+        # (we should remove the values that are not in the attachlist)
+        for req in self.Dattached:
+            if req["asname"] not in self.attached.get(req["name"], []):
+                ares = {"error":"%d was attached but not in the attachlist" }
+                logger.error(str(ares))
+                return ares
+        return {"status":"ok"}
+
+
+    def progress_handler(self):
+        if self.cstate == 'sqliteexecute':
+             self.progressticks += 1
+             self.totalprogressticks += 1
+             if self.progressticks == self.timeout_tickslimit:
+                 logger.debug("client#%d tickslimit timeout" % (self.dataproxy.clientnumber))
+                 return 1
+             if time.time() - self.etimestate > self.timeout_secondslimit:
+                 logger.debug("client#%d elapsed time timeout" % (self.dataproxy.clientnumber))
+                 return 2
+        logger.debug("client#%d progress %d time=%.0f" % (self.dataproxy.clientnumber, self.progressticks, time.time() - self.etimestate))
+        if self.dataproxy.connectionlostwhiledeferredprocessing:
+            logger.debug("client#%d terminating progress" % (self.dataproxy.clientnumber))
+            return 3
+        return 0  # continue
+        
+        
+    def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
+        self.establishconnection(True)
+        ares = self.updateattached(attachlist)
+        if "error" in ares:
+            return ares
             
-            # If the query hasn't run in timeout_len seconds then we'll timeout
-            #signal.signal(signal.SIGALRM, timeout_handler)
-            #signal.alarm(timeout_len)  # should use set_progress_handler !!!!
+        self.cstate, self.etimestate = 'sqliteexecute', time.time()
+        self.progressticks = 0
+        try:
+            self.updateattached(attachlist)
             if data:
                 self.m_sqlitedbcursor.execute(sqlquery, data)  # handle "(?,?,?)", (val, val, val)
             else:
                 self.m_sqlitedbcursor.execute(sqlquery)
-            #signal.alarm(0)
-
-            #INSERT/UPDATE/DELETE/REPLACE), and commits transactions implicitly before a non-DML, non-query statement (i. e. anything other than SELECT
-            #check that only SELECT has a legitimate return state
 
             keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
 
@@ -280,11 +326,11 @@ class SQLiteDatabase(Database):
                         else:
                             row.append(c)
                     rows.append(row)
-                return {"keys":keys, "data": rows}                
-#                return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()}
+                arg = {"keys":keys, "data": rows} 
+                    # skip over the loop that's next
 
                 # this loop has the one internal jsend in it
-            while True:
+            while streamchunking:
                 odata = self.m_sqlitedbcursor.fetchmany(streamchunking)
                 rows = []
                 for r in odata:
@@ -301,58 +347,23 @@ class SQLiteDatabase(Database):
                 arg["moredata"] = True
                 logger.debug("midchunk %s %d" % (self.short_name, len(odata),))
                 self.dataproxy.connection.sendall(json.dumps(arg)+'\n')
-            return arg
         except sqlite3.Error, e:
-            #print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
-            log.err( e )
-            return {"error":"sqliteexecute: sqlite3.Error: %s" % str(e)}
+            arg = {"error":"sqliteexecute: sqlite3.Error: %s" % str(e)}
         except ValueError, ve:
-            #print "user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000])
-            log.err( ve )            
-            return {"error":"sqliteexecute: ValueError: %s" % str(ve)}
-        except TimeoutException,tout:
-            #print "user sqltimeout %s %s" % (sqlquery[:1000], str(data)[:1000])
-            log.err( tout )
-            return { "error" : "Query timeout: %s" % str(tout) }
+            arg = {"error":"sqliteexecute: ValueError: %s" % str(ve)}
+        if "error" in arg:
+            logger.error(arg["error"])
+        arg["progressticks"] = self.progressticks
+        arg["timeseconds"] = time.time() - self.etimestate
+        self.cstate = ''
+        return arg
 
 
-    def sqliteattach(self, name, asname):
-        logger.debug("attach to %s  %s as %s" % (self.short_name, name, asname))
-        self.establishconnection(True)
-        if self.authorizer_func == authorizer_writemain:
-            self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
-        
-        logger.debug("attachables: "+str(self.attachables))
-        logger.info("requesting permission to attach %s to %s" % (self.short_name, name))
-        aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
-        ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
-        logger.info("permission to attach %s to %s response: %s" % (self.short_name, name, ares))
-        if ares == "Yes":
-            logger.debug('Connection allowed')
-        elif ares == "DoesNotExist":
-            return {"error":"Does Not Exist %s" % name}
-        else:
-            return {"error":"no permission to attach to %s" % name}
 
-        attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
-        self.authorizer_func = authorizer_attaching
-        try:
-            self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))
-        except sqlite3.Error, e:
-            log.err(e)
-            return {"error":"sqliteattach: sqlite3.Error: "+str(e)}
-        return {"status":"attach succeeded"}
-
-
-    def sqlitecommit(self):
-        self.establishconnection(True)
-        #signal.alarm(10)
-        self.m_sqlitedbconn.commit()
-        #signal.alarm(0)
-        return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
 
 
     def save_sqlite(self, unique_keys, data, swdatatblname):
+        self.cstate, self.etimestate = 'save_sqlite', time.time()
         res = { }
         if type(data) == dict:
             data = [data]
@@ -391,6 +402,7 @@ class SQLiteDatabase(Database):
         self.m_sqlitedbconn.commit()
         res["nrecords"] = nrecords
         res["status"] = 'Data record(s) inserted or replaced'
+        self.cstate = ''
         return res
 
 

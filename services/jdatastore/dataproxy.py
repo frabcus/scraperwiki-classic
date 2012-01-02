@@ -51,6 +51,9 @@ class DatastoreProtocol(protocol.Protocol):
         self.db = None
         self.clienttype = ''
         self.attachauthurl = attachauthurl  # so it is available to datalib
+        self.dbdeferredprocessing = False
+        self.connectionlostwhiledeferredprocessing = False
+        
 
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
@@ -65,10 +68,20 @@ class DatastoreProtocol(protocol.Protocol):
             raise e
         
     def connectionLost(self, reason):
-        if self.db:
-            self.db.close()
-        self.factory.clientConnectionLost(self)
+        logger.info("connection client#%d lost reason:%s" % (self.clientnumber, reason))
+        if self.dbdeferredprocessing:
+            self.connectionlostwhiledeferredprocessing = True
+                # connectionlost will be deferred
+            # closing the connection to the database while the process is still going causes a segmentation fault in sqlite
+        else:
+            if self.db:
+                self.db.close()
+            self.factory.clientConnectionLost(self)
 
+    def deferredConnectionLost(self):
+        logger.info("connection client#%d deferredlost" % (self.clientnumber))
+        self.db.close()
+        self.factory.clientConnectionLost(self)
 
     # this will generalize to making status and other outputs from here
     def handlehttpgetresponse(self, path, params):
@@ -181,22 +194,35 @@ class DatastoreProtocol(protocol.Protocol):
                     raise
 
                 logger.debug("client#%d deferredrequest %s" % (self.clientnumber, str(request)[:100]))
+                if self.dbdeferredprocessing:
+                    logger.error("already doing deferredrequest!!!")
+                    return
+                    
+                self.dbdeferredprocessing = True
                 d = deferToThread(self.db.process, request)
                 d.addCallback(self.db_process_success)
                 d.addErrback(self.db_process_error)
-                return d
+            return
                 
         logger.warning("client#%d Unhandled line: %s" % (self.clientnumber, line[:1000]))
 
 
     def db_process_success(self, res):
+        self.dbdeferredprocessing = False
         logger.debug("client#%d success %s" % (self.clientnumber, str(res)[:100]))
-        json.dump(res, self.transport)
-        self.transport.write('\n')
+        if self.connectionlostwhiledeferredprocessing:
+            self.deferredConnectionLost()
+        else:
+            json.dump(res, self.transport)
+            self.transport.write('\n')
 
     def db_process_error(self, failure):
+        self.dbdeferredprocessing = False
         logger.warning("client#%d failure %s" % (self.clientnumber, str(failure)[:100]))
-        self.transport.write(json.dumps({"error":"dataproxy.process: %s" % str(failure)})+'\n')        
+        if self.connectionlostwhiledeferredprocessing:
+            self.deferredConnectionLost()
+        else:
+            self.transport.write(json.dumps({"error":"dataproxy.process: %s" % str(failure)})+'\n')        
 
 
 class DatastoreFactory(protocol.ServerFactory):
@@ -213,8 +239,8 @@ class DatastoreFactory(protocol.ServerFactory):
         
     def clientConnectionLost(self, client):
         if client in self.clients:
-            self.clients.remove(client)  # main list
             logger.debug("removing client# %d" % (client.clientnumber))
+            self.clients.remove(client)  # main list
         else:
             logger.error("No place to remove client %d" % client.clientnumber)
 
