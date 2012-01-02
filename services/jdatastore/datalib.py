@@ -15,7 +15,8 @@ import json
 
 logger = None  # filled in by dataproxy
 ninstructions_progresshandler = 1000000  # about 0.4secs on Julian's laptop
-
+resourcedir = None # filled in by dataproxy
+attachauthurl = None # filled in by dataproxy
 
 def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
     #logger.debug("authorizer_readonly: %s, %s, %s, %s, %s" % (action_code, tname, cname, sql_location, trigger))
@@ -51,25 +52,24 @@ def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
 
 class SQLiteDatabase(object):
 
-    def __init__(self, ldataproxy, resourcedir, short_name, dataauth, runID, attachables):
-        self.dataproxy = ldataproxy  # this is just to give access to self.dataproxy.connection.send()
-        self.m_resourcedir = resourcedir
+    def __init__(self, short_name, short_name_dbreadonly, attachables):
+        self.Dclientnumber = -1
+
         self.short_name = short_name
-        self.dataauth = dataauth
-        self.runID = runID
+        self.short_name_dbreadonly = short_name_dbreadonly
         
             # the set of known allowable attaches (which saves us calling back)
         self.attachables = attachables   # (not referred to yet)
-        self.attached = { } # name => [ asname1, ... ]
-        self.Dattached = [ ] # attached function calls (for debug purposes)
-                
+        self.attached = { } # name => [ asname1, ... ] list
+        self.Dattached = [ ]
+        
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
         self.sqlitesaveinfo = { }  # tablename -> info
 
         if self.short_name:
-            self.scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
+            self.scraperresourcedir = os.path.join(resourcedir, self.short_name)
 
         self.cstate = ''
         self.etimestate = time.time()
@@ -78,6 +78,12 @@ class SQLiteDatabase(object):
         
         self.timeout_tickslimit = 300    # about 2 minutes
         self.timeout_secondslimit = 180  # real time
+        self.timeout_nowterminate = False
+
+    def setuponclient(self, dataproxy):
+        self.Dclientnumber = dataproxy.clientnumber
+        self.timeout_nowterminate = False
+        self.Dattached = dataproxy.Dattached[:]
 
     def close(self):
         logger.warning("calling close ")
@@ -155,14 +161,12 @@ class SQLiteDatabase(object):
     
     def establishconnection(self, bcreate):
         
-        # apparently not able to reset authorizer function after it has been set once, so have to redirect this way
+            # seems not able to reset authorizer function after it has been set once, so have to redirect this way
         def authorizer_all(action_code, tname, cname, sql_location, trigger):
             #print "authorizer_all", (action_code, tname, cname, sql_location, trigger)
             return self.authorizer_func(action_code, tname, cname, sql_location, trigger)
         
-        if self.dataauth == "fromfrontend":
-            self.authorizer_func = authorizer_readonly
-        elif self.dataauth == "draft" and self.short_name:
+        if self.short_name_dbreadonly:
             self.authorizer_func = authorizer_readonly
         else:
             self.authorizer_func = authorizer_writemain
@@ -178,7 +182,7 @@ class SQLiteDatabase(object):
                 logger.debug('Connected to %s' % (scrapersqlitefile))
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:", check_same_thread=False)   # draft scrapers make a local version
-            if self.authorizer_func == authorizer_writemain:
+            if not self.short_name_dbreadonly:
                 self.m_sqlitedbconn.isolation_level = None   # autocommit!
                 
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
@@ -234,7 +238,7 @@ class SQLiteDatabase(object):
         logger.info("requesting permission to attach %s to %s" % (self.short_name, name))
         
         aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
-        ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
+        ares = urllib.urlopen("%s?%s" % (attachauthurl, urllib.urlencode(aquery))).read()
         logger.info("permission to attach %s to %s response: %s" % (self.short_name, name, ares))
         
         if ares == "Yes":
@@ -244,7 +248,7 @@ class SQLiteDatabase(object):
         else:
             return {"error":"no permission to attach to %s" % name}
 
-        attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
+        attachscrapersqlitefile = os.path.join(resourcedir, name, "defaultdb.sqlite")
         self.authorizer_func = authorizer_attaching
         try:
             self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))
@@ -278,18 +282,19 @@ class SQLiteDatabase(object):
              self.progressticks += 1
              self.totalprogressticks += 1
              if self.progressticks == self.timeout_tickslimit:
-                 logger.debug("client#%d tickslimit timeout" % (self.dataproxy.clientnumber))
+                 logger.debug("client#%d tickslimit timeout" % (self.Dclientnumber))
                  return 1
              if time.time() - self.etimestate > self.timeout_secondslimit:
-                 logger.debug("client#%d elapsed time timeout" % (self.dataproxy.clientnumber))
+                 logger.debug("client#%d elapsed time timeout" % (self.Dclientnumber))
                  return 2
-        logger.debug("client#%d progress %d time=%.0f" % (self.dataproxy.clientnumber, self.progressticks, time.time() - self.etimestate))
-        if self.dataproxy.connectionlostwhiledeferredprocessing:
-            logger.debug("client#%d terminating progress" % (self.dataproxy.clientnumber))
+        logger.debug("client#%d progress %d time=%.0f" % (self.Dclientnumber, self.progressticks, time.time() - self.etimestate))
+        if self.timeout_nowterminate:
+            logger.debug("client#%d terminating progress" % (self.Dclientnumber))
             return 3
         return 0  # continue
         
         
+         # streamchunking feature has been discarded
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
         self.establishconnection(True)
         if attachlist:
@@ -306,39 +311,17 @@ class SQLiteDatabase(object):
                 self.m_sqlitedbcursor.execute(sqlquery)
 
             keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
+            rows = []
+            for r in self.m_sqlitedbcursor:
+                row = []
+                for c in r:
+                    if type(c) == buffer:
+                        row.append( unicode(c) )
+                    else:
+                        row.append(c)
+                rows.append(row)
+            arg = {"keys":keys, "data": rows} 
 
-            # non-chunking return point
-            if not streamchunking:
-                rows = []
-                for r in self.m_sqlitedbcursor:
-                    row = []
-                    for c in r:
-                        if type(c) == buffer:
-                            row.append( unicode(c) )
-                        else:
-                            row.append(c)
-                    rows.append(row)
-                arg = {"keys":keys, "data": rows} 
-                    # skip over the loop that's next
-
-                # this loop has the one internal jsend in it
-            while streamchunking:
-                odata = self.m_sqlitedbcursor.fetchmany(streamchunking)
-                rows = []
-                for r in odata:
-                    row = []
-                    for c in r:
-                        if type(c) == buffer:
-                            row.append(unicode(c))
-                        else:
-                            row.append(c)
-                    rows.append(row)
-                arg = {"keys":keys, "data":rows} 
-                if len(odata) < streamchunking:
-                    break
-                arg["moredata"] = True
-                logger.debug("midchunk %s %d" % (self.short_name, len(odata),))
-                self.dataproxy.connection.sendall(json.dumps(arg)+'\n')
         except sqlite3.Error, e:
             arg = {"error":"sqliteexecute: sqlite3.Error: %s" % str(e)}
         except ValueError, ve:
@@ -349,9 +332,6 @@ class SQLiteDatabase(object):
         arg["timeseconds"] = time.time() - self.etimestate
         self.cstate = ''
         return arg
-
-
-
 
 
     def save_sqlite(self, unique_keys, data, swdatatblname):

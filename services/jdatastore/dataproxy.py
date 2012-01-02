@@ -26,8 +26,8 @@ configfile = '/var/www/scraperwiki/uml/uml.cfg'
 config = ConfigParser.ConfigParser()
 config.readfp(open(configfile))
 dataproxy_secret = config.get('dataproxy', 'dataproxy_secret')
-attachauthurl = config.get("dataproxy", 'attachauthurl')
-resourcedir = config.get('dataproxy', 'resourcedir')
+datalib.attachauthurl = config.get("dataproxy", 'attachauthurl')
+datalib.resourcedir = config.get('dataproxy', 'resourcedir')
 
 logging.config.fileConfig(configfile)
 # port = config.getint('dataproxy', 'port')
@@ -50,14 +50,15 @@ class DatastoreProtocol(protocol.Protocol):
         self.clientsessionbegan = datetime.datetime.now()
         self.sbufferclient = [ ] # incoming messages from the client
         self.db = None
+        self.Dattached = [ ] # attached function calls (for debug purposes)
         self.clienttype = 'justconnected'
-        self.attachauthurl = attachauthurl  # so it is available to datalib
         self.dbdeferredprocessing = False
         self.connectionlostwhiledeferredprocessing = False
         self.httpheaders = [ ]
         self.httpgetparams = {}
         self.httpgetpath = ''
         self.httppostbuffer = None
+        
 
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
@@ -75,6 +76,8 @@ class DatastoreProtocol(protocol.Protocol):
         logger.info("connection client#%d lost reason:%s" % (self.clientnumber, reason))
         if self.dbdeferredprocessing:
             self.connectionlostwhiledeferredprocessing = True
+            self.db.dataproxy.timeout_nowterminate = True
+
                 # connectionlost will be deferred
             # closing the connection to the database while the process is still going causes a segmentation fault in sqlite
         else:
@@ -151,7 +154,9 @@ class DatastoreProtocol(protocol.Protocol):
         self.transport.write(json.dumps(firstmessage)+'\n')
         
         logger.debug("connection made to dataproxy for %s %s - %s" % (self.dataauth, self.short_name, self.runID))
-        self.db = datalib.SQLiteDatabase(self, resourcedir, self.short_name, self.dataauth, self.runID, self.attachables)
+        short_name_dbreadonly = (self.dataauth == "fromfrontend") or (self.dataauth == "draft" and self.short_name)
+        self.db = datalib.SQLiteDatabase(self.short_name, short_name_dbreadonly, self.attachables)
+        self.db.setuponclient(self)
 
         self.clienttype = "dataproxy_socketmode"
 
@@ -223,7 +228,7 @@ class DatastoreProtocol(protocol.Protocol):
             elif "maincommand" not in request:
                 self.sendResponse({"error":'request must contain maincommand', "content":str(request)})
             elif request["maincommand"] == 'sqlitecommand' and request.get("command") == "attach":
-                self.db.Dattached.append(request)
+                self.Dattached.append(request)
                 self.sendResponse({"status":"attach dataproxy request no longer necessary"})
             elif request["maincommand"] == 'sqlitecommand' and request.get("command") == "commit":
                 self.sendResponse({"status":"commit not necessary as autocommit is enabled"})
