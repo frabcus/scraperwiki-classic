@@ -217,38 +217,45 @@ class DatastoreProtocol(protocol.Protocol):
             try:
                 request = json.loads(line) 
             except ValueError, ve:
-                logger.error("%s; reading line '%s'" % (str(ve), line))
-                raise
-
-            logger.debug("client#%d deferredrequest %s" % (self.clientnumber, str(request)[:100]))
-            if not self.dbdeferredprocessing:
+                request = line
+            if type(request) != dict:
+                self.sendResponse({"error":'request must be dict', "content":str(request)[:200]})
+            elif "maincommand" not in request:
+                self.sendResponse({"error":'request must contain maincommand', "content":str(request)})
+            elif request["maincommand"] == 'sqlitecommand' and request.get("command") == "attach":
+                self.db.Dattached.append(request)
+                self.sendResponse({"status":"attach dataproxy request no longer necessary"})
+            elif request["maincommand"] == 'sqlitecommand' and request.get("command") == "commit":
+                self.sendResponse({"status":"commit not necessary as autocommit is enabled"})
+            elif self.dbdeferredprocessing:
+                self.sendResponse({"error":'already doing deferredrequest!!!'})
+            else:
                 self.dbdeferredprocessing = True
                 d = deferToThread(self.db.process, request)
                 d.addCallback(self.db_process_success)
                 d.addErrback(self.db_process_error)
-            else:
-                logger.error("already doing deferredrequest!!!")
 
         else:
-            logger.warning("client#%d Unhandled line: %s" % (self.clientnumber, line[:1000]))
+            logger.warning("client#%d Unhandled lineReceived: %s" % (self.clientnumber, line[:1000]))
 
-
-    def db_process_success(self, res):
-        self.dbdeferredprocessing = False
-        logger.debug("client#%d success %s" % (self.clientnumber, str(res)[:100]))
+    def sendResponse(self, res):
+        if "error" in res:
+            logger.warning("client#%d error: %s" % (self.clientnumber, str(res)))
         if self.connectionlostwhiledeferredprocessing:
             self.deferredConnectionLost()
         else:
             json.dump(res, self.transport)
             self.transport.write('\n')
 
+    def db_process_success(self, res):
+        self.dbdeferredprocessing = False
+        logger.debug("client#%d success %s" % (self.clientnumber, str(res)[:100]))
+        self.sendResponse(res)
+
     def db_process_error(self, failure):
         self.dbdeferredprocessing = False
         logger.warning("client#%d failure %s" % (self.clientnumber, str(failure)[:100]))
-        if self.connectionlostwhiledeferredprocessing:
-            self.deferredConnectionLost()
-        else:
-            self.transport.write(json.dumps({"error":"dataproxy.process: %s" % str(failure)})+'\n')        
+        self.sendResponse({"error":"dataproxy.process: %s" % str(failure)})
 
 
 class DatastoreFactory(protocol.ServerFactory):

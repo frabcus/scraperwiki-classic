@@ -90,11 +90,7 @@ class SQLiteDatabase(object):
             logger.warning("close error: "+str(e))
             
     def process(self, request):
-        if type(request) != dict:
-            res = {"error":'request must be dict', "content":str(request)}
-        elif "maincommand" not in request:
-            res = {"error":'request must contain maincommand', "content":str(request)}
-        elif request["maincommand"] == 'save_sqlite':
+        if request["maincommand"] == 'save_sqlite':
             res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         elif request["maincommand"] == 'clear_datastore':
             res = self.clear_datastore()
@@ -105,11 +101,6 @@ class SQLiteDatabase(object):
                 res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
             elif request["command"] == "datasummary":
                 res = self.datasummary(request.get("limit", 10))
-            elif request["command"] == "attach":
-                self.Dattached.append(request)
-                res = {"status":"attach dataproxy request no longer necessary"}
-            elif request["command"] == "commit":
-                res = {"status":"commit not necessary as autocommit is enabled"}
                 
                 # in the case of stream chunking there is one sendall in a loop in this function
         elif request["maincommand"] == "sqliteexecute":
