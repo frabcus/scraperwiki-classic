@@ -300,14 +300,14 @@ class SQLiteDatabase(object):
         
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
         self.establishconnection(True)
-        ares = self.updateattached(attachlist)
-        if "error" in ares:
-            return ares
+        if attachlist:
+            ares = self.updateattached(attachlist)
+            if "error" in ares:
+                return ares
             
         self.cstate, self.etimestate = 'sqliteexecute', time.time()
         self.progressticks = 0
         try:
-            self.updateattached(attachlist)
             if data:
                 self.m_sqlitedbcursor.execute(sqlquery, data)  # handle "(?,?,?)", (val, val, val)
             else:
