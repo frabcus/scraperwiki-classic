@@ -43,7 +43,7 @@ def authorizer_attaching(action_code, tname, cname, sql_location, trigger):
     return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
 
 def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
-    #print "authorizer_writemain", (action_code, tname, cname, sql_location, trigger)
+    #logger.debug("authorizer_writemain: %s, %s, %s, %s, %s" % (action_code, tname, cname, sql_location, trigger))
     if sql_location == None or sql_location == 'main':  
         return sqlite3.SQLITE_OK
     return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
@@ -299,6 +299,7 @@ class SQLiteDatabase(object):
             ares = self.updateattached(attachlist)
             if "error" in ares:
                 return ares
+            self.establishconnection(True)  # reset the attach authorizations
             
         self.cstate, self.etimestate = 'sqliteexecute', time.time()
         self.progressticks = 0

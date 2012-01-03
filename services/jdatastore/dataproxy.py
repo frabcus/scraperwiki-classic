@@ -36,7 +36,7 @@ logger.info("Serving twisted dataproxy now")
 datalib.logger = logger
 
 from twisted.python import log
-from twisted.internet import reactor, protocol
+from twisted.internet import reactor, protocol, task
 from twisted.protocols import basic
 from twisted.internet import defer
 from twisted.internet.threads import deferToThread
@@ -52,8 +52,10 @@ class DatastoreProtocol(protocol.Protocol):
         self.db = None
         self.Dattached = [ ] # attached function calls (for debug purposes)
         self.clienttype = 'justconnected'
-        self.dbdeferredprocessing = False
+
         self.connectionlostwhiledeferredprocessing = False
+        self.dbprocessrequest = None
+        
         self.httpheaders = [ ]
         self.httpgetparams = {}
         self.httpgetpath = ''
@@ -74,20 +76,16 @@ class DatastoreProtocol(protocol.Protocol):
         
     def connectionLost(self, reason):
         logger.info("connection client#%d lost reason:%s" % (self.clientnumber, reason))
-        if self.dbdeferredprocessing:
+        if self.db:
             self.connectionlostwhiledeferredprocessing = True
             self.db.dataproxy.timeout_nowterminate = True
-
-                # connectionlost will be deferred
-            # closing the connection to the database while the process is still going causes a segmentation fault in sqlite
         else:
-            if self.db:
-                self.db.close()
             self.factory.clientConnectionLost(self)
 
     def deferredConnectionLost(self):
         logger.info("connection client#%d deferredlost" % (self.clientnumber))
-        self.db.close()
+        if self.db:
+            self.factory.releasedbprocess(self)
         self.factory.clientConnectionLost(self)
 
     # this will generalize to making status and other outputs from here
@@ -154,11 +152,8 @@ class DatastoreProtocol(protocol.Protocol):
         self.transport.write(json.dumps(firstmessage)+'\n')
         
         logger.debug("connection made to dataproxy for %s %s - %s" % (self.dataauth, self.short_name, self.runID))
-        short_name_dbreadonly = (self.dataauth == "fromfrontend") or (self.dataauth == "draft" and self.short_name)
-        #self.db = datalib.SQLiteDatabase(self.short_name, short_name_dbreadonly)
-        self.db = self.factory.fetchswconn(self.short_name, short_name_dbreadonly, [], self.Dclientnumber)
+        self.short_name_dbreadonly = (self.dataauth == "fromfrontend") or (self.dataauth == "draft" and self.short_name)
         self.clienttype = "dataproxy_socketmode"
-
 
 
     # incoming to this connection
@@ -186,6 +181,7 @@ class DatastoreProtocol(protocol.Protocol):
     # incoming to this connection
     # even the socket connections from the uml are initialized with a GET line 
     def lineReceived(self, line):
+        logger.info("--- %s %s" % (self.clienttype, line))
         if self.clienttype == 'justconnected':
             if line[:4] == 'GET ' or line[:5] == 'POST ':
                 self.clienttype = "httpget_headers"
@@ -231,13 +227,13 @@ class DatastoreProtocol(protocol.Protocol):
                 self.sendResponse({"status":"attach dataproxy request no longer necessary"})
             elif request["maincommand"] == 'sqlitecommand' and request.get("command") == "commit":
                 self.sendResponse({"status":"commit not necessary as autocommit is enabled"})
-            elif self.dbdeferredprocessing:
+            elif self.db:
                 self.sendResponse({"error":'already doing deferredrequest!!!'})
+            elif self.dbprocessrequest:
+                self.sendResponse({"error":'already waiting on a processrequest!!!'})
             else:
-                self.dbdeferredprocessing = True
-                d = deferToThread(self.db.process, request)
-                d.addCallback(self.db_process_success)
-                d.addErrback(self.db_process_error)
+                self.dbprocessrequest = request
+                self.factory.addwaitingclient(self)
 
         else:
             logger.warning("client#%d Unhandled lineReceived: %s" % (self.clientnumber, line[:1000]))
@@ -252,13 +248,16 @@ class DatastoreProtocol(protocol.Protocol):
             self.transport.write('\n')
 
     def db_process_success(self, res):
-        self.dbdeferredprocessing = False
-        logger.debug("client#%d success %s" % (self.clientnumber, str(res)[:100]))
+        logger.debug("%d client#%d success %s" % (self.Ddeffcount, self.clientnumber, str(res)[:100]))
+        if self.db:
+            self.factory.releasedbprocess(self)
         self.sendResponse(res)
 
+        # the error can be called after success has been called by same deferred?  how?
     def db_process_error(self, failure):
-        self.dbdeferredprocessing = False
-        logger.warning("client#%d failure %s" % (self.clientnumber, str(failure)[:100]))
+        logger.warning("%s client#%d failure %s" % (self.Ddeffcount, self.clientnumber, str(failure)[:100]))
+        if self.db:
+            self.factory.releasedbprocess(self)
         self.sendResponse({"error":"dataproxy.process: %s" % str(failure)})
 
 
@@ -266,10 +265,41 @@ class DatastoreFactory(protocol.ServerFactory):
     protocol = DatastoreProtocol
     
     def __init__(self):
-        self.clients = [ ]   # all clients
-        self.clientcount = 0
-        self.swsqliteconnections = [ ]
+        self.clients = [ ]     # all clients
+        self.clientcount = 0   # for clientnumbers
+        self.clientswaitingforswconn = [ ]
+        #self.swsqliteconnections = [ ]
+        self.lc = task.LoopingCall(self.processnextwaitingclient)
+        self.lc.start(5)
+        self.Ddeffcount = 1000
+
+    def addwaitingclient(self, client):
+        logger.info("added waiting client")
+        assert client not in self.clientswaitingforswconn
+        self.clientswaitingforswconn.append(client)
         
+    def processnextwaitingclient(self):
+        logger.info("looping call %d" % len(self.clientswaitingforswconn))
+        if not self.clientswaitingforswconn:
+            return
+        client = self.clientswaitingforswconn.pop(0)
+        logger.info("process open on client#%d" % client.clientnumber)
+        client.db = datalib.SQLiteDatabase(client.short_name, client.short_name_dbreadonly)
+        client.db.Dclientnumber = client.clientnumber
+        client.db.timeout_nowterminate = False
+        d = deferToThread(client.db.process, client.dbprocessrequest)
+        client.dbprocessrequest = None
+        client.Ddeffcount = self.Ddeffcount
+        self.Ddeffcount += 1
+        d.addCallback(client.db_process_success)
+        d.addErrback(client.db_process_error)
+        
+    def releasedbprocess(self, client):
+        logger.info("rrrrr "+str(client.db))
+        client.db.close()
+        client.db.Dclientnumber = -1
+        client.db = None
+
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount
         self.clients.append(client)
@@ -282,12 +312,4 @@ class DatastoreFactory(protocol.ServerFactory):
         else:
             logger.error("No place to remove client %d" % client.clientnumber)
 
-    def fetchswconn(self, short_name, short_name_dbreadonly, attached, Dclientnumber):
-        swsqliteconnection = datalib.SQLiteDatabase(self.short_name, short_name_dbreadonly, attached)
-        swsqliteconnection.Dclientnumber = Dclientnumber
-        swsqliteconnection.timeout_nowterminate = False
-
-    def releaseswconn(self, swsqliteconnection):
-        swsqliteconnection.Dclientnumber = -1
-        swsqliteconnection.Dattached = []
         
