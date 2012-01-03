@@ -155,9 +155,8 @@ class DatastoreProtocol(protocol.Protocol):
         
         logger.debug("connection made to dataproxy for %s %s - %s" % (self.dataauth, self.short_name, self.runID))
         short_name_dbreadonly = (self.dataauth == "fromfrontend") or (self.dataauth == "draft" and self.short_name)
-        self.db = datalib.SQLiteDatabase(self.short_name, short_name_dbreadonly, self.attachables)
-        self.db.setuponclient(self)
-
+        #self.db = datalib.SQLiteDatabase(self.short_name, short_name_dbreadonly)
+        self.db = self.factory.fetchswconn(self.short_name, short_name_dbreadonly, [], self.Dclientnumber)
         self.clienttype = "dataproxy_socketmode"
 
 
@@ -269,6 +268,7 @@ class DatastoreFactory(protocol.ServerFactory):
     def __init__(self):
         self.clients = [ ]   # all clients
         self.clientcount = 0
+        self.swsqliteconnections = [ ]
         
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount
@@ -282,3 +282,12 @@ class DatastoreFactory(protocol.ServerFactory):
         else:
             logger.error("No place to remove client %d" % client.clientnumber)
 
+    def fetchswconn(self, short_name, short_name_dbreadonly, attached, Dclientnumber):
+        swsqliteconnection = datalib.SQLiteDatabase(self.short_name, short_name_dbreadonly, attached)
+        swsqliteconnection.Dclientnumber = Dclientnumber
+        swsqliteconnection.timeout_nowterminate = False
+
+    def releaseswconn(self, swsqliteconnection):
+        swsqliteconnection.Dclientnumber = -1
+        swsqliteconnection.Dattached = []
+        

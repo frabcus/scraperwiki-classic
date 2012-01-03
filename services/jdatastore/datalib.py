@@ -52,14 +52,13 @@ def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
 
 class SQLiteDatabase(object):
 
-    def __init__(self, short_name, short_name_dbreadonly, attachables):
+    def __init__(self, short_name, short_name_dbreadonly):
         self.Dclientnumber = -1
 
         self.short_name = short_name
         self.short_name_dbreadonly = short_name_dbreadonly
         
             # the set of known allowable attaches (which saves us calling back)
-        self.attachables = attachables   # (not referred to yet)
         self.attached = { } # name => [ asname1, ... ] list
         self.Dattached = [ ]
         
@@ -234,7 +233,6 @@ class SQLiteDatabase(object):
         if self.authorizer_func == authorizer_writemain:
             self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
         
-        logger.debug("attachables: "+str(self.attachables))
         logger.info("requesting permission to attach %s to %s" % (self.short_name, name))
         
         aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
