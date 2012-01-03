@@ -82,9 +82,9 @@
 
       <div class="history_run_event" id="run_{{itemfirst.runevent.id}}">
         <div class="history_view_changes">
+            <a class="runpermalink" href="{% url editor_edit scraper.wiki_type scraper.short_name %}#run_{{itemfirst.runevent.id}}">Permalink</a>
           <a class="hiderunevent">Hide details</a>
           <a class="showrunevent">Show details</a>
-
           <span class="runidlist hide">
             {% for item in itemloggroup.list %}
             <span class="runidelem">

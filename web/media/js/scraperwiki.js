@@ -35,6 +35,16 @@ $(document).ajaxSend(function(event, xhr, settings) {
     }
 });
 
+function trim(stringToTrim) {
+	return stringToTrim.replace(/^\s+|\s+$/g,"");
+}
+function ltrim(stringToTrim) {
+	return stringToTrim.replace(/^\s+/,"");
+}
+function rtrim(stringToTrim) {
+	return stringToTrim.replace(/\s+$/,"");
+}
+
 
 function setupNavSearchBoxHint(){
     $('#nav_search_q').bind('focus', function() {
@@ -222,9 +232,32 @@ function newUserMessage(url){
 	}
 }
 
+//	Creates a pretty orange Alert bar at the top of the window.
+//	Uses the same HTML as web/templates/frontend/messages.html
+function newAlert(htmlcontent, level, actions){
+	if(typeof(level) != 'string'){ level = 'error'; }
+	$alert_outer = $('<div>').attr('id','alert_outer').addClass(level);
+	$alert_inner = $('<div>').attr('id','alert_inner').html(htmlcontent);
+	if(typeof(actions) == 'object'){
+		console.log('actions is an object');
+		var a = '<a href="' + actions.url + '"';
+		if(typeof(actions.secondary) != 'undefined'){
+			s += ' class="secondary"'
+		}
+		a += '>' + actions.text + '</a>';
+		$alert_inner.append(a);
+	}
+	console.log(typeof(actions));
+	$('<a>').attr('id','alert_close').bind('click', function(){ 
+		$('#alert_outer').slideUp(250);
+		$('#nav_outer').animate({marginTop:0}, 250);
+	}).appendTo($alert_inner);
+	$('#nav_outer').css('margin-top', $('#alert_outer').outerHeight());
+}
 
-$(function()
-{
+
+
+$(function(){
 	
     setupNavSearchBoxHint();
 
