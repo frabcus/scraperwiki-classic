@@ -43,7 +43,7 @@ def authorizer_attaching(action_code, tname, cname, sql_location, trigger):
     return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
 
 def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
-    #print "authorizer_writemain", (action_code, tname, cname, sql_location, trigger)
+    #logger.debug("authorizer_writemain: %s, %s, %s, %s, %s" % (action_code, tname, cname, sql_location, trigger))
     if sql_location == None or sql_location == 'main':  
         return sqlite3.SQLITE_OK
     return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
@@ -77,12 +77,7 @@ class SQLiteDatabase(object):
         
         self.timeout_tickslimit = 300    # about 2 minutes
         self.timeout_secondslimit = 180  # real time
-        self.timeout_nowterminate = False
-
-    def setuponclient(self, dataproxy):
-        self.Dclientnumber = dataproxy.clientnumber
-        self.timeout_nowterminate = False
-        self.Dattached = dataproxy.Dattached[:]
+        self.clientforresponse = None
 
     def close(self):
         logger.warning("calling close ")
@@ -93,6 +88,25 @@ class SQLiteDatabase(object):
                 self.m_sqlitedbconn.close()
         except Exception, e:
             logger.warning("close error: "+str(e))
+            
+            
+    def db_process_success(self, res):
+        logger.debug("client#%d success %s" % (self.Dclientnumber, str(res)[:150]))
+        self.factory.releasedbprocess(self)
+        if self.clientforresponse:
+            self.clientforresponse.sendResponse(res)
+        else:
+            logger.debug("client#%d has no connection" % (self.Dclientnumber))
+
+        # the error can be called after success has been called by same deferred?  how?
+    def db_process_error(self, failure):
+        logger.warning("client#%d failure %s" % (self.Dclientnumber, str(failure)[:100]))
+        self.factory.releasedbprocess(self)
+        if self.clientforresponse:
+            self.clientforresponse.sendResponse({"error":"dataproxy.process: %s" % str(failure)})
+        else:
+            logger.debug("client#%d has no connection" % (self.Dclientnumber))
+            
             
     def process(self, request):
         if request["maincommand"] == 'save_sqlite':
@@ -286,8 +300,8 @@ class SQLiteDatabase(object):
                  logger.debug("client#%d elapsed time timeout" % (self.Dclientnumber))
                  return 2
         logger.debug("client#%d progress %d time=%.0f" % (self.Dclientnumber, self.progressticks, time.time() - self.etimestate))
-        if self.timeout_nowterminate:
-            logger.debug("client#%d terminating progress" % (self.Dclientnumber))
+        if not self.clientforresponse:
+            logger.debug("client#%d terminating progress" % (self.Dclientnumber))  # as nothing to receive the result anyway
             return 3
         return 0  # continue
         
@@ -299,6 +313,7 @@ class SQLiteDatabase(object):
             ares = self.updateattached(attachlist)
             if "error" in ares:
                 return ares
+            self.establishconnection(True)  # reset the attach authorizations
             
         self.cstate, self.etimestate = 'sqliteexecute', time.time()
         self.progressticks = 0
