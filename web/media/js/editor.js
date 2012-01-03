@@ -5,6 +5,30 @@ var lastRev = null;
 var setupKeygrabs;     // function
 var inRollback = false;
 
+
+//	A duplicate of the usual function (in scraperwiki.js)
+//	but with a few changes for the unusual Editor DOM layout
+function newAlert(htmlcontent, level, actions){
+	if(typeof(level) != 'string'){ level = 'error'; }
+	$alert_outer = $('<div>').attr('id','alert_outer').addClass(level);
+	$alert_inner = $('<div>').attr('id','alert_inner').html(htmlcontent);
+	if(typeof(actions) == 'object'){
+		console.log('actions is an object');
+		var a = '<a href="' + actions.url + '"';
+		if(typeof(actions.secondary) != 'undefined'){
+			s += ' class="secondary"'
+		}
+		a += '>' + actions.text + '</a>';
+		$alert_inner.append(a);
+	}
+	console.log(typeof(actions));
+	$('<a>').attr('id','alert_close').bind('click', function(){ 
+		$('#alert_outer').slideUp(250);
+		$('body div.editor').animate({paddingTop:0}, 250);
+	}).appendTo($alert_inner);
+	$('body div.editor').prepend($alert_outer.prepend($alert_inner)).css('padding-top', $('#alert_outer').outerHeight());
+}
+
 $(document).ready(function() 
 {
     // variable transmitted through the html
@@ -885,7 +909,7 @@ $(document).ready(function()
         {
             var errmessage = "Response error: " + textStatus + "  thrown: " + errorThrown + "  text:" + jqXHR.responseText; 
             writeToChat(errmessage);
-            alert('Sorry, something went wrong with the save, please try copying your code and then reloading the page. Technical details: ' + textStatus);
+			newAlert('Sorry, something went wrong with the save. Try copying your code and reloading the page.');
             window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
         }});
 

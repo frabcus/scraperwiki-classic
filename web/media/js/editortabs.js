@@ -475,7 +475,6 @@ function resetTabNumber(tab){
 function setupTabs(){
     $('.editor_output .tabs a').bind('click', function(e){
     	e.preventDefault();
-		console.log($(this).attr('href').replace('#output_', ''));
         showTab($(this).attr('href').replace('#output_', ''));
     }).eq(0).trigger('click');
 }
