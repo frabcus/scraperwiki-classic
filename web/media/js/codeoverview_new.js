@@ -444,27 +444,42 @@ $(function(){
 	});
 	
 	
+	function show_new_tag_box(){
+		$('.new_tag').hide().next().show().find('input').focus();
+	}
 	
-	$('.new_tag a').bind('click', function(e){
+	function hide_new_tag_box(){
+		$('li.new_tag_box input').animate({width:1}, 200, function(){
+			$(this).css('width','auto').val('').parent().hide().prev().show();
+		});
+	}
+	
+	$('.new_tag a, div.network .titlebar .tag a').bind('click', function(e){
 		e.preventDefault();
-		$(this).parent().hide().next().show().find('input').focus();
+		show_new_tag_box();
 	});
 	
 	$('li.new_tag_box input').bind('keyup', function(event){
 		var key = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
 		if(key == 13){
 			var new_tag = $(this).val();
+			var new_tag_array = new_tag.split(',');
 			var tags = [ ]; 
 	        $("div.tags ul li").not('.new_tag, .new_tag_box').each(function(i, el) { 
 				tags.push($(el).children('a:first').text());
 			});
 			tags.push(new_tag);
+			console.log(new_tag_array);
 			$.ajax({
 				type: 'POST',
 				url: $("#adminsettagurl").val(),
 				data: {value: tags.join(",") + ','},
 				success: function(data){
-					$('li.new_tag_box input').val('').parent().hide().prev().show().before('<li class="editable"><a href="/tags/' + encodeURIComponent(new_tag) + '">' + new_tag + '</a><a class="remove" title="Remove this tag">&times;</a></li>');
+					var new_html = '';
+					$.each(new_tag_array, function(i, t){
+						new_html += '<li class="editable"><a href="/tags/' + encodeURIComponent(trim(t)) + '">' + trim(t) + '</a><a class="remove" title="Remove this tag">&times;</a></li>';
+					});
+					$('li.new_tag_box input').val('').parent().prev().before(new_html);
 				}, error: function(){
 					alert('Sorry, your tag could not be added. Please try again later.');
 				},
@@ -473,11 +488,13 @@ $(function(){
 			});
 		}
 	}).bind('focus', function(){
+		if(typeof(new_tag_hider) != 'undefined'){ clearTimeout(new_tag_hider); }
 		$(this).parent().addClass('focus');
 	}).bind('blur', function(){
+		new_tag_hider = setTimeout(function(){hide_new_tag_box();}, 1000);
 		$(this).parent().removeClass('focus');
 	}).next('.hide').bind('click', function(){
-		$(this).prev().val('').parent().hide().prev().show();
+		hide_new_tag_box();
 	});
 	
 	$('div.tags a.remove').live('click', function(e){
@@ -487,6 +504,7 @@ $(function(){
         $("div.tags ul li").not('.new_tag, .new_tag_box').not($old_tag).each(function(i, el) { 
 			tags.push($(el).children('a:first').text());
 		});
+		
 		$.ajax({
 			type: 'POST',
 			url: $("#adminsettagurl").val(),
@@ -499,11 +517,6 @@ $(function(){
 			dataType: 'html',
 			cache: false
 		});
-	});
-	
-	$('div.network .titlebar .tag a').bind('click', function(e){
-		e.preventDefault();
-		$('div.tags').show().find('.new_tag a').trigger('click');
 	});
 	
 	$('#id_comment').bind('focus', function(){

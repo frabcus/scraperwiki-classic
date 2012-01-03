@@ -35,6 +35,16 @@ $(document).ajaxSend(function(event, xhr, settings) {
     }
 });
 
+function trim(stringToTrim) {
+	return stringToTrim.replace(/^\s+|\s+$/g,"");
+}
+function ltrim(stringToTrim) {
+	return stringToTrim.replace(/^\s+/,"");
+}
+function rtrim(stringToTrim) {
+	return stringToTrim.replace(/\s+$/,"");
+}
+
 
 function setupNavSearchBoxHint(){
     $('#nav_search_q').bind('focus', function() {
