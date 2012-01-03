@@ -725,7 +725,7 @@ function previewrunevent_show(block)
     hideallshowhistrun(); 
 
     block.find(".showrunevent").hide(); 
-    block.find(".hiderunevent").show(); 
+    block.find(".hiderunevent, .runpermalink").show();
 
     var runid = block.find("span.runidlist span.runidelem:first span.runid").text();  
     block.find(".history_code_border").hide();
@@ -744,7 +744,7 @@ function previewrunevent_hide(block)
 {
     block.find(".runpreviewer").hide(); 
     block.find(".showrunevent").show(); 
-    block.find(".hiderunevent").hide(); 
+    block.find(".hiderunevent, .runpermalink").hide(); 
 }
 
 function hideallshowhistrun()
