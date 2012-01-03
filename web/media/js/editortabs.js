@@ -11,7 +11,7 @@ var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 };
 var outputMaxItems = 400;
 // *sTabCurrent* is generally to the class name of the currently shown tab.
 var sTabCurrent = ''; 
-var sChatTabMessage = 'Chat'; 
+var sChatTabMessage = 'Chat';
 
 // information handling who else is watching and editing during this session
 var editingusername = "";  // primary editor
@@ -31,8 +31,7 @@ var lasttouchedtime = undefined;
 
 var cachehidlookup = { }; // this itself is a cache of a cache
 
-function cgiescape(text) 
-{
+function cgiescape(text) {
     if (typeof text == 'number')
         return String(text); 
     if (typeof text != 'string')
@@ -41,8 +40,7 @@ function cgiescape(text)
 }
 
 // some are implemented with tables, and some with span rows.  
-function setTabScrollPosition(sTab, command) 
-{
+function setTabScrollPosition(sTab, command) {
     divtab = '#output_' + sTab; 
     contenttab = '#output_' + sTab; 
 
@@ -51,18 +49,17 @@ function setTabScrollPosition(sTab, command)
         contenttab = '#output_' + sTab + ' .output_content';
     }
 
-    if (command == 'hide')
+    if (command == 'hide'){
         scrollPositions[sTab] = $(divtab).scrollTop();
-    else 
-    {
-        if (command == 'bottom')
-            scrollPositions[sTab] = $(contenttab).height()+$(divtab)[0].scrollHeight; 
-        $(divtab).animate({ scrollTop: scrollPositions[sTab] }, 0);
+    } else {
+        if (command == 'bottom' || command == 'show'){
+            scrollPositions[sTab] = $(contenttab).height()+$(divtab)[0].scrollHeight;
+		}
+        $(divtab).scrollTop(scrollPositions[sTab]);
     }
 }
 
-function showTextPopup(sLongMessage) 
-{
+function showTextPopup(sLongMessage){
     $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
             {overlayClose: true, 
                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
@@ -71,8 +68,7 @@ function showTextPopup(sLongMessage)
 }
 
 
-function lparsehighlightcode(sdata, lmimetype)
-{
+function lparsehighlightcode(sdata, lmimetype){
 	// sdata is already a JSON object
     var cachejson = sdata; 
 
@@ -121,8 +117,7 @@ function lparsehighlightcode(sdata, lmimetype)
 }
 
 
-function popupCached(cacheid, lmimetype)
-{
+function popupCached(cacheid, lmimetype){
     modaloptions = { overlayClose: true, 
                         overlayCss: { cursor:"auto" }, 
                         containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
@@ -153,8 +148,7 @@ function popupCached(cacheid, lmimetype)
 }
 
 
-function clearOutput() 
-{
+function clearOutput() {
     $('#output_console div').html('');
     $('#output_sources div').html('');
     $('#output_data table').html('');
@@ -341,7 +335,6 @@ function writeToData(aRowData)
     });
 
     $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
-    setTabScrollPosition('data', 'bottom'); 
     $('.editor_output div.tabs li.data').addClass('new');
 	incrementTabNumber('data'); 
 
@@ -383,8 +376,8 @@ function writeToSqliteData(command, val1, lval2)
 }
 
 function writeToChat(seMessage, sechatname){
-    while ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) 
-        $('#output_chat table.output_content tbody').children(':first').remove();
+   while ($('#output_chat .output_content tbody').children().size() >= outputMaxItems) 
+        $('#output_chat .output_content tbody').children(':first').remove();
 
 	var iScrollStart = getScrollPosition('chat');
 	if(iScrollStart <= 0){
@@ -392,10 +385,9 @@ function writeToChat(seMessage, sechatname){
 	}
 
     var oRow = $('<tr><td>' + (sechatname ? sechatname + ": " : "") + seMessage + '</td></tr>');
-    $('#output_chat table.output_content').append(oRow);
-    setTabScrollPosition('chat', 'bottom');
-	$('.editor_output div.tabs li.chat').addClass('new');
-	incrementTabNumber('chat'); 
+    $('#output_chat .output_content').append(oRow);
+	$('.editor_output .tabs .chat').addClass('new');
+	incrementTabNumber('chat');
 
 	if(iScrollStart <= 0 && getScrollPosition('chat') > 0){
 		setTabScrollPosition('chat', 'bottom');
@@ -409,7 +401,7 @@ function writeToChat(seMessage, sechatname){
 		){
             chatpeopletimes[sechatname] = servernowtime; 
             if (sTabCurrent != 'chat'){
-                $('.editor_output div.tabs li.chat').addClass('chatalert');
+                $('.editor_output .tabs .chat').addClass('chatalert');
 			}
         }
      }
@@ -430,13 +422,7 @@ function showTab(sTab)
 
     $('.editor_output div.tabs ul').children().removeClass('selected');
     $('.editor_output div.tabs li.' + sTab).addClass('selected');
-    $('.editor_output div.tabs li.' + sTab).removeClass('new');
-    if (sTab == 'chat'){
-        $('.editor_output div.tabs li.chat').removeClass('chatalert');
-	}
-    $('.editor_output div.tabs li.' + sTab + ' a').each(function(){
-		$(this).text($(this).text().replace(/ \(\d+\)/g, ''));
-	});
+    $('.editor_output div.tabs li.' + sTab).removeClass('new chatalert').find('.unread').empty().hide();
 
     setTabScrollPosition(sTab, 'show'); 
 }
@@ -470,38 +456,21 @@ function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blocked
 
 //  Increments the number displayed at the top of the tab
 function incrementTabNumber(tab){
+	//console.log('increment tab: ' + tab);
+	//console.log('current tab: ' + sTabCurrent);
 	if(sTabCurrent != tab) {
-		var $a = $('.editor_output div.tabs li.' + tab + ' a');
-		var num = Number( $a.text().replace(/\D/g, '') );
-		$a.text($a.text().replace(/( \(\d+\))|$/, ' (' + (num + 1) + ')'));
+		var $i = $('.tabs .' + tab + ' .unread');
+		$i.show().text( Number($i.text()) + 1 );
 	}
 }
 
 
 //Setup Tabs
-function setupTabs()
-{
-    $('.editor_output .console a').click(function(){
-        showTab('console');
-        return false;
-    });
-    $('.editor_output .data a').click(function(){
-        showTab('data');
-        return false;
-    })
-    $('.editor_output .sources a').click(function(){
-        showTab('sources');
-        return false;
-    })
-    $('.editor_output .chat a').click(function(){
-        showTab('chat');
-        return false;
-    })
-
-    //show default tab
-    if ($('.editor_output div.tabs li.console').length)
-        showTab('console'); 
-    else
-        showTab('chat'); 
+function setupTabs(){
+    $('.editor_output .tabs a').bind('click', function(e){
+    	e.preventDefault();
+		console.log($(this).attr('href').replace('#output_', ''));
+        showTab($(this).attr('href').replace('#output_', ''));
+    }).eq(0).trigger('click');
 }
 

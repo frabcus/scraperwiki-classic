@@ -190,7 +190,7 @@ $(document).ready(function()
     conn.onopen = function(code)
     {
         sChatTabMessage = 'Chat'; 
-        $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
+        $('.editor_output div.tabs li.chat a').html(sChatTabMessage + '<b class="unread"></b>');
 
         writeToChat('Connection opened: ' + (conn.readyState == conn.READY_STATE_OPEN ? 'Ready' : 'readystate=' + conn.readyState)); 
         bConnected = true; 
