@@ -46,8 +46,7 @@ function setTabScrollPosition(sTab, command)
     divtab = '#output_' + sTab; 
     contenttab = '#output_' + sTab; 
 
-    if ((sTab == 'console') || (sTab == 'sources')) 
-    {
+    if ((sTab == 'console') || (sTab == 'sources')){
         divtab = '#output_' + sTab + ' div';
         contenttab = '#output_' + sTab + ' .output_content';
     }
@@ -173,7 +172,7 @@ function getScrollPosition(sTab){
 	iTabScroll = $('.output_content', oTab).scrollTop();
 	iContentHeight = 0;
 	if($('.output_content', oTab).is('div')){
-		$('.output_content span', oTab).each(function(){ 
+		$('.output_item', oTab).each(function(){ 
 			iContentHeight = iContentHeight + $(this).outerHeight();
 		});
 	} else {
@@ -273,9 +272,7 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
 
     // normalize the mimetypes
     if (lmimetype == undefined)
-        lmimetype = "text/html"; 
-    else if (lmimetype == "text/html")
-        ; 
+        lmimetype = "text/html";
     else if (lmimetype == "application/json")
         lmimetype = "text/json";
 
@@ -294,10 +291,10 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
             smessage.push("<b>"+lmimetype+"</b>"); 
 
         // this is the orange up-arrow link that doesn't work because something wrong in the server, so hide it for now
-        if (cacheid != undefined) {
+        /*if (cacheid != undefined) {
             smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
 			smessage.push( cacheid );
-		}
+		}*/
 		
         if (cached == 'True')
             smessage.push('(from cache)'); 
