@@ -155,6 +155,9 @@ function clearOutput() {
     $('.editor_output div.tabs li.console').removeClass('new');
     $('.editor_output div.tabs li.data').removeClass('new');
     $('.editor_output div.tabs li.sources').removeClass('new');
+	resetTabNumber('console');
+	resetTabNumber('data');
+	resetTabNumber('sources');
 }
 
 function getScrollPosition(sTab){
@@ -422,7 +425,8 @@ function showTab(sTab)
 
     $('.editor_output div.tabs ul').children().removeClass('selected');
     $('.editor_output div.tabs li.' + sTab).addClass('selected');
-    $('.editor_output div.tabs li.' + sTab).removeClass('new chatalert').find('.unread').empty().hide();
+    $('.editor_output div.tabs li.' + sTab).removeClass('new chatalert');
+	resetTabNumber(sTab);
 
     setTabScrollPosition(sTab, 'show'); 
 }
@@ -456,12 +460,14 @@ function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blocked
 
 //  Increments the number displayed at the top of the tab
 function incrementTabNumber(tab){
-	//console.log('increment tab: ' + tab);
-	//console.log('current tab: ' + sTabCurrent);
 	if(sTabCurrent != tab) {
 		var $i = $('.tabs .' + tab + ' .unread');
 		$i.show().text( Number($i.text()) + 1 );
 	}
+}
+
+function resetTabNumber(tab){
+	$('.tabs .' + tab + ' .unread').empty().hide();
 }
 
 
