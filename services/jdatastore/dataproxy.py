@@ -52,8 +52,6 @@ class DatastoreProtocol(protocol.Protocol):
         self.db = None
         self.Dattached = [ ] # attached function calls (for debug purposes)
         self.clienttype = 'justconnected'
-
-        self.connectionlostwhiledeferredprocessing = False
         self.dbprocessrequest = None
         
         self.httpheaders = [ ]
@@ -76,17 +74,8 @@ class DatastoreProtocol(protocol.Protocol):
         
     def connectionLost(self, reason):
         logger.info("connection client#%d lost reason:%s" % (self.clientnumber, reason))
-        if self.db:
-            self.connectionlostwhiledeferredprocessing = True
-            self.db.dataproxy.timeout_nowterminate = True
-        else:
-            self.factory.clientConnectionLost(self)
-
-    def deferredConnectionLost(self):
-        logger.info("connection client#%d deferredlost" % (self.clientnumber))
-        if self.db:
-            self.factory.releasedbprocess(self)
         self.factory.clientConnectionLost(self)
+
 
     # this will generalize to making status and other outputs from here
     def handlehttpgetresponse(self):
@@ -241,24 +230,8 @@ class DatastoreProtocol(protocol.Protocol):
     def sendResponse(self, res):
         if "error" in res:
             logger.warning("client#%d error: %s" % (self.clientnumber, str(res)))
-        if self.connectionlostwhiledeferredprocessing:
-            self.deferredConnectionLost()
-        else:
-            json.dump(res, self.transport)
-            self.transport.write('\n')
-
-    def db_process_success(self, res):
-        logger.debug("%d client#%d success %s" % (self.Ddeffcount, self.clientnumber, str(res)[:100]))
-        if self.db:
-            self.factory.releasedbprocess(self)
-        self.sendResponse(res)
-
-        # the error can be called after success has been called by same deferred?  how?
-    def db_process_error(self, failure):
-        logger.warning("%s client#%d failure %s" % (self.Ddeffcount, self.clientnumber, str(failure)[:100]))
-        if self.db:
-            self.factory.releasedbprocess(self)
-        self.sendResponse({"error":"dataproxy.process: %s" % str(failure)})
+        json.dump(res, self.transport)
+        self.transport.write('\n')
 
 
 class DatastoreFactory(protocol.ServerFactory):
@@ -268,10 +241,10 @@ class DatastoreFactory(protocol.ServerFactory):
         self.clients = [ ]     # all clients
         self.clientcount = 0   # for clientnumbers
         self.clientswaitingforswconn = [ ]
-        #self.swsqliteconnections = [ ]
+        self.swsqliteconnections = [ ]
+        
         self.lc = task.LoopingCall(self.processnextwaitingclient)
         self.lc.start(5)
-        self.Ddeffcount = 1000
 
     def addwaitingclient(self, client):
         logger.info("added waiting client")
@@ -282,23 +255,23 @@ class DatastoreFactory(protocol.ServerFactory):
         logger.info("looping call %d" % len(self.clientswaitingforswconn))
         if not self.clientswaitingforswconn:
             return
+            
         client = self.clientswaitingforswconn.pop(0)
         logger.info("process open on client#%d" % client.clientnumber)
         client.db = datalib.SQLiteDatabase(client.short_name, client.short_name_dbreadonly)
         client.db.Dclientnumber = client.clientnumber
-        client.db.timeout_nowterminate = False
+        client.db.clientforresponse = client
+        client.db.factory = client.factory
         d = deferToThread(client.db.process, client.dbprocessrequest)
         client.dbprocessrequest = None
-        client.Ddeffcount = self.Ddeffcount
-        self.Ddeffcount += 1
-        d.addCallback(client.db_process_success)
-        d.addErrback(client.db_process_error)
+        d.addCallback(client.db.db_process_success)
+        d.addErrback(client.db.db_process_error)
         
-    def releasedbprocess(self, client):
-        logger.info("rrrrr "+str(client.db))
-        client.db.close()
-        client.db.Dclientnumber = -1
-        client.db = None
+    def releasedbprocess(self, db):
+        if db.clientforresponse:
+            db.clientforresponse.db = None
+        db.close()
+        db.Dclientnumber = -1
 
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount
@@ -306,6 +279,10 @@ class DatastoreFactory(protocol.ServerFactory):
         self.clientcount += 1
         
     def clientConnectionLost(self, client):
+        if client.db:
+            logger.debug("stillrunning clientdb client# %d" % (client.clientnumber))
+            client.db.clientforresponse = None
+
         if client in self.clients:
             logger.debug("removing client# %d" % (client.clientnumber))
             self.clients.remove(client)  # main list
