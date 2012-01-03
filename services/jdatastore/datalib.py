@@ -12,6 +12,10 @@ import logging
 import urllib
 import traceback
 import json
+import csv
+import StringIO
+
+from twisted.internet import reactor
 
 logger = None  # filled in by dataproxy
 ninstructions_progresshandler = 1000000  # about 0.4secs on Julian's laptop
@@ -93,24 +97,23 @@ class SQLiteDatabase(object):
     def db_process_success(self, res):
         logger.debug("client#%d success %s" % (self.Dclientnumber, str(res)[:150]))
         self.factory.releasedbprocess(self)
-        if self.clientforresponse:
-            self.clientforresponse.sendResponse(res)
+        lclientforresponse = self.clientforresponse  # thread protection for value setting to None
+        if lclientforresponse:
+            lclientforresponse.sendResponse(res)
         else:
             logger.debug("client#%d has no connection" % (self.Dclientnumber))
 
+
         # the error can be called after success has been called by same deferred?  how?
     def db_process_error(self, failure):
-        logger.warning("client#%d failure %s" % (self.Dclientnumber, str(failure)[:100]))
-        self.factory.releasedbprocess(self)
-        if self.clientforresponse:
-            self.clientforresponse.sendResponse({"error":"dataproxy.process: %s" % str(failure)})
-        else:
-            logger.debug("client#%d has no connection" % (self.Dclientnumber))
-            
+        logger.warning("client#%d failure %s" % (self.Dclientnumber, str(failure)[:900]))
+        self.db_process_success({"error":"dataproxy.process: %s" % str(failure)})
             
     def process(self, request):
+        logger.debug("doing req %s" % str(request))
         if request["maincommand"] == 'save_sqlite':
             res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
+            logger.debug("Resssss %s" % str(res))
         elif request["maincommand"] == 'clear_datastore':
             res = self.clear_datastore()
         elif request["maincommand"] == 'undelete_datastore':
@@ -120,10 +123,11 @@ class SQLiteDatabase(object):
                 res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
             elif request["command"] == "datasummary":
                 res = self.datasummary(request.get("limit", 10))
+            else:
+                res = {"error":'Unknown command: %s' % request["command"]}
                 
-                # in the case of stream chunking there is one sendall in a loop in this function
         elif request["maincommand"] == "sqliteexecute":
-            res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
+            res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"))
 
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
@@ -300,14 +304,20 @@ class SQLiteDatabase(object):
                  logger.debug("client#%d elapsed time timeout" % (self.Dclientnumber))
                  return 2
         logger.debug("client#%d progress %d time=%.0f" % (self.Dclientnumber, self.progressticks, time.time() - self.etimestate))
-        if not self.clientforresponse:
+        
+        lclientforresponse = self.clientforresponse
+        if not lclientforresponse:
             logger.debug("client#%d terminating progress" % (self.Dclientnumber))  # as nothing to receive the result anyway
             return 3
+        elif lclientforresponse.httpgetpath == "/scrapercall":
+            jtickline = json.dumps({"progresstick":self.progressticks, "etime":time.time() - self.etimestate})+"\n"
+            reactor.callFromThread(lclientforresponse.transport.write, jtickline)
+            #lclientforresponse.transport.write(jtickline)
+
         return 0  # continue
         
         
-         # streamchunking feature has been discarded
-    def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
+    def sqliteexecute(self, sqlquery, data, attachlist):
         self.establishconnection(True)
         if attachlist:
             ares = self.updateattached(attachlist)
@@ -323,7 +333,35 @@ class SQLiteDatabase(object):
             else:
                 self.m_sqlitedbcursor.execute(sqlquery)
 
+                # take a copy of the clientforresponse as it may be disconnected by the other thread
+            lclientforresponse = self.clientforresponse
+            if not lclientforresponse:
+                return {"error":"client must have disconnected"}
+
             keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
+            
+                    # attempt to stream out the request (somehow it gets batched up somewhere)
+            if lclientforresponse.clienttype == 'httpgetprocessing' and lclientforresponse.httpgetparams.get("format") == "csv":
+                sbuff = StringIO.StringIO()
+                csvwriter = csv.writer(sbuff, dialect='excel')
+                csvwriter.writerow([ k.encode('utf-8')  for k in keys ])
+                reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
+                time.sleep(3.5)
+                def stringnot(v):
+                    if v == None:
+                        return ""
+                    if type(v) == buffer:
+                        v = unicode(v)
+                    if type(v) in [unicode, str]:
+                        return v.encode("utf-8")
+                    return v
+                for row in self.m_sqlitedbcursor:
+                    csvwriter.writerow([ stringnot(v)  for v in row ])
+                    # should clear the buffer iin batches and send it through
+                reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
+                return {"status":"csv case done"}
+            
+            
             rows = []
             for r in self.m_sqlitedbcursor:
                 row = []
@@ -400,7 +438,7 @@ class SqliteSaveInfo:
         self.sqdatatemplate = ""
 
     def sqliteexecute(self, sqlquery, data=None):
-        res = self.database.sqliteexecute(sqlquery, data, None, None)
+        res = self.database.sqliteexecute(sqlquery, data, None)
         if "error" in res:
             logger.warning("%s  %s" % (self.database.short_name, str(res)))
         return res

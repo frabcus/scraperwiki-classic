@@ -51,7 +51,7 @@ class DatastoreProtocol(protocol.Protocol):
         self.sbufferclient = [ ] # incoming messages from the client
         self.db = None
         self.Dattached = [ ] # attached function calls (for debug purposes)
-        self.clienttype = 'justconnected'
+        self.clienttype = 'justconstructed'
         self.dbprocessrequest = None
         
         self.httpheaders = [ ]
@@ -61,6 +61,7 @@ class DatastoreProtocol(protocol.Protocol):
         
 
     def connectionMade(self):
+        self.clienttype = 'justconnected'
         self.factory.clientConnectionMade(self)
         logger.info("connection client#%d" % self.clientnumber)
         try:
@@ -75,24 +76,51 @@ class DatastoreProtocol(protocol.Protocol):
     def connectionLost(self, reason):
         logger.info("connection client#%d lost reason:%s" % (self.clientnumber, reason))
         self.factory.clientConnectionLost(self)
+        self.clienttype == 'connectionlost'
 
 
     # this will generalize to making status and other outputs from here
     def handlehttpgetresponse(self):
+        self.clienttype = 'httpgetprocessing'
+        mimetype = "text/plain"
+        if self.httpgetpath == "/api":
+            mimetype = "%s; charset=utf-8" % {"csv":"text/csv", "htmltable":"text/html"}.get(self.httpgetparams.get("format"), "application/json")
         self.transport.write('HTTP/1.0 200 OK\r\n')  
         self.transport.write('Connection: Close\r\n')  
         self.transport.write('Pragma: no-cache\r\n')  
         self.transport.write('Cache-Control: no-cache\r\n')  
-        self.transport.write('Content-Type: text/text\r\n')  
+        self.transport.write('Content-Type: %s\r\n' % mimetype)  
         self.transport.write('\r\n')
         
-        if self.httpgetpath == "/status":
+        if self.httpgetpath == "/api" and "name" in self.httpgetparams and "query" in self.httpgetparams:
+            self.short_name = self.httpgetparams["name"]
+            self.short_name_dbreadonly = True
+            self.dbprocessrequest = { "maincommand":"sqliteexecute", "sqlquery":self.httpgetparams["query"], "data":None, "attachlist":[ ]}
+            for aattach in self.httpgetparams.get('attach', '').split(";"):
+                if aattach:
+                    aa = aattach.split(",")
+                    self.dbprocessrequest["attachlist"].append({"name":aa[0], "asname":(len(aa) == 2 and aa[1] or None)})
+            logger.debug("api connection made to dataproxy %s " % str(self.dbprocessrequest))
+            self.factory.addwaitingclient(self)
+            
+        elif self.httpgetpath == "/scrapercall" and "x-scrapername:" in self.httpheadersmap and self.httppostbuffer:
+            httppostmap = json.loads(self.httppostbuffer.getvalue())
+            self.short_name = httppostmap.get("scrapername")
+            self.short_name_dbreadonly = False
+            self.dbprocessrequest = httppostmap
+            logger.info("::: "+str(httppostmap))
+            self.factory.addwaitingclient(self)
+            
+        elif self.httpgetpath == "/status":
             self.transport.write('There are %d clients connected\n' % len(self.factory.clients))
+            self.transport.loseConnection()
         else:
+            logger.info("::: "+str(self.httpheadersmap)+ "  "+self.httpgetpath)
             self.transport.write('Hello there\n')
-        if self.httppostbuffer:
-            self.transport.write('received post body size: %d\n' % len(self.httppostbuffer.getvalue()))
-        self.transport.loseConnection()
+            if self.httppostbuffer:
+                self.transport.write('received post body size: %d\n' % len(self.httppostbuffer.getvalue()))
+            self.transport.loseConnection()
+        
 
     # directly from def do_GET (self) :
     def handlesocketmodefirstmessage(self):
@@ -185,8 +213,8 @@ class DatastoreProtocol(protocol.Protocol):
             logger.info("client#%d finished headers" % (self.clientnumber))
             self.httpgetpath, q, self.httpgetquery = self.httpheaders[0][1].partition("?")
             self.httpgetparams = dict(cgi.parse_qsl(self.httpgetquery))
-            self.httpheadersmap = dict(self.httpheaders[1:])
-            self.httpgetcontentlength = int(self.httpheadersmap.get('Content-Length:', '0'))
+            self.httpheadersmap = dict((k.lower(), v)  for k, v in self.httpheaders[1:])
+            self.httpgetcontentlength = int(self.httpheadersmap.get('content-length:', '0'))
             
             if self.httpheaders[0][0] == 'POST' and self.httpgetcontentlength:
                 self.clienttype = "httppostbody"
@@ -228,10 +256,31 @@ class DatastoreProtocol(protocol.Protocol):
             logger.warning("client#%d Unhandled lineReceived: %s" % (self.clientnumber, line[:1000]))
 
     def sendResponse(self, res):
-        if "error" in res:
-            logger.warning("client#%d error: %s" % (self.clientnumber, str(res)))
-        json.dump(res, self.transport)
-        self.transport.write('\n')
+        #logger.warning("client#%d %s response: %s" % (self.clientnumber, self.clienttype, str(res)))
+        if self.clienttype == "httpgetprocessing":
+            if "callback" in self.httpgetparams:
+                self.transport.write("%s(" % self.httpgetparams["callback"])
+            if "keys" not in res:
+                json.dump(res, self.transport)
+            elif self.httpgetpath == "/scrapercall":
+                json.dump(res, self.transport)
+            elif self.httpgetparams.get("format", "jsondict") == "jsondict":
+                json.dump([ dict(zip(res["keys"], values))  for values in res["data"] ], self.transport, indent=4)
+            elif self.httpgetparams.get("format") == "jsonlist":
+                json.dump({"keys":res["keys"], "data":res["data"]}, self.transport)
+            elif self.httpgetparams.get("format") in ["csv", "htmltable"]:
+                pass
+            else:
+                self.transport.write("Unknown format: %s" % self.httpgetparams.get("format"))
+            if "callback" in self.httpgetparams:
+                self.transport.write(")")
+            self.transport.loseConnection()
+            
+        else:
+            if "error" in res:
+                logger.warning("client#%d error: %s" % (self.clientnumber, str(res)))
+            json.dump(res, self.transport)
+            self.transport.write('\n')
 
 
 class DatastoreFactory(protocol.ServerFactory):
@@ -250,7 +299,9 @@ class DatastoreFactory(protocol.ServerFactory):
         logger.info("added waiting client")
         assert client not in self.clientswaitingforswconn
         self.clientswaitingforswconn.append(client)
-        
+        reactor.callLater(0, self.processnextwaitingclient)
+
+        # this has everything we want about the request so can delay ones that would clash
     def processnextwaitingclient(self):
         logger.info("looping call %d" % len(self.clientswaitingforswconn))
         if not self.clientswaitingforswconn:

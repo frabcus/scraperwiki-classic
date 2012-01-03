@@ -19,3 +19,4 @@ import sqlite
 import metadata
 import stacktrace
 import newsql
+import jsqlite
