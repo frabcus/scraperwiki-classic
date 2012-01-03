@@ -164,6 +164,35 @@ function clearOutput()
     $('.editor_output div.tabs li.sources').removeClass('new');
 }
 
+function getScrollPosition(sTab){
+	//	Returns a tab's scrollTop value or 0, whichever's greater.
+	//	Useful for finding out whether to scroll to the bottom of
+	//	a tab when adding new content.
+	oTab = $('#output_' + sTab);
+	iTabHeight = $('.output_content', oTab).height();
+	iTabScroll = $('.output_content', oTab).scrollTop();
+	iContentHeight = 0;
+	if($('.output_content', oTab).is('div')){
+		$('.output_content span', oTab).each(function(){ 
+			iContentHeight = iContentHeight + $(this).outerHeight();
+		});
+	} else {
+		$('.output_content tr', oTab).each(function(){ 
+			iContentHeight = iContentHeight + $(this).outerHeight();
+		});
+	}
+	if(iContentHeight > iTabHeight){
+		if(iContentHeight == iTabHeight + iTabScroll) {
+			return 0;
+		} else {
+			return (iContentHeight - iTabHeight - iTabScroll);
+		}
+	} else {
+		return 0;
+	}
+}
+
+
 //Write to console/data/sources
 function writeToConsole(sMessage, sMessageType, iLine) 
 {
@@ -189,7 +218,12 @@ function writeToConsole(sMessage, sMessageType, iLine)
         escsMessage = cgiescape(sMessage.replace(/^\s+|\s+$/g, "").substring(0, 100)); 
     }
 
-    //create new item
+	var iScrollStart = getScrollPosition('console');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('console', 'bottom');
+	}
+
+    // create new item
     var oConsoleItem = $('<span></span>');
     oConsoleItem.addClass('output_item');
     oConsoleItem.addClass(sShortClassName);
@@ -213,7 +247,6 @@ function writeToConsole(sMessage, sMessageType, iLine)
         oConsoleItem.prepend(oLineLink);
         oLineLink.click(function() { SelectEditorLine(iLine); }); 
     }
-
     
     //remove items if over max
     while ($('#output_console div.output_content').children().size() >= outputMaxItems) 
@@ -223,8 +256,11 @@ function writeToConsole(sMessage, sMessageType, iLine)
     $('#output_console div.output_content').append(oConsoleItem);
     $('.editor_output div.tabs li.console').addClass('new');
 	incrementTabNumber('console');
+	
+	if(iScrollStart <= 0 && getScrollPosition('console') > 0){
+		setTabScrollPosition('console', 'bottom');
+	}
 
-    setTabScrollPosition('console', 'bottom'); 
 };
 
 
@@ -241,7 +277,12 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
     else if (lmimetype == "text/html")
         ; 
     else if (lmimetype == "application/json")
-        lmimetype = "text/json"; 
+        lmimetype = "text/json";
+
+	var iScrollStart = getScrollPosition('sources');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('sources', 'bottom');
+	}
 
     //append to sources tab
     var smessage = [ ]; 
@@ -274,10 +315,13 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
     $('.editor_output div.tabs li.sources').addClass('new');
 	incrementTabNumber('sources');
     
+   	if(iScrollStart <= 0 && getScrollPosition('sources') > 0){
+		setTabScrollPosition('sources', 'bottom');
+	}
+	
     if (cacheid != undefined)  
         $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid, lmimetype); return false; }); 
 
-    setTabScrollPosition('sources', 'bottom'); 
 }
 
 
@@ -285,6 +329,11 @@ function writeToData(aRowData)
 {
     while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) 
         $('#output_data table.output_content tbody').children(':first').remove();
+
+	var iScrollStart = getScrollPosition('data');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('data', 'bottom');
+	}
 
     var oRow = $('<tr></tr>');
 
@@ -297,13 +346,22 @@ function writeToData(aRowData)
     $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
     setTabScrollPosition('data', 'bottom'); 
     $('.editor_output div.tabs li.data').addClass('new');
-	incrementTabNumber('data');
+	incrementTabNumber('data'); 
+
+	if(iScrollStart <= 0 && getScrollPosition('data') > 0){
+		setTabScrollPosition('data', 'bottom');
+	}
 }
 
 function writeToSqliteData(command, val1, lval2) 
 {
     while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems){
         $('#output_data table.output_content tbody').children(':first').remove();
+	}	
+
+	var iScrollStart = getScrollPosition('data');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('data', 'bottom');
 	}
 	
     var row = [ ]; 
@@ -319,28 +377,32 @@ function writeToSqliteData(command, val1, lval2)
     row.push('</tr>'); 
 
     $('#output_data table.output_content').append($(row.join("")));  
-    setTabScrollPosition('data', 'bottom'); 
     $('.editor_output div.tabs li.data').addClass('new');
 	incrementTabNumber('data');
-}
 
-/* function writeToChat(seMessage, sechatname) 
-{
-    if ( typeof console == 'object' ) { 
-        var msg = (sechatname ? sechatname + ": " : "") + seMessage;
-        console.log ( msg );
-    }
-} */
+	if(iScrollStart <= 0 && getScrollPosition('data') > 0){
+		setTabScrollPosition('data', 'bottom');
+	}
+}
 
 function writeToChat(seMessage, sechatname){
     while ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) 
         $('#output_chat table.output_content tbody').children(':first').remove();
 
+	var iScrollStart = getScrollPosition('chat');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('chat', 'bottom');
+	}
+
     var oRow = $('<tr><td>' + (sechatname ? sechatname + ": " : "") + seMessage + '</td></tr>');
     $('#output_chat table.output_content').append(oRow);
     setTabScrollPosition('chat', 'bottom');
 	$('.editor_output div.tabs li.chat').addClass('new');
-	incrementTabNumber('chat');
+	incrementTabNumber('chat'); 
+
+	if(iScrollStart <= 0 && getScrollPosition('chat') > 0){
+		setTabScrollPosition('chat', 'bottom');
+	}
 
     if (sechatname && (sechatname != chatname)){
        	// Currently highlights when there is more than a minute gap.
