@@ -445,16 +445,21 @@ $(function(){
 	
 	
 	function show_new_tag_box(){
+		$('div.tags').show();
 		$('.new_tag').hide().next().show().find('input').focus();
 	}
 	
 	function hide_new_tag_box(){
 		$('li.new_tag_box input').animate({width:1}, 200, function(){
 			$(this).css('width','auto').val('').parent().hide().prev().show();
+			if( ! $('div.tags li').not('.new_tag, .new_tag_box').length ){
+				$('div.tags').fadeOut();
+			}
 		});
 	}
 	
 	$('.new_tag a, div.network .titlebar .tag a').bind('click', function(e){
+		console.log('hello');
 		e.preventDefault();
 		show_new_tag_box();
 	});
@@ -511,6 +516,9 @@ $(function(){
 			data: {value: tags.join(", ")},
 			success: function(data){
 				$old_tag.remove();
+				if( ! $('div.tags li').not('.new_tag, .new_tag_box').length ){
+					$('div.tags').fadeOut();
+				}
 			}, error: function(){
 				alert('Sorry, your tag could not be removed. Please try again later.');
 			},
