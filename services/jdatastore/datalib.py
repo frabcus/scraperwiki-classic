@@ -84,18 +84,18 @@ class SQLiteDatabase(object):
         self.clientforresponse = None
 
     def close(self):
-        logger.warning("calling close ")
+        logger.debug("calling close on database for client#%d" % self.Dclientnumber)
         try:
             if self.m_sqlitedbcursor:
                 self.m_sqlitedbcursor.close()
             if self.m_sqlitedbconn:
                 self.m_sqlitedbconn.close()
         except Exception, e:
-            logger.warning("close error: "+str(e))
+            logger.warning("close database error: %s" % str(e))
             
             
     def db_process_success(self, res):
-        logger.debug("client#%d success %s" % (self.Dclientnumber, str(res)[:150]))
+        logger.info("completed client#%d process: %s" % (self.Dclientnumber, str(res)[:50]))
         self.factory.releasedbprocess(self)
         lclientforresponse = self.clientforresponse  # thread protection for value setting to None
         if lclientforresponse:
@@ -106,14 +106,14 @@ class SQLiteDatabase(object):
 
         # the error can be called after success has been called by same deferred?  how?
     def db_process_error(self, failure):
-        logger.warning("client#%d failure %s" % (self.Dclientnumber, str(failure)[:900]))
+        logger.warning("client#%d process failure %s" % (self.Dclientnumber, str(failure)[:900]))
         self.db_process_success({"error":"dataproxy.process: %s" % str(failure)})
             
     def process(self, request):
-        logger.debug("doing req %s" % str(request))
+        logger.debug("doing request %s" % str(request))
         if request["maincommand"] == 'save_sqlite':
             res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
-            logger.debug("Resssss %s" % str(res))
+            logger.debug("save_sqlite response %s" % str(res))
         elif request["maincommand"] == 'clear_datastore':
             res = self.clear_datastore()
         elif request["maincommand"] == 'undelete_datastore':
@@ -196,7 +196,7 @@ class SQLiteDatabase(object):
                     os.mkdir(self.scraperresourcedir)
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile, check_same_thread=False)
-                logger.debug('Connected to %s' % (scrapersqlitefile))
+                logger.debug('Connecting to %s' % (scrapersqlitefile))
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:", check_same_thread=False)   # draft scrapers make a local version
             if not self.short_name_dbreadonly:
@@ -258,7 +258,7 @@ class SQLiteDatabase(object):
         logger.info("permission to attach %s to %s response: %s" % (self.short_name, name, ares))
         
         if ares == "Yes":
-            logger.debug('Connection allowed')
+            logger.debug('attach connection allowed')
         elif ares == "DoesNotExist":
             return {"error":"Does Not Exist %s" % name}
         else:
@@ -298,21 +298,21 @@ class SQLiteDatabase(object):
              self.progressticks += 1
              self.totalprogressticks += 1
              if self.progressticks == self.timeout_tickslimit:
-                 logger.debug("client#%d tickslimit timeout" % (self.Dclientnumber))
+                 logger.info("client#%d tickslimit timeout" % (self.Dclientnumber))
                  return 1
              if time.time() - self.etimestate > self.timeout_secondslimit:
-                 logger.debug("client#%d elapsed time timeout" % (self.Dclientnumber))
+                 logger.info("client#%d elapsed time timeout" % (self.Dclientnumber))
                  return 2
-        logger.debug("client#%d progress %d time=%.0f" % (self.Dclientnumber, self.progressticks, time.time() - self.etimestate))
+        logger.debug("client#%d progress %d time=%.2f" % (self.Dclientnumber, self.progressticks, time.time() - self.etimestate))
         
         lclientforresponse = self.clientforresponse
         if not lclientforresponse:
-            logger.debug("client#%d terminating progress" % (self.Dclientnumber))  # as nothing to receive the result anyway
+            logger.info("client#%d terminating progress" % (self.Dclientnumber))  # as nothing to receive the result anyway
             return 3
         elif lclientforresponse.progress_ticks == "yes":
             jtickline = json.dumps({"progresstick":self.progressticks, "timeseconds":time.time() - self.etimestate})+"\n"
             reactor.callFromThread(lclientforresponse.transport.write, jtickline)
-            #lclientforresponse.transport.write(jtickline)
+            # instead of lclientforresponse.transport.write(jtickline)
 
         return 0  # continue
         
@@ -355,9 +355,16 @@ class SQLiteDatabase(object):
                     if type(v) in [unicode, str]:
                         return v.encode("utf-8")
                     return v
+                irowschunk = 0
                 for row in self.m_sqlitedbcursor:
                     csvwriter.writerow([ stringnot(v)  for v in row ])
-                    # should clear the buffer iin batches and send it through
+                    irowschunk += 1
+                    if irowschunk == 100:
+                        reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
+                        sbuff = StringIO.StringIO()
+                        csvwriter = csv.writer(sbuff, dialect='excel')
+                        irowschunk = 0
+                        time.sleep(3.5)  # to prove it is streaming
                 reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
                 return {"status":"csv case done"}
             
