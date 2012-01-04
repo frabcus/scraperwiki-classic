@@ -320,7 +320,7 @@ class DatastoreFactory(protocol.ServerFactory):
             
         client = self.clientswaitingforswconn.pop(0)
         logger.info("Open process on client#%d" % client.clientnumber)
-        client.db = datalib.SQLiteDatabase(client.short_name, client.short_name_dbreadonly)
+        client.db = datalib.SQLiteDatabase(client.short_name, client.short_name_dbreadonly, client.dbprocessrequest.get("attachlist", []))
         client.db.Dclientnumber = client.clientnumber
         client.db.clientforresponse = client
         client.db.factory = client.factory
@@ -333,7 +333,6 @@ class DatastoreFactory(protocol.ServerFactory):
         if db.clientforresponse:
             db.clientforresponse.db = None
         db.close()
-        db.Dclientnumber = -1
 
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount

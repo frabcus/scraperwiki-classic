@@ -56,16 +56,14 @@ def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
 
 class SQLiteDatabase(object):
 
-    def __init__(self, short_name, short_name_dbreadonly):
+    def __init__(self, short_name, short_name_dbreadonly, attachlist):
         self.Dclientnumber = -1
 
         self.short_name = short_name
         self.short_name_dbreadonly = short_name_dbreadonly
-        
-            # the set of known allowable attaches (which saves us calling back)
+        self.attachlist = attachlist   # to be used to drive the attaches on setup
+
         self.attached = { } # name => [ asname1, ... ] list
-        self.Dattached = [ ]
-        
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
@@ -127,7 +125,14 @@ class SQLiteDatabase(object):
                 res = {"error":'Unknown command: %s' % request["command"]}
                 
         elif request["maincommand"] == "sqliteexecute":
-            res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"))
+            if self.attachlist:
+                self.establishconnection(True)
+                for req in self.attachlist:
+                    if req["asname"] not in self.attached.get(req["name"], []):
+                        ares = self.sqliteattach(req["name"], req["asname"])
+                        if "error" in ares:
+                            return ares
+            res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"])
 
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
@@ -278,20 +283,6 @@ class SQLiteDatabase(object):
         self.attached[name].append(asname)
         return {"status":"attach succeeded"}
 
-    def updateattached(self, attachlist):
-        for req in attachlist:
-            if req["asname"] not in self.attached.get(req["name"], []):
-                ares = self.sqliteattach(req["name"], req["asname"])
-                if "error" in ares:
-                    return ares
-        # (we should remove the values that are not in the attachlist)
-        for req in self.Dattached:
-            if req["asname"] not in self.attached.get(req["name"], []):
-                ares = {"error":"%d was attached but not in the attachlist" }
-                logger.error(str(ares))
-                return ares
-        return {"status":"ok"}
-
 
     def progress_handler(self):
         if self.cstate == 'sqliteexecute':
@@ -317,14 +308,8 @@ class SQLiteDatabase(object):
         return 0  # continue
         
         
-    def sqliteexecute(self, sqlquery, data, attachlist):
+    def sqliteexecute(self, sqlquery, data):
         self.establishconnection(True)
-        if attachlist:
-            ares = self.updateattached(attachlist)
-            if "error" in ares:
-                return ares
-            self.establishconnection(True)  # reset the attach authorizations
-            
         self.cstate, self.etimestate = 'sqliteexecute', time.time()
         self.progressticks = 0
         try:
