@@ -2,11 +2,32 @@ import re
 import datetime
 import scraperwiki
 import pytz
+import urllib2, urllib
+import json
 
 class SqliteError(Exception):  pass
 class NoSuchTableSqliteError(SqliteError):  pass
 
 attachlist = [ ]
+
+def jrequest(request):
+    request["scrapername"] = scraperwiki.datastore.m_scrapername
+    request["runid"] = scraperwiki.datastore.m_runid
+    request["attachables"] = " ".join(scraperwiki.datastore.m_attachables)
+    request["verify"] = scraperwiki.datastore.m_verification_key
+    url = 'http://%s:%s/scrapercall' % (scraperwiki.datastore.m_host, scraperwiki.datastore.m_port)
+    req = urllib2.Request(url, json.dumps(request))
+    response = urllib2.urlopen(req)
+    while True:
+        jres = response.readline()
+        if not jres:
+            break
+        res = json.loads(jres.strip())
+        if "progresstick" in res:
+            scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'progresstick', "val1":res.get("progresstick"), "lval2":res.get("timeseconds")})
+        else:
+            return res
+    
 
 def strunc(v, t):
     if not t or len(v) < t:
@@ -37,12 +58,7 @@ def execute(sqlquery, data=None, verbose=1):
         data = [data]
         
     global attachlist
-    result = scraperwiki.datastore.request({"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist})
-    while "progresstick" in result:
-        if verbose:
-            scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'progresstick', "val1":result.get("progresstick"), "lval2":result.get("timeseconds")})
-        result = scraperwiki.datastore.request(None)  # goes back and waits for next line
-        
+    result = jrequest({"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist})
     if "error" in result:
         raise databaseexception(result)
     if "status" not in result and "keys" not in result:
@@ -136,7 +152,7 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
             if ljdata.get("error"):
                 raise databaseexception(ljdata)
             rjdata.append(ljdata)
-    result = scraperwiki.datastore.request({"maincommand":'save_sqlite', "unique_keys":unique_keys, "data":rjdata, "swdatatblname":table_name})
+    result = jrequest({"maincommand":'save_sqlite', "unique_keys":unique_keys, "data":rjdata, "swdatatblname":table_name})
 
     if "error" in result:
         raise databaseexception(result)
@@ -157,25 +173,9 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
 def attach(name, asname=None, verbose=1):
     global attachlist
     attachlist.append({"name":name, "asname":asname})
-    result = scraperwiki.datastore.request({"maincommand":'sqlitecommand', "command":"attach", "name":name, "asname":asname})
-    if "error" in result:
-        raise databaseexception(result)
-    if "status" not in result:
-        raise Exception("possible signal timeout: "+str(result))
-        scraperwiki.dumpMessage({'message_type':'data', 'content': pdata})
-    return result
-
 
 def commit(verbose=1):
-    result = scraperwiki.datastore.request({"maincommand":'sqlitecommand', "command":"commit"})
-    if "error" in result:
-        raise databaseexception(result)
-    if "status" not in result:
-        raise Exception("possible signal timeout: "+str(result))
-        scraperwiki.dumpMessage({'message_type':'data', 'content': pdata})
-    return result    
-    
-
+    pass
 
 def select(sqlquery, data=None, verbose=1):
     sqlquery = "select %s" % sqlquery   # maybe check if select or another command is there already?

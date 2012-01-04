@@ -12,6 +12,10 @@ import logging
 import urllib
 import traceback
 import json
+import csv
+import StringIO
+
+from twisted.internet import reactor
 
 logger = None  # filled in by dataproxy
 ninstructions_progresshandler = 1000000  # about 0.4secs on Julian's laptop
@@ -52,16 +56,14 @@ def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
 
 class SQLiteDatabase(object):
 
-    def __init__(self, short_name, short_name_dbreadonly):
+    def __init__(self, short_name, short_name_dbreadonly, attachlist):
         self.Dclientnumber = -1
 
         self.short_name = short_name
         self.short_name_dbreadonly = short_name_dbreadonly
-        
-            # the set of known allowable attaches (which saves us calling back)
+        self.attachlist = attachlist   # to be used to drive the attaches on setup
+
         self.attached = { } # name => [ asname1, ... ] list
-        self.Dattached = [ ]
-        
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
@@ -80,37 +82,36 @@ class SQLiteDatabase(object):
         self.clientforresponse = None
 
     def close(self):
-        logger.warning("calling close ")
+        logger.debug("calling close on database for client#%d" % self.Dclientnumber)
         try:
             if self.m_sqlitedbcursor:
                 self.m_sqlitedbcursor.close()
             if self.m_sqlitedbconn:
                 self.m_sqlitedbconn.close()
         except Exception, e:
-            logger.warning("close error: "+str(e))
+            logger.warning("close database error: %s" % str(e))
             
             
     def db_process_success(self, res):
-        logger.debug("client#%d success %s" % (self.Dclientnumber, str(res)[:150]))
+        logger.info("completed client#%d process: %s" % (self.Dclientnumber, str(res)[:50]))
         self.factory.releasedbprocess(self)
-        if self.clientforresponse:
-            self.clientforresponse.sendResponse(res)
+        lclientforresponse = self.clientforresponse  # thread protection for value setting to None
+        if lclientforresponse:
+            lclientforresponse.sendResponse(res)
         else:
             logger.debug("client#%d has no connection" % (self.Dclientnumber))
 
+
         # the error can be called after success has been called by same deferred?  how?
     def db_process_error(self, failure):
-        logger.warning("client#%d failure %s" % (self.Dclientnumber, str(failure)[:100]))
-        self.factory.releasedbprocess(self)
-        if self.clientforresponse:
-            self.clientforresponse.sendResponse({"error":"dataproxy.process: %s" % str(failure)})
-        else:
-            logger.debug("client#%d has no connection" % (self.Dclientnumber))
-            
+        logger.warning("client#%d process failure %s" % (self.Dclientnumber, str(failure)[:900]))
+        self.db_process_success({"error":"dataproxy.process: %s" % str(failure)})
             
     def process(self, request):
+        logger.debug("doing request %s" % str(request))
         if request["maincommand"] == 'save_sqlite':
             res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
+            logger.debug("save_sqlite response %s" % str(res))
         elif request["maincommand"] == 'clear_datastore':
             res = self.clear_datastore()
         elif request["maincommand"] == 'undelete_datastore':
@@ -120,10 +121,18 @@ class SQLiteDatabase(object):
                 res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
             elif request["command"] == "datasummary":
                 res = self.datasummary(request.get("limit", 10))
+            else:
+                res = {"error":'Unknown command: %s' % request["command"]}
                 
-                # in the case of stream chunking there is one sendall in a loop in this function
         elif request["maincommand"] == "sqliteexecute":
-            res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
+            if self.attachlist:
+                self.establishconnection(True)
+                for req in self.attachlist:
+                    if req["asname"] not in self.attached.get(req["name"], []):
+                        ares = self.sqliteattach(req["name"], req["asname"])
+                        if "error" in ares:
+                            return ares
+            res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"])
 
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
@@ -192,7 +201,7 @@ class SQLiteDatabase(object):
                     os.mkdir(self.scraperresourcedir)
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile, check_same_thread=False)
-                logger.debug('Connected to %s' % (scrapersqlitefile))
+                logger.debug('Connecting to %s' % (scrapersqlitefile))
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:", check_same_thread=False)   # draft scrapers make a local version
             if not self.short_name_dbreadonly:
@@ -254,7 +263,7 @@ class SQLiteDatabase(object):
         logger.info("permission to attach %s to %s response: %s" % (self.short_name, name, ares))
         
         if ares == "Yes":
-            logger.debug('Connection allowed')
+            logger.debug('attach connection allowed')
         elif ares == "DoesNotExist":
             return {"error":"Does Not Exist %s" % name}
         else:
@@ -274,47 +283,33 @@ class SQLiteDatabase(object):
         self.attached[name].append(asname)
         return {"status":"attach succeeded"}
 
-    def updateattached(self, attachlist):
-        for req in attachlist:
-            if req["asname"] not in self.attached.get(req["name"], []):
-                ares = self.sqliteattach(req["name"], req["asname"])
-                if "error" in ares:
-                    return ares
-        # (we should remove the values that are not in the attachlist)
-        for req in self.Dattached:
-            if req["asname"] not in self.attached.get(req["name"], []):
-                ares = {"error":"%d was attached but not in the attachlist" }
-                logger.error(str(ares))
-                return ares
-        return {"status":"ok"}
-
 
     def progress_handler(self):
         if self.cstate == 'sqliteexecute':
              self.progressticks += 1
              self.totalprogressticks += 1
              if self.progressticks == self.timeout_tickslimit:
-                 logger.debug("client#%d tickslimit timeout" % (self.Dclientnumber))
+                 logger.info("client#%d tickslimit timeout" % (self.Dclientnumber))
                  return 1
              if time.time() - self.etimestate > self.timeout_secondslimit:
-                 logger.debug("client#%d elapsed time timeout" % (self.Dclientnumber))
+                 logger.info("client#%d elapsed time timeout" % (self.Dclientnumber))
                  return 2
-        logger.debug("client#%d progress %d time=%.0f" % (self.Dclientnumber, self.progressticks, time.time() - self.etimestate))
-        if not self.clientforresponse:
-            logger.debug("client#%d terminating progress" % (self.Dclientnumber))  # as nothing to receive the result anyway
+        logger.debug("client#%d progress %d time=%.2f" % (self.Dclientnumber, self.progressticks, time.time() - self.etimestate))
+        
+        lclientforresponse = self.clientforresponse
+        if not lclientforresponse:
+            logger.info("client#%d terminating progress" % (self.Dclientnumber))  # as nothing to receive the result anyway
             return 3
+        elif lclientforresponse.progress_ticks == "yes":
+            jtickline = json.dumps({"progresstick":self.progressticks, "timeseconds":time.time() - self.etimestate})+"\n"
+            reactor.callFromThread(lclientforresponse.transport.write, jtickline)
+            # instead of lclientforresponse.transport.write(jtickline)
+
         return 0  # continue
         
         
-         # streamchunking feature has been discarded
-    def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
+    def sqliteexecute(self, sqlquery, data):
         self.establishconnection(True)
-        if attachlist:
-            ares = self.updateattached(attachlist)
-            if "error" in ares:
-                return ares
-            self.establishconnection(True)  # reset the attach authorizations
-            
         self.cstate, self.etimestate = 'sqliteexecute', time.time()
         self.progressticks = 0
         try:
@@ -323,7 +318,42 @@ class SQLiteDatabase(object):
             else:
                 self.m_sqlitedbcursor.execute(sqlquery)
 
+                # take a copy of the clientforresponse as it may be disconnected by the other thread
+            lclientforresponse = self.clientforresponse
+            if not lclientforresponse:
+                return {"error":"client must have disconnected"}
+
             keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
+            
+                    # attempt to stream out the request (somehow it gets batched up somewhere)
+            if lclientforresponse.clienttype == 'httpgetprocessing' and lclientforresponse.httpgetparams.get("format") == "csv":
+                sbuff = StringIO.StringIO()
+                csvwriter = csv.writer(sbuff, dialect='excel')
+                csvwriter.writerow([ k.encode('utf-8')  for k in keys ])
+                reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
+                time.sleep(3.5)
+                def stringnot(v):
+                    if v == None:
+                        return ""
+                    if type(v) == buffer:
+                        v = unicode(v)
+                    if type(v) in [unicode, str]:
+                        return v.encode("utf-8")
+                    return v
+                irowschunk = 0
+                for row in self.m_sqlitedbcursor:
+                    csvwriter.writerow([ stringnot(v)  for v in row ])
+                    irowschunk += 1
+                    if irowschunk == 100:
+                        reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
+                        sbuff = StringIO.StringIO()
+                        csvwriter = csv.writer(sbuff, dialect='excel')
+                        irowschunk = 0
+                        time.sleep(3.5)  # to prove it is streaming
+                reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
+                return {"status":"csv case done"}
+            
+            
             rows = []
             for r in self.m_sqlitedbcursor:
                 row = []
@@ -400,7 +430,7 @@ class SqliteSaveInfo:
         self.sqdatatemplate = ""
 
     def sqliteexecute(self, sqlquery, data=None):
-        res = self.database.sqliteexecute(sqlquery, data, None, None)
+        res = self.database.sqliteexecute(sqlquery, data, None)
         if "error" in res:
             logger.warning("%s  %s" % (self.database.short_name, str(res)))
         return res

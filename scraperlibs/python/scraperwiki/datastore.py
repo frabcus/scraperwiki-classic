@@ -93,6 +93,7 @@ def ensure_connected():
         data["vrunid"] = m_runid
         data["attachables"] = " ".join(m_attachables)
         data['verify'] = m_verification_key
+        data['progress_ticks'] = "yes"
         
         m_socket.sendall('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         line = receiveoneline(m_socket)  # comes back with True, "Ok"
@@ -102,7 +103,8 @@ def ensure_connected():
 
 def request(req):
     ensure_connected()
-    m_socket.sendall(json.dumps(req)+'\n')
+    if req != None:
+        m_socket.sendall(json.dumps(req)+'\n')
     line = receiveoneline(m_socket)
     if not line:
         return {"error":"blank returned from dataproxy"}

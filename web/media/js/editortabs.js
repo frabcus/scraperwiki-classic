@@ -357,22 +357,35 @@ function writeToSqliteData(command, val1, lval2)
 		setTabScrollPosition('data', 'bottom');
 	}
 	
-    var row = [ ]; 
-    row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
-    if (val1){
-        row.push('<td>'+cgiescape(val1)+'</td>');
-	}
-    if (lval2){
-        for (var i = 0; i < lval2.length; i++){
-            row.push('<td>'+cgiescape(lval2[i])+'</td>');
-		}
+    var trlast = $('#output_data table.output_content tr:last'); 
+    if (!trlast.hasClass('progresstick'))
+        trlast = undefined; 
+	if (command == 'progresstick'){
+        var pval = '<td><i>progress-tick: '+val1+'</i></td><td><i>elapsed seconds: '+lval2.toFixed(2)+'</i></td>'; 
+        if (trlast)
+            $(trlast).html(pval); 
+        else
+            $('#output_data table.output_content').append('<tr class="progresstick">'+pval+'</tr>'); 
+    }else{
+        var row = [ ]; 
+        row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
+        if (val1){
+            row.push('<td>'+cgiescape(val1)+'</td>');
+        }
+        if (lval2){
+            for (var i = 0; i < lval2.length; i++){
+                row.push('<td>'+cgiescape(lval2[i])+'</td>');
+            }
+        }
+        row.push('</tr>'); 
+        if (trlast)
+            $(trlast).html($(row.join("")));  
+        else
+            $('#output_data table.output_content').append($(row.join("")));  
+        incrementTabNumber('data');
     }
-    row.push('</tr>'); 
-
-    $('#output_data table.output_content').append($(row.join("")));  
+    
     $('.editor_output div.tabs li.data').addClass('new');
-	incrementTabNumber('data');
-
 	if(iScrollStart <= 0 && getScrollPosition('data') > 0){
 		setTabScrollPosition('data', 'bottom');
 	}
