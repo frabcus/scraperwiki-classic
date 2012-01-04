@@ -665,6 +665,7 @@ function setDataPreview(table_name, table_schema){
                         $('#datapreviews').append(ich.data_preview({table_name: table_name,
                            column_names: column_names}));
 
+	// $('#id_data_base').val()
 
     var dt = $('#datapreviews #data_preview_'+table_name+' table').dataTable( {
         "bProcessing": true,
@@ -672,7 +673,7 @@ function setDataPreview(table_name, table_schema){
         "bDeferRender": true,
        	"bJQueryUI": true,
         "sPaginationType": "full_numbers", 
-        "sAjaxSource": $('#id_data_base').val()+table_name,
+        "sAjaxSource": 'https://foobar.com/' + $('#id_data_base').val() + table_name,
         "sScrollX": "100%",
         "bStateSave": true,
         "bScrollCollapse": true,
