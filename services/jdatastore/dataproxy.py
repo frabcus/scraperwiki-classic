@@ -58,6 +58,7 @@ class DatastoreProtocol(protocol.Protocol):
         self.httpgetparams = {}
         self.httpgetpath = ''
         self.httppostbuffer = None
+        self.progress_ticks = 'no'
         
 
     def connectionMade(self):
@@ -107,13 +108,23 @@ class DatastoreProtocol(protocol.Protocol):
             httppostmap = json.loads(self.httppostbuffer.getvalue())
             self.short_name = httppostmap.get("scrapername")
             self.short_name_dbreadonly = False
+            self.progress_ticks = 'yes'
             self.dbprocessrequest = httppostmap
             logger.info("::: "+str(httppostmap))
             self.factory.addwaitingclient(self)
             
         elif self.httpgetpath == "/status":
             self.transport.write('There are %d clients connected\n' % len(self.factory.clients))
+            for client in self.factory.clients:
+                self.transport.write("#%d %s " % (client.clientnumber, client.clienttype))
+                if client.dbprocessrequest:
+                    self.transport.write(" waiting to process %s " % str(client.dbprocessrequest)[:100])
+                ldb = client.db
+                if ldb:
+                    self.transport.write(" processing %s attached: %s" % (str(ldb.short_name), str(ldb.attached)))
+                self.transport.write("\n")
             self.transport.loseConnection()
+
         else:
             logger.info("::: "+str(self.httpheadersmap)+ "  "+self.httpgetpath)
             self.transport.write('Hello there\n')
@@ -128,7 +139,8 @@ class DatastoreProtocol(protocol.Protocol):
 
         self.dataauth = None
         self.attachables = self.httpgetparams.get('attachables', '').split()
-                
+        self.progress_ticks = self.httpgetparams.get('progress_ticks', 'no')
+        
         firstmessage = {"status":"good"}
         if 'short_name' in self.httpgetparams:
             self.short_name = self.httpgetparams.get('short_name', '')
@@ -290,7 +302,6 @@ class DatastoreFactory(protocol.ServerFactory):
         self.clients = [ ]     # all clients
         self.clientcount = 0   # for clientnumbers
         self.clientswaitingforswconn = [ ]
-        self.swsqliteconnections = [ ]
         
         self.lc = task.LoopingCall(self.processnextwaitingclient)
         self.lc.start(5)

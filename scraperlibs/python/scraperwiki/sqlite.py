@@ -38,6 +38,11 @@ def execute(sqlquery, data=None, verbose=1):
         
     global attachlist
     result = scraperwiki.datastore.request({"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist})
+    while "progresstick" in result:
+        if verbose:
+            scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'progresstick', "val1":result.get("progresstick"), "lval2":result.get("timeseconds")})
+        result = scraperwiki.datastore.request(None)  # goes back and waits for next line
+        
     if "error" in result:
         raise databaseexception(result)
     if "status" not in result and "keys" not in result:

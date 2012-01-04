@@ -14,18 +14,17 @@ def jrequest(request):
     request["scrapername"] = scraperwiki.datastore.m_scrapername
     request["runid"] = scraperwiki.datastore.m_runid
     request["attachables"] = " ".join(scraperwiki.datastore.m_attachables)
-    request["verify"] = scraperwiki.datastore.verify
+    request["verify"] = scraperwiki.datastore.m_verification_key
     url = 'http://%s:%s/scrapercall' % (scraperwiki.datastore.m_host, scraperwiki.datastore.m_port)
     req = urllib2.Request(url, json.dumps(request))
     response = urllib2.urlopen(req)
     while True:
         jres = response.readline()
-        print jres
         if not jres:
             break
         res = json.loads(jres.strip())
         if "progresstick" in res:
-            print res
+            scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'progresstick', "val1":res.get("progresstick"), "lval2":res.get("timeseconds")})
         else:
             return res
     

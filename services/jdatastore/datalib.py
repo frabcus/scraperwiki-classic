@@ -309,8 +309,8 @@ class SQLiteDatabase(object):
         if not lclientforresponse:
             logger.debug("client#%d terminating progress" % (self.Dclientnumber))  # as nothing to receive the result anyway
             return 3
-        elif lclientforresponse.httpgetpath == "/scrapercall":
-            jtickline = json.dumps({"progresstick":self.progressticks, "etime":time.time() - self.etimestate})+"\n"
+        elif lclientforresponse.progress_ticks == "yes":
+            jtickline = json.dumps({"progresstick":self.progressticks, "timeseconds":time.time() - self.etimestate})+"\n"
             reactor.callFromThread(lclientforresponse.transport.write, jtickline)
             #lclientforresponse.transport.write(jtickline)
 
