@@ -669,7 +669,7 @@ function setDataPreview(table_name, table_schema){
 	
 	$.ajax({
 		type: 'GET',
-		url: $('#id_data_base').val() + 'swdata/?sEcho=1&iColumns=2&sColumns=&iDisplayStart=0&iDisplayLength=10&mDataProp_0=0&mDataProp_1=1&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&sSearch_1=&bRegex_1=false&bSearchable_1=true&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc&bSortable_0=true&bSortable_1=true&_=1325690712712'
+		url: $('#id_data_base').val() + 'swdata/?sEcho=1&iColumns=2&sColumns=&iDisplayStart=0&iDisplayLength=10&mDataProp_0=0&mDataProp_1=1&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&sSearch_1=&bRegex_1=false&bSearchable_1=true&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc&bSortable_0=true&bSortable_1=true&_=1325690712712',
 		success: function(data){
             console.log(data);
         }, error: function(){
