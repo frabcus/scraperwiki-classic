@@ -684,7 +684,7 @@ function setDataPreview(table_name, table_schema){
         "bDeferRender": true,
        	"bJQueryUI": true,
         "sPaginationType": "full_numbers", 
-        "sAjaxSource": $('#id_data_base').val() + table_name,
+        "sAjaxSource": $('#id_data_base').val() + table_name + '/',
         "sScrollX": "100%",
         "bStateSave": true,
         "bScrollCollapse": true,
