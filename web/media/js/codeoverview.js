@@ -528,16 +528,17 @@ $(function(){
 	});
 	
 	$('#id_comment').bind('focus', function(){
-		if($(this).val() == 'Make a comment or ask a question about this scraper'){
+		console.log($(this).data('placeholder'));
+		if($(this).val() == $(this).data('placeholder')){
 			$(this).val('').css('color', '#000');
 		} else {
 			$(this).css('color', '#000');
 		}
 	}).bind('blur', function(){
 		if($(this).val() == ''){
-			$(this).val('Make a comment or ask a question about this scraper').css('color','#666');
+			$(this).val($(this).data('placeholder')).css('color','#666');
 		}
-	}).css('color', '#666');
+	}).data('placeholder', $('#id_comment').val()).css('color', '#666');
 	
 });
 
