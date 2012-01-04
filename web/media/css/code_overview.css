@@ -17,18 +17,16 @@ h3 {
 	color: #164259;
 }
 
-#header_inner p span,
-#header_inner p .privacystatus {
-	margin-right: 20px;
+#header_inner p span {
+	margin-right: 24px;
 }
 
-#header_inner p span:before,
-#header_inner p .privacystatus:before {
+#header_inner p span:before {
 	content: ".";
 	display: inline-block;
 	width: 16px;
 	height: 16px;
-	margin-right: 3px;
+	margin-right: 7px;
 	background: transparent url(../images/header_icon_sprite.gif) 0 0 no-repeat;
 	text-indent: -9000px;
 }
@@ -54,17 +52,17 @@ h3 {
 	background-position: -16px -16px;
 }
 
-#header_inner p a.public:before {
+#header_inner p .public:before {
 	background-position: 0 -32px;
 	margin-right: 7px;
 }
 
-#header_inner p a.visible:before {
+#header_inner p .visible:before {
 	background-position: -16px -32px;
 	margin-right: 7px;
 }
 
-#header_inner p a.private:before {
+#header_inner p .private:before {
 	background-position: -32px -32px;
 	margin-right: 7px;
 }
@@ -82,9 +80,8 @@ h3 {
 	text-decoration: underline;
 }
 
-#header_inner a.privacystatus {
+#header_inner .privacystatus {
 	cursor: help;
-	text-decoration: none;
 }
 
 
@@ -1062,6 +1059,15 @@ box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
 	padding: 0.4em 0.8em;
 }
 
+.datapreview.hidden {
+	position: absolute;
+	left: -9000px;
+}
+
+.datapreview {
+	position: static;
+}
+
 .data_content table {
 	border-collapse: collapse;
 	border: none;
@@ -1464,7 +1470,7 @@ span.historyexception {
 	background-color: #eee;
 }
 
-a.rollbackchanges {
+a.rollbackchanges, a.runpermalink {
 	font-size: 14px;
 	float: right;
 	cursor: pointer;
@@ -1472,6 +1478,13 @@ a.rollbackchanges {
 	height: 16px;
 	line-height: 16px;
 	padding-left: 21px;
+}
+
+a.runpermalink {
+	float: none;
+	display: none;
+	margin-right: 20px;
+	background-image: url(../images/icons/link.png);
 }
 
 .history_code_border {

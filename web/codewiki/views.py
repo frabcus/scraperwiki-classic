@@ -250,7 +250,7 @@ def code_overview(request, wiki_type, short_name):
             code = scraper.saved_code()
             if re.match('<div\s+class="inline">', code):
                 context["htmlcode"] = code
-        return render_to_response('codewiki/new_view_overview.html', context, context_instance=RequestContext(request))
+        return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
 
     #
     # (else) scraper type section
@@ -260,67 +260,20 @@ def code_overview(request, wiki_type, short_name):
     context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
-# No longer work with the new datatable
-#    previewsqltables = re.findall("(?s)__BEGINPREVIEWSQL__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWSQL__", scraper.description)
-#    previewrssfeeds = re.findall("(?s)__BEGINPREVIEWRSS__\s*?\n\s*?(.+?)\s*?\n__ENDPREVIEWRSS__", scraper.description)
-    
-        # there's a good case for having this load through the api by ajax
-        # instead of inlining it and slowing down the page load considerably
-    dataproxy = None
     try:
-        dataproxy = DataStore(scraper.short_name)
-        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":10})
-        if not sqlitedata:
-            context['sqliteconnectionerror'] = 'No content in response'
-        elif type(sqlitedata) in [str, unicode]:
-            context['sqliteconnectionerror'] = sqlitedata
-        elif 'tables' not in sqlitedata:
-            if 'status' in sqlitedata:
-                if sqlitedata['status'] == 'No sqlite database':
-                    pass # just leave 'sqlitedata' not in context
-                else:
-                    context['sqliteconnectionerror'] = sqlitedata['status']
-            elif 'error' in sqlitedata:
-                context['sqliteconnectionerror'] = sqlitedata['error']
-            else:
-                context['sqliteconnectionerror'] = 'Response with unexpected format'
-                logger.error("Response with unexpected format:" + str(sqlitedata))
-
-            # success, have good data
-        else:
-            total_rows = 0
-            context['sqlitedata'] = [ ]
-            for sqltablename, sqltabledata in sqlitedata['tables'].items():
-                sqltabledata["tablename"] = sqltablename
-                context['sqlitedata'].append(sqltabledata)
-                try:
-                    total_rows += int( sqltabledata['count'] )
-                except:
-                    pass
-             
-            context['total_record_count'] = total_rows
-            try:
-                beta_user = request.user.get_profile().beta_user
-            except frontend.models.UserProfile.DoesNotExist:
-                beta_user = False
-            except AttributeError:  # happens with AnonymousUser which has no get_profile function!
-                beta_user = False
-            
-        # which domains have been scraped
-        context["domainscrapes"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:10]
-        context["latestdomain"] = models.DomainScrape.objects.filter(scraper_run_event__scraper=scraper)[:1]
-
-
-    except socket.error, e:
-        context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
+        beta_user = request.user.get_profile().beta_user
+    except frontend.models.UserProfile.DoesNotExist:
+        beta_user = False
+    except AttributeError:  # happens with AnonymousUser which has no get_profile function!
+        beta_user = False
 
     context['forked_to'] = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').order_by('-created_at')[:5]
     context['forked_to_total'] = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').count()
 
     context['forked_to_remainder'] = int(models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').count()) - 5;    
 
-    if dataproxy:
-        dataproxy.close()
+    #if dataproxy:
+    #    dataproxy.close()
 
     try:
         event = ScraperRunEvent.objects.filter(scraper=scraper).order_by('-last_run')[0]
@@ -338,7 +291,7 @@ def code_overview(request, wiki_type, short_name):
         pass
             
             
-    return render_to_response('codewiki/new_scraper_overview.html', context, context_instance=RequestContext(request))
+    return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
 # all remaining functions are ajax or temporary pages linked only 

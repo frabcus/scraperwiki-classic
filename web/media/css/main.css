@@ -1579,6 +1579,7 @@ body.profiles.edit #features li input {
 	position: absolute;
 	top: 105px;
 	right: 10px;
+	-webkit-transform-style: preserve-3d;
 }
 
 
@@ -5119,6 +5120,7 @@ body.events ul#events a {
 	padding: 8px 10px;
 	background-color: #f2f6f9;
 	border: 1px solid #cfdee9;
+	-webkit-transform-style: preserve-3d;
 }
 
 body.events ul#events a:hover,

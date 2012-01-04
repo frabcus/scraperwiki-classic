@@ -245,17 +245,17 @@
             <ul>			
 	            {% ifnotequal scraper.language 'html' %}
 	                <li class="console">
-	                    <a href="#" title="Console output from scraper">Console</a>
+	                    <a href="#output_console" title="Console output from scraper">Console<b class="unread"></b></a>
 	                </li>
 	                <li class="data">
-	                    <a href="#" title="The data that this scraper generates">Data</a>
+	                    <a href="#output_data" title="The data that this scraper generates">Data<b class="unread"></b></a>
 	                </li>
 	                <li class="sources">
-	                    <a href="#" title="Pages you are scraping">Sources</a>
+	                    <a href="#output_sources" title="Pages you are scraping">Sources<b class="unread"></b></a>
 	                </li>
 	            {% endifnotequal %}
                 <li class="chat">
-                    <a href="#" title="Communicate to others">Chat</a>
+                    <a href="#output_chat" title="Communicate to others">Chat<b class="unread"></b></a>
                 </li>
             </ul>
         </div>

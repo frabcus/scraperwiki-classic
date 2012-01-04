@@ -57,7 +57,7 @@ function setupOrbited()
         $('#running_annimation').hide(); 
 
         sChatTabMessage = 'Disconnected'; 
-        $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
+        $('.editor_output div.tabs li.chat a').html(sChatTabMessage + '<b class="unread"></b>');
     }
     
     

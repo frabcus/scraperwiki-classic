@@ -9,6 +9,7 @@
 {% load gravatar %}
 {% load comments %}
 {% load history %}
+{% load icanhaz %}
 
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
@@ -30,7 +31,7 @@
     <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.dataTables.min.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.snippet.min.js?{{settings.REVISION}}"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/codeoverview_new.js?{{settings.REVISION}}"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/codeoverview.js?{{settings.REVISION}}"></script>
 
     {{ block.super }}
       {% with scraper.language|lower as language %}
@@ -53,35 +54,19 @@
        {% endif %}
     </h2>
 	<p>
-	    <span class="language {{scraper.language|lower}}" rel="{{scraper.language|lower}}">
-	        {% if scraper.language == 'php' %}PHP{% else %}{{ scraper.language|capfirst }}{% endif %}
-	    </span>
-	    <span class="latestdomain">
-	    {% if latestdomain %}
-	        {% for d in latestdomain %}
-                <a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>
-            {% endfor %}
-        {% else %}
-            Hasn&rsquo;t run yet
-        {% endif %}
-        </span> <span class="totalrows">
-        {% if sqlitedata %}
-            {{ total_record_count|intcomma }} record{{ total_record_count|pluralize }}
-        {% else %}
-            No data yet
-        {% endif %}
-        </span> 
+	    <span class="language {{scraper.language|lower}}" rel="{{scraper.language|lower}}">{% if scraper.language == 'php' %}PHP{% else %}{{ scraper.language|capfirst }}{% endif %}</span>
+	    <span class="latestdomain">{% if latestdomain %}{% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>{% endfor %}{% else %}Hasn&rsquo;t run yet{% endif %}</span>
         {% if scraper.privacy_status == 'public' %}
-    	    <a class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</a>
+    	    <span class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
         {% endif %}
     	{% if scraper.privacy_status == 'visible' %}
-    	    <a class="privacystatus visible" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected</a>
+    	    <span class="privacystatus visible" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected</span>
         {% endif %}
         {% if scraper.vault %}
-            <a class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</a>
+            <span class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</span>
         {% else %}
             {% if scraper.privacy_status == 'private' %}
-    	    <a class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</a>
+    	    <span class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</span>
     	    {% endif %}
     	{% endif %} 
     </p>
@@ -102,6 +87,7 @@
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
     <input type="text" id="id_api_base" value="{{api_base}}" class="hide"/>
+    <input type="text" id="id_data_base" value="{{MAIN_URL}}{% url code_overview scraper.wiki_type scraper.short_name %}data/" class="hide"/>
     <input type="hidden" id="scrapershortname" value="{{scraper.short_name}}"/>
     {% if scraper.access_apikey %}
         <input type="text" id="id_apikey" value="{{scraper.access_apikey}}" class="hide"/>
@@ -369,7 +355,6 @@
 </table>
 
 <div class="data">
-{% if sqlitedata %}
     <ul class="titlebar">
         <li class="first"><h3>This scraper&rsquo;s datastore</h3></li>
         <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}{% if scraper.access_apikey %}&apikey_scraper={{scraper.access_apikey}}{% endif %}#sqlite"><img src="{{ MEDIA_URL }}images/icons/hard_hat.png" width="16" height="16" alt="">Explore with API</a></li>
@@ -402,117 +387,15 @@
             </form>
         </li>{% endif %}
         <li class="clear"></li>
+      </ul>
+
+    {% icanhaz "data_preview" %}
+    {% icanhaz "overview_data_tabs" %}
+    {% icanhaz "data_preview_schema" %}
+   <ul class="data_tabs">
     </ul>
-    <ul class="data_tabs">
-        {% for sqltabledata in sqlitedata|dictsort:"tablename" %}
-          <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
-            <span class="tablename">{{sqltabledata.tablename}}</span>
-            <i>{{sqltabledata.count}}  record{{sqltabledata.count|pluralize}}</i>
-            <a></a>
-          </li>
-        {% endfor %}
-        <li class="clear"></li>
-    </ul>
-    
-    <div id="datapreviews">
-        {% for sqltabledata in sqlitedata|dictsort:"tablename" %}
-        <div class="datapreview">
-        <table cellpadding="0" cellspacing="0" border="0" id="datapreview_{{forloop.counter}}">
-        	<thead>
-        		<tr>{% for heading in sqltabledata.keys %}<th>{{ heading }}</th>{% endfor %}</tr>
-        	</thead>
-        	<tbody>
-                <tr><td colspan="{{ sqltabledata.count }}">Loading data preview&hellip;</td></tr>
-        	</tbody>
-        </table>
-        <script type="text/javascript">
-        $(document).ready(function() {
-            $('#datapreview_{{forloop.counter}}').dataTable( {
-                "bProcessing": true,
-                "bServerSide": true,
-				"bJQueryUI": true,
-				"sPaginationType": "full_numbers",
-                "sAjaxSource": '{% url scraper_data_view "scraper",scraper.short_name,sqltabledata.tablename %}',
-                "sScrollX": "100%",
-                "bStateSave": true,
-                "bScrollCollapse": true,
-                "sDom": '<"H"<"#schema_{{forloop.counter}}">lfr>t<"F"ip>',
-                "fnRowCallback": function( tr, array, iDisplayIndex, iDisplayIndexFull ) {
-                    $('td', tr).each(function(){
-                        $(this).html( $(this).html().replace(/((http|https|ftp):\/\/\S+)/g, '<a href="$1">$1</a> ') );
-                    });
-                    return tr;
-                }
-            } );
-            $('#schema_{{forloop.counter}}').addClass('schema').html('<a>Show schema</a><div><span class="tableschema">{{sqltabledata.sql}}</span><span class="arrow"></span></div>').children('a').bind('click', function(){
-    			var $a = $(this).text('Hide schema');
-    			var $p = $a.siblings('div');
-    			if($p.is(':visible')){
-    				$p.fadeOut(400);
-    				$a.text('Show schema');
-    				$('html').unbind('click');
-    			} else {
-    				$p.fadeIn(150, function(){
-    					$('html').bind('click', function(e){
-    						if( $(e.target).parents().index($a.parent()) == -1 ) {
-    							if( $(e.target).parents().index($p) == -1 ) {
-    								$p.filter(':visible').fadeOut(400);
-    								$a.text('Show schema');
-    								$('html').unbind('click');
-    							}
-    						}
-    					});
-    				});
-    			}
-    		}).next().children('.tableschema').each(function(){
-    		    str = $(this).text();
-    		    str = str.replace(/(CREATE \w+) `(\w+)`/g,'<span class="create">$1</span> `<span class="tablename">$2</span>`');
-    		    str = str.replace(/`([^`]+)` (\w+)/g, '`<span class="column">$1</span>` <span class="type">$2</span>');
-    		    $(this).html(str);
-    		});
-        } );
-        </script>
-        </div>
-        {% endfor %}
-    </div>
-{% else %}
-        {% if sqliteconnectionerror %}
-            <ul class="titlebar">
-                <li class="first"><h3>Sorry! The datastore isn't working right now</h3></li>
-                <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}{% if scraper.access_apikey %}&apikey_scraper={{scraper.access_apikey}}{% endif %}#sqlite"><img src="{{ MEDIA_URL }}images/icons/hard_hat.png" width="16" height="16" alt="">Explore with API</a></li>
-                <li class="download">
-                    <a><img src="{{ MEDIA_URL }}images/icons/arrow_down.png" width="16" height="16" alt="">Download</a>
-                    <div class="download_popover">
-                        <h6>Download whole datastore&hellip;</h6>
-                        <ul>
-                            <li class="database_sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow"><span class="icon"></span> As an SQLite database</a></li>
-                        <!--  <li class="database_csv"><a href="#"><span class="icon"></span> As a folder of CSVs</a></li>
-                            <li class="database_json"><a href="#"><span class="icon"></span> As a folder of JSON files</a></li>
-                            <li class="database_excel"><a href="#"><span class="icon"></span> As an Excel file</a></li>  -->
-                        </ul>
-                        <span class="arrow"></span>
-                    </div>
-                </li>
-                {% if user_owns_it or user.is_staff %}<li class="empty">
-                    <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore" rel="nofollow">Clear data</a>
-                    <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
-                        {% csrf_token %}
-                        <input type="hidden" name="delete_data" value="1" />
-                        <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
-                    </form>
-                </li>{% endif %}
-                <li class="clear"></li>
-            </ul>
-            
-            <p class="sqliteconnectionerror">{{sqliteconnectionerror}}</p>
-        {% else %}
-            <ul class="titlebar">
-                <li class="first"><h3>This scraper has no data yet</h3></li>
-                <li class="clear"></li>
-            </ul>
-        {% endif %}
-        <!-- <li class="import"><a href="">Import Data</a></li> -->
-{% endif %}
+    <div id="datapreviews"></div>
+
 </div>
 
 <div class="network">
@@ -833,7 +716,7 @@ function previewrunevent_show(block)
     hideallshowhistrun(); 
 
     block.find(".showrunevent").hide(); 
-    block.find(".hiderunevent").show(); 
+    block.find(".hiderunevent, .runpermalink").show();
 
     var runid = block.find("span.runidlist span.runidelem:first span.runid").text();  
     block.find(".history_code_border").hide();
@@ -852,7 +735,7 @@ function previewrunevent_hide(block)
 {
     block.find(".runpreviewer").hide(); 
     block.find(".showrunevent").show(); 
-    block.find(".hiderunevent").hide(); 
+    block.find(".hiderunevent, .runpermalink").hide(); 
 }
 
 function hideallshowhistrun()

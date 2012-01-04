@@ -11,7 +11,7 @@ var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 };
 var outputMaxItems = 400;
 // *sTabCurrent* is generally to the class name of the currently shown tab.
 var sTabCurrent = ''; 
-var sChatTabMessage = 'Chat'; 
+var sChatTabMessage = 'Chat';
 
 // information handling who else is watching and editing during this session
 var editingusername = "";  // primary editor
@@ -31,8 +31,7 @@ var lasttouchedtime = undefined;
 
 var cachehidlookup = { }; // this itself is a cache of a cache
 
-function cgiescape(text) 
-{
+function cgiescape(text) {
     if (typeof text == 'number')
         return String(text); 
     if (typeof text != 'string')
@@ -41,29 +40,26 @@ function cgiescape(text)
 }
 
 // some are implemented with tables, and some with span rows.  
-function setTabScrollPosition(sTab, command) 
-{
+function setTabScrollPosition(sTab, command) {
     divtab = '#output_' + sTab; 
     contenttab = '#output_' + sTab; 
 
-    if ((sTab == 'console') || (sTab == 'sources')) 
-    {
+    if ((sTab == 'console') || (sTab == 'sources')){
         divtab = '#output_' + sTab + ' div';
         contenttab = '#output_' + sTab + ' .output_content';
     }
 
-    if (command == 'hide')
+    if (command == 'hide'){
         scrollPositions[sTab] = $(divtab).scrollTop();
-    else 
-    {
-        if (command == 'bottom')
-            scrollPositions[sTab] = $(contenttab).height()+$(divtab)[0].scrollHeight; 
-        $(divtab).animate({ scrollTop: scrollPositions[sTab] }, 0);
+    } else {
+        if (command == 'bottom' || command == 'show'){
+            scrollPositions[sTab] = $(contenttab).height()+$(divtab)[0].scrollHeight;
+		}
+        $(divtab).scrollTop(scrollPositions[sTab]);
     }
 }
 
-function showTextPopup(sLongMessage) 
-{
+function showTextPopup(sLongMessage){
     $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
             {overlayClose: true, 
                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
@@ -72,8 +68,7 @@ function showTextPopup(sLongMessage)
 }
 
 
-function lparsehighlightcode(sdata, lmimetype)
-{
+function lparsehighlightcode(sdata, lmimetype){
 	// sdata is already a JSON object
     var cachejson = sdata; 
 
@@ -122,8 +117,7 @@ function lparsehighlightcode(sdata, lmimetype)
 }
 
 
-function popupCached(cacheid, lmimetype)
-{
+function popupCached(cacheid, lmimetype){
     modaloptions = { overlayClose: true, 
                         overlayCss: { cursor:"auto" }, 
                         containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
@@ -154,15 +148,46 @@ function popupCached(cacheid, lmimetype)
 }
 
 
-function clearOutput() 
-{
+function clearOutput() {
     $('#output_console div').html('');
     $('#output_sources div').html('');
     $('#output_data table').html('');
     $('.editor_output div.tabs li.console').removeClass('new');
     $('.editor_output div.tabs li.data').removeClass('new');
     $('.editor_output div.tabs li.sources').removeClass('new');
+	resetTabNumber('console');
+	resetTabNumber('data');
+	resetTabNumber('sources');
 }
+
+function getScrollPosition(sTab){
+	//	Returns a tab's scrollTop value or 0, whichever's greater.
+	//	Useful for finding out whether to scroll to the bottom of
+	//	a tab when adding new content.
+	oTab = $('#output_' + sTab);
+	iTabHeight = $('.output_content', oTab).height();
+	iTabScroll = $('.output_content', oTab).scrollTop();
+	iContentHeight = 0;
+	if($('.output_content', oTab).is('div')){
+		$('.output_item', oTab).each(function(){ 
+			iContentHeight = iContentHeight + $(this).outerHeight();
+		});
+	} else {
+		$('.output_content tr', oTab).each(function(){ 
+			iContentHeight = iContentHeight + $(this).outerHeight();
+		});
+	}
+	if(iContentHeight > iTabHeight){
+		if(iContentHeight == iTabHeight + iTabScroll) {
+			return 0;
+		} else {
+			return (iContentHeight - iTabHeight - iTabScroll);
+		}
+	} else {
+		return 0;
+	}
+}
+
 
 //Write to console/data/sources
 function writeToConsole(sMessage, sMessageType, iLine) 
@@ -189,7 +214,12 @@ function writeToConsole(sMessage, sMessageType, iLine)
         escsMessage = cgiescape(sMessage.replace(/^\s+|\s+$/g, "").substring(0, 100)); 
     }
 
-    //create new item
+	var iScrollStart = getScrollPosition('console');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('console', 'bottom');
+	}
+
+    // create new item
     var oConsoleItem = $('<span></span>');
     oConsoleItem.addClass('output_item');
     oConsoleItem.addClass(sShortClassName);
@@ -213,7 +243,6 @@ function writeToConsole(sMessage, sMessageType, iLine)
         oConsoleItem.prepend(oLineLink);
         oLineLink.click(function() { SelectEditorLine(iLine); }); 
     }
-
     
     //remove items if over max
     while ($('#output_console div.output_content').children().size() >= outputMaxItems) 
@@ -223,8 +252,11 @@ function writeToConsole(sMessage, sMessageType, iLine)
     $('#output_console div.output_content').append(oConsoleItem);
     $('.editor_output div.tabs li.console').addClass('new');
 	incrementTabNumber('console');
+	
+	if(iScrollStart <= 0 && getScrollPosition('console') > 0){
+		setTabScrollPosition('console', 'bottom');
+	}
 
-    setTabScrollPosition('console', 'bottom'); 
 };
 
 
@@ -237,11 +269,14 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
 
     // normalize the mimetypes
     if (lmimetype == undefined)
-        lmimetype = "text/html"; 
-    else if (lmimetype == "text/html")
-        ; 
+        lmimetype = "text/html";
     else if (lmimetype == "application/json")
-        lmimetype = "text/json"; 
+        lmimetype = "text/json";
+
+	var iScrollStart = getScrollPosition('sources');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('sources', 'bottom');
+	}
 
     //append to sources tab
     var smessage = [ ]; 
@@ -253,10 +288,10 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
             smessage.push("<b>"+lmimetype+"</b>"); 
 
         // this is the orange up-arrow link that doesn't work because something wrong in the server, so hide it for now
-        if (cacheid != undefined) {
+        /*if (cacheid != undefined) {
             smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
 			smessage.push( cacheid );
-		}
+		}*/
 		
         if (cached == 'True')
             smessage.push('(from cache)'); 
@@ -274,10 +309,13 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
     $('.editor_output div.tabs li.sources').addClass('new');
 	incrementTabNumber('sources');
     
+   	if(iScrollStart <= 0 && getScrollPosition('sources') > 0){
+		setTabScrollPosition('sources', 'bottom');
+	}
+	
     if (cacheid != undefined)  
         $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid, lmimetype); return false; }); 
 
-    setTabScrollPosition('sources', 'bottom'); 
 }
 
 
@@ -285,6 +323,11 @@ function writeToData(aRowData)
 {
     while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) 
         $('#output_data table.output_content tbody').children(':first').remove();
+
+	var iScrollStart = getScrollPosition('data');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('data', 'bottom');
+	}
 
     var oRow = $('<tr></tr>');
 
@@ -295,52 +338,76 @@ function writeToData(aRowData)
     });
 
     $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
-    setTabScrollPosition('data', 'bottom'); 
     $('.editor_output div.tabs li.data').addClass('new');
-	incrementTabNumber('data');
+	incrementTabNumber('data'); 
+
+	if(iScrollStart <= 0 && getScrollPosition('data') > 0){
+		setTabScrollPosition('data', 'bottom');
+	}
 }
 
 function writeToSqliteData(command, val1, lval2) 
 {
     while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems){
         $('#output_data table.output_content tbody').children(':first').remove();
+	}	
+
+	var iScrollStart = getScrollPosition('data');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('data', 'bottom');
 	}
 	
-    var row = [ ]; 
-    row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
-    if (val1){
-        row.push('<td>'+cgiescape(val1)+'</td>');
-	}
-    if (lval2){
-        for (var i = 0; i < lval2.length; i++){
-            row.push('<td>'+cgiescape(lval2[i])+'</td>');
-		}
+    var trlast = $('#output_data table.output_content tr:last'); 
+    if (!trlast.hasClass('progresstick'))
+        trlast = undefined; 
+	if (command == 'progresstick'){
+        var pval = '<td><i>progress-tick: '+val1+'</i></td><td><i>elapsed seconds: '+lval2.toFixed(2)+'</i></td>'; 
+        if (trlast)
+            $(trlast).html(pval); 
+        else
+            $('#output_data table.output_content').append('<tr class="progresstick">'+pval+'</tr>'); 
+    }else{
+        var row = [ ]; 
+        row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
+        if (val1){
+            row.push('<td>'+cgiescape(val1)+'</td>');
+        }
+        if (lval2){
+            for (var i = 0; i < lval2.length; i++){
+                row.push('<td>'+cgiescape(lval2[i])+'</td>');
+            }
+        }
+        row.push('</tr>'); 
+        if (trlast)
+            $(trlast).html($(row.join("")));  
+        else
+            $('#output_data table.output_content').append($(row.join("")));  
+        incrementTabNumber('data');
     }
-    row.push('</tr>'); 
-
-    $('#output_data table.output_content').append($(row.join("")));  
-    setTabScrollPosition('data', 'bottom'); 
+    
     $('.editor_output div.tabs li.data').addClass('new');
-	incrementTabNumber('data');
+	if(iScrollStart <= 0 && getScrollPosition('data') > 0){
+		setTabScrollPosition('data', 'bottom');
+	}
 }
 
-/* function writeToChat(seMessage, sechatname) 
-{
-    if ( typeof console == 'object' ) { 
-        var msg = (sechatname ? sechatname + ": " : "") + seMessage;
-        console.log ( msg );
-    }
-} */
-
 function writeToChat(seMessage, sechatname){
-    while ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) 
-        $('#output_chat table.output_content tbody').children(':first').remove();
+   while ($('#output_chat .output_content tbody').children().size() >= outputMaxItems) 
+        $('#output_chat .output_content tbody').children(':first').remove();
+
+	var iScrollStart = getScrollPosition('chat');
+	if(iScrollStart <= 0){
+		setTabScrollPosition('chat', 'bottom');
+	}
 
     var oRow = $('<tr><td>' + (sechatname ? sechatname + ": " : "") + seMessage + '</td></tr>');
-    $('#output_chat table.output_content').append(oRow);
-    setTabScrollPosition('chat', 'bottom');
-	$('.editor_output div.tabs li.chat').addClass('new');
+    $('#output_chat .output_content').append(oRow);
+	$('.editor_output .tabs .chat').addClass('new');
 	incrementTabNumber('chat');
+
+	if(iScrollStart <= 0 && getScrollPosition('chat') > 0){
+		setTabScrollPosition('chat', 'bottom');
+	}
 
     if (sechatname && (sechatname != chatname)){
        	// Currently highlights when there is more than a minute gap.
@@ -350,7 +417,7 @@ function writeToChat(seMessage, sechatname){
 		){
             chatpeopletimes[sechatname] = servernowtime; 
             if (sTabCurrent != 'chat'){
-                $('.editor_output div.tabs li.chat').addClass('chatalert');
+                $('.editor_output .tabs .chat').addClass('chatalert');
 			}
         }
      }
@@ -371,13 +438,8 @@ function showTab(sTab)
 
     $('.editor_output div.tabs ul').children().removeClass('selected');
     $('.editor_output div.tabs li.' + sTab).addClass('selected');
-    $('.editor_output div.tabs li.' + sTab).removeClass('new');
-    if (sTab == 'chat'){
-        $('.editor_output div.tabs li.chat').removeClass('chatalert');
-	}
-    $('.editor_output div.tabs li.' + sTab + ' a').each(function(){
-		$(this).text($(this).text().replace(/ \(\d+\)/g, ''));
-	});
+    $('.editor_output div.tabs li.' + sTab).removeClass('new chatalert');
+	resetTabNumber(sTab);
 
     setTabScrollPosition(sTab, 'show'); 
 }
@@ -412,37 +474,21 @@ function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blocked
 //  Increments the number displayed at the top of the tab
 function incrementTabNumber(tab){
 	if(sTabCurrent != tab) {
-		var $a = $('.editor_output div.tabs li.' + tab + ' a');
-		var num = Number( $a.text().replace(/\D/g, '') );
-		$a.text($a.text().replace(/( \(\d+\))|$/, ' (' + (num + 1) + ')'));
+		var $i = $('.tabs .' + tab + ' .unread');
+		$i.show().text( Number($i.text()) + 1 );
 	}
+}
+
+function resetTabNumber(tab){
+	$('.tabs .' + tab + ' .unread').empty().hide();
 }
 
 
 //Setup Tabs
-function setupTabs()
-{
-    $('.editor_output .console a').click(function(){
-        showTab('console');
-        return false;
-    });
-    $('.editor_output .data a').click(function(){
-        showTab('data');
-        return false;
-    })
-    $('.editor_output .sources a').click(function(){
-        showTab('sources');
-        return false;
-    })
-    $('.editor_output .chat a').click(function(){
-        showTab('chat');
-        return false;
-    })
-
-    //show default tab
-    if ($('.editor_output div.tabs li.console').length)
-        showTab('console'); 
-    else
-        showTab('chat'); 
+function setupTabs(){
+    $('.editor_output .tabs a').bind('click', function(e){
+    	e.preventDefault();
+        showTab($(this).attr('href').replace('#output_', ''));
+    }).eq(0).trigger('click');
 }
 
