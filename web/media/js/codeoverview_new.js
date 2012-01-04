@@ -75,7 +75,7 @@ function setupCodeOverview(short_name){
 
 function setupCollaborationUI(){
 	$('#privacy_status, #contributors').hide();
-	$('#collaboration ul.buttons a, #header_inner a.privacystatus').bind('click', function(e){
+	$('#collaboration ul.buttons a, #header_inner .privacystatus').bind('click', function(e){
 		e.preventDefault();
 		var href = $(this).attr('href');
 		if($(href).is(':visible')){
@@ -653,9 +653,9 @@ function setTotalRowCount(tables){
     total_rows = _.reduce(values, function(m, v){
         return m + v;
     }, 0);
-    $('span.totalrows').text(total_rows);
-    $('span.totalrows').digits();
-    $('span.totalrows').append(total_rows > 0 ? ' records' : ' record')
+	var $span = $('<span>').text(total_rows).addClass('totalrows').insertBefore('.privacystatus');
+    $span.digits();
+    $span.append(total_rows > 0 ? ' records' : ' record');
 }
 
 function setDataPreview(table_name, table_schema){

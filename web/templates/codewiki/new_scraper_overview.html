@@ -54,29 +54,19 @@
        {% endif %}
     </h2>
 	<p>
-	    <span class="language {{scraper.language|lower}}" rel="{{scraper.language|lower}}">
-	        {% if scraper.language == 'php' %}PHP{% else %}{{ scraper.language|capfirst }}{% endif %}
-	    </span>
-	    <span class="latestdomain">
-	    {% if latestdomain %}
-	        {% for d in latestdomain %}
-                <a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>
-            {% endfor %}
-        {% else %}
-            Hasn&rsquo;t run yet
-        {% endif %}
-      </span> <span class="totalrows"></span>
+	    <span class="language {{scraper.language|lower}}" rel="{{scraper.language|lower}}">{% if scraper.language == 'php' %}PHP{% else %}{{ scraper.language|capfirst }}{% endif %}</span>
+	    <span class="latestdomain">{% if latestdomain %}{% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>{% endfor %}{% else %}Hasn&rsquo;t run yet{% endif %}</span>
         {% if scraper.privacy_status == 'public' %}
-    	    <a class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</a>
+    	    <span class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
         {% endif %}
     	{% if scraper.privacy_status == 'visible' %}
-    	    <a class="privacystatus visible" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected</a>
+    	    <span class="privacystatus visible" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">Protected</span>
         {% endif %}
         {% if scraper.vault %}
-            <a class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</a>
+            <span class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by members of the vault &lsquo;{{ scraper.vault.name }}&rsquo;">In {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</span>
         {% else %}
             {% if scraper.privacy_status == 'private' %}
-    	    <a class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</a>
+    	    <span class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</span>
     	    {% endif %}
     	{% endif %} 
     </p>
