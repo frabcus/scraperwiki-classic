@@ -598,8 +598,8 @@ function getTableNames(callback){
   $.get(url, {}, null, "json")
   .success(function(data) {
     var count_url, tables;
-    if (typeof(data) == 'object' && $.inArray('error', data) != -1) {
-        setDataPreviewWarning(data['error']); 
+    if (typeof(data) == 'object' && data.error) {
+        setDataPreviewWarning(data.error); 
         $('#header_inner span.totalrows').text("Error");
     } else if (data.length) {
         tables = _.reduce(_.map(data, function(d) {
