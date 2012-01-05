@@ -595,10 +595,13 @@ function getTableNames(callback){
   var url;
   url = api_url + "datastore/sqlite?format=jsondict&name="+short_name+"&query=SELECT%20name, sql%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
   
-  $.get(url)
+  $.get(url, {}, null, "json")
   .success(function(data) {
     var count_url, tables;
-    if (data.length) {
+    if (typeof(data) == 'object' && $.inArray('error', data) != -1) {
+        setDataPreviewWarning(data['error']); 
+        $('#header_inner span.totalrows').text("Error");
+    } else if (data.length) {
         tables = _.reduce(_.map(data, function(d) {
             var t = {}
             t[d.name] = d.sql;
