@@ -85,9 +85,9 @@ def ensure_connected():
         m_socket = socket.socket()
         m_socket.connect((m_host, m_port))
 
+        data = {"uml": 'lxc', "port":m_socket.getsockname()[1]}
         # needed to make it work locally.  how has this ever worked?
         #data["uml"] = "uml001"
-        data = {"uml": 'lxc', "port":m_socket.getsockname()[1]}
 
         data["vscrapername"] = m_scrapername
         data["vrunid"] = m_runid
