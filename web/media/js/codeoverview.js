@@ -581,25 +581,32 @@ function setupTabFolding(){
 	});
 }
 
-function setupTabClicks(){
-	$('li.data_tab').live('click', function(){
-		if( ! $(this).is('.selected')){
-			$('.data_tab.selected').removeClass('selected');
-			$(this).addClass('selected');
-			if($(this).is('#more_tabs li')){
-				$('#more_tabs').addClass('selected');
-			} else {
-				$('#more_tabs').removeClass('selected');
-			}
-			
-			var table_name = $(this).attr('id').replace('data_tab_', '');
-			var $dp_div = $('#data_preview_'+table_name);
-			$dp_div.removeClass('hidden').siblings().addClass('hidden');
+$.fn.switchTab = function(){
+	return this.each(function(){
 		
+		$('.data_tab.selected').removeClass('selected');
+		$(this).addClass('selected');
+		if($(this).is('#more_tabs li')){
+			$('#more_tabs').addClass('selected');
+		} else {
+			$('#more_tabs').removeClass('selected');
+		}
+		
+		var table_name = $(this).attr('id').replace('data_tab_', '');
+		var $dp_div = $('#data_preview_'+table_name);
+		
+		if( $dp_div.is('.hidden')){		
+			$dp_div.removeClass('hidden').siblings().addClass('hidden');
 	        $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
 	        $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
 		}
-	}).eq(0).addClass('selected');	
+    })
+}
+
+function setupTabClicks(){
+	$('li.data_tab').live('click', function(){
+		$(this).switchTab();
+	});	
 }
 
 function getTableNames(callback){
@@ -665,7 +672,7 @@ function getTableRowCounts(tables, callback){
 	    } else {
         	var zipped = _.zip(resp.keys, resp.data[0]);
         	callback(_.map(zipped, function(z){
-            	return {name: z[0], count: z[1]};
+            	return {name: z[0], id: z[0].replace(/\s+/g, ''), count: z[1]};
         		}));
 		}
      });
@@ -683,19 +690,19 @@ function setTotalRowCount(tables){
     $span.append(total_rows > 0 ? ' records' : ' record');
 }
 
-function setDataPreview(table_name, table_schema){
+function setDataPreview(table_name, table_schema, first_table){
    getTableColumnNames( table_name, 
                         function(column_names){
      // get template
-                        $('#datapreviews').append(ich.data_preview({table_name: table_name,
+                        $('#datapreviews').append(ich.data_preview({table_name: table_name.replace(/\s+/g, ''),
                            column_names: column_names}));
-    var dt = $('#datapreviews #data_preview_'+table_name+' table').dataTable( {
+    var dt = $('#datapreviews #data_preview_' + table_name.replace(/\s+/g, '') + ' table').dataTable( {
         "bProcessing": true,
         "bServerSide": true,
         "bDeferRender": true,
        	"bJQueryUI": true,
         "sPaginationType": "full_numbers", 
-        "sAjaxSource": $('#id_data_base').val() + table_name + '/',
+        "sAjaxSource": $('#id_data_base').val() + encodeURIComponent(table_name) + '/',
         "sScrollX": "100%",
         "bStateSave": true,
         "bScrollCollapse": true,
@@ -707,10 +714,12 @@ function setDataPreview(table_name, table_schema){
             return tr;
         }
     });
+	if(!first_table){
+		dt.parents('.datapreview').addClass('hidden');
+	}
     schema_html = ich.data_preview_schema({sql: table_schema});
     schema_html = highlightSql(schema_html);
     $('#schema_'+table_name).addClass('schema').html(schema_html).children('a').bind('click', schemaClick);
-    $('#datapreviews>div').first().siblings().addClass('hidden');              
     data_tables.push(dt); 
    });
 }
@@ -752,6 +761,7 @@ function highlightSql(html) {
 }
 
 function setupDataPreviews() {  
+	$('.data h3').text('Loading this scraper\u2019s datastore\u2026');
 	var tab_src = $('#data-tab-template').html();
 	getTableNames(
 		function(tables){
@@ -761,15 +771,16 @@ function setupDataPreviews() {
 				var tab_context = {tables: r}
 				$('.data_tabs').html(ich.overview_data_tabs(tab_context)).find('i').each(function(i){
 					$(this).append(' ' + pluralise('record', $(this).text()));
-					//	only runs after the last tab has been finished
-					if(i == $('.data_tab').length - 1){
-						setupTabFolding();
-						setupTabClicks();
-					}
 				});
+				setupTabFolding();
+				setupTabClicks();
+				var i = 0;
 				_.each(table_names, function(tn){
-					setDataPreview(tn, tables[tn]);
+					setDataPreview(tn, tables[tn], (i ? false : true ));
+					i++;
 				});
+				$('li.data_tab').eq(0).switchTab();
+				$('.data h3').text('This scraper\u2019s datastore');
 			}); 
 		}
 	);
