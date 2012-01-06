@@ -200,6 +200,7 @@ class Code(models.Model):
     def _buildfromfirsttitle(self):
         assert not self.short_name
         self.short_name = util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
+        assert self.short_name != ''
 
     def last_runevent(self):
         lscraperrunevents = self.scraper.scraperrunevent_set.all().order_by("-run_started")[:1]
@@ -304,6 +305,9 @@ class Code(models.Model):
     def get_repo_path(self):
         if settings.SPLITSCRAPERS_DIR:
             return os.path.join(settings.SPLITSCRAPERS_DIR, self.short_name)
+        # XXX this should either raise an error, or return something, in the case
+        # where SPLITSCRAPERS_DIR isn't set. no idea if there is some real case
+        # where that happens
 
     def get_absolute_url(self):
         from django.contrib.sites.models import Site

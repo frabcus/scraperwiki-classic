@@ -527,18 +527,22 @@ $(function(){
 		});
 	});
 	
-	$('#id_comment').bind('focus', function(){
-		console.log($(this).data('placeholder'));
-		if($(this).val() == $(this).data('placeholder')){
-			$(this).val('').css('color', '#000');
-		} else {
-			$(this).css('color', '#000');
-		}
-	}).bind('blur', function(){
-		if($(this).val() == ''){
-			$(this).val($(this).data('placeholder')).css('color','#666');
-		}
-	}).data('placeholder', $('#id_comment').val()).css('color', '#666');
+	//	Only do magic placeholder stuff if there's actually a
+	//	comment box to work with (box only present for logged in users)
+	if($('#id_comment').length){
+		$('#id_comment').bind('focus', function(){
+			console.log($(this).data('placeholder'));
+			if($(this).val() == $(this).data('placeholder')){
+				$(this).val('').css('color', '#000');
+			} else {
+				$(this).css('color', '#000');
+			}
+		}).bind('blur', function(){
+			if($(this).val() == ''){
+				$(this).val($(this).data('placeholder')).css('color','#666');
+			}
+		}).data('placeholder', $('#id_comment').val()).css('color', '#666');
+	}
 	
 });
 
@@ -595,10 +599,13 @@ function getTableNames(callback){
   var url;
   url = api_url + "datastore/sqlite?format=jsondict&name="+short_name+"&query=SELECT%20name, sql%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
   
-  $.get(url)
+  $.get(url, {}, null, "json")
   .success(function(data) {
     var count_url, tables;
-    if (data.length) {
+    if (typeof(data) == 'object' && data.error) {
+        setDataPreviewWarning(data.error); 
+        $('#header_inner span.totalrows').text("Error");
+    } else if (data.length) {
         tables = _.reduce(_.map(data, function(d) {
             var t = {}
             t[d.name] = d.sql;
@@ -627,7 +634,7 @@ function setDataPreviewWarning(text) {
 
 function getTableColumnNames(table_name, callback){
   qry = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
-  jQuery.get(qry, function(data) {
+  jQuery.get(qry, {}, null, 'json').success( function(data) {
     callback(data.keys);
   });
  
@@ -639,7 +646,7 @@ function getTableRowCounts(tables, callback){
         return "(SELECT COUNT(*) FROM [" + d + "]) AS '"+ d + "'";
       })).join(',');
     count_url = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20" + (encodeURIComponent(sub_queries));
-    return jQuery.get(count_url, function(resp) {
+    return jQuery.get(count_url, {}, null, 'json').success(function(resp) {
         var zipped = _.zip(resp.keys, resp.data[0]);
         callback(_.map(zipped, function(z){
             return {name: z[0], count: z[1]};
@@ -665,7 +672,6 @@ function setDataPreview(table_name, table_schema){
      // get template
                         $('#datapreviews').append(ich.data_preview({table_name: table_name,
                            column_names: column_names}));
-
     var dt = $('#datapreviews #data_preview_'+table_name+' table').dataTable( {
         "bProcessing": true,
         "bServerSide": true,

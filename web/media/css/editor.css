@@ -379,16 +379,19 @@ span.hiddenfields {
 }
 
 .editor_output .tabs .unread {
+	font-family: Verdana;
+	font-size: 9px;
+	color: #fff;
+	background-color: #329e32;
+	text-shadow: 0 1px 0 green;
+	padding: 1px 5px 2px 5px;
 	margin-left: 5px;
-	background: #bad7ba;
-	color: green;
-	padding: 0px 5px;
 	-webkit-border-radius: 20px;
 	-moz-border-radius: 20px;
 	border-radius: 20px;
-	text-shadow: 0 1px 0 #eee;
-	border: 1px solid #8eca8e;
 	display: none;
+	position: relative;
+	top: -1px;
 }
 
 .editor_output div.controls {

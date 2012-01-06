@@ -32,6 +32,8 @@ def get_overdue_scrapers():
 def Nslugify(value):
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
     value = unicode(re.sub('[^\w\s\-]', '', value).strip().lower())
+    if value == '':
+        value = 'u'
     return re.sub('\s+', '_', value)
 
 def SlugifyUniquely(value, model, slugfield="slug", instance=None):
