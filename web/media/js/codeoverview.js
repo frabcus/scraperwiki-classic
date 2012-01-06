@@ -672,7 +672,7 @@ function setDataPreview(table_name, table_schema){
      // get template
                         $('#datapreviews').append(ich.data_preview({table_name: table_name,
                            column_names: column_names}));
-
+	console.log(column_names);
     var dt = $('#datapreviews #data_preview_'+table_name+' table').dataTable( {
         "bProcessing": true,
         "bServerSide": true,
