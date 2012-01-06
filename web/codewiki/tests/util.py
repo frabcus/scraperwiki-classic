@@ -1,10 +1,12 @@
+# -*- coding: utf-8 -*-
+
 from django.test import TestCase
 
 from codewiki.util import SlugifyUniquely
 from codewiki.models import Scraper
 
 class ScraperUtilTests(TestCase):
-    def test_scraper_list(self):
+    def test_short_name_several_same_long_name(self):
         long_title = u'I think this is a very very very very very very very long title'
 
         short_name = SlugifyUniquely(long_title, Scraper, 'short_name')
@@ -27,3 +29,15 @@ class ScraperUtilTests(TestCase):
 
         short_name = SlugifyUniquely(long_title, Scraper, 'short_name')
         self.assertEqual(u'i_think_this_is_a_very_very_very_very_very_very_2', short_name)
+
+    def test_short_name_katakana(self):
+        long_title = u'ギンレイホール'
+        short_name = SlugifyUniquely(long_title, Scraper, 'short_name')
+
+        # check the slug for a Katakana only titled scraper isn't empty
+        self.assertNotEqual(u'', short_name)
+
+        # and (less importantly) check it comes out as 'u', which is what we do
+        # at the moment (not reason it shouldn't change)
+        self.assertEqual(u'u', short_name)
+
