@@ -647,7 +647,6 @@ function getTableRowCounts(tables, callback){
       })).join(',');
     count_url = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20" + (encodeURIComponent(sub_queries));
     return jQuery.get(count_url, {}, null, 'json').success(function(resp) {
-		console.log(resp);
         var zipped = _.zip(resp.keys, resp.data[0]);
         callback(_.map(zipped, function(z){
             return {name: z[0], count: z[1]};
