@@ -304,6 +304,9 @@ class Code(models.Model):
     def get_repo_path(self):
         if settings.SPLITSCRAPERS_DIR:
             return os.path.join(settings.SPLITSCRAPERS_DIR, self.short_name)
+        # XXX this should either raise an error, or return something, in the case
+        # where SPLITSCRAPERS_DIR isn't set. no idea if there is some real case
+        # where that happens
 
     def get_absolute_url(self):
         from django.contrib.sites.models import Site
