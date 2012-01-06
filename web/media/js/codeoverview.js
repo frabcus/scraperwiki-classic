@@ -642,7 +642,12 @@ function setDataPreviewWarning(text) {
 function getTableColumnNames(table_name, callback){
   qry = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
   jQuery.get(qry, {}, null, 'json').success( function(data) {
-    callback(data.keys);
+	if (data.error) {
+        setDataPreviewWarning(data.error); 
+        $('#header_inner span.totalrows').text("Error");
+    } else {
+    	callback(data.keys);
+	}
   });
  
 }
@@ -654,10 +659,15 @@ function getTableRowCounts(tables, callback){
       })).join(',');
     count_url = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20" + (encodeURIComponent(sub_queries));
     return jQuery.get(count_url, {}, null, 'json').success(function(resp) {
-        var zipped = _.zip(resp.keys, resp.data[0]);
-        callback(_.map(zipped, function(z){
-            return {name: z[0], count: z[1]};
-        }));
+		if (resp.error) {
+	        setDataPreviewWarning(resp.error); 
+	        $('#header_inner span.totalrows').text("Error");
+	    } else {
+        	var zipped = _.zip(resp.keys, resp.data[0]);
+        	callback(_.map(zipped, function(z){
+            	return {name: z[0], count: z[1]};
+        		}));
+		}
      });
 }
 
