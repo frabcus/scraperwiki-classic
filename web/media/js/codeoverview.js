@@ -634,7 +634,7 @@ function setDataPreviewWarning(text) {
 
 function getTableColumnNames(table_name, callback){
   qry = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
-  jQuery.get(qry, function(data) {
+  jQuery.get(qry, {}, null, 'json').success( function(data) {
     callback(data.keys);
   });
  
