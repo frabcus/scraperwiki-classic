@@ -611,7 +611,7 @@ function getTableNames(callback){
     var count_url, tables;
     if (typeof(data) == 'object' && data.error) {
         setDataPreviewWarning(data.error); 
-        $('#header_inner span.totalrows').text("Error");
+        $('#header_inner span.totalrows').text("Datastore error");
     } else if (data.length) {
         tables = _.reduce(_.map(data, function(d) {
             var t = {}
@@ -635,7 +635,7 @@ function getTableNames(callback){
 }
 
 function setDataPreviewWarning(text) {
-    $('.data h3').text(text).parent().siblings('.download, .empty').hide();
+    $('.data h3').text('Error loading datastore').parent().siblings('.download, .empty').hide().parent().after('<p class="sqliteconnectionerror">' + text + '</p>');
     $('ul.data_tabs, #datapreviews').hide();
 }
 
@@ -644,7 +644,7 @@ function getTableColumnNames(table_name, callback){
   jQuery.get(qry, {}, null, 'json').success( function(data) {
 	if (data.error) {
         setDataPreviewWarning(data.error); 
-        $('#header_inner span.totalrows').text("Error");
+        $('#header_inner span.totalrows').text("Datastore error");
     } else {
     	callback(data.keys);
 	}
