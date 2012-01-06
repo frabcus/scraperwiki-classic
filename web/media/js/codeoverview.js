@@ -668,7 +668,7 @@ function getTableRowCounts(tables, callback){
     return jQuery.get(count_url, {}, null, 'json').success(function(resp) {
 		if (resp.error) {
 	        setDataPreviewWarning(resp.error); 
-	        $('#header_inner span.totalrows').text("Error");
+	        $('#header_inner span.totalrows').text("Datastore error");
 	    } else {
         	var zipped = _.zip(resp.keys, resp.data[0]);
         	callback(_.map(zipped, function(z){
@@ -687,7 +687,7 @@ function setTotalRowCount(tables){
     }, 0);
 	var $span = $('<span>').text(total_rows).addClass('totalrows').insertBefore('.privacystatus');
     $span.digits();
-    $span.append(total_rows > 0 ? ' records' : ' record');
+    $span.append(total_rows > 1 ? ' records' : ' record');
 }
 
 function setDataPreview(table_name, table_schema, first_table){
