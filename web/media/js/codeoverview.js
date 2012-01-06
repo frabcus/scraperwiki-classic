@@ -527,18 +527,22 @@ $(function(){
 		});
 	});
 	
-	$('#id_comment').bind('focus', function(){
-		console.log($(this).data('placeholder'));
-		if($(this).val() == $(this).data('placeholder')){
-			$(this).val('').css('color', '#000');
-		} else {
-			$(this).css('color', '#000');
-		}
-	}).bind('blur', function(){
-		if($(this).val() == ''){
-			$(this).val($(this).data('placeholder')).css('color','#666');
-		}
-	}).data('placeholder', $('#id_comment').val()).css('color', '#666');
+	//	Only do magic placeholder stuff if there's actually a
+	//	comment box to work with (box only present for logged in users)
+	if($('#id_comment').length){
+		$('#id_comment').bind('focus', function(){
+			console.log($(this).data('placeholder'));
+			if($(this).val() == $(this).data('placeholder')){
+				$(this).val('').css('color', '#000');
+			} else {
+				$(this).css('color', '#000');
+			}
+		}).bind('blur', function(){
+			if($(this).val() == ''){
+				$(this).val($(this).data('placeholder')).css('color','#666');
+			}
+		}).data('placeholder', $('#id_comment').val()).css('color', '#666');
+	}
 	
 });
 
