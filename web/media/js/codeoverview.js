@@ -312,6 +312,13 @@ function reloadScheduleUI(){
 $(function(){
     // globals 
     api_url = $('#id_api_base').val();
+	sqlite_url = api_url + 'datastore/sqlite?'
+	if($('#id_apikey').val() != ''){
+		apikey = $('#id_apikey').val();
+		sqlite_url += 'apikey=' + apikey + '&';
+	} else {
+		apikey = null;
+	}
     short_name = $('#scrapershortname').val();
     data_tables = [];
 
@@ -597,7 +604,7 @@ function setupTabClicks(){
 
 function getTableNames(callback){
   var url;
-  url = api_url + "datastore/sqlite?format=jsondict&name="+short_name+"&query=SELECT%20name, sql%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
+  url = sqlite_url + "format=jsondict&name="+short_name+"&query=SELECT%20name, sql%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
   
   $.get(url, {}, null, "json")
   .success(function(data) {
@@ -633,7 +640,7 @@ function setDataPreviewWarning(text) {
 }
 
 function getTableColumnNames(table_name, callback){
-  qry = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
+  qry = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
   jQuery.get(qry, {}, null, 'json').success( function(data) {
     callback(data.keys);
   });
@@ -645,7 +652,7 @@ function getTableRowCounts(tables, callback){
     sub_queries = (_.map(tables, function(d) {
         return "(SELECT COUNT(*) FROM [" + d + "]) AS '"+ d + "'";
       })).join(',');
-    count_url = api_url + "datastore/sqlite?format=jsonlist&name="+short_name+"&query=SELECT%20" + (encodeURIComponent(sub_queries));
+    count_url = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20" + (encodeURIComponent(sub_queries));
     return jQuery.get(count_url, {}, null, 'json').success(function(resp) {
         var zipped = _.zip(resp.keys, resp.data[0]);
         callback(_.map(zipped, function(z){
