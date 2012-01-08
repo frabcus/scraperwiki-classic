@@ -1,3 +1,17 @@
+//	Avoids the 'event.layerX and event.layerY' warnings in Chrome
+//	http://stackoverflow.com/questions/7825448/webkit-issues-with-event-layerx-and-event-layery
+(function(){
+    // remove layerX and layerY
+    var all = $.event.props,
+        len = all.length,
+        res = [];
+    while (len--) {
+      var el = all[len];
+      if (el != 'layerX' && el != 'layerY') res.push(el);
+    }
+    $.event.props = res;
+}());
+
 // Boilerplate to add CSRF protection headers, taken from https://docs.djangoproject.com/en/1.3/ref/contrib/csrf/
 $(document).ajaxSend(function(event, xhr, settings) {
     function getCookie(name) {
