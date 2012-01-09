@@ -610,53 +610,66 @@ function setupTabClicks(){
 }
 
 function getTableNames(callback){
-  var url;
-  url = sqlite_url + "format=jsondict&name="+short_name+"&query=SELECT%20name, sql%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
+	var url;
+	url = sqlite_url + "format=jsondict&name="+short_name+"&query=SELECT%20name, sql%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
   
-  $.get(url, {}, null, "json")
-  .success(function(data) {
-    var count_url, tables;
-    if (typeof(data) == 'object' && data.error) {
-        setDataPreviewWarning(data.error); 
-        $('#header_inner span.totalrows').text("Datastore error");
-    } else if (data.length) {
-        tables = _.reduce(_.map(data, function(d) {
-            var t = {}
-            t[d.name] = d.sql;
-            return t;
-          }), function(dict, x) {
-              var k = _.keys(x)[0];
-              dict[k] = x[k];
-              return dict;
-          }, {});
-        callback(tables);
-    } else {
-        setDataPreviewWarning("This scraper has no data");
-        $('#header_inner span.totalrows').text("No data");
-    }
-  })
-  .error(function() {
-      setDataPreviewWarning("Sorry, we couldn\u2019t connect to the datastore");
-      $('#header_inner span.totalrows').hide();
-  });
+	$.ajax({
+		type: 'GET',
+		url: url,
+		dataType: 'json',
+		cache: false,
+		success: function(data){
+			var count_url, tables;
+		    if (typeof(data) == 'object' && data.error) {
+		        setDataPreviewWarning(data.error); 
+		        $('#header_inner span.totalrows').text("Datastore error");
+		    } else if (data.length) {
+		        tables = _.reduce(_.map(data, function(d) {
+		            var t = {}
+		            t[d.name] = d.sql;
+		            return t;
+		        }), function(dict, x) {
+		              var k = _.keys(x)[0];
+		              dict[k] = x[k];
+		              return dict;
+		        }, {});
+		        callback(tables);
+		    } else {
+		        setDataPreviewWarning("This scraper has no data", true);
+		        $('#header_inner span.totalrows').text("No data");
+		    }
+		}, error: function(){
+			setDataPreviewWarning("Sorry, we couldn\u2019t connect to the datastore");
+		    $('#header_inner span.totalrows').hide();
+		}
+	});
 }
 
-function setDataPreviewWarning(text) {
-    $('.data h3').text('Error loading datastore').parent().siblings('.download, .empty').hide().parent().after('<p class="sqliteconnectionerror">' + text + '</p>');
+function setDataPreviewWarning(text, warningInHeader) {
+	if(warningInHeader){
+	    $('.data h3').text(text).parent().siblings('.download, .empty').hide();
+	} else {
+	    $('.data h3').text('Error loading datastore').parent().siblings('.download, .empty').hide().parent().after('<p class="sqliteconnectionerror">' + text + '</p>');
+	}
     $('ul.data_tabs, #datapreviews').hide();
 }
 
 function getTableColumnNames(table_name, callback){
-  qry = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
-  jQuery.get(qry, {}, null, 'json').success( function(data) {
-	if (data.error) {
-        setDataPreviewWarning(data.error); 
-        $('#header_inner span.totalrows').text("Datastore error");
-    } else {
-    	callback(data.keys);
-	}
-  });
- 
+	qry = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
+	$.ajax({
+		type: 'GET',
+		url: qry,
+		dataType: 'json',
+		cache: false,
+		success: function(data){
+			if (data.error) {
+		        setDataPreviewWarning(data.error); 
+		        $('#header_inner span.totalrows').text("Datastore error");
+		    } else {
+		    	callback(data.keys);
+			}
+		}
+	});
 }
 
 function getTableRowCounts(tables, callback){
@@ -665,17 +678,23 @@ function getTableRowCounts(tables, callback){
         return "(SELECT COUNT(*) FROM [" + d + "]) AS '"+ d + "'";
       })).join(',');
     count_url = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20" + (encodeURIComponent(sub_queries));
-    return jQuery.get(count_url, {}, null, 'json').success(function(resp) {
-		if (resp.error) {
-	        setDataPreviewWarning(resp.error); 
-	        $('#header_inner span.totalrows').text("Datastore error");
-	    } else {
-        	var zipped = _.zip(resp.keys, resp.data[0]);
-        	callback(_.map(zipped, function(z){
-            	return {name: z[0], id: z[0].replace(/\s+/g, ''), count: z[1]};
-        		}));
+	return $.ajax({
+		type: 'GET',
+		url: count_url,
+		dataType: 'json',
+		cache: false,
+		success: function(resp){
+			if (resp.error) {
+		        setDataPreviewWarning(resp.error); 
+		        $('#header_inner span.totalrows').text("Datastore error");
+		    } else {
+	        	var zipped = _.zip(resp.keys, resp.data[0]);
+	        	callback(_.map(zipped, function(z){
+	            	return {name: z[0], id: z[0].replace(/\s+/g, ''), count: z[1]};
+	        	}));
+			}
 		}
-     });
+	});
 }
 
 function setTotalRowCount(tables){
