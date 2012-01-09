@@ -174,7 +174,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 logger.warning("connection to dataproxy socket.error: "+str(firstmessage))
             if "error" in firstmessage:
                 logger.warning("connection to dataproxy refused error: "+str(firstmessage["error"]))
-                self.connection.close()
+                self.connection.shutdown()
                 return
             
             logger.debug("connection made to dataproxy for %s %s - %s" % (dataauth, short_name, runID))
