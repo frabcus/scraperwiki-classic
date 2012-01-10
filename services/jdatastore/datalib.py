@@ -108,7 +108,7 @@ class SQLiteDatabase(object):
         self.db_process_success({"error":"dataproxy.process: %s" % str(failure)})
             
     def process(self, request):
-        logger.debug("doing request %s" % str(request))
+        #logger.debug("doing request %s" % str(request)[:1000])
         if request["maincommand"] == 'save_sqlite':
             res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
             logger.debug("save_sqlite response %s" % str(res))
@@ -394,6 +394,8 @@ class SQLiteDatabase(object):
             ssinfo = self.sqlitesaveinfo[swdatatblname]
         
         nrecords = 0
+        self.sqliteexecute("BEGIN TRANSACTION", None)
+        logger.debug("begintrans for client#%d records %d" % (self.Dclientnumber, len(data)))
         for ldata in data:
             newcols = ssinfo.newcolumns(ldata)
             if newcols:
@@ -410,11 +412,17 @@ class SQLiteDatabase(object):
                         return lres
                     res.update(lres)
             
-            lres = ssinfo.insertdata(ldata)
+            values = [ ldata.get(k)  for k in ssinfo.swdatakeys ]
+            lres = self.sqliteexecute(ssinfo.sqdatatemplate, values)
+
             if "error" in lres:  
                 return lres
             nrecords += 1
-        self.m_sqlitedbconn.commit()
+        logger.debug("about to endtrans for client#%d" % (self.Dclientnumber))
+        self.sqliteexecute("END TRANSACTION", None)
+        logger.debug("endtrans for client#%d" % (self.Dclientnumber))
+        #self.m_sqlitedbconn.commit()
+        
         res["nrecords"] = nrecords
         res["status"] = 'Data record(s) inserted or replaced'
         self.cstate = ''
@@ -432,7 +440,7 @@ class SqliteSaveInfo:
     def sqliteexecute(self, sqlquery, data=None):
         res = self.database.sqliteexecute(sqlquery, data)
         if "error" in res:
-            logger.warning("%s  %s" % (self.database.short_name, str(res)))
+            logger.warning("%s  %s" % (self.database.short_name, str(res)[:1000]))
         return res
     
     def rebuildinfo(self):
@@ -518,11 +526,8 @@ class SqliteSaveInfo:
             if "error" in lres:  
                 if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
                     return lres
-                logger.info("%s:  %s" % (self.database.short_name, str(lres)))
+                logger.info("%s:  %s" % (self.database.short_name, str(lres)[:1000]))
             res["droppedindex"] = idxname
         return res
             
-    def insertdata(self, data):
-        values = [ data.get(k)  for k in self.swdatakeys ]
-        return self.sqliteexecute(self.sqdatatemplate, values)
 
