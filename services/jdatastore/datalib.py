@@ -430,7 +430,7 @@ class SqliteSaveInfo:
         self.sqdatatemplate = ""
 
     def sqliteexecute(self, sqlquery, data=None):
-        res = self.database.sqliteexecute(sqlquery, data, None)
+        res = self.database.sqliteexecute(sqlquery, data)
         if "error" in res:
             logger.warning("%s  %s" % (self.database.short_name, str(res)))
         return res
