@@ -313,10 +313,12 @@ class SQLiteDatabase(object):
         self.cstate, self.etimestate = 'sqliteexecute', time.time()
         self.progressticks = 0
         try:
+            logger.info("client#%d sqlexecute %s" % (self.Dclientnumber, str(sqlquery)[:100]))  
             if data:
                 self.m_sqlitedbcursor.execute(sqlquery, data)  # handle "(?,?,?)", (val, val, val)
             else:
                 self.m_sqlitedbcursor.execute(sqlquery)
+            logger.info("client#%d end-sqlexecute %f" % (self.Dclientnumber, time.time() - self.etimestate))  
 
                 # take a copy of the clientforresponse as it may be disconnected by the other thread
             lclientforresponse = self.clientforresponse
