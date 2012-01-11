@@ -53,7 +53,7 @@ def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
     return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
     
 
-
+#http://twistedmatrix.com/documents/current/core/howto/producers.html
 class SQLiteDatabase(object):
 
     def __init__(self, short_name, short_name_dbreadonly, attachlist):
@@ -82,18 +82,18 @@ class SQLiteDatabase(object):
         self.clientforresponse = None
 
     def close(self):
-        logger.debug("calling close on database for client#%d" % self.Dclientnumber)
+        logger.debug("client#%d calling close on database" % self.Dclientnumber)
         try:
             if self.m_sqlitedbcursor:
                 self.m_sqlitedbcursor.close()
             if self.m_sqlitedbconn:
                 self.m_sqlitedbconn.close()
         except Exception, e:
-            logger.warning("close database error: %s" % str(e))
+            logger.warning("client#%d close database error: %s" % (self.Dclientnumber, str(e)))
             
             
     def db_process_success(self, res):
-        logger.info("completed client#%d process: %s" % (self.Dclientnumber, str(res)[:50]))
+        logger.info("client#%d completed process: %s" % (self.Dclientnumber, str(res)[:50]))
         self.factory.releasedbprocess(self)
         lclientforresponse = self.clientforresponse  # thread protection for value setting to None
         if lclientforresponse:
@@ -397,7 +397,7 @@ class SQLiteDatabase(object):
         
         nrecords = 0
         self.sqliteexecute("BEGIN TRANSACTION", None)
-        logger.debug("begintrans for client#%d records %d" % (self.Dclientnumber, len(data)))
+        logger.debug("client#%d begintrans for records %d" % (self.Dclientnumber, len(data)))
         for ldata in data:
             newcols = ssinfo.newcolumns(ldata)
             if newcols:
@@ -420,9 +420,9 @@ class SQLiteDatabase(object):
             if "error" in lres:  
                 return lres
             nrecords += 1
-        logger.debug("about to endtrans for client#%d" % (self.Dclientnumber))
+        logger.debug("client#%d about to endtrans" % (self.Dclientnumber))
         self.sqliteexecute("END TRANSACTION", None)
-        logger.debug("endtrans for client#%d" % (self.Dclientnumber))
+        logger.debug("client#%d endtrans" % (self.Dclientnumber))
         #self.m_sqlitedbconn.commit()
         
         res["nrecords"] = nrecords

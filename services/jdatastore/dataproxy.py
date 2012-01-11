@@ -41,8 +41,29 @@ from twisted.internet import reactor, protocol, task
 from twisted.protocols import basic
 from twisted.internet import defer
 from twisted.internet.threads import deferToThread
+from twisted.internet.interfaces import IPullProducer
+from twisted.internet.error import ConnectionDone
+from zope.interface import implements
+
 
 allowed_ips = ['127.0.0.1']
+
+
+class PullProducer(object):
+    implements(IPullProducer)
+
+    def __init__(self, ):
+        self.toProduce = toProduce
+
+    def start(self, consumer):
+        self.consumer = consumer
+        self.consumer.registerProducer(self, False)
+
+    def resumeProducing(self):
+        self.consumer.write(self.toProduce.pop(0))
+        if not self.toProduce:
+            self.consumer.unregisterProducer()
+                    
 
 class DatastoreProtocol(protocol.Protocol):
 
@@ -65,7 +86,7 @@ class DatastoreProtocol(protocol.Protocol):
     def connectionMade(self):
         self.clienttype = 'justconnected'
         self.factory.clientConnectionMade(self)
-        logger.info("Connection made client#%d" % self.clientnumber)
+        logger.info("client#%d connection made" % self.clientnumber)
         try:
             socket = self.transport.getHandle()
             if not socket.getpeername()[0] in allowed_ips:
@@ -76,7 +97,10 @@ class DatastoreProtocol(protocol.Protocol):
             raise e
         
     def connectionLost(self, reason):
-        logger.info("Connection lost client#%d reason:%s" % (self.clientnumber, reason))
+        if reason.type  == ConnectionDone and reason.getErrorMessage() == 'Connection was closed cleanly.':
+            logger.info("client#%d connection closed cleanly" % (self.clientnumber))
+        else:
+            logger.warning("client#%d connection lost reason:%s" % (self.clientnumber, str(reason)))
         self.factory.clientConnectionLost(self)
         self.clienttype == 'connectionlost'
 
@@ -102,7 +126,7 @@ class DatastoreProtocol(protocol.Protocol):
                 if aattach:
                     aa = aattach.split(",")
                     self.dbprocessrequest["attachlist"].append({"name":aa[0], "asname":(len(aa) == 2 and aa[1] or None)})
-            logger.info("Connection client#%d is API query: %s " % (self.clientnumber, self.dbprocessrequest["sqlquery"][:50]))
+            logger.info("client#%d connection is API query: %s " % (self.clientnumber, self.dbprocessrequest["sqlquery"][:50]))
             self.factory.addwaitingclient(self)
             
         elif self.httpgetpath == "/scrapercall" and "x-scrapername:" in self.httpheadersmap and self.httppostbuffer:
@@ -111,11 +135,11 @@ class DatastoreProtocol(protocol.Protocol):
             self.short_name_dbreadonly = False
             self.progress_ticks = 'yes'
             self.dbprocessrequest = httppostmap
-            logger.info("Connection client#%d is scrapercall query: %s" % (self.clientnumber, self.dbprocessrequest["sqlquery"][:50]))
+            logger.info("client#%d connection is scrapercall query: %s" % (self.clientnumber, self.dbprocessrequest["sqlquery"][:50]))
             self.factory.addwaitingclient(self)
             
         elif self.httpgetpath == "/status":
-            logger.info("Connection client#%d is status query" % (self.clientnumber))
+            logger.info("client#%d connection is status query" % (self.clientnumber))
             self.transport.write('There are %d clients connected\n' % len(self.factory.clients))
             for client in self.factory.clients:
                 self.transport.write("#%d %s " % (client.clientnumber, client.clienttype))
@@ -128,7 +152,7 @@ class DatastoreProtocol(protocol.Protocol):
             self.transport.loseConnection()
 
         else:
-            logger.info("Connection client#%d is unrecognized; path:%s" % (self.clientnumber, self.httpgetpath))
+            logger.info("client#%d connection is unrecognized; path:%s" % (self.clientnumber, self.httpgetpath))
             self.transport.write('Hello there\n')
             if self.httppostbuffer:
                 self.transport.write('received post body size: %d\n' % len(self.httppostbuffer.getvalue()))
@@ -181,14 +205,14 @@ class DatastoreProtocol(protocol.Protocol):
         logger.debug(firstmessage)
         self.transport.write(json.dumps(firstmessage)+'\n')
         
-        logger.info("Socket connection opened client#%d  short_name:%s" % (self.clientnumber, self.short_name))
+        logger.info("client#%d socket connection opened: short_name:%s" % (self.clientnumber, self.short_name))
         self.short_name_dbreadonly = (self.dataauth == "fromfrontend") or (self.dataauth == "draft" and self.short_name)
         self.clienttype = "dataproxy_socketmode"
 
 
     # incoming to this connection
     def dataReceived(self, srec):
-        logger.debug("client#%d rec: %s" % (self.clientnumber, str([srec])[:200]))
+        #logger.debug("client#%d rec: %s" % (self.clientnumber, str([srec])[:200]))
         self.sbufferclient.append(srec)
         while self.clienttype in ["justconnected", "httpget_headers", "dataproxy_socketmode"]:
             ssrec = self.sbufferclient[-1].split("\n", 1)  # multiple strings if a "\n" exists (\r precedes \n)
@@ -210,7 +234,7 @@ class DatastoreProtocol(protocol.Protocol):
     # incoming to this connection
     # even the socket connections from the uml are initialized with a GET line 
     def lineReceived(self, line):
-        logger.debug("client#%d line: %s" % (self.clientnumber, line))
+        #logger.debug("client#%d line: %s" % (self.clientnumber, line[:1000]))
         if self.clienttype == 'justconnected':
             if line[:4] == 'GET ' or line[:5] == 'POST ':
                 self.clienttype = "httpget_headers"
@@ -307,7 +331,7 @@ class DatastoreFactory(protocol.ServerFactory):
         self.lc.start(5)
 
     def addwaitingclient(self, client):
-        logger.info("adding client#%d to clientswaitingforswconn" % client.clientnumber)
+        logger.info("client#%d adding to clientswaitingforswconn" % client.clientnumber)
         assert client not in self.clientswaitingforswconn
         self.clientswaitingforswconn.append(client)
         reactor.callLater(0, self.processnextwaitingclient)
@@ -319,7 +343,7 @@ class DatastoreFactory(protocol.ServerFactory):
             return
             
         client = self.clientswaitingforswconn.pop(0)
-        logger.info("Open process on client#%d" % client.clientnumber)
+        logger.info("client#%d open process" % client.clientnumber)
         client.db = datalib.SQLiteDatabase(client.short_name, client.short_name_dbreadonly, client.dbprocessrequest.get("attachlist", []))
         client.db.Dclientnumber = client.clientnumber
         client.db.clientforresponse = client
@@ -341,13 +365,13 @@ class DatastoreFactory(protocol.ServerFactory):
         
     def clientConnectionLost(self, client):
         if client.db:
-            logger.info("Disconnecting running db from client#%d" % (client.clientnumber))
+            logger.info("client#%d disconnecting running db" % (client.clientnumber))
             client.db.clientforresponse = None
 
         if client in self.clients:
-            logger.info("Removing client#%d" % (client.clientnumber))
+            logger.info("client#%d removing" % (client.clientnumber))
             self.clients.remove(client)  # main list
         else:
-            logger.error("Client#%d not in clientlist!!!" % client.clientnumber)
+            logger.error("client#%d not in clientlist!!!" % client.clientnumber)
 
         
