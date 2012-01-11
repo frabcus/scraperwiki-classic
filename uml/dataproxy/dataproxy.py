@@ -4,8 +4,6 @@ import BaseHTTPServer
 import ConfigParser
 import SocketServer
 import cgi
-import datalib
-import datetime
 import grp
 import hashlib
 import optparse
@@ -18,7 +16,6 @@ import time
 import traceback
 import urllib
 import urlparse
-import traceback
 
 import logging
 import logging.config
@@ -31,6 +28,9 @@ try:
     import json
 except:
     import simplejson as json
+
+# ScraperWiki
+import datalib
 
 # note: there is a symlink from /var/www/scraperwiki to the scraperwiki directory
 # which allows us to get away with being crap with the paths
@@ -174,7 +174,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 logger.warning("connection to dataproxy socket.error: "+str(firstmessage))
             if "error" in firstmessage:
                 logger.warning("connection to dataproxy refused error: "+str(firstmessage["error"]))
-                self.connection.close()
+                self.connection.shutdown(socket.SHUT_RDWR)
                 return
             
             logger.debug("connection made to dataproxy for %s %s - %s" % (dataauth, short_name, runID))
