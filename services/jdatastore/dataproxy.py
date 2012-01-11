@@ -7,7 +7,7 @@ import socket
 import traceback
 import urllib
 import traceback
-import json
+import json, csv
 import StringIO
 
 import logging
@@ -18,6 +18,8 @@ except:
     pass
 
 import datalib
+
+
 
 # note: there is a symlink from /var/www/scraperwiki to the scraperwiki directory
 # which allows us to get away with being crap with the paths
@@ -49,21 +51,55 @@ from zope.interface import implements
 allowed_ips = ['127.0.0.1']
 
 
-class PullProducer(object):
+class DataPullProducer(object):
     implements(IPullProducer)
 
-    def __init__(self, ):
-        self.toProduce = toProduce
-
-    def start(self, consumer):
-        self.consumer = consumer
-        self.consumer.registerProducer(self, False)
-
+    def __init__(self, client):
+        self.client = client
+        if self.client.clienttype == 'httpgetprocessing' and self.client.httpgetparams.get("format") == "csv":
+            self.csvwriter = csv.writer(self.client.transport, dialect='excel')
+        else:
+            self.csvwriter = None
+            
     def resumeProducing(self):
-        self.consumer.write(self.toProduce.pop(0))
-        if not self.toProduce:
-            self.consumer.unregisterProducer()
-                    
+        nrows = 10
+        if not self.client.db:
+            logger.warning("client#%d has no db on resumeProducing" % self.client.clientnumber)
+            return self.stopProducing()
+        rows = self.client.db.FetchRows(nrows)
+        bstillproducing = (len(rows) == nrows)
+        
+        logger.debug("client#%d pullproducing %d byte-object" % (self.client.clientnumber, sys.getsizeof(rows)))
+        if self.csvwriter:
+            def stringnot(v):
+                if v == None:
+                    return ""
+                if type(v) == buffer:
+                    v = unicode(v)
+                if type(v) in [unicode, str]:
+                    return v.encode("utf-8")
+                return v
+            for row in rows:
+                self.csvwriter.writerow([ stringnot(v)  for v in row ])
+        else:
+            res = { "data":rows }
+            if bstillproducing:
+                res["stillproducing"] = "yes"
+            json.dump(res, self.client.transport)
+            self.client.transport.write("\n")
+        
+        if not bstillproducing:
+            self.stopProducing()
+            
+    def stopProducing(self):
+        if self.client.db:
+            self.client.db.cstate = ''
+        self.client.factory.releasedbprocess(self.client)
+        self.client.transport.unregisterProducer()
+        if self.client.clienttype == 'httpgetprocessing':
+            self.client.transport.loseConnection()
+
+
 
 class DatastoreProtocol(protocol.Protocol):
 
@@ -72,6 +108,7 @@ class DatastoreProtocol(protocol.Protocol):
         self.clientsessionbegan = datetime.datetime.now()
         self.sbufferclient = [ ] # incoming messages from the client
         self.db = None
+        self.datapullproducer = None
         self.Dattached = [ ] # attached function calls (for debug purposes)
         self.clienttype = 'justconstructed'
         self.dbprocessrequest = None
@@ -147,7 +184,7 @@ class DatastoreProtocol(protocol.Protocol):
                     self.transport.write(" waiting to process %s " % str(client.dbprocessrequest)[:100])
                 ldb = client.db
                 if ldb:
-                    self.transport.write(" processing %s attached: %s" % (str(ldb.short_name), str(ldb.attached)))
+                    self.transport.write(" %s processing %s attached: %s" % (ldb.cstate, str(ldb.short_name), str(ldb.attached)))
                 self.transport.write("\n")
             self.transport.loseConnection()
 
@@ -318,6 +355,30 @@ class DatastoreProtocol(protocol.Protocol):
             json.dump(res, self.transport)
             self.transport.write('\n')
 
+        
+    def db_process_success(self, res):
+        logger.info("client#%d completed process: %s" % (self.clientnumber, str(res)[:50]))
+        if res.get("stillproducing") == "yes":
+            #request["maincommand"] == "sqliteexecute"
+            self.db.cstate = "fetchrowsproducing"
+            self.datapullproducer = DataPullProducer(self)
+            if self.datapullproducer.csvwriter:
+                self.datapullproducer.csvwriter.writerow([ k.encode('utf-8')  for k in res.get("keys", []) ])
+            else:
+                json.dump(res, self.transport)
+                self.transport.write("\n")
+            self.transport.registerProducer(self.datapullproducer, False)  # must be done last
+            
+        else:
+            self.factory.releasedbprocess(self)
+            self.sendResponse(res)
+
+
+        # the error can be called after success has been called by same deferred?  how?
+    def db_process_error(self, failure):
+        logger.warning("client#%d process failure %s" % (self.clientnumber, str(failure)[:900]))
+        self.db_process_success({"error":"dataproxy.process: %s" % str(failure)})
+
 
 class DatastoreFactory(protocol.ServerFactory):
     protocol = DatastoreProtocol
@@ -346,18 +407,21 @@ class DatastoreFactory(protocol.ServerFactory):
         logger.info("client#%d open process" % client.clientnumber)
         client.db = datalib.SQLiteDatabase(client.short_name, client.short_name_dbreadonly, client.dbprocessrequest.get("attachlist", []))
         client.db.Dclientnumber = client.clientnumber
+        
         client.db.clientforresponse = client
-        client.db.factory = client.factory
+        
         d = deferToThread(client.db.process, client.dbprocessrequest)
         client.dbprocessrequest = None
-        d.addCallback(client.db.db_process_success)
-        d.addErrback(client.db.db_process_error)
+        d.addCallback(client.db_process_success)
+        d.addErrback(client.db_process_error)
         
-    def releasedbprocess(self, db):
-        if db.clientforresponse:
-            db.clientforresponse.db = None
-        db.close()
-
+        
+    def releasedbprocess(self, client):
+        db = client.db
+        client.db = None
+        if db:
+            db.close()
+        
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount
         self.clients.append(client)

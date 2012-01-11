@@ -92,20 +92,6 @@ class SQLiteDatabase(object):
             logger.warning("client#%d close database error: %s" % (self.Dclientnumber, str(e)))
             
             
-    def db_process_success(self, res):
-        logger.info("client#%d completed process: %s" % (self.Dclientnumber, str(res)[:50]))
-        self.factory.releasedbprocess(self)
-        lclientforresponse = self.clientforresponse  # thread protection for value setting to None
-        if lclientforresponse:
-            lclientforresponse.sendResponse(res)
-        else:
-            logger.debug("client#%d has no connection" % (self.Dclientnumber))
-
-
-        # the error can be called after success has been called by same deferred?  how?
-    def db_process_error(self, failure):
-        logger.warning("client#%d process failure %s" % (self.Dclientnumber, str(failure)[:900]))
-        self.db_process_success({"error":"dataproxy.process: %s" % str(failure)})
             
     def process(self, request):
         #logger.debug("doing request %s" % str(request)[:1000])
@@ -132,8 +118,10 @@ class SQLiteDatabase(object):
                         ares = self.sqliteattach(req["name"], req["asname"])
                         if "error" in ares:
                             return ares
+            self.cstate, self.etimestate = 'sqliteexecute', time.time()
             res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"])
-
+            res["stillproducing"] = "yes"
+            
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
             logger.debug(json.dumps(res))
@@ -296,6 +284,7 @@ class SQLiteDatabase(object):
                  return 2
         logger.debug("client#%d progress %d time=%.2f" % (self.Dclientnumber, self.progressticks, time.time() - self.etimestate))
         
+            # should be using IBodyPushProducer for this cycle
         lclientforresponse = self.clientforresponse
         if not lclientforresponse:
             logger.info("client#%d terminating progress" % (self.Dclientnumber))  # as nothing to receive the result anyway
@@ -303,14 +292,12 @@ class SQLiteDatabase(object):
         elif lclientforresponse.progress_ticks == "yes":
             jtickline = json.dumps({"progresstick":self.progressticks, "timeseconds":time.time() - self.etimestate})+"\n"
             reactor.callFromThread(lclientforresponse.transport.write, jtickline)
-            # instead of lclientforresponse.transport.write(jtickline)
 
         return 0  # continue
         
         
     def sqliteexecute(self, sqlquery, data):
         self.establishconnection(True)
-        self.cstate, self.etimestate = 'sqliteexecute', time.time()
         self.progressticks = 0
         try:
             logger.info("client#%d sqlexecute %s" % (self.Dclientnumber, str(sqlquery)[:100]))  
@@ -326,46 +313,7 @@ class SQLiteDatabase(object):
                 return {"error":"client must have disconnected"}
 
             keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
-            
-                    # attempt to stream out the request (somehow it gets batched up somewhere)
-            if lclientforresponse.clienttype == 'httpgetprocessing' and lclientforresponse.httpgetparams.get("format") == "csv":
-                sbuff = StringIO.StringIO()
-                csvwriter = csv.writer(sbuff, dialect='excel')
-                csvwriter.writerow([ k.encode('utf-8')  for k in keys ])
-                reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
-                time.sleep(3.5)
-                def stringnot(v):
-                    if v == None:
-                        return ""
-                    if type(v) == buffer:
-                        v = unicode(v)
-                    if type(v) in [unicode, str]:
-                        return v.encode("utf-8")
-                    return v
-                irowschunk = 0
-                for row in self.m_sqlitedbcursor:
-                    csvwriter.writerow([ stringnot(v)  for v in row ])
-                    irowschunk += 1
-                    if irowschunk == 100:
-                        reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
-                        sbuff = StringIO.StringIO()
-                        csvwriter = csv.writer(sbuff, dialect='excel')
-                        irowschunk = 0
-                        time.sleep(3.5)  # to prove it is streaming
-                reactor.callFromThread(lclientforresponse.transport.write, sbuff.getvalue())
-                return {"status":"csv case done"}
-            
-            
-            rows = []
-            for r in self.m_sqlitedbcursor:
-                row = []
-                for c in r:
-                    if type(c) == buffer:
-                        row.append( unicode(c) )
-                    else:
-                        row.append(c)
-                rows.append(row)
-            arg = {"keys":keys, "data": rows} 
+            arg = {"keys":keys, "data":[] }   # data empty for filling in in another function
 
         except sqlite3.Error, e:
             arg = {"error":"sqliteexecute: sqlite3.Error: %s" % str(e)}
@@ -375,7 +323,6 @@ class SQLiteDatabase(object):
             logger.error(arg["error"])
         arg["progressticks"] = self.progressticks
         arg["timeseconds"] = time.time() - self.etimestate
-        self.cstate = ''
         return arg
 
 
@@ -416,7 +363,6 @@ class SQLiteDatabase(object):
             
             values = [ ldata.get(k)  for k in ssinfo.swdatakeys ]
             lres = self.sqliteexecute(ssinfo.sqdatatemplate, values)
-
             if "error" in lres:  
                 return lres
             nrecords += 1
@@ -431,6 +377,22 @@ class SQLiteDatabase(object):
         return res
 
 
+    def FetchRows(self, nrows=-1):
+        rows = []
+        for r in self.m_sqlitedbcursor:
+            row = []
+            for c in r:
+                if type(c) == buffer:
+                    row.append( unicode(c) )
+                else:
+                    row.append(c)
+            rows.append(row)
+            if nrows != -1 and len(rows) == nrows:
+                break
+        return rows
+
+
+
 class SqliteSaveInfo:
     def __init__(self, database, swdatatblname):
         self.database = database
@@ -439,17 +401,18 @@ class SqliteSaveInfo:
         self.swdatatypes = [  ]
         self.sqdatatemplate = ""
 
-    def sqliteexecute(self, sqlquery, data=None):
+    def sqliteexecuteSS(self, sqlquery, data=None):
         res = self.database.sqliteexecute(sqlquery, data)
         if "error" in res:
             logger.warning("%s  %s" % (self.database.short_name, str(res)[:1000]))
+        res["data"] = self.database.FetchRows()
         return res
     
     def rebuildinfo(self):
-        if not self.sqliteexecute("select * from main.sqlite_master where name=?", (self.swdatatblname,))['data']:
+        if not self.sqliteexecuteSS("select * from main.sqlite_master where name=?", (self.swdatatblname,))['data']:
             return False
 
-        tblinfo = self.sqliteexecute("PRAGMA main.table_info(`%s`)" % self.swdatatblname)
+        tblinfo = self.sqliteexecuteSS("PRAGMA main.table_info(`%s`)" % self.swdatatblname)
             # there's a bug:  PRAGMA main.table_info(swdata) returns the schema for otherdatabase.swdata 
             # following an attach otherdatabase where otherdatabase has a swdata and main does not
         
@@ -466,7 +429,7 @@ class SqliteSaveInfo:
         # coldef = coldef[:1]  # just put one column in; the rest could be altered -- to prove it's good
         scoldef = ", ".join(["`%s` %s" % col  for col in coldef])
                 # used to just add date_scraped in, but without it can't create an empty table
-        self.sqliteexecute("create table main.`%s` (%s)" % (self.swdatatblname, scoldef))
+        self.sqliteexecuteSS("create table main.`%s` (%s)" % (self.swdatatblname, scoldef))
     
     def newcolumns(self, data):
         newcols = [ ]
@@ -486,10 +449,10 @@ class SqliteSaveInfo:
         return newcols
 
     def addnewcolumn(self, k, vt):
-        self.sqliteexecute("alter table main.`%s` add column `%s` %s" % (self.swdatatblname, k, vt))
+        self.sqliteexecuteSS("alter table main.`%s` add column `%s` %s" % (self.swdatatblname, k, vt))
 
     def findclosestindex(self, unique_keys):
-        idxlist = self.sqliteexecute("PRAGMA main.index_list(`%s`)" % self.swdatatblname)  # [seq,name,unique]
+        idxlist = self.sqliteexecuteSS("PRAGMA main.index_list(`%s`)" % self.swdatatblname)  # [seq,name,unique]
         uniqueindexes = [ ]
         if 'error' in idxlist:
             return None, None
@@ -497,7 +460,7 @@ class SqliteSaveInfo:
         for idxel in idxlist["data"]:
             if idxel[2]:
                 idxname = idxel[1]
-                idxinfo = self.sqliteexecute("PRAGMA main.index_info(`%s`)" % idxname) # [seqno,cid,name]
+                idxinfo = self.sqliteexecuteSS("PRAGMA main.index_info(`%s`)" % idxname) # [seqno,cid,name]
                 idxset = set([ a[2]  for a in idxinfo["data"] ])
                 idxoverlap = len(idxset.intersection(unique_keys))
                 uniqueindexes.append((idxoverlap, idxname, idxset))
@@ -516,15 +479,15 @@ class SqliteSaveInfo:
                 istart = int(mnum.group(1))
         for i in range(10000):
             newidxname = "%s_index%d" % (self.swdatatblname, istart+i)
-            if not self.sqliteexecute("select name from main.sqlite_master where name=?", (newidxname,))['data']:
+            if not self.sqliteexecuteSS("select name from main.sqlite_master where name=?", (newidxname,))['data']:
                 break
             
         res = { "newindex": newidxname }
-        lres = self.sqliteexecute("create unique index `%s` on `%s` (%s)" % (newidxname, self.swdatatblname, ",".join(["`%s`"%k  for k in unique_keys])))
+        lres = self.sqliteexecuteSS("create unique index `%s` on `%s` (%s)" % (newidxname, self.swdatatblname, ",".join(["`%s`"%k  for k in unique_keys])))
         if "error" in lres:  
             return lres
         if idxname:
-            lres = self.sqliteexecute("drop index main.`%s`" % idxname)
+            lres = self.sqliteexecuteSS("drop index main.`%s`" % idxname)
             if "error" in lres:  
                 if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
                     return lres
