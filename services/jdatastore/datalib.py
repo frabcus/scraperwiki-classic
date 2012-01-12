@@ -284,13 +284,15 @@ class SQLiteDatabase(object):
                  return 2
         logger.debug("client#%d progress %d time=%.2f" % (self.Dclientnumber, self.progressticks, time.time() - self.etimestate))
         
-            # should be using IBodyPushProducer for this cycle
+            # looks like should be using IBodyPushProducer for this cycle
+            # but prob couldn't work as we are in a deferred thread here
         lclientforresponse = self.clientforresponse
         if not lclientforresponse:
             logger.info("client#%d terminating progress" % (self.Dclientnumber))  # as nothing to receive the result anyway
             return 3
         elif lclientforresponse.progress_ticks == "yes":
             jtickline = json.dumps({"progresstick":self.progressticks, "timeseconds":time.time() - self.etimestate})+"\n"
+                # should this be using IPushProducer?
             reactor.callFromThread(lclientforresponse.transport.write, jtickline)
 
         return 0  # continue

@@ -50,6 +50,7 @@ from zope.interface import implements
 
 allowed_ips = ['127.0.0.1']
 
+nproductionrowbatch = 600
 
 class DataPullProducer(object):
     implements(IPullProducer)
@@ -60,16 +61,45 @@ class DataPullProducer(object):
             self.csvwriter = csv.writer(self.client.transport, dialect='excel')
         else:
             self.csvwriter = None
+        self.producedrows = 0
+        self.producedbatches = 0
             
+    def firstProduction(self, res):
+        self.keys = res.get("keys", [])
+        self.format = self.client.httpgetparams.get("format", "jsondict")
+        
+        if self.csvwriter:
+            self.csvwriter.writerow([ k.encode('utf-8')  for k in self.keys ])
+        elif self.client.httpgetpath == "/scrapercall" or self.client.clienttype == "dataproxy_socketmode":
+            json.dump(res, self.client.transport)
+            self.client.transport.write("\n")
+        elif self.client.clienttype == "httpgetprocessing":
+            if "callback" in self.client.httpgetparams:
+                self.client.transport.write("%s(" % self.client.httpgetparams["callback"])
+            if self.format == "jsondict":
+                self.bfirstdata = True
+            elif self.format == "jsonlist":
+                self.client.transport.write("{ keys:")
+                json.dump(self.keys, self.client.transport)
+                self.client.transport.write(", data:")
+                self.bfirstdata = True
+            elif self.format == "htmltable":
+                self.client.transport.write("<table>\n")
+        else:
+            logger.warning("client#%d unexpected clienttype %s" % (self.client.clientnumber, self.client.clienttype))
+
+# make the client stop producing delay by one call or find why the cutoff
+
     def resumeProducing(self):
-        nrows = 10
         if not self.client.db:
             logger.warning("client#%d has no db on resumeProducing" % self.client.clientnumber)
             return self.stopProducing()
-        rows = self.client.db.FetchRows(nrows)
-        bstillproducing = (len(rows) == nrows)
+        rows = self.client.db.FetchRows(nproductionrowbatch)
+        bstillproducing = (len(rows) == nproductionrowbatch)
+        self.producedrows += len(rows)
+        self.producedbatches += 1
         
-        logger.debug("client#%d pullproducing %d byte-object" % (self.client.clientnumber, sys.getsizeof(rows)))
+        logger.debug("client#%d producedrows %d producedbatches %d byte-object %d" % (self.client.clientnumber, self.producedrows, self.producedbatches, sys.getsizeof(rows)))
         if self.csvwriter:
             def stringnot(v):
                 if v == None:
@@ -81,14 +111,49 @@ class DataPullProducer(object):
                 return v
             for row in rows:
                 self.csvwriter.writerow([ stringnot(v)  for v in row ])
-        else:
-            res = { "data":rows }
+                
+        elif self.client.httpgetpath == "/scrapercall" or self.client.clienttype == "dataproxy_socketmode":
+            res = { "data":rows, "producedrows":self.producedrows, "producedbatches":self.producedbatches }
+                # shouldn't be doing this if progress_ticks!=yes, which will be case with non-python languages for now
             if bstillproducing:
                 res["stillproducing"] = "yes"
             json.dump(res, self.client.transport)
             self.client.transport.write("\n")
-        
+            
+        elif self.client.clienttype == "httpgetprocessing":
+            if self.format == "jsondict" or self.format == "jsonlist":
+                if self.bfirstdata:
+                    self.client.transport.write("[")
+                    self.bfirstdata = False
+                elif rows:
+                    self.client.transport.write(",")
+            if self.format == "jsondict":
+                self.client.transport.write(",".join(json.dumps(dict(zip(self.keys, row)))  for row in rows))
+            elif self.format == "jsonlist":
+                self.client.transport.write(",".join(json.dumps(row)  for row in rows))
+            elif self.format == "htmltable":
+                def sstringnot(v):
+                    if v == None:
+                        return ""
+                    if type(v) == buffer:
+                        v = unicode(v)
+                    if type(v) in [unicode, str]:
+                        return v.encode("utf-8")
+                    return str(v)
+                for row in rows:
+                    self.client.transport.write("<tr><td>%s</td></tr>\n" % "</td><td>".join(sstringnot(v)  for v in row))
+
         if not bstillproducing:
+            if self.client.clienttype == "httpgetprocessing":
+                if self.format == "jsondict":
+                    self.client.transport.write("]")
+                elif self.format == "jsonlist":
+                    self.client.transport.write("]}")
+                elif self.format == "htmltable":
+                    self.client.transport.write("</table>\n")
+                if "callback" in self.client.httpgetparams:
+                    self.client.transport.write(")")
+            #self.client.transport.unregisterProducer()
             self.stopProducing()
             
     def stopProducing(self):
@@ -107,18 +172,19 @@ class DatastoreProtocol(protocol.Protocol):
         self.clientnumber = -1         # number for whole operation of twisted
         self.clientsessionbegan = datetime.datetime.now()
         self.sbufferclient = [ ] # incoming messages from the client
-        self.db = None
         self.datapullproducer = None
         self.Dattached = [ ] # attached function calls (for debug purposes)
         self.clienttype = 'justconstructed'
-        self.dbprocessrequest = None
-        
+
         self.httpheaders = [ ]
         self.httpgetparams = {}
         self.httpgetpath = ''
         self.httppostbuffer = None
         self.progress_ticks = 'no'
-        
+
+        self.db = None
+        self.dbprocessrequest = None
+
 
     def connectionMade(self):
         self.clienttype = 'justconnected'
@@ -318,6 +384,7 @@ class DatastoreProtocol(protocol.Protocol):
             elif request["maincommand"] == 'sqlitecommand' and request.get("command") == "commit":
                 self.sendResponse({"status":"commit not necessary as autocommit is enabled"})
             elif self.db:
+                logger.error("client#%d received during deferredrequest: %s" % (self.clientnumber, line[:1000]))
                 self.sendResponse({"error":'already doing deferredrequest!!!'})
             elif self.dbprocessrequest:
                 self.sendResponse({"error":'already waiting on a processrequest!!!'})
@@ -362,12 +429,8 @@ class DatastoreProtocol(protocol.Protocol):
             #request["maincommand"] == "sqliteexecute"
             self.db.cstate = "fetchrowsproducing"
             self.datapullproducer = DataPullProducer(self)
-            if self.datapullproducer.csvwriter:
-                self.datapullproducer.csvwriter.writerow([ k.encode('utf-8')  for k in res.get("keys", []) ])
-            else:
-                json.dump(res, self.transport)
-                self.transport.write("\n")
-            self.transport.registerProducer(self.datapullproducer, False)  # must be done last
+            self.datapullproducer.firstProduction(res)
+            self.transport.registerProducer(self.datapullproducer, False)  # immediately sets it going
             
         else:
             self.factory.releasedbprocess(self)
