@@ -3,8 +3,13 @@
 #  David Jones, ScraperWiki Limited.
 #  2011-12-21
 #
-#  Run the datastore, proxy, twister, orbited and scriptmgr servers locally,
-#  i.e. without using a real LXC.
+#  Run backend components (datastore, proxy, twister, orbited and scriptmgr)
+#  locally, for developing on a developer's laptop.
+#  Is intended to run without using a real LXC.
+#
+#  Usage:
+#  ./runlocal [--skip datastore,httpproxy,twister,orbited]
+# (not implemented yet)
 
 [ -f uml.cfg ] || {
     echo "runlocal: uml.cfg not found;"
