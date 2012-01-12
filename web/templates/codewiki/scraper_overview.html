@@ -176,8 +176,8 @@
         </p>
         
         
-        {% if latestdomain %}
-            {% for d in latestdomain %}<a href="{% if url_screenshot %}{{ url_screenshot }}{% else %}{{ d.domain }}{% endif %}" target="_blank" id="scraper_screenshot" rel="nofollow">{% screen_shot scraper %}</a>{% endfor %}
+        {% if url_screenshot %}
+            <a href="{ url_screenshot }" target="_blank" id="scraper_screenshot" rel="nofollow">{% screen_shot scraper %}</a>
         {% else %}
             <a href="#" id="scraper_screenshot" rel="nofollow"><img src="{{ MEDIA_URL }}images/screenshot_placeholder.png" alt="Run this scraper to generate a screenshot"></a>
         {% endif %}

@@ -22,7 +22,6 @@ import PyRSS2Gen
 
 from django.utils.encoding import smart_str
 from django.core.serializers.json import DateTimeAwareJSONEncoder
-from django.utils import simplejson
 
 from frontend.models import UserProfile
 
@@ -59,7 +58,7 @@ def stream_rows(dataproxy, format):
     while True:
         line = dataproxy.receiveonelinenj()
         try:
-            ret = simplejson.loads(line)
+            ret = json.loads(line)
         except ValueError, e:
             yield str(e)
             break
@@ -123,29 +122,39 @@ def out_csvhtml(dataproxy, short_name, format):
     return response
     
 
-# TODO: Fix this so that we can stream the results to either the browser or the download.  Currently
-# this dies on large data ~38k rows (depending on query) with a timeout and so the user gets nothing
-# but maybe we should do iterating over the results as they come in and part-encoding the stream with
-# each row?
+# TODO: Fix this so that we can stream the results to either the browser
+# or the download.  Currently this dies on large data ~38k rows (depending
+# on query) with a timeout and so the user gets nothing, but maybe we should
+# do iterating over the results as they come in and part-encoding the
+# stream with each row?
 def out_json(dataproxy, callback, short_name, format):
-    # json is not chunked.  The output is of finite fixed bite sizes because it is generally used by browsers which aren't going to survive a huge download
-    # however could chunk the jsondict type stream_wise as above by manually creating the outer bracketing as with htmltable
+    # json is not chunked.  The output is of finite fixed bite sizes because
+    # it is generally used by browsers which aren't going to survive a huge
+    # download; however could chunk the jsondict type stream_wise as above
+    # by manually creating the outer bracketing as with htmltable.
+
     result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
     
     if not result:
         dataproxy.close()
         return HttpResponse("Error: Dataproxy responded with an invalid response")        
-        
+
     if format == "jsondict":
         try:
-            res = simplejson.loads(result)
+            res = json.loads(result)
+
+            while res.get('stillproducing') == 'yes':
+                dresult = json.loads(dataproxy.receiveonelinenj())
+                res['data'].extend(dresult['data'])
+                res['stillproducing'] = dresult.get('stillproducing')
+
         except ValueError, e:
             dataproxy.close()            
             return HttpResponse("Error: %s" % (e.message,))
             
         if "error" not in res:
             dictlist = [ dict(zip(res["keys"], values))  for values in res["data"] ]
-            result = simplejson.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
+            result = json.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
     else:
         assert format == "jsonlist"
     if callback:
@@ -159,7 +168,7 @@ def out_json(dataproxy, callback, short_name, format):
 def out_rss2(dataproxy, scraper):
     result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
     try:
-        res = simplejson.loads(result)
+        res = json.loads(result)
     except ValueError, e:
         return HttpResponse("Error:%s" % (e.message,))
     if "error" in res:
@@ -211,10 +220,11 @@ def out_rss2(dataproxy, scraper):
 # Should consider giving transfer-coding: chunked, 
 # http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6
 
-# streaming is only happening from the dataproxy into here.  Streaming from here out through django is 
-# nearly impossible as we don't know the length of the output file if we incrementally build the csv output
-# the generator code has therefore been undone
-# all for want of setting response["Content-Length"] to the correct value
+# Streaming is only happening from the dataproxy into here.  Streaming
+# from here out through django is  nearly impossible as we don't know
+# the length of the output file if we incrementally build the csv output;
+# the generator code has therefore been undone,
+# all for want of setting response["Content-Length"] to the correct value.
 @condition(etag_func=None)
 def sqlite_handler(request):
     short_name = request.GET.get('name')
@@ -263,10 +273,12 @@ def sqlite_handler(request):
     if format == "csv":
         req["streamchunking"] = 1000
     
-    # this is inlined from the dataproxy.request() function to allow for receiveoneline to perform multiple readlines in this case
-        # (this is the stream-chunking thing.  the right interface is not yet apparent)
+    # This is inlined from the dataproxy.request() function to allow for
+    # receiveoneline to perform multiple readlines in this case.
+    # (this is the stream-chunking thing.  the right interface is not yet
+    # apparent)
     
-    dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
+    dataproxy.m_socket.sendall(json.dumps(req) + '\n')
     
     if format not in ["jsondict", "jsonlist", "csv", "htmltable", "rss2"]:
         dataproxy.close()
@@ -278,7 +290,8 @@ def sqlite_handler(request):
     if format == "rss2":
         return out_rss2(dataproxy, scraper)
         
-    return  out_json(dataproxy, request.GET.get("callback"), scraper.short_name, format)
+    return  out_json(dataproxy, request.GET.get("callback"),
+      scraper.short_name, format)
     
 
 def scraper_search_handler(request):

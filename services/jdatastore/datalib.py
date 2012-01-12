@@ -18,7 +18,7 @@ import StringIO
 from twisted.internet import reactor
 
 logger = None  # filled in by dataproxy
-ninstructions_progresshandler = 1000000  # about 0.4secs on Julian's laptop
+ninstructions_progresshandler = 10000000  # about 0.4secs on Julian's laptop
 resourcedir = None # filled in by dataproxy
 attachauthurl = None # filled in by dataproxy
 
@@ -120,7 +120,8 @@ class SQLiteDatabase(object):
                             return ares
             self.cstate, self.etimestate = 'sqliteexecute', time.time()
             res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"])
-            res["stillproducing"] = "yes"
+            if 'error' not in res:
+                res["stillproducing"] = "yes"
             
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
