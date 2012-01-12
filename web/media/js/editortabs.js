@@ -366,6 +366,12 @@ function writeToSqliteData(command, val1, lval2)
             $(trlast).html(pval); 
         else
             $('#output_data table.output_content').append('<tr class="progresstick">'+pval+'</tr>'); 
+    } else if (command == 'stillproducing'){
+        var pval = '<td><i>producing-tick: '+val1+'</i></td><td><i>records: '+lval2+'</i></td>'; 
+        if (trlast)
+            $(trlast).html(pval); 
+        else
+            $('#output_data table.output_content').append('<tr class="progresstick">'+pval+'</tr>'); 
     }else{
         var row = [ ]; 
         row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
