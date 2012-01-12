@@ -25,6 +25,7 @@ m_attachables = [ ]
 m_verification_key = ''
 # The JSON object returned by the initial connection
 m_connection_res = None
+sbuffer = [ ]
 
 verify = ''
 def make_request(data, attachlist):
@@ -61,23 +62,21 @@ def create(host, port, scrapername, runid, attachables, verification_key=None):
         
 
 def receiveoneline(socket):
-    """Read one line/record and return it.  A \n delimits the end of
-    the record.  It is unwise to read beyond it or it will hang.
-    """
-
-    sbuffer = [ ]
+    # poor implementation.  But previous longstanding version even had a bug on it if records concattenated
+    global sbuffer
+    if len(sbuffer) >= 2:
+        return sbuffer.pop(0)
     while True:
         srec = socket.recv(1024)
         if not srec:
-            scraperwiki.dumpMessage({'message_type': 'chat',
-              'message':"socket from dataproxy has unfortunately closed"})
-            break
+            scraperwiki.dumpMessage({'message_type': 'chat', 'message':"socket from dataproxy has unfortunately closed"})
+            return None
         ssrec = srec.split("\n")  # multiple strings if a "\n" exists
-        sbuffer.append(ssrec.pop(0))
-        if ssrec:
-            break
-    line = "".join(sbuffer)
-    return line
+        sbuffer.append(ssrec[0])
+        if len(ssrec) >= 2:
+            line = "".join(sbuffer)
+            sbuffer = ssrec[1:]
+            return line
 
 
 def ensure_connected():
@@ -119,6 +118,7 @@ def request(req):
     if req != None:
         m_socket.sendall(json.dumps(req)+'\n')
     line = receiveoneline(m_socket)
+    #print str([line])
     if not line:
         return {"error":"blank returned from dataproxy"}
     return json.loads(line)

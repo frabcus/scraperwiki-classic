@@ -42,6 +42,14 @@ def execute(sqlquery, data=None, verbose=1):
         if verbose:
             scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'progresstick', "val1":result.get("progresstick"), "lval2":result.get("timeseconds")})
         result = scraperwiki.datastore.request(None)  # goes back and waits for next line
+
+    while result.get("stillproducing") == "yes":
+        dataresult = scraperwiki.datastore.request(None)  # goes back and waits for next line
+        if verbose and dataresult.get("stillproducing"):
+            scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'stillproducing', "val1":dataresult.get("producedbatches"), "lval2":dataresult.get("producedrows")})
+        result["data"].extend(dataresult["data"])
+        result["stillproducing"] = dataresult.get("stillproducing")
+        #result["nchunks"] += 1
         
     if "error" in result:
         raise databaseexception(result)
