@@ -42,7 +42,7 @@ def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
         return sqlite3.SQLITE_OK
 
     if action_code == sqlite3.SQLITE_PRAGMA:
-        if tname in ["table_info", "index_list", "index_info", "page_size"]:
+        if tname in ["table_info", "index_list", "index_info", "page_size", "synchronous"]:
             return sqlite3.SQLITE_OK
 
     # SQLite FTS (full text search) requires this permission even when reading, and
