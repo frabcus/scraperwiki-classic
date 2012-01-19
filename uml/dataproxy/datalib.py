@@ -213,6 +213,7 @@ class SQLiteDatabase(Database):
 #            except AttributeError:
 #                pass  # must be python version 2.6
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
+            self.m_sqlitedbcursor.execute("pragma synchronous=0") # reduce fsyncs to reduce load, we don't need that level of integrity - OS will flush fairly often anyway
              
         return True
                 
