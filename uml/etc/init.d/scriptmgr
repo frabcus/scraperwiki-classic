@@ -56,7 +56,7 @@ SCRIPTNAME=/etc/init.d/$INIT_SCRIPT_NAME
 . /lib/lsb/init-functions
 
 # uncomment to override system setting
-# VERBOSE=yes
+VERBOSE=yes
 
 #
 # Function that starts the daemon/service
@@ -69,9 +69,9 @@ do_start()
 	#   2 if daemon could not be started
 	
     ulimit -n 32768 && echo "ULIMIT Set" || echo "ULIMIT not set"
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --chuid $NODEUSER --background --exec $DAEMON --test > /dev/null \
+    start-stop-daemon --start --pidfile $PIDFILE --chuid $NODEUSER --background --exec $DAEMON --test \
 		|| { [ "$VERBOSE" != no ] && log_daemon_msg  "  --->  Daemon already running $DESC" "$INIT_SCRIPT_NAME_NOEXT"; return 1; }
-	start-stop-daemon --start --quiet --chuid $NODEUSER --make-pidfile --pidfile $PIDFILE --background --exec $DAEMON -- \
+    start-stop-daemon --start --chuid $NODEUSER --make-pidfile --pidfile $PIDFILE --background --exec $DAEMON -- \
 		$DAEMON_ARGS \
 		|| { [ "$VERBOSE" != no ] && log_daemon_msg  "  --->  could not be start $DESC" "$INIT_SCRIPT_NAME_NOEXT"; return 2; }
 	# Add code here, if necessary, that waits for the process to be ready
