@@ -525,8 +525,6 @@ class CodePermission(models.Model):
     for another scraper/view.
     """
     code = models.ForeignKey(Code, related_name='permissions')    
-    can_read  = models.BooleanField( default=False )   # delete this field
-    can_write = models.BooleanField( default=False )   # delete this field
     permitted_object = models.ForeignKey(Code, related_name='permitted')    # should call this permitted_code so we don't assume is untyped
     
     def __unicode__(self):

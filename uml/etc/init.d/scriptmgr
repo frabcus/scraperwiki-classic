@@ -17,11 +17,13 @@
 
 # Author: Ross <ross@scraperwiki.com>
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin # modify if you need
+NODE_PATH=/usr/local/lib/node_modules/
+export NODE_PATH
 
-#CONFIG=/etc/appsettings.scriptmgr.js
-DAEMON_ARGS="/var/www/scraperwiki/services/scriptmgr/scriptmgr.js" #-c $CONFIG" # uses debug config if none specified
+CONFIG=/etc/appsettings.scriptmgr.js
+DAEMON_ARGS="/var/www/scraperwiki/services/scriptmgr/scriptmgr.js -c $CONFIG"
 DESC="scriptmgr"                  # whatever fancy description you like
-#NODEUSER=root:root               # USER who OWNS the daemon process (no matter whoever runs the init script)
+NODEUSER=root:root               # USER who OWNS the daemon process (no matter whoever runs the init script)
 LOCAL_VAR_RUN=/var/run            # in case the init script is run by non-root user, you need to
 NAME=node                                   # name of the node.js executable
 DAEMON=/usr/local/bin/$NAME                 # this SHOULD POINT TO where your node executable is

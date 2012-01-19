@@ -55,7 +55,7 @@
     </h2>
 	<p>
 	    <span class="language {{scraper.language|lower}}" rel="{{scraper.language|lower}}">{% if scraper.language == 'php' %}PHP{% else %}{{ scraper.language|capfirst }}{% endif %}</span>
-	    <span class="latestdomain">{% if latestdomain %}{% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank">{{ d.domain }}</a>{% endfor %}{% else %}Hasn&rsquo;t run yet{% endif %}</span>
+	    <span class="latestdomain">{% if url_screenshot %}<a href="{{ url_screenshot }}" target="_blank">{{ url_screenshot }}</a>{% else %}Hasn&rsquo;t run yet{% endif %}</span>
         {% if scraper.privacy_status == 'public' %}
     	    <span class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
         {% endif %}
@@ -177,7 +177,7 @@
         
         
         {% if url_screenshot %}
-            <a href="{ url_screenshot }" target="_blank" id="scraper_screenshot" rel="nofollow">{% screen_shot scraper %}</a>
+            <a href="{{ url_screenshot }}" target="_blank" id="scraper_screenshot" rel="nofollow">{% screen_shot scraper %}</a>
         {% else %}
             <a href="#" id="scraper_screenshot" rel="nofollow"><img src="{{ MEDIA_URL }}images/screenshot_placeholder.png" alt="Run this scraper to generate a screenshot"></a>
         {% endif %}

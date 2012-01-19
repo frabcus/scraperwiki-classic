@@ -42,7 +42,7 @@ def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
         return sqlite3.SQLITE_OK
 
     if action_code == sqlite3.SQLITE_PRAGMA:
-        if tname in ["table_info", "index_list", "index_info", "page_size"]:
+        if tname in ["table_info", "index_list", "index_info", "page_size", "synchronous"]:
             return sqlite3.SQLITE_OK
 
     # SQLite FTS (full text search) requires this permission even when reading, and
@@ -213,6 +213,7 @@ class SQLiteDatabase(Database):
 #            except AttributeError:
 #                pass  # must be python version 2.6
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
+            self.m_sqlitedbcursor.execute("pragma synchronous=0") # reduce fsyncs to reduce load, we don't need that level of integrity - OS will flush fairly often anyway
              
         return True
                 
