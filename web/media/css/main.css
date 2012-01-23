@@ -4244,14 +4244,15 @@ body.about #people p {
 	color: #444;
 }
 
-#about_specifics .logos {
-	padding: 15px 20px 5px 20px;
+#about_specifics .logos,
+#about_specifics .opensource {
+	padding: 5px 20px 5px 20px;
+	width: 330px;
+	float: left;
 }
 
-#about_specifics .licence {
+#about_specifics .logos {
 	float: right;
-	width: 340px;
-	padding: 15px 20px 5px 20px;
 	border-left: 2px solid #fff;
 }
 
@@ -4261,8 +4262,15 @@ body.about #people p {
 
 #about_specifics .logos img {
 	float: right;
-	margin: 0 0 10px 20px;
+	margin: 10px 0 10px 20px;
 	width: 100px;
+	height: 64px;
+}
+
+#about_specifics .opensource img {
+	float: left;
+	margin: 10px 20px 10px 0;
+	width: 64px;
 	height: 64px;
 }
 
