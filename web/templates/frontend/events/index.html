@@ -45,13 +45,13 @@ type="text/javascript"></script>
         'date':'23rd February 2012',
         'lat':38.62931,
         'lng':-90.20743
-    },{
+    }{% if debug %},{
         'shortname':'jdcdc',
         'title':'Journalism Data Camp DC',
         'date':'30th \u2013 31st March 2012',
         'lat':38.895111,
         'lng':-77.036667
-    }];
+    }{% endif %}];
     $.each(events, function(i) {
         var e = events[i];
         var latlng = new google.maps.LatLng(e.lat, e.lng)
@@ -104,13 +104,13 @@ type="text/javascript"></script>
                         <span class="location">St Louis, MO</span>
                     </h4>
                 </a></li>
-                <li><a href="/events/jdcdc/" id="jdcdc">
+                {% if debug %}<li><a href="/events/jdcdc/" id="jdcdc">
                     <h3>Journalism Data Camp DC</h3>
                     <h4>
                         <span class="date">30th&ndash;31st Mar</span>
                         <span class="location">Washington, DC</span>
                     </h4>
-                </a></li>
+                </a></li>{% endif %}
             </ul>
         </div>
         <div id="event_details">
