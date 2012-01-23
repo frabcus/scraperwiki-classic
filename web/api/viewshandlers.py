@@ -313,6 +313,8 @@ def scraper_search_handler(request):
         
         if request.META.get("HTTP_X_REAL_IP", "Not specified") in settings.INTERNAL_IPS:
             boverduescraperrequest = True
+        if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"] or '127.0.0.1' in settings.INTERNAL_IPS:
+            boverduescraperrequest = True
     else:
         u = None
         if request.user.is_authenticated():
