@@ -23,6 +23,9 @@ DATABASES = {
         'NAME'       : '',
         'USER'       : '',
         'PASSWORD'   : '',
+        'OPTIONS': {
+            "init_command": "SET storage_engine=MyISAM",
+        }
     }
 }
 

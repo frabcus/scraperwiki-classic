@@ -1,9 +1,9 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}Journalism Data Camp NY | Events{% endblock %}
+{% block title %}Journalism Data Camp DC | Events{% endblock %}
 
 {% block meta %}
-    <meta name="description" content="ScraperWiki/Tow Center Journalism Data Camp, New York, with Columbia University" />
+    <meta name="description" content="ScraperWiki/AUSOC Journalism Data Camp, Washington DC, with the Washington Post" />
 {% endblock %}
 
 {% block body_class_extra %} event{% endblock %}
@@ -13,7 +13,7 @@
 type="text/javascript"></script>
 <script type="text/javascript">
   function createMap() {
-    var latlng = new google.maps.LatLng(40.807443, -73.963544);
+    var latlng = new google.maps.LatLng(38.895111, -77.036667);
     var myOptions = {
       zoom: 16,
       center: latlng,
@@ -30,10 +30,9 @@ type="text/javascript"></script>
 {% endblock %}
 
 {% block header %}
-	<h2>ScraperWiki/Tow Center <em>Journalism Data Camp</em> NY</h2>
-	<!-- <h3>on New York Data and Accountability</h3> -->
-	<p class="deets"><span class="when">February 3rd &amp; 4th</span> <span class="price">Hosted by Columbia University</span> <span class="twitter">#jdcny</span></p>
-	<p>Three streams, two days, one goal: opening up New York&rsquo;s data.</p>
+	<h2>ScraperWiki/AUSOC <em>Journalism Data Camp</em> DC</h2>
+	<p class="deets"><span class="when">March 30th &amp; 31st</span> <span class="price">Hosted by HOSTNAME HERE</span> <span class="twitter">#jdcdc</span></p>
+	<p>Three streams, two days, one goal: opening up DC&rsquo;s data.</p>
 	<p class="links">
 	    <a href="#streams" class="findoutmore">Find out more</a>
 	    <a href="#tickets" class="reserveaspace">Sign up <em>&ndash; free</em></a>
@@ -46,9 +45,9 @@ type="text/javascript"></script>
         <div id="event_sidebar">
             <h4 class="association">In association with</h4>
             <div class="module">
-                <p><a href="http://www.journalism.columbia.edu/" target="_blank"><img src="{{MEDIA_URL}}images/event_tow_logo.gif" width="268" height="44" /></p>
-                <p><a href="http://www.columbia.edu/" target="_blank"><img src="{{MEDIA_URL}}images/event_columbia_logo.gif" width="268" height="42" /></p>
-                <p><a href="http://www.knightfoundation.org/" target="_blank"><img src="{{MEDIA_URL}}images/event_knight_logo.gif" width="268" height="35" /></a></p>
+                <p><a href="http://www.american.edu/soc/" target="_blank"><img src="{{MEDIA_URL}}images/event_ausoc_logo.gif" width="268" height="32" /></p>
+                <p><a href="http://www.washingtonpost.com/" target="_blank"><img src="{{MEDIA_URL}}images/event_washingtonpost_logo.gif" width="268" height="42" /></p>
+                <p><a href="http://www.knightfoundation.org/" target="_blank"><img src="{{MEDIA_URL}}images/event_knight_logo_black.gif" width="268" height="35" /></a></p>
                 <p><a href="http://www.sunlightfoundation.com/" target="_blank"><img src="{{MEDIA_URL}}images/event_sunlight_logo.gif" width="268" height="50" /></a></p>
             </div>
             <h4 class="who">Who&rsquo;s coming?</h4>
@@ -57,20 +56,20 @@ type="text/javascript"></script>
             </div>
             <h4 class="when">When?</h4>
             <div class="module">
-                <p>09:00&ndash;18:00 Friday 3rd Feb 2012</p>
-                <p>09:00&ndash;18:00 Saturday 4th Feb 2012</p>
+                <p>09:00&ndash;18:00 Friday 30th Mar 2012</p>
+                <p>09:00&ndash;18:00 Saturday 31st Mar 2012</p>
             </div>
             <h4>Where?</h4>
             <div class="module">
                 <div id="googlemap" style="width: 268px; height: 250px; margin: 5px 0"></div>
-                <p class="address"><a href="http://maps.google.com/maps?q=2950+Broadway,+New+York,+NY+10027" target="_blank" title="Show in Google Maps">School of Journalism,<br/><strong>Columbia University</strong>,<br/>2950 Broadway (at 116th Street),<br/>New York, NY 10027</a></p>
+                <p class="address"><a href="http://maps.google.com/maps?q=INSERT+ADDRESS+HERE" target="_blank" title="Show in Google Maps">SOME LOCATION,<br/><strong>SOME UNIVERSITY</strong>,<br/>SOME STREET NUMBER,<br/>SOME CITY, STATE ZIPCODE</a></p>
             </div>  
         </div>
         <div id="event_details">
             <h3 class="description">Why we need you <span class="hint">Click to find out more</span></h3>
             <div id="description">
                 <p class="first">There are mountains of documents and websites out there that contain essential data about New York, but someone needs to liberate and analyze it to keep businesses and government accountable.</p>
-                <p>ScraperWiki, together with the Tow Center at Columbia University School of Journalism and the Knight Foundation, are doing just that. We need journalists, students, computer scientists, programmers, statisticians and public officials to dig up the&nbsp;data!</p>
+                <p>ScraperWiki, together with the School of Communication at American University DC and the Washington Post, are doing just that. We need journalists, students, computer scientists, programmers, statisticians and public officials to dig up the&nbsp;data!</p>
                 <p class="last"><img src="{{MEDIA_URL}}images/event_big_arrow.gif" width="45" height="65" alt="" />All you need is enthusiasm and a laptop &ndash; we supply the food, drink and wifi. <b>Entry is free</b> but space is limited. We&rsquo;ve got something for everyone, so check out the three streams below, and reserve a ticket before&nbsp;they&nbsp;go.</p>
             </div>
             <h3 class="streams">Pick a stream <span class="hint">Click to see the streams</span></h3>
