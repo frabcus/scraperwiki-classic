@@ -19,10 +19,7 @@ import traceback
 
 import logging
 import logging.config
-try:
-    import cloghandler
-except:
-    pass
+from sqlite_functions import distance_on_spherical_earth
 
 try:
     import json
@@ -208,6 +205,8 @@ class SQLiteDatabase(Database):
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:", check_same_thread=False)   # draft scrapers make a local version
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
+            self.m_sqlitedbconn.create_function('distance', 4, distance_on_spherical_earth)
+            
 #            try:
 #                self.m_sqlitedbconn.set_progress_handler(progress_handler, 1000000)  # can be order of 0.4secs 
 #            except AttributeError:
