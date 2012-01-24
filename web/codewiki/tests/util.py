@@ -41,3 +41,9 @@ class ScraperUtilTests(TestCase):
         # at the moment (not reason it shouldn't change)
         self.assertEqual(u'u', short_name)
 
+    def test_short_name_space_terminated(self):
+        long_title = u'some name ending in a space '
+        short_name = SlugifyUniquely(long_title, Scraper, 'short_name')
+
+        self.assertEqual(u'some_name_ending_in_a_space', short_name)
+
