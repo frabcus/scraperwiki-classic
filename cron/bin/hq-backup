@@ -15,8 +15,8 @@ do
   esac
 done
 
-# Note that suffix is used to rename the old file, so Friday's file gets renamed on
-# Saturday, and typically has suffix .saturday.
+# Note that suffix is used to rename the old file, so Friday's file
+# gets renamed on Saturday, and typically has suffix .saturday.
 suffix=.$(date +\%A | tr '[A-Z]' '[a-z]')
 destdir=swbackup@kippax.scraperwiki.com:/home/swbackup/$(hostname)/
 
