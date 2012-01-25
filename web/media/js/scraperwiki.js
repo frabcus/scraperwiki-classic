@@ -301,6 +301,7 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 }
 
 function openSurvey(){
+	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Open modal window']); }
 	var url = 'http://sw.zarino.co.uk/';
 	if($('#nav_inner .loggedin').length){
 		regexp_username = new RegExp('/profiles/([^/])+/');
@@ -336,10 +337,12 @@ function openSurvey(){
 
 function developerSurveyDone(){
 	setCookie("developerSurveyDone", '1', 365);
+	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Leave modal window']); }
 }
 
 function developerSurveySkipped(){
 	setCookie("developerSurveySkipped", '1', 365);
+	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Ignore alert bar']); }
 }
 
 function setCookie(c_name,value,exdays){
@@ -375,11 +378,13 @@ $(function(){
 		// console.log('You&rsquo;ve either skipped or completed the survey');
 	} else {
 		newAlert('Help us make ScraperWiki even better for you!', null, {'onclick': openSurvey, 'text': 'Take our speedy survey'}, survey_alert_slide, developerSurveySkipped);
+		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Alert shown']); }
 	}
 	
 	$('#divMenu ul li.survey a').bind('click', function(e){
 		e.preventDefault();
 		openSurvey();
+		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Open modal window']); }
 	});
 	
     setupNavSearchBoxHint();
