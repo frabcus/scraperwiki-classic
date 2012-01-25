@@ -304,7 +304,7 @@ function openSurvey(){
 	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Open modal window']); }
 	var url = 'http://sw.zarino.co.uk/';
 	if($('#nav_inner .loggedin').length){
-		regexp_username = new RegExp('/profiles/([^/])+/');
+		regexp_username = new RegExp('/profiles/([^/]+)/');
 		var url = url + '?username=' + $('#nav_inner .loggedin a').attr('href').replace(regexp_username, '$1');
 	}
 	$.modal('<h1 class="modalheader">ScraperWiki Developer Survey</h1><iframe src="' + url + '" height="500" width="500" style="border:0">', {
