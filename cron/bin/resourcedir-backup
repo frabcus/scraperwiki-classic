@@ -10,11 +10,14 @@
 set -e
 
 dir=$(mktemp -d /tmp/resourcedir-XXXXXX)
+
 for s in $(find /var/www/scraperwiki/resourcedir -name defaultdb.sqlite -print | sort)
 do
     scrapername=$(basename $(dirname "$s"))
     sqlite3 "$s" .dump |
       gzip --rsyncable > "${dir}/${scrapername}.sql.gz"
 done
-tar cf /root/backup/sqlite.tar "$dir"
+
+cd $(dirname "$dir")
+tar cf /root/backup/sqlite.tar $(basename "$dir")
 rm -rf "$dir"
