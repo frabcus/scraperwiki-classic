@@ -407,7 +407,7 @@ class Code(models.Model):
             roles = [ usercoderole.role  for usercoderole in UserCodeRole.objects.filter(code=self, user=user) ]
         else:
             roles = [ ]
-        print "AUTH", (action, user, roles, self.privacy_status)
+        #print "Code.actionauthorized AUTH", (action, user, roles, self.privacy_status)
         
         # roles are: "owner", "editor", "follow", "requester", "email"
         # privacy_status: "public", "visible", "private", "deleted"
