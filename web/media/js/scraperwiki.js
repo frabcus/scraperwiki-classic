@@ -374,7 +374,7 @@ $(function(){
 	if(typeof(getCookie('developerSurveyDone')) != 'undefined' || typeof(getCookie('developerSurveySkipped')) != 'undefined'){
 		// console.log('You&rsquo;ve either skipped or completed the survey');
 	} else {
-		newAlert('Help us make ScraperWiki even better for you!', 'info', {'onclick': openSurvey, 'text': 'Take our speedy survey'}, survey_alert_slide, developerSurveySkipped);
+		newAlert('Help us make ScraperWiki even better for you!', null, {'onclick': openSurvey, 'text': 'Take our speedy survey'}, survey_alert_slide, developerSurveySkipped);
 	}
 	
 	$('#divMenu ul li.survey a').bind('click', function(e){
