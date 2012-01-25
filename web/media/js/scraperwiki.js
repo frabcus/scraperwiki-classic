@@ -250,21 +250,29 @@ function newUserMessage(url){
 //	Uses the same HTML as web/templates/frontend/messages.html
 //	htmlcontent (string) -> the textual content of the alert (can include html tags and entities)
 //	level (string) -> either 'error' or 'info' (null is treated as error)
-//	actions (array) -> array of buttons (each with a url, text and optional 'secondary' object)
+//	actions (array) -> array of buttons (each with a url/action, text and optional 'secondary' object)
 //	duration (number/string) -> how long slide animation lasts (set to null for no animation)
-function newAlert(htmlcontent, level, actions, duration){
+function newAlert(htmlcontent, level, actions, duration, onclose){
 	if(typeof(level) != 'string'){ level = 'error'; }
 	$alert_outer = $('<div>').attr('id','alert_outer').addClass(level);
 	$alert_inner = $('<div>').attr('id','alert_inner').html(htmlcontent);
 	if(typeof(actions) == 'object'){
-		var a = '<a href="' + actions.url + '"';
-		if(typeof(actions.secondary) != 'undefined'){
-			s += ' class="secondary"'
+		var $a = $('<a>').html(actions.text);
+		if(typeof(actions.url) != 'undefined'){
+			$a.attr('href', actions.url);
 		}
-		a += '>' + actions.text + '</a>';
-		$alert_inner.append(a);
+		if(typeof(actions.secondary) != 'undefined'){
+			$a.addClass('secondary');
+		}
+		if(typeof(actions.onclick) != 'undefined'){
+			$a.bind('click', actions.onclick);
+		}		
+		$alert_inner.append($a);
 	}
-	$('<a>').attr('id','alert_close').bind('click', function(){ 
+	$('<a>').attr('id','alert_close').bind('click', function(){
+		if(typeof(onclose) != 'undefined'){
+			onclose();
+		}
 		$('#alert_outer').slideUp(250);
 		$('#nav_outer').animate({marginTop:0}, 250);
 	}).appendTo($alert_inner);
@@ -292,6 +300,61 @@ function newAlert(htmlcontent, level, actions, duration){
 	
 }
 
+function openSurvey(){
+	var url = 'http://sw.zarino.co.uk/';
+	if($('#nav_inner .loggedin').length){
+		regexp_username = new RegExp('/profiles/([^/])+/');
+		var url = url + '?username=' + $('#nav_inner .loggedin a').attr('href').replace(regexp_username, '$1');
+	}
+	$.modal('<h1 class="modalheader">ScraperWiki Developer Survey</h1><iframe src="' + url + '" height="500" width="500" style="border:0">', {
+        overlayClose: true, 
+        autoResize: true,
+        overlayCss: { cursor:"auto" },
+		onOpen: function(dialog) {
+			dialog.data.show();
+			dialog.overlay.fadeIn(200);
+			dialog.container.fadeIn(200);
+		},
+		onShow: function(dialog){
+			$('#simplemodal-container').css('height', 'auto');
+		},
+		onClose: function(dialog) {
+			$('#alert_close').trigger('click');
+			developerSurveyDone();
+			dialog.container.fadeOut(200);
+			dialog.overlay.fadeOut(200, function(){
+				$.modal.close();
+			});
+		}
+    });
+}
+
+function developerSurveyDone(){
+	setCookie("developerSurveyDone", '1', 365);
+}
+
+function developerSurveySkipped(){
+	setCookie("developerSurveySkipped", '1', 365);
+}
+
+function setCookie(c_name,value,exdays){
+	var exdate = new Date();
+	exdate.setDate(exdate.getDate() + exdays);
+	var c_value = escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+	document.cookie = c_name + "=" + c_value;
+}
+
+function getCookie(c_name){
+	var i,x,y,ARRcookies = document.cookie.split(";");
+	for (i=0;i<ARRcookies.length;i++){
+		x = ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+		y = ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+		x = x.replace(/^\s+|\s+$/g,"");
+		if (x == c_name){
+			return unescape(y);
+		}
+	}
+}
 
 
 $(function(){
@@ -301,8 +364,13 @@ $(function(){
 		survey_alert_slide = null;
 	} else {
 		survey_alert_slide = 250;
-	}	
-	// newAlert('Help keep ScraperWiki great!', null, {'url':'http://sw.zarino.co.uk', 'text':'Take our <b>awesome</b> survey'}, survey_alert_slide);
+	}
+	
+	if(typeof(getCookie('developerSurveyDone')) != 'undefined' || typeof(getCookie('developerSurveySkipped')) != 'undefined'){
+		// console.log('You&rsquo;ve either skipped or completed the survey');
+	} else {
+		// newAlert('Help keep ScraperWiki great!', null, {'onclick': openSurvey, 'text': 'Take our <b>awesome</b> survey'}, survey_alert_slide, developerSurveySkipped);
+	}
 	
     setupNavSearchBoxHint();
 
@@ -604,7 +672,7 @@ $(function(){
 		});
 	}).attr('disabled', true);
 	
-	if($('#alert_outer').length){
+	if($('#alert_outer').length && (!$('#alert_close').length)){
 		$('<a>').attr('id','alert_close').bind('click', function(){ 
 			$('#alert_outer').slideUp(250);
 			$('#nav_outer').animate({marginTop:0}, 250);
