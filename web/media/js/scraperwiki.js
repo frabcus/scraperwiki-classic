@@ -248,12 +248,15 @@ function newUserMessage(url){
 
 //	Creates a pretty orange Alert bar at the top of the window.
 //	Uses the same HTML as web/templates/frontend/messages.html
-function newAlert(htmlcontent, level, actions){
+//	htmlcontent (string) -> the textual content of the alert (can include html tags and entities)
+//	level (string) -> either 'error' or 'info' (null is treated as error)
+//	actions (array) -> array of buttons (each with a url, text and optional 'secondary' object)
+//	duration (number/string) -> how long slide animation lasts (set to null for no animation)
+function newAlert(htmlcontent, level, actions, duration){
 	if(typeof(level) != 'string'){ level = 'error'; }
 	$alert_outer = $('<div>').attr('id','alert_outer').addClass(level);
 	$alert_inner = $('<div>').attr('id','alert_inner').html(htmlcontent);
 	if(typeof(actions) == 'object'){
-		console.log('actions is an object');
 		var a = '<a href="' + actions.url + '"';
 		if(typeof(actions.secondary) != 'undefined'){
 			s += ' class="secondary"'
@@ -261,17 +264,45 @@ function newAlert(htmlcontent, level, actions){
 		a += '>' + actions.text + '</a>';
 		$alert_inner.append(a);
 	}
-	console.log(typeof(actions));
 	$('<a>').attr('id','alert_close').bind('click', function(){ 
 		$('#alert_outer').slideUp(250);
 		$('#nav_outer').animate({marginTop:0}, 250);
 	}).appendTo($alert_inner);
-	$('#nav_outer').css('margin-top', $('#alert_outer').outerHeight());
+	if(typeof(duration) == 'string' || typeof(duration) == 'number'){
+		$('#nav_outer').animate({'marginTop': $alert_outer.outerHeight()}, duration);
+		$alert_outer.hide().insertBefore($('#nav_outer'));
+		$alert_outer.append($alert_inner).animate({
+			height: "show",
+			marginTop: "show",
+		    marginBottom: "show",
+		    paddingTop: "show",
+		    paddingBottom: "show"
+		}, { 
+			step: function(now, fx){
+				$('#nav_outer').css('margin-top', $(fx.elem).outerHeight());
+			}, complete: function(){
+				$('#nav_outer').css('margin-top', $('#alert_outer').outerHeight());
+			},
+			duration: duration
+		});
+	} else {
+		$alert_outer.append($alert_inner).insertBefore($('#nav_outer'));
+		$('#nav_outer').css('margin-top', $alert_outer.outerHeight());
+	}
+	
 }
 
 
 
 $(function(){
+	
+	regexp_baseurl = new RegExp('(https?://[^/]+).*');
+	if(document.referrer.replace(regexp_baseurl, '$1') == document.URL.replace(regexp_baseurl, '$1')){
+		survey_alert_slide = null;
+	} else {
+		survey_alert_slide = 250;
+	}	
+	// newAlert('Help keep ScraperWiki great!', null, {'url':'http://sw.zarino.co.uk', 'text':'Take our <b>awesome</b> survey'}, survey_alert_slide);
 	
     setupNavSearchBoxHint();
 
