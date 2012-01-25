@@ -7,7 +7,7 @@
 set -e
 
 cd /var/www/scraperwiki/
-source bin/activate
+. bin/activate
 dir=$(mktemp -d)
 for s in $(ls splitscrapers/)
 do

@@ -322,9 +322,13 @@ print urllib.urlopen(url).read()
 
            <dt id="slow_datastore">The datastore is slow and/or timing out, what should I do?</dt>
            <dd>
-               <p>Here are a few things you can do.</p>
+               <p>Queries to the datastore can take at most 30 seconds. Here are some things you
+               can do if this is a problem:</p>
                <ol>
-                   <li> It is faster to save lots of rows in groups. Instead
+                   <li> If this is happening with a large database from the web site, 
+                   try reloading the page again. It should then be cached in
+                   the server's memory and respond the second time.</li>
+                   <li> From code, it is faster to save lots of rows in groups. Instead
                     of passing a dictionary/hash to the save command, pass a list of dictionaries/hashes.
                     See "for greater speed" in the {% doc_link_full 'LANG_datastore_guide' language %}.
                    </li>
