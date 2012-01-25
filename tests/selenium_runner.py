@@ -58,33 +58,37 @@ class _OurTextTestResult(unittest.TestResult):
             self.stream.write('.')
             self.stream.flush()
 
-    def pauseIfSetTo(self, err):
+    def pauseIfRequired(self, err):
         if self.pause_on_failure:
             traceback.print_exc(err)
             line = 'x'
             while line != '':
-                line = raw_input("press return to continue, d to dump html source >>> ")
+                line = raw_input(
+                  "press return to continue, d to dump html source >>> ")
                 if line == 'd':
-                    html = SeleniumTest._selenium.get_html_source() # XXX bit of a hack for this to go cut straight through to our SeleniumTest, but not obvious what would be better and clearer
+                    # XXX bit of a hack for this to go cut straight through
+                    # to our SeleniumTest, but not obvious what would be
+                    # better and clearer.
+                    html = SeleniumTest._selenium.get_html_source()
                     print html
 
     def addError(self, test, err):
         unittest.TestResult.addError(self, test, err)
         if self.showAll:
             self.stream.writeln("ERROR")
-            self.pauseIfSetTo(err)
         elif self.dots:
             self.stream.write('E')
             self.stream.flush()
+        self.pauseIfRequired(err)
 
     def addFailure(self, test, err):
         unittest.TestResult.addFailure(self, test, err)
         if self.showAll:
             self.stream.writeln("FAIL")
-            self.pauseIfSetTo(err)
         elif self.dots:
             self.stream.write('F')
             self.stream.flush()
+        self.pauseIfRequired(err)
 
     def printErrors(self):
         if self.dots or self.showAll:
