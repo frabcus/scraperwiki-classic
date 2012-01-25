@@ -2111,6 +2111,15 @@ ul.user_menu li {
 	color: #89BEE2;
 }
 
+#divMenu ul li.survey a {
+	color: #DA7311;
+}
+
+#divMenu ul li.survey,
+#divMenu ul li.survey a .unimportant {
+	color: #EDAB6A;
+}
+
 #divMenu .sub_menu {
 	font-size: 0.8em;
 	padding-left: 0;

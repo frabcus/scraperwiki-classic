@@ -319,7 +319,9 @@ function openSurvey(){
 			$('#simplemodal-container').css('height', 'auto');
 		},
 		onClose: function(dialog) {
-			$('#alert_close').trigger('click');
+			if($('#alert_close').length){
+				$('#alert_close').trigger('click');
+			}
 			developerSurveyDone();
 			dialog.container.fadeOut(200);
 			dialog.overlay.fadeOut(200, function(){
@@ -369,8 +371,13 @@ $(function(){
 	if(typeof(getCookie('developerSurveyDone')) != 'undefined' || typeof(getCookie('developerSurveySkipped')) != 'undefined'){
 		// console.log('You&rsquo;ve either skipped or completed the survey');
 	} else {
-		// newAlert('Help keep ScraperWiki great!', null, {'onclick': openSurvey, 'text': 'Take our <b>awesome</b> survey'}, survey_alert_slide, developerSurveySkipped);
+		newAlert('Help keep ScraperWiki great!', null, {'onclick': openSurvey, 'text': 'Take our <b>awesome</b> survey'}, survey_alert_slide, developerSurveySkipped);
 	}
+	
+	$('#divMenu ul li.survey a').bind('click', function(e){
+		e.preventDefault();
+		openSurvey();
+	});
 	
     setupNavSearchBoxHint();
 
