@@ -255,7 +255,7 @@ function newUserMessage(url){
 function newAlert(htmlcontent, level, actions, duration, onclose){
 	if(typeof(level) != 'string'){ level = 'error'; }
 	$alert_outer = $('<div>').attr('id','alert_outer').addClass(level);
-	$alert_inner = $('<div>').attr('id','alert_inner').html(htmlcontent);
+	$alert_inner = $('<div>').attr('id','alert_inner').html('<span class="message">' + htmlcontent + '</span>');
 	if(typeof(actions) == 'object'){
 		var $a = $('<a>').html(actions.text);
 		if(typeof(actions.url) != 'undefined'){
@@ -320,7 +320,10 @@ function openSurvey(){
 		},
 		onClose: function(dialog) {
 			if($('#alert_close').length){
-				$('#alert_close').trigger('click');
+				$('#alert_inner .message').text('Thanks!').siblings('a').not('#alert_close').remove();
+				var t = setTimeout(function(){
+					$('#alert_close').trigger('click');
+				}, 1000);
 			}
 			developerSurveyDone();
 			dialog.container.fadeOut(200);
@@ -371,7 +374,7 @@ $(function(){
 	if(typeof(getCookie('developerSurveyDone')) != 'undefined' || typeof(getCookie('developerSurveySkipped')) != 'undefined'){
 		// console.log('You&rsquo;ve either skipped or completed the survey');
 	} else {
-		newAlert('Help keep ScraperWiki great!', null, {'onclick': openSurvey, 'text': 'Take our <b>awesome</b> survey'}, survey_alert_slide, developerSurveySkipped);
+		newAlert('Help us make ScraperWiki even better for you!', 'info', {'onclick': openSurvey, 'text': 'Take our speedy survey'}, survey_alert_slide, developerSurveySkipped);
 	}
 	
 	$('#divMenu ul li.survey a').bind('click', function(e){
