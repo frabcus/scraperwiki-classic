@@ -1,9 +1,12 @@
 MAILTO=cron@scraperwiki.com
 SHELL=/bin/bash
 
-# Backup database, and scraper mercurial repositories
-0 5 * * * root /var/www/scraperwiki/cron/bin/mysql-backup
-30 5 * * * root /var/www/scraperwiki/cron/bin/code-backup
+# Backup Django database, and scraper mercurial repositories
+# ... this one takes 5 minutes (26th Jan 2012)
+0 4 * * * root /var/www/scraperwiki/cron/bin/mysql-backup
+# ... this one takes 45 minutes (26th Jan 2012)
+0 3 * * * root /var/www/scraperwiki/cron/bin/code-backup
+# Backup to bytemark's backup
 0 7 * * * root rsync -qazr --partial /root/backup umi.backup.bytemark.co.uk::umi/
 
 # Remove dummy users, scrapers etc. that the Selenium test script can make
@@ -12,7 +15,7 @@ SHELL=/bin/bash
 # Every morning update KPIs
 0 4 * * * scraperdeploy cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_kpis
 
-# Reload Apache (and all Django processes) at 2am every day 
+# Reload Apache (and all Django processes) at 4am (UK time) every day 
 # (this is to make sure Apache never monotonically eats RAM)
-0 2 * * * root /usr/sbin/apache2ctl graceful
+0 4 * * * root /usr/sbin/apache2ctl graceful
 
