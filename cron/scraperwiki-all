@@ -1,7 +1,11 @@
 MAILTO=cron@scraperwiki.com
 SHELL=/bin/bash
 
+# Randomly backup these two directories, in case we missed something
 0 3 * * * root tar zcfP /root/backup/scraperwiki.tar.gz /var/www/scraperwiki --exclude "/var/www/scraperwiki/resourcedir"
 0 5 * * * root tar zcfP /root/backup/etc.tar.gz /etc
 
+# Backup everything to headquarters
 0 23 * * * root /var/www/scraperwiki/cron/bin/hq-backup
+
+
