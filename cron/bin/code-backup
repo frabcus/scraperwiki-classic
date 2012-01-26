@@ -13,5 +13,6 @@ for s in $(ls splitscrapers/)
 do
     hg clone splitscrapers/"$s" "$dir/$s" 2>&1 >/dev/null 
 done
-tar zcfP - "$dir" | gzip --rsyncable > /root/backup/mercurial.tar.gz
+tar cfP - "$dir" | gzip --rsyncable > /tmp/new-mercurial.tar.gz
+mv /tmp/new-mercurial.tar.gz /root/backup/mercurial.tar.gz
 rm -rf "$dir"
