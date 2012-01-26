@@ -1,7 +1,7 @@
 MAILTO=cron@scraperwiki.com
 SHELL=/bin/bash
 
-# Backup database, and scraper mercurial repositories
+# Backup Django database, and scraper mercurial repositories
 0 5 * * * root /var/www/scraperwiki/cron/bin/mysql-backup
 30 5 * * * root /var/www/scraperwiki/cron/bin/code-backup
 0 7 * * * root rsync -qazr --partial /root/backup umi.backup.bytemark.co.uk::umi/
