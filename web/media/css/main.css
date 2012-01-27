@@ -4989,7 +4989,7 @@ body.events #tickets {
 	text-shadow: 0 1px 0 white;
 	font-weight: bold;
 	text-align: center;
-	padding: 12px 20px;
+	padding: 12px 20px 10px 20px;
 	margin-left: 20px;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
@@ -5009,8 +5009,8 @@ body.events #tickets {
 
 #liberatesomedata img {
 	position: absolute;
-	bottom: 10px;
-	right: 30px;
+	bottom: -10px;
+	right: 20px;
 }
 
 #liberatesomedata:hover {
