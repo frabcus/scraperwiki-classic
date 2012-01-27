@@ -480,6 +480,10 @@ def request_data(request):
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
 
+def subscribe(request, plan):
+    plans = { 'individual' : { 'name' : 'Individual', 'price' : '9' }, 'smallbusiness' : { 'name' : 'Small Business', 'price' : '29' }, 'corporate' : { 'name' : 'Corporate', 'price' : '299' } }
+    return render_to_response('frontend/subscribe.html', plans[plan], context_instance = RequestContext(request))
+
 def pricing(request):        
     context = {'self_service_vaults':False}
     if request.user.is_authenticated():
