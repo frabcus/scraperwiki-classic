@@ -4983,9 +4983,11 @@ body.events #tickets {
 
 #liberatesomedata {
 	float: right;
+	position: relative;
 	cursor: pointer;
-	background-color: #c7ecbd;
-	color: #0b6403;
+	color: #854c00;
+	text-shadow: 0 1px 0 white;
+	font-weight: bold;
 	text-align: center;
 	padding: 12px 20px;
 	margin-left: 20px;
@@ -4996,17 +4998,30 @@ body.events #tickets {
 	-moz-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
 	box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
 	font-weight: normal;
-	background-image: -moz-linear-gradient(top,  rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
-	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.5)), color-stop(100%,rgba(255,255,255,0)));
-	background-image: -webkit-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
-	background-image: -o-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
-	background-image: -ms-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
-	background-image: linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+	background: #fcef8f;
+	background: -moz-linear-gradient(top, #fcef8f 0%, #ffd86d 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fcef8f), color-stop(100%,#ffd86d));
+	background: -webkit-linear-gradient(top, #fcef8f 0%,#ffd86d 100%);
+	background: -o-linear-gradient(top, #fcef8f 0%,#ffd86d 100%);
+	background: -ms-linear-gradient(top, #fcef8f 0%,#ffd86d 100%);
+	background: linear-gradient(top, #fcef8f 0%,#ffd86d 100%);
+}
+
+#liberatesomedata img {
+	position: absolute;
+	bottom: 10px;
+	right: 30px;
 }
 
 #liberatesomedata:hover {
 	text-decoration: none;
-	background-color: #acd9a0;
+	background: #fcf3b5;
+	background: -moz-linear-gradient(top, #fcf3b5 0%, #ffe196 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fcf3b5), color-stop(100%,#ffe196));
+	background: -webkit-linear-gradient(top, #fcf3b5 0%,#ffe196 100%);
+	background: -o-linear-gradient(top, #fcf3b5 0%,#ffe196 100%);
+	background: -ms-linear-gradient(top, #fcf3b5 0%,#ffe196 100%);
+	background: linear-gradient(top, #fcf3b5 0%,#ffe196 100%);
 }
 
 #liberatesomedata:active {
