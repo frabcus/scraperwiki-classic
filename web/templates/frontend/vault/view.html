@@ -15,6 +15,15 @@
 
 <div class="content">
     <input type="hidden" id="id_api_base" value="{{api_base}}" />
+    
+    {% if self_service_vaults %}
+    <div id="welcome_to_premium">
+        <h3>Thanks for upgrading your account!</h3>
+        <p class="first">You can now schedule scrapers to run more often than daily<br/>and keep scrapers and views private by putting them in Vaults.</p>
+        <p class="last">To get you started, we’ve created a new Vault for you.<br/>You can always access all your Vaults by selecting<br/>&ldquo;Your Vaults&rdquo; from the ScraperWiki user menu.</p>
+        <img src="{{ MEDIA_URL }}images/vaults_menu_introduction.gif" width="136" height="95" alt="" />
+    </div>
+    {% endif %}
 
 {% if vaults.count %}
 <div id="my_vaults">

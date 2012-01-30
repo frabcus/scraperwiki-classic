@@ -7576,6 +7576,34 @@ body.vaults .empty_vault p + p {
 	margin-top: 10px;
 }
 
+#welcome_to_premium {
+	position: relative;
+	background-color: #fff8e1;
+	border: 1px solid #f6d065;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	padding: 20px 0 25px 0;
+	margin-bottom: 30px;
+	text-align: center;
+	color: #960;
+	line-height: 22px;
+}
+
+#welcome_to_premium img {
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	margin-left: 140px;
+}
+
+#welcome_to_premium p.last {
+	margin-bottom: 0;
+	padding-right: 130px;
+}
+
+
+
 
 
 
