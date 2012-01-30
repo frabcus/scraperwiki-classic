@@ -561,6 +561,10 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	background-image: url(../images/header_icon_calendar.gif);
 }
 
+.pricing #header_inner {
+	background-image: url(../images/header_icon_premium.gif);
+}
+
 #header_inner h2 {
 	font-size: 30px;
 	line-height: 36px;
@@ -2097,7 +2101,8 @@ ul.user_menu li {
 
 #divMenu .main_menu, #divMenu .sub_menu, #divMenu form {
 	border-bottom: solid 1px #ccc;
-	padding-bottom: 1em;
+	padding-bottom: 10px;
+	margin-bottom: 10px;
 }
 
 #divMenu ul li {
@@ -4351,6 +4356,8 @@ body.pricing .column-right {
 	width: 174px;
 	font-size: 12px;
 	text-align: center;
+	position: relative;
+	z-index: 1;
 }
 
 #pricing_chart .footnote {
@@ -4379,7 +4386,6 @@ body.pricing .column-right {
 #pricing_chart #smallbusiness {
 	background: #f7e9b9;
 	border: 2px solid #f2dd96;
-	position: relative;
 	z-index: 20;
 	-webkit-box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
 	-moz-box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
@@ -4441,7 +4447,88 @@ body.pricing .column-right {
 }
 
 #pricing_chart #smallbusiness p.limit {
+	margin-top: 5px;
+	margin-bottom: 25px;
+}
+
+#pricing_chart.selfservice #smallbusiness p.limit {
+	margin-bottom: 20px;
+}
+
+#pricing_chart p.buy,
+#pricing_chart p.current {
+	margin: 10px 0 20px;
+}
+
+#pricing_chart #smallbusiness p.buy,
+#pricing_chart #smallbusiness p.current {
 	margin: 5px 0 25px 0;
+}
+
+#pricing_chart .buy a {
+	display: inline-block;
+	padding: 5px 20px 6px;
+	font-size: 15px;
+	line-height: 15px;
+	font-weight: bold;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	color: #fff;
+	cursor: pointer;
+	background-color: #e1865a;
+	border-bottom: 1px solid #b2ab86;
+	text-shadow: 0 1px 3px #c36639;
+	-webkit-box-shadow: 0px 1px 20px rgba(255, 255, 255, 0.6);
+	-moz-box-shadow: 0px 1px 20px rgba(255, 255, 255, 0.6);
+	box-shadow: 0px 1px 20px rgba(255, 255, 255, 0.6);
+	background-image: -moz-linear-gradient(top,  rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.25)), color-stop(100%,rgba(255,255,255,0)));
+	background-image: -webkit-linear-gradient(top,  rgba(255,255,255,0.25) 0%,rgba(255,255,255,0) 100%);
+	background-image: -o-linear-gradient(top,  rgba(255,255,255,0.25) 0%,rgba(255,255,255,0) 100%);
+	background-image: -ms-linear-gradient(top,  rgba(255,255,255,0.25) 0%,rgba(255,255,255,0) 100%);
+	background-image: linear-gradient(top,  rgba(255,255,255,0.25) 0%,rgba(255,255,255,0) 100%);
+}
+
+#pricing_chart .buy a:hover {
+	background-color: #c36639;
+	text-decoration: none;
+	-webkit-box-shadow: 0px 1px 20px rgba(255, 255, 255, 1);
+	-moz-box-shadow: 0px 1px 20px rgba(255, 255, 255, 1);
+	box-shadow: 0px 1px 20px rgba(255, 255, 255, 1);
+	text-shadow: 0 1px 3px #af5c33;
+}
+
+#pricing_chart .buy a:active {
+	position: relative;
+	top: 1px;
+}
+
+#pricing_chart #smallbusiness .buy a {
+	-webkit-box-shadow: 0px 1px 20px rgba(255, 255, 255, 1);
+	-moz-box-shadow: 0px 1px 20px rgba(255, 255, 255, 1);
+	box-shadow: 0px 1px 20px rgba(255, 255, 255, 1);
+}
+
+#pricing_chart .current a {
+	font-size: 15px;
+	line-height: 15px;
+	display: inline-block;
+	padding: 5px 0 6px 22px;
+	background: transparent url(../images/icons/tick.png) 0 4px no-repeat;
+	font-weight: bold;
+	color: #5aa159;
+}
+
+#pricing_chart .current a:hover {
+	text-decoration: none;
+}
+
+#pricing_chart #free .current {
+	margin: 0;
+	position: absolute;
+	bottom: 20px;
+	width: 174px;
 }
 
 body.pricing a#buy {
@@ -4901,11 +4988,13 @@ body.events #tickets {
 
 #liberatesomedata {
 	float: right;
+	position: relative;
 	cursor: pointer;
-	background-color: #c7ecbd;
-	color: #0b6403;
+	color: #854c00;
+	text-shadow: 0 1px 0 white;
+	font-weight: bold;
 	text-align: center;
-	padding: 12px 20px;
+	padding: 12px 20px 10px 20px;
 	margin-left: 20px;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
@@ -4914,17 +5003,30 @@ body.events #tickets {
 	-moz-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
 	box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
 	font-weight: normal;
-	background-image: -moz-linear-gradient(top,  rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
-	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.5)), color-stop(100%,rgba(255,255,255,0)));
-	background-image: -webkit-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
-	background-image: -o-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
-	background-image: -ms-linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
-	background-image: linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
+	background: #fcef8f;
+	background: -moz-linear-gradient(top, #fcef8f 0%, #ffd86d 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fcef8f), color-stop(100%,#ffd86d));
+	background: -webkit-linear-gradient(top, #fcef8f 0%,#ffd86d 100%);
+	background: -o-linear-gradient(top, #fcef8f 0%,#ffd86d 100%);
+	background: -ms-linear-gradient(top, #fcef8f 0%,#ffd86d 100%);
+	background: linear-gradient(top, #fcef8f 0%,#ffd86d 100%);
+}
+
+#liberatesomedata img {
+	position: absolute;
+	bottom: -10px;
+	right: 20px;
 }
 
 #liberatesomedata:hover {
 	text-decoration: none;
-	background-color: #acd9a0;
+	background: #fcf3b5;
+	background: -moz-linear-gradient(top, #fcf3b5 0%, #ffe196 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fcf3b5), color-stop(100%,#ffe196));
+	background: -webkit-linear-gradient(top, #fcf3b5 0%,#ffe196 100%);
+	background: -o-linear-gradient(top, #fcf3b5 0%,#ffe196 100%);
+	background: -ms-linear-gradient(top, #fcf3b5 0%,#ffe196 100%);
+	background: linear-gradient(top, #fcf3b5 0%,#ffe196 100%);
 }
 
 #liberatesomedata:active {

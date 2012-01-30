@@ -480,8 +480,22 @@ def request_data(request):
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
 
-def pricing(request):
-    return render_to_response('frontend/pricing.html', context_instance = RequestContext(request))
+def subscribe(request, plan):
+    plans = { 'individual' : { 'name' : 'Individual', 'price' : '9' }, 'smallbusiness' : { 'name' : 'Small Business', 'price' : '29' }, 'corporate' : { 'name' : 'Corporate', 'price' : '299' } }
+    return render_to_response('frontend/subscribe.html', plans[plan], context_instance = RequestContext(request))
+
+def pricing(request):        
+    context = {'self_service_vaults':False}
+    if request.user.is_authenticated():
+        if request.user.get_profile().has_feature('Self Service Vaults'):
+            context['self_service_vaults'] = True
+            # The 'current_plan' variable will equal something like
+            # 'individual', 'smallbusiness' or 'corporate' if the user
+            # has one of those plans, or False if they have no paid plan.
+            context['current_plan'] = False
+            from codewiki.models import Vault
+            context['vaults'] = request.user.vaults
+    return render_to_response('frontend/pricing.html', context, context_instance = RequestContext(request))
 
 def test_error(request):
     raise Exception('failed in test_error')

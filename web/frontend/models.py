@@ -61,6 +61,7 @@ class UserProfile(models.Model):
         """ 
             Returns true if this profile has a feature connected with 
             the specified name 
+            Use it something like this: request.user.get_profile().has_feature('xxx')
         """
         return self.features.filter(name=fname).count() > 0
     
