@@ -561,6 +561,10 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	background-image: url(../images/header_icon_calendar.gif);
 }
 
+.pricing #header_inner {
+	background-image: url(../images/header_icon_premium.gif);
+}
+
 #header_inner h2 {
 	font-size: 30px;
 	line-height: 36px;
