@@ -371,16 +371,16 @@ a {
 }
 
 .recurly .error {
-	padding: 5px;
-	line-height: 22px;
+	padding: 8px;
+	line-height: 16px;
+	font-size: 13px;
 	vertical-align: middle;
 	color: #000;
 	text-shadow: 0 1px 0 #fec;
 	background: #ffc;
 	border: 1px solid #ba1;
-	box-shadow: 3px 5px 5px 0 rgba(0,0,0,0.10);
-	border-radius: 5px;
-	font-size: 13px;
+	box-shadow: 0px 2px 4px 0 rgba(0,0,0,0.1);
+	border-radius: 4px;
 }
 
 .recurly .server_errors {
@@ -472,7 +472,7 @@ a {
 }
 
 .recurly .field .error {
-	min-width: 128px;
+	min-width: 122px;
 	white-space: nowrap;
 	position: absolute;
 	top: 0;
@@ -724,41 +724,73 @@ a {
 	width: 100%;
 }
 
+.recurly .month {
+	margin-right: 5px;
+}
+
 .recurly select > option {
 	color: inherit;
 }
 
+.recurly .introduction {
+	margin: 0;
+	padding: 15px;
+	text-align: center;
+	font-size: 16px;
+	font-weight: normal;
+	line-height: 20px;
+	background: #f4e5ba;
+	color: #9b8a59;
+	border-bottom: 1px solid #d7c89f;
+	-webkit-box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7);
+	-moz-box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7);
+	box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7);
+	-webkit-border-top-left-radius: 3px;
+	-webkit-border-top-right-radius: 3px;
+	-moz-border-radius-topleft: 3px;
+	-moz-border-radius-topright: 3px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+	text-shadow: 0 1px 0px rgba(255,255,255,0.8);
+}
+
 .recurly .due_now {
-	background: #ccc;
 	clear: both;
 	color: #2a3a3c;
 	height: 70px;
 	line-height: 67px;
 	vertical-align: middle;
-	padding: 0 25px;
+	padding: 0 20px;
 	text-shadow: 0px 1px 3px rgba(0,0,0,0.6);
 	color: #fff;
+	background: #e8b62a;
+	border-bottom: 1px solid #a4801b;
+	border-top: 1px solid #a4801b;
+	-webkit-box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7);
+	-moz-box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7);
+	box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7);
+	font-weight: bold;
+	font-size: 33px;
 }
 
 .recurly .due_now .title {
 	float: left;
-	font-size: 29px;
 	position: relative;
 }
 
 .recurly .due_now .cost {
 	float: right;
 	font-size: 33px;
-	font-weight: bold;
 	letter-spacing: 1px;
 	margin: 0;
 	position: relative;
 }
 
 .recurly .footer {
-	border-radius: 0px 0px 9px 9px;
 	margin: 0px;
-	padding: 20px;
+	padding: 20px 20px 23px 20px;
+	overflow: auto;
+	background: url("../images/recurly/dash.png") repeat-x 1px top;
 }
 
 .recurly.submitting .footer {
@@ -766,59 +798,56 @@ a {
 }
 
 .recurly button.submit {
-	height: 46px;
-	max-width: 600px;
+	height: 35px;
+	margin: 0;
+	padding: 0 25px;
+	max-width: 200px;
+	background: #e8b62a;
+	color: #fff;
+	font-weight: bold;	
 	font-size: 18px;
-	font-weight: 700;
-	color: #302106;
+	line-height: 33px;
+	vertical-align: middle;
 	text-align: center;
-	margin-left: 0px;
-	border: 1px solid #767674;
-	background: #e7a500;
-	border-radius: 10px;
+	text-shadow: rgba(60,42,29,0.8) 0 1px 3px;
+	border-radius: 4px;
+	border: 1px solid #a4801b;
+	-webkit-box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7);
+	-moz-box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7);
+	box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.7);
+	float: right;
+	cursor: pointer;
 	outline: none;
-	box-shadow: inset rgba(255,255,255,0.70) 0px 1px 0px, rgba(0,0,0,0.50) 0px 1px 3px;
-	background-image: -webkit-gradient(linear, 0% 20%, 0% 100%, from(#fecd00), to(#ce7b00));
-	background: -moz-linear-gradient(top, #fecd00, #ce7b00);
-	text-shadow: rgba(255,255,255,0.50) 0 1px 0;
-	padding: 10px 20px;
 }
 
 .recurly button.submit:hover {
-	color: #451;
+	background: #f0c03c;
 }
 
 .recurly button.submit:active {
-	top: 2px;
-	color: #302106;
-	text-shadow: rgba(255,255,255,0.57) 0 -1px 0;
-	outline: none;
-	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ce7b00), to(#fecd00));
-	background: -moz-linear-gradient(top, #ce7b00, #fecd00);
-	box-shadow: rgba(255,255,255,0.69) 0px -1px 0px inset, rgba(0,0,0,0.26) 0px 2px 3px;
+	position: relative;
+	top: 1px;
 }
 
 .recurly button.submit[disabled] {
-	position: relative;
-	height: 46px;
-	max-width: 600px;
-	padding: 0 10px;
-	font-weight: 700;
-	color: #555;
-	text-shadow: rgba(255,255,255,0.57) 0 1px 0;
+	text-shadow: rgba(0,0,0,0.6) 0 1px 3px;
+	background: #bfbfbf;
+	border: 1px solid #7f7f7f;
+}
+
+.recurly .back {
+	line-height: 35px;
+	font-size: 14px;
+	text-decoration: none;
+	color: #888;
+	padding: 10px 20px 10px 0;
+}
+
+.recurly .back:hover {
+	color: #444;
+}
+
+p.loading {
 	text-align: center;
-	opacity: 0.75;
-	border: 1px solid #767674;
-	background: #e7a500;
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	border-radius: 10px;
-	-webkit-user-select: none;
-	-moz-user-select: -moz-none;
-	outline: none;
-	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#dbd9d2), to(#999));
-	background: -moz-linear-gradient(top, #dbd9d2, #999);
-	-webkit-background-clip: padding-box;
-	-webkit-box-shadow: rgba(255,255,255,0.69) 0px 1px 0px inset, rgba(0,0,0,0.26) 0px 2px 3px;
-	box-shadow: rgba(255,255,255,0.70) 0px 1px 0px inset, rgba(0,0,0,0.27) 0px 2px 3px;
+	color: #444;
 }
