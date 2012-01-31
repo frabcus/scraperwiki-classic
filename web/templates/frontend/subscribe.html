@@ -7,20 +7,20 @@
         <script src="{{ MEDIA_URL }}js/recurly.js"></script>
         <script>
             Recurly.config({
-                subdomain: 'recurlyjsdemo-test'
+                subdomain: 'scraperwiki'
                 , currency: 'USD'
                 , country: 'US'
             });
-
             Recurly.buildSubscriptionForm({
                 target: '#recurly-subscribe'
-                , planCode: 'simpleplan'
-                , accountCode: 'test'
+                , planCode: '{{code}}'
+                // , accountCode: 'we_can_explicitly_set_the_new_users_account_code_here'
                 , successURL: 'confirmation.html'
                 , distinguishContactFromBillingInfo: true
                 , collectCompany: true
-                , termsOfServiceURL: 'http://example.com/tos'
-                , account: {
+                , enableCoupons: false
+                , enableAddOns: false
+                /* , account: {
                     firstName: 'Joe'
                     , lastName: 'User'
                     , email: 'test@example.net'
@@ -38,11 +38,11 @@
                     , country: 'US'
                     , cardNumber: '4111-1111-1111-1111'
                     , CVV: '123'
-                }
-                , signature: 'bc3027a216e3fa51382c3cbdbb24bf7eb7b4bc69-0'
+                } */
+                , signature: 'bc3027a216e3fa51382c3cbdbb24bf7eb7b4bc69-0' // This needs to be generated server-side
             });
         </script>
-        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/payment.css" />
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/recurly.css" />
 
     	{% if not debug %}
     	    <script type="text/javascript">
@@ -94,7 +94,6 @@
         <![endif]-->
         <h1>ScraperWiki</h1>
         <h2>Subscribe to a Premium Account</h2>
-        <p>{{ name }} ${{ price }}</p>
         <div id="recurly-subscribe">
             
         </div>
