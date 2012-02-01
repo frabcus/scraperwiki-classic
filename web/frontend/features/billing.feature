@@ -20,7 +20,7 @@ Feature: As a person who writes code on ScraperWiki
     And I should see "$9"
   
   Scenario: I can choose to purchase the Small Business plan
-    Given I'm logged in
+    Given user "test" with password "pass" is logged in
     And the "Self Service Vaults" feature exists
     And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
@@ -30,7 +30,7 @@ Feature: As a person who writes code on ScraperWiki
     And I should see "$29"
 
   Scenario: I can choose to purchase the Corporate plan
-    Given I'm logged in
+    Given user "test" with password "pass" is logged in
     And the "Self Service Vaults" feature exists
     And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page

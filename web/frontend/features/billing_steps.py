@@ -29,6 +29,15 @@ def create_and_login(step, username, password):
 
     assert world.browser.find_by_css('#nav_inner .loggedin')
 
+    # Clear alerts and windows that would otherwise obscure buttons.
+    for id in ["djHideToolBarButton", "alert_close"]:
+        elements = world.browser.find_by_id(id)
+        if not elements:
+            continue
+        element = elements.first
+        if element.visible:
+            element.click()
+
 @step(u'And the "([^"]*)" feature exists')
 def and_the_feature_exists(step, feature):
     Feature.objects.filter(name=feature).delete()
