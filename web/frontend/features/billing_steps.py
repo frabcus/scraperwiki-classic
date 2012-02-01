@@ -1,23 +1,21 @@
 from lettuce import step,before,world
-from django.test.client import Client
 from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals
-from lxml import html
-from pprint import pprint
+from splinter.browser import Browser
 
 @before.all
 def set_browser():
-    world.browser = Client()
+    world.browser = Browser()
 
 @step(u'When I visit the pricing page')
 def when_i_visit_the_pricing_page(step):
-    response = world.browser.get('/pricing/')
-    world.dom = html.fromstring(response.content)
+    prefix = 'http://localhost:8000'
+    response = world.browser.visit(prefix + '/pricing/')
 
 @step(u'(?:Then|And) I should see the "([^"]*)" payment plan')
 def then_i_should_see_the_payment_plan(step, plan):
-    plan_name = world.dom.xpath(".//h3[text()='%s']" % plan)[0].text
+    plan_name = world.browser.find_by_xpath(".//h3[text()='%s']" % plan)[0].text
     assert plan_name == plan
 
 @step(u"Given I'm logged in")
