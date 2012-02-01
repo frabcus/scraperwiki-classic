@@ -5,13 +5,14 @@ from nose.tools import assert_equals
 from splinter.browser import Browser
 from selenium.webdriver.support.ui import WebDriverWait
 
+prefix = 'http://localhost:8000'
+
 @before.all
 def set_browser():
     world.browser = Browser()
 
 @step(u'When I visit the pricing page')
 def when_i_visit_the_pricing_page(step):
-    prefix = 'http://localhost:8000'
     response = world.browser.visit(prefix + '/pricing/')
 
 @step(u'(?:Then|And) I should see the "([^"]*)" payment plan')
@@ -54,14 +55,70 @@ def and_i_click_on_a_plan_button(step, plan, button):
 def then_i_should_be_on_the_payment_page(step):
     assert '/subscribe' in world.browser.url
 
-@step(u'And I should see "([^"]*)"')
+@step(u'(?:And|Then) I should see "([^"]*)"')
 def and_i_should_see(step, text):
     assert world.browser.is_text_present(text)
+
+@step(u'Given I have chosen the "([^"]*)" plan')
+def given_i_have_chosen_a_plan(step, plan):
+    step.behave_as('Given user "test" with password "pass" is logged in')
+    world.browser.visit(prefix + '/subscribe/%s' % plan.lower())
+    wait_for_element_by_css('.card_number')
+
+@step(u'When I enter my contact information')
+def when_i_enter_my_contact_information(step):
+    contact_info = world.browser.find_by_css('.contact_info').first
+    contact_info.find_by_css('.first_name input').first.fill('Test') 
+    contact_info.find_by_css('.last_name input').first.fill('Testerson') 
+    contact_info.find_by_css('.email input').first.fill('test@testerson.com') 
+
+@step(u'And I enter "([^"]*)" as the billing name')
+def and_i_enter_the_billing_name(step, billing_name):
+    billing_info = world.browser.find_by_css('.billing_info').first
+    billing_info.find_by_css('.first_name input').first.fill('Test') 
+    billing_info.find_by_css('.last_name input').first.fill('Testerson') 
+
+@step(u'And I enter "([^"]*)" as the credit card number')
+def and_i_enter_the_credit_card_number(step, number):
+    billing_info = world.browser.find_by_css('.billing_info').first
+    billing_info.find_by_css('.card_number input').first.fill(number) 
+
+@step(u'And I enter "([^"]*)" as the CVV')
+def and_i_enter_the_cvv(step, cvv):
+    billing_info = world.browser.find_by_css('.billing_info').first
+    billing_info.find_by_css('.cvv input').first.fill(cvv) 
+    
+@step(u'And I enter "([^"]*)" as the expiry month and year')
+def and_i_enter_the_expiry_month_and_year(step, expiry):
+    month, year = expiry.split('/')
+    world.browser.find_by_css('.expires .month').first.find_option_by_value(month).check()
+    # Convert 2-digit year to 21st Century!
+    year = "20%s" % year
+    world.browser.find_by_css('.expires .year').first.find_option_by_text(year).check()
+
+@step(u'And I enter the billing address')
+def and_i_enter_the_billing_address(step):
+    div = world.browser.find_by_css('.billing_info').first
+    div.find_by_css('.address1 input').first.fill('ScraperWiki Limited')
+    div.find_by_css('.address2 input').first.fill('146 Brownlow Hill')
+    div.find_by_css('.city input').first.fill('Liverpool')
+    div.find_by_css('.zip input').first.fill('L3 5RF')
+    div.find_by_css('.country').find_option_by_value('GB').check()
+    div.find_by_css('.state input').first.fill('MERSEYSIDE')
+
+@step(u'And I click "([^"]*)"')
+def and_i_click(step, text):
+    world.browser.find_link_by_text(text).first.click()
 
 # :todo: Useful function, but probably should be kept somewhere else.
 def wait_for_fx(timeout=5):
     WebDriverWait(world.browser.driver, timeout).until(lambda _d:
       world.browser.evaluate_script('jQuery.queue("fx").length == 0'))
+
+# :todo: Useful function, but probably should be kept somewhere else.
+def wait_for_element_by_css(css, timeout=5):
+    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
+      len(world.browser.find_by_css(css)) != 0)
 
 # :todo: Useful function, but probably should be kept somewhere else.
 def clear_obscuring_popups(browser):
