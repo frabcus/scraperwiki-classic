@@ -362,10 +362,15 @@ class Code(models.Model):
             if nqsenvvars:
                 cdesc = "%s\n\n_Has %d secret query-string environment variable%s._" % (cdesc, nqsenvvars, (nqsenvvars>1 and "s" or ""))
 
-        text = textile.textile(cdesc)   # wikicreole at the very least here!!!
-        text = text.replace("&#8220;", '"')
-        text = text.replace("&#8221;", '"')        
-        text = text.replace("&#8217;", "'")                
+        # Doing some very crude XSS protection
+        cdesc = re.sub("<(\s*script)(?i)", "&lt;\\1", cdesc)
+        if not re.search("<", cdesc):
+            text = textile.textile(cdesc)   # wikicreole at the very least here!!!
+            text = text.replace("&#8220;", '"')
+            text = text.replace("&#8221;", '"')
+            text = text.replace("&#8217;", "'")
+        else:
+            text = cdesc
         return text
 
         
