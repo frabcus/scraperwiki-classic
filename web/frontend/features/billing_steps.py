@@ -22,9 +22,14 @@ def then_i_should_see_the_payment_plan(step, plan):
 
 @step(u"Given I'm logged in")
 def given_i_m_logged_in(step):
-    u = User.objects.filter(username='test')[0]
-    UserProfile.objects.filter(user=u).delete()
-    u.delete()
+    us = list(User.objects.filter(username='test'))
+    if not us:
+        # no users, no need to delete
+        pass
+    else:
+        u = us[0]
+        UserProfile.objects.filter(user=u).delete()
+        u.delete()
     #create user
     user = User.objects.create_user('test', 'test@testerson.com', 'test')
     user.save()
