@@ -16,28 +16,18 @@ def when_i_visit_the_pricing_page(step):
 @step(u'(?:Then|And) I should see the "([^"]*)" payment plan')
 def then_i_should_see_the_payment_plan(step, plan):
     plan_name = world.browser.find_by_xpath(".//h3[text()='%s']" % plan)[0].text
-    assert plan_name == plan
+    assert_equals(plan_name, plan)
 
-@step(u"Given I'm logged in")
-def given_i_m_logged_in(step):
-    us = list(User.objects.filter(username='test'))
-    if not us:
-        # no users, no need to delete
-        pass
-    else:
-        u = us[0]
-        UserProfile.objects.filter(user=u).delete()
-        u.delete()
-    #create user
-    user = User.objects.create_user('test', 'test@testerson.com', 'test')
-    user.save()
-    profile = UserProfile(user=user)
-    success = world.browser.login(username='test', password='test') 
+@step(u'Given user "([^"]*)" with password "([^"]*)" is logged in')
+def create_and_login(step, username, password):
+    step.behave_as("""
+    Given there is a username "%(username)s" with password "%(password)s"
+    Given I am on the login page
+    When I fill in my username "%(username)s" and my password "%(password)s"
+    And I click the button "Log in"
+    """ % locals())
 
-    response = world.browser.get('/')
-    dom = html.fromstring(response.content)
-    logged_in = dom.cssselect('#nav_inner .loggedin')
-    assert logged_in != []
+    assert world.browser.find_by_css('#nav_inner .loggedin')
 
 @step(u'And the "([^"]*)" feature exists')
 def and_the_feature_exists(step, feature):
@@ -54,14 +44,14 @@ def and_i_have_a_feature_enabled(step, feature):
 
 @step(u'And I click on the "([^"]*)" "([^"]*)" button')
 def and_i_click_on_a_plan_button(step, plan, button):
-    world.href = world.dom.xpath(".//h3[text()='%s']/../p/a[text()='%s']" % (plan, button))[0].get('href')
+    el = world.browser.find_by_xpath(".//h3[text()='%s']/../p/a[text()='%s']" % (plan, button)).first
+    el.click()
 
 @step(u'Then I should be on the payment page')
 def then_i_should_be_on_the_payment_page(step):
-    assert world.href.startswith('/subscribe')
+    assert '/subscribe' in world.browser.url
 
 @step(u'And I should see "([^"]*)"')
-def and_i_should_see_group1(step, text):
-    response = world.browser.get(world.href)
-    assert text in response.content
+def and_i_should_see(step, text):
+    assert world.browser.is_text_present(text)
 
