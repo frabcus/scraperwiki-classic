@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals
 from splinter.browser import Browser
+from selenium.webdriver.support.ui import WebDriverWait
 
 @before.all
 def set_browser():
@@ -29,14 +30,7 @@ def create_and_login(step, username, password):
 
     assert world.browser.find_by_css('#nav_inner .loggedin')
 
-    # Clear alerts and windows that would otherwise obscure buttons.
-    for id in ["djHideToolBarButton", "alert_close"]:
-        elements = world.browser.find_by_id(id)
-        if not elements:
-            continue
-        element = elements.first
-        if element.visible:
-            element.click()
+    clear_obscuring_popups(world.browser)
 
 @step(u'And the "([^"]*)" feature exists')
 def and_the_feature_exists(step, feature):
@@ -64,3 +58,20 @@ def then_i_should_be_on_the_payment_page(step):
 def and_i_should_see(step, text):
     assert world.browser.is_text_present(text)
 
+# :todo: Useful function, but probably should be kept somewhere else.
+def wait_for_fx(timeout=5):
+    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
+      world.browser.evaluate_script('jQuery.queue("fx").length == 0'))
+
+# :todo: Useful function, but probably should be kept somewhere else.
+def clear_obscuring_popups(browser):
+    """Clear alerts and windows that would otherwise obscure buttons.
+    """
+
+    for id in ["djHideToolBarButton", "alert_close"]:
+        elements = browser.find_by_id(id)
+        if not elements:
+            continue
+        element = elements.first
+        if element.visible:
+            element.click()
