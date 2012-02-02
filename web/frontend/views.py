@@ -480,6 +480,12 @@ def request_data(request):
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
 
+def generate_recurly_signature(plan_code, account_code):
+    import recurly
+    recurly.js.PRIVATE_KEY = settings.RECURLY_PRIVATE_KEY
+    signature = recurly.js.sign_subscription(plan_code, account_code)
+    return signature
+
 def subscribe(request, plan):
     plans = { 
         'individual' : { 
@@ -495,7 +501,11 @@ def subscribe(request, plan):
             'code' : 'corporate'
         }
     }
-    return render_to_response('frontend/subscribe.html', plans[plan], context_instance = RequestContext(request))
+    context = plans[plan]
+    account_code = "%s-%s" % (request.user.id, request.user.username)
+    context['signature'] = generate_recurly_signature(plan_code=plan, account_code=account_code)
+    context['account_code'] = account_code
+    return render_to_response('frontend/subscribe.html', context, context_instance = RequestContext(request))
 
 def pricing(request):        
     context = {'self_service_vaults':False}
