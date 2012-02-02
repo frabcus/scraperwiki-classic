@@ -91,10 +91,12 @@ def and_i_enter_the_cvv(step, cvv):
 @step(u'And I enter "([^"]*)" as the expiry month and year')
 def and_i_enter_the_expiry_month_and_year(step, expiry):
     month, year = expiry.split('/')
-    world.browser.find_by_css('.expires .month').first.find_option_by_value(month).check()
+    # The option value for month does not have a leading 0.
+    month = str(int(month))
+    world.browser.find_option_by_value(month).first.check()
     # Convert 2-digit year to 21st Century!
     year = "20%s" % year
-    world.browser.find_by_css('.expires .year').first.find_option_by_text(year).check()
+    world.browser.find_option_by_text(year).first.check()
 
 @step(u'And I enter the billing address')
 def and_i_enter_the_billing_address(step):
@@ -103,12 +105,13 @@ def and_i_enter_the_billing_address(step):
     div.find_by_css('.address2 input').first.fill('146 Brownlow Hill')
     div.find_by_css('.city input').first.fill('Liverpool')
     div.find_by_css('.zip input').first.fill('L3 5RF')
-    div.find_by_css('.country').find_option_by_value('GB').check()
+    world.browser.find_option_by_value('GB').first.check()
     div.find_by_css('.state input').first.fill('MERSEYSIDE')
 
 @step(u'And I click "([^"]*)"')
 def and_i_click(step, text):
-    world.browser.find_link_by_text(text).first.click()
+    # :todo: Make it not wrong.  so wrong.
+    world.browser.find_by_tag("button").first.click()
 
 # :todo: Useful function, but probably should be kept somewhere else.
 def wait_for_fx(timeout=5):
