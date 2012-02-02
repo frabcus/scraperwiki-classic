@@ -108,10 +108,27 @@ def and_i_enter_the_billing_address(step):
     world.browser.find_option_by_value('GB').first.check()
     div.find_by_css('.state input').first.fill('MERSEYSIDE')
 
-@step(u'And I click "([^"]*)"')
+@step(u'(?:And|When) I click "([^"]*)"')
 def and_i_click(step, text):
     # :todo: Make it not wrong.  so wrong.
     world.browser.find_by_tag("button").first.click()
+
+@step(u'And I have entered my payment details')
+def and_i_have_entered_my_payment_details(step):
+    # Using Credit Card details for the recurly test gateway:
+    # http://docs.recurly.com/payment-gateways/test-gateway
+    step.behave_as("""
+      When I enter my contact information
+      And I enter "Test Testinator" as the billing name
+      And I enter "02/13" as the expiry month and year
+      And I enter "4111-1111-1111-1111" as the credit card number
+      And I enter "666" as the CVV
+      And I enter the billing address
+      """)
+
+@step(u'Then I should be on the vaults page')
+def then_i_should_be_on_the_vaults_page(step):
+    assert '/vaults' in world.browser.url
 
 # :todo: Useful function, but probably should be kept somewhere else.
 def wait_for_fx(timeout=5):
