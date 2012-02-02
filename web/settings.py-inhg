@@ -111,4 +111,9 @@ if DEBUG:
 HIGHRISE_ENABLED = False
 SHOW_APIKEY_UI = True
 
-INSTALLED_APPS += ['lettuce.django']
+if DEBUG:
+    # Django-nose: https://github.com/jbalogh/django-nose
+    INSTALLED_APPS += ['lettuce.django', 'django_nose']
+
+# Go to https://scraperwiki.recurly.com/developer/recurly_js to find this.
+RECURLY_PRIVATE_KEY = None
