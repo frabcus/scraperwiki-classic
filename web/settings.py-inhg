@@ -36,6 +36,8 @@ URL_ROOT            = '/'           # prefix for URLs to run not at top level of
 if 'test' in sys.argv:
     DATABASES['default']['TEST_NAME'] = ':memory:'
     DATABASES['default']['ENGINE'] = 'sqlite3'
+    # Any options specified are going to me MySQL specific.
+    del DATABASES['default']['OPTIONS']
     SOUTH_TESTS_MIGRATE = False
     OVERDUE_SQL = "julianday(strftime(?,last_run) + run_interval,'unixepoch') < julianday('now', 'localtime') or last_run is null"
     OVERDUE_SQL_PARAMS = ['%s']
