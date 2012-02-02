@@ -9,45 +9,39 @@
     </a> 
 
     {% spaceless %}
-      {% ifequal role 'follow' %}
+      {% if role == 'follow' %}
           (follower)
       {% else %}
-		  {% ifequal role 'email' %}
+		  {% if role == 'email' %}
               (is emailed output)
       	  {% else %}
-      	      {% if role != 'owner' %}
+      	      {% if role != 'owner' and role != 'editor' %}
                   ({{role}})
               {% endif %}
-          {% endifequal %}
-	  {% endifequal %}
+          {% endif %}
+	  {% endif %}
     {% endspaceless %}
 
     <span class="hide">{{contributor.username}}</span>
     
-    {% if scraper.vault %}{% else %}
-
-	{% if role == 'editor' %}
-		{% if request.user.username == contributor.username %}
-			<input type="button" value="demote" class="detachbutton"/>
-		{% endif %}		
-	{% endif %}
-	
-    {% if user_owns_it %}
-      {% ifnotequal scraper.privacy_status 'public' %}
-        {% ifequal role 'editor' %}
-          <input type="button" value="demote" class="demotebutton"/>
-          <a title="Remove this user from the list of editors" class="demotelink">Remove</a>
-        {% endifequal %}
-        {% ifequal role 'follow' %}
-          <input type="button" value="promote" class="promotebutton"/>
-        {% endifequal %}
-      {% endifnotequal %}
+    {% if role == 'owner' %}
+        <img class="vault_owner_flash" src="{{ MEDIA_URL }}/images/vault_owner_flash.png" width="39" height="39" />
+    {% else %}
+        {% if scraper.vault %}
+            {% if user_owns_it and role == 'editor' %}
+              <input type="button" value="demote" class="demotebutton"/>
+              <a title="Remove this user from the list of editors. Note: they will remain a member of the vault." class="demotelink">Remove</a>
+            {% endif %}
+        {% else %}
+        	{% if role == 'editor' and request.user.username == contributor.username %}
+                <input type="button" value="demote" class="demotebutton"/>
+                <a title="Remove yourself from this list" class="demotelink">Remove</a>
+        	{% endif %}
+            {% if user_owns_it and scraper.privacy_status == 'visible' and role == 'editor' %}
+                <input type="button" value="demote" class="demotebutton"/>
+                <a title="Remove this user from the list of editors" class="demotelink">Remove</a>
+            {% endif %}
+        {% endif %}
     {% endif %}
-    
-    {% endif %}
-    
-    
-    {% if role == 'owner' %}<img class="vault_owner_flash" src="{{ MEDIA_URL }}/images/vault_owner_flash.png" width="39" height="39" />{% endif %}
-    
 </li>
 
