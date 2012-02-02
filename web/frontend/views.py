@@ -502,8 +502,7 @@ def subscribe(request, plan):
         }
     }
     context = plans[plan]
-    # :todo: get the User object here, and use the shortname for the recurly account name?
-    account_code = 'recurly_test_account'
+    account_code = "%s-%s" % (request.user.id, request.user.username)
     context['signature'] = generate_recurly_signature(plan_code=plan, account_code=account_code)
     context['account_code'] = account_code
     return render_to_response('frontend/subscribe.html', context, context_instance = RequestContext(request))
