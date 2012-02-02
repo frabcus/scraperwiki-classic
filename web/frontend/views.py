@@ -1,6 +1,6 @@
 from django import forms
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseForbidden
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
 from django.conf import settings
@@ -12,6 +12,8 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
+# https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
+from django.views.decorators.csrf import csrf_exempt
 
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
@@ -507,6 +509,48 @@ def subscribe(request, plan):
     context['account_code'] = account_code
     return render_to_response('frontend/subscribe.html', context, context_instance = RequestContext(request))
 
+# We're CSRF exempt because we only expect recurly to POST here, and they use their own
+# authentication/signing mechanism, so we know that random people will not be able
+# to successfully POST.
+@csrf_exempt
+def confirm_subscription(request):
+    """We arrive here when recurly POST to this confirmation page."""
+
+    """
+    signature
+    account_code
+    plan_code
+    add_on_codes
+    couponcode
+    """
+
+    import recurly.js
+    from recurly.js import RequestForgeryError
+
+    def strip_brackets(s):
+        """Given a string "prefix[thing]" return "thing".
+        """
+        import re
+
+        m = re.search(r'.*\[(.*)\]', s)
+        return m.group(1)
+
+    # Each recurly result comes in a key of the form: "recurly_result[thing]";
+    # we have to unpack those into the dictionary that verify_subscription expects.
+    recurly_result = dict((strip_brackets(k), v)
+      for k,v in request.POST.items() if 'recurly_result' in k)
+
+    try:
+       recurly.js.verify_subscription(recurly_result)
+    except RequestForgeryError:
+       # Private key is invalid or the result was tampered with
+       # Log?
+       return HttpResponseForbidden('Do not call this, imp!')
+
+    # :todo: Upgrade users account!!
+
+    return redirect('vault')
+
 def pricing(request):        
     context = {'self_service_vaults':False}
     if request.user.is_authenticated():
@@ -584,6 +628,9 @@ def view_vault(request, username=None):
     if request.user.is_authenticated():
         if request.user.get_profile().has_feature('Self Service Vaults'):
             context['self_service_vaults'] = True
+        if request.user.vaults.count() == 0:
+            context['has_upgraded'] = True
+            # :todo: create a vault
         
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))
