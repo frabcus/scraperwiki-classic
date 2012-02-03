@@ -43,7 +43,7 @@ page_titles = {
     "shared_libraries" : ("3rd party libraries","Binaries availabile inside ScraperWiki"),
 
     "html_views": ("HTML Views 101", "How to get the most out of HTML Views on ScraperWiki"),
-    "ajax_topic_guide": ("Using Ajax from ScraperWiki", "A quick guide to getting data out of ScraperWiki using the Ajax API"),
+    "ajax_topic_guide": ("Using Ajax with ScraperWiki", "A quick guide to getting data out of ScraperWiki using the Ajax API"),
     "gmap_topic_guide" : ("Google Maps",""),
     "jquery_topic_guide" : ("Introduction to jQuery","Quickly add interactivity to your HTML Views with jQuery"),
 }
