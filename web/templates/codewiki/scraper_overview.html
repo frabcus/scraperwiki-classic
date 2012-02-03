@@ -56,7 +56,7 @@
     </h2>
 	<p>
 	    <span class="language {{scraper.language|lower}}" rel="{{scraper.language|lower}}">{% if scraper.language == 'php' %}PHP{% else %}{{ scraper.language|capfirst }}{% endif %}</span>
-	    <span class="latestdomain">{% if scraper.last_runevent.first_url_scraped %}<a href="{{ scraper.last_runevent.first_url_scraped }}" target="_blank">{% str_replace "http://" "" scraper.last_runevent.first_url_scraped %}</a>{% else %}{% if scraper.last_runevent %}No pages scraped{% else %}Hasn&rsquo;t run yet{% endif %}{% endif %}</span>
+	    <span class="latestdomain">{% if scraper.last_runevent.first_url_scraped %}<a href="{{ scraper.last_runevent.first_url_scraped }}" target="_blank">{% str_replace "https?://" "" scraper.last_runevent.first_url_scraped %}</a>{% else %}{% if scraper.last_runevent %}No pages scraped{% else %}Hasn&rsquo;t run yet{% endif %}{% endif %}</span>
         {% if scraper.privacy_status == 'public' %}
     	    <span class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
         {% endif %}
@@ -186,7 +186,7 @@
         {% if scraper.last_runevent %}
             <p><a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}" rel="nofollow">{{scraper.last_runevent.run_started|timesince}} ago</a></p>
             {% if scraper.last_runevent.pages_scraped %}
-                <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from <a id="first_url_scraped" href="{{ scraper.last_runevent.first_url_scraped }}" target="_blank" rel="nofollow">{% str_replace "http://" "" scraper.last_runevent.first_url_scraped %}</a></p>
+                <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from <a id="first_url_scraped" href="{{ scraper.last_runevent.first_url_scraped }}" target="_blank" rel="nofollow">{% str_replace "https?://" "" scraper.last_runevent.first_url_scraped %}</a></p>
             {% else %}
                 <p>No pages scraped</p>
             {% endif %}
