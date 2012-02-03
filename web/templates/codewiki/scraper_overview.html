@@ -186,7 +186,7 @@
         {% if scraper.last_runevent %}
             <p><a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}" rel="nofollow">{{scraper.last_runevent.run_started|timesince}} ago</a></p>
             {% if scraper.last_runevent.pages_scraped %}
-                <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from <a id="first_url_scraped" href="{{ scraper.last_runevent.first_url_scraped }}" target="_blank" rel="nofollow">{% str_replace "https?://" "" scraper.last_runevent.first_url_scraped %}</a></p>
+                <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }}{% if scraper.last_runevent.first_url_scraped %} from <a id="first_url_scraped" href="{{ scraper.last_runevent.first_url_scraped }}" target="_blank" rel="nofollow">{% str_replace "https?://" "" scraper.last_runevent.first_url_scraped %}</a>{% endif %}</p>
             {% else %}
                 <p>No pages scraped</p>
             {% endif %}

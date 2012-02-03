@@ -6,4 +6,4 @@ register = Library()
 
 @register.simple_tag
 def str_replace(search, replace, subject):
-    return subject.replace(search,replace)
+    return re.sub(search,replace,subject)
