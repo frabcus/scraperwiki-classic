@@ -16,15 +16,24 @@ import urllib2
 import urlparse
 import cgi
 
+# This function is such a mess, mainly because of: 
+# a) HTML and Javascript being only semi-supported languages and
+# b) the odd way the 'supported' languages are held in a user session
+# Could do with a re-write.
+# Z - Feb 2012
 def docmain(request, language=None, path=None):
     from titles import page_titles
+    
+    if (language == 'html' or language == 'javascript') and not path:
+        return HttpResponseRedirect(reverse('docsroot', kwargs={'language':'python'}) )
 
     language_session = request.session.get('language', 'python')
     if not language and language_session:
         return HttpResponseRedirect(reverse('docsroot', kwargs={'language':language_session}) )
     language = language or language_session
 
-    request.session['language'] = language
+    if language == 'python' or language == 'php' or language == 'ruby':
+        request.session['language'] = language
     context = {'language': language }
    
     # Which languages is this available for?
@@ -34,8 +43,8 @@ def docmain(request, language=None, path=None):
     # context["lang_javascript"] = True
     
     # not written by anyone yet
-    if language == 'html':
-        return HttpResponseRedirect(reverse('docsroot', kwargs={'language':'python'}) )
+    #if language == 'html':
+    #    return HttpResponseRedirect(reverse('docsroot', kwargs={'language':'python'}) )
     if path in ['ruby_libraries', 'python_libraries', 'php_libraries', 'shared_libraries']:
         context["lang_shared"] = True
     
