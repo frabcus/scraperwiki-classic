@@ -10,6 +10,7 @@
 {% load comments %}
 {% load history %}
 {% load icanhaz %}
+{% load str_replace %}
 
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 
@@ -55,7 +56,7 @@
     </h2>
 	<p>
 	    <span class="language {{scraper.language|lower}}" rel="{{scraper.language|lower}}">{% if scraper.language == 'php' %}PHP{% else %}{{ scraper.language|capfirst }}{% endif %}</span>
-	    <span class="latestdomain">{% if url_screenshot %}<a href="{{ url_screenshot }}" target="_blank">{{ url_screenshot }}</a>{% else %}Hasn&rsquo;t run yet{% endif %}</span>
+	    <span class="latestdomain">{% if scraper.last_runevent.first_url_scraped %}<a href="{{ scraper.last_runevent.first_url_scraped }}" target="_blank">{% str_replace "http://" "" scraper.last_runevent.first_url_scraped %}</a>{% else %}{% if scraper.last_runevent %}No pages scraped{% else %}Hasn&rsquo;t run yet{% endif %}{% endif %}</span>
         {% if scraper.privacy_status == 'public' %}
     	    <span class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
         {% endif %}
@@ -68,7 +69,7 @@
             {% if scraper.privacy_status == 'private' %}
     	    <span class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</span>
     	    {% endif %}
-    	{% endif %} 
+    	{% endif %}
     </p>
 {% endblock %}
 
@@ -185,9 +186,9 @@
         {% if scraper.last_runevent %}
             <p><a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}" rel="nofollow">{{scraper.last_runevent.run_started|timesince}} ago</a></p>
             {% if scraper.last_runevent.pages_scraped %}
-                <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from {% for d in latestdomain %}<a href="{{ d.domain }}" target="_blank" rel="nofollow">{{ d.domain }}</a>{% endfor %}</p>
+                <p>Scraped {{ scraper.last_runevent.pages_scraped }} page{{ scraper.last_runevent.pages_scraped|pluralize }} from <a id="first_url_scraped" href="{{ scraper.last_runevent.first_url_scraped }}" target="_blank" rel="nofollow">{% str_replace "http://" "" scraper.last_runevent.first_url_scraped %}</a></p>
             {% else %}
-                <p>Did not scrape any pages</p>
+                <p>No pages scraped</p>
             {% endif %}
         {% else %}
             <p>Has not run yet</p>

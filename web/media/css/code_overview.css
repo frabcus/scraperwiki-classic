@@ -80,6 +80,15 @@ h3 {
 	text-decoration: underline;
 }
 
+#header_inner p span.latestdomain a {
+	max-width: 320px;
+	display: inline-block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 19px;
+	padding-right: 5px;
+}
+
 #header_inner .privacystatus {
 	cursor: help;
 }
@@ -596,6 +605,19 @@ table.about p {
 
 #divAboutScraper p {
 	margin-bottom: 10px;
+}
+
+#first_url_scraped {
+	white-space: pre;
+	white-space: pre-wrap;
+	white-space: pre-line;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -hp-pre-wrap;
+	word-wrap: break-word;
+	width: 180px;
+	display: block;
 }
 
 table.about a.edit {

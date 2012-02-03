@@ -293,7 +293,6 @@ def code_overview(request, wiki_type, short_name):
     except:
         pass
             
-            
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
