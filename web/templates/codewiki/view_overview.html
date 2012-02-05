@@ -115,16 +115,12 @@
         </div>
     </li>
     {% if user_owns_it or user.is_staff %}<li class="admin">
-        <a>Admin</a>
-        <div class="admin_popover">
-            <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" id="delete_scraper" rel="nofollow">Delete {{scraper.wiki_type}}</a>
-            <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post" class="hide">
-                {% csrf_token %}    
-                <input type="hidden" name="delete_scraper" value="1" />
-                <input type="submit" id="btnDeleteScraper" value="Delete {{scraper.wiki_type}}" />
-              </form>
-            <span class="arrow"></span>
-        </div>
+        <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" id="delete_scraper" rel="nofollow">Delete {{scraper.wiki_type|title}}</a>
+        <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post" class="hide">
+            {% csrf_token %}    
+            <input type="hidden" name="delete_scraper" value="1" />
+            <input type="submit" id="btnDeleteScraper" value="Delete {{scraper.wiki_type|title}}" />
+        </form>
     </li>{% endif %}
     <li class="clear"></li>
 </ul>
