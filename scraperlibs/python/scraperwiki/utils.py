@@ -80,16 +80,21 @@ def urllibSetup(http_proxy):
 #  Scrape a URL optionally with parameters. This is effectively a wrapper around
 #  urllib2.orlopen().
 #
-def scrape (url, params = None) :
+def scrape (url, params = None, user_agent = None) :
+    headers = {}
+    
+    if user_agent:
+        headers['User-Agent'] = user_agent
+        
     data = params and urllib.urlencode(params) or None
-   
-    fin  = urllib2.urlopen(url, data)
-    text = fin.read()
-    fin.close()   # get the mimetype here
-
+    req = urllib2.Request(url, data=data, headers=headers)
+    f = urllib2.urlopen(req)
+    
+    text = f.read()
+    f.close()
+    
     return text
-
-
+            
 def pdftoxml(pdfdata):
     """converts pdf file to xml file"""
     pdffout = tempfile.NamedTemporaryFile(suffix='.pdf')
