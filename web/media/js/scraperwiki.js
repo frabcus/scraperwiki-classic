@@ -707,7 +707,8 @@ $(function(){
 	
 	$('#liberatesomedata').bind('click', function(e){
 		e.preventDefault();
-		var viewurl = $(this).attr('href')
+		var viewurl = $(this).attr('href');
+		console.log(viewurl);
 		$.ajax({
 			url: viewurl,
 			dataType: 'jsonp',
@@ -717,7 +718,8 @@ $(function(){
 				div.append('<h2 class="vote">Vote for other people&rsquo;s suggestions&hellip;</h2>');
 				div.append('<ul></ul>');
 				
-				function populate_list(data){
+				function populate_list(data, viewurl){
+					console.log(viewurl);
 					if(data.length){
 						$('ul', div).empty();
 						$.map(data, function(val, i){
@@ -731,7 +733,7 @@ $(function(){
 									url: viewurl + '?vote=' + encodeURIComponent(val.url),
 									dataType: 'jsonp',
 									success: function(data){
-										populate_list(data);
+										populate_list(data, viewurl);
 									}
 								});
 							}).appendTo(li);
@@ -742,7 +744,7 @@ $(function(){
 					}
 				}
 				
-				populate_list(data);	
+				populate_list(data, viewurl);	
 				
 				var form = $('<form>');
 				
@@ -751,6 +753,7 @@ $(function(){
 				$('<p class="why"><label for="why">Why do you want it liberated?</label><input type="text" id="why" /></p>').appendTo(form);
 				$('<p class="submit"><input type="submit" value="Liberate this data!" /></p>').bind('click', function(e){
 					e.preventDefault();
+					console.log(viewurl);
 					$.ajax({
 						url: viewurl + '?add=' + encodeURIComponent($('#url').val()) + '&why=' + encodeURIComponent($('#why').val()),
 						dataType: 'jsonp',
