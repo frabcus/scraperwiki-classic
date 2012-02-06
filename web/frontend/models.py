@@ -41,6 +41,11 @@ class UserProfile(models.Model):
     work instead of refactoring every place that connects to a resource/class
     outside of this application.
     """
+    plan_choices = choices=(('free', 'Free'),
+               ('individual', 'Individual'),
+               ('smallbusiness', 'Small Business'),
+               ('corporate', 'Corporate'),
+              )
     user             = models.ForeignKey(User, unique=True)
     name             = models.CharField(max_length=64)
     bio              = models.TextField(blank=True, null=True)
@@ -48,7 +53,8 @@ class UserProfile(models.Model):
     beta_user        = models.BooleanField( default=False )
     apikey           = models.CharField(max_length=64, null=True, blank=True)
     # The user's payment plan.
-    plan             = models.CharField(max_length=64)
+    plan             = models.CharField(max_length=64,
+      choices=plan_choices, default='free')
     
     features         = models.ManyToManyField( "Feature", related_name='features', null=True, blank=True )
     
@@ -73,7 +79,6 @@ class UserProfile(models.Model):
     def regenerate_apikey(self):
         import uuid
         self.apikey = str( uuid.uuid4() )
-    
 
     def save(self):
         #this seems pretty pointless
@@ -107,7 +112,13 @@ class UserProfile(models.Model):
         they have submitted a successful credit card subscription.
         """
 
+        valid_choices = dict(self.plan_choices).keys()
+        if plan not in valid_choices:
+            raise ValueError("The plan %r is invalid (%r are acceptable)" %
+              (plan, valid_choices))
+
         self.plan = plan
+        self.save()
 
 
 # Signal Registrations
