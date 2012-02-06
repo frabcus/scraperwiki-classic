@@ -707,8 +707,9 @@ $(function(){
 	
 	$('#liberatesomedata').bind('click', function(e){
 		e.preventDefault();
+		var viewurl = $(this).attr('href')
 		$.ajax({
-			url: $(this).attr('href'),
+			url: viewurl,
 			dataType: 'jsonp',
 			success: function(data){
 				var div = $('<div id="liberate_popup">');
@@ -727,7 +728,7 @@ $(function(){
 							$('<span class="vote" title="Vote for this">Vote</span>').bind('click', function(){
 								$(this).addClass('loading').unbind('click');
 								$.ajax({
-									url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/?vote=' + encodeURIComponent(val.url),
+									url: viewurl + '?vote=' + encodeURIComponent(val.url),
 									dataType: 'jsonp',
 									success: function(data){
 										populate_list(data);
@@ -751,7 +752,7 @@ $(function(){
 				$('<p class="submit"><input type="submit" value="Liberate this data!" /></p>').bind('click', function(e){
 					e.preventDefault();
 					$.ajax({
-						url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/?add=' + encodeURIComponent($('#url').val()) + '&why=' + encodeURIComponent($('#why').val()),
+						url: viewurl + '?add=' + encodeURIComponent($('#url').val()) + '&why=' + encodeURIComponent($('#why').val()),
 						dataType: 'jsonp',
 						success: function(data){
 							populate_list(data);
