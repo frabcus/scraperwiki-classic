@@ -612,8 +612,7 @@ def transfer_vault(request, vaultid, username):
 def view_vault(request, username=None):
     """
     View the details of the vault for the specific user. If they have no vault
-    then we will redirect to their dashboard as they shouldn't have been able
-    to get here.
+    then nothing special happens.
     """
     import logging
     from codewiki.models import Vault    
@@ -625,12 +624,11 @@ def view_vault(request, username=None):
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
     context['self_service_vaults'] = False
+    context['has_upgraded'] = False
     if request.user.is_authenticated():
         if request.user.get_profile().has_feature('Self Service Vaults'):
             context['self_service_vaults'] = True
-        if request.user.vaults.count() == 0:
-            context['has_upgraded'] = True
-            # :todo: create a vault
+        # :todo: create a vault
         
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))

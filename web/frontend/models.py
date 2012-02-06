@@ -47,6 +47,8 @@ class UserProfile(models.Model):
     created_at       = models.DateTimeField(auto_now_add=True)
     beta_user        = models.BooleanField( default=False )
     apikey           = models.CharField(max_length=64, null=True, blank=True)
+    # The user's payment plan.
+    plan             = models.CharField(max_length=64)
     
     features         = models.ManyToManyField( "Feature", related_name='features', null=True, blank=True )
     
@@ -99,7 +101,14 @@ class UserProfile(models.Model):
     def get_absolute_url(self):
         return ('profiles_profile_detail', (), { 'username': self.user.username })
     get_absolute_url = models.permalink(get_absolute_url)        
-        
+
+    def change_plan(self, plan):
+        """Change the user's payment plan.  For example, upgrading them when
+        they have submitted a successful credit card subscription.
+        """
+
+        self.plan = plan
+
 
 # Signal Registrations
 # when a user is created, we want to generate a profile for them
