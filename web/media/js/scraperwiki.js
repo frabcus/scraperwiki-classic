@@ -707,8 +707,9 @@ $(function(){
 	
 	$('#liberatesomedata').bind('click', function(e){
 		e.preventDefault();
+		var viewurl = $(this).attr('href');
 		$.ajax({
-			url: $(this).attr('href'),
+			url: viewurl,
 			dataType: 'jsonp',
 			success: function(data){
 				var div = $('<div id="liberate_popup">');
@@ -716,7 +717,7 @@ $(function(){
 				div.append('<h2 class="vote">Vote for other people&rsquo;s suggestions&hellip;</h2>');
 				div.append('<ul></ul>');
 				
-				function populate_list(data){
+				function populate_list(data, viewurl){
 					if(data.length){
 						$('ul', div).empty();
 						$.map(data, function(val, i){
@@ -727,10 +728,10 @@ $(function(){
 							$('<span class="vote" title="Vote for this">Vote</span>').bind('click', function(){
 								$(this).addClass('loading').unbind('click');
 								$.ajax({
-									url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/?vote=' + encodeURIComponent(val.url),
+									url: viewurl + '?vote=' + encodeURIComponent(val.url),
 									dataType: 'jsonp',
 									success: function(data){
-										populate_list(data);
+										populate_list(data, viewurl);
 									}
 								});
 							}).appendTo(li);
@@ -741,7 +742,7 @@ $(function(){
 					}
 				}
 				
-				populate_list(data);	
+				populate_list(data, viewurl);	
 				
 				var form = $('<form>');
 				
@@ -751,10 +752,10 @@ $(function(){
 				$('<p class="submit"><input type="submit" value="Liberate this data!" /></p>').bind('click', function(e){
 					e.preventDefault();
 					$.ajax({
-						url: 'https://views.scraperwiki.com/run/columbia_data_liberation_vote/?add=' + encodeURIComponent($('#url').val()) + '&why=' + encodeURIComponent($('#why').val()),
+						url: viewurl + '?add=' + encodeURIComponent($('#url').val()) + '&why=' + encodeURIComponent($('#why').val()),
 						dataType: 'jsonp',
 						success: function(data){
-							populate_list(data);
+							populate_list(data, viewurl);
 							$('#why, #url').val('');
 							$('h2.suggest').nextAll('p').animate({"height": "hide", "marginTop": "hide", "marginBottom": "hide", "paddingTop": "hide", "paddingBottom": "hide"},{
 							duration: 250,
