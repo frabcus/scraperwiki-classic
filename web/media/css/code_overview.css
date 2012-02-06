@@ -80,15 +80,6 @@ h3 {
 	text-decoration: underline;
 }
 
-#header_inner p span.latestdomain a {
-	max-width: 320px;
-	display: inline-block;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	height: 19px;
-	padding-right: 5px;
-}
-
 #header_inner .privacystatus {
 	cursor: help;
 }
