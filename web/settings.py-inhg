@@ -36,6 +36,8 @@ URL_ROOT            = '/'           # prefix for URLs to run not at top level of
 if 'test' in sys.argv:
     DATABASES['default']['TEST_NAME'] = ':memory:'
     DATABASES['default']['ENGINE'] = 'sqlite3'
+    # Any options specified are going to be MySQL specific.
+    del DATABASES['default']['OPTIONS']
     SOUTH_TESTS_MIGRATE = False
     OVERDUE_SQL = "julianday(strftime(?,last_run) + run_interval,'unixepoch') < julianday('now', 'localtime') or last_run is null"
     OVERDUE_SQL_PARAMS = ['%s']
@@ -70,7 +72,9 @@ EMAIL_FROM = 'noreply@localhost'
 
 ORBITED_URL = 'http://localhost:8001'
 
-# TEST_RUNNER = 'django-test-coverage.runner.run_tests'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = ['--with-spec', '--spec-color', '--include=^(it|ensure|must|should|test)',
+             '--include=(specs?(.py)?|tests?(.py)?)$'] 
 
 API_URL = 'http://localhost:8010'
 MEDIA_URL = '/media/'
@@ -111,4 +115,9 @@ if DEBUG:
 HIGHRISE_ENABLED = False
 SHOW_APIKEY_UI = True
 
-INSTALLED_APPS += ['lettuce.django']
+if DEBUG:
+    # Django-nose: https://github.com/jbalogh/django-nose
+    INSTALLED_APPS += ['lettuce.django', 'django_nose']
+
+# Go to https://scraperwiki.recurly.com/developer/recurly_js to find this.
+RECURLY_PRIVATE_KEY = None

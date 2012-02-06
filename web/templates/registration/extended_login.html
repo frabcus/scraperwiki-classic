@@ -134,9 +134,12 @@ $(function(){
 	});
 	
 	$('#id_username').bind('keyup', function(){
-		$(this).unbind('keyup');
+	    $(this).unbind('keyup');
 		$('#id_name').unbind('keyup');
-	}); 
+	}).bind('blur', function(){
+		var username = $(this).val().replace(/\W/g, '');
+		$(this).val(username);
+	});
 });
 
 {% endblock %}

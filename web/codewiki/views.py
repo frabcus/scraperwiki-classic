@@ -234,7 +234,10 @@ def code_overview(request, wiki_type, short_name):
     
     # if {% if a in b %} worked we wouldn't need these two
     context["user_owns_it"] = (request.user in context["userrolemap"]["owner"])
-    context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
+    if scraper.privacy_status == 'public' and request.user.is_authenticated:
+        context["user_edits_it"] = True;
+    else:
+        context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
     
     context["PRIVACY_STATUSES"] = PRIVACY_STATUSES_UI[0:2]  
     if request.user.is_staff:
@@ -289,7 +292,6 @@ def code_overview(request, wiki_type, short_name):
         context['url_screenshot'] = s.first_url_scraped
     except:
         pass
-            
             
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 

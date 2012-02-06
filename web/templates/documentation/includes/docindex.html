@@ -50,18 +50,16 @@ in SQL API gets the data out as JSON, CSV or RSS files.  -->
      <li class="doclink">{% doc_link_full 'LANG_excel_guide' language %} <span> Get data from Excel spreadsheet files </span> </li>
      <li class="doclink">{% doc_link_full 'LANG_css_guide' language %} <span> Get data from web pages using CSS selectors </span> </li>
      <li class="doclink">{% doc_link_full 'LANG_time_guide' language %} <span> Parse dates and times and save them in the datastore </span> </li>
-     {% if user.is_staff %} 
-        <div class="staff">
-            {% ifequal language 'python' %}
-             <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
-            {% endifequal %}
-        </div> 
+     {% if user.is_staff %}
+        {% ifequal language 'python' %}
+            <li class="staff"><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
+        {% endifequal %}
       {% endif %}
     </ul>
 
-{% if user.is_staff %} <div class="staff">
-    <h3>Scraper tools</h3>
-    <ul>
+{% if user.is_staff %}
+    <h3 class="staff">Scraper tools</h3>
+    <ul class="staff">
      <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml document model viewer</a></li>
     {% comment %} Not found
      <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
@@ -70,32 +68,35 @@ in SQL API gets the data out as JSON, CSV or RSS files.  -->
      <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">Sqlite Tool</a></li>
      <li><a href="{% url docscontrib 'postcode_and_geo_cheat_sheet' %}">Postcodes and grid coordinates</a></li>
     </ul>
-</div> {% endif %}
+{% endif %}
 
 </div>
 
 <div class="content half right index">
-
-{% if user.is_staff %} <div class="staff">
     <h3>Viewing guides</h3>
     <ul>
-     <li><a href="{% url docs 'jquery_topic_guide' %}">Using JQuery</a></li>
-     <li><a href="{% url docs 'ajax_topic_guide' %}">AJAX Guidance</a></li>
-     <li><a href="{% url docs 'gmap_topic_guide' %}">Google maps</a></li>
-    {% comment %} <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>{% endcomment %}
-     <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Vector Graphics with Raphaeljs</a></li>
-    {% ifequal language 'python' %}
-     <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">Reading querystring parameters</a></li>
-    {% endifequal %}
+        <li><a href="/docs/html/html_views/">HTML Views 101</a></li>
+        <li><a href="/docs/javascript/ajax_topic_guide/">Using AJAX with ScraperWiki</a></li>
+        {% if user.is_staff %}
+        <li class="staff"><a href="/docs/javascript/jquery_topic_guide/">Introduction to jQuery</a></li>
+        <li class="staff"><a href="{% url docs 'gmap_topic_guide' %}">Google maps</a></li>
+        <li class="staff"><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
+        <li class="staff"><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Vector Graphics with Raphaeljs</a></li>
+        {% if language == 'python' %}
+        <li class="staff"><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">Reading querystring parameters</a></li>
+        {% endif %}
+        {% endif %}
     </ul>
-</div> {% endif %}
+</div>
 
-{% if user.is_staff %} <div class="staff">
-    <h3>View tools</h3>
-    <ul>
+{% if user.is_staff %}
+<div class="content half right index">
+    <h3 class="staff">View tools</h3>
+    <ul class="staff">
      <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
     </ul>
-</div> {% endif %}
+</div>
+{% endif %}
 
 </div>
 

@@ -326,7 +326,7 @@ function openSurvey(){
 					$('#alert_close').trigger('click');
 				}, 1000);
 			}
-			developerSurveyDone();
+			// developerSurveyDone();
 			dialog.container.fadeOut(200);
 			dialog.overlay.fadeOut(200, function(){
 				$.modal.close();
@@ -335,7 +335,7 @@ function openSurvey(){
     });
 }
 
-function developerSurveyDone(){
+/* function developerSurveyDone(){
 	setCookie("developerSurveyDone", '1', 365);
 	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Leave modal window']); }
 }
@@ -343,7 +343,7 @@ function developerSurveyDone(){
 function developerSurveySkipped(){
 	setCookie("developerSurveySkipped", '1', 365);
 	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Ignore alert bar']); }
-}
+} */
 
 function setCookie(c_name,value,exdays){
 	var exdate = new Date();
@@ -367,7 +367,7 @@ function getCookie(c_name){
 
 $(function(){
 	
-	regexp_baseurl = new RegExp('(https?://[^/]+).*');
+	/* regexp_baseurl = new RegExp('(https?://[^/]+).*');
 	if(document.referrer.replace(regexp_baseurl, '$1') == document.URL.replace(regexp_baseurl, '$1')){
 		survey_alert_slide = null;
 	} else {
@@ -379,7 +379,7 @@ $(function(){
 	} else {
 		newAlert('Help us make ScraperWiki even better for you!', null, {'onclick': openSurvey, 'text': 'Take our speedy survey'}, survey_alert_slide, developerSurveySkipped);
 		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Alert shown']); }
-	}
+	} */
 	
 	$('#divMenu ul li.survey a').bind('click', function(e){
 		e.preventDefault();

@@ -14,32 +14,22 @@
             Recurly.buildSubscriptionForm({
                 target: '#recurly-subscribe'
                 , planCode: '{{code}}'
-                // , accountCode: 'we_can_explicitly_set_the_new_users_account_code_here'
-                , successURL: 'confirmation.html'
+                , accountCode: '{{account_code}}'
+                , successURL: '/confirm_subscription/'
                 , distinguishContactFromBillingInfo: true
                 , collectCompany: true
                 , enableCoupons: false
                 , enableAddOns: false
-                /* , account: {
-                    firstName: 'Joe'
-                    , lastName: 'User'
-                    , email: 'test@example.net'
-                    , phone: '555-555-5555'
-                    , companyName: 'Acme'
+                , account: {
+                    firstName: '{{ firstname }}'
+                    , lastName: '{{ lastname }}'
+                    , email: '{{ email }}'
                 }
-                , billingInfo: {
-                    firstName: 'Joe'
-                    , lastName: 'User'
-                    , address1: '123 somestreet'
-                    , address2: '45'
-                    , city: 'San Francisco'
-                    , zip: '94107'
-                    , state: 'CA'
-                    , country: 'US'
-                    , cardNumber: '4111-1111-1111-1111'
-                    , CVV: '123'
-                } */
-                , signature: 'bc3027a216e3fa51382c3cbdbb24bf7eb7b4bc69-0' // This needs to be generated server-side
+                , signature: '{{ signature }}'
+                , beforeInject: function(form){
+                    $(form).prepend('<h2 class="introduction">Almost there! Just enter your payment details.</h2>');
+                    $('.footer', $(form)).prepend('<a href="/pricing/" class="back">&larr; Go back to pricing plans</a>')
+                }
             });
         </script>
         <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/recurly.css" />

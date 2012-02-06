@@ -26,6 +26,7 @@ urlpatterns = patterns('',
     url(r'^example_data/$', direct_to_template, {'template': 'frontend/example_data.html'}, name='api'),
     url(r'^pricing/$', frontend_views.pricing, name='pricing'),
     url(r'^subscribe/(?P<plan>individual|smallbusiness|corporate)/$', frontend_views.subscribe, name='subscribe'),
+    url(r'^confirm_subscription/$', frontend_views.confirm_subscription, name='confirm_subscription'),
 
 
     url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/(?P<language>python|php|ruby|javascript)/$','django.views.generic.simple.redirect_to', {'url': '/docs/%(language)s'},name='help'),

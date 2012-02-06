@@ -80,6 +80,15 @@ h3 {
 	text-decoration: underline;
 }
 
+#header_inner p span.latestdomain a {
+	max-width: 320px;
+	display: inline-block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 19px;
+	padding-right: 5px;
+}
+
 #header_inner .privacystatus {
 	cursor: help;
 }
@@ -233,11 +242,11 @@ ul.titlebar>li>a img {
 	vertical-align: -3px;
 }
 
-li.share, li.admin {
+li.share {
 	position: relative;
 }
 
-.share_popover, .admin_popover, .download_popover {
+.share_popover, .download_popover {
 	display: none;
 	position: absolute;
 	z-index: 900;
@@ -257,7 +266,7 @@ li.share, li.admin {
     text-align: center;
 }
 
-.share_popover .arrow, .admin_popover .arrow, .download_popover .arrow {
+.share_popover .arrow, .download_popover .arrow {
     width: 22px;
     height: 9px;
     position: absolute;
@@ -321,43 +330,6 @@ li.share, li.admin {
 .share_popover .embed a:hover {
 	text-decoration: none;
 	color: #498415;
-}
-
-.admin_popover {
-	padding: 15px 15px;
-	width: 120px;
-	margin-left: -75px;
-}
-
-#delete_scraper {
-	color: #944;
-	background: #ffffff; /* Old browsers */
-background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 2%, #f6f6f6 2%, #ede1e1 100%); /* FF3.6+ */
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(2%,#ffffff), color-stop(2%,#f6f6f6), color-stop(100%,#ede1e1)); /* Chrome,Safari4+ */
-background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* Chrome10+,Safari5.1+ */
-background: -o-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* Opera11.10+ */
-background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* IE10+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#EDE1E1',GradientType=0 ); /* IE6-9 */
-background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* W3C */
-	display: block;
-	font-size: 14px;
-	line-height: 18px;
-	-webkit-box-shadow: 0px 1px 2px #ccc;
-	-moz-box-shadow: 0px 1px 2px #ccc;
-	box-shadow: 0 1px 2px #ccc;
-	border: 1px solid #b69f9f;
-	text-decoration: none;
-	padding: 3px 0;
-}
-
-#delete_scraper:hover {
-	border-color: #a48080;
-	color: #733;
-}
-
-#delete_scraper:active {
-	position: relative;
-	top: 1px;
 }
 
 .download_popover {
@@ -596,6 +568,19 @@ table.about p {
 
 #divAboutScraper p {
 	margin-bottom: 10px;
+}
+
+#first_url_scraped {
+	white-space: pre;
+	white-space: pre-wrap;
+	white-space: pre-line;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -hp-pre-wrap;
+	word-wrap: break-word;
+	width: 180px;
+	display: block;
 }
 
 table.about a.edit {
