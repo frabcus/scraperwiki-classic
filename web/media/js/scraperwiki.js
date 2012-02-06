@@ -708,7 +708,6 @@ $(function(){
 	$('#liberatesomedata').bind('click', function(e){
 		e.preventDefault();
 		var viewurl = $(this).attr('href');
-		console.log(viewurl);
 		$.ajax({
 			url: viewurl,
 			dataType: 'jsonp',
@@ -719,7 +718,6 @@ $(function(){
 				div.append('<ul></ul>');
 				
 				function populate_list(data, viewurl){
-					console.log(viewurl);
 					if(data.length){
 						$('ul', div).empty();
 						$.map(data, function(val, i){
@@ -753,12 +751,11 @@ $(function(){
 				$('<p class="why"><label for="why">Why do you want it liberated?</label><input type="text" id="why" /></p>').appendTo(form);
 				$('<p class="submit"><input type="submit" value="Liberate this data!" /></p>').bind('click', function(e){
 					e.preventDefault();
-					console.log(viewurl);
 					$.ajax({
 						url: viewurl + '?add=' + encodeURIComponent($('#url').val()) + '&why=' + encodeURIComponent($('#why').val()),
 						dataType: 'jsonp',
 						success: function(data){
-							populate_list(data);
+							populate_list(data, viewurl);
 							$('#why, #url').val('');
 							$('h2.suggest').nextAll('p').animate({"height": "hide", "marginTop": "hide", "marginBottom": "hide", "paddingTop": "hide", "paddingBottom": "hide"},{
 							duration: 250,
