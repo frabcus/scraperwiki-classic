@@ -9,6 +9,7 @@ from django.contrib.contenttypes import generic
 from django.dispatch import dispatcher
 from django.core.mail import send_mail, mail_admins
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 
 from frontend import highrise
 
@@ -119,7 +120,12 @@ class UserProfile(models.Model):
 
         self.plan = plan
         self.save()
-
+    
+    def create_vault(self, name):
+        """Create a Vault.  Checks that the user is authorised to do so;
+        raises an Exception if not.
+        """
+        raise PermissionDenied
 
 # Signal Registrations
 # when a user is created, we want to generate a profile for them
