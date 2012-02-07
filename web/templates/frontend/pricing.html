@@ -32,7 +32,7 @@
             <li><em>No</em> schedule control</li>
             <li>Unlimited collaborators</li>
         </ul>
-        {% if not current_plan %}
+        {% if not current_plan or current_plan = 'free' %}
             <p class="current"><a>Current plan</a></p>
         {% endif %}
     </div>

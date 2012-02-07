@@ -558,7 +558,7 @@ def confirm_subscription(request):
     try:
        recurly.js.verify_subscription(recurly_result)
     except RequestForgeryError:
-       # Private key is invalid or the result was tampered with
+       # Private key is invalid or the result was tampered with.
        # Log?
        return HttpResponseForbidden('Do not call this, imp!')
 
@@ -580,13 +580,9 @@ def pricing(request):
     if request.user.is_authenticated():
         if request.user.get_profile().has_feature('Self Service Vaults'):
             context['self_service_vaults'] = True
-            # The 'current_plan' variable will equal something like
-            # 'individual', 'smallbusiness' or 'corporate' if the user
-            # has one of those plans, or False if they have no paid plan.
-            context['current_plan'] = False
-            from codewiki.models import Vault
-            context['vaults'] = request.user.vaults
-    return render_to_response('frontend/pricing.html', context, context_instance = RequestContext(request))
+            context['current_plan'] = request.user.get_profile().plan
+    return render_to_response('frontend/pricing.html', context,
+      context_instance=RequestContext(request))
 
 def test_error(request):
     raise Exception('failed in test_error')
