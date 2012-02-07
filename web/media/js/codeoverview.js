@@ -826,7 +826,7 @@ function setupDataPreviews() {
 					$.ajax({
 						type: 'GET',
 						url: url,
-						dataType: 'json',
+						dataType: 'jsonp',
 						success: function(data){
 							$('<div>').attr('id', 'moar').text(data[0].moar).modal({
 					            overlayClose: true, 
