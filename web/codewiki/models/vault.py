@@ -3,15 +3,11 @@ from django.db.models import F
 from django.contrib.auth.models import User
 from datetime import datetime
 
-PLAN_TYPES = (
-    ('individual', 'Individual'),
-    ('small_business', 'Small Business'),
-    ('corporate', 'Corporate'),    
-)
+from frontend.models import UserProfile
 
 PLAN_PAGE_REQUESTS = {
-    'individual':     20000,
-    'small_business': 100000,
+    'individual':       20000,
+    'smallbusiness':   100000,
     'corporate':      2000000,    
 }
 
@@ -22,7 +18,7 @@ class Vault(models.Model):
     name = models.CharField(max_length=64, blank=True)    
     
     created_at = models.DateTimeField(auto_now_add=True)
-    plan = models.CharField(max_length=32, choices=PLAN_TYPES)    
+    plan = models.CharField(max_length=32, choices=UserProfile.plan_choices)    
 
     # A list of the members who can access this vault.  This is 
     # distinct from the owner (self.user) of the vault.
@@ -79,6 +75,7 @@ class Vault(models.Model):
         The percent of pages (using records retrieved and records allowed) fetched this month.
         The value MAY be more than 100%
         """
+
         pct = float(1.0 * float(self.records_this_month()) / float(self.records_allowed())) * 100;
         if(pct > 0 and pct < 0.1):
             pct = 0.1
