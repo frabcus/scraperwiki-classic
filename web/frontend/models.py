@@ -82,11 +82,6 @@ class UserProfile(models.Model):
         self.apikey = str( uuid.uuid4() )
 
     def save(self):
-        #this seems pretty pointless
-        new = False
-        if not self.pk:
-            new = True
-        
         if not self.apikey:
             self.regenerate_apikey()
         
@@ -125,7 +120,17 @@ class UserProfile(models.Model):
         """Create a Vault.  Checks that the user is authorised to do so;
         raises an Exception if not.
         """
-        raise PermissionDenied
+
+        from codewiki.models import Vault
+
+        valid_for_vault = dict(self.plan_choices).keys()
+        valid_for_vault.remove('free')
+
+        if self.plan not in valid_for_vault:
+            raise PermissionDenied
+        vault = Vault(user=self.user, name=name, plan=self.plan)
+        vault.save()
+        return vault
 
 # Signal Registrations
 # when a user is created, we want to generate a profile for them

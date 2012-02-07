@@ -509,6 +509,32 @@ def subscribe(request, plan):
     context['account_code'] = account_code
     return render_to_response('frontend/subscribe.html', context, context_instance = RequestContext(request))
 
+def unpack_recurly_result(request):
+    """Helper function for confirm_subscription.
+    Each recurly result comes in a key of the form: "recurly_result[thing]";
+    we have to unpack those into the dictionary that verify_subscription expects.
+    """
+
+    def strip_brackets(s):
+        """Given a string "prefix[thing]" return "thing".
+        """
+        import re
+
+        m = re.search(r'.*\[(.*)\]', s)
+        return m.group(1)
+
+    return dict((strip_brackets(k), v)
+      for k,v in request.POST.items() if 'recurly_result' in k)
+
+def user_profile_from_account_code(account_code):
+    """From the account_code, created in *subscribe()* (above), extract the user id,
+    and then the UserProfile object, which is returned.
+    """
+
+    id = int(account_code.split('-')[0])
+    user = User.objects.get(id=id)
+    return user.get_profile()
+
 # We're CSRF exempt because we only expect recurly to POST here, and they use their own
 # authentication/signing mechanism, so we know that random people will not be able
 # to successfully POST.
@@ -527,18 +553,7 @@ def confirm_subscription(request):
     import recurly.js
     from recurly.js import RequestForgeryError
 
-    def strip_brackets(s):
-        """Given a string "prefix[thing]" return "thing".
-        """
-        import re
-
-        m = re.search(r'.*\[(.*)\]', s)
-        return m.group(1)
-
-    # Each recurly result comes in a key of the form: "recurly_result[thing]";
-    # we have to unpack those into the dictionary that verify_subscription expects.
-    recurly_result = dict((strip_brackets(k), v)
-      for k,v in request.POST.items() if 'recurly_result' in k)
+    recurly_result = unpack_recurly_result(request)
 
     try:
        recurly.js.verify_subscription(recurly_result)
@@ -547,7 +562,16 @@ def confirm_subscription(request):
        # Log?
        return HttpResponseForbidden('Do not call this, imp!')
 
-    # :todo: Upgrade users account!!
+    # Upgrade users account...
+    profile = user_profile_from_account_code(recurly_result['account_code'])
+    plan = recurly_result['plan_code']
+    profile.change_plan(plan)
+    # ... and create a vault if they don't already have one.
+    vs = Vault.objects.filter(user=profile.user)
+    if len(vs) == 0:
+        profile.create_vault(name='My first vault')
+
+    request.session['recently_upgraded'] = True
 
     return redirect('vault')
 
@@ -611,11 +635,12 @@ def transfer_vault(request, vaultid, username):
 @login_required
 def view_vault(request, username=None):
     """
-    View the details of the vault for the specific user. If they have no vault
-    then nothing special happens.
+    View the details of the vault for the specific user.
+    If they have no vault then nothing special happens.
+    If they have just upgraded (check with a session variable), then
+    they are thanked.
     """
-    import logging
-    from codewiki.models import Vault    
+
     context = {}
     
     context['vaults'] = request.user.vaults
@@ -623,12 +648,10 @@ def view_vault(request, username=None):
     context['vault_membership']  = request.user.vault_membership.all().exclude(user__id=request.user.id)
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
-    context['self_service_vaults'] = False
     context['has_upgraded'] = False
-    if request.user.is_authenticated():
-        if request.user.get_profile().has_feature('Self Service Vaults'):
-            context['self_service_vaults'] = True
-        # :todo: create a vault
+    if request.session.get('recently_upgraded'):
+        context['has_upgraded'] = True
+        del request.session['recently_upgraded']
         
     return render_to_response('frontend/vault/view.html', context, 
                                context_instance=RequestContext(request))
