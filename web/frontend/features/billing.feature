@@ -57,4 +57,5 @@ Feature: As a person who writes code on ScraperWiki
     When I click "Subscribe"
     Then I should be on the vaults page
     And I should see "Thanks for upgrading your account!"
+    And I should see "You own 1 vault"
 
