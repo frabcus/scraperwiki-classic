@@ -254,6 +254,7 @@ tr.even {
 
 .dataTables_empty {
 	text-align: center;
+	padding: 10px;
 }
 
 tfoot input {
