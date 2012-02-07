@@ -1589,7 +1589,13 @@ div.user_comment small {
 }
 
 
-
+#moar {
+	font-size: 12px;
+	line-height: 18px;
+	font-family: Courier, monospace;
+	text-align: left;
+	padding: 20px;
+}
 
 
 
