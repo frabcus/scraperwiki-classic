@@ -36,6 +36,8 @@ import datetime
 import urllib
 import itertools
 import json
+import recurly
+recurly.js.PRIVATE_KEY = settings.RECURLY_PRIVATE_KEY
 
 from utilities import location
 
@@ -483,8 +485,6 @@ def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
 
 def generate_recurly_signature(plan_code, account_code):
-    import recurly
-    recurly.js.PRIVATE_KEY = settings.RECURLY_PRIVATE_KEY
     signature = recurly.js.sign_subscription(plan_code, account_code)
     return signature
 
@@ -550,7 +550,6 @@ def confirm_subscription(request):
     couponcode
     """
 
-    import recurly.js
     from recurly.js import RequestForgeryError
 
     recurly_result = unpack_recurly_result(request)
