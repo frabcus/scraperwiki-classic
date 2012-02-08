@@ -58,6 +58,7 @@ Feature: As a person who writes code on ScraperWiki
     Then I should be on the vaults page
     And I should see "Thanks for upgrading your account!"
     And I should see "You own 1 vault"
+    And I should see "1 member"
 
   Scenario: I can see my current plan
     Given user "test" with password "pass" is logged in
