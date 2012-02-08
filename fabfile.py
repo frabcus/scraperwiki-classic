@@ -86,7 +86,7 @@ def run_in_virtualenv(command):
 def run_buildout():
     with cd(env.path):
         run('[ -f "bin/activate" ] || virtualenv --no-site-packages .')
-        run_in_virtualenv('[ -f "bin/buildout" || pip install zc.buildout')
+        run_in_virtualenv('[ -f "bin/buildout" ] || pip install zc.buildout')
 
     run_in_virtualenv('buildout -N -qq')
 
@@ -115,17 +115,17 @@ def update_crons():
     _update_cron_if_exists('%(path)s/cron/scraperwiki-%(task)s-%(flock)s' % env)
     _update_cron_if_exists('%(path)s/cron/scraperwiki-%(task)s' % env)
 
-def restart_webserver():
-    sudo('apache2ctl graceful')
-
-# process_check - a string to search in command line names to check if process has not died
-def restart_daemon(name, process_check = None):
+def restart_daemon(name, process_check=None):
+    """*process_check* a string to search in command line names to
+    check if process has not died.
+    """
     run('sudo -i /etc/init.d/%s stop' % name)
     if process_check:
         with settings(warn_only=True):
             run_with_retries('ps auxxwwww | egrep -- "%s" | egrep -v "/bin/bash|grep"; true' % process_check)
 
-    # this needs a login shell with "sudo -i" to start scriptmgr, for unknown reasons
+    # This needs a login shell with "sudo -i" to start scriptmgr,
+    # for unknown reasons.
     run('sudo -i /etc/init.d/%s start' % name)
 
 def deploy_done():
@@ -164,8 +164,10 @@ def webserver(buildout='yes', restart='no'):
     '''Deploys Django web application, runs schema migrations, clears caches,
 kicks webserver so it starts using new code. 
 
-restart=yes, also restarts twisted (Apache is gracefully restarted always)
-buildout=no, stops it updating buildout which can be slow'''
+restart=yes, also restarts twisted (uwgsi will gracefully restart
+automatically because revision.txt is touched)
+buildout=no, stops it updating buildout which can be slow
+    '''
     restart = parse_bool(restart)
     buildout = parse_bool(buildout)
 
@@ -176,7 +178,6 @@ buildout=no, stops it updating buildout which can be slow'''
     django_db_migrate()
     update_js_cache_revision()
 
-    restart_webserver()   
     if restart:
         restart_daemon('twister', 'twister.py')
 
