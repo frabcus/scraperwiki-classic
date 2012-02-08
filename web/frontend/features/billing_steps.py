@@ -55,7 +55,7 @@ def and_i_click_on_a_plan_button(step, plan, button):
 def then_i_should_be_on_the_payment_page(step):
     assert '/subscribe' in world.browser.url
 
-@step(u'(?:And|Then) I should see "([^"]*)"')
+@step(u'(?:And|Then) I should see "([^"]*)"$')
 def and_i_should_see(step, text):
     assert world.browser.is_text_present(text)
 
@@ -129,6 +129,20 @@ def and_i_have_entered_my_payment_details(step):
 @step(u'Then I should be on the vaults page')
 def then_i_should_be_on_the_vaults_page(step):
     assert '/vaults' in world.browser.url
+
+@step(u'And I already have the individual plan')
+def and_i_already_have_the_individual_plan(step):
+    from django.contrib.auth.models import User
+
+    user = User.objects.get(username='test')
+    profile = user.get_profile()
+    profile.change_plan('individual')
+
+@step(u'Then I should see "([^"]*)" in the individual box')
+def then_i_should_see_text_in_the_individual_box(step, text):
+    something = world.browser.find_by_xpath(
+      ".//div[@id='%s']//*[text()='%s']" % ('individual', text))
+    assert something
 
 # :todo: Useful function, but probably should be kept somewhere else.
 def wait_for_fx(timeout=5):

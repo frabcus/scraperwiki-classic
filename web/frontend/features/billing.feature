@@ -8,7 +8,7 @@ Feature: As a person who writes code on ScraperWiki
     Then I should see the "Individual" payment plan
     And I should see the "Small Business" payment plan
     And I should see the "Corporate" payment plan
-  
+
   Scenario: I can choose to purchase the Individual plan
     Given user "test" with password "pass" is logged in
     And the "Self Service Vaults" feature exists
@@ -57,4 +57,12 @@ Feature: As a person who writes code on ScraperWiki
     When I click "Subscribe"
     Then I should be on the vaults page
     And I should see "Thanks for upgrading your account!"
+    And I should see "You own 1 vault"
 
+  Scenario: I can see my current plan
+    Given user "test" with password "pass" is logged in
+    And the "Self Service Vaults" feature exists
+    And I have the "Self Service Vaults" feature enabled
+    And I already have the individual plan
+    When I visit the pricing page
+    Then I should see "Current plan" in the individual box

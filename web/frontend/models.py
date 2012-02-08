@@ -9,6 +9,7 @@ from django.contrib.contenttypes import generic
 from django.dispatch import dispatcher
 from django.core.mail import send_mail, mail_admins
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 
 from frontend import highrise
 
@@ -41,12 +42,20 @@ class UserProfile(models.Model):
     work instead of refactoring every place that connects to a resource/class
     outside of this application.
     """
+    plan_choices = choices=(('free', 'Free'),
+               ('individual', 'Individual'),
+               ('smallbusiness', 'Small Business'),
+               ('corporate', 'Corporate'),
+              )
     user             = models.ForeignKey(User, unique=True)
     name             = models.CharField(max_length=64)
     bio              = models.TextField(blank=True, null=True)
     created_at       = models.DateTimeField(auto_now_add=True)
     beta_user        = models.BooleanField( default=False )
     apikey           = models.CharField(max_length=64, null=True, blank=True)
+    # The user's payment plan.
+    plan             = models.CharField(max_length=64,
+      choices=plan_choices, default='free')
     
     features         = models.ManyToManyField( "Feature", related_name='features', null=True, blank=True )
     
@@ -71,14 +80,8 @@ class UserProfile(models.Model):
     def regenerate_apikey(self):
         import uuid
         self.apikey = str( uuid.uuid4() )
-    
 
     def save(self):
-        #this seems pretty pointless
-        new = False
-        if not self.pk:
-            new = True
-        
         if not self.apikey:
             self.regenerate_apikey()
         
@@ -99,7 +102,35 @@ class UserProfile(models.Model):
     def get_absolute_url(self):
         return ('profiles_profile_detail', (), { 'username': self.user.username })
     get_absolute_url = models.permalink(get_absolute_url)        
-        
+
+    def change_plan(self, plan):
+        """Change the user's payment plan.  For example, upgrading them when
+        they have submitted a successful credit card subscription.
+        """
+
+        valid_choices = dict(self.plan_choices).keys()
+        if plan not in valid_choices:
+            raise ValueError("The plan %r is invalid (%r are acceptable)" %
+              (plan, valid_choices))
+
+        self.plan = plan
+        self.save()
+    
+    def create_vault(self, name):
+        """Create a Vault.  Checks that the user is authorised to do so;
+        raises an Exception if not.
+        """
+
+        from codewiki.models import Vault
+
+        valid_for_vault = dict(self.plan_choices).keys()
+        valid_for_vault.remove('free')
+
+        if self.plan not in valid_for_vault:
+            raise PermissionDenied
+        vault = Vault(user=self.user, name=name, plan=self.plan)
+        vault.save()
+        return vault
 
 # Signal Registrations
 # when a user is created, we want to generate a profile for them

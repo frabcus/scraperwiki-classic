@@ -857,12 +857,17 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
         else:
             raise Http404()
         
-        columns = [ "`%s`" % c for c in columns]
+        sorting_columns = [ "`%s`" % c for c in columns]
+        selecting_columns = [ "CASE WHEN length(%s)<1000 THEN `%s` ELSE substr(%s, 1, 1000)||'... {{MOAR||%s||'||rowid||'||NUFF}}' END AS %s" % (c,c,c,c,c) for c in columns]
+        # jQuery can now use a regexp like...
+        # {{MOAR\|\|([^\|]+)\|\|([^\|]+)\|\|NUFF}}$
+        # ...to fish out the cell's column name and rowid
+        # and show its full content if the user wants.
             
         # Build query and do the count for the same query
-        sortby = "%s %s" % (columns[sortbyidx], sortdir,)
-        query = 'select %s from `%s` order by %s limit %d offset %d' % (','.join(columns), table_name, sortby, limit, offset,)
-        sqlite_data = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery": query, "attachlist":"", "streamchunking": False, "data": ""})        
+        sortby = "%s %s" % (sorting_columns[sortbyidx], sortdir,)
+        query = 'select %s from `%s` order by %s limit %d offset %d' % (','.join(selecting_columns), table_name, sortby, limit, offset,)
+        sqlite_data = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery": query, "attachlist":"", "streamchunking": False, "data": ""})
         # We need to now convert this to the aaData list of lists
         if 'error' in sqlite_data:
             # Log the error

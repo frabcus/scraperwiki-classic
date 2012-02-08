@@ -6,6 +6,17 @@ $.fn.digits = function(){
     })
 }
 
+$.extend({
+    keys: function(obj){
+		// Usage:
+		// var obj = {a: 1, b: 2, c: 3, d: 4, kitty: 'cat'}
+		// alert($.keys(obj));    ->   a,b,c,d,kitty
+        var a = [];
+        $.each(obj, function(k){ a.push(k) });
+        return a;
+    }
+})
+
 function pluralise(thing,number,plural){
 	if(plural == null){ plural = thing + 's'; }
     return (number == 1 ? thing : plural);
@@ -725,7 +736,15 @@ function setDataPreview(table_name, table_schema, first_table){
         "sDom": '<"H"<"#schema_'+table_name+'">lfr>t<"F"ip>',
         "fnRowCallback": function( tr, array, iDisplayIndex, iDisplayIndexFull ) {
             $('td', tr).each(function(){
-                $(this).html( $(this).html().replace(/((http|https|ftp):\/\/\S+)/g, '<a href="$1">$1</a> ') );
+				$(this).html( 
+					$(this).html().replace(
+						/\.\.\. {{MOAR\|\|([^\|]+)\|\|([^\|]+)\|\|NUFF}}$/g, 
+						' <a class="moar" href="/api/1.0/datastore/sqlite?format=jsondict&name=' + $('#scrapershortname').val() + '&query=select%20$1%20as%20%60moar%60%20from%20%60'+ table_name + '%60%20where%20rowid%3D$2">&hellip;more</a>'
+					).replace(
+						/((http|https|ftp):\/\/[a-zA-Z0-9-_~#:\.\?%&\/\[\]@\!\$'\(\)\*\+,;=]+)/g, 
+						'<a href="$1">$1</a>'
+					) 
+				);
             });
             return tr;
         }
@@ -800,6 +819,36 @@ function setupDataPreviews() {
 
 			    $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
 			    $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
+			
+				$('a.moar').live('click', function(e){
+					e.preventDefault();
+					var url = $(this).attr('href');
+					$.ajax({
+						type: 'GET',
+						url: url,
+						dataType: 'jsonp',
+						success: function(data){
+							$('<div>').attr('id', 'moar').text(data[0].moar).modal({
+					            overlayClose: true, 
+					            autoResize: true,
+					            overlayCss: { cursor:"auto" },
+								maxHeight: $(window).height() * 0.7,
+								maxWidth: $(window).width() * 0.7,
+								onOpen: function(dialog) {
+									dialog.data.show();
+									dialog.overlay.fadeIn(200);
+									dialog.container.fadeIn(200);
+								},
+								onClose: function(dialog) {
+									dialog.container.fadeOut(200);
+									dialog.overlay.fadeOut(200, function(){
+										$.modal.close();
+									});
+								}
+					        });
+						}
+					});
+				})
 			
 			}); 
 		}

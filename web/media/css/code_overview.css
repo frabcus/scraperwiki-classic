@@ -1589,7 +1589,14 @@ div.user_comment small {
 }
 
 
-
+#moar {
+	font-size: 12px;
+	line-height: 18px;
+	font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+	text-align: left;
+	padding: 20px;
+	background: #f6f6f6;
+}
 
 
 
