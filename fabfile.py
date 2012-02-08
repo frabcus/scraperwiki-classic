@@ -86,7 +86,7 @@ def run_in_virtualenv(command):
 def run_buildout():
     with cd(env.path):
         run('[ -f "bin/activate" ] || virtualenv --no-site-packages .')
-        run_in_virtualenv('[ -f "bin/buildout" || pip install zc.buildout')
+        run_in_virtualenv('[ -f "bin/buildout" ] || pip install zc.buildout')
 
     run_in_virtualenv('buildout -N -qq')
 
