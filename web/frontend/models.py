@@ -130,6 +130,7 @@ class UserProfile(models.Model):
             raise PermissionDenied
         vault = Vault(user=self.user, name=name, plan=self.plan)
         vault.save()
+        vault.members.add(self.user)
         return vault
 
 # Signal Registrations
