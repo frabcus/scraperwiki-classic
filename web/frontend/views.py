@@ -504,6 +504,7 @@ def subscribe(request, plan):
         }
     }
     context = plans[plan]
+    context['subdomain'] = settings.RECURLY_SUBDOMAIN
     account_code = "%s-%s" % (request.user.id, request.user.username)
     context['signature'] = generate_recurly_signature(plan_code=plan, account_code=account_code)
     context['account_code'] = account_code
