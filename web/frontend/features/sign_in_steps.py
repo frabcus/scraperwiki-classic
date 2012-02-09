@@ -45,7 +45,7 @@ def fill_in(step, username, password):
     world.browser.find_by_css('div#divContent [name=user_or_email]').first.fill(username)
     world.browser.find_by_css('div#divContent [name=password]').first.fill(password)
 
-@step(r'And I click the button "([^"]*)"')
+@step(r'''And I click the page's "([^"]*)" button''')
 def click_button(step, button):
     world.browser.find_by_css('div#divContent').first.find_by_value(button).first.click()
 
