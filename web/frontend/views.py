@@ -576,8 +576,9 @@ def confirm_subscription(request):
     return redirect('vault')
 
 def pricing(request):        
-    context = {'self_service_vaults':False}
+    context = {'self_service_vaults':False, 'anonymous':True}
     if request.user.is_authenticated():
+        context['anonymous'] = False
         if request.user.get_profile().has_feature('Self Service Vaults'):
             context['self_service_vaults'] = True
             context['current_plan'] = request.user.get_profile().plan
