@@ -5,4 +5,4 @@ Feature: As a non logged-in user
   Scenario: I am told to sign in to buy a Premium Account
     When I visit the pricing page
     Then I should not see "Buy now"
-    And I should see "Please log in to buy"
+    And I should see "Please log in or sign up to buy"
