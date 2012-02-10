@@ -1632,7 +1632,7 @@ body.profiles.edit #features li input {
 #request_options h3 a {
 	display: block;
 	padding: 10px 15px;
-	margin-bottom: 6px;
+	margin-bottom: 10px;
 	font-size: 16px;
 	line-height: 20px;
 	font-weight: normal;
@@ -1656,10 +1656,25 @@ body.profiles.edit #features li input {
 }
 
 #request_options h2 {
-	color: #069;
-    text-align: center;
-    height: 40px;
+	text-align: center;
+	border-bottom: 1px solid #EDAB6A;
+	margin-bottom: 12px;
+	padding-bottom: 10px;
+	font-size: 14px;
+	text-transform: uppercase;
+	font-weight: normal;
+	color: #DA7311;
 }
+
+#request_options h2 i {
+	font-style: normal;
+	color: #EDAB6A;
+}
+
+#request_options h2.free {
+	margin-top: 25px;
+}
+
 
 #request_options h3 a:hover {
 	color: #28c;
@@ -1701,7 +1716,7 @@ body.profiles.edit #features li input {
 #request_options div {
 	border: 2px solid #39c;
 	border-top: none;
-	margin-bottom: 6px;
+	margin-bottom: 10px;
 	padding: 12px 15px;
 	display: none;
 	position: relative;
@@ -1746,7 +1761,7 @@ body.profiles.edit #features li input {
 }
 
 #page_inner #request_options p.paid {
-	background-image: url(../images/request_data_icon_paid.gif);
+	background-image: url(../images/request_data_icon_paid_dammit.gif);
 }
 
 #page_inner #request_options p.free {
