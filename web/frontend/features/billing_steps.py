@@ -33,12 +33,12 @@ def create_and_login(step, username, password):
 
     clear_obscuring_popups(world.browser)
 
-@step(u'And the "([^"]*)" feature exists')
+@step(u'(?:Given|And) the "([^"]*)" feature exists')
 def and_the_feature_exists(step, feature):
     Feature.objects.filter(name=feature).delete()
     Feature.objects.create(name=feature, public=True)
 
-@step(u'And I have the "([^"]*)" feature enabled')
+@step(u'(?:Given|And) I have the "([^"]*)" feature enabled')
 def and_i_have_a_feature_enabled(step, feature):
     u = User.objects.filter(username='test')[0]
     feature = Feature.objects.filter(name=feature)[0]

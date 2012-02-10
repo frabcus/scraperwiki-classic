@@ -8,7 +8,7 @@ register = Library()
 def schedule(value):
     for schedule_option in SCHEDULE_OPTIONS:
         if schedule_option[0] == int(value):
-            return schedule_option[1]
-    return "every " + str(int(value)) + " seconds"
+            return schedule_option[3]
+    return "Runs every " + str(int(value)) + " seconds"
 
 register.filter(schedule)

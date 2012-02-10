@@ -585,7 +585,7 @@ table.about a.edit {
 	font-weight: normal;
 	text-transform: none;
 	color: #926926;
-	margin-top: 1px;
+	margin-top: 2px;
 }
 
 table.about a.cancel {
@@ -614,7 +614,7 @@ body.views #scraper_screenshot {
 	width: 150px;
 	height: 98px;
 	padding: 5px;
-	margin: 25px -5px 10px 10px;
+	margin: 25px -5px 15px 10px;
 	-webkit-box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
 	-moz-box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
 	box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
@@ -697,7 +697,36 @@ table.about .running {
 }
 
 #edit_schedule {
-	margin-top: -1px;
+	font-size: 14px;
+}
+
+#edit_schedule td {
+	padding: 5px 10px;
+}
+
+#edit_schedule td.checkbox {
+	text-align: center;
+	width: 20px;
+	padding-right: 0;
+}
+
+#edit_schedule input {
+	vertical-align: top;
+}
+
+#edit_schedule .upgrade_to_activate {
+	padding: 3px 10px;
+	float: right;
+}
+
+#edit_schedule .premium {
+	background-color: rgba(255,255,255,0.4);
+	border: 1px solid #ccc;
+}
+
+#edit_schedule .premium label {
+	vertical-align: -15%;
+	opacity: 0.6;
 }
 
 ul.buttons {
