@@ -200,8 +200,7 @@
             <p>Has not run yet</p>
         {% endif %}
         
-        <h3 class="schedule">Schedule</h3>
-        {% if user_owns_it or user_edits_it or user.is_staff %}<a href="#edit_schedule" title="Edit this scraper&rsquo;s schedule" class="edit edit_schedule" rel="nofollow">Edit</a>{% endif %}
+        <h3 class="schedule">Schedule{% if user_owns_it or user_edits_it or user.is_staff %} <a href="#edit_schedule" title="Edit this scraper&rsquo;s schedule" class="edit edit_schedule" rel="nofollow">Edit</a>{% endif %}</h3>
         {% if scraper.scraper.next_run.year != 9999 %}
             {% if scraper.scraper.run_interval != 1000000000 %}
                 <p>{{scraper.scraper.run_interval|schedule}}</p>           
@@ -215,14 +214,14 @@
         <table cellspacing="0" cellpadding="0" style="display:none" id="edit_schedule">
             {% for interval, id, label in schedule_options %}
             {% if id = 'hourly' and not user_can_set_hourly %}
-            <tr>
-                <td><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}disabled="disabled"/></td>
-                <td><label for="schedule_{{id}}">{{label|safe}}</label><a href="#" class="upgrade_to_activate">Upgrade to activate</a></td>
+            <tr class="premium">
+                <td class="checkbox"><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}disabled="disabled"/></td>
+                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label><a href="#" class="upgrade_to_activate">Upgrade to activate</a></td>
             </tr>
             {% else %}
             <tr>
-                <td><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}/></td>
-                <td><label for="schedule_{{id}}">{{label|safe}}</label></td>
+                <td class="checkbox"><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}/></td>
+                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label></td>
             </tr>
             {% endif %}
             {% endfor %}

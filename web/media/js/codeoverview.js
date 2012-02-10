@@ -269,14 +269,17 @@ function reloadCollaborationUI(auto_enable_tab){
 
 function setupScheduleUI(){
 	$('#edit_schedule input').bind('change', function(){
-		// $(this).val('Saving\u2026');
-		$.getJSON($(this).val(), function(data) {
-			if(data.status == 'ok'){
-				reloadScheduleUI();
-			} else {
-				alert('New schedule could not be saved: ' + data.error);
-			}
-		});
+		if($(this).is(':disabled')){
+			alert('That button is disabled');
+		} else {
+			$.getJSON($(this).val(), function(data) {
+				if(data.status == 'ok'){
+					reloadScheduleUI();
+				} else {
+					alert('New schedule could not be saved: ' + data.error);
+				}
+			});
+		}
 	});
 	
 	$('.edit_schedule').bind('click', function(e){
