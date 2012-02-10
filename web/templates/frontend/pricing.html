@@ -144,7 +144,11 @@
     
 </div>
 
-<a id="buy" href="/contact/#vault">To order a Vault or find out more, <em>contact us here</em></a>
+{% if anonymous %}
+<a id="buy" href="{% url login %}?next={% url pricing %}">Please <em>log in</em> or <em>sign up</em> to buy a Premium Account</a>
+{% else %}
+<a id="buy" href="/contact/#vault">To buy a Premium Account or find out more, <em>contact us here</em></a>
+{% endif %}
 
 {% endif %}
 

@@ -2,11 +2,11 @@
 
 {% load formhelper %}
 
-{% block title %}Sign in or create an account{% endblock %}
+{% block title %}Log in or create an account{% endblock %}
 
 {% block header %}
-	<h2>Sign in or create an account</h2>
-	<p>If you are an existing user please sign in, if not create a new account</a>.</p>
+	<h2>Log in or create an account</h2>
+	<p>If you are an existing user please log in, if not create a new account</a>.</p>
 {% endblock %}
 
 {% block errors %}
@@ -67,7 +67,7 @@
 
 	<form method="post" action="." id="registration_form">
         {% csrf_token %}
-        <h3>Create a free account</h3>
+        <h3>Sign up for a free account</h3>
         {% if registration_form.non_field_errors %}
             <div id="main_error">
                 {% for error in registration_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}

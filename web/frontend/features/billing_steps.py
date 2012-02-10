@@ -26,7 +26,7 @@ def create_and_login(step, username, password):
     Given there is a username "%(username)s" with password "%(password)s"
     Given I am on the login page
     When I fill in my username "%(username)s" and my password "%(password)s"
-    And I click the button "Log in"
+    And I click the page's "Log in" button
     """ % locals())
 
     assert world.browser.find_by_css('#nav_inner .loggedin')

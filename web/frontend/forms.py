@@ -49,10 +49,16 @@ class UserProfileForm(forms.ModelForm):
             self.fields['alert_frequency'].initial = 86400
 
         self.fields['email'].initial = self.user.email
+    
+    print SCHEDULE_OPTIONS
+    
+    email_intervals = []
+    for s in SCHEDULE_OPTIONS:
+        email_intervals.append([s[0], s[1]])
 
     alert_frequency = forms.ChoiceField(required=False, 
                                         label="How often do you want to be emailed?", 
-                                        choices = SCHEDULE_OPTIONS)
+                                        choices = email_intervals)
     bio = forms.CharField(label="A bit about you", widget=forms.Textarea(), required=False)
     email = forms.EmailField(label="Email Address")
     email_on_comments = forms.BooleanField(required=False, 
