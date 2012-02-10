@@ -231,14 +231,34 @@ def code_overview(request, wiki_type, short_name):
     context = {'selected_tab':'overview', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
     context["userrolemap"] = scraper.userrolemap()
+
+    context["schedule_options"] = list(models.SCHEDULE_OPTIONS)
     
     # if {% if a in b %} worked we wouldn't need these two
     context["user_owns_it"] = (request.user in context["userrolemap"]["owner"])
-    if scraper.privacy_status == 'public' and request.user.is_authenticated:
+    if request.user.is_anonymous:
+        context['user_edits_it'] = False
+    elif scraper.privacy_status == 'public' and request.user.is_authenticated:
         context["user_edits_it"] = True;
     else:
         context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
-    
+
+
+    context['user_can_set_hourly'] = False
+    context['self_service_vaults'] = False
+    if request.user.is_authenticated():
+        context['user_plan'] = request.user.get_profile().plan
+        if context['user_plan'] == 'smallbusiness' or context['user_plan'] == 'corporate':
+            context['user_can_set_hourly'] = True
+        if request.user.get_profile().has_feature('Self Service Vaults'):
+            context['self_service_vaults'] = True
+        else:
+            del(context["schedule_options"][4])
+    else:
+        context['user_plan'] = None
+        del(context["schedule_options"][4])
+
+
     context["PRIVACY_STATUSES"] = PRIVACY_STATUSES_UI[0:2]  
     if request.user.is_staff:
         context["PRIVACY_STATUSES"] = PRIVACY_STATUSES_UI[0:3]  
@@ -260,7 +280,6 @@ def code_overview(request, wiki_type, short_name):
     #
     assert wiki_type == 'scraper'
 
-    context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
     try:

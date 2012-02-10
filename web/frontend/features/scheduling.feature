@@ -3,13 +3,15 @@ Feature: As a person who writes code on ScraperWiki
   So that I can gather data regularly without thinking about it.
 
   Scenario: I can see my scraper's schedule
-    Given that I have a scraper
-    When I visit its overview page
+    Given I am a "Small Business" user
+    And that I have a scraper
+    And I am on the scraper overview page
     Then I should see the scheduling panel
     And I should see the button to edit the schedule
 
   Scenario: I can set one of my scrapers to run daily
-    Given that I have a scraper
+    Given I am a "Small Business" user
+    And that I have a scraper
     And I am on the scraper overview page
     When I click the "Edit" button in the scheduling panel
     Then I should see the following scheduling options:
@@ -18,3 +20,42 @@ Feature: As a person who writes code on ScraperWiki
       | Run every week  |
       | Run every day   |
       | Run every hour  |
+
+  Scenario: If I have a Small Business account then I can set my scraper to run hourly
+    Given I am a "Small Business" user
+    And that I have a scraper
+    And I am on the scraper overview page
+    When I click the "Edit" button in the scheduling panel
+    And I click the "Run every hour" schedule option
+    Then the scraper should be set to "Runs every hour"
+
+  Scenario: If I have a Corporate account then I can set my scraper to run hourly
+    Given I am a "Corporate" user
+    And that I have a scraper
+    And I am on the scraper overview page
+    When I click the "Edit" button in the scheduling panel
+    And I click the "Run every hour" schedule option
+    Then the scraper should be set to "Runs every hour"
+
+  Scenario: If I have an Individual account then I am told to upgrade to run my scraper hourly
+    Given I am an "Individual" user
+    And that I have a scraper
+    And I am on the scraper overview page
+    When I click the "Edit" button in the scheduling panel
+    And I should see "Upgrade to activate" 
+
+  Scenario: If I have a Free account then I am told to upgrade to run my scraper hourly
+    Given I am an "Free" user
+    And that I have a scraper
+    And I am on the scraper overview page
+    When I click the "Edit" button in the scheduling panel
+    And I should see "Upgrade to activate"
+
+ Scenario: If I have a Free account, but no self service feature, then I don't see the hourly option
+    Given user "test" with password "pass" is logged in
+    And that I have a scraper
+    And I am on the scraper overview page
+    When I click the "Edit" button in the scheduling panel
+    And I should not see "Run every hour"
+
+  # TODO: Scenario for NOT logged in

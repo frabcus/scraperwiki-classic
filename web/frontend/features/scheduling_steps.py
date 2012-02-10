@@ -4,26 +4,38 @@ from nose.tools import assert_equals
 from splinter.browser import Browser
 from selenium.webdriver.support.ui import WebDriverWait
 import re
-import sys
+from django.contrib.auth.models import User
 
 prefix = 'http://localhost:8000'
 
 @before.all
 def set_browser():
+    if not world.browser: world.browser = Browser()
+
+@before.each_scenario
+def set_scraper_name(waht):
     import random
     import string
-    if not world.browser: world.browser = Browser()
     world.name = ''.join(random.choice(string.letters) for _ in range(6))
     world.name = 'schedule_test_' + world.name
 
 @after.all
-def close_browser():
-    world.browser.quit()
+def close_browser(total):
+    if total.scenarios_ran == total.scenarios_passed:
+        world.browser.quit()
 
-@step(u'Given that I have a scraper')
-def given_that_i_have_a_scraper(step):
+@step(u'Given I am an? "([^"]*)" user') 
+def given_i_am_a_plan_user(step, plan):
+    plan = plan.replace(' ', '').lower()
     step.behave_as("""
     Given user "test" with password "pass" is logged in
+    And I have the "Self Service Vaults" feature enabled
+    And I am on the "%s" plan
+    """ % plan)
+
+@step(u'(?:Given|And) that I have a scraper')
+def given_that_i_have_a_scraper(step):
+    step.behave_as("""
     And I click the button "Create a scraper"
     """)
     world.browser.find_link_by_href("/scrapers/new/python").first.click()
@@ -59,9 +71,43 @@ def and_i_am_on_the_scraper_overview_page(step):
 def when_i_click_a_button_in_the_scheduling_panel(step, button):
     panel = world.browser.find_by_css("td.schedule").first
     panel.find_by_css("a." + button.lower()).first.click()
+    wait_for_fx()
     
 @step(u'Then I should see the following scheduling options:')
 def then_i_should_see_the_scheduling_options(step):
     for label in step.hashes:
         xpath = ".//table[@id='edit_schedule']//label[text()=\"%s\"]" % label["Don't schedule"]
         assert world.browser.find_by_xpath(xpath)
+
+@step(u'And I am on the "([^"]*)" plan')
+def and_i_am_on_the_plan(step, plan):
+    user = User.objects.get(username='test')
+    profile = user.get_profile()
+    profile.change_plan(plan)
+
+@step(u'And I click the "([^"]*)" schedule option')
+def when_i_click_the_schedule_option(step, option):
+    xpath = ".//table[@id='edit_schedule']//label[text()=\"%s\"]" % option
+    world.browser.find_by_xpath(xpath).first.click()
+    wait_for_ajax()
+
+@step(u'Then the scraper should be set to "([^"]*)"')
+def then_the_scraper_should_be_set_to_schedule(step, schedule):
+    step.behave_as('Then I should see "%s"' % schedule)
+
+@step(u'And I should not see "([^"]*)"')
+def and_i_should_not_see_text(step, text):
+    assert world.browser.is_text_not_present(text)
+
+# :todo: Useful function, but probably should be kept somewhere else.
+def wait_for_fx(timeout=5):
+    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
+      world.browser.evaluate_script('jQuery.queue("fx").length == 0'))
+
+# :todo: Useful function, but probably should be kept somewhere else.
+def wait_for_ajax(timeout=5):
+    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
+      world.browser.evaluate_script('jQuery.active == 0'))
+
+
+

@@ -214,13 +214,20 @@
 
         <table cellspacing="0" cellpadding="0" style="display:none" id="edit_schedule">
             {% for interval, id, label in schedule_options %}
+            {% if id = 'hourly' and not user_can_set_hourly %}
+            <tr>
+                <td><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}disabled="disabled"/></td>
+                <td><label for="schedule_{{id}}">{{label|safe}}</label><a href="#" class="upgrade_to_activate">Upgrade to activate</a></td>
+            </tr>
+            {% else %}
             <tr>
                 <td><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}/></td>
                 <td><label for="schedule_{{id}}">{{label|safe}}</label></td>
             </tr>
+            {% endif %}
             {% endfor %}
 
-        </table> 
+        </table>
     </td>
     <td class="description">
         <h3 class="about_this_scraper">About this scraper {% if user_edits_it or user.is_staff %}<a class="edit edit_description"{% if user.is_staff %} title="(You can only see this because you&rsquo;re staff)"{% endif %}>Edit</a>{% endif %}</h3>
