@@ -12,4 +12,9 @@ Feature: As a person who writes code on ScraperWiki
     Given that I have a scraper
     And I am on the scraper overview page
     When I click the "Edit" button in the scheduling panel
-    Then I should see the scheduling options
+    Then I should see the following scheduling options:
+      | Don't schedule  |
+      | Run every month |
+      | Run every week  |
+      | Run every day   |
+      | Run every hour  |

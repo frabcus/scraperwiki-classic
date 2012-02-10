@@ -268,16 +268,13 @@ function reloadCollaborationUI(auto_enable_tab){
 }
 
 function setupScheduleUI(){
-	$('#select_schedule').bind('change', function(){
-		$(this).next().attr('disabled', false);
-	}).next().attr('disabled', true).bind('click', function(){
-		$(this).val('Saving\u2026');
-		$.getJSON($(this).prev().val(), function(data) {
+	$('#edit_schedule input').bind('change', function(){
+		// $(this).val('Saving\u2026');
+		$.getJSON($(this).val(), function(data) {
 			if(data.status == 'ok'){
 				reloadScheduleUI();
 			} else {
 				alert('New schedule could not be saved: ' + data.error);
-				$(this).val('Save');
 			}
 		});
 	});

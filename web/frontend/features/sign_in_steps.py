@@ -8,7 +8,7 @@ prefix = 'http://localhost:8000'
 
 @before.all
 def set_browser():
-    world.browser = Browser()
+    if not world.browser: world.browser = Browser()
 
 @step("Given I am on the home page")
 def given_i_am_on_the_home_page(step):

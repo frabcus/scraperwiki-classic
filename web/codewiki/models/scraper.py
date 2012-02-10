@@ -37,10 +37,13 @@ except:
 # for now till we establish logging into the django system
 logger = logging
 
-SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every two days'), (3600*24*3, 'every three days'), 
-                    (3600*24*7, 'once a week'), (3600*24*14, 'every two weeks'), (3600*24*31, 'once a month'), 
-                    (3600*24*63, 'every two months'), (3600*24*182, 'every six months'),)
-SCHEDULE_OPTIONS_DICT = dict(SCHEDULE_OPTIONS)
+SCHEDULE_OPTIONS =  (
+                    (-1, 'never', 'Don&rsquo;t schedule', 'No schedule set'), 
+                    (3600*24*31, 'monthly', 'Run every month', 'Runs every month'),
+                    (3600*24*7, 'weekly', 'Run every week', 'Runs every week'),
+                    (3600*24, 'daily', 'Run every day', 'Runs every day'),
+                    (3600, 'hourly', 'Run every hour', 'Runs every hour')
+                    )
 
 
     # unfortunately has to be a scrapers list because run_interval and last_run not available to code objects
