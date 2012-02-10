@@ -877,7 +877,7 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
             raise Http404()
         
         sorting_columns = [ "`%s`" % c for c in columns]
-        selecting_columns = [ "CASE WHEN length(%s)<1000 THEN `%s` ELSE substr(%s, 1, 1000)||'... {{MOAR||%s||'||rowid||'||NUFF}}' END AS %s" % (c,c,c,c,c) for c in columns]
+        selecting_columns = [ "CASE WHEN length(`%s`)<1000 THEN `%s` ELSE substr(`%s`, 1, 1000)||'... {{MOAR||%s||'||rowid||'||NUFF}}' END AS `%s`" % (c,c,c,c,c) for c in columns]
         # jQuery can now use a regexp like...
         # {{MOAR\|\|([^\|]+)\|\|([^\|]+)\|\|NUFF}}$
         # ...to fish out the cell's column name and rowid
