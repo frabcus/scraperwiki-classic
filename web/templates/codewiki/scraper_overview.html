@@ -216,7 +216,7 @@
             {% if id = 'hourly' and not user_can_set_hourly %}
             <tr class="premium">
                 <td class="checkbox"><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}disabled="disabled"/></td>
-                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label><a href="#" class="upgrade_to_activate">Upgrade to activate</a></td>
+                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label><a href="/pricing/" class="upgrade_to_activate">Upgrade to activate</a></td>
             </tr>
             {% else %}
             <tr>
