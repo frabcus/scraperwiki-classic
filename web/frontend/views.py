@@ -645,6 +645,18 @@ def view_vault(request, username=None):
     context['vault_membership']  = request.user.vault_membership.all().exclude(user__id=request.user.id)
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
+    context['self_service_vaults'] = False
+    if request.user.get_profile().has_feature('Self Service Vaults'):
+        context['self_service_vaults'] = True
+        context['current_plan'] = request.user.get_profile().plan
+        context['vaults_remaining_in_plan'] = 0
+        if context['current_plan'] == 'individual':
+            context['vaults_remaining_in_plan'] = 1 - context['vaults'].count()
+        if context['current_plan'] == 'smallbusiness':
+            context['vaults_remaining_in_plan'] = 5 - context['vaults'].count()
+        if context['current_plan'] == 'corporate':
+            context['vaults_remaining_in_plan'] = 9999
+    
     context['has_upgraded'] = False
     if request.session.get('recently_upgraded'):
         context['has_upgraded'] = True
