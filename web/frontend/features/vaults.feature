@@ -3,7 +3,8 @@ Feature: As a small business or corporate account holder
   So that I can partition my work into different private projects
 
   Scenario: I can't see the 'new vault' button (individual user)
-	Given I am a "Individual" user
+	  Given I am a "Individual" user
+    And I have a vault
     When I visit my vaults page
     Then I should not see the "Create a new vault" button
 

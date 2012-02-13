@@ -50,6 +50,7 @@ urlpatterns = patterns('',
     url(r'^vaults/(?P<vaultid>\d+)/addscraper/(?P<shortname>.*)/$', frontend_views.vault_scrapers_add, name='vault_scrapers_add'),            
     url(r'^vaults/(?P<vaultid>\d+)/removescraper/(?P<shortname>.*)/(?P<newstatus>public|visible)$', frontend_views.vault_scrapers_remove, name='vault_scrapers_remove'),                
     url(r'^vaults/$', frontend_views.view_vault, name='vault'),    
+    url(r'^vaults/new/$', frontend_views.new_vault, name='new_vault'),    
     
     url(r'^dashboard/(?P<page_number>\d+)?$', frontend_views.dashboard, name='dashboard'),
     url(r'^stats/$',                  frontend_views.stats, name='stats'),    

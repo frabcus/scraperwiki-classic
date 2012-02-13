@@ -595,6 +595,12 @@ def test_error(request):
 ###############################################################################
 
 @login_required
+def new_vault(request):
+    profile = request.user.get_profile()
+    profile.create_vault('My New Vault')
+    return redirect('vault')
+
+@login_required
 def transfer_vault(request, vaultid, username):
     """
     When called by the owner of a vault, the ownership of the vault

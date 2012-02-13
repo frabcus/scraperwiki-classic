@@ -25,6 +25,12 @@ def given_i_am_a_plan_user(step, plan):
     And I am on the "%s" plan
     """ % plan)
 
+@step(u'And I have a vault')
+def and_i_have_a_vault(step):
+    user = User.objects.get(username='test')
+    profile = user.get_profile()
+    profile.create_vault('My First Vault')
+
 @step(u'(?:When|And) I visit my vaults page')
 def when_i_visit_the_pricing_page(step):
     response = world.browser.visit(prefix + '/vaults/')
