@@ -49,9 +49,7 @@ class UserProfileForm(forms.ModelForm):
             self.fields['alert_frequency'].initial = 86400
 
         self.fields['email'].initial = self.user.email
-    
-    print SCHEDULE_OPTIONS
-    
+        
     email_intervals = []
     for s in SCHEDULE_OPTIONS:
         email_intervals.append([s[0], s[1]])
