@@ -1,11 +1,48 @@
 from lettuce import step,before,world
+from django.conf import settings
+from django.utils.importlib import import_module 
+from django.http import SimpleCookie, HttpRequest, QueryDict
 from django.contrib.auth.models import User
+from django.core.handlers.base import BaseHandler
+from django.core.handlers.wsgi import WSGIRequest
+from django.contrib.auth import authenticate, login
 from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals
 from splinter.browser import Browser
 from selenium.webdriver.support.ui import WebDriverWait
 
 prefix = 'http://localhost:8000'
+session = None
+
+def login(username, password):
+    user = authenticate(username=username, password=password)
+    if user and user.is_active \
+            and 'django.contrib.sessions.middleware.SessionMiddleware' in settings.MIDDLEWARE_CLASSES:
+        engine = import_module(settings.SESSION_ENGINE)
+
+        request = HttpRequest()
+        if session:
+            request.session = session
+        else:
+            request.session = engine.SessionStore()
+        login(request, user)
+
+        request.session.save()
+
+        session_cookie = settings.SESSION_COOKIE_NAME
+        self.cookies[session_cookie] = request.session.session_key
+        cookie_data = {
+                'max-age' : None,
+                'path'    : '/',
+                'domain'  : settings.SESSION_COOKIE_DOMAIN,
+                'secure'  : settings.SESSION_COOKIE_SECURE or None,
+                'expires' : None,
+                }
+
+        # Inject cookie into selenium
+        browser.cookies[session_cookie] = cookie_data
+    else:
+        raise Exception("Couldn't authenticate")
 
 @before.all
 def set_browser():
@@ -24,14 +61,9 @@ def then_i_should_see_the_payment_plan(step, plan):
 def create_and_login(step, username, password):
     step.behave_as("""
     Given there is a username "%(username)s" with password "%(password)s"
-    Given I am on the login page
-    When I fill in my username "%(username)s" and my password "%(password)s"
-    And I click the page's "Log in" button
     """ % locals())
+    login(username, password)
 
-    assert world.browser.find_by_css('#nav_inner .loggedin')
-
-    clear_obscuring_popups(world.browser)
 
 @step(u'(?:Given|And) the "([^"]*)" feature exists')
 def and_the_feature_exists(step, feature):
