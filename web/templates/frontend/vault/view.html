@@ -27,7 +27,7 @@
 
 {% if vaults.count %}
 <div id="my_vaults">
-    <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: <!-- <a id="new_vault">Create another</a> --></h2>
+    <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: {% if self_service_vaults and vaults_remaining_in_plan %}<a id="new_vault">Create a new vault</a>{% endif %}</h2>
     {% for vault in vaults.all %}
     <div class="vault">
         
@@ -124,6 +124,10 @@
     </div>
     
     {% endfor %}
+</div>
+{% else %}
+<div id="my_vaults">
+    <h2>You don&rsquo;t have any vaults! {% if self_service_vaults and vaults_remaining_in_plan %}<a id="new_vault">Create a new vault</a>{% endif %}</h2>
 </div>
 {% endif %}
 
