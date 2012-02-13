@@ -5001,6 +5001,29 @@ body.events #tickets {
 	margin-top: 10px;
 }
 
+body.events #tickets .tip {
+	font-size: 14px;
+	line-height: 18px;
+	color: #333;
+	margin-bottom: 20px;
+	margin-top: 0;
+}
+
+body.events #tickets span {
+	font-weight: bold;
+	color: #999;
+}
+
+body.events #tickets strong {
+	font-weight: bold;
+	color: #ee6702;
+}
+
+body.events #tickets em {
+	color: #888;
+	margin: 0 2px;
+}
+
 #liberatesomedata {
 	float: right;
 	position: relative;
