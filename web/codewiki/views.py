@@ -236,9 +236,9 @@ def code_overview(request, wiki_type, short_name):
     
     # if {% if a in b %} worked we wouldn't need these two
     context["user_owns_it"] = (request.user in context["userrolemap"]["owner"])
-    if request.user.is_anonymous:
+    if request.user.is_anonymous():
         context['user_edits_it'] = False
-    elif scraper.privacy_status == 'public' and request.user.is_authenticated:
+    elif scraper.privacy_status == 'public' and request.user.is_authenticated():
         context["user_edits_it"] = True;
     else:
         context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
