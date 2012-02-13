@@ -7083,13 +7083,7 @@ xbody.vaults .content h2 a {
 	font-weight: normal;
 }
 
-xbody.vaults .content h2 a:hover {
-	text-decoration: none;
-	background-color: #D3E7F5;
-	color: #06a;
-}
-
-#new_vault {
+body.vaults .content h2 a {
 	float: right;
 	position: relative;
 	top: -2px;
@@ -7117,7 +7111,7 @@ xbody.vaults .content h2 a:hover {
 	border-radius: 3px;
 }
 
-#new_vault:before {
+body.vaults .content h2 a:before {
 	content: '';
 	display: inline-block;
 	width: 16px;
@@ -7128,7 +7122,7 @@ xbody.vaults .content h2 a:hover {
 	opacity: 0.9;
 }
 
-#new_vault:hover {
+body.vaults .content h2 a:hover {
 	cursor: pointer;
 	text-decoration: none;
 	background: #f1f8eb;
@@ -7140,7 +7134,7 @@ xbody.vaults .content h2 a:hover {
 	background: linear-gradient(top, #fff 0%,#f1f8eb 100%);
 }
 
-#new_vault:active {
+body.vaults .content h2 a:active {
 	position: relative;
 	top: -1px;
 }
