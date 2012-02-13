@@ -25,11 +25,15 @@ def given_i_am_a_plan_user(step, plan):
     And I am on the "%s" plan
     """ % plan)
 
-@step(u'And I have a vault')
-def and_i_have_a_vault(step):
+@step(u'(?:Given|And) I have ([a0-9]) vaults?')
+def and_i_have_a_vault(step, num):
+    if num == 'a': num = 1
+    num = int(num)
     user = User.objects.get(username='test')
     profile = user.get_profile()
-    profile.create_vault('My First Vault')
+
+    for i in range(1,num+1):
+        profile.create_vault('My #%d Vault' % i)
 
 @step(u'(?:When|And) I visit my vaults page')
 def when_i_visit_the_pricing_page(step):
