@@ -594,12 +594,15 @@ def test_error(request):
 # Vault specific views
 ###############################################################################
 
+maximum_vaults = {'free': 0, 'individual': 1, 'smallbusiness': 5, 'corporate': 9999}
+
 @login_required
 def new_vault(request):
     profile = request.user.get_profile()
     plan = request.user.get_profile().plan
     vaults = Vault.objects.filter(user=profile.user)
-    if (plan == 'individual' and vaults < 1) or (plan == 'smallbusiness' and vaults < 5) or (plan == 'corporate'): 
+    maximum = maximum_vaults[plan]
+    if vaults < maximum: 
         profile.create_vault('My New Vault')        
         return redirect('vault')
     else:
@@ -660,13 +663,7 @@ def view_vault(request, username=None):
     if request.user.get_profile().has_feature('Self Service Vaults'):
         context['self_service_vaults'] = True
         context['current_plan'] = request.user.get_profile().plan
-        context['vaults_remaining_in_plan'] = 0
-        if context['current_plan'] == 'individual':
-            context['vaults_remaining_in_plan'] = 1 - context['vaults'].count()
-        if context['current_plan'] == 'smallbusiness':
-            context['vaults_remaining_in_plan'] = 5 - context['vaults'].count()
-        if context['current_plan'] == 'corporate':
-            context['vaults_remaining_in_plan'] = 9999
+        context['vaults_remaining_in_plan'] = max(0, maximum_vaults[context['current_plan']] - context['vaults'].count())
     
     context['has_upgraded'] = False
     if request.session.get('recently_upgraded'):
