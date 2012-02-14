@@ -43,11 +43,9 @@ Feature: As a small business or corporate account holder
     And I have 5 vaults
     When I visit the URL "scraperwiki.com/vaults/new/"
     Then I should not see a new empty vault
-    And I should see the "Upgrade to create more vaults" button
 
   Scenario: I can't sneakily create a new vault if I have a vault (individual user)
     Given I am a "Individual" user
     And I have a vault
     When I visit the URL "scraperwiki.com/vaults/new/"
     Then I should not see a new empty vault
-    And I should see the "Upgrade to create more vaults" button

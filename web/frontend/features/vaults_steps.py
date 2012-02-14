@@ -11,11 +11,6 @@ prefix = 'http://localhost:8000'
 def set_browser():
     if not world.browser: world.browser = Browser()
 
-@after.all
-def close_browser(total):
-    if total.scenarios_ran == total.scenarios_passed:
-        world.browser.quit()
-
 @step(u'(?:Given|And) I am an? "([^"]*)" user') 
 def given_i_am_a_plan_user(step, plan):
     plan = plan.replace(' ', '').lower()
@@ -40,11 +35,11 @@ def when_i_visit_the_pricing_page(step):
     response = world.browser.visit(prefix + '/vaults/')
 
 @step(u'(?:Then|And) I should see the "([^"]*)" button')
-def i_see_the_button(step, text):
+def i_should_see_the_button(step, text):
     assert world.browser.find_link_by_partial_text(text)
 
 @step(u'(?:Then|And) I should not see the "([^"]*)" button')
-def i_see_the_button(step, text):
+def i_should_not_see_the_button(step, text):
     assert not world.browser.find_link_by_partial_text(text)
 
 @step(u'(?:When|And) I click the "([^"]*)" button')
@@ -56,3 +51,13 @@ def i_click_the_button(step, text):
 @step(u'(?:Then|And) I should see a new empty vault')
 def i_should_see_a_new_empty_vault(step):
     assert world.browser.find_by_css('div.vault_contents.empty')
+
+@step(u'(?:Then|And) I should not see a new empty vault')
+def i_should_not_see_a_new_empty_vault(step):
+    assert not world.browser.find_by_css('div.vault_contents.empty')
+    
+@step(u'When I visit the URL "([^"]*)"')
+def when_i_visit_the_url(step, url):
+    url = url.replace('scraperwiki.com', prefix)
+    response = world.browser.visit(url)
+    

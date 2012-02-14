@@ -601,7 +601,9 @@ def new_vault(request):
     vaults = Vault.objects.filter(user=profile.user)
     if (plan == 'individual' and vaults < 1) or (plan == 'smallbusiness' and vaults < 5) or (plan == 'corporate'): 
         profile.create_vault('My New Vault')        
-    return redirect('vault')
+        return redirect('vault')
+    else:
+        return HttpResponseForbidden("You can't create a new vault. Please upgrade your ScraperWiki account.")
 
 @login_required
 def transfer_vault(request, vaultid, username):
