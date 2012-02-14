@@ -7,10 +7,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 prefix = 'http://localhost:8000'
 
-@before.all
-def set_browser():
-    world.browser = Browser()
-
 @step(u'(?:When|And) I visit the pricing page')
 def when_i_visit_the_pricing_page(step):
     response = world.browser.visit(prefix + '/pricing/')
