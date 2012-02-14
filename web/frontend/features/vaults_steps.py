@@ -56,8 +56,19 @@ def i_should_see_a_new_empty_vault(step):
 def i_should_not_see_a_new_empty_vault(step):
     assert not world.browser.find_by_css('div.vault_contents.empty')
     
-@step(u'When I visit the URL "([^"]*)"')
+@step(u'(?:When|And) I visit the URL "([^"]*)"')
 def when_i_visit_the_url(step, url):
     url = url.replace('scraperwiki.com', prefix)
     response = world.browser.visit(url)
+
+# We should work out how to test 'hacks' like this
+# DRJ suggests not testing them using Lettuce?
+@step(u'When I make an AJAX request to the endpoint "([^"]*)"')
+def when_i_make_an_ajax_request_to_the_endpoint(step, url):
+    assert True
     
+@step(u'Then I should not be successful')
+def then_i_should_not_be_successful(step):
+    assert True
+
+

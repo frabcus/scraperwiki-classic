@@ -7285,18 +7285,22 @@ body.vaults .vault_header .vault_users_popover a.user_delete:hover {
 }
 
 body.vaults .vault_header .vault_users_popover a.add_user,
-body.vaults .vault_header .vault_users_popover a.add_user:hover {
+body.vaults .vault_header .vault_users_popover a.add_user:hover,
+body.vaults .vault_header .vault_users_popover a.upgrade_to_add_user,
+body.vaults .vault_header .vault_users_popover a.upgrade_to_add_user:hover {
     display: block;
     text-align: center;
     cursor: pointer;
     padding: 10px 0 0 0;
 }
 
-body.vaults .vault_header .vault_users_popover a.add_user:hover {
+body.vaults .vault_header .vault_users_popover a.add_user:hover,
+body.vaults .vault_header .vault_users_popover a.upgrade_to_add_user:hover {
 	color: #298105;
 }
 
-body.vaults .vault_header a.add_user img {
+body.vaults .vault_header a.add_user img,
+body.vaults .vault_header a.upgrade_to_add_user img {
 	vertical-align: -2px;
 }
 

@@ -44,7 +44,11 @@
     	        	{% include 'frontend/includes/vault_member.html' %}
     			{% endfor %}
                 </ul>
+                {% if can_add_vault_members %}
                 <a class="add_user" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add another user</a>
+                {% else %}
+                <a class="upgrade_to_add_user" href="/pricing/"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Upgrade to add more users</a>
+                {% endif %}
                 <span class="arrow"></span>
             {% endifequal %}
             </div>

@@ -49,3 +49,17 @@ Feature: As a small business or corporate account holder
     And I have a vault
     When I visit the URL "scraperwiki.com/vaults/new/"
     Then I should not see a new empty vault
+    
+  Scenario: My vault can't have more than one member (individual user)
+    Given I am a "Individual" user
+    And I have a vault
+    When I visit my vaults page
+    When I click the "member" button
+    Then I should not see the "Add another user" button
+    And I should see the "Upgrade to add more users" button
+
+  Scenario: [WE DON'T ACTUALLY TEST THAT] I can't sneakily add more than one member to my vault (individual user)
+    Given I am a "Individual" user
+    And I have a vault
+    When I make an AJAX request to the endpoint "/vaults/{vaultid}/adduser/{userid}/"
+    Then I should not be successful
