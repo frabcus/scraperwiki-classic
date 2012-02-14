@@ -597,7 +597,10 @@ def test_error(request):
 @login_required
 def new_vault(request):
     profile = request.user.get_profile()
-    profile.create_vault('My New Vault')
+    plan = request.user.get_profile().plan
+    vaults = Vault.objects.filter(user=profile.user)
+    if (plan == 'individual' and vaults < 1) or (plan == 'smallbusiness' and vaults < 5) or (plan == 'corporate'): 
+        profile.create_vault('My New Vault')        
     return redirect('vault')
 
 @login_required
