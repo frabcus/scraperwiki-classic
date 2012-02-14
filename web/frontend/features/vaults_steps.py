@@ -22,16 +22,17 @@ def given_i_am_a_plan_user(step, plan):
 
 @step(u'(?:Given|And) I have ([a0-9]) vaults?')
 def and_i_have_a_vault(step, num):
-    if num == 'a': num = 1
+    if num == 'a':
+        num = 1
     num = int(num)
     user = User.objects.get(username='test')
     profile = user.get_profile()
 
-    for i in range(1,num+1):
-        profile.create_vault('My #%d Vault' % i)
+    for i in range(num):
+        profile.create_vault('My #%d Vault' % (i+1))
 
 @step(u'(?:When|And) I visit my vaults page')
-def when_i_visit_the_pricing_page(step):
+def when_i_visit_my_vaults_page(step):
     response = world.browser.visit(prefix + '/vaults/')
 
 @step(u'(?:Then|And) I should see the "([^"]*)" button')
@@ -60,4 +61,4 @@ def i_should_not_see_a_new_empty_vault(step):
 def when_i_visit_the_url(step, url):
     url = url.replace('scraperwiki.com', prefix)
     response = world.browser.visit(url)
-    
+
