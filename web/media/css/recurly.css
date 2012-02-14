@@ -794,7 +794,7 @@ a {
 }
 
 .recurly.submitting .footer {
-	background: url("../images/recurly/submitting.gif") no-repeat 180px 28px;
+	background: url("../images/recurly/submitting.gif") no-repeat 250px center;
 }
 
 .recurly button.submit {
