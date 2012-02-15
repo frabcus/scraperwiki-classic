@@ -602,7 +602,7 @@ def new_vault(request):
     plan = request.user.get_profile().plan
     vaults = Vault.objects.filter(user=profile.user)
     maximum = maximum_vaults[plan]
-    if vaults < maximum: 
+    if len(vaults) < maximum: 
         profile.create_vault('My New Vault')        
         return redirect('vault')
     else:

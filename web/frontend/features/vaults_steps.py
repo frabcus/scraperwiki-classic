@@ -2,7 +2,6 @@ from lettuce import *
 from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals
-from splinter.browser import Browser
 from selenium.webdriver.support.ui import WebDriverWait
 
 prefix = 'http://localhost:8000'
@@ -39,7 +38,7 @@ def i_should_see_the_button(step, text):
 def i_should_not_see_the_button(step, text):
     assert not world.browser.find_link_by_partial_text(text)
 
-@step(u'(?:When|And) I click the "([^"]*)" button')
+@step(u'(?:When|And) I click the "([^"]*)" button$')
 def i_click_the_button(step, text):
     world.browser.find_link_by_partial_text(text).first.click()
 

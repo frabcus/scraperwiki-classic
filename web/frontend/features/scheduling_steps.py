@@ -1,7 +1,5 @@
-#from lettuce import step,before,world,after
-from lettuce import *
+from lettuce import step,before,world,after
 from nose.tools import assert_equals
-from splinter.browser import Browser
 from selenium.webdriver.support.ui import WebDriverWait
 import re
 from django.contrib.auth.models import User
@@ -26,6 +24,7 @@ def given_i_am_a_plan_user(step, plan):
 
 @step(u'(?:Given|And) that I have a scraper')
 def given_that_i_have_a_scraper(step):
+    world.browser.visit(prefix + '/')
     step.behave_as("""
     And I click the button "Create a scraper"
     """)

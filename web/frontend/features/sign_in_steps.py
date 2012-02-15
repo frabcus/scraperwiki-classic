@@ -2,7 +2,6 @@ from lettuce import step,before,world
 from django.contrib.auth.models import User
 from frontend.models import UserProfile
 from nose.tools import assert_equals
-from splinter.browser import Browser
 
 prefix = 'http://localhost:8000'
 

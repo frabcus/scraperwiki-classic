@@ -2,7 +2,6 @@ from lettuce import step,before,world
 from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals
-from splinter.browser import Browser
 from selenium.webdriver.support.ui import WebDriverWait
 import time
 
