@@ -4,13 +4,11 @@ from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals
 from splinter.browser import Browser
 from selenium.webdriver.support.ui import WebDriverWait
+import time
 
 prefix = 'http://localhost:8000'
 
-@before.all
-def set_browser():
-    world.browser = Browser()
-
+   
 @step(u'When I visit the pricing page')
 def when_i_visit_the_pricing_page(step):
     response = world.browser.visit(prefix + '/pricing/')
@@ -24,14 +22,11 @@ def then_i_should_see_the_payment_plan(step, plan):
 def create_and_login(step, username, password):
     step.behave_as("""
     Given there is a username "%(username)s" with password "%(password)s"
-    Given I am on the login page
-    When I fill in my username "%(username)s" and my password "%(password)s"
-    And I click the page's "Log in" button
     """ % locals())
-
-    assert world.browser.find_by_css('#nav_inner .loggedin')
-
-    clear_obscuring_popups(world.browser)
+    world.browser.visit(prefix + '/contact/')
+    l = world.FakeLogin()
+    cookie_data = l.login(username, password) 
+    world.browser.driver.add_cookie(cookie_data)
 
 @step(u'(?:Given|And) the "([^"]*)" feature exists')
 def and_the_feature_exists(step, feature):
@@ -61,7 +56,8 @@ def and_i_should_see(step, text):
 
 @step(u'Given I have chosen the "([^"]*)" plan')
 def given_i_have_chosen_a_plan(step, plan):
-    step.behave_as('Given user "test" with password "pass" is logged in')
+    username = 'test-%s' % time.strftime('%Y%m%dT%H%M%S')
+    step.behave_as('Given user "%s" with password "pass" is logged in' % username)
     world.browser.visit(prefix + '/subscribe/%s' % plan.lower())
     wait_for_element_by_css('.card_number')
 

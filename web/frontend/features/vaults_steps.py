@@ -7,10 +7,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 prefix = 'http://localhost:8000'
 
-@before.all
-def set_browser():
-    if not world.browser: world.browser = Browser()
-
 @step(u'(?:Given|And) I am an? "([^"]*)" user') 
 def given_i_am_a_plan_user(step, plan):
     plan = plan.replace(' ', '').lower()

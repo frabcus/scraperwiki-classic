@@ -6,10 +6,6 @@ from splinter.browser import Browser
 
 prefix = 'http://localhost:8000'
 
-@before.all
-def set_browser():
-    if not world.browser: world.browser = Browser()
-
 @step("Given I am on the home page")
 def given_i_am_on_the_home_page(step):
     world.browser.visit(prefix + '/')

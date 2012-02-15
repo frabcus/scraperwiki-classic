@@ -8,21 +8,12 @@ from django.contrib.auth.models import User
 
 prefix = 'http://localhost:8000'
 
-@before.all
-def set_browser():
-    if not world.browser: world.browser = Browser()
-
 @before.each_scenario
 def set_scraper_name(waht):
     import random
     import string
     world.name = ''.join(random.choice(string.letters) for _ in range(6))
     world.name = 'schedule_test_' + world.name
-
-@after.all
-def close_browser(total):
-    if total.scenarios_ran == total.scenarios_passed:
-        world.browser.quit()
 
 @step(u'Given I am an? "([^"]*)" user') 
 def given_i_am_a_plan_user(step, plan):

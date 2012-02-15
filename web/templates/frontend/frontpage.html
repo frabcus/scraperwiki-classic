@@ -118,9 +118,14 @@
 			
 			<div class="activity">
 			    <h2><a>From the Blog</a></h2>
-			    {% load blog_latest %}
-                {% blog_latest %}
-            </div>
+          {% if not debug %}
+			      {% load blog_latest %}
+               {% blog_latest %}
+
+          {% else %}
+            <p>Blog not displayed on dev</p>
+          {% endif %}
+      </div>
 			
 			<br class="clear"/>
 			
