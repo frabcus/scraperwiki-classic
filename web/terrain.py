@@ -17,8 +17,8 @@ def close_browser(totals):
     for total in totals:
         if total.scenarios_ran != total.scenarios_passed:
             failed = True
-    if not failed: world.browser.quit() 
-
+    if not failed:
+        world.browser.quit()
 
 @world.absorb
 class FakeLogin(Client):
