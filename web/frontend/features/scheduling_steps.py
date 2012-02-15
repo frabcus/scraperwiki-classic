@@ -1,6 +1,5 @@
 from lettuce import step,before,world,after
 from nose.tools import assert_equals
-from selenium.webdriver.support.ui import WebDriverWait
 import re
 from django.contrib.auth.models import User
 
@@ -61,7 +60,7 @@ def and_i_am_on_the_scraper_overview_page(step):
 def when_i_click_a_button_in_the_scheduling_panel(step, button):
     panel = world.browser.find_by_css("td.schedule").first
     panel.find_by_css("a." + button.lower()).first.click()
-    wait_for_fx()
+    world.wait_for_fx()
     
 @step(u'Then I should see the following scheduling options:')
 def then_i_should_see_the_scheduling_options(step):
@@ -79,7 +78,7 @@ def and_i_am_on_the_plan(step, plan):
 def when_i_click_the_schedule_option(step, option):
     xpath = ".//table[@id='edit_schedule']//label[text()=\"%s\"]" % option
     world.browser.find_by_xpath(xpath).first.click()
-    wait_for_ajax()
+    world.wait_for_ajax()
 
 @step(u'Then the scraper should be set to "([^"]*)"')
 def then_the_scraper_should_be_set_to_schedule(step, schedule):
@@ -88,16 +87,6 @@ def then_the_scraper_should_be_set_to_schedule(step, schedule):
 @step(u'And I should not see "([^"]*)"')
 def and_i_should_not_see_text(step, text):
     assert world.browser.is_text_not_present(text)
-
-# :todo: Useful function, but probably should be kept somewhere else.
-def wait_for_fx(timeout=5):
-    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
-      world.browser.evaluate_script('jQuery.queue("fx").length == 0'))
-
-# :todo: Useful function, but probably should be kept somewhere else.
-def wait_for_ajax(timeout=5):
-    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
-      world.browser.evaluate_script('jQuery.active == 0'))
 
 
 

@@ -7,6 +7,7 @@ from django.utils.importlib import import_module
 from django.http import HttpRequest
 from south.management.commands import patch_for_test_db_setup
 from splinter.browser import Browser
+from selenium.webdriver.support.ui import WebDriverWait
 
 @before.harvest
 def sync_db(variables):
@@ -57,4 +58,37 @@ class FakeLogin(Client):
             return cookie_data
         else:
             raise Exception("Couldn't authenticate")
- 
+
+@world.absorb
+def wait_for_fx(timeout=5):
+    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
+      world.browser.evaluate_script('jQuery.queue("fx").length == 0'))
+
+@world.absorb
+def wait_for_ajax(timeout=5):
+    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
+      world.browser.evaluate_script('jQuery.active == 0'))
+
+@world.absorb
+def wait_for_element_by_css(css, timeout=5):
+    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
+      len(world.browser.find_by_css(css)) != 0)
+
+@world.absorb
+def wait_for_url(url, timeout=5):
+    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
+      (url in world.browser.url))
+   
+# Not currently used
+def clear_obscuring_popups(browser):
+    """Clear alerts and windows that would otherwise obscure buttons.
+    """
+
+    for id in ["djHideToolBarButton", "alert_close"]:
+        elements = browser.find_by_id(id)
+        if not elements:
+            continue
+        element = elements.first
+        if element.visible:
+            element.click()
+
