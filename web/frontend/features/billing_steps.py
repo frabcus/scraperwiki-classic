@@ -25,7 +25,7 @@ def create_and_login(step, username, password):
     world.browser.visit(prefix)
     l = world.FakeLogin()
     cookie_data = l.login(username, password) 
-    world.browser.cookies.add(cookie_data)
+    world.browser.driver.add_cookie(cookie_data)
 
 @step(u'(?:Given|And) the "([^"]*)" feature exists')
 def and_the_feature_exists(step, feature):
