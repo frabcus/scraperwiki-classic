@@ -1,7 +1,12 @@
-from lettuce import before
+from lettuce import before,after,world
+from django.contrib.auth import authenticate, login
 from django.conf import settings
 from django.core.management import call_command 
+from django.test.client import Client
+from django.utils.importlib import import_module
+from django.http import HttpRequest
 from south.management.commands import patch_for_test_db_setup
+from splinter.browser import Browser
 
 @before.harvest
 def sync_db(variables):
