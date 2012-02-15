@@ -10,8 +10,10 @@ from splinter.browser import Browser
 
 @before.harvest
 def sync_db(variables):
-    patch_for_test_db_setup() 
-    call_command('syncdb', interactive=False)
+    if getattr(settings, 'LETTUCE_TESTING', False):
+        patch_for_test_db_setup()
+        call_command('flush', interactive=False)
+        call_command('syncdb', interactive=False)
 
 @before.harvest
 def set_browser(variables):
