@@ -54,3 +54,4 @@ syntax: regexp
 ^services/scriptmgr/appsettings.scriptmgr.js$
 ^services/switchboard/appsettings.switchboard.js$
 ^services/datastore/appfiles/config.xml$
+.db$
