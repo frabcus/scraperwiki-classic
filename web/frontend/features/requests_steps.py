@@ -26,7 +26,7 @@ def then_i_should_see_the_services(step, plan):
     assert_equals(1, len(plans))
 
 @step(u'(?:Then|And) I should see a link to "([^"]*)"')
-def then_i_should_see_a_link(step, url_expected):
+def then_i_should_see_a_link(step, url):
     nodes = world.browser.find_by_xpath("//a[@href='%s']" % url)
     assert_less(0, len(nodes))
 

@@ -18,4 +18,4 @@ Feature: As a person who wants someone else to liberate data for me
     Then I should be on the public requests page
     And I should see "exciting"
     And I should see "Why you want to liberate this data"
-    And I should see "screenshot"
+    And I should see "Screenshot"
