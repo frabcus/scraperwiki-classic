@@ -5,21 +5,31 @@ from nose.tools import assert_equals,assert_less
 import time
 
 prefix = 'http://localhost:8000'
+service_xpath = "//h3[a[contains(strong,'%s')]]"
 
 @step(u'When I visit the request page')
 def when_i_visit_the_pricing_page(step):
     response = world.browser.visit(prefix + '/request_data/')
 
-@step(u'(?:Then|And) I should see the "([^"]*)" services button')
-def then_i_should_see_the_payment_plan(step, plan):
-    plan_name = world.browser.find_by_xpath(".//h3/a/strong[text()='%s']" % plan)[0].text
-    assert_equals(plan_name, plan)
+@step(u'And I click the "([^"]*)" services button')
+def and_i_click_the_group1_services_button(step, service):
+    el = world.browser.find_by_xpath(service_xpath % service).first
+    el.click()
+
+@step(u'Then I should be on the public requests page')
+def then_i_should_be_on_the_public_requests_page(step):
+    assert False, 'This step must be implemented'
+
+@step(u'(?:Then|And) I should see the "([^"]*)" service')
+def then_i_should_see_the_services(step, plan):
+    plans = world.browser.find_by_xpath(service_xpath % plan)
+    assert_equals(1, len(plans))
 
 @step(u'(?:Then|And) I should see a link to "([^"]*)"')
-def then_i_should_see_the_payment_plan(step, url_expected):
+def then_i_should_see_a_link(step, url_expected):
     nodes = world.browser.find_by_xpath("//a[@href='%s']" % url)
     assert_less(0, len(nodes))
 
 @step(u'(?:And|Then) I should see "([^"]*)"$')
-def and_i_should_see(step, text):
+def then_i_should_see(step, text):
     assert world.browser.is_text_present(text)

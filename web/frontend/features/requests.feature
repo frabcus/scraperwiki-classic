@@ -4,7 +4,7 @@ Feature: As a person who wants someone else to liberate data for me
 
   Scenario: I can see that free, public requests are available.
     When I visit the request page
-    Then I should see the "public" services button
+    Then I should see the "public" service
 
   Scenario: I can make a free, public request.
     When I visit the request page
