@@ -7,7 +7,7 @@ from frontend.models import UserProfile
 
 PLAN_PAGE_REQUESTS = {
     'individual':       20000,
-    'smallbusiness':   100000,
+    'business':   100000,
     'corporate':      2000000,    
 }
 

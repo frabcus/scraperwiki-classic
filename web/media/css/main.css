@@ -4398,7 +4398,7 @@ body.pricing .column-right {
 	margin-top: 15px;
 }
 
-#pricing_chart #smallbusiness {
+#pricing_chart #business {
 	background: #f7e9b9;
 	border: 2px solid #f2dd96;
 	z-index: 20;
@@ -4450,28 +4450,28 @@ body.pricing .column-right {
 	line-height: 13px;
 }
 
-#pricing_chart #smallbusiness h3 {
+#pricing_chart #business h3 {
 	margin-top: 25px;
 }
 
-#pricing_chart.selfservice #smallbusiness p.price {
+#pricing_chart.selfservice #business p.price {
 	margin-top: 10px;
 	font-size: 15px;
 }
 
-#pricing_chart #smallbusiness p.price {
+#pricing_chart #business p.price {
 	margin: 7px 0 25px 0;
 }
 
-#pricing_chart #smallbusiness li {
+#pricing_chart #business li {
 	padding-bottom: 8px;
 }
 
-#pricing_chart.selfservice #smallbusiness li {
+#pricing_chart.selfservice #business li {
 	padding-bottom: 10px;
 }
 
-#pricing_chart #smallbusiness p.limit {
+#pricing_chart #business p.limit {
 	margin-top: 5px;
 	margin-bottom: 25px;
 }
@@ -4481,13 +4481,13 @@ body.pricing .column-right {
 	margin: 10px 0 20px;
 }
 
-#pricing_chart #smallbusiness p.buy,
-#pricing_chart #smallbusiness p.current {
+#pricing_chart #business p.buy,
+#pricing_chart #business p.current {
 	margin: 5px 0 25px 0;
 }
 
-#pricing_chart.selfservice #smallbusiness p.buy,
-#pricing_chart.selfservice #smallbusiness p.current {
+#pricing_chart.selfservice #business p.buy,
+#pricing_chart.selfservice #business p.current {
 	margin-top: 22px;
 }
 
@@ -4534,7 +4534,7 @@ body.pricing .column-right {
 	top: 1px;
 }
 
-#pricing_chart #smallbusiness .buy a {
+#pricing_chart #business .buy a {
 	-webkit-box-shadow: 0px 1px 20px rgba(255, 255, 255, 1);
 	-moz-box-shadow: 0px 1px 20px rgba(255, 255, 255, 1);
 	box-shadow: 0px 1px 20px rgba(255, 255, 255, 1);
