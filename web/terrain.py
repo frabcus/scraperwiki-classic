@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.test.client import Client
 from django.utils.importlib import import_module
 from django.http import HttpRequest
-from south.management.commands import patch_for_test_db_setup
+from south.management.commands import *
 from splinter.browser import Browser
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -14,7 +14,8 @@ def sync_db(variables):
     if getattr(settings, 'LETTUCE_TESTING', False):
         patch_for_test_db_setup()
         call_command('flush', interactive=False)
-        call_command('syncdb', interactive=False)
+        call_command('syncdb', interactive=False, verbosity=0)
+        call_command('loaddata', 'test-fixture.yaml')
 
 @before.harvest
 def set_browser(variables):

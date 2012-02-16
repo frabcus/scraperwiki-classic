@@ -45,7 +45,7 @@ Feature: As a person who writes code on ScraperWiki
     And I should see "Upgrade to activate" 
 
   Scenario: If I have a Free account then I am told to upgrade to run my scraper hourly
-    Given I am an "Free" user
+    Given I am a "Free" user
     And that I have a scraper
     And I am on the scraper overview page
     When I click the "Edit" button in the scheduling panel
