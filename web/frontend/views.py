@@ -481,6 +481,9 @@ def request_data(request):
         return HttpResponseRedirect(reverse('request_data_thanks'))
     return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
 
+def request_data_public(request):
+    return render_to_response('frontend/request_data_public.html')
+
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
 

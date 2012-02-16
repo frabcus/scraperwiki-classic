@@ -35,6 +35,7 @@ urlpatterns = patterns('',
     
     url(r'^get_involved/$',frontend_views.get_involved, name='get_involved'),
     url(r'^request_data/$',frontend_views.request_data, name='request_data'),
+    url(r'^request_data/public/$',frontend_views.request_data_public, name='request_data_public'),
     url(r'^request_data/thanks/$',frontend_views.request_data_thanks, name='request_data_thanks'),
     
     #hello world
