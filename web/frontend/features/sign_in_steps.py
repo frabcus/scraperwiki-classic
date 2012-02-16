@@ -23,16 +23,12 @@ def given_i_am_on_the_login_page(step):
 
 @step('Given there is a username "([^"]*)" with password "([^"]*)"')
 def make_user(step, username, password):
-    us = list(User.objects.filter(username=username))
-    if not us:
-        # no users, no need to delete
-        pass
-    else:
-        u = us[0]
-        UserProfile.objects.filter(user=u).delete()
-        u.delete()
-    #create user
-    user = User.objects.create_user(username, '%s@example.com' % username, password)
+    if username == 'test':
+        # Should already have been created in the test-fixture
+        # fixture file; so no need to create it here.
+        return
+    user = User.objects.create_user(username,
+      '%s@example.com' % username, password)
     user.save()
 
 @step(r'When I fill in my username "([^"]*)" and my password "([^"]*)"')

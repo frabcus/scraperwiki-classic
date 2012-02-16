@@ -52,7 +52,8 @@ Feature: As a person who writes code on ScraperWiki
     And I should see "Upgrade to activate"
 
  Scenario: If I have a Free account, but no self service feature, then I don't see the hourly option
-    Given user "test" with password "pass" is logged in
+    Given I am a "Free" user
+    And I do not have the "Self Service Vaults" feature enabled
     And that I have a scraper
     And I am on the scraper overview page
     When I click the "Edit" button in the scheduling panel

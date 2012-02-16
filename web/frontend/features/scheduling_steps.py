@@ -1,7 +1,10 @@
+from django.contrib.auth.models import User
 from lettuce import step,before,world,after
 from nose.tools import assert_equals
+
+from frontend.models import Feature
+
 import re
-from django.contrib.auth.models import User
 
 prefix = 'http://localhost:8000'
 
@@ -88,5 +91,17 @@ def then_the_scraper_should_be_set_to_schedule(step, schedule):
 def and_i_should_not_see_text(step, text):
     assert world.browser.is_text_not_present(text)
 
+@step(u'And I do not have the "([^"]*)" feature enabled$')
+def feature_not_enabled(step, feature):
+    u = User.objects.filter(username='test')[0]
+    feature = Feature.objects.filter(name=feature)[0]
+    profile = u.get_profile();
 
+    try:
+        profile.features.remove(feature)
+    except ValueError:
+        # Expected when the user already does not have the
+        # feature in question.
+        pass
 
+    assert not profile.has_feature(feature)

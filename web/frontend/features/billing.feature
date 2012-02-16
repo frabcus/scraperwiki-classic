@@ -10,8 +10,7 @@ Feature: As a person who writes code on ScraperWiki
     And I should see the "Corporate" payment plan
 
   Scenario: I can choose to purchase the Individual plan
-    Given user "test" with password "pass" is logged in
-    And the "Self Service Vaults" feature exists
+    Given I am a "Free" user
     And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
     And I click on the "Individual" "Buy now" button
