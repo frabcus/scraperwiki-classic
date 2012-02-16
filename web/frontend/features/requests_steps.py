@@ -13,7 +13,7 @@ def when_i_visit_the_pricing_page(step):
 
 @step(u'And I click the "([^"]*)" services button')
 def and_i_click_the_group1_services_button(step, service):
-    el = world.browser.find_by_xpath(service_xpath % service).first
+    el = world.browser.find_by_xpath((service_xpath % service)+'/a').first
     el.click()
 
 @step(u'Then I should be on the public requests page')
