@@ -1587,8 +1587,20 @@ body.profiles.edit #features li input {
 }
 
 
+/* COMMUNITY DATA REQUESTS PAGE */
+#public_request_directions {
+	width: 70%;
+	margin-left: auto;
+	margin-right: auto;
+}
 
-/* REQUEST DATA PAGE */
+#public_request_directions {
+	background-color: #F4F8FB;
+	padding: 20px;
+	border: 1px solid #C4E0F0;
+}
+
+/* REQUEST DATA PAGES */
 
 #request_options {
 	width: 365px;
@@ -1655,7 +1667,8 @@ body.profiles.edit #features li input {
 	font-weight: bold;
 }
 
-#request_options h2 {
+#request_options h2 ,
+#public_request_directions h2 {
 	text-align: center;
 	border-bottom: 1px solid #EDAB6A;
 	margin-bottom: 12px;
@@ -2000,9 +2013,6 @@ body.profiles.edit #features li input {
 	line-height: 18px;
 	margin: 4px 0 0 0;
 }
-
-
-
 
 
 
