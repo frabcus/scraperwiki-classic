@@ -494,9 +494,9 @@ def subscribe(request, plan):
             'name' : 'Individual', 
             'code' : 'individual'
         }, 
-        'smallbusiness' : { 
-            'name' : 'Small Business', 
-            'code' : 'smallbusiness'
+        'business' : { 
+            'name' : 'Business', 
+            'code' : 'business'
         }, 
         'corporate' : { 
             'name' : 'Corporate', 
@@ -594,7 +594,7 @@ def test_error(request):
 # Vault specific views
 ###############################################################################
 
-maximum_vaults = {'free': 0, 'individual': 1, 'smallbusiness': 5, 'corporate': 9999}
+maximum_vaults = {'free': 0, 'individual': 1, 'business': 5, 'corporate': 9999}
 
 @login_required
 def new_vault(request):
@@ -664,7 +664,7 @@ def view_vault(request, username=None):
         context['self_service_vaults'] = True
         context['current_plan'] = request.user.get_profile().plan
         context['vaults_remaining_in_plan'] = max(0, maximum_vaults[context['current_plan']] - context['vaults'].count())
-        context['can_add_vault_members'] = ( context['current_plan'] in ('smallbusiness','corporate',) )
+        context['can_add_vault_members'] = ( context['current_plan'] in ('business','corporate',) )
     
     context['has_upgraded'] = False
     if request.session.get('recently_upgraded'):
@@ -778,7 +778,7 @@ def vault_users(request, vaultid, username, action):
     if action =='adduser':
         if not user in vault.members.all():
             current_plan = request.user.get_profile().plan
-            if current_plan not in ('smallbusiness','corporate',):
+            if current_plan not in ('business','corporate',):
                 return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
                 
             result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 

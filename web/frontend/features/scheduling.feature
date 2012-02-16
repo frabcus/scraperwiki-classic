@@ -3,14 +3,14 @@ Feature: As a person who writes code on ScraperWiki
   So that I can gather data regularly without thinking about it.
 
   Scenario: I can see my scraper's schedule
-    Given I am a "Small Business" user
+    Given I am a "Business" user
     And that I have a scraper
     And I am on the scraper overview page
     Then I should see the scheduling panel
     And I should see the button to edit the schedule
 
   Scenario: I can set one of my scrapers to run daily
-    Given I am a "Small Business" user
+    Given I am a "Business" user
     And that I have a scraper
     And I am on the scraper overview page
     When I click the "Edit" button in the scheduling panel
@@ -21,8 +21,8 @@ Feature: As a person who writes code on ScraperWiki
       | Run every day   |
       | Run every hour  |
 
-  Scenario: If I have a Small Business account then I can set my scraper to run hourly
-    Given I am a "Small Business" user
+  Scenario: If I have a Business account then I can set my scraper to run hourly
+    Given I am a "Business" user
     And that I have a scraper
     And I am on the scraper overview page
     When I click the "Edit" button in the scheduling panel

@@ -6,7 +6,7 @@ Feature: As a person who writes code on ScraperWiki
   Scenario: I can see available plans
     When I visit the pricing page
     Then I should see the "Individual" payment plan
-    And I should see the "Small Business" payment plan
+    And I should see the "Business" payment plan
     And I should see the "Corporate" payment plan
 
   Scenario: I can choose to purchase the Individual plan
@@ -19,14 +19,14 @@ Feature: As a person who writes code on ScraperWiki
     And I should see "Individual"
     And I should see "$9"
   
-  Scenario: I can choose to purchase the Small Business plan
+  Scenario: I can choose to purchase the Business plan
     Given user "test" with password "pass" is logged in
     And the "Self Service Vaults" feature exists
     And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
-    And I click on the "Small Business" "Buy now" button
+    And I click on the "Business" "Buy now" button
     Then I should be on the payment page
-    And I should see "Small Business"
+    And I should see "Business"
     And I should see "$29"
 
   Scenario: I can choose to purchase the Corporate plan

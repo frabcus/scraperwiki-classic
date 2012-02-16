@@ -248,7 +248,7 @@ def code_overview(request, wiki_type, short_name):
     context['self_service_vaults'] = False
     if request.user.is_authenticated():
         context['user_plan'] = request.user.get_profile().plan
-        if context['user_plan'] == 'smallbusiness' or context['user_plan'] == 'corporate':
+        if context['user_plan'] == 'business' or context['user_plan'] == 'corporate':
             context['user_can_set_hourly'] = True
         if request.user.get_profile().has_feature('Self Service Vaults'):
             context['self_service_vaults'] = True

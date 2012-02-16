@@ -19,7 +19,7 @@ def ensure_freeloaders_cannot_create_vault():
     profile.create_vault(name='avault')
 
 def ensure_paying_user_can_create_vault():
-    for plan in ('individual', 'smallbusiness', 'corporate'):
+    for plan in ('individual', 'business', 'corporate'):
         yield user_plan_create_vault, plan
 
 def ensure_vault_is_saved():

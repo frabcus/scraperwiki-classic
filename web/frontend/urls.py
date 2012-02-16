@@ -25,7 +25,7 @@ urlpatterns = patterns('',
     url(r'^tour/$', direct_to_template, {'template': 'frontend/tour.html'}, name='tour'),                                          
     url(r'^example_data/$', direct_to_template, {'template': 'frontend/example_data.html'}, name='api'),
     url(r'^pricing/$', frontend_views.pricing, name='pricing'),
-    url(r'^subscribe/(?P<plan>individual|smallbusiness|corporate)/$', frontend_views.subscribe, name='subscribe'),
+    url(r'^subscribe/(?P<plan>individual|business|corporate)/$', frontend_views.subscribe, name='subscribe'),
     url(r'^confirm_subscription/$', frontend_views.confirm_subscription, name='confirm_subscription'),
 
 

@@ -4454,13 +4454,17 @@ body.pricing .column-right {
 	margin-top: 25px;
 }
 
-#pricing_chart.selfservice #business p.price {
-	margin-top: 10px;
-	font-size: 15px;
+#pricing_chart.selfservice #business h3 {
+	font-size: 19px;
+	line-height: 22px;
 }
 
 #pricing_chart #business p.price {
 	margin: 7px 0 25px 0;
+}
+
+#pricing_chart.selfservice #business p.price {
+	font-size: 15px;
 }
 
 #pricing_chart #business li {
