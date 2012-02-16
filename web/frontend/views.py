@@ -482,7 +482,7 @@ def request_data(request):
     return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
 
 def request_data_public(request):
-    return render_to_response('frontend/request_data_public.html')
+    return render_to_response('frontend/request_data_public.html', context_instance = RequestContext(request))
 
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
