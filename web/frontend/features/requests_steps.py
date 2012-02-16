@@ -18,7 +18,7 @@ def and_i_click_the_group1_services_button(step, service):
 
 @step(u'Then I should be on the public requests page')
 def then_i_should_be_on_the_public_requests_page(step):
-    assert False, 'This step must be implemented'
+    assert '/public' in world.browser.url
 
 @step(u'(?:Then|And) I should see the "([^"]*)" service')
 def then_i_should_see_the_services(step, plan):
