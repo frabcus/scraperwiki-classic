@@ -4429,6 +4429,7 @@ body.pricing .column-right {
 
 #pricing_chart ul {
 	padding: 0;
+	margin: 12px 0;
 	color: #6a5926;
 }
 
@@ -4453,6 +4454,11 @@ body.pricing .column-right {
 	margin-top: 25px;
 }
 
+#pricing_chart.selfservice #smallbusiness p.price {
+	margin-top: 10px;
+	font-size: 15px;
+}
+
 #pricing_chart #smallbusiness p.price {
 	margin: 7px 0 25px 0;
 }
@@ -4461,13 +4467,13 @@ body.pricing .column-right {
 	padding-bottom: 8px;
 }
 
+#pricing_chart.selfservice #smallbusiness li {
+	padding-bottom: 10px;
+}
+
 #pricing_chart #smallbusiness p.limit {
 	margin-top: 5px;
 	margin-bottom: 25px;
-}
-
-#pricing_chart.selfservice #smallbusiness p.limit {
-	margin-bottom: 20px;
 }
 
 #pricing_chart p.buy,
@@ -4478,6 +4484,15 @@ body.pricing .column-right {
 #pricing_chart #smallbusiness p.buy,
 #pricing_chart #smallbusiness p.current {
 	margin: 5px 0 25px 0;
+}
+
+#pricing_chart.selfservice #smallbusiness p.buy,
+#pricing_chart.selfservice #smallbusiness p.current {
+	margin-top: 22px;
+}
+
+#pricing_chart.selfservice #individual ul {
+	margin-bottom: 32px;
 }
 
 #pricing_chart .buy a {
