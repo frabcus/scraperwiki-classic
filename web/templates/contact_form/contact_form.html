@@ -88,15 +88,13 @@
                 $("#requesting_data_tip:visible").slideUp(250);
                 $('.form li').not(':first').add('p.last').slideDown(250);
             }
-            if ($(this).val() == 'request') {
-                
-            }
         });
         
         if(
             window.location.hash === '#suggestion' ||
             window.location.hash === '#request' ||
-            window.location.hash === '#vault' ||
+            window.location.hash === '#premium' ||
+            window.location.hash === '#corporate' ||
             window.location.hash === '#help' ||
             window.location.hash === '#bug' ||
             window.location.hash === '#other'

@@ -39,7 +39,7 @@ def i_should_see_the_button(step, text):
 def i_should_not_see_the_button(step, text):
     assert not world.browser.find_link_by_partial_text(text)
 
-@step(u'(?:When|And) I click the "([^"]*)" button$')
+@step(u'(?:When|And) I click the "([^"]*)" (?:link|button)$')
 def i_click_the_button(step, text):
     world.browser.find_link_by_partial_text(text).first.click()
 

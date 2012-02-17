@@ -7,7 +7,7 @@ import time
 prefix = 'http://localhost:8000'
 
    
-@step(u'When I visit the pricing page')
+@step(u'(?:Given I am on|When I visit) the pricing page')
 def when_i_visit_the_pricing_page(step):
     response = world.browser.visit(prefix + '/pricing/')
 
