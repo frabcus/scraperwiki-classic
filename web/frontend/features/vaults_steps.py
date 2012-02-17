@@ -31,11 +31,11 @@ def and_i_have_a_vault(step, num):
 def when_i_visit_my_vaults_page(step):
     response = world.browser.visit(prefix + '/vaults/')
 
-@step(u'(?:Then|And) I should see the "([^"]*)" button')
+@step(u'(?:Then|And) I should see (?:the|a|an) "([^"]*)" (?:link|button)$')
 def i_should_see_the_button(step, text):
     assert world.browser.find_link_by_partial_text(text)
 
-@step(u'(?:Then|And) I should not see the "([^"]*)" button')
+@step(u'(?:Then|And) I should not see (?:the|a|an) "([^"]*)" (?:link|button)$')
 def i_should_not_see_the_button(step, text):
     assert not world.browser.find_link_by_partial_text(text)
 
