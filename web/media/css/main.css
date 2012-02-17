@@ -4378,10 +4378,15 @@ body.pricing .column-right {
 #pricing_chart .footnote {
 	width: 174px;
 	text-align: center;
-	margin-left: 525px;
+	margin-left: 532px;
 	font-size: 11px;
 	color: #888;
 	line-height: 14px;
+}
+
+#pricing_chart .footnote a {
+	color: #DA7311;
+	text-decoration: underline;
 }
 
 #pricing_chart #free {
