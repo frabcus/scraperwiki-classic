@@ -24,20 +24,6 @@ def given_i_am_a_plan_user(step, plan):
     And I am on the "%s" plan
     """ % plan)
 
-@step(u'(?:Given|And) that I have a scraper')
-def given_that_i_have_a_scraper(step):
-    world.browser.visit(prefix + '/')
-    step.behave_as("""
-    And I click the button "Create a scraper"
-    """)
-    world.browser.find_link_by_href("/scrapers/new/python").first.click()
-    world.browser.find_by_value("save scraper").first.click()
-    # See http://splinter.cobrateam.info/docs/iframes-and-alerts.html
-    prompt = world.browser.get_alert()
-    prompt.fill_with(world.name)
-    prompt.accept()
-    world.browser.find_by_id("back_to_overview").first.click()
-
 @step(u'And I click the button "([^"]*)"')
 def and_i_click(step, text):
     world.browser.find_link_by_partial_text(text).first.click()
@@ -55,7 +41,11 @@ def then_i_should_see_the_scheduling_panel(step):
 def and_i_should_see_the_button(step):
     assert world.browser.find_by_css("a.edit_schedule")
     
-@step(u'And I am on the scraper overview page')
+@step(u"(?:When|And) I visit my scraper's overview page$")
+def and_i_am_on_the_scraper_overview_page(step):
+    world.browser.visit(prefix + '/scrapers/test_scraper')
+
+@step(u'(?:Then|And) I am on the scraper overview page$')
 def and_i_am_on_the_scraper_overview_page(step):
     assert re.search('/scrapers/' + world.name + '/$', world.browser.url, re.I)
     
