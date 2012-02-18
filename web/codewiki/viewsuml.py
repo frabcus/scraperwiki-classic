@@ -49,7 +49,7 @@ def running_scrapers(request):
 
 @login_required
 def status(request):
-    if not request.user.is_staff and not debug:
+    if not request.user.is_staff:
         return HttpResponseRedirect( reverse('dashboard') )    
     recenteventsmax = 20
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
