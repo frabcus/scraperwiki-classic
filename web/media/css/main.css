@@ -553,7 +553,8 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	background-image: url(../images/header_icon_vault.gif);
 }
 
-.running_scrapers #header_inner {
+.running_scrapers #header_inner,
+.status #header_inner {
 	background-image: url(../images/header_icon_stopwatch.gif);
 }
 
@@ -7838,6 +7839,257 @@ form.fourohfourhint p {
 
 body.kpi tr.this_month {
 	color: #b0b0b0;
+}
+
+
+
+
+/* STATUS (LXCs) */
+
+body.status #page_inner {
+	width: 920px;
+}
+
+body.status #page_inner h2 {
+	font-size: 14px;
+	font-weight: normal;
+	text-transform: uppercase;
+	color: #999;
+	margin-bottom: 20px;
+}
+
+body.status ul.rows {
+	margin: 0;
+	padding: 0;
+}
+
+body.status li.row {
+	background-color: #eff3f5;
+	margin: 0 0 10px 0;
+	padding: 0;
+	position: relative;
+	overflow: auto;
+	line-height: 18px;
+	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.2);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.2);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.2);
+}
+
+body.status li.row.bkrunning {
+	background-color: #f5f4df;
+}
+
+body.status li.row.bkrunning:after {
+	content: "Running";
+	position: absolute;
+	top: 50%;
+	right: 30px;
+	height: 16px;
+	line-height: 14px;
+	font-size: 14px;
+	margin-top: -6px;
+	text-transform: uppercase;
+	color: #cd8e00;
+}
+
+body.status li.row.bksaving {
+	background-color: #eef5df;
+}
+
+body.status li.row.bksaving:after {
+	content: "Saving";
+	position: absolute;
+	top: 50%;
+	right: 10px;
+	height: 16px;
+	line-height: 14px;
+	font-size: 14px;
+	margin-top: -6px;
+	text-transform: uppercase;
+	color: #536920;
+}
+
+body.status .row .title {
+	float: left;
+	width: 200px;
+	padding: 10px 5px 10px 13px;
+	background-color: #cfdce2;
+	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.2)), color-stop(100%,rgba(255,255,255,0)));
+	background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.2) 0%,rgba(255,255,255,0) 100%);
+	background-image: -o-linear-gradient(top, rgba(255,255,255,0.2) 0%,rgba(255,255,255,0) 100%);
+	background-image: -ms-linear-gradient(top, rgba(255,255,255,0.2) 0%,rgba(255,255,255,0) 100%);
+	background-image: linear-gradient(top, rgba(255,255,255,0.2) 0%,rgba(255,255,255,0) 100%);
+	-moz-box-shadow: 1px 0 1px rgba(0,0,0,0.2);
+	-webkit-box-shadow: 1px 0 1px rgba(0,0,0,0.2);
+	box-shadow: 1px 0 1px rgba(0,0,0,0.2);
+	text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+	color: #577d8e;
+	line-height: 16px;
+	font-size: 16px;
+	border: 1px solid #bfd0d8;
+	border-right: none;
+}
+
+body.status .row.bkrunning .title {
+	background-color: #eada87;
+	border-color: #dbbf30;
+	color: #776715;
+}
+
+body.status .row.bksaving .title {
+	background-color: #bcd87d;
+	border-color: #9ec642;
+	color: #536920;
+}
+
+body.status .row .users {
+	float: left;
+	margin: 0;
+	padding: 0;
+}
+
+body.status .row .users .user {
+	float: left;
+	padding: 5px 7px 3px 28px;
+	margin: 6px 8px;
+	line-height: 16px;
+	font-size: 12px;
+	color: #9e87b2;
+	background: #e0d7e8 url(../images/icons/user_purple.png) 6px 3px no-repeat;
+	-moz-box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+	border: 1px solid #c7b4d8;
+}
+
+body.status .row .users .bktyping {
+	background-color: #f3f5c7;
+	border-color: #b9bb81;
+}
+
+body.status .row .users .bkrunning,
+body.status .row.bkrunning .user {
+	border-color: #ddc762;
+	-moz-box-shadow: 0 0 4px #ffda3c, 0 0 2px #ffda3c;
+	-webkit-box-shadow: 0 0 4px #ffda3c, 0 0 2px #ffda3c;
+	box-shadow: 0 0 4px #ffda3c, 0 0 2px #ffda3c;
+	background: #f2e6b4 url(../images/running.gif) 6px 6px no-repeat;
+	color: #b7a659;
+}
+
+body.status .row .users .bkrunning a,
+body.status .row.bkrunning .user a {
+	color: #8d7819;
+}
+
+body.status .row .user .lasttouchdiff {
+	color: #9e87b2;
+	margin: 0 3px;
+}
+
+body.status .row.bkrunning .user .lasttouchdiff {
+	color: #b7a659;
+}
+
+body.status .row .user a {
+	color: #7a4ba2;
+	font-size: 14px;
+	line-height: 14px;
+}
+
+#monitoringusers .title,
+#rpcrunningclients .title,
+#draftscraperusers .title {
+	font-weight: bold;
+	text-decoration: none;
+}
+
+body.status .row .killrunning {
+	position: absolute;
+	top: 50%;
+	right: 7px;
+	font-size: 22px;
+	font-weight: bold;
+	height: 18px;
+	line-height: 22px;
+	margin-top: -12px;
+	padding: 0 5px 5px 5px;
+	color: #cd8e00;
+	cursor: pointer;
+}
+
+body.status .row .killrunning:hover,
+body.status #killallscheduled:hover {
+	text-decoration: none;
+	color: #9a6100;
+}
+
+body.status #killallscheduled {
+	float: right;
+	color: #cd8e00;
+	background: transparent url(../images/icons/cross.png) right center no-repeat;
+	padding-right: 20px;
+	cursor: pointer;
+}
+
+body.status #maxscheduledscrapers,
+body.status p#overdue {
+	margin: 20px 0 18px 0;
+}
+
+body.status #maxscheduledscrapers input {
+	width: 2.4em;
+	text-align: center;
+	margin-left: 5px;
+}
+
+body.status #showmonitoradmin {
+	float: right;
+	background: transparent url(../images/icons/bug.png) right center no-repeat;
+	padding-right: 20px;
+	cursor: pointer;
+	text-decoration: none;
+	color: #3f6f3c;
+}
+
+body.status #showmonitoradmin:hover {
+	color: #2c4e2a
+}
+
+body.status #jdatareceived {
+	padding: 10px;
+	font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+	font-size: 13px;
+	line-height: 18px;
+	margin-top: 10px;
+	background: #f1f4f1;
+	border: 1px solid #dbe7da;
+}
+
+body.status #connectionstatus {
+	margin-right: 20px;
+}
+
+body.status #runevents {
+	margin: 40px 0 20px 0;
+	font-size: 14px;
+	line-height: 16px;
+}
+
+body.status #runevents td,
+body.status #runevents th {
+	border: 1px solid #ddd;
+	padding: 4px 6px;
+}
+
+body.status #runevents th {
+	background-color: #eff3f5;
+	color: #577d8e;
+}
+
+body.status #runevents abbr {
+	cursor: help;
 }
 
 
