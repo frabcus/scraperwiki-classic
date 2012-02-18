@@ -139,12 +139,12 @@ $(document).ready(function()
 
     function getScraperfromScrapername(scrapername)
     {
-        return "<a href=\"/scrapers/"+scrapername+"/\" class=\"scrapername title\">"+scrapername+"</a>"
+        return '<a href="/scrapers/' + scrapername + '/" class="scrapername title" title="' + scrapername + '">' + scrapername + '</a>';
     }
 
     function getNewDatetimeSpan(datetime)
     {
-        return "<span class=\"lasttouchdiff\"><span class=\"lasttouch\">"+datetime.getTime()+"</span><span></span></span>"; 
+        return '<span class="lasttouchdiff"><span class="lasttouch">' + datetime.getTime() + "</span><span></span></span>"; 
     }
     function parseISOdate(sdatetime)
     {

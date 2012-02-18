@@ -7912,6 +7912,8 @@ body.status li.row.bksaving:after {
 body.status .row .title {
 	float: left;
 	width: 200px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	padding: 10px 5px 10px 13px;
 	background-color: #cfdce2;
 	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
