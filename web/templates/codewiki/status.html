@@ -68,7 +68,7 @@ $(document).ready(function()
             mcode = 'ConnectionTimeout'; 
         else  
             mcode = 'code=' + code;
-        $("#monitoroutput #connectionstatus").html('<span style="background-color:black; color:white">Connection closed: ' + mcode+"</span>"); 
+        $("#monitoroutput #connectionstatus").html('<span class="error">Connection closed: ' + mcode+"</span>"); 
     }
 
     // should post up status in a little box
@@ -173,8 +173,6 @@ $(document).ready(function()
             $(this).next().text(mess);
         });
     }
-    
-    window.setInterval(function(){ updateLastTouches(); }, 5000);
 
     //read data back from twisted
     function receiveRecord(jdata) 
@@ -296,7 +294,6 @@ $(document).ready(function()
                         {
                             var scrapername = $(this).parent().find("a.scrapername").text(); 
                             sendjson({command:'umlcontrol', subcommand:'killscraper', scrapername:scrapername}); 
-                            $(this).css("background-color", "blue"); 
                         }); 
                     }
                     if (running)
@@ -395,7 +392,6 @@ $(document).ready(function()
     if (isstaff){
         $("a#killallscheduled").click(function(){
             sendjson({command:'umlcontrol', subcommand:'killallscheduled'}); 
-            $(this).css("background-color", "blue"); 
         }); 
         $("#maxscheduledscrapers input").bind('keypress', function(eventObject){
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
@@ -408,6 +404,16 @@ $(document).ready(function()
             return true; 
         });
     }
+    
+    window.setInterval(function(){
+        updateLastTouches();
+        $.get('/status/', function(html){
+            $('#runevents').replaceWith( $('#runevents', html) );
+            $('#overdue').replaceWith( $('#overdue', html) );
+        });
+    }, 5000);
+    
+    
 }); 
 </script>
 {% endblock %}
@@ -464,6 +470,7 @@ $(document).ready(function()
                 </div>
                 <div id="maxscheduledscrapers">
                     {% if user.is_staff %}<a id="killallscheduled" title="Kill all scheduled runs">Kill all scheduled scrapers</a>{% endif %}
+                    Number of overdue scrapers: <strong id="overdue">{{overdue_count}}</strong>
                     <label>Max scheduled scrapers</label>
                     <input type="text" value="0">
                 </div>
@@ -477,8 +484,6 @@ $(document).ready(function()
                 <div id="jdatareceived"></div>
             </div>
         </div>
-
-        <p id="overdue">Number of overdue scrapers: <b>{{overdue_count}}</b></p>
 
         <div id="runevents">
             <h2>{{eventsmax}} most recent run events</h2>

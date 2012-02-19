@@ -8021,18 +8021,27 @@ body.status .row .killrunning {
 	cursor: pointer;
 }
 
-body.status .row .killrunning:hover,
-body.status #killallscheduled:hover {
+body.status .row .killrunning:hover {
 	text-decoration: none;
 	color: #9a6100;
 }
 
 body.status #killallscheduled {
 	float: right;
-	color: #cd8e00;
+	color: #c13e37;
 	background: transparent url(../images/icons/cross.png) right center no-repeat;
 	padding-right: 20px;
 	cursor: pointer;
+}
+
+body.status #killallscheduled:hover {
+	text-decoration: none;
+	color: #ff1e13;
+}
+
+body.status #killallscheduled:active {
+	position: relative;
+	top: 1px;
 }
 
 body.status #maxscheduledscrapers,
@@ -8056,7 +8065,7 @@ body.status #showmonitoradmin {
 }
 
 body.status #showmonitoradmin:hover {
-	color: #2c4e2a
+	color: #0aa800;
 }
 
 body.status #jdatareceived {
@@ -8069,8 +8078,15 @@ body.status #jdatareceived {
 	border: 1px solid #dbe7da;
 }
 
-body.status #connectionstatus {
+body.status #connectionstatus,
+body.status #overdue {
 	margin-right: 20px;
+}
+
+body.status #connectionstatus .error {
+	background-color: black; 
+	color: white;
+	padding: 2px 5px;
 }
 
 body.status #runevents {
