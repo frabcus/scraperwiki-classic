@@ -590,7 +590,14 @@ def pricing(request):
             context['current_plan'] = request.user.get_profile().plan
     return render_to_response('frontend/pricing.html', context,
       context_instance=RequestContext(request))
-
+      
+def corporate(request):
+    context = {}
+    if settings.DEBUG:
+        return render_to_response('frontend/corporate/index.html', context, context_instance=RequestContext(request))
+    else:
+        return HttpResponseRedirect(reverse('frontpage'))
+    
 def test_error(request):
     raise Exception('failed in test_error')
 
