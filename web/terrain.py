@@ -5,6 +5,7 @@ from django.core.management import call_command
 from django.test.client import Client
 from django.utils.importlib import import_module
 from django.http import HttpRequest
+from django.db import DatabaseError
 from south.management.commands import *
 from splinter.browser import Browser
 from selenium.webdriver.support.ui import WebDriverWait
@@ -13,7 +14,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 def sync_db(variables):
     if getattr(settings, 'LETTUCE_TESTING', False):
         patch_for_test_db_setup()
-        call_command('flush', interactive=False)
+        try:
+            call_command('flush', interactive=False)
+        except DatabaseError:
+            pass # This will occur if the tests are run for the first time
         call_command('syncdb', interactive=False, verbosity=0)
         call_command('loaddata', 'test-fixture.yaml')
 
