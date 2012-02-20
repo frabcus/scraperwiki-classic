@@ -47,6 +47,17 @@ def running_scrapers(request):
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
 
 
+@login_required
+def status(request):
+    if not request.user.is_staff:
+        return HttpResponseRedirect( reverse('dashboard') )    
+    recenteventsmax = 20
+    recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
+    context = { 'events':recentevents, 'eventsmax':recenteventsmax }
+    context['overdue_count'] = get_overdue_scrapers().count()
+    return render_to_response('codewiki/status.html', context, context_instance=RequestContext(request))
+
+
 def scraper_killrunning(request, run_id, event_id):
     event = None
     if event_id or not request.user.is_staff:

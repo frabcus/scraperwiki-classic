@@ -1,16 +1,12 @@
-#from lettuce import step,before,world,after
-from lettuce import *
-from nose.tools import assert_equals
-from splinter.browser import Browser
-from selenium.webdriver.support.ui import WebDriverWait
-import re
 from django.contrib.auth.models import User
+from lettuce import step,before,world,after
+from nose.tools import assert_equals
+
+from frontend.models import Feature
+
+import re
 
 prefix = 'http://localhost:8000'
-
-@before.all
-def set_browser():
-    if not world.browser: world.browser = Browser()
 
 @before.each_scenario
 def set_scraper_name(waht):
@@ -18,11 +14,6 @@ def set_scraper_name(waht):
     import string
     world.name = ''.join(random.choice(string.letters) for _ in range(6))
     world.name = 'schedule_test_' + world.name
-
-@after.all
-def close_browser(total):
-    if total.scenarios_ran == total.scenarios_passed:
-        world.browser.quit()
 
 @step(u'Given I am an? "([^"]*)" user') 
 def given_i_am_a_plan_user(step, plan):
@@ -32,19 +23,6 @@ def given_i_am_a_plan_user(step, plan):
     And I have the "Self Service Vaults" feature enabled
     And I am on the "%s" plan
     """ % plan)
-
-@step(u'(?:Given|And) that I have a scraper')
-def given_that_i_have_a_scraper(step):
-    step.behave_as("""
-    And I click the button "Create a scraper"
-    """)
-    world.browser.find_link_by_href("/scrapers/new/python").first.click()
-    world.browser.find_by_value("save scraper").first.click()
-    # See http://splinter.cobrateam.info/docs/iframes-and-alerts.html
-    prompt = world.browser.get_alert()
-    prompt.fill_with(world.name)
-    prompt.accept()
-    world.browser.find_by_id("back_to_overview").first.click()
 
 @step(u'And I click the button "([^"]*)"')
 def and_i_click(step, text):
@@ -63,7 +41,11 @@ def then_i_should_see_the_scheduling_panel(step):
 def and_i_should_see_the_button(step):
     assert world.browser.find_by_css("a.edit_schedule")
     
-@step(u'And I am on the scraper overview page')
+@step(u"(?:When|And) I visit my scraper's overview page$")
+def and_i_am_on_the_scraper_overview_page(step):
+    world.browser.visit(prefix + '/scrapers/test_scraper')
+
+@step(u'(?:Then|And) I am on the scraper overview page$')
 def and_i_am_on_the_scraper_overview_page(step):
     assert re.search('/scrapers/' + world.name + '/$', world.browser.url, re.I)
     
@@ -71,7 +53,7 @@ def and_i_am_on_the_scraper_overview_page(step):
 def when_i_click_a_button_in_the_scheduling_panel(step, button):
     panel = world.browser.find_by_css("td.schedule").first
     panel.find_by_css("a." + button.lower()).first.click()
-    wait_for_fx()
+    world.wait_for_fx()
     
 @step(u'Then I should see the following scheduling options:')
 def then_i_should_see_the_scheduling_options(step):
@@ -89,7 +71,7 @@ def and_i_am_on_the_plan(step, plan):
 def when_i_click_the_schedule_option(step, option):
     xpath = ".//table[@id='edit_schedule']//label[text()=\"%s\"]" % option
     world.browser.find_by_xpath(xpath).first.click()
-    wait_for_ajax()
+    world.wait_for_ajax()
 
 @step(u'Then the scraper should be set to "([^"]*)"')
 def then_the_scraper_should_be_set_to_schedule(step, schedule):
@@ -99,15 +81,17 @@ def then_the_scraper_should_be_set_to_schedule(step, schedule):
 def and_i_should_not_see_text(step, text):
     assert world.browser.is_text_not_present(text)
 
-# :todo: Useful function, but probably should be kept somewhere else.
-def wait_for_fx(timeout=5):
-    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
-      world.browser.evaluate_script('jQuery.queue("fx").length == 0'))
+@step(u'And I do not have the "([^"]*)" feature enabled$')
+def feature_not_enabled(step, feature):
+    u = User.objects.filter(username='test')[0]
+    feature = Feature.objects.filter(name=feature)[0]
+    profile = u.get_profile();
 
-# :todo: Useful function, but probably should be kept somewhere else.
-def wait_for_ajax(timeout=5):
-    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
-      world.browser.evaluate_script('jQuery.active == 0'))
+    try:
+        profile.features.remove(feature)
+    except ValueError:
+        # Expected when the user already does not have the
+        # feature in question.
+        pass
 
-
-
+    assert not profile.has_feature(feature)

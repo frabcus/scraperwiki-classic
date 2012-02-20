@@ -2,16 +2,12 @@ from lettuce import step,before,world
 from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals
-from splinter.browser import Browser
-from selenium.webdriver.support.ui import WebDriverWait
+import time
 
 prefix = 'http://localhost:8000'
 
-@before.all
-def set_browser():
-    world.browser = Browser()
-
-@step(u'When I visit the pricing page')
+   
+@step(u'(?:Given I am on|When I visit) the pricing page')
 def when_i_visit_the_pricing_page(step):
     response = world.browser.visit(prefix + '/pricing/')
 
@@ -24,14 +20,11 @@ def then_i_should_see_the_payment_plan(step, plan):
 def create_and_login(step, username, password):
     step.behave_as("""
     Given there is a username "%(username)s" with password "%(password)s"
-    Given I am on the login page
-    When I fill in my username "%(username)s" and my password "%(password)s"
-    And I click the page's "Log in" button
     """ % locals())
-
-    assert world.browser.find_by_css('#nav_inner .loggedin')
-
-    clear_obscuring_popups(world.browser)
+    world.browser.visit(prefix + '/contact/')
+    l = world.FakeLogin()
+    cookie_data = l.login(username, password) 
+    world.browser.driver.add_cookie(cookie_data)
 
 @step(u'(?:Given|And) the "([^"]*)" feature exists')
 def and_the_feature_exists(step, feature):
@@ -61,9 +54,10 @@ def and_i_should_see(step, text):
 
 @step(u'Given I have chosen the "([^"]*)" plan')
 def given_i_have_chosen_a_plan(step, plan):
-    step.behave_as('Given user "test" with password "pass" is logged in')
+    username = 'test-%s' % time.strftime('%Y%m%dT%H%M%S')
+    step.behave_as('Given user "%s" with password "pass" is logged in' % username)
     world.browser.visit(prefix + '/subscribe/%s' % plan.lower())
-    wait_for_element_by_css('.card_number')
+    world.wait_for_element_by_css('.card_number')
 
 @step(u'When I enter my contact information')
 def when_i_enter_my_contact_information(step):
@@ -128,6 +122,7 @@ def and_i_have_entered_my_payment_details(step):
 
 @step(u'Then I should be on the vaults page')
 def then_i_should_be_on_the_vaults_page(step):
+    world.wait_for_url('/vaults')
     assert '/vaults' in world.browser.url
 
 @step(u'And I already have the individual plan')
@@ -144,25 +139,13 @@ def then_i_should_see_text_in_the_individual_box(step, text):
       ".//div[@id='%s']//*[text()='%s']" % ('individual', text))
     assert something
 
-# :todo: Useful function, but probably should be kept somewhere else.
-def wait_for_fx(timeout=5):
-    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
-      world.browser.evaluate_script('jQuery.queue("fx").length == 0'))
-
-# :todo: Useful function, but probably should be kept somewhere else.
-def wait_for_element_by_css(css, timeout=5):
-    WebDriverWait(world.browser.driver, timeout).until(lambda _d:
-      len(world.browser.find_by_css(css)) != 0)
-
-# :todo: Useful function, but probably should be kept somewhere else.
-def clear_obscuring_popups(browser):
-    """Clear alerts and windows that would otherwise obscure buttons.
-    """
-
-    for id in ["djHideToolBarButton", "alert_close"]:
-        elements = browser.find_by_id(id)
-        if not elements:
-            continue
-        element = elements.first
-        if element.visible:
-            element.click()
+@step(u'(?:When|And) I enter the coupon code "([^"]*)"')
+def i_enter_the_coupon_code(step, code):
+    world.wait_for_element_by_css('.card_number')
+    world.browser.find_by_css('input.coupon_code').first.fill(code)
+    world.browser.find_by_css('div.coupon .check').first.click()
+    world.wait_for_ajax()
+    
+@step(u'(?:Given I am on|When I visit) the "([^"]*)" subscribe page')
+def i_visit_the_subscribe_page(step, plan):
+    world.browser.visit(prefix + '/subscribe/%s' % plan.lower())

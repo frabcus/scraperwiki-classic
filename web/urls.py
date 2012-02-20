@@ -66,6 +66,7 @@ urlpatterns = patterns('',
 
     # Status
     url(r'^running_scrapers/$', codewiki.viewsuml.running_scrapers,    name='running_scrapers'),
+    url(r'^status/$', codewiki.viewsuml.status, name='status'),
 
     # Documentation
     (r'^docs/', include('documentation.urls')),

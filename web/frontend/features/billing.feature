@@ -6,12 +6,11 @@ Feature: As a person who writes code on ScraperWiki
   Scenario: I can see available plans
     When I visit the pricing page
     Then I should see the "Individual" payment plan
-    And I should see the "Small Business" payment plan
+    And I should see the "Business" payment plan
     And I should see the "Corporate" payment plan
 
   Scenario: I can choose to purchase the Individual plan
-    Given user "test" with password "pass" is logged in
-    And the "Self Service Vaults" feature exists
+    Given I am a "Free" user
     And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
     And I click on the "Individual" "Buy now" button
@@ -19,14 +18,14 @@ Feature: As a person who writes code on ScraperWiki
     And I should see "Individual"
     And I should see "$9"
   
-  Scenario: I can choose to purchase the Small Business plan
+  Scenario: I can choose to purchase the Business plan
     Given user "test" with password "pass" is logged in
     And the "Self Service Vaults" feature exists
     And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
-    And I click on the "Small Business" "Buy now" button
+    And I click on the "Business" "Buy now" button
     Then I should be on the payment page
-    And I should see "Small Business"
+    And I should see "Business"
     And I should see "$29"
 
   Scenario: I can choose to purchase the Corporate plan
@@ -67,3 +66,26 @@ Feature: As a person who writes code on ScraperWiki
     And I already have the individual plan
     When I visit the pricing page
     Then I should see "Current plan" in the individual box
+    
+  Scenario: I can buy a Business plan with a coupon code
+    Given user "test" with password "pass" is logged in
+    And the "Self Service Vaults" feature exists
+    And I have the "Self Service Vaults" feature enabled
+    And the "Alpha Vault User" feature exists
+    And I have the "Alpha Vault User" feature enabled
+    When I visit the pricing page
+    And I click on the "Business" "Buy now" button
+    And I enter the coupon code "alpha5456"
+    Then I should see "$9"
+    
+  Scenario: I can't see the Coupon box if I don't have the "Alpha Vault User" feature enabled
+    Given I have chosen the "Business" plan
+    Then I should not see "Coupon Code"
+    
+  Scenario: When I'm not logged in and I visit the subscribe page, I'm redirected to log in first
+    Given I am not logged in
+    When I visit the "Business" subscribe page
+    Then I should be on the login page
+  
+  
+

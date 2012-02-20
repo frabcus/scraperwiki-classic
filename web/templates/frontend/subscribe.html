@@ -18,7 +18,7 @@
                 , successURL: '/confirm_subscription/'
                 , distinguishContactFromBillingInfo: true
                 , collectCompany: true
-                , enableCoupons: false
+                {% if not enable_coupons %}, enableCoupons: false{% endif %}
                 , enableAddOns: false
                 , account: {
                     firstName: '{{ firstname }}'

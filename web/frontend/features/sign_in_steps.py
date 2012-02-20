@@ -2,13 +2,8 @@ from lettuce import step,before,world
 from django.contrib.auth.models import User
 from frontend.models import UserProfile
 from nose.tools import assert_equals
-from splinter.browser import Browser
 
 prefix = 'http://localhost:8000'
-
-@before.all
-def set_browser():
-    if not world.browser: world.browser = Browser()
 
 @step("Given I am on the home page")
 def given_i_am_on_the_home_page(step):
@@ -28,16 +23,12 @@ def given_i_am_on_the_login_page(step):
 
 @step('Given there is a username "([^"]*)" with password "([^"]*)"')
 def make_user(step, username, password):
-    us = list(User.objects.filter(username=username))
-    if not us:
-        # no users, no need to delete
-        pass
-    else:
-        u = us[0]
-        UserProfile.objects.filter(user=u).delete()
-        u.delete()
-    #create user
-    user = User.objects.create_user(username, '%s@example.com' % username, password)
+    if username == 'test':
+        # Should already have been created in the test-fixture
+        # fixture file; so no need to create it here.
+        return
+    user = User.objects.create_user(username,
+      '%s@example.com' % username, password)
     user.save()
 
 @step(r'When I fill in my username "([^"]*)" and my password "([^"]*)"')

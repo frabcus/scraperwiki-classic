@@ -44,7 +44,7 @@ class UserProfile(models.Model):
     """
     plan_choices = choices=(('free', 'Free'),
                ('individual', 'Individual'),
-               ('smallbusiness', 'Small Business'),
+               ('business', 'Business'),
                ('corporate', 'Corporate'),
               )
     user             = models.ForeignKey(User, unique=True)

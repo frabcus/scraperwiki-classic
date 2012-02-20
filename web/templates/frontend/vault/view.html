@@ -27,7 +27,7 @@
 
 {% if vaults.count %}
 <div id="my_vaults">
-    <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: {% if self_service_vaults and vaults_remaining_in_plan %}<a id="new_vault">Create a new vault</a>{% endif %}</h2>
+    <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: {% if self_service_vaults and vaults_remaining_in_plan %}<a id="new_vault" href="/vaults/new/">Create a new vault</a>{% else %}{%if self_service_vaults %}<a id="upgrade_plan" href="/pricing/">Upgrade to create more vaults</a>{% endif %}{% endif %}</h2>
     {% for vault in vaults.all %}
     <div class="vault">
         
@@ -44,7 +44,11 @@
     	        	{% include 'frontend/includes/vault_member.html' %}
     			{% endfor %}
                 </ul>
+                {% if can_add_vault_members %}
                 <a class="add_user" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add another user</a>
+                {% else %}
+                <a class="upgrade_to_add_user" href="/pricing/"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Upgrade to add more users</a>
+                {% endif %}
                 <span class="arrow"></span>
             {% endifequal %}
             </div>
@@ -128,7 +132,7 @@
 {% else %}
 {% if self_service_vaults and vaults_remaining_in_plan %}
 <div id="my_vaults">
-    <h2>You don&rsquo;t have any vaults of your own <a id="new_vault">Create a new vault</a></h2>
+    <h2>You don&rsquo;t have any vaults of your own <a id="new_vault" href="/vaults/new/">Create a new vault</a></h2>
 </div>
 {% endif %}
 {% endif %}
