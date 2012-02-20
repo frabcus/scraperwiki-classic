@@ -19,7 +19,7 @@ do
     data="code=import time;print 1-2;time.sleep(10);print 'hello'&run_id=$i&scrapername=test&scraper_id=$i&language=python"
     length=${#data}
     set -x
-    curl -H "Content-Length: $length" -d "$data" http://127.0.0.1:8001/run &
+    curl -H "Content-Length: $length" -d "$data" http://127.0.0.1:9001/Execute &
     set +x
 done
 
