@@ -1,20 +1,17 @@
-from django.contrib.auth.models import User
+from lettuce.django import django_url
 from lettuce import step,before,world,after
-from nose.tools import assert_equals
-
+from django.contrib.auth.models import User
 from frontend.models import Feature
-
+from codewiki.models import Scraper
 import re
-
-prefix = 'http://localhost:8000'
+import time
 
 @before.each_scenario
-def set_scraper_name(waht):
-    import random
-    import string
-    world.name = ''.join(random.choice(string.letters) for _ in range(6))
-    world.name = 'schedule_test_' + world.name
-
+def reset_schedule(scenario):
+    scraper = Scraper.objects.get(pk=1)    
+    scraper.run_interval = -1
+    scraper.save()
+    
 @step(u'Given I am an? "([^"]*)" user') 
 def given_i_am_a_plan_user(step, plan):
     plan = plan.replace(' ', '').lower()
@@ -28,11 +25,6 @@ def given_i_am_a_plan_user(step, plan):
 def and_i_click(step, text):
     world.browser.find_link_by_partial_text(text).first.click()
     
-@step(u'When I visit its overview page')
-def when_i_visit_its_overview_page(step):
-    # Assume we're already on the overview page
-    assert '/scrapers/' + world.name + '/' in world.browser.url
-    
 @step(u'Then I should see the scheduling panel')
 def then_i_should_see_the_scheduling_panel(step):
     assert world.browser.find_by_css(".schedule")
@@ -43,12 +35,8 @@ def and_i_should_see_the_button(step):
     
 @step(u"(?:When|And) I visit my scraper's overview page$")
 def and_i_am_on_the_scraper_overview_page(step):
-    world.browser.visit(prefix + '/scrapers/test_scraper')
+    world.browser.visit(django_url('/scrapers/test_scraper'))
 
-@step(u'(?:Then|And) I am on the scraper overview page$')
-def and_i_am_on_the_scraper_overview_page(step):
-    assert re.search('/scrapers/' + world.name + '/$', world.browser.url, re.I)
-    
 @step(u'When I click the "([^"]*)" button in the scheduling panel')
 def when_i_click_a_button_in_the_scheduling_panel(step, button):
     panel = world.browser.find_by_css("td.schedule").first

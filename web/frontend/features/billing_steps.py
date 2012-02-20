@@ -1,15 +1,10 @@
 from lettuce import step,before,world
+from lettuce.django import django_url
 from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals
 import time
 
-prefix = 'http://localhost:8000'
-
-   
-@step(u'(?:Given I am on|When I visit) the pricing page')
-def when_i_visit_the_pricing_page(step):
-    response = world.browser.visit(prefix + '/pricing/')
 
 @step(u'(?:Then|And) I should see the "([^"]*)" payment plan')
 def then_i_should_see_the_payment_plan(step, plan):
@@ -21,7 +16,7 @@ def create_and_login(step, username, password):
     step.behave_as("""
     Given there is a username "%(username)s" with password "%(password)s"
     """ % locals())
-    world.browser.visit(prefix + '/contact/')
+    world.browser.visit(django_url('/contact/'))
     l = world.FakeLogin()
     cookie_data = l.login(username, password) 
     world.browser.driver.add_cookie(cookie_data)
@@ -44,10 +39,6 @@ def and_i_click_on_a_plan_button(step, plan, button):
     el = world.browser.find_by_xpath(".//h3[text()='%s']/../p/a[text()='%s']" % (plan, button)).first
     el.click()
 
-@step(u'Then I should be on the payment page')
-def then_i_should_be_on_the_payment_page(step):
-    assert '/subscribe' in world.browser.url
-
 @step(u'(?:And|Then) I should see "([^"]*)"$')
 def and_i_should_see(step, text):
     assert world.browser.is_text_present(text)
@@ -56,7 +47,7 @@ def and_i_should_see(step, text):
 def given_i_have_chosen_a_plan(step, plan):
     username = 'test-%s' % time.strftime('%Y%m%dT%H%M%S')
     step.behave_as('Given user "%s" with password "pass" is logged in' % username)
-    world.browser.visit(prefix + '/subscribe/%s' % plan.lower())
+    world.browser.visit(django_url('/subscribe/%s' % plan.lower()))
     world.wait_for_element_by_css('.card_number')
 
 @step(u'When I enter my contact information')
@@ -145,7 +136,3 @@ def i_enter_the_coupon_code(step, code):
     world.browser.find_by_css('input.coupon_code').first.fill(code)
     world.browser.find_by_css('div.coupon .check').first.click()
     world.wait_for_ajax()
-    
-@step(u'(?:Given I am on|When I visit) the "([^"]*)" subscribe page')
-def i_visit_the_subscribe_page(step, plan):
-    world.browser.visit(prefix + '/subscribe/%s' % plan.lower())
