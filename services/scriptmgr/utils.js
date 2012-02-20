@@ -109,10 +109,10 @@ exports.env_for_language = function( lang, extra_path ) {
 exports.dumpError = function(err) {
   if (typeof err === 'object') {
     if (err.message) {
-      util.log.warn('Message: ' + err.message)
+      logger.warn('Message: ' + err.message)
     }
     if (err.stack) {
-      util.log.warn(err.stack);
+      logger.warn(err.stack);
     }
   } else {
     console.log('dumpError :: argument is not an object');
