@@ -93,13 +93,13 @@
 
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
-    <input type="text" id="id_api_base" value="{{api_base}}" class="hide"/>
-    <input type="text" id="id_data_base" value="{{MAIN_URL}}{% url code_overview scraper.wiki_type scraper.short_name %}data/" class="hide"/>
+    <input type="hidden" id="id_api_base" value="{{api_base}}" />
+    <input type="hidden" id="id_data_base" value="{{MAIN_URL}}{% url code_overview scraper.wiki_type scraper.short_name %}data/" />
     <input type="hidden" id="scrapershortname" value="{{scraper.short_name}}"/>
     {% if scraper.access_apikey %}
-        <input type="text" id="id_apikey" value="{{scraper.access_apikey}}" class="hide"/>
+        <input type="hidden" id="id_apikey" value="{{scraper.access_apikey}}" />
     {% else %}
-        <input type="text" id="id_apikey" value="" class="hide"/>
+        <input type="hidden" id="id_apikey" value="" />
     {% endif %}
 </fieldset>
 
@@ -216,7 +216,7 @@
             {% if id = 'hourly' and not user_can_set_hourly %}
             <tr class="premium">
                 <td class="checkbox"><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}disabled="disabled"/></td>
-                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label><a href="/pricing/" class="upgrade_to_activate">Upgrade to activate</a></td>
+                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label><a href="/pricing/" class="upgrade_to_activate">Upgrade to activate &raquo;</a></td>
             </tr>
             {% else %}
             <tr>
@@ -303,7 +303,7 @@
                                 /></td>
                                 <td><h4><label for="privacy_protected">{% if scraper.privacy_status == 'visible' %}Keep as Protected{% else %}Change to Protected{% endif %}</label></h4><p><label for="privacy_protected">Everyone {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} see this {{scraper.wiki_type}}, but only selected contributors {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} edit it.</label></p></td>
                             </tr>
-                            {% if scraper.privacy_status == 'private' or user.is_staff %}
+                            {% if scraper.privacy_status == 'private' %}
                             <tr>
                                 <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" 
                                 {% ifequal scraper.privacy_status 'private' %} checked="checked" {% endifequal %}
@@ -311,20 +311,32 @@
                                 <td><h4><label for="privacy_private">{% if scraper.privacy_status == 'private' %}Keep as Private{% else %}Change to Private{% endif %} <span style="color:#999; font-weight: normal">({% if user.is_staff %}staff-only{% else %}deprecated{% endif %})</span></label></h4><p><label for="privacy_private">Only selected contributors {% if scraper.privacy_status == 'private' %}can{% else %}will be able to{% endif %} see or edit this {{scraper.wiki_type}}.</label></p></td>
                             </tr>
                             {% endif %}
-                            {% if request.user.vault_membership.count %}
+                            {% if request.user.vault_membership.count or user_plan != 'free' %}
                             <tr>
-                                <td class="radio"><input type="radio" name="privacy_status" value="vault" id="privacy_vault" {% if scraper.vault %}checked="checked"{% endif %} /></td>
+                                <td class="radio"><input type="radio" name="privacy_status" value="vault" id="privacy_vault"{% if scraper.vault %} checked="checked"{% endif %}{% if not request.user.vault_membership.count %} disabled="disabled"{% endif %} /></td>
                                 <td>
                                     <h4><label for="privacy_vault">{% if scraper.vault %}Keep in a Vault{% else %}Move to a Vault{% endif %}</label></h4>
                                     <p><label for="privacy_vault">Only vault members {% if scraper.vault %}can{% else %}will be able to{% endif %} <br/>see or edit this {{scraper.wiki_type}}.</label></p>
                                     <p><select id="move_to_vault">
                                         {% if scraper.vault %}{% else %}<option></option>{% endif %}
+                                        {% if not request.user.vault_membership.count %}<option disabled="disabled">Oh noes! You don't have a vault!</option>{% endif %}
                                     {% for vault in request.user.vault_membership.all %}
                                         <option  value="{% url vault_scrapers_add vault.id, scraper.short_name %}" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
                                     {% endfor %}
                                     </select> <input type="button" value="&rarr; Move!"/></p>
                                 </td>
                             </tr>
+                        	{% else %}
+                        	    {% if self_service_vaults %}
+                            <tr class="premium">
+                                <td class="radio"><input type="radio" name="privacy_status" value="vault" id="privacy_vault" disabled="disabled" /></td>
+                                <td>
+                                    <h4><label for="privacy_vault">Move to a private vault</label></h4>
+                                    <p><label for="privacy_vault">Only people you select will be able to see or edit&nbsp;this&nbsp;{{scraper.wiki_type}}.</label></p>
+                                    <a href="/pricing/" class="upgrade_to_activate">Upgrade to activate &raquo;</a>
+                                </td>
+                            </tr>
+                        	    {% endif %}
                             {% endif %}
                         </table>
                         {% if scraper.vault.id %}<input type="hidden" id="current_vault_id" value="{{scraper.vault.id}}" />{% endif %}

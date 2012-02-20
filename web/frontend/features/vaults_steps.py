@@ -1,10 +1,7 @@
 from lettuce import *
 from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
-from nose.tools import assert_equals
 from selenium.webdriver.support.ui import WebDriverWait
-
-prefix = 'http://localhost:8000'
 
 @step(u'(?:Given|And) I am an? "([^"]*)" user') 
 def given_i_am_a_plan_user(step, plan):
@@ -26,10 +23,6 @@ def and_i_have_a_vault(step, num):
 
     for i in range(num):
         profile.create_vault('My #%d Vault' % (i+1))
-
-@step(u'(?:When|And) I visit my vaults page')
-def when_i_visit_my_vaults_page(step):
-    response = world.browser.visit(prefix + '/vaults/')
 
 @step(u'(?:Then|And) I should see (?:the|a|an) "([^"]*)" (?:link|button)$')
 def i_should_see_the_button(step, text):
@@ -53,11 +46,6 @@ def i_should_see_a_new_empty_vault(step):
 def i_should_not_see_a_new_empty_vault(step):
     assert not world.browser.find_by_css('div.vault_contents.empty')
     
-@step(u'(?:When|And) I visit the URL "([^"]*)"')
-def when_i_visit_the_url(step, url):
-    url = url.replace('scraperwiki.com', prefix)
-    response = world.browser.visit(url)
-
 # We should work out how to test 'hacks' like this
 # DRJ suggests not testing them using Lettuce?
 @step(u'When I make an AJAX request to the endpoint "([^"]*)"')

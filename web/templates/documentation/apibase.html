@@ -420,9 +420,9 @@ $(function()
             </div>
         </div>
         <div id="response">
-            <input type="text" id="id_scraperoverview_url" value="{% url code_overview 'scraper' 'XXX' %}" class="hide">
-            <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
-            <input type="text" id="id_api_explore" value="{% url api_explore %}" class="hide">
+            <input type="hidden" id="id_scraperoverview_url" value="{% url code_overview 'scraper' 'XXX' %}" />
+            <input type="hidden" id="id_api_base" value="{{api_base}}" />
+            <input type="hidden" id="id_api_explore" value="{% url api_explore %}" />
             <iframe name="iframeResponse" id="api_response" src="{% url api_explore %}"></iframe>
         </div>
     </div>

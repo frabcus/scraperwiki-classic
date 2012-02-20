@@ -14,7 +14,7 @@ Feature: As a person who writes code on ScraperWiki
     And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
     And I click on the "Individual" "Buy now" button
-    Then I should be on the payment page
+    Then I should be on the individual payment page
     And I should see "Individual"
     And I should see "$9"
   
@@ -24,7 +24,7 @@ Feature: As a person who writes code on ScraperWiki
     And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
     And I click on the "Business" "Buy now" button
-    Then I should be on the payment page
+    Then I should be on the business payment page
     And I should see "Business"
     And I should see "$29"
 
@@ -34,7 +34,7 @@ Feature: As a person who writes code on ScraperWiki
     And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
     And I click on the "Corporate" "Buy now" button
-    Then I should be on the payment page
+    Then I should be on the corporate payment page
     And I should see "Corporate"
     And I should see "$299"
 
@@ -84,7 +84,7 @@ Feature: As a person who writes code on ScraperWiki
     
   Scenario: When I'm not logged in and I visit the subscribe page, I'm redirected to log in first
     Given I am not logged in
-    When I visit the "Business" subscribe page
+    When I visit the business payment page
     Then I should be on the login page
   
   
