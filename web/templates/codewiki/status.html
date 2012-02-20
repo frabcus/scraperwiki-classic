@@ -134,7 +134,7 @@ $(document).ready(function()
                 return "<a href=\"/profiles/"+vv[0]+"/\">"+vv[1]+"</a>";
             }
         }
-        return vv[1]; // anonymous type
+        return '<a>' + vv[1] + '</a>'; // anonymous type
     }
 
     function getScraperfromScrapername(scrapername)
@@ -226,7 +226,7 @@ $(document).ready(function()
                 {
                     if (!$(ele).attr("id"))
                     {
-                        var lli = [ '<li id="', idclientnumber, '" class="lscraper user">', getScraperfromScrapername(scrapername), ' ' ]; 
+                        var lli = [ '<li id="', idclientnumber, '" class="lscraper user">', '<a href="/scrapers/' + scrapername + '/">' + scrapername + '</a>', ' ' ]; 
                         lli.push(getNewDatetimeSpan(lasttouch), '</li>'); 
                         $("#monitoroutput #rpcrunningclients ul ul").append(lli.join("")); 
                     }
