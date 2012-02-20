@@ -81,4 +81,11 @@ Feature: As a person who writes code on ScraperWiki
   Scenario: I can't see the Coupon box if I don't have the "Alpha Vault User" feature enabled
     Given I have chosen the "Business" plan
     Then I should not see "Coupon Code"
+    
+  Scenario: When I'm not logged in and I visit the subscribe page, I'm redirected to log in first
+    Given I am not logged in
+    When I visit the "Business" subscribe page
+    Then I should be on the login page
+  
+  
 

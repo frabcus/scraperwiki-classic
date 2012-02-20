@@ -489,6 +489,9 @@ def generate_recurly_signature(plan_code, account_code):
     return signature
 
 def subscribe(request, plan):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('login') + "?next=" + request.path)
+
     plans = { 
         'individual' : { 
             'name' : 'Individual', 

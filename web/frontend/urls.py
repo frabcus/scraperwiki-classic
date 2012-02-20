@@ -1,12 +1,11 @@
 from django.conf.urls.defaults import *
 
-
 from profiles import views as profile_views  # a not very well namespaced django plugin class
 from contact_form.views import contact_form
 import frontend.views as frontend_views  # who thinks replacing dots with underscores here is useful?? --JT
 import frontend.forms as frontend_forms
 
-from django.views.generic.simple import direct_to_template
+from django.views.generic.simple import redirect_to, direct_to_template
 from frontend.models import Feature
 
 urlpatterns = patterns('',
@@ -25,6 +24,7 @@ urlpatterns = patterns('',
     url(r'^tour/$', direct_to_template, {'template': 'frontend/tour.html'}, name='tour'),                                          
     url(r'^example_data/$', direct_to_template, {'template': 'frontend/example_data.html'}, name='api'),
     url(r'^pricing/$', frontend_views.pricing, name='pricing'),
+    url(r'^subscribe/$', redirect_to, {'url': '/pricing/'}),
     url(r'^subscribe/(?P<plan>individual|business|corporate)/$', frontend_views.subscribe, name='subscribe'),
     url(r'^confirm_subscription/$', frontend_views.confirm_subscription, name='confirm_subscription'),
 

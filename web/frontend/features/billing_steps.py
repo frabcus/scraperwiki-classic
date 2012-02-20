@@ -145,3 +145,7 @@ def i_enter_the_coupon_code(step, code):
     world.browser.find_by_css('input.coupon_code').first.fill(code)
     world.browser.find_by_css('div.coupon .check').first.click()
     world.wait_for_ajax()
+    
+@step(u'(?:Given I am on|When I visit) the "([^"]*)" subscribe page')
+def i_visit_the_subscribe_page(step, plan):
+    world.browser.visit(prefix + '/subscribe/%s' % plan.lower())
