@@ -82,12 +82,12 @@
 }(document, 'script', 'facebook-jssdk'));</script>
 
 <fieldset>
-    <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
+    <input type="hidden" id="id_api_base" value="{{api_base}}" />
     <input type="hidden" id="scrapershortname" value="{{scraper.short_name}}"/>
     {% if scraper.access_apikey %}
-        <input type="text" id="id_apikey" value="{{scraper.access_apikey}}" class="hide"/>
+        <input type="hidden" id="id_apikey" value="{{scraper.access_apikey}}" />
     {% else %}
-        <input type="text" id="id_apikey" value="" class="hide"/>
+        <input type="hidden" id="id_apikey" value="" />
     {% endif %}
 </fieldset>
 
