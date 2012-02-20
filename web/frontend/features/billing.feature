@@ -66,3 +66,10 @@ Feature: As a person who writes code on ScraperWiki
     And I already have the individual plan
     When I visit the pricing page
     Then I should see "Current plan" in the individual box
+    
+  Scenario: I can buy a Business plan with a coupon code
+    Given I have chosen the "Business" plan
+    When I enter the coupon code "alpha5456"
+    Then I should see "$9"
+
+
