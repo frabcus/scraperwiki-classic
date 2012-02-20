@@ -1,26 +1,29 @@
-/******************************************************************************
+/***********************************************************************
 * scriptmgr.js
 *
-* Provides script management services to a dispatching service to allow for the 
-* execution of code from webapp users within an LXC (when not in dev mode). The
-* behaviour of the service is the same as the original UML controller.py and 
-* accepts url requests in the same format with the same parameters.
+* Provides script management services to a dispatching service to allow
+* for the execution of code from webapp users within an LXC
+* (when not in dev mode).
 *
-* Acceptable urls are listed below, but see the relevant functions for the
-* expected parameters:
+* The behaviour of the service is the same as the original UML
+* controller.py and accepts url requests in the same format with
+* the same parameters (probably not any more, drj 2012-02).
 *
-*	/run    - Run the provided code within an LXC container and return all of 
-*			  the output on the same connection (as our response).
-*	/kill   - Kill the specified scraper (by stopping its container)
-*	/status - Return a list of all of the current containers and the 
-*			  information about what is running
-* 	/ident  - Accept an ident request from the httpproxy so that it can 
-*			  determine the source of the request
-* 	/notify - Called by the httpproxy to let us know what URL the scraper
-*			  has requested (so we can send it back and add to the sources
-*			  tab in the editor)
+* Acceptable urls are listed below, but see _routemap and the
+* relevant functions for the "truth":
+*
+*  /Execute - Run the provided code within an LXC container and return
+*    all of the output on the same connection (as our response).
+*  /Kill    - Kill the specified scraper (by stopping its container).
+*  /Status  - Return a list of all of the current containers and the 
+*    information about what is running
+*  /Ident   - Accept an ident request from the httpproxy so that it can 
+*    determine the source of the request
+*  /Notify  - Called by the httpproxy to let us know what URL the
+*    scraper has requested (so we can send it back and add to the
+*    sources tab in the editor).
 * 
-******************************************************************************/
+***********************************************************************/
 var path  = require('path');
 var http = require('http');
 var url  = require('url');
@@ -33,24 +36,24 @@ _routemap = {
 	'/Execute'   : handleRun,
 	'/Kill'  : handleKill,
 	'/Status': handleStatus,
-	'/ScriptInfo': handleScriptInfo,	
+	'/ScriptInfo': handleScriptInfo,
 	'/Ident' : handleIdent,
 	'/Notify': handleNotify,
 	'/'      : handleUrlError,
 };
 
 /******************************************************************************
-* Initialises the http server used for accepting (and then processing) requests
-* from a remote dispatcher service.  In general once a request has been 
-* accepted it is long running until the connection is closed, or local script
-* execution is stopped.
+* Initialises the http server used for accepting (and then processing)
+* requests from a remote dispatcher service.  In general once a request
+* has been accepted it is long running until the connection is closed,
+* or local script execution is stopped.
 ******************************************************************************/
 var opts = require('opts');
 var options = [
   { short       : 'c', 
-	long        : 'config',
+    long        : 'config',
     description : 'Specify the configuration file to use',
-	value : true 
+    value       : true 
   }
 ];
 opts.parse(options, true);
@@ -139,8 +142,9 @@ function handleKill(req,res) {
 }
 
 /******************************************************************************
-* Returns the status of the service, which is essentially just a list of run
-* ids and names.  This is the same regardless of execution method.
+* Returns the status of the service, which is essentially just a list
+* of run ids and names.  This is the same regardless of execution
+* method.
 ******************************************************************************/
 function handleStatus(req,res) {
 	

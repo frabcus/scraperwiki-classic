@@ -98,13 +98,14 @@ exports.known_ips = function() {
 }
 
 /******************************************************************************
-* Iterates through the list of scripts that we know is running and outputs 
-* them in the old format of runID=&scrapername=
+* Iterates through the list of scripts that we know is running and
+* outputs them in the old format of runID=&scrapername=
 ******************************************************************************/
 exports.get_status = function(response) {
     for(var runID in scripts) {
         var script = scripts[runID];
-        response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
+        response.write('runID=' + runID +
+          "&scrapername=" + script.scraper_name + "\n");
     }   
 }
 
@@ -149,20 +150,23 @@ exports.get_details = function(details) {
 
 
 /******************************************************************************
-* Works out from the incoming request what it is that needs executing, if 
-* we can find it from the post data.
+* Works out from the incoming request what it is that needs executing,
+* if we can find it from the post data.
 ******************************************************************************/
 exports.run_script = function( http_request, http_response ) {
+    var r;
     
-    http_request.setEncoding( 'utf8');
+    http_request.setEncoding('utf8');
     
     if ( scripts.length > max_runs ) {
-        r = {"error":"Too busy", "headers": http_request.headers , "lengths":  -1 };
+        r = {"error":"Too busy",
+          "headers": http_request.headers,
+          "lengths":  -1 };
         http_response.end( JSON.stringify(r) );
         return;
-    };
+    }
     
-    len = http_request.headers['content-length'] || -1
+    var len = http_request.headers['content-length'] || -1;
     var body = '';
 
     http_request.on('data', function (data) {
@@ -170,8 +174,12 @@ exports.run_script = function( http_request, http_response ) {
     });
     
     http_request.on('end', function () {
-        if ( body == undefined || body.length == 0 || body.length != len ) {
-            r = {"error":"incoming message incomplete", "headers": http_request.headers , "lengths":  len.toString() };
+        if ( body.length == 0 ||
+             body.length != len )
+        {
+            r = {"error":"incoming message incomplete",
+              "headers": http_request.headers,
+              "lengths":  len.toString() };
             http_response.end( JSON.stringify(r) );
             return;
         };
@@ -202,10 +210,28 @@ function writeLaunchFile( f, ds, runid, scrapername, querystring, attachables ) 
 }
 
 /******************************************************************************
-* Actually extracts the code and then checks config to determine whether we 
-* should run this as if on a developer machine or whether to run as if on an
-* actual server.
-* TODO: Refactor executor to be two classes one for local and one for lxc
+* Actually extracts the code and then checks config to determine
+* whether we should run this as if on a developer machine or whether
+* to run as if on an actual server.
+*
+* The *raw_request_data* parameter (which usually comes from the
+* body of the HTTP request) should contain a JSON object with
+* the properties (many optional):
+
+code
+runid
+scrapername
+scraperid
+username
+urlquery
+language
+beta_user
+attachables
+scheduled_run
+permissions
+
+* TODO: Refactor executor to be two classes one for local and
+* one for lxc.
 ******************************************************************************/
 function execute(http_req, http_res, raw_request_data) {
     http_res.writeHead(200, {'Content-Type': 'text/plain'});
