@@ -216,7 +216,7 @@
             {% if id = 'hourly' and not user_can_set_hourly %}
             <tr class="premium">
                 <td class="checkbox"><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}disabled="disabled"/></td>
-                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label><a href="/pricing/" class="upgrade_to_activate">Upgrade to activate</a></td>
+                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label><a href="/pricing/" class="upgrade_to_activate">Upgrade to activate &raquo;</a></td>
             </tr>
             {% else %}
             <tr>
@@ -313,12 +313,13 @@
                             {% endif %}
                             {% if request.user.vault_membership.count or user_plan != 'free' %}
                             <tr>
-                                <td class="radio"><input type="radio" name="privacy_status" value="vault" id="privacy_vault" {% if scraper.vault %}checked="checked"{% endif %} /></td>
+                                <td class="radio"><input type="radio" name="privacy_status" value="vault" id="privacy_vault"{% if scraper.vault %} checked="checked"{% endif %}{% if not request.user.vault_membership.count %} disabled="disabled"{% endif %} /></td>
                                 <td>
                                     <h4><label for="privacy_vault">{% if scraper.vault %}Keep in a Vault{% else %}Move to a Vault{% endif %}</label></h4>
                                     <p><label for="privacy_vault">Only vault members {% if scraper.vault %}can{% else %}will be able to{% endif %} <br/>see or edit this {{scraper.wiki_type}}.</label></p>
                                     <p><select id="move_to_vault">
                                         {% if scraper.vault %}{% else %}<option></option>{% endif %}
+                                        {% if not request.user.vault_membership.count %}<option disabled="disabled">Oh noes! You don't have a vault!</option>{% endif %}
                                     {% for vault in request.user.vault_membership.all %}
                                         <option  value="{% url vault_scrapers_add vault.id, scraper.short_name %}" {% if vault.id == scraper.vault.id %}selected="selected"{% endif %}>{{ vault.name }} ({% if vault.user.username == user.username %}your vault{% else %}{{vault.user.get_profile.name}}&rsquo;s vault{% endif %})</option>
                                     {% endfor %}
@@ -332,7 +333,7 @@
                                 <td>
                                     <h4><label for="privacy_vault">Move to a private vault</label></h4>
                                     <p><label for="privacy_vault">Only people you select will be able to see or edit&nbsp;this&nbsp;{{scraper.wiki_type}}.</label></p>
-                                    <p><a href="/pricing/" class="upgrade_to_activate">Upgrade to activate</a></p>
+                                    <a href="/pricing/" class="upgrade_to_activate">Upgrade to activate &raquo;</a>
                                 </td>
                             </tr>
                         	    {% endif %}
