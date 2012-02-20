@@ -508,6 +508,9 @@ def subscribe(request, plan):
     account_code = "%s-%s" % (request.user.id, request.user.username)
     context['signature'] = generate_recurly_signature(plan_code=plan, account_code=account_code)
     context['account_code'] = account_code
+    context['enable_coupons'] = False
+    if request.user.get_profile().has_feature('Alpha Vault User'):
+        context['enable_coupons'] = True
     return render_to_response('frontend/subscribe.html', context, context_instance = RequestContext(request))
 
 def unpack_recurly_result(request):

@@ -68,8 +68,17 @@ Feature: As a person who writes code on ScraperWiki
     Then I should see "Current plan" in the individual box
     
   Scenario: I can buy a Business plan with a coupon code
-    Given I have chosen the "Business" plan
-    When I enter the coupon code "alpha5456"
+    Given user "test" with password "pass" is logged in
+    And the "Self Service Vaults" feature exists
+    And I have the "Self Service Vaults" feature enabled
+    And the "Alpha Vault User" feature exists
+    And I have the "Alpha Vault User" feature enabled
+    When I visit the pricing page
+    And I click on the "Business" "Buy now" button
+    And I enter the coupon code "alpha5456"
     Then I should see "$9"
-
+    
+  Scenario: I can't see the Coupon box if I don't have the "Alpha Vault User" feature enabled
+    Given I have chosen the "Business" plan
+    Then I should not see "Coupon Code"
 

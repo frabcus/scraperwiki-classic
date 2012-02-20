@@ -139,8 +139,9 @@ def then_i_should_see_text_in_the_individual_box(step, text):
       ".//div[@id='%s']//*[text()='%s']" % ('individual', text))
     assert something
 
-@step(u'When I enter the coupon code "([^"]*)"')
-def when_i_enter_the_coupon_code_group1(step, code):
+@step(u'(?:When|And) I enter the coupon code "([^"]*)"')
+def i_enter_the_coupon_code(step, code):
+    world.wait_for_element_by_css('.card_number')
     world.browser.find_by_css('input.coupon_code').first.fill(code)
     world.browser.find_by_css('div.coupon .check').first.click()
     world.wait_for_ajax()
