@@ -19,6 +19,14 @@ def i_have_chosen_a_plan(step, plan):
     step.behave_as('Given user "%s" with password "pass" is logged in' % username)
     world.browser.visit(django_url('/subscribe/%s' % plan.lower()))
     world.wait_for_element_by_css('.card_number')
+    
+@step(u'(?:Then|And) the subtotal should be "([^"]*)"')
+def the_subtotal_should_be(step, subtotal):
+    assert world.browser.find_by_css('div.plan div.recurring_cost div.cost').first.text == subtotal
+    
+@step(u'(?:Then|And) the total should be "([^"]*)"')
+def the_total_should_be(step, total):
+    assert world.browser.find_by_css('div.due_now div.cost').first.text == total
 
 @step(u'(?:When|And) I enter my contact information')
 def i_enter_my_contact_information(step):
