@@ -1,55 +1,17 @@
 from lettuce import step,before,world
 from lettuce.django import django_url
-from django.contrib.auth.models import User
-from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals
 import time
-
 
 @step(u'(?:Then|And) I should see the "([^"]*)" payment plan')
 def then_i_should_see_the_payment_plan(step, plan):
     plan_name = world.browser.find_by_xpath(".//h3[text()='%s']" % plan)[0].text
     assert_equals(plan_name, plan)
 
-@step(u'(?:Given|And) user "([^"]*)" with password "([^"]*)" is logged in')
-def create_and_login(step, username, password):
-    step.behave_as("""
-    Given there is a username "%(username)s" with password "%(password)s"
-    """ % locals())
-    world.browser.visit(django_url('/contact/'))
-    l = world.FakeLogin()
-    cookie_data = l.login(username, password) 
-    world.browser.driver.add_cookie(cookie_data)
-
-@step(u'(?:Given|And) the "([^"]*)" feature exists')
-def and_the_feature_exists(step, feature):
-    Feature.objects.filter(name=feature).delete()
-    Feature.objects.create(name=feature, public=True)
-
-@step(u'(?:Given|And) I have the "([^"]*)" feature enabled')
-def and_i_have_a_feature_enabled(step, feature):
-    u = User.objects.filter(username='test')[0]
-    feature = Feature.objects.filter(name=feature)[0]
-    profile = u.get_profile();
-    profile.features.add(feature)
-    assert profile.has_feature(feature)
-
-@step(u'(?:When|And) I click on the "([^"]*)" "([^"]*)" button')
-def i_click_on_a_plan_button(step, plan, button):
+@step(u'And I click on the "([^"]*)" "([^"]*)" button')
+def and_i_click_on_a_plan_button(step, plan, button):
     el = world.browser.find_by_xpath(".//h3[text()='%s']/../p/a[text()='%s']" % (plan, button)).first
     el.click()
-
-@step(u'(?:And|Then) I should see "([^"]*)"$')
-def and_i_should_see(step, text):
-    assert world.browser.is_text_present(text)
-    
-@step(u'(?:Then|And) the subtotal should be "([^"]*)"')
-def the_subtotal_should_be(step, subtotal):
-    assert world.browser.find_by_css('div.plan div.recurring_cost div.cost').first.text == subtotal
-    
-@step(u'(?:Then|And) the total should be "([^"]*)"')
-def the_total_should_be(step, total):
-    assert world.browser.find_by_css('div.due_now div.cost').first.text == total
 
 @step(u'(?:Given|And) I have chosen the "([^"]*)" plan')
 def i_have_chosen_a_plan(step, plan):
@@ -105,11 +67,6 @@ def i_enter_the_billing_address(step):
 def i_select_a_country_from_the_country_select_box(step, country):
     world.browser.find_option_by_text(country).first.check()
 
-@step(u'(?:And|When) I click "([^"]*)"')
-def and_i_click(step, text):
-    # :todo: Make it not wrong.  so wrong.
-    world.browser.find_by_tag("button").first.click()
-
 @step(u'(?:When|And) I have entered my payment details')
 def i_have_entered_my_payment_details(step):
     # Using Credit Card details for the recurly test gateway:
@@ -126,11 +83,6 @@ def i_have_entered_my_payment_details(step):
 @step(u'(?:When|And) I enter "([^"]*)" as the VAT number')
 def i_enter_the_vat_number(step, number):
     world.browser.find_by_css('.vat_number input').first.fill(number)
-
-@step(u'(?:Then|And) I should be on the vaults page')
-def i_should_be_on_the_vaults_page(step):
-    world.wait_for_url('/vaults')
-    assert '/vaults' in world.browser.url
 
 @step(u'(?:Given|When|And) I already have the individual plan')
 def i_already_have_the_individual_plan(step):

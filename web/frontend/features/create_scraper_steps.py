@@ -9,7 +9,7 @@ def when_i_choose_to_write_my_scraper_in(step, language):
 def and_i_create_a_scraper(step):
     step.behave_as("""
         And I am on the home page
-        And I click the button "Create a scraper"
+        And I click the "Create a scraper" button
         And I choose to write my scraper in "Python"
         Then I should be on the python scraper code editing page
     """

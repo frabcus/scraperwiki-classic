@@ -3,16 +3,6 @@ from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
 from selenium.webdriver.support.ui import WebDriverWait
 
-@step(u'(?:Given|And) I am an? "([^"]*)" user') 
-def given_i_am_a_plan_user(step, plan):
-    plan = plan.replace(' ', '').lower()
-    step.behave_as("""
-    Given user "test" with password "pass" is logged in
-    And the "Self Service Vaults" feature exists
-    And I have the "Self Service Vaults" feature enabled
-    And I am on the "%s" plan
-    """ % plan)
-
 @step(u'(?:Given|And) I have ([a0-9]) vaults?')
 def and_i_have_a_vault(step, num):
     if num == 'a':
@@ -23,18 +13,6 @@ def and_i_have_a_vault(step, num):
 
     for i in range(num):
         profile.create_vault('My #%d Vault' % (i+1))
-
-@step(u'(?:Then|And) I should see (?:the|a|an) "([^"]*)" (?:link|button)$')
-def i_should_see_the_button(step, text):
-    assert world.browser.find_link_by_partial_text(text)
-
-@step(u'(?:Then|And) I should not see (?:the|a|an) "([^"]*)" (?:link|button)$')
-def i_should_not_see_the_button(step, text):
-    assert not world.browser.find_link_by_partial_text(text)
-
-@step(u'(?:When|And) I click the "([^"]*)" (?:link|button)$')
-def i_click_the_button(step, text):
-    world.browser.find_link_by_partial_text(text).first.click()
 
 # This actually only checks that I can see *any* empty vault
 # Not neccessarily that the empty vault is *new*

@@ -1,22 +1,40 @@
 #!/bin/sh
-# Tests for scriptmgr
+# Tests for scriptmgr.
 # scriptmgr should be already running.
 
-usage="test.sh [-c count]"
+usage="test.sh [-s] [-c count]"
 
 count=90
+sync=
 
 # Option parsing
-case $1 in
-  (-c) count=$2;shift 2;;
-  *) break;;
-esac
+while true
+do
+  case $1 in
+    (-c) count=$2;shift 2;;
+    (-s) sync=yes;shift 1;;
+    *) break;;
+  esac
+done
+
+countN () {
+    # Output a list of numbers from 1 to $1
+    awk 'BEGIN{for(i=1;i<='$1';++i)print i}'
+}
+
+Execute () {
+    # Send the Execute command to the scripmgr server, using $1
+    # as the body of the command.
+    set -x
+    curl -d "$1" http://127.0.0.1:9001/Execute
+    set +x
+}
 
 
-for i in $(awk 'BEGIN{for(i=1;i<='$count';++i)print i}')
+for i in $(countN "$count")
 do
     echo 'Running' $i
-    # Templated JSON object passed to /Execute
+    # Templated JSON object passed to Execute
     data=$( cat <<!
 {
     "runid" : "$i",
@@ -27,10 +45,12 @@ do
 }
 !
 )
-    length=${#data}
-    set -x
-    curl -H "Content-Length: $length" -d "$data" http://127.0.0.1:9001/Execute &
-    set +x
+    if [ -n "$sync" ]
+    then
+        Execute "$data"
+    else
+        Execute "$data" &
+    fi
 done
 
 echo ''
