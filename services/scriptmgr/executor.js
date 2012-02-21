@@ -37,10 +37,10 @@ var use_lxc = true;
 var extra_path;
 var code_folder = '/tmp';
 
-// A list of all of the currently running scripts, indexed by
+// A table of all of the currently running scripts, indexed by
 // their run_id which usually comes from the runid property of
 // the original /Execute request.
-var scripts = [ ];
+var scripts = {};
 var scripts_ip = [ ];
 var max_runs = 100;
 var dataproxy = '';
@@ -166,7 +166,7 @@ exports.run_script = function( http_request, http_response ) {
     
     http_request.setEncoding('utf8');
     
-    if ( scripts.length > max_runs ) {
+    if ( Object.keys(scripts).length >= max_runs ) {
         r = {"error":"Too busy",
           "headers": http_request.headers,
           "lengths":  -1 };
