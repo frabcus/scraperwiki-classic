@@ -74,6 +74,10 @@ def i_enter_the_billing_address(step):
 @step(u'(?:When|And) I select "([^"]*)" from the country select box')
 def i_select_a_country_from_the_country_select_box(step, country):
     world.browser.find_option_by_text(country).first.check()
+    
+@step(u'(?:Then|And) the country should be set to "([^"]*)"')
+def the_country_should_be_set_to(step, country):
+    assert world.browser.find_by_css('.country select').first.value == country
 
 @step(u'(?:When|And) I have entered my payment details')
 def i_have_entered_my_payment_details(step):

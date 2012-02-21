@@ -88,6 +88,11 @@ Feature: As a person who writes code on ScraperWiki
     Given I am not logged in
     When I visit the business payment page
     Then I should be on the login page
+    
+  Scenario: By default I'm assumed to be a US customer, paying no VAT
+    Given I have chosen the "Business" plan
+    Then I should not see "VAT at"
+    And the country should be set to "US"
   
   Scenario: As a US customer, I'm not charged VAT
     Given I have chosen the "Business" plan
