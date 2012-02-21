@@ -113,12 +113,15 @@ $(function()
         var ents = $('#detail li').not(':hidden'); 
         var entdropdown = ents.find('select'); 
         surl.push(entdropdown.attr("name"), "=", entdropdown.val()); 
+        if ((entdropdown.attr("name") == "format") && (entdropdown.val() == "base64singleton"))
+            surl.push("&mimetype=", encodeURIComponent("image/png")); // default mimetype as not yet in UI
         for (var i = 0; i < ents.length; i++)
         {
             var ent = $(ents[i]).find("input, textarea"); 
             if ((ent.length == 1) && (ent.val().length != 0))
                 surl.push("&", ent.attr("name"), "=", encodeURIComponent(ent.val())); 
         }
+
         $('#id_apiuri').text(surl.join("")).attr('href', surl.join(""));
 
         if ($('#id_name').val().length != 0)
@@ -341,6 +344,10 @@ $(function()
                     <option value="csv">csv</option>
                     <option value="htmltable">htmltable</option>
                     <option value="rss2">rss2</option>
+                    {% if user.is_staff %}
+                      <option class="staff" value="base64singleton">base64singleton</option>
+                      <option class="staff" value="htmltable_unescaped">htmltable_unescaped</option>
+                    {% endif %}
                 </select>
         	</li> 
         	<li class="name">
