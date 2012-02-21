@@ -1,0 +1,41 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Public requests{% endblock %}
+
+{% block meta %}
+    <meta name="description" content="If you have found an interesting dataset, ask our developer community to scrape some data for you." />
+{% endblock %}
+
+{% block header %}
+    <h2>Public requests</h2>
+{% endblock %}
+
+{% block content %}
+<div id="public_request_directions">
+    <h2>Community Requests</h2>
+    <p>
+        If you've found a cool dataset that you don't know how to liberate,
+        you should post it on <a href="http://groups.google.com/group/scraperwiki?hl=en">our community Google Group</a>.
+        Someone might be able to give you some tips or even write the scraper for you.
+    </p>
+    <p>
+        If you make your request exciting and straightforward,
+        you might get more of a response. Here are some suggestions of things to include.
+    </p>
+    <ul class="bulleted">
+        <li>Title</li>
+        <li>Why you want to liberate this data</li>
+        <li>URLs or source documents</li>
+        <li>Walkthrough of how you would get the data if you needed to resort to copy-and-paste, which could include</li>
+        <ul class="bulleted">
+            <li>Column names of the resulting tables</li>
+            <li>Screenshots</li>
+        </ul>
+        <li>How often the site gets updated (if you know)</li>
+    </ul> 
+    <p>
+        If your request sounds boring or overly commercial, people probably won't respond;
+        please consider our <a href="{% url request_data %}">premium services</a> if that is the case.
+    </p>
+</div>
+{% endblock %}
