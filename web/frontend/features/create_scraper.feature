@@ -5,7 +5,7 @@ Feature: As a user
    Scenario: I can create a scraper if I'm logged in
     Given I am a "Free" user
     And I am on the home page
-    And I click the button "Create a scraper"
+    And I click the "Create a scraper" button 
     And I choose to write my scraper in "Python"
     Then I should be on the python scraper code editing page
 
