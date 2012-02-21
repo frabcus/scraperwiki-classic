@@ -2,17 +2,22 @@
 # Tests for scriptmgr.
 # scriptmgr should be already running.
 
-usage="test.sh [-s] [-c count]"
+usage="test.sh [-s] [-c count] [-p idprefix]"
 
 count=90
 sync=
+idprefix=
 
 # Option parsing
 while true
 do
   case $1 in
     (-c) count=$2;shift 2;;
+    (-p) idprefix=$2;shift 2;;
     (-s) sync=yes;shift 1;;
+    (-*) echo "Unknown option: $1" 1>&2
+         echo "$usage" 1>&2
+         exit 99;;
     *) break;;
   esac
 done
@@ -37,7 +42,7 @@ do
     # Templated JSON object passed to Execute
     data=$( cat <<!
 {
-    "runid" : "$i",
+    "runid" : "$idprefix$i",
     "code": "import time;print 1-2;time.sleep(10);print 'hello'",
     "scrapername": "test",
     "scraperid": "$i",
