@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, cgi, hashlib
+import os, sys, cgi, hashlib, re
 import ConfigParser
 import datetime, time
 import socket
@@ -9,6 +9,8 @@ import urllib
 import traceback
 import json, csv
 import StringIO
+import PyRSS2Gen
+import base64
 
 import logging
 import logging.config
@@ -57,16 +59,46 @@ class DataPullProducer(object):
 
     def __init__(self, client):
         self.client = client
-        if self.client.clienttype == 'httpgetprocessing' and self.client.httpgetparams.get("format") == "csv":
+        self.format = self.client.httpgetparams.get("format", "jsondict")
+        if self.client.clienttype == 'httpgetprocessing' and self.format == "csv":
             self.csvwriter = csv.writer(self.client.transport, dialect='excel')
         else:
             self.csvwriter = None
         self.producedrows = 0
         self.producedbatches = 0
+    
+    def makerss2(self, rows):
+        keymatches = { }
+        if "guid" not in self.keys and "link" in self.keys:
+            keymatches["guid"] = "link"
+        if "pubDate" not in self.keys and "date" in self.keys:
+            keymatches["pubDate"] = "date"
+        rsskeys = ["title", "link", "description", "guid", "pubDate"]
+        missingkeys = [ key  for key in rsskeys  if key not in self.keys and key not in keymatches ]
+        if missingkeys:
+            rows = [ {"title":"Bad rss", "link":"", "description":"Missing keys: %s" % str(missingkeys), "guid":"1", "pubDate":""} ]
+        
+        items = [ ]
+        for row in rows:
+            spubDate = re.findall("\d+", row[keymatches.get("pubDate", "pubDate")])
+            try:
+                pubDate = datetime.datetime(*map(int, spubDate[:6]))
+            except Exception, e:
+                pubDate = datetime.datetime(1999,12,31)
+        
+            guid = PyRSS2Gen.Guid(row[keymatches.get("guid", "guid")])
+            rssitem = PyRSS2Gen.RSSItem(title=row["title"], link=row["link"], description=row["description"], guid=guid, pubDate=pubDate)
+            items.append(rssitem)
+        link = 'https://scraperwiki.com/scrapers/%s' % (self.client.short_name)
+        rss = PyRSS2Gen.RSS2(title=self.client.short_name, link=link, description="description of %s" % self.client.short_name, lastBuildDate=datetime.datetime.now(), items=items)
+
+        fout = StringIO.StringIO()
+        rss.write_xml(fout)
+        return fout.getvalue()
+
             
     def firstProduction(self, res):
         self.keys = res.get("keys", [])
-        self.format = self.client.httpgetparams.get("format", "jsondict")
         
         if self.csvwriter:
             self.csvwriter.writerow([ k.encode('utf-8')  for k in self.keys ])
@@ -83,8 +115,23 @@ class DataPullProducer(object):
                 json.dump(self.keys, self.client.transport)
                 self.client.transport.write(", data:")
                 self.bfirstdata = True
-            elif self.format == "htmltable":
-                self.client.transport.write("<table>\n")
+            elif self.format == "htmltable" or self.format == "htmltable_unescaped":
+                self.client.transport.write('<table border="1" style="border-collapse:collapse">\n')   # there seems to be an 8px margin imposed on the body tag when delivering a page that has no <body> tag
+                
+            elif self.format == "base64singleton":
+                # tricky to report errors here (eg that it's not a singleton table) as the mimetype has already been sent out by now
+                rows = self.client.db.FetchRows(1)
+                if len(rows) == 1 and len(rows[0]) == 1:
+                    self.client.transport.write(base64.decodestring(rows[0][0]))
+                self.stopProducing()
+                
+            elif self.format == "rss2":
+                lrows = self.client.db.FetchRows(-1)
+                rows = [ dict(zip(self.keys, row))  for row in lrows ]
+                res = self.makerss2(rows)
+                self.client.transport.write(res)
+                self.stopProducing()
+
         else:
             logger.warning("client#%d unexpected clienttype %s" % (self.client.clientnumber, self.client.clienttype))
 
@@ -131,7 +178,7 @@ class DataPullProducer(object):
                 self.client.transport.write(",".join(json.dumps(dict(zip(self.keys, row)))  for row in rows))
             elif self.format == "jsonlist":
                 self.client.transport.write(",".join(json.dumps(row)  for row in rows))
-            elif self.format == "htmltable":
+            elif self.format == "htmltable" or self.format == "htmltable_unescaped":
                 def sstringnot(v):
                     if v == None:
                         return ""
@@ -139,10 +186,14 @@ class DataPullProducer(object):
                         v = unicode(v)
                     if type(v) in [unicode, str]:
                         return v.encode("utf-8")
-                    return str(v)
+                    v = str(v)
+                    if self.format == "htmltable":
+                        v = v.replace("<", "&lt;")
+                    return v
                 for row in rows:
                     self.client.transport.write("<tr><td>%s</td></tr>\n" % "</td><td>".join(sstringnot(v)  for v in row))
-
+                    
+                    
         if not bstillproducing:
             if self.client.clienttype == "httpgetprocessing":
                 if self.format == "jsondict":
@@ -213,7 +264,12 @@ class DatastoreProtocol(protocol.Protocol):
         self.clienttype = 'httpgetprocessing'
         mimetype = "text/plain"
         if self.httpgetpath == "/api":
-            mimetype = "%s; charset=utf-8" % {"csv":"text/csv", "htmltable":"text/html"}.get(self.httpgetparams.get("format"), "application/json")
+            format = self.httpgetparams.get("format")
+            if format == "base64singleton":
+                mimetype = self.httpgetparams.get("mimetype", "text/plain")
+            else:
+                mimeconversions = {"csv":"text/csv", "htmltable":"text/html", "htmltable_unescaped":"text/html", "rss2":"application/rss+xml"}
+                mimetype = "%s; charset=utf-8" % mimeconversions.get(format, "application/json")
         self.transport.write('HTTP/1.0 200 OK\r\n')  
         self.transport.write('Connection: Close\r\n')  
         self.transport.write('Pragma: no-cache\r\n')  

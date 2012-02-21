@@ -93,7 +93,7 @@ def stream_rows(dataproxy, format):
         
         yield fout.getvalue()
         n += 1
-        if not ret.get("moredata"):
+        if (not ret.get("moredata")) and (ret.get("stillproducing") != "yes"):
             if format != "csv":
                 yield "</table>\n"
             break  
@@ -128,11 +128,20 @@ def out_csvhtml(dataproxy, short_name, format):
     return response
     
 def out_base64singleton(dataproxy, mimetype):
-    result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
+    result = dataproxy.receiveonelinenj()  
+    print result
+    
     try:
         res = json.loads(result)
+        while res.get('stillproducing') == 'yes':
+            dresult = json.loads(dataproxy.receiveonelinenj())
+            res['data'].extend(dresult['data'])
+            res['stillproducing'] = dresult.get('stillproducing')
     except ValueError, e:
-        return HttpResponse("Error:%s" % (e.message,))
+        dataproxy.close()            
+        return HttpResponse("Error: %s" % (e.message,))
+        
+        
     if "error" in res:
         return HttpResponse("Error2: %s" % res["error"])
     if len(res["keys"]) != 1:
@@ -156,30 +165,26 @@ def out_json(dataproxy, callback, short_name, format):
     # download; however could chunk the jsondict type stream_wise as above
     # by manually creating the outer bracketing as with htmltable.
 
-    result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
-    
+    result = dataproxy.receiveonelinenj()      
     if not result:
         dataproxy.close()
         return HttpResponse("Error: Dataproxy responded with an invalid response")        
 
-    if format == "jsondict":
-        try:
-            res = json.loads(result)
-
-            while res.get('stillproducing') == 'yes':
-                dresult = json.loads(dataproxy.receiveonelinenj())
-                res['data'].extend(dresult['data'])
-                res['stillproducing'] = dresult.get('stillproducing')
-
-        except ValueError, e:
-            dataproxy.close()            
-            return HttpResponse("Error: %s" % (e.message,))
-            
-        if "error" not in res:
-            dictlist = [ dict(zip(res["keys"], values))  for values in res["data"] ]
-            result = json.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
+    try:
+        res = json.loads(result)
+        while res.get('stillproducing') == 'yes':
+            dresult = json.loads(dataproxy.receiveonelinenj())
+            res['data'].extend(dresult['data'])
+            res['stillproducing'] = dresult.get('stillproducing')
+    except ValueError, e:
+        dataproxy.close()            
+        return HttpResponse("Error: %s" % (e.message,))
+        
+    if format == "jsondict" and "error" not in res:
+        dictlist = [ dict(zip(res["keys"], values))  for values in res["data"] ]
+        result = json.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
     else:
-        assert format == "jsonlist"
+        result = json.dumps(res)
     if callback:
         result = "%s(%s)" % (callback, result)
     response = HttpResponse(result, mimetype='application/json; charset=utf-8')
@@ -192,8 +197,13 @@ def out_rss2(dataproxy, scraper):
     result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
     try:
         res = json.loads(result)
+        while res.get('stillproducing') == 'yes':
+            dresult = json.loads(dataproxy.receiveonelinenj())
+            res['data'].extend(dresult['data'])
+            res['stillproducing'] = dresult.get('stillproducing')
     except ValueError, e:
-        return HttpResponse("Error:%s" % (e.message,))
+        dataproxy.close()            
+        return HttpResponse("Error: %s" % (e.message,))
     if "error" in res:
         return HttpResponse("Error2: %s" % res["error"])
 
