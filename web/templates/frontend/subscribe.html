@@ -9,7 +9,9 @@
             Recurly.config({
                 subdomain: '{{subdomain}}'
                 , currency: 'USD'
-                , country: 'US'
+                //, country: 'US'
+                , country: 'GB'
+                , VATPercent: '20'
             });
             Recurly.buildSubscriptionForm({
                 target: '#recurly-subscribe'
