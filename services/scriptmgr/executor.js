@@ -37,10 +37,14 @@ var use_lxc = true;
 var extra_path;
 var code_folder = '/tmp';
 
-// A list of all of the currently running scripts, indexed by
+// A table of all of the currently running scripts, indexed by
 // their run_id which usually comes from the runid property of
 // the original /Execute request.
-var scripts = [ ];
+var scripts = {};
+// Number of entries in *scripts* table
+function count_scripts() {
+    return Object.keys(scripts).length
+}
 var scripts_ip = [ ];
 var max_runs = 100;
 var dataproxy = '';
@@ -166,7 +170,7 @@ exports.run_script = function( http_request, http_response ) {
     
     http_request.setEncoding('utf8');
     
-    if ( scripts.length > max_runs ) {
+    if ( count_scripts() >= max_runs ) {
         r = {"error":"Too busy",
           "headers": http_request.headers,
           "lengths":  -1 };
@@ -269,6 +273,7 @@ function execute(http_req, http_res, raw_request_data) {
                 attachables: request_data.attachables || [],
                 scheduled_run: request_data.scheduled_run || false,
                 permissions: request_data.permissions || [] };
+    script.start_time = new Date();
     
     if ( ! use_lxc ) {
         // Execute the code locally using the relevant file (exec.whatever)
@@ -299,7 +304,6 @@ function execute(http_req, http_res, raw_request_data) {
             
             var exe = './scripts/exec.' + util.extension_for_language(script.language);
 
-            var startTime = new Date();
             var environ = util.env_for_language(script.language, extra_path);
             
             if (script.query) {
@@ -321,7 +325,13 @@ function execute(http_req, http_res, raw_request_data) {
             http_req.connection.addListener('close', function () {
                 // Let's handle the user quitting early it might be
                 // a KILL command from the dispatcher.
-                if ( e ) e.kill('SIGKILL');
+                util.log.debug(
+                  "Connection closed for script id " +
+                  script.run_id +
+                  " pid " + script.pid)
+                if ( e ) {
+                    e.kill('SIGKILL');
+                }
                 if ( script ) {
                     delete scripts[script.run_id];                  
                     delete scripts_ip[ script.ip ];                 
@@ -341,58 +351,9 @@ function execute(http_req, http_res, raw_request_data) {
             });             
             
             e.on('exit', function (code, signal) {
-                if ( code == null ) {
-                    util.log.debug(
-                      'child process exited badly, we may have killed it');
-                } else {
-                    util.log.debug(
-                      'child process exited with code ' + code);
-                }
-                if ( script ) {
-                    delete scripts[script.run_id];
-                    delete scripts_ip[ script.ip ];
-                }
-                
-                util.log.debug('child process removed from script list');                   
-
-                var endTime = new Date();
-                var elapsed = (endTime - startTime) / 1000;
-
-                // If we have something left in the buffer we really
-                // should flush it about now. Suspect this will only
-                // be PHP.
-                if ( script.response.jsonbuffer &&
-                  script.response.jsonbuffer.length > 0 )
-                {
-                    util.log.debug('We still have something left in the buffer');
-                    util.log.debug( script.response.jsonbuffer );
-                
-                    var left = script.response.jsonbuffer.join("");
-                    if ( left && left.length > 0 ) {
-                        // reset the buffer for the final run
-                        script.response.jsonbuffer = [];
-                        var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
-                        if ( m == null ) {
-                            util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
-                            var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
-                            partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";                    
-                            util.write_to_caller( resp, partial );
-                        } else {
-                            util.log.debug( "Looks like the remaining data is JSON so sending as is");                     
-                            util.write_to_caller( resp, left.toString() );
-                        }                   
-                    }                       
-                }
-
-                // 'CPU_seconds': 1, Temporarily removed
-                var result =  { 'message_type':'executionstatus',
-                  'content':'runcompleted',
-                  'elapsed_seconds': elapsed };
-                result.exit_status = code;
-
-                    http_res.end( JSON.stringify( result ) + "\n" );
-                                        
-                    util.log.debug('Finished writing responses');
+                onexit(code, signal, script, function(){
+                  // no release to do
+                  })
             });
         }); // end of writefile
     } else {
@@ -448,8 +409,6 @@ function execute(http_req, http_res, raw_request_data) {
 
             util.log.debug('File written to ' + tmpfile );
 
-            var startTime = new Date();     
-
             // Pass the data proxy and runid to the script that will
             // trigger the exec.py
             var cfgpath = '/mnt/' + rVM + '/config';
@@ -486,78 +445,102 @@ function execute(http_req, http_res, raw_request_data) {
         
             var local_script = script;  
             e.on('exit', function (code, signal) {
-                if ( code == null )
-                    util.log.debug('child process exited badly, ScraperWiki killed it');
-                else 
-                    util.log.debug('child process exited with code ' + code);                   
-
-                // If code is 137 then it is probably an out of memory error which LXC has decided
-                // to just kill it
-                var exitError;
-                if ( code == 137 ) {
-                    // Check signal var to double-check what signal killed us
-                    var exitError = "[Warning] The script was killed, it may have exceeded the memory limit";
-                    if ( local_script.response.jsonbuffer )
-                        local_script.response.jsonbuffer.push(exitError)
-                }
-
-                var endTime = new Date();
-                var elapsed = (endTime - startTime) / 1000;
-                util.log.debug('Elapsed' + elapsed );
-
-                // If we have something left in the buffer we really should flush it about
-                // now. Suspect this will only be PHP
-                if ( local_script.response.jsonbuffer && local_script.response.jsonbuffer.length > 0 ) {
-                    util.log.debug('We still have something left in the buffer');
-                    util.log.debug( local_script.response.jsonbuffer );
-                
-                    var left = local_script.response.jsonbuffer.join("");                       
-                    if ( left && left.length > 0 ) {
-                        // reset the buffer for the final run
-                        local_script.response.jsonbuffer = [];
-                        var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
-                        if ( m == null ) {
-                            util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
-                            var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
-                            partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";                    
-                            util.write_to_caller( resp, partial );
-                        } else {
-                            util.log.debug( "Looks like the remaining data is JSON so sending as is");                      
-                            util.write_to_caller( resp, left.toString() );
-                        }                   
-                    }                       
-                }
-
-                // 'CPU_seconds': 1, Temporarily removed
-                var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
-                   'elapsed_seconds' : elapsed };
-                result.exit_status = code;
-
-                if ( local_script && local_script.response ) {
-                    local_script.response.end( JSON.stringify( result ) + "\n" );
-                    util.log.debug('Have just written end message to the vm ' + local_script.vm );
-                } else { 
-                    util.log.debug('Script is null?' + script);
-                    util.log.debug('Script has been disconnected from caller?' + local_script.response );                   
-                }
-                                
-                lxc.release_vm( local_script, rVM );
-                if ( local_script) {
-                    delete scripts[local_script.run_id];
-                    delete scripts_ip[ local_script.ip ];
-                }
-                util.log.debug('child process removed from script list');                   
-                                
-                if ( local_script) { 
-                    util.log.debug('Finished writing responses for ' + local_script.vm);
-                } else {
-                    util.log.debug('Finished writing a response');
-                }
+                onexit(code, signal, script, function(){
+                  lxc.release_vm( script, rVM );})
             });
         });
     }
 }
 
+// Called when a script exits (in either LXC or local process
+// case).  *code* and *signal* come from the Node 'exit'
+// handler, *script* is the script object, *release* is a function
+// to call to release the VM (only used for LXC).
+function onexit(code, signal, script, release)
+{
+    var pid = 'child process pid ' + script.pid;
+    if ( code == null ) {
+        util.log.debug(pid + ' exited with null code.')
+    } else {
+        util.log.debug(
+          pid + ' exited with code ' + code);
+    }
+
+    // If code is 137 then it is probably an out of memory error;
+    // LXC has decided to just kill it?
+    var exitError;
+    if ( code == 137 ) {
+        // :todo: Check *signal* to double-check what signal killed us
+        var exitError = "[Warning] The script was killed, it may have exceeded the memory limit";
+        if ( script.response.jsonbuffer ) {
+            script.response.jsonbuffer.push(exitError)
+        }
+    }
+
+    var endTime = new Date();
+    var elapsed = (endTime - script.start_time) / 1000;
+    util.log.debug(pid + ' elapsed ' + elapsed );
+
+    // If we have something left in the buffer we really should flush
+    // it about now. Suspect this will only be PHP (but
+    // actually, all scripts seem to leave a single empty record in
+    // the buffer).
+    if ( script.response.jsonbuffer &&
+      script.response.jsonbuffer.length > 0 )
+    {
+        util.log.debug('Buffer still has ' +
+          script.response.jsonbuffer.length +
+          ' entries');
+        util.log.debug( script.response.jsonbuffer );
+    
+        var left = script.response.jsonbuffer.join("");                       
+        if ( left && left.length > 0 ) {
+            // reset the buffer for the final run
+            script.response.jsonbuffer = [];
+            var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
+            if ( m == null ) {
+                util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
+                var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
+                partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";                    
+                util.write_to_caller( resp, partial );
+            } else {
+                util.log.debug( "Looks like the remaining data is JSON so sending as is");                      
+                util.write_to_caller( resp, left.toString() );
+            }                   
+        }                       
+    }
+
+    // 'CPU_seconds': 1, Temporarily removed
+    var result =  { 'message_type':'executionstatus',
+      'content':'runcompleted', 
+      'elapsed_seconds': elapsed
+    };
+    result.exit_status = code;
+
+    if ( script && script.response ) {
+        script.response.end( JSON.stringify( result ) + "\n" );
+        util.log.debug('Have just written end message to the vm ' + script.vm );
+    } else { 
+        util.log.debug('Script is null?' + script);
+        util.log.debug('Script has been disconnected from caller?' + script.response );                   
+    }
+
+    release();
+
+    if ( script) {
+        delete scripts[script.run_id];
+        delete scripts_ip[ script.ip ];
+    }
+    util.log.debug('script list now has ' +
+      count_scripts() + ' entries')
+                    
+    if (script) { 
+        util.log.debug('Finished writing responses for ' +
+          script.vm);
+    } else {
+        util.log.debug('Finished writing a response');
+    }
+}
 
 
 
