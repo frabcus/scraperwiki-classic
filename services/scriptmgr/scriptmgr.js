@@ -79,40 +79,44 @@ process.on('uncaughtException', function (err) {
 
 
 http.createServer(function (req, res) {
-	// Decide whether we will accept the connection (from twister machine and 
-	// local dataproxy/httpproxy only)
-	// allowed_ips: ["127.0.0.1"],	
-	if ( settings.allowed_ips ) {
-		var allowed = false;
+    // Decide whether we will accept the connection (from twister machine and 
+    // local dataproxy/httpproxy only)
+    // allowed_ips: ["127.0.0.1"],	
+    if ( settings.allowed_ips ) {
+        var allowed = false;
 
-        for (x in settings.allowed_ips)
-		{
-			var ip = settings.allowed_ips[x];
-			allowed = req.connection.remoteAddress == ip;
-			if ( allowed )
-				break;
-		}
+        for (x in settings.allowed_ips) {
+            var ip = settings.allowed_ips[x];
+            allowed = req.connection.remoteAddress == ip;
+            if ( allowed )
+                    break;
+        }
 
-		if ( ! allowed ) {
-			write_error(res, "Not allowed to connect from " + req.connection.remoteAddress );
-			return;
-		}
-	}
-	
-	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/'];
-	handler(req,res);
+        if ( ! allowed ) {
+            write_error(res, "Not allowed to connect from " +
+              req.connection.remoteAddress );
+            return;
+        }
+    }
+
+    var handler = _routemap[url.parse(req.url).pathname] || _routemap['/'];
+    handler(req,res);
 }).listen(settings.port, settings.listen_on || "0.0.0.0");
 
 // Log information to the logfile.
 util.log.info('Server started listening on port ' + settings.port );
 
 /******************************************************************************
-* Handles a run request when a client POSTs code to be executed along with a 
-* run id, a scraper id and the scraper name
+* Handles a run request when a client POSTs code to be executed.
+* See exec.js for details.
 ******************************************************************************/
 function handleRun(req,res) {
-	util.log.debug( 'Starting run request' );
-	exec.run_script( req, res);
+    util.log.debug( 'Starting run request' );
+    // A 1-day timeout for running scripts.  If we don't set
+    // this, we get a 2 minute timeout provided by Node's
+    // http library; which is too short.  See ticket #864.
+    req.connection.setTimeout(24*3600*1000);
+    exec.run_script( req, res);
 }
 
 /******************************************************************************
