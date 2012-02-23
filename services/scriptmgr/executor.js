@@ -499,13 +499,17 @@ function onexit(code, signal, script, release)
             script.response.jsonbuffer = [];
             var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
             if ( m == null ) {
-                util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
-                var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
-                partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";                    
-                util.write_to_caller( resp, partial );
+                util.log.debug(
+                  "Looks like the remaining data is not JSON so need to wrap");
+                var partial = JSON.stringify(
+                  {'message_type': 'console', 'content': left} );
+                partial = "JSONRECORD(" +
+                  partial.length.toString() + "):" + partial + "\n";                    
+                util.write_to_caller(script.response, partial);
             } else {
-                util.log.debug( "Looks like the remaining data is JSON so sending as is");                      
-                util.write_to_caller( resp, left.toString() );
+                util.log.debug(
+                  "Looks like the remaining data is JSON so sending as is");                      
+                util.write_to_caller(script.response, left.toString());
             }                   
         }                       
     }
