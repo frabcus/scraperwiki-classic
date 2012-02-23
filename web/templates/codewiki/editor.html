@@ -135,7 +135,7 @@
 {% endif %}
 
 {% if scraper.short_name %}
-    <input type="hidden" id="viewrunurl"    value="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}"/>
+    <input type="hidden" id="viewrunurl"    value="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}{% if scraper.access_apikey %}?apikey={{scraper.access_apikey}}{% endif %}"/>
     <input type="hidden" id="editorreloadurl" value="{% url reload scraper.short_name %}"/>
 {% endif %}
 
