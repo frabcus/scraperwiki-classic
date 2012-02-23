@@ -52,7 +52,8 @@ urlpatterns = patterns('',
     url(r'^vaults/$', frontend_views.view_vault, name='vault'),    
     url(r'^vaults/new/$', frontend_views.new_vault, name='new_vault'),    
     
-    url(r'^dashboard/(?P<page_number>\d+)?$', frontend_views.dashboard, name='dashboard'),
+    # this (?P<page_number>\d+) thing doesn't actually do anything, you know that right??
+    url(r'^dashboard/?(?P<privacy_status>(?:non)?private)?/?(?P<page_number>\d+)?$', frontend_views.dashboard, name='dashboard'),
     url(r'^stats/$',                  frontend_views.stats, name='stats'),    
     
     # Example pages to scrape :)

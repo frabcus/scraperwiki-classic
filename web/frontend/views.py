@@ -64,10 +64,15 @@ def frontpage(request, public_profile_field=None):
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 
 @login_required
-def dashboard(request, page_number=1):
+def dashboard(request, privacy_status=None, page_number=1):
     user = request.user
     owned_or_edited_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=user)
-        
+    
+    if privacy_status == 'private':
+        owned_or_edited_code_objects = owned_or_edited_code_objects.filter(privacy_status="private")
+    elif privacy_status == 'nonprivate':
+        owned_or_edited_code_objects = owned_or_edited_code_objects.filter(Q(privacy_status="public")|Q(privacy_status="visible"))
+    
     context = {'object_list': owned_or_edited_code_objects,
                'language':'python' }
     return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
