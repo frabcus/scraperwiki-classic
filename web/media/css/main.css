@@ -7347,7 +7347,7 @@ body.status ul.rows {
 body.status li.row {
 	background-color: #eff3f5;
 	margin: 0 0 10px 0;
-	padding: 0;
+	padding: 0 0 0 220px;
 	position: relative;
 	overflow: auto;
 	line-height: 18px;
@@ -7391,11 +7391,14 @@ body.status li.row.bksaving:after {
 }
 
 body.status .row .title {
-	float: left;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
 	width: 200px;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	padding: 10px 5px 10px 13px;
+	padding: 10px 7px 10px 13px;
 	background-color: #cfdce2;
 	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
 	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.2)), color-stop(100%,rgba(255,255,255,0)));
