@@ -18,7 +18,7 @@ do
 done
 
 # Only backup to kippax if not on kippax...
-if [ "$host" != "kippax.scraperwiki.com" ]
+if [ "$host" != "kippax" ]
 then
   # Note that suffix is used to rename the old file, so Friday's file
   # gets renamed on Saturday, and typically has suffix .saturday.
