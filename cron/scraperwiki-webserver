@@ -6,8 +6,6 @@ SHELL=/bin/bash
 0 4 * * * root /var/www/scraperwiki/cron/bin/mysql-backup
 # ... this one takes 45 minutes (26th Jan 2012)
 0 3 * * * root /var/www/scraperwiki/cron/bin/code-backup
-# Backup to bytemark's backup
-0 7 * * * root rsync -qazr --partial /root/backup umi.backup.bytemark.co.uk::umi/
 
 # Remove dummy users, scrapers etc. that the Selenium test script can make
 0 0 * * * scraperdeploy cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py clear_selenium_byproducts
