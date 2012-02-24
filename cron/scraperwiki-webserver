@@ -1,9 +1,6 @@
 MAILTO=cron@scraperwiki.com
 SHELL=/bin/bash
 
-# Backup Django database, and scraper mercurial repositories
-# ... this one takes 5 minutes (26th Jan 2012)
-0 4 * * * root /var/www/scraperwiki/cron/bin/mysql-backup
 # ... this one takes 45 minutes (26th Jan 2012)
 0 3 * * * root /var/www/scraperwiki/cron/bin/code-backup
 
