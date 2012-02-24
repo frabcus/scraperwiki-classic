@@ -7,6 +7,8 @@
 
 verbose=''
 quiet='q'
+host=`hostname`
+
 while [ $# -ne 0 ]
 do
   case "$1" in
@@ -15,9 +17,13 @@ do
   esac
 done
 
-# Note that suffix is used to rename the old file, so Friday's file
-# gets renamed on Saturday, and typically has suffix .saturday.
-suffix=.$(date +\%A | tr '[A-Z]' '[a-z]')
-destdir=swbackup@kippax.scraperwiki.com:/home/swbackup/$(hostname)/
+# Only backup to kippax if not on kippax...
+if [ "$host" != "kippax.scraperwiki.com" ]
+then
+  # Note that suffix is used to rename the old file, so Friday's file
+  # gets renamed on Saturday, and typically has suffix .saturday.
+  suffix=.$(date +\%A | tr '[A-Z]' '[a-z]')
+  destdir=swbackup@kippax.scraperwiki.com:/home/swbackup/$(hostname)/
 
-rsync "-az${quiet}${verbose}" -e 'ssh -i /root/backup-key.rsa' /root/backup/ "$destdir" -b --suffix="$suffix"
+  rsync "-az${quiet}${verbose}" -e 'ssh -i /root/backup-key.rsa' /root/backup/ "$destdir" -b --suffix="$suffix"
+fi
