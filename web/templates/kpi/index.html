@@ -150,14 +150,14 @@ $(function(){
 <!-- <p id="datastore_graph" style="height:200px"></p> -->
 
 <table class="data">
-    <th>
+    <tr>
        <!-- <th>Scrapers</th>
        <th>Views</th>
        <th>Users</th> -->
        <th>Active Coders</th>
        <th>Longtime<br>Active Coders</th>
        <!-- <th>Datastore<br>Record Count</th> -->
-    </th>
+    </tr>
 
     {% for year in data reversed %}
         {% for month in year.months reversed %}
