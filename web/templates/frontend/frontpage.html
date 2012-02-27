@@ -83,14 +83,6 @@
 				</ul>
 			</div>
 			
-			<div class="involved">
-			    <h2>Get involved</h2>
-			    <a data-wiki_type="scraper" id="new_scraper"class="editor_scraper" href="{% url choose_template 'scraper' %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Get Involved buttons', 'Create a new scraper']);}"><strong>Create a new scraper</strong> <span>Start using our collaborative coding environment right now for free.</span></a>
-			    <a id="new_request" href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Get Involved buttons', 'Request a new scraper']); }"><strong>Request a new scraper</strong> <span>Not a developer? No problem! Tell us what you want and we&rsquo;ll build it</span></a>
-			    <a id="fix_scraper" href="{% url get_involved %}#technical" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Get Involved buttons', 'Fix a broken scraper']); }"><strong>Fix a broken scraper</strong> <span>Fancy a challenge? Try getting a broken scraper back onto its feet.</span></a>
-			    <a id="tag_scraper" href="{% url get_involved %}#nontechnical" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Get Involved buttons', 'Spring cleaning']); }"><strong>Spring cleaning</strong> <span>Help us organise our scrapers and views by describing and tagging them.</span></a>
-			</div>
-			
 			<div class="tags">
 			    <h2><a href="{% url all_tags %}" title="Browse by tag">Popular tags</a></h2>
     			<ul class="tags">

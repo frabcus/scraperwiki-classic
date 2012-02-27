@@ -356,49 +356,6 @@ def search(request, q=""):
         form = SearchForm()
         return render_to_response('frontend/search_results.html', {'form': form}, context_instance = RequestContext(request))
 
-def get_involved(request):
-
-        scraper_count = Scraper.objects.exclude(privacy_status="deleted").count()
-        view_count = View.objects.exclude(privacy_status="deleted").count()
-        
-        #no description
-        scraper_no_description_count = Scraper.objects.filter(description='').exclude(privacy_status="deleted").count()
-        scraper_description_percent = 100 - int(scraper_no_description_count / float(scraper_count) * 100)
-
-        view_no_description_count = View.objects.filter(description='').exclude(privacy_status="deleted").count()
-        view_description_percent = 100 - int(view_no_description_count / float(view_count) * 100)
-
-        #no tags
-        scraper_no_tags_count = TaggedItem.objects.get_no_tags(Scraper.objects.exclude(privacy_status="deleted")).count()
-        scraper_tags_percent = 100 - int(scraper_no_tags_count / float(scraper_count) * 100)
-    
-        view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.exclude(privacy_status="deleted")).count()
-        view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
-
-        #scraper status
-        scraper_sick_count = Scraper.objects.filter(status='sick').exclude(privacy_status="deleted").count()
-        scraper_sick_percent = 100 - int(scraper_sick_count / float(scraper_count) * 100)
-
-        data = {
-            'scraper_count': scraper_count,
-            'view_count': view_count,
-            'scraper_no_description_count': scraper_no_description_count,
-            'scraper_description_percent': scraper_description_percent,
-            'view_no_description_count': view_no_description_count,
-            'view_description_percent': view_description_percent,
-            'scraper_no_tags_count': scraper_no_tags_count,
-            'scraper_tags_percent': scraper_tags_percent,
-            'view_no_tags_count': view_no_tags_count,
-            'view_tags_percent': view_tags_percent,
-            'scraper_sick_count': scraper_sick_count,
-            'scraper_sick_percent': scraper_sick_percent,
-            'language': 'python', 
-        }
-
-        return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
-
-
-
 def events(request, e=''):
     names = ['jdcny','ltdmo','jdcdc']
     if e in names:
