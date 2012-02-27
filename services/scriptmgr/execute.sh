@@ -3,15 +3,17 @@
 # Run a script by passing to the local scriptmgr.
 # scriptmgr should be already running.
 
-usage="execute.sh [-s] code"
+usage="execute.sh [-s] [-l php|python|ruby]code"
 
 sync=
+language=python
 
 # Option parsing
 while true
 do
   case $1 in
     (-s) sync=yes;shift 1;;
+    (-l) language=$2;shift 2;;
     *) break;;
   esac
 done
@@ -38,7 +40,7 @@ data=$( cat <<!
     "code": "$code",
     "scrapername": "test",
     "scraperid": "$id",
-    "language": "python"
+    "language": "$language"
 }
 !
 )

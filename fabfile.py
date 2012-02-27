@@ -32,10 +32,12 @@ env.server_lookup = {
 
     ('screenshooter', 'live'): ['kippax.scraperwiki.com'], # bit nasty that this is a dev server!
 }
-# This is slightly magic - we want to generate the host list from the pair of
-# the service deployed (e.g. firebox) and the flock (e.g. live). This gets
-# fabric to call the function do_server_lookup to do that work -
-# do_server_lookup in turn uses the env.server_lookup dictionary above
+# This is slightly magic - we want to generate the host list from
+# the pair of the service deployed (e.g. firebox) and the flock
+# (e.g. live). This gets fabric to call the function
+# do_server_lookup to do that work -
+# do_server_lookup in turn uses the env.server_lookup dictionary
+# above.
 env.roledefs = {
     'webserver' : lambda: do_server_lookup('webserver'),
     'datastore' : lambda: do_server_lookup('datastore'),
@@ -48,7 +50,8 @@ env.activate = env.path + '/bin/activate'
 env.user = 'scraperdeploy'
 env.name = getpass.getuser()
 
-# Call one of these tasks first to set which flock of servers you're working on
+# Call one of these tasks first to set which flock of servers
+# you're working on.
 @task
 def dev():
     '''Call first to deploy to development servers'''
@@ -68,7 +71,7 @@ def live():
 
 def parse_bool(s):
     if s not in ['yes','no']:
-        raise Exception("buildout must be yes or no")
+        raise Exception("bool flag must be yes or no")
     return s == 'yes'
 
 def do_server_lookup(task):
@@ -103,26 +106,30 @@ def django_db_migrate():
     run_in_virtualenv('cd web; python manage.py migrate --verbosity=0')
 
 def update_js_cache_revision():
-    # Put the current HG revision in a file so that Django can use it to avoid caching JS files
+    """Put the current HG revision in the file web/revision.txt
+    so that Django can use it to avoid caching JS files.
+    """
     run_in_virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def _update_cron_if_exists(local_file):
     run('[ -e %s ] && sudo cp %s /etc/cron.d/ || echo -n'  % (local_file, local_file), shell=True)
 
 def update_crons():
-    # deploy cron files for all servers, just this task, or just this task and flock
+    """Deploy cron files for all servers, just this task, or
+    just this task and flock.
+    """
     _update_cron_if_exists('%(path)s/cron/scraperwiki-all' % env)
     _update_cron_if_exists('%(path)s/cron/scraperwiki-%(task)s-%(flock)s' % env)
     _update_cron_if_exists('%(path)s/cron/scraperwiki-%(task)s' % env)
 
 def restart_daemon(name, process_check=None):
-    """*process_check* a string to search in command line names to
+    """*process_check* is a string to search in output of ps to
     check if process has not died.
     """
     run('sudo -i /etc/init.d/%s stop' % name)
     if process_check:
         with settings(warn_only=True):
-            run_with_retries('ps auxxwwww | egrep -- "%s" | egrep -v "/bin/bash|grep"; true' % process_check)
+            run_with_retries('ps auxww | egrep -- "%s" | egrep -v "/bin/bash|grep"; true' % process_check)
 
     # This needs a login shell with "sudo -i" to start scriptmgr,
     # for unknown reasons.
@@ -161,12 +168,12 @@ def code_pull():
 @task
 @roles('webserver')
 def webserver(buildout='yes', restart='no'):
-    '''Deploys Django web application, runs schema migrations, clears caches,
-kicks webserver so it starts using new code. 
+    '''Deploys Django web application, runs schema migrations,
+    clears caches, kicks webserver so it starts using new code. 
 
-restart=yes, also restarts twisted (uwgsi will gracefully restart
-automatically because revision.txt is touched)
-buildout=no, stops it updating buildout which can be slow
+    restart=yes, also restarts twisted (uwgsi will gracefully restart
+    automatically because revision.txt is touched);
+    buildout=no, stops it running buildout which can be slow.
     '''
     restart = parse_bool(restart)
     buildout = parse_bool(buildout)
@@ -198,11 +205,12 @@ def screenshooter():
 
 @task
 @roles('datastore')
-def datastore(buildout='no', restart='no'): # default buildout to no until ready
+def datastore(buildout='no', restart='no'):
     '''Deploys datastore SQL database.
 
-restart=yes, restarts daemons
-buildout=no, stops it updating buildout which can be slow'''
+    restart=yes, restarts daemons;
+    buildout=no, stops it running buildout which can be slow:
+    '''
     restart = parse_bool(restart)
     buildout = parse_bool(buildout)
 
@@ -221,9 +229,11 @@ buildout=no, stops it updating buildout which can be slow'''
 @task
 @roles('firebox')
 def firebox(restart='no'):
-    '''Deploys LXC script sandbox executor. XXX currently doesn't restart any daemons
+    '''Deploys LXC script sandbox executor.
+    :todo: currently doesn't restart any daemons.
 
-restart=yes, restarts daemons'''
+    restart=yes, restarts daemons.
+    '''
     restart = parse_bool(restart)
 
     code_pull()
@@ -240,8 +250,11 @@ restart=yes, restarts daemons'''
 
 @task
 def merge_to_stable():
-    '''In your local copy, merges changes from default branch to stable in Mercurial,
-in preparation for a deploy. Pushes to server. Make sure you commit everything first.'''
+    '''In your local copy, merges changes from default branch to stable
+    in Mercurial, in preparation for a deploy.  Pushes to server.
+    It can get upset if you have uncommitted changes, so
+    make sure you commit everything first.
+    '''
 
     # grab anything remote
     local('hg --quiet update default')
@@ -260,18 +273,6 @@ in preparation for a deploy. Pushes to server. Make sure you commit everything f
 
     # done, working in default again
     local('hg --quiet update default')
-
-'''
-@task
-def setup():
-    # this really ought to make sure it checks out default vs. stable
-    raise Exception("not implemented, really old broken code")
-
-    sudo('hg clone file:///home/scraperwiki/scraperwiki %(path)s' % env)        
-    sudo('chown -R %(fab_user)s %(path)s' % env)
-    sudo('cd %(path)s; easy_install virtualenv' % env)
-    run('hg clone %(web_path)s %(path)s' % env, fail='ignore')
-'''
 
 '''
 @task
