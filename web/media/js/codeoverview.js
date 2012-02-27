@@ -739,11 +739,11 @@ function setDataPreview(table_name, table_schema, first_table){
 				$(this).html( 
 					$(this).html().replace(
 						/\.\.\. {{MOAR\|\|([^\|]+)\|\|([^\|]+)\|\|NUFF}}$/g, 
-						' <a class="moar" href="/api/1.0/datastore/sqlite?format=jsondict&name=' + $('#scrapershortname').val() + '&query=select%20$1%20as%20%60moar%60%20from%20%60'+ table_name + '%60%20where%20rowid%3D$2">&hellip;more</a>'
+						' <a class="moar" href="/api/1.0/datastore/sqlite?format=jsondict&name=' + $('#scrapershortname').val() + '&query=select%20$1%20as%20%60moar%60%20from%20%60'+ table_name + '%60%20where%20rowid%3D$2&apikey=' + $('#id_apikey').val() + '">&hellip;more</a>'
 					).replace(
 						/((http|https|ftp):\/\/[a-zA-Z0-9-_~#:\.\?%&\/\[\]@\!\$'\(\)\*\+,;=]+)/g, 
-						'<a href="$1">$1</a>'
-					) 
+						'<a href="$1">$1</a>'  
+					)
 				);
             });
             return tr;
