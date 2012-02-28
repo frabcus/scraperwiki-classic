@@ -511,10 +511,6 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	background-image: url(../images/header_icon_dashboard.gif);
 }
 
-.get_involved #header_inner {
-	background-image: url(../images/header_icon_users.gif);
-	background-position: 5px center;
-}
 
 .help #header_inner,
 .docs #header_inner {
@@ -1050,67 +1046,6 @@ body.frontpage .featured li .about {
 body.frontpage .featured li .when {
 	font-size: 11px;
 	line-height: 12px;
-}
-
-body.frontpage .involved {
-	position: relative;
-	width: 640px;
-	height: 172px;
-	padding: 28px 0 0 320px;
-	margin-bottom: 20px;
-	background: #fff6df url(../images/get_involved_box.png) no-repeat 0 0;
-}
-
-body.frontpage #page_inner .involved h2 {
-	position: absolute;
-	top: 35px;
-	left: 35px;
-	width: 240px;
-	height: 32px;
-	margin-top: 0;
-	background: transparent url(../images/get_involved.gif) no-repeat 0 0;
-	text-indent: -9000px;
-}
-
-body.frontpage .involved a {
-	float: left;
-	width: 230px;
-	height: 54px;
-	padding-left: 70px;
-	margin-bottom: 30px;
-	margin-right: 20px;
-	background: transparent url(../images/get_involved_scraper.gif) no-repeat 0 0;
-	color: #927539;
-	text-decoration: none;
-}
-
-body.frontpage .involved a strong {
-	display: block;
-	margin-bottom: 5px;
-	font-size: 18px;
-	line-height: 18px;
-}
-
-body.frontpage .involved a span {
-	display: block;
-	font-size: 13px;
-	line-height: 16px;
-}
-
-body.frontpage .involved a#new_request {
-	background-image: url(../images/get_involved_request.gif);
-	margin-right: 0;
-}
-
-body.frontpage .involved a#fix_scraper {
-	background-image: url(../images/get_involved_fix.gif);
-	color: #B29B6A;
-}
-
-body.frontpage .involved a#tag_scraper {
-	background-image: url(../images/get_involved_tag.gif);
-	color: #B29B6A;
-	margin-right: 0;
 }
 
 body.frontpage .tags {
@@ -5921,28 +5856,8 @@ h4 a.edit {
 	background: url(../images/staff.png);
 }
 
-/* get involved */
 
-.task_complete {
-	border-bottom: dotted 1px #ccc;
-	padding-bottom: 2em;
-	margin-bottom: 2em;
-}
-
-.task_complete {
-	min-height: 150px;
-}
-
-.task_complete img.dial, .task_complete img.photo {
-	float: left;
-	margin-right: 20px;
-}
-
-.task_complete p, .task_complete form {
-	padding-left: 220px;
-}
-
-/* function docmentation */
+/* function documentation */
 
 div#divQuickHelp {
 	text-align: left
@@ -7347,7 +7262,7 @@ body.status ul.rows {
 body.status li.row {
 	background-color: #eff3f5;
 	margin: 0 0 10px 0;
-	padding: 0;
+	padding: 0 0 0 220px;
 	position: relative;
 	overflow: auto;
 	line-height: 18px;
@@ -7391,11 +7306,14 @@ body.status li.row.bksaving:after {
 }
 
 body.status .row .title {
-	float: left;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
 	width: 200px;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	padding: 10px 5px 10px 13px;
+	padding: 10px 7px 10px 13px;
 	background-color: #cfdce2;
 	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
 	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.2)), color-stop(100%,rgba(255,255,255,0)));
