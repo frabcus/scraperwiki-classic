@@ -148,7 +148,7 @@
     	    <span class="shineyshiney"></span>
 	        <!-- <a class="vault_leave"><img src="{{ MEDIA_URL }}images/icons/door_exit.png" width="16" height="16"> Leave vault</a> -->
 	        <a class="vault_users"><img src="{{ MEDIA_URL }}images/icons/user_purple.png" width="16" height="16"> <span class="x_users">{% if vault.members.count > 0 %}{{ vault.members.count }} member{{ vault.members.count|pluralize }}{% else %}No members{% endif %}</span></a>
-    	    <h3><!-- <a href="{% url profiles_profile_detail vault.user.username %}" title="This vault is owned by {% if vault.user.get_profile.name %}{{vault.user.get_profile.name}}{% else %}{{vault.user.username}}{% endif %}" class="vault_owner">{% show_gravatar vault.user 'medium' %}</a> -->{{ vault.name }}</h3>
+    	    <h3><!-- <a href="{% url profile vault.user.username %}" title="This vault is owned by {% if vault.user.get_profile.name %}{{vault.user.get_profile.name}}{% else %}{{vault.user.username}}{% endif %}" class="vault_owner">{% show_gravatar vault.user 'medium' %}</a> -->{{ vault.name }}</h3>
 	        <div class="vault_users_popover">
     		    <h4><span class="x_users">{{ vault.members.count }} user{{ vault.members.count|pluralize }}</span> can access this vault:</h4>
     		    <ul>

@@ -111,8 +111,8 @@ def user_message(request, username):
         body = form.cleaned_data['body']
 
         site = Site.objects.get_current()
-        reply_url = "https://%s%s#message" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
-        sender_profile_url = "https://%s%s" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
+        reply_url = "https://%s%s#message" % (site.domain,reverse("profile",kwargs={"username":sending_user_profile.user.username}))
+        sender_profile_url = "https://%s%s" % (site.domain,reverse("profile",kwargs={"username":sending_user_profile.user.username}))
         if sending_user_profile.messages and receiving_user_profile.messages:
             text_content = render_to_string('emails/new_message.txt', locals(), context_instance=RequestContext(request) )
             html_content = render_to_string('emails/new_message.html', locals(), context_instance=RequestContext(request) )
@@ -166,7 +166,8 @@ def login(request):
                 if redirect:
                     return HttpResponseRedirect(redirect)
                 else:
-                    return HttpResponseRedirect(reverse('frontpage'))
+                    return HttpResponseRedirect(reverse('profile',
+                                                kwargs=dict(username=request.user.username)))
 
         #New user is registering
         elif request.POST.has_key('register'):
@@ -185,7 +186,8 @@ def login(request):
                 if redirect:
                     return HttpResponseRedirect(redirect)
                 else:
-                    return HttpResponseRedirect(reverse('frontpage'))
+                    return HttpResponseRedirect(reverse('profile', 
+                                                kwargs=dict(username=request.user.username)))
 
     return render_to_response('registration/extended_login.html', {'registration_form': registration_form,
                                                                    'login_form': login_form, 
