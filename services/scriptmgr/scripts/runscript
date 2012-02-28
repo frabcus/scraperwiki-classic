@@ -1,8 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 route add default gw 10.0.0.1 eth0 > /dev/null
 export RUBYLIB='/home/scraperwiki/ruby/scraperwiki/lib'
 export PYTHONPATH='/home/scraperwiki/python'
 export PHPPATH='/home/scraperwiki/php:$PHPPATH'
 export NODE_PATH='/usr/local/lib/node_modules:/home/scraperwiki/javascript:/home/scriptrunner'
 export TMPDIR='/tmp'
-su scriptrunner -c "cd ~;/home/startup/exec.$1 --script=/home/scriptrunner/script.$1"
+# We exec here, to avoid having this script's process lying around;
+# and the same again for the script we run inside the su
+# environment.  We can run just fine without the 'exec's; it's
+# just tidier.
+exec su scriptrunner -c "cd ~;exec /home/startup/exec.$1 --script=/home/scriptrunner/script.$1"
