@@ -15,4 +15,9 @@ Feature: As a user
     When I save the scraper as "Testing" 
     Then I should be on my "Testing" scraper page
 
- 
+   Scenario: I can delete a scraper
+    Given I am a "Free" user
+    And I visit my scraper's overview page
+    When I click the "Delete Scraper" button
+    Then I should be on my profile page
+

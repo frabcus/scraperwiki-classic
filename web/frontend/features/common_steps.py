@@ -50,6 +50,11 @@ def and_i_am_on_the_plan(step, plan):
     profile = user.get_profile()
     profile.change_plan(plan)
 
+# Scrapers
+@step(u"(?:When|And) I visit my scraper's overview page$")
+def i_am_on_the_scraper_overview_page(step):
+    world.browser.visit(django_url('/scrapers/test_scraper'))
+
 # Seeing matchers
 @step(u'(?:And|Then) I should see "([^"]*)"$')
 def and_i_should_see(step, text):

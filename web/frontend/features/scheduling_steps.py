@@ -19,10 +19,6 @@ def then_i_should_see_the_scheduling_panel(step):
 @step(u'And I should see the button to edit the schedule')
 def and_i_should_see_the_button(step):
     assert world.browser.find_by_css("a.edit_schedule")
-    
-@step(u"(?:When|And) I visit my scraper's overview page$")
-def and_i_am_on_the_scraper_overview_page(step):
-    world.browser.visit(django_url('/scrapers/test_scraper'))
 
 @step(u'When I click the "([^"]*)" button in the scheduling panel')
 def when_i_click_a_button_in_the_scheduling_panel(step, button):
