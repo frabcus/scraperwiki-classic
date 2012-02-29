@@ -593,7 +593,7 @@ def scraper_delete_scraper(request, wiki_type, short_name):
             ]
      } )
 
-    return HttpResponseRedirect(reverse('dashboard'))
+    return HttpResponseRedirect(reverse('profile', dict(username=request.user.username)))
 
 
 def scraper_undelete_scraper(request, wiki_type, short_name):

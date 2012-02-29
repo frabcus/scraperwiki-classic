@@ -39,7 +39,7 @@ def run_event(request, run_id):
 @login_required
 def running_scrapers(request):
     if not request.user.is_staff:
-        return HttpResponseRedirect( reverse('dashboard') )    
+        return HttpResponseRedirect(reverse('profile', dict(username=request.user.username)))
     recenteventsmax = 20
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
     context = { 'events':recentevents, 'eventsmax':recenteventsmax }
@@ -50,7 +50,7 @@ def running_scrapers(request):
 @login_required
 def status(request):
     if not request.user.is_staff:
-        return HttpResponseRedirect( reverse('dashboard') )    
+        return HttpResponseRedirect(reverse('profile', dict(username=request.user.username)))
     recenteventsmax = 20
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
     context = { 'events':recentevents, 'eventsmax':recenteventsmax }

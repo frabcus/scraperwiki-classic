@@ -507,11 +507,6 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	background-image: url(../images/header_icon_contact.gif);
 }
 
-.dashboard #header_inner {
-	background-image: url(../images/header_icon_dashboard.gif);
-}
-
-
 .help #header_inner,
 .docs #header_inner {
 	background-image: url(../images/header_icon_help.gif);
@@ -6448,18 +6443,6 @@ a.your-own {
     background:url(../images/icons/control_play.png) no-repeat;
     background-position: left 60%;
 }
-
-
-
-
-/* DASHBOARD */
-
-body.dashboard #divContent {
-	padding-top: 5px;
-}
-
-
-
 
 /* VAULTS */
 
