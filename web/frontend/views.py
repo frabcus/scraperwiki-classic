@@ -63,20 +63,6 @@ def frontpage(request, public_profile_field=None):
             'language': 'python'}
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 
-@login_required
-def dashboard(request, privacy_status=None, page_number=1):
-    user = request.user
-    owned_or_edited_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=user)
-    
-    if privacy_status == 'private':
-        owned_or_edited_code_objects = owned_or_edited_code_objects.filter(privacy_status="private")
-    elif privacy_status == 'nonprivate':
-        owned_or_edited_code_objects = owned_or_edited_code_objects.filter(Q(privacy_status="public")|Q(privacy_status="visible"))
-    
-    context = {'object_list': owned_or_edited_code_objects,
-               'language':'python' }
-    return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
-
 
 def profile_detail(request, username):
     # The templates for this view are in templates/profiles/
@@ -111,8 +97,8 @@ def user_message(request, username):
         body = form.cleaned_data['body']
 
         site = Site.objects.get_current()
-        reply_url = "https://%s%s#message" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
-        sender_profile_url = "https://%s%s" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
+        reply_url = "https://%s%s#message" % (site.domain,reverse("profile",kwargs={"username":sending_user_profile.user.username}))
+        sender_profile_url = "https://%s%s" % (site.domain,reverse("profile",kwargs={"username":sending_user_profile.user.username}))
         if sending_user_profile.messages and receiving_user_profile.messages:
             text_content = render_to_string('emails/new_message.txt', locals(), context_instance=RequestContext(request) )
             html_content = render_to_string('emails/new_message.html', locals(), context_instance=RequestContext(request) )
@@ -166,7 +152,8 @@ def login(request):
                 if redirect:
                     return HttpResponseRedirect(redirect)
                 else:
-                    return HttpResponseRedirect(reverse('frontpage'))
+                    return HttpResponseRedirect(reverse('profile',
+                                                kwargs=dict(username=request.user.username)))
 
         #New user is registering
         elif request.POST.has_key('register'):
@@ -185,7 +172,8 @@ def login(request):
                 if redirect:
                     return HttpResponseRedirect(redirect)
                 else:
-                    return HttpResponseRedirect(reverse('frontpage'))
+                    return HttpResponseRedirect(reverse('profile', 
+                                                kwargs=dict(username=request.user.username)))
 
     return render_to_response('registration/extended_login.html', {'registration_form': registration_form,
                                                                    'login_form': login_form, 

@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     # profiles
     url(r'^profiles/edit/$', profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm}, name='profiles_edit_profile'),
     url(r'^profiles/(?P<username>.*)/message/$', frontend_views.user_message, name='user_message'),
-    url(r'^profiles/(?P<username>.*)/$', frontend_views.profile_detail, name='profiles_profile_detail'),
+    url(r'^profiles/(?P<username>.*)/$', frontend_views.profile_detail, name='profile'),
     #url(r'^profiles/', include('profiles.urls')), 
 
     url(r'^login/$',frontend_views.login, name='login'),
@@ -50,10 +50,8 @@ urlpatterns = patterns('',
     url(r'^vaults/(?P<vaultid>\d+)/removescraper/(?P<shortname>.*)/(?P<newstatus>public|visible)$', frontend_views.vault_scrapers_remove, name='vault_scrapers_remove'),                
     url(r'^vaults/$', frontend_views.view_vault, name='vault'),    
     url(r'^vaults/new/$', frontend_views.new_vault, name='new_vault'),    
-    
-    # this (?P<page_number>\d+) thing doesn't actually do anything, you know that right??
-    url(r'^dashboard/?(?P<privacy_status>(?:non)?private)?/?(?P<page_number>\d+)?$', frontend_views.dashboard, name='dashboard'),
-    url(r'^stats/$',                  frontend_views.stats, name='stats'),    
+
+    url(r'^stats/$', frontend_views.stats, name='stats'),    
     
     # Example pages to scrape :)
     url(r'^examples/basic_table\.html$', direct_to_template, {'template': 'examples/basic_table.html'}, name='example_basic_table'),

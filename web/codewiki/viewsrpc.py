@@ -6,26 +6,21 @@ from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail, mail_admins
 
+from django.conf import settings
+
 
 from codewiki.models.code import MAGIC_RUN_INTERVAL
 from codewiki.models.vault import VaultRecord
+from codewiki import runsockettotwister
 
-import smtplib
-
-from django.conf import settings
-
-from codewiki import models, runsockettotwister
-import frontend
-import urllib
-import subprocess
-import re
 import base64
-import cgi
 import ConfigParser
 import datetime
+import logging
+import re
+import smtplib
 import sys
 
-import logging
 logger = logging
 
 
@@ -34,7 +29,6 @@ except ImportError: import simplejson as json
 
 config = ConfigParser.ConfigParser()
 config.readfp(open(settings.CONFIGFILE))
-
 
 
 def scraperwikitag(scraper, html, panepresent):

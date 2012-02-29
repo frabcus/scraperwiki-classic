@@ -6,7 +6,7 @@ from lettuce.django import django_url
 def when_i_click_the_login_link(step):
     world.browser.click_link_by_text("Log in")
 
-@step('Given there is a username "([^"]*)" with password "([^"]*)"')
+@step('(?:Given|And) there is a username "([^"]*)" with password "([^"]*)"')
 def make_user(step, username, password):
     if username == 'test':
         # Should already have been created in the test-fixture
@@ -42,3 +42,8 @@ def create_and_login(step, username, password):
 @step(u'Given I am not logged in')
 def given_i_am_not_logged_in(step):
     world.browser.driver.delete_all_cookies()
+
+@step(u'(?:Then|And) I should be on my profile page')
+def and_i_should_be_on_my_profile_page(step):
+    assert '/profiles/' in world.browser.url
+

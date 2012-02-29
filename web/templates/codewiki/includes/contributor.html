@@ -1,5 +1,5 @@
 <li>
-    <a href="{% url profiles_profile_detail contributor.username %}">
+    <a href="{% url profile contributor.username %}">
     {% load gravatar %} {% show_gravatar contributor 'medium' %} 
     {% if contributor.get_profile.name %}
         {{contributor.get_profile.name}}

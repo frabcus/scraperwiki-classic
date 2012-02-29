@@ -70,14 +70,17 @@ def scrapers_overdue():
 class Scraper (code.Code):
     last_run     = models.DateTimeField(blank=True, null=True)    
     record_count = models.IntegerField(default=0)        
-    run_interval = models.IntegerField(default=-1)  # in seconds, we are defaulting to disabled
+    # In seconds; default to disabled.
+    run_interval = models.IntegerField(default=-1)
 
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)
         self.wiki_type = 'scraper'
 
-    # It would be good to kill this function off and move its functionality into being properties of the database
-    # for now it represents some kind of caching of the size of the datastore
+    # :todo: It would be good to kill this function off and move
+    # its functionality into being properties of the database.
+    # For now it represents some kind of caching of the size
+    # of the datastore.
     def update_meta(self):
         dataproxy = DataStore(self.short_name)
         try:
@@ -142,10 +145,11 @@ class ScraperRunEvent(models.Model):
     # before abolishing the scraper parameter
     
     run_id            = models.CharField(max_length=100, db_index=True, blank=True, null=True)
-    pid               = models.IntegerField()   # will only be temporarily valid and probably doesn't belong here
+    # Will only be temporarily valid and probably doesn't belong here.
+    pid               = models.IntegerField()
     run_started       = models.DateTimeField(db_index=True)
     
-        # missnamed. used as last_updated so you can see if the scraper is hanging
+    # missnamed. used as last_updated so you can see if the scraper is hanging
     run_ended         = models.DateTimeField(null=True)   
     records_produced  = models.IntegerField(default=0)
     pages_scraped     = models.IntegerField(default=0)

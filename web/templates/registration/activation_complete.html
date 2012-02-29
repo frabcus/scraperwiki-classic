@@ -8,7 +8,7 @@
             <h1>Your account has been activated</h1>
             {% if user.is_authenticated %}
             <p>
-                <a href="{% url dashboard %}">Click here to go to your dashboard</a>
+                <a href="{% url profile username=user.username %}">Click here to go to your profile</a>
             </p>
             {% else %}
             <p>

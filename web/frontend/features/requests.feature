@@ -16,9 +16,8 @@ Feature: As a person who wants someone else to liberate data for me
     When I visit the request page
     And I click the "public" services button
     Then I should be on the public request page
-    And I should see "exciting"
+    And I should see "cool dataset"
     And I should see "Why you want to liberate this data"
-    And I should see "Screenshot"
     
   Scenario: I can back to the premium request page once I am on the public request page
     When I visit the public request page

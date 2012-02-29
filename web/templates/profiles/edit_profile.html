@@ -87,7 +87,7 @@
             
             <div class="profilesettings">
                 <input type="hidden" name="success_url" value="/" />
-                <p class="cancel"><a href="{% url profiles_profile_detail user.username %}"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Cancel Changes</a></p>
+                <p class="cancel"><a href="{% url profile user.username %}"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Cancel Changes</a></p>
                 <p class="save"><input type="submit" class="button" value="Save changes" /><a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/tick.png" width="16" height="16" alt="" /> Save Changes</a></p>
                 <br class="clear" />
             </div>

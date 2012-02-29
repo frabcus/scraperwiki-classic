@@ -100,7 +100,7 @@ class UserProfile(models.Model):
         ordering = ('-created_at',)
     
     def get_absolute_url(self):
-        return ('profiles_profile_detail', (), { 'username': self.user.username })
+        return ('profile', (), { 'username': self.user.username })
     get_absolute_url = models.permalink(get_absolute_url)        
 
     def change_plan(self, plan):
