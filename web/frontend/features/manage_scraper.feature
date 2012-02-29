@@ -1,5 +1,5 @@
 Feature: As a user
-  I want to be able to create a scraper
+  I want to be able to create and manage my scrapers
   So that I can start writing and running my code
 
    Scenario: I can create a scraper if I'm logged in
