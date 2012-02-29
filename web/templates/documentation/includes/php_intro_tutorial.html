@@ -8,7 +8,8 @@ non-programmers (30 minutes).
 
 <p>We're going to scrape the average number of years children spend
 in school in different countries from 
-<a href="http://unstats.un.org/unsd/demographic/products/socind/education.htm">this page</a> on a UN site.
+<a href="http://web.archive.org/web/20110514112442/http://unstats.un.org/unsd/demographic/products/socind/education.htm">this page</a>, which was once on a UN site
+but has since been replaced with an <a href="http://unstats.un.org/unsd/demographic/products/socind/education.htm">Excel spreadsheet</a>.
 </p>
 
 <p>Pick "new scraper" from the main menu on the right, and choose PHP.
@@ -36,7 +37,7 @@ printed in the Console tab at the bottom of the editor.
 There is also a simple built in {% doc_link_full 'LANG_help_documentation' language 'ScraperWiki function' %} which may be easier to use.
 </p>
 
-<code>$html = scraperWiki::scrape("http://unstats.un.org/unsd/demographic/products/socind/education.htm");
+<code>$html = scraperWiki::scrape("http://web.archive.org/web/20110514112442/http://unstats.un.org/unsd/demographic/products/socind/education.htm");
 print $html . "\n";
 </code>
 
