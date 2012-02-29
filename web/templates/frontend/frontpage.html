@@ -68,22 +68,7 @@
     <div id="page_outer">
 		<div id="page_inner">
 
-			<div class="featured">
-        		<h2><a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers">Featured Scrapers &amp; Views</a></h2>
-				<ul>
-				{% load markup %}
-                {% load screen_shot %}
-	    		{% for code in featured_both %}<li><a href="{% url code_overview code.wiki_type code.short_name %}">
-                            {% screen_shot code 'medium' %}
-                            <h4>{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %} / {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</h4>
-                            <span class="about">{{code.language}}&nbsp;&nbsp;{{code.wiki_type}}</span>
-                            <span class="when">Created {{code.created_at|timesince}} ago</span>
-                        </a></li>{% endfor %}
-	    		    <li class="clear"></li>
-				</ul>
-			</div>
-			
-			<div class="tags">
+      <div class="tags">
 			    <h2><a href="{% url all_tags %}" title="Browse by tag">Popular tags</a></h2>
     			<ul class="tags">
                 {% for tag in tags %}
