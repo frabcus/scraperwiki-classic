@@ -40,6 +40,12 @@
               <td class="link">Private</td>
             </tr>
             {% endif %}
+	        {% if code.privacy_status == 'public' %}
+    	    <tr class="status public">
+              <td class="label">Status</td>
+              <td class="link">Public</td>
+            </tr>
+            {% endif %}
         {% endif %}
 
         {% if code.is_sick_and_not_running %}
