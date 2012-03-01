@@ -372,18 +372,6 @@ function execute(http_req, http_res, raw_request_data) {
         }
         util.log.debug( 'Running on ' + res );      
                 
-/*                
-        // Write out a new FSTAB for this run using the template, so that we can later 
-        // add/modify the fstab template.
- 	    var ctx = {'name': res, 'scrapername':  script.scraper_name || "__public__" }
-	    var fs_compiled = _.template( fstab_tpl );
-	    var fstab = fs_compiled( ctx );
-        util.log.debug('Writing fstab to ' + '/mnt/' + res + '/fstab')
-	    var f = fs.openSync('/mnt/' + res + '/fstab', 'w');
-	    fs.writeSync(f, fstab);
-	    fs.closeSync( f );
-*/
-
         var extension = util.extension_for_language(script.language);
         
         // /var/www/scraperwiki/resourcedir/<%= scrapername >/
@@ -399,6 +387,9 @@ function execute(http_req, http_res, raw_request_data) {
                 return;             
             } 
 
+            // Details such as data proxy and runid are passed
+            // to the script by writing to a launch.json file in
+            // its filesystem.
             writeLaunchFile( path.join(lxc.code_folder(res),
               "launch.json"), 
               dataproxy, 
@@ -409,8 +400,6 @@ function execute(http_req, http_res, raw_request_data) {
 
             util.log.debug('File written to ' + tmpfile );
 
-            // Pass the data proxy and runid to the script that will
-            // trigger the exec.py
             var cfgpath = '/mnt/' + rVM + '/config';
 
             var args = [ '-n', rVM, '-f', cfgpath,
