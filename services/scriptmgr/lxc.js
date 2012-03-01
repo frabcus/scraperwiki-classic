@@ -1,10 +1,13 @@
-/******************************************************************************
+/**********************************************************************
 * lxc.js
 *
-* Abstracts running the provided code through an lxc instance. We make sure at
-* initialisation that all of the LXCs that we expect are created and running.
+* An abstraction of an execution engine, using LXC instances to
+* run code.
+*
+* We make sure at initialisation that all of the LXCs that we
+* expect are created and running.
 * 
-******************************************************************************/
+**********************************************************************/
 var _    = require('underscore')._;
 var mu   = require('mu');
 var fs   = require('fs');
@@ -24,17 +27,19 @@ var config_tpl = '';
 var fstab_tpl  = '';
 
 
-/******************************************************************************
-* Initialise the LXC handling by storing some properties and caching some 
-* templates ( only until we have created the relevant config files ).
-******************************************************************************/
-exports.init = function(start, count, lxc_root_folder) {
+/**********************************************************************
+* Initialise the LXC handling by storing some properties and caching
+* some templates (only until we have created the relevant config
+* files).
+**********************************************************************/
+exports.init = function(start, count, lxc_root_folder, settings_) {
 	root_folder = lxc_root_folder;
 	
 	config_tpl = fs.readFileSync( path.join(__dirname,'templates/config.tpl'), "utf-8");
 	fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");
 
-	console.log('Creating VMS from ' + start + ' to '+ ((start + count)));
+	console.log('Creating VMs from ' + start +
+          ' to ' + ((start + count)));
 	var ids = _.range(start, (start + count) + 1);
 	for ( var idx in ids ) {
 		var i = parseInt(ids[idx]);
@@ -45,46 +50,65 @@ exports.init = function(start, count, lxc_root_folder) {
 };
 
 
-/******************************************************************************
-* Execute the provided code on an lxc instance if we can get one.
-******************************************************************************/
-exports.exec = function(script, code) {
+/**********************************************************************
+* Allocate an instance and clean it, prior to executing code.
+* *script* is a script object, passed from executor.js.
+* An object is returned, use its name property for the VM name.
+**********************************************************************/
+exports.alloc = function(script) {
 	// execute lxc-execute on a vm, after we've been allocated on
-	var name = allocate_vm( script );
+	var v = allocate_vm( script );
 
-	// Make sure we have a clean environment before we run? 
-	var cf = get_code_folder(name);
+	// Make sure we have a clean environment before we run.
+	var cf = get_code_folder(v);
 	util.cleanup( cf );
 	
-	return name;
+	return v;
 };
 
+/*  Spawn a process inside the vm; this is the
+ *  runscript shell script.
+ */
+exports.spawn = function(vm, script) {
+    var extension = util.extension_for_language(script.language);
+    var cfgpath = '/mnt/' + vm.name + '/config';
 
-/******************************************************************************
+    var args = [ '-n', vm.name, '-f', cfgpath,
+      "/home/startup/runscript", extension];
+    var e = spawn(
+      '/var/www/scraperwiki/services/scriptmgr/cleanfd.py',
+      ['/usr/bin/lxc-execute'].concat(args));
+    return e;
+}
+
+
+/**********************************************************************
 * Kill the LXC instance that is currently running the provided script
-******************************************************************************/
-exports.kill = function( vmname ) {
-	util.log.debug('Killing ' + vmname );
-	try {
-		e = spawn('/usr/bin/lxc-stop', ['-n', vmname]);
-	} catch(e) {
-		util.log.debug(e);
-	}
+**********************************************************************/
+exports.kill = function( vm ) {
+    var e;
+    util.log.debug('Killing ' + vm.name );
+    try {
+            e = spawn('/usr/bin/lxc-stop', ['-n', vm.name]);
+    } catch(e) {
+            util.log.debug(e);
+    }
 };
 
 
-exports.code_folder = get_code_folder = function(name) {
-	return path.join(root_folder, name + '/code/');
+exports.code_folder = get_code_folder = function(vm) {
+    return path.join(root_folder, vm.name + '/code/');
 }
 
-exports.ip_for_vm = function(name) {
-	var num = parseInt( name.substring(2) );
-	return '10.0.1.' + (num + 1).toString();
+exports.ip_for_vm = function(vm) {
+    var num = parseInt( vm.name.substring(2) );
+    return '10.0.1.' + (num + 1).toString();
 }
 
-/*****************************************************************************
-* Create a new VM based on newly created config files - if not already created
-******************************************************************************/
+/*********************************************************************
+* Create a new VM based on newly created config files,
+* if not already created.
+**********************************************************************/
 function create_vm ( name ) {
 
 	var v = {
@@ -163,40 +187,44 @@ function create_vm ( name ) {
 
 
 
-/*****************************************************************************
+/*********************************************************************
 * Release the VM using the provided script. 
-*****************************************************************************/
-exports.release_vm = function( script, name ) {
+*********************************************************************/
+exports.release_vm = function(script_, vm) {
+    var err;
+    var name = vm.name;
+    util.log.debug('Releasing ' + name);
+    var v = vms[name];
+    if (!v) {
+        return;
+    }
 
-	util.log.debug('Releasing ' + name);
-	var v = vms[name];
-	if ( ! v ) return;
-
-	// Remove it from the two lookup tables
-	delete vms_by_runid[ v.script.run_id ]
-	delete vms_by_ip[ v.script.ip ]
-	
-	v.running = false;
-	v.script = null;
-	vms[v.name] = v;
-	
-	// Make sure we have a clean environment after a release
-	try {
-		var cf = get_code_folder(name);
-		util.cleanup( cf );
-	} catch( err ) {}
+    // Remove it from the two lookup tables
+    delete vms_by_runid[ v.script.run_id ]
+    delete vms_by_ip[ v.script.ip ]
+    
+    v.running = false;
+    v.script = null;
+    vms[v.name] = v;
+    
+    // Make sure we have a clean environment after a release.
+    try {
+        var cf = get_code_folder(name);
+        util.cleanup( cf );
+    } catch(err) {}
 }
 
-/*****************************************************************************
-* Allocate a vm to the calling script.  We will check to find one that isn't
-* running and either allocate it or return null if none are found.
+/*********************************************************************
+* Allocate a vm to the calling script.  We will check to find one
+* that isn't running and either allocate it or return null if
+* none are found.
 *
 * TODO: Fix this and use detect
-* i.e.
+* for example
 * var even = _.detect([1, 2, 3, 4, 5, 6], function(num){ return num % 2 == 0; });
 * => 2
-******************************************************************************/
-function allocate_vm ( script ) {
+**********************************************************************/
+function allocate_vm(script) {
 	var v;
 	
 	for ( var k in vms ) {
