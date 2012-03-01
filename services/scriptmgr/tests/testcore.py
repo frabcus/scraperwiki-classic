@@ -59,10 +59,19 @@ class testCore(unittest.TestCase):
     def testPython(self):
         stuff = self.Execute(
           """print 'hell'+'o'*3""", language='python')
-        l = [ j for j in mjson(stuff)
-          if j['message_type'] == 'console' and
-             'hellooo' in j['content'] ]
-        assert l
+        output = console(stuff)
+        assert 'hellooo' in output
+
+def console(response):
+    """*response* is the entire response stream returned from
+    scriptmgr.  Parse out the console messages from the JSON
+    object sequence, and return all console output as a single
+    string.
+    """
+    l = [ j for j in mjson(response) ]
+    l = [ j['content'] for j in l
+      if j['message_type'] == 'console' ]
+    return ''.join(l)
 
 def mjson(s):
     """*s* is a string holding one or more JSON objects that
