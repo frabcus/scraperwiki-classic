@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # tests/core.py
 
-"""Tests the core functionality of scriptmgr."""
+"""Tests the core functionality of scriptmgr.
+
+Assumes scriptmgr is already running."""
 
 # http://docs.python.org/release/2.6.7/library/json.html
 import json
@@ -47,9 +49,31 @@ class testCore(unittest.TestCase):
         return self.url + command
 
     def testAlive(self):
+        """Simple Is scriptmgr Alive test.  If this fails then
+        it may be that scriptmgr is not running already; which
+        it should be to run the tests.
+        """
         urllib.urlopen(self.URL("Status")).read()
         pass
     
     def testPython(self):
-        self.Execute("""print 'hell'+'o'*3""", language='python')
-        pass
+        stuff = self.Execute(
+          """print 'hell'+'o'*3""", language='python')
+        l = [ j for j in mjson(stuff)
+          if j['message_type'] == 'console' and
+             'hellooo' in j['content'] ]
+        assert l
+
+def mjson(s):
+    """*s* is a string holding one or more JSON objects that
+    have been concatenated (multi-JSON); yield each JSON object
+    in turn."""
+
+    decode = json.JSONDecoder().raw_decode
+
+    while True:
+        o,i = decode(s)
+        yield o
+        s = s[i:].strip()
+        if not s:
+            break
