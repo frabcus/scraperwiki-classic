@@ -3293,6 +3293,10 @@ strong.language {
 	color: #8f6316;
 }
 
+.code_about .status.public td.link {
+	background-image: url(../images/icons/shield-public.png);
+}
+
 .code_about .fork td.link {
 	background-repeat: no-repeat;
 	padding-left: 22px;
