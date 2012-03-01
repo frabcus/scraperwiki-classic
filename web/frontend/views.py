@@ -543,14 +543,7 @@ def pricing(request):
             context['current_plan'] = request.user.get_profile().plan
     return render_to_response('frontend/pricing.html', context,
       context_instance=RequestContext(request))
-      
-def corporate(request):
-    context = {}
-    if settings.DEBUG:
-        return render_to_response('frontend/corporate/index.html', context, context_instance=RequestContext(request))
-    else:
-        return HttpResponseRedirect(reverse('frontpage'))
-    
+
 def test_error(request):
     raise Exception('failed in test_error')
 
@@ -769,5 +762,25 @@ def vault_users(request, vaultid, username, action):
 
 
 
+###############################################################################
+# Corporate mini-site
+###############################################################################
 
+def corporate(request, page=''):
+    if settings.DEBUG and request.user.is_staff:
+        
+        # do they want the index page?
+        if not page:
+            page = 'index'
+        
+        # 404 if requested page doesn't exist
+        # return page if it does  
+        if page not in ['index', 'pricing', 'contact']:
+            raise Http404
+        else:
+            context = {'page':page}
+            return render_to_response('frontend/corporate/' + page + '.html', context, context_instance=RequestContext(request))
+        
+    else:
+        return HttpResponseRedirect(reverse('frontpage'))
 

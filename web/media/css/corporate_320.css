@@ -45,6 +45,11 @@ table {
 	height: 100%;
 }
 
+body {
+	background: #000 url(http://subtlepatterns.com/patterns/broken_noise.png) top center;
+	color: #fff;
+}
+
 body:after {
 	content: '320px';
 	position: absolute;
@@ -53,8 +58,29 @@ body:after {
 	opacity: 0.5;
 }
 
-.content {
-	width: 320px;
-	margin-left: auto;
-	margin-right: auto;
+a {
+	color: orange;
+	text-decoration: none;
 }
+
+a:hover {
+	text-decoration: underline;
+}
+
+header, section, footer {
+	width: 320px;
+	margin: 0 auto;
+}
+
+header {
+	padding-top: 20px;
+	margin-bottom: 20px;
+}
+
+footer {
+	padding-bottom: 40px;
+}
+
+
+
+
