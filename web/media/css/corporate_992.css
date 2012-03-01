@@ -11,6 +11,6 @@ body:after {
 	content: '992px';
 }
 
-.content {
+header, section, footer {
 	width: 992px;
 }

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}{% endblock %}</title>
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% block meta %}{% endblock %}
+        <link rel="stylesheet" media="screen" href="{{MEDIA_URL}}css/corporate_320.css">
+        <link rel="stylesheet" media="only screen and (min-width: 480px)" href="{{MEDIA_URL}}css/corporate_480.css">
+        <link rel="stylesheet" media="only screen and (min-width: 768px)" href="{{MEDIA_URL}}css/corporate_768.css">
+        <link rel="stylesheet" media="only screen and (min-width: 992px)" href="{{MEDIA_URL}}css/corporate_992.css">
+        <link rel="stylesheet" media="print" href="{{MEDIA_URL}}css/corporate_print.css">
+        {% block css %}{% endblock %}
+    	{% block rss %}{% endblock %}
+        <!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+		<script type="text/javascript" src="{{MEDIA_URL}}js/corporate.js"></script>-->
+		{% block script %}{% endblock %}
+		{% if not debug %}
+    	    <script type="text/javascript">
+
+    	      var _gaq = _gaq || [];
+    	      _gaq.push(['_setAccount', 'UA-21451224-1']);
+              _gaq.push(['_setDomainName', 'none']);
+              _gaq.push(['_setCustomVar', 1, 'Registered User', '{% if user.is_authenticated %}True{% else %}False{% endif %}', 2]);
+    	      _gaq.push(['_trackPageview']);
+
+    	      (function() {
+    	        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    	        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    	        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    	      })();
+
+    	    </script>
+    	{% endif %}
+    </head>
+    <body class="corporate {{ page }}">
+        <noscript>
+    	    Oh no! You need to enable Javascript to use ScraperWiki Corporate.
+            <a href="http://support.google.com/bin/answer.py?hl=en&mp;answer=23852">Find out how</a>
+        </noscript>
+        {% block header %}
+        <header>
+            <nav>
+                <h1><a href="/corporate/">ScraperWiki Corporate</a></h1>
+                <ul>
+                    <li class="features"><a href="/corporate/pricing">Features &amp; Pricing</a></li>
+                    <li class="contact"><a href="/corporate/contact">Get in touch</a></li>
+                </ul>
+            </nav>
+        </header>
+        {% endblock %}
+        {% block content %}{% endblock %}
+        {% block footer %}
+        <footer>
+            <ul class="vcard">
+            	<li class="name"><a rel="me" class="fn org" href="http://scraperwiki.com/corporate">ScraperWiki Corporate</a></li>
+            	<li><a rel="me" class="email" href="mailto:corporate@scraperwiki.com">corporate@scraperwiki.com</a></li>
+            	<li><a rel="me" class="tel" href="tel:+492081330541">+44 2081 330541</a></li>
+            	<li><a rel="me" class="url"href="http://twitter.com/scraperwiki">@scraperwiki</a></li>
+        	</ul>
+        	<ul class="legal">
+            	<li class="copyright">&copy; ScraperWiki Limited, 2012</li>
+            	<li class="terms"><a href="#">Terms of Use</a></li>
+            	<li class="privacy"><a href="#">Privacy Policy</a></li>
+        	</ul>
+        </footer>
+        {% endblock %}
+        <!--[if IE 6]>
+        <script src="{{MEDIA_URL}}js/DD_belatedPNG_0.0.8a-min.js"></script>
+    	<script>DD_belatedPNG.fix('.png_bg, img');</script>
+    	<![endif]-->
+    </body>
+</hmtl>
