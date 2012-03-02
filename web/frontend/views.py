@@ -16,6 +16,9 @@ from django.contrib.sites.models import Site
 from django.views.decorators.csrf import csrf_exempt
 
 
+from tagging.models import Tag, TaggedItem
+from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
+
 from codewiki.models import Code, UserCodeRole, Scraper, Vault, View, scraper_search_query, user_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
 from frontend.forms import CreateAccountForm, UserMessageForm
