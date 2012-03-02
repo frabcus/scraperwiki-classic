@@ -60,23 +60,21 @@ opts.parse(options, true);
 
 var config_path = opts.get('config') || './appsettings.scriptmgr.js';
 var settings = require(config_path).settings;
-
-// Load settings and store them locally
-exec.init( settings );
-
-util.setup_logging( settings.logfile, settings.loglevel );
+util.setup_logging(settings.logfile, settings.loglevel);
 if (settings.devmode) {
-	util.log.emitter.addListener('loggedMessage', function(message,levelName) {
-    	console.log(levelName.toUpperCase() + ": " + message);
-  	});
+    util.log.emitter.addListener('loggedMessage',
+      function(message, levelName) {
+        console.log(levelName.toUpperCase() + ": " + message);
+    });
 };
-
 // Handle uncaught exceptions and make sure they get logged
 process.on('uncaughtException', function (err) {
   util.log.fatal('Caught exception: ' + err);
   if ( settings.devmode ) console.log( err.stack );
 });
 
+// Pass settings and initialise exec module.
+exec.init( settings );
 
 http.createServer(function (req, res) {
     // Decide whether we will accept the connection (from twister machine and 

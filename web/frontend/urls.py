@@ -1,8 +1,9 @@
 from django.conf.urls.defaults import *
 
-from profiles import views as profile_views  # a not very well namespaced django plugin class
+# a not very well namespaced django plugin class
+from profiles import views as profile_views
 from contact_form.views import contact_form
-import frontend.views as frontend_views  # who thinks replacing dots with underscores here is useful?? --JT
+import frontend.views as frontend_views
 import frontend.forms as frontend_forms
 
 from django.views.generic.simple import redirect_to, direct_to_template
@@ -14,6 +15,10 @@ urlpatterns = patterns('',
     url(r'^profiles/edit/$', profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm}, name='profiles_edit_profile'),
     url(r'^profiles/(?P<username>.*)/message/$', frontend_views.user_message, name='user_message'),
     url(r'^profiles/(?P<username>.*)/$', frontend_views.profile_detail, name='profile'),
+    # This duplicate is provided because the standard profiles
+    # plugin requires that 'profiles_profile_detail' work when
+    # using reverse().
+    url(r'^profiles/(?P<username>.*)/$', frontend_views.profile_detail, name='profiles_profile_detail'),
     #url(r'^profiles/', include('profiles.urls')), 
 
     url(r'^login/$',frontend_views.login, name='login'),
@@ -71,6 +76,6 @@ urlpatterns = patterns('',
     url(r'^events/(?P<e>[^/]+)?/?$', frontend_views.events, name='events'),
     
     # corporate minisite
-    url(r'corporate/', frontend_views.corporate, name='corporate'),
+    url(r'corporate/(?P<page>[^/]+)?/?$', frontend_views.corporate, name='corporate'),
     
 )

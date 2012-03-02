@@ -23,16 +23,17 @@ def page_name_is_valid(name):
     return True
 
 @step(u'(?:(?:Given|And) I am on|When I visit) the (.+) page')
-def when_i_visit_the_pricing_page(step, name):
+def when_i_visit_the_particular_page(step, name):
     response = world.browser.visit(django_url(PAGES[name]))
 
 @step(u'(?:And|Then) I should be on the (.+) page')
-def then_i_should_be_on_the_payment_page(step, name):
+def then_i_should_be_on_the_particular_page(step, name):
     assert page_name_is_valid(name)
     current_url = world.browser.url.split('?')[0] # ignore querystring (hacky)
 
     if '#' not in PAGES[name]:
-        current_url = current_url.split('#')[0] # ignore querystring if not in page URL
+        # Ignore querystring if not in page URL.
+        current_url = current_url.split('#')[0]
 
     full_url = django_url(PAGES[name])
 
