@@ -135,6 +135,14 @@ class UserProfile(models.Model):
         vault.save()
         vault.members.add(self.user)
         return vault
+    
+    # sorts against what the current user can see and what the identity of the profiled_user
+    def owned_code_objects(self, profiled_user):
+        from codewiki.models import scraper_search_query
+        return scraper_search_query(self.user, None).filter(usercoderole__user=profiled_user)
+
+    def emailer_code_objects(self, username, profiled_user):
+        return self.owned_code_objects(profiled_user).filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
 
 # Signal Registrations
 # when a user is created, we want to generate a profile for them

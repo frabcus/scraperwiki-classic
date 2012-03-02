@@ -42,7 +42,8 @@ def frontpage(request, public_profile_field=None):
     user = request.user
     data = {
             'tags': Tags.sorted(), 
-            'language': 'python'}
+            'language': 'python'
+           }
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 
 
@@ -50,12 +51,12 @@ def profile_detail(request, username):
     # The templates for this view are in templates/profiles/
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
+    profile = profiled_user.get_profile()
     
-    # sorts against what the current user can see and what the identity of the profiled_user
-    extra_context = { }
-    owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
-    extra_context['owned_code_objects'] = owned_code_objects
-    extra_context['emailer_code_objects'] = owned_code_objects.filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
+    extra_context = {
+                     'owned_code_objects' : profile.owned_code_objects(profiled_user),
+                     'emailer_code_objects' : profile.emailer_code_objects(username, profiled_user)
+                    }
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
 
