@@ -15,16 +15,12 @@ from django.contrib.sites.models import Site
 # https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 from django.views.decorators.csrf import csrf_exempt
 
-from tagging.models import Tag, TaggedItem
-from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
-from tagging.models import Tag, TaggedItem
 
 from codewiki.models import Code, UserCodeRole, Scraper, Vault, View, scraper_search_query, user_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
 from frontend.forms import CreateAccountForm, UserMessageForm
 from registration.backends import get_backend
-from frontend.models import UserProfile
-from codewiki.models import Scraper
+from frontend.models import UserProfile, Tags
         
 # find this in lib/python/site-packages/profiles
 from profiles import views as profile_views   
@@ -44,22 +40,8 @@ from utilities import location
 
 def frontpage(request, public_profile_field=None):
     user = request.user
-
-    #featured
-    featured_both = Code.objects.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-created_at')[:4]
-	
-    #popular tags
-    #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
-    tags_sorted = sorted([(tag, int(tag.count)) for tag in Tag.objects.usage_for_model(Scraper, counts=True)], key=lambda k:k[1], reverse=True)[:40]
-    tags = []
-    for tag in tags_sorted:
-        # email (for emailers) and test far outweigh other tags :(
-        if tag[0].name not in ['test','email']:
-            tags.append(tag[0])
-    
     data = {
-			'featured_both': featured_both,
-            'tags': tags, 
+            'tags': Tags.sorted(), 
             'language': 'python'}
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 

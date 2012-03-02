@@ -11,6 +11,9 @@ from django.core.mail import send_mail, mail_admins
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 
+from tagging.models import Tag, TaggedItem
+from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
+from tagging.models import Tag, TaggedItem
 from frontend import highrise
 
 class Feature(models.Model):
@@ -176,6 +179,20 @@ class Message(models.Model):
         else:
             return "%s [Inactive]" % self.text
 
+class Tags:
+
+    @classmethod
+    def sorted(self):
+        from codewiki.models import Scraper
+        #popular tags
+        #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
+        tags_sorted = sorted([(tag, int(tag.count)) for tag in Tag.objects.usage_for_model(Scraper, counts=True)], key=lambda k:k[1], reverse=True)[:40]
+        tags = []
+        for tag in tags_sorted:
+            # email (for emailers) and test far outweigh other tags :(
+            if tag[0].name not in ['test','email']:
+                tags.append(tag[0])
+        return tags
 
 class DataEnquiry(models.Model):
     date_of_enquiry = models.DateTimeField(auto_now_add=True)
