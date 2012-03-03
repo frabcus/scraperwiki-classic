@@ -16,38 +16,67 @@ var showinglookup = {
     public:'.urls, .columns, .frequency, .due_date, .first_name, .last_name, .email, .broadcast, .why'
 }
 
-$(function()
-{ 
+$(function(){ 
+
 	function requestOption($a){
 		
-		function requestOptionInner($a){
-			$d = $a.parent().next();
-			var id = $d.attr('id');
-            window.location.hash = id; 
-			$a.addClass('selected').parent().next().css('border-color', '#39c').slideDown(250);
+		$d = $a.parent().next();
+		var id = $d.attr('id');
+        window.location.hash = id;
+		
+		function switchForm($a, fade){
+		    if(id == 'public'){
+		        $('#request_form:visible').hide();
+		        if(fade){
+		            $('#public_request:hidden').fadeIn(200);
+		        } else {
+		            $('#public_request:hidden').show();
+		        }
+		    } else {
+		        $('#public_request:visible').hide();
+		        if(fade){
+		            $('#request_form:hidden').fadeIn(200);
+		        } else {
+		            $('#request_form:hidden').show();
+		        }
+    			$(showinglookup[id], $('#request_form')).filter(':hidden').slideDown(250);
+    			$('#request_form li').not(showinglookup[id]).slideUp(250);
+                $('#id_category').val(id);
+                $('#id_category_title').val($a.text());
+		    }
+		}
+		
+		function switchNav($a){
+		    $a.addClass('selected').parent().next().css('border-color', '#39c').slideDown(250);
 			$('#request_options h3 a.selected').not($a).removeClass('selected');
 			$('#request_options div:visible').not($d).css('border-color', '#E8F2F9').slideUp(250);
-			$(showinglookup[id], $('#request_form')).filter(':hidden').slideDown(250);
-			$('#request_form li').not(showinglookup[id]).slideUp(250);
-            $('#id_category').val(id);
-            $('#id_category_title').val($a.text());
 		}
 		
-		if($('#request_form').is(':hidden')){
+		if($('#request_options').css('marginLeft') != '0px'){
 			$('#request_options').animate({marginLeft: 0}, 400, 'easeOutCubic', function(){
-				$('#request_form').fadeIn(200, function(){
-					requestOptionInner($a)
-				});
+        		switchNav($a);
+				switchForm($a, true);
 			});	
 		} else {
-			requestOptionInner($a)
+    		switchNav($a);
+    		switchForm($a, false);
 		}
 		
+	}
+	
+	function publicOption(){
+	    if($('#request_options').css('marginLeft') != '0px'){
+			$('#request_options').animate({marginLeft: 0}, 400, 'easeOutCubic', function(){
+				$('#public_request').fadeIn(200);
+			});	
+		} else {
+			$('#request_form').hide().prev().show();
+		}
 	}
 		
 	$('#request_options h3 a').bind('click', function(e){
 		e.preventDefault();
-		requestOption($(this));
+    	requestOption($(this));
 	}).each(function(){
 		h = $(this).outerHeight() - 2;
 		$('<span>').addClass('arrow').css('border-width', Math.round(h/2) + 'px 0px ' + Math.round(h/2) + 'px 10px').attr('title',h).appendTo($(this));
@@ -71,30 +100,6 @@ $(function()
 		$(this).prev().datepicker("show");
 	});
 	
-	$('body.tags .content #filter').css('visibility','hidden').bind('click', function(){
-		if($('#filter_text').val() != ''){
-			$('.content li').hide().filter(":contains(" + $('#filter_text').val() + ")").show();
-			$(this).siblings('#reset').css('visibility','visible');
-		}
-	}).siblings('#reset').css('visibility','hidden').bind('click', function(){
-		$('.content li').show();
-		$(this).css('visibility','hidden');
-		$('#filter_text').val('');
-		$('#filter').css('visibility','hidden');
-	}).siblings('#filter_text').bind('keyup', function(e){
-		if(e.which == 13){
-			if($('#filter_text').val() != ''){
-				$('.content li').hide().filter(":contains(" + $('#filter_text').val() + ")").show();
-				$(this).siblings('#reset').css('visibility','visible');
-			}
-		} else if($(this).val() != ''){
-			$('#filter').css('visibility','visible');
-		} else {
-			$('#filter').css('visibility','hidden');
-			$('#reset').css('visibility','hidden');
-			$('.content li').show();
-		}
-	});
 }); 
 
 </script>
@@ -111,32 +116,57 @@ $(function()
 
 <div id="request_options">
     <h2 class="paid">Paid premium services <i>(starting&nbsp;at&nbsp;$1000)</i></h2>
-    <h3><a href="#private">I need some data that I want to <strong>keep&nbsp;private</strong></a></h3>
+    <h3 class="premium"><a href="#private">I need some data that I want to <strong>keep&nbsp;private</strong></a></h3>
 	<div id="private">
 		<p>We pay the best developers in our community to gather the data and store it for you in a private vault.</p>
 		<p class="paid">This is a paid service. The cost will depend on the amount and complexity of the information being gathered. It can take between a couple of hours and a few days to gather. When we know what you want, we will give you a quote.</p>
 	</div>
-    <h3><a href="#viz">I need data and I also want a <strong>visualisation</strong></a></h3>
+    <h3 class="premium"><a href="#viz">I need data and I also want a <strong>visualisation</strong></a></h3>
 	<div id="viz">
 		<p>This is a combination of getting the data, storing it, and creating a visualisation that tells a story. You give us a short brief and a link to the data, and we help you create an engaging visualisation either directly or with a ScraperWiki partner.</p>
 		<p class="paid">This is a paid service. The cost will depend on the brief you give us, so be descriptive and we&rsquo;ll send you a quote.
 	</div>
-    <h3><a href="#app">I need a <strong>data application</strong> for my website</a></h3>
+    <h3 class="premium"><a href="#app">I need a <strong>data application</strong> for my website</a></h3>
 	<div id="app">
 		<p>Data applications are designed to drive continuous traffic to a website and also offer the possibility of generating revenue through a subscription model for services like email alerts. This is an automated service.</p>
 		<p class="paid">This is a paid service.</p>
 	</div>
-    <h3><a href="#etl">I want to merge content from systems that cannot talk to each other (<strong>ETL</strong>) &ndash; Help!</a></h3>
+    <h3 class="premium"><a href="#etl">I want to merge content from systems that cannot talk to each other (<strong>ETL</strong>) &ndash; Help!</a></h3>
 	<div id="etl">
 		<p>Sometimes it can be easier to scrape data from systems than to re-engineer the back-end. In this context ScraperWiki acts as a data hub for the purposes of transforming data into a central datastore. It is a more cost effective &lsquo;ETL&rsquo; (Extract, Transform and Load) and a flexible option for building an API for web or mobile applications.</p>
 		<p class="paid">This is a paid service &ndash; although it&rsquo;s usually a lot cheaper and faster than traditional ETL solutions. The time and cost will depend on the amount and the accessibility of the data we&rsquo;re scraping.
 	</div>
-	<h2 class="free">Free scraping service</h2>
-    <h3><a href="#public">I need some data and I want to make it <strong>public&nbsp;&amp;&nbsp;open</strong></a></h3>
+	<h2 class="free">Community scraping service</h2>
+    <h3 class="free"><a href="#public">I need some data and I want to make it <strong>public&nbsp;&amp;&nbsp;open</strong></a></h3>
 	<div id="public">
-		<p class="free">This is a free service, if you have the technical skills just go and do it! If not, we can broadcast this request to our developer community.</p>
+		<p class="free">This is a free service, if you have the technical skills just go and do it! If not, our developer community might help out.</p>
 		<p>Alternatively if you have budget we can pay a developer to do it for you. The cost can range in price and will depend on the size and complexity of the information.</p>
 	</div>
+</div>
+
+<div id="public_request" style="display: none">
+    <p>
+        If you&rsquo;ve found a cool dataset that you don't know how to liberate,
+        you should post it on <a href="http://groups.google.com/group/scraperwiki?hl=en">our community Google Group</a>.
+        Someone might be able to give you some tips or even write the scraper for you.
+        Here are some things you should include.
+    </p>
+    <ul class="bulleted">
+        <li>Why you want to liberate this data</li>
+        <li>URLs or source documents</li>
+        <li>How often the site gets updated (if you know)</li>
+    </ul>
+    <p>
+        It can also help developers if you provide a walkthrough
+        of how you would get the data if you needed to resort to
+        copy-and-paste. For complicated websites, annotated
+        screenshots are sometimes nice.
+        {# Column names of the resulting tables #}
+    </p> 
+    <p>
+        If your request sounds boring or overly commercial, people probably won&rsquo;t respond;
+        please consider our <a href="{% url request_data %}">premium services</a> if that is the case.
+    </p>
 </div>
 
 <form action="." method="post" id="request_form">

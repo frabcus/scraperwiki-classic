@@ -6,9 +6,10 @@ non-programmers (30 minutes).
 
 <h2>1. Make a new scraper</h2>
 
-<p>We're going to scrape the averge number of years children spend
+<p>We're going to scrape the average number of years children spend
 in school in different countries from 
-<a href="http://unstats.un.org/unsd/demographic/products/socind/education.htm">this page</a> on a UN site.
+<a href="http://web.archive.org/web/20110514112442/http://unstats.un.org/unsd/demographic/products/socind/education.htm">this page</a>, which was once on a UN site
+but has since been replaced with an <a href="http://unstats.un.org/unsd/demographic/products/socind/education.htm">Excel spreadsheet</a>.
 </p>
 
 <p>Pick "new scraper" from the main menu on the right, and choose PHP.
@@ -36,7 +37,7 @@ printed in the Console tab at the bottom of the editor.
 There is also a simple built in {% doc_link_full 'LANG_help_documentation' language 'ScraperWiki function' %} which may be easier to use.
 </p>
 
-<code>$html = scraperWiki::scrape("http://unstats.un.org/unsd/demographic/products/socind/education.htm");
+<code>$html = scraperWiki::scrape("http://web.archive.org/web/20110514112442/http://unstats.un.org/unsd/demographic/products/socind/education.htm");
 print $html . "\n";
 </code>
 
@@ -107,22 +108,6 @@ the SQL query in the URL.</p>
 
 <h2>What next?</h2>
 
-<p>If you have a scraper you want to write, and feel ready, then get going. Otherwise...
-
-{% load doc_links %}
-<ul>
-    <li>
-        <a href="{% url docs language %}">More documentation</a> on ScraperWiki
-        and common PHP scraping libraries.
-    </li>
-    <li>
-        <a href="{% url get_involved %}" title="Get involved">Get involved!</a>
-        Fix, tag or document our shared public data scrapers.
-    </li>
-</ul>
-
-
-
-
-
+<p>If you have a scraper you want to write, and feel ready, then get going.
+Otherwise <a href="../">take a look at the documentation</a>.</p>
 

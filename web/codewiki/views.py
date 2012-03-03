@@ -153,36 +153,6 @@ def scraper_history(request, wiki_type, short_name):
     
     return render_to_response('codewiki/history.html', context, context_instance=RequestContext(request))
 
-###############################################################################
-# Called as a result of a GIT PUSH when the callback is pointed at a specific 
-# scraper, we will handle the incoming request only if the fields match what
-# the owner told us about the scraper/git connection.
-###############################################################################
-def gitpush(request, wiki_type, short_name):
-    if not request.method == 'POST':
-        return HttpResponse("Error - not a post request")                    
-        
-    try:
-        data = json.loads( request.raw_post_data )
-    except:
-        # We need to notify the user that the push request was not handled
-        return HttpResponse("Error - no JSON found")            
-
-    # TODO: Check the username,repo and filename in the scraper properties 
-    # against the properties set in the scraper. If they match then go 
-    # fetch the updated file and use it.
-    
-    scraper = get_object_or_404( Scraper, short_name=short_name)
-    if scraper.privacy_status == 'deleted':
-        raise Http404
-    
-    # Check the scraper properties.
-        
-    return HttpResponse("OK")
-
-
-
-
 # Rewrite of the overview page by Zarino
 def full_history(request, wiki_type, short_name):
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
@@ -593,7 +563,8 @@ def scraper_delete_scraper(request, wiki_type, short_name):
             ]
      } )
 
-    return HttpResponseRedirect(reverse('dashboard'))
+    return HttpResponseRedirect(reverse('profile',
+      kwargs=dict(username=request.user.username)))
 
 
 def scraper_undelete_scraper(request, wiki_type, short_name):

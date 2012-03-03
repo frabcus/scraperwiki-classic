@@ -10,7 +10,7 @@
 	<p>{{profile.user.username}}{% ifequal profile.user.username user.username %} {% if owned_code_objects %}
 	    &bull;
 	    {{ owned_code_objects.count }}
-	    {% ifequal paginator.count 1 %}scraper or view{% else %}scrapers and views{% endifequal %}
+	    {% ifequal owned_code_objects.count 1 %}scraper or view{% else %}scrapers and views{% endifequal %}
 	{% endif %}{% endifequal %}</p>
 {% endblock %}
 

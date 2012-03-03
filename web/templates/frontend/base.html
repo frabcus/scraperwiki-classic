@@ -8,20 +8,20 @@
     {% block meta %}{% endblock %}
 
 	{% load compress %}
-	
+
 	{% compress js %}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.12.custom.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>		
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/underscore.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/ICanHaz.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/csrf.js?{{settings.REVISION}}"></script>       
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>		
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/csrf.js?{{settings.REVISION}}"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>
 	{% endcompress %}
 
 	{% block javascript %}{% endblock %}
@@ -30,7 +30,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.8.12.css" />
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css?{{settings.REVISION}}" />
 	{% endcompress %}
-	
+
 	{% block css %}{% endblock %}
 	{% block rss %}{% endblock %}
 
@@ -85,7 +85,7 @@
             </div>
         </div>
     <![endif]-->
-	
+
 	{% block nav_outer %}
 	<div id="nav_outer">
 		<div id="nav_inner">
@@ -99,21 +99,19 @@
 				<li class="events"><a href="{% url events %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Events']); }">Events</a></li>
 				{% if user.is_authenticated %}
 				<li class="user loggedin">
-					<a href="{% url profiles_profile_detail user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
+					<a href="{% url profile user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
 					<ul>
-						<li class="dashboard"><a href="{% url dashboard %}">Your dashboard</a></li>
+						<li class="profile"><a href="{% url profile user.username %}">Your profile</a></li>
 						{% if user.vaults.count > 0 or request.user.vault_membership.count %}
 						<li class="vaults"><a href="{% url vault %}">Your vaults</a></li>
 						{% endif %}
-						
-						<li class="profile"><a href="{% url profiles_profile_detail user.username %}">Your profile</a></li>
 						<li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
 						<li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
 					</ul>
 				</li>
 				{% else %}
 				<li class="user login">
-                <a href="{% url login %}?next={% ifequal request.get_full_path '/' %}/dashboard/{% else %}{{ request.get_full_path }}{% endifequal %}">Log in</a>
+                <a href="{% url login %}">Log in</a>
 				    <ul>
 						<li class="login_form">
 						    <form method="post" action="{% url login %}" id="nav_login_form">
@@ -123,7 +121,6 @@
                                 <label for="id_nav_password">Password:</label>
                                 <input type="password" id="id_nav_password" name="password" />
                                 <a id="forgotten" href="/accounts/password/reset/">Forgotten?</a>
-                                <input type="hidden" name="redirect" value="{% ifequal request.get_full_path '/' %}/dashboard/{% else %}{{ request.get_full_path }}{% endifequal %}"/>
                                 <input type="submit" class="submit" id="nav_login_submit" name="login" value="Log in" />
                                 <span class="clear"></span>
                             </form>
@@ -159,25 +156,24 @@
 	{% block content_outer %}
 	<div id="page_outer">
 		<div id="page_inner">
-		
+
 		{% block menu %}
-		
+
 		<div id="divMenu">
               <ul class="main_menu">
 				{% if user.is_authenticated %}
-                <li><a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Dashboard']); }">Your dashboard</a></li>
+                <li><a href="{% url profile username=user.username %}" title="Manage your scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Profile']); }">Your Profile</a></li>
                 {% endif %}
                 <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Browse']); }">Browse</a></li>
                 <li>
                     <a data-wiki_type="scraper" href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'New scraper']); }">New scraper</a> /
                     <a data-wiki_type="view" href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'New view']); }">view</a>
                 </li>
-                <li><a href="{% url get_involved %}" title="Get involved" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Get involved']); }">Get involved!</a></li>
                 <li><a href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Request data']); }">Request data</a></li>
                 <li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Documentation']); }">Documentation</a></li>
               </ul>
 
-              <ul class="sub_menu"> 
+              <ul class="sub_menu">
                    <li class="survey"><a href="http://sw.zarino.co.uk" title="ScraperWiki Developer Survey" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Take our survey']); }"><span class="unimportant">Take our</span> survey!</a></li>
                  <li><a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Read our blog']); }"><span class="unimportant">Read our</span> blog</a></li>
                  <li><a href="http://groups.google.com/group/scraperwiki" title="Google groups" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Join our email list']); }"><span class="unimportant">Join our</span> email list</a></li>
@@ -187,7 +183,7 @@
               </ul>
 
               {% if user.is_staff %}
-              <ul class="sub_menu staff"> 
+              <ul class="sub_menu staff">
                   {% if scraper.pk %}
                     <li><a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}">Django admin (this scraper)</a></li>
                   {% else %}
@@ -204,10 +200,10 @@
               </ul>
               {% endif %}
             </div>
-		
+
 		{% endblock %}
-		
-		{% block above_page %}{% endblock %}		    
+
+		{% block above_page %}{% endblock %}
 
 		<div id="divPage">
     		{% block tabs %}{% endblock %}
@@ -243,9 +239,9 @@
 					<ul>
 					    <li><a data-wiki_type="scraper" href="#" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new scraper']); }">Create new scraper</a> / <a data-wiki_type="view" href="#" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new view']); }">view</a></li>
 						<li><a href="{% url docsexternal %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'API']); }">API</a></li>
-						<li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Docs &amp; tutorials']); }">Docs &amp; tutorials</a></li>	
+						<li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Docs &amp; tutorials']); }">Docs &amp; tutorials</a></li>
 						<li><a href="{% url docs 'faq' %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'FAQ']); }">FAQ</a></li>
-						<li><a href="http://groups.google.com/group/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Discussion group']); }">Discussion group</a></li>			                   			                 
+						<li><a href="http://groups.google.com/group/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Discussion group']); }">Discussion group</a></li>
 					</ul>
 				</dd>
 				<dt>ScraperWiki</dt>
@@ -253,7 +249,6 @@
 					<ul>
 						<li><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'About']); }">About us</a></li>
 						<li><a href="{% url contact_form %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Contact us']); }">Contact us</a></li>
-						<li><a href="{% url get_involved %}" title="Get involved" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Get involved']); }">Get involved!</a></li>
 						<li><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Blog']); }">Blog</a></li>
 						<li><a href="http://twitter.com/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Twitter']); }">Twitter</a></li>
                         <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Facebook']); }">Facebook</a></li>
@@ -284,10 +279,10 @@
 		DD_belatedPNG.fix('.png_bg, img');
 	</script>
 	<![endif]-->
-    
+
         {# use this one if you want your editor to syntax highlight the javascript #}
     {% block jrun_script %}
-    {% endblock %}  
+    {% endblock %}
 
 {% if sqldebug %}
 <div id="debug">
@@ -318,7 +313,7 @@
   </table>
 </div>
 {% endif %}
-	
+
 </body>
 
 </html>

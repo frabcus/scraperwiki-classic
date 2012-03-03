@@ -43,7 +43,7 @@
 
 {% block header %}
     <h2>
-        <a href="{% if scraper.owner.username %}{% url profiles_profile_detail scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> / 
+        <a href="{% if scraper.owner.username %}{% url profile scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> / 
         {% if user.is_authenticated %}
             <span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span> 
             <a id="aEditTitle" title="Edit title">Edit title</a>
@@ -53,7 +53,7 @@
     </h2>
     <p>
 	    <span class="language {{scraper.language|lower}}" rel="{{scraper.language|lower}}">{% if scraper.language == 'php' %}PHP{% else %}{{ scraper.language|capfirst }}{% endif %}</span>
-        {% if related_scrapers %}{% for related_scraper in related_scrapers %}<span class="visualises"><a href="{% url profiles_profile_detail related_scraper.owner.username %}">{% if related_scraper.owner.get_profile.name %}{{ related_scraper.owner.get_profile.name }}{% else %}{{related_scraper.owner.username}}{% endif %}</a> / <a href="{% url code_overview related_scraper.wiki_type related_scraper.short_name %}">{{related_scraper.title}}</a></span>{% endfor %}{% endif %}
+        {% if related_scrapers %}{% for related_scraper in related_scrapers %}<span class="visualises"><a href="{% url profile related_scraper.owner.username %}">{% if related_scraper.owner.get_profile.name %}{{ related_scraper.owner.get_profile.name }}{% else %}{{related_scraper.owner.username}}{% endif %}</a> / <a href="{% url code_overview related_scraper.wiki_type related_scraper.short_name %}">{{related_scraper.title}}</a></span>{% endfor %}{% endif %}
         {% if scraper.privacy_status == 'public' %}
     	    <span class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
         {% endif %}
@@ -82,12 +82,12 @@
 }(document, 'script', 'facebook-jssdk'));</script>
 
 <fieldset>
-    <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
+    <input type="hidden" id="id_api_base" value="{{api_base}}" />
     <input type="hidden" id="scrapershortname" value="{{scraper.short_name}}"/>
     {% if scraper.access_apikey %}
-        <input type="text" id="id_apikey" value="{{scraper.access_apikey}}" class="hide"/>
+        <input type="hidden" id="id_apikey" value="{{scraper.access_apikey}}" />
     {% else %}
-        <input type="text" id="id_apikey" value="" class="hide"/>
+        <input type="hidden" id="id_apikey" value="" />
     {% endif %}
 </fieldset>
 
@@ -311,7 +311,7 @@
         <ul>
         {% for related_scraper in related_scrapers %}
             <li>
-                <a href="{% url profiles_profile_detail related_scraper.owner.username %}">{% if related_scraper.owner.get_profile.name %}{{ related_scraper.owner.get_profile.name }}{% else %}{{related_scraper.owner.username}}{% endif %}</a> /
+                <a href="{% url profile related_scraper.owner.username %}">{% if related_scraper.owner.get_profile.name %}{{ related_scraper.owner.get_profile.name }}{% else %}{{related_scraper.owner.username}}{% endif %}</a> /
                 <a href="{% url code_overview related_scraper.wiki_type related_scraper.short_name %}">{{related_scraper.title}}</a>
             </li>
         {% endfor %}
@@ -323,7 +323,7 @@
     <div class="forked_from">
         <h4>Based&nbsp;on:</h4>
         <ul>
-            <li><a href="{% url profiles_profile_detail scraper.forked_from.owner.username %}">{{ scraper.forked_from.owner.get_profile.name }}</a> / <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{ scraper.forked_from.title }}</a></li>
+            <li><a href="{% url profile scraper.forked_from.owner.username %}">{{ scraper.forked_from.owner.get_profile.name }}</a> / <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{ scraper.forked_from.title }}</a></li>
         </ul>
     </div>
     {% endif %}
@@ -333,7 +333,7 @@
         <h4>Copied&nbsp;to:</h4>
         <ul>
         {% for s in forked_to %}
-            <li><a href="{% url profiles_profile_detail s.owner.username %}">{{ s.owner.get_profile.name }}</a> / <a href="{% url code_overview s.wiki_type s.short_name %}">{{ s.title }}</a></li>
+            <li><a href="{% url profile s.owner.username %}">{{ s.owner.get_profile.name }}</a> / <a href="{% url code_overview s.wiki_type s.short_name %}">{{ s.title }}</a></li>
         {% endfor %}
         {% if forked_to_total > forked_to|length %}
             <li class="more"><a href="/browse/{{scraper.wiki_type}}s/?forked_from={{scraper.short_name}}" title="Click to show all {{scraper.wiki_type}}s based on this one">&hellip;and {{forked_to_remainder}} more</a></li>
@@ -347,7 +347,7 @@
         <h4>Views&nbsp;using this&nbsp;data:</h4>
         <ul>
         {% for v in related_views %}
-            <li><a href="{% url profiles_profile_detail v.owner.username %}">{{ v.owner.get_profile.name }}</a> / <a href="{% url code_overview v.wiki_type v.short_name %}">{{ v.title }}</a></li>
+            <li><a href="{% url profile v.owner.username %}">{{ v.owner.get_profile.name }}</a> / <a href="{% url code_overview v.wiki_type v.short_name %}">{{ v.title }}</a></li>
         {% endfor %}
         </ul>
     </div>
@@ -402,7 +402,7 @@
                 {{ comment.comment|escape|urlizetrunc:"100"|linebreaks }}
             </p>
             <small>
-                Added by <a href="{% url profiles_profile_detail comment.user.username %}">{{ comment.name|escape }}</a>, {{ comment.submit_date|timesince }} ago
+                Added by <a href="{% url profile comment.user.username %}">{{ comment.name|escape }}</a>, {{ comment.submit_date|timesince }} ago
             </small>
         </div>
      {% endfor %}

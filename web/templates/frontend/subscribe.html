@@ -9,7 +9,9 @@
             Recurly.config({
                 subdomain: '{{subdomain}}'
                 , currency: 'USD'
-                , country: 'US'
+                //, country: 'US'
+                , country: 'GB'
+                , VATPercent: '20'
             });
             Recurly.buildSubscriptionForm({
                 target: '#recurly-subscribe'
@@ -18,7 +20,7 @@
                 , successURL: '/confirm_subscription/'
                 , distinguishContactFromBillingInfo: true
                 , collectCompany: true
-                , enableCoupons: false
+                {% if not enable_coupons %}, enableCoupons: false{% endif %}
                 , enableAddOns: false
                 , account: {
                     firstName: '{{ firstname }}'
@@ -28,7 +30,8 @@
                 , signature: '{{ signature }}'
                 , beforeInject: function(form){
                     $(form).prepend('<h2 class="introduction">Almost there! Just enter your payment details.</h2>');
-                    $('.footer', $(form)).prepend('<a href="/pricing/" class="back">&larr; Go back to pricing plans</a>')
+                    $('.footer', $(form)).prepend('<a href="/pricing/" class="back">&larr; Go back to pricing plans</a>');
+                    $('.country select', $(form)).val('US').trigger('change');
                 }
             });
         </script>

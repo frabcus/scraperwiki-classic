@@ -40,6 +40,12 @@
               <td class="link">Private</td>
             </tr>
             {% endif %}
+	        {% if code.privacy_status == 'public' %}
+    	    <tr class="status public">
+              <td class="label">Status</td>
+              <td class="link">Public</td>
+            </tr>
+            {% endif %}
         {% endif %}
 
         {% if code.is_sick_and_not_running %}
@@ -54,7 +60,7 @@
     <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
     
     <h3>
-      <a class="owner" href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}</a> / <a href="{% url code_overview code.wiki_type code.short_name %}">{% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</a>
+      <a class="owner" href="{% if code.owner.username %}{% url profile code.owner.username %}{% endif %}">{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}</a> / <a href="{% url code_overview code.wiki_type code.short_name %}">{% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</a>
     </h3>
     
     <p class="context">
@@ -72,19 +78,7 @@
         {% endif %} 
     </p>
     <p class="context">
-        {% if on_dashboard and code.scraper %}
-              {% ifnotequal code.scraper.next_run.year 9999 %}
-                {% ifequal code.scraper.next_run|timeuntil '0 minutes' %}
-                  Scheduled next run ASAP.
-                {% else %}
-                  Scheduled next run in {{code.scraper.next_run|timeuntil}}.
-                {% endifequal %}
-              {% else %}
-                No future run scheduled.
-              {% endifnotequal %}
-        {% else %}
-            Created {{code.created_at|timesince}} ago.
-        {% endif %}
+        Created {{code.created_at|timesince}} ago.
     </p>
     
     <p class="description">{{ code.description_ashtml|striptags|truncatewords:75 }}</p>

@@ -15,16 +15,15 @@ from django.contrib.sites.models import Site
 # https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 from django.views.decorators.csrf import csrf_exempt
 
+
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
-from tagging.models import Tag, TaggedItem
 
 from codewiki.models import Code, UserCodeRole, Scraper, Vault, View, scraper_search_query, user_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
 from frontend.forms import CreateAccountForm, UserMessageForm
 from registration.backends import get_backend
-from frontend.models import UserProfile
-from codewiki.models import Scraper
+from frontend.models import UserProfile, Tags
         
 # find this in lib/python/site-packages/profiles
 from profiles import views as profile_views   
@@ -44,45 +43,23 @@ from utilities import location
 
 def frontpage(request, public_profile_field=None):
     user = request.user
-
-    #featured
-    featured_both = Code.objects.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-created_at')[:4]
-	
-    #popular tags
-    #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
-    tags_sorted = sorted([(tag, int(tag.count)) for tag in Tag.objects.usage_for_model(Scraper, counts=True)], key=lambda k:k[1], reverse=True)[:40]
-    tags = []
-    for tag in tags_sorted:
-        # email (for emailers) and test far outweigh other tags :(
-        if tag[0].name not in ['test','email']:
-            tags.append(tag[0])
-    
     data = {
-			'featured_both': featured_both,
-            'tags': tags, 
-            'language': 'python'}
+            'tags': Tags.sorted(), 
+            'language': 'python'
+           }
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
-
-@login_required
-def dashboard(request, page_number=1):
-    user = request.user
-    owned_or_edited_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=user)
-        
-    context = {'object_list': owned_or_edited_code_objects,
-               'language':'python' }
-    return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
 
 
 def profile_detail(request, username):
     # The templates for this view are in templates/profiles/
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
+    profile = profiled_user.get_profile()
     
-    # sorts against what the current user can see and what the identity of the profiled_user
-    extra_context = { }
-    owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
-    extra_context['owned_code_objects'] = owned_code_objects
-    extra_context['emailer_code_objects'] = owned_code_objects.filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
+    extra_context = {
+                     'owned_code_objects' : profile.owned_code_objects(profiled_user),
+                     'emailer_code_objects' : profile.emailer_code_objects(username, profiled_user)
+                    }
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
 
@@ -106,8 +83,8 @@ def user_message(request, username):
         body = form.cleaned_data['body']
 
         site = Site.objects.get_current()
-        reply_url = "https://%s%s#message" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
-        sender_profile_url = "https://%s%s" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":sending_user_profile.user.username}))
+        reply_url = "https://%s%s#message" % (site.domain,reverse("profile",kwargs={"username":sending_user_profile.user.username}))
+        sender_profile_url = "https://%s%s" % (site.domain,reverse("profile",kwargs={"username":sending_user_profile.user.username}))
         if sending_user_profile.messages and receiving_user_profile.messages:
             text_content = render_to_string('emails/new_message.txt', locals(), context_instance=RequestContext(request) )
             html_content = render_to_string('emails/new_message.html', locals(), context_instance=RequestContext(request) )
@@ -161,7 +138,8 @@ def login(request):
                 if redirect:
                     return HttpResponseRedirect(redirect)
                 else:
-                    return HttpResponseRedirect(reverse('frontpage'))
+                    return HttpResponseRedirect(reverse('profile',
+                                                kwargs=dict(username=request.user.username)))
 
         #New user is registering
         elif request.POST.has_key('register'):
@@ -180,7 +158,8 @@ def login(request):
                 if redirect:
                     return HttpResponseRedirect(redirect)
                 else:
-                    return HttpResponseRedirect(reverse('frontpage'))
+                    return HttpResponseRedirect(reverse('profile', 
+                                                kwargs=dict(username=request.user.username)))
 
     return render_to_response('registration/extended_login.html', {'registration_form': registration_form,
                                                                    'login_form': login_form, 
@@ -351,49 +330,6 @@ def search(request, q=""):
         form = SearchForm()
         return render_to_response('frontend/search_results.html', {'form': form}, context_instance = RequestContext(request))
 
-def get_involved(request):
-
-        scraper_count = Scraper.objects.exclude(privacy_status="deleted").count()
-        view_count = View.objects.exclude(privacy_status="deleted").count()
-        
-        #no description
-        scraper_no_description_count = Scraper.objects.filter(description='').exclude(privacy_status="deleted").count()
-        scraper_description_percent = 100 - int(scraper_no_description_count / float(scraper_count) * 100)
-
-        view_no_description_count = View.objects.filter(description='').exclude(privacy_status="deleted").count()
-        view_description_percent = 100 - int(view_no_description_count / float(view_count) * 100)
-
-        #no tags
-        scraper_no_tags_count = TaggedItem.objects.get_no_tags(Scraper.objects.exclude(privacy_status="deleted")).count()
-        scraper_tags_percent = 100 - int(scraper_no_tags_count / float(scraper_count) * 100)
-    
-        view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.exclude(privacy_status="deleted")).count()
-        view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
-
-        #scraper status
-        scraper_sick_count = Scraper.objects.filter(status='sick').exclude(privacy_status="deleted").count()
-        scraper_sick_percent = 100 - int(scraper_sick_count / float(scraper_count) * 100)
-
-        data = {
-            'scraper_count': scraper_count,
-            'view_count': view_count,
-            'scraper_no_description_count': scraper_no_description_count,
-            'scraper_description_percent': scraper_description_percent,
-            'view_no_description_count': view_no_description_count,
-            'view_description_percent': view_description_percent,
-            'scraper_no_tags_count': scraper_no_tags_count,
-            'scraper_tags_percent': scraper_tags_percent,
-            'view_no_tags_count': view_no_tags_count,
-            'view_tags_percent': view_tags_percent,
-            'scraper_sick_count': scraper_sick_count,
-            'scraper_sick_percent': scraper_sick_percent,
-            'language': 'python', 
-        }
-
-        return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
-
-
-
 def events(request, e=''):
     names = ['jdcny','ltdmo','jdcdc']
     if e in names:
@@ -481,6 +417,9 @@ def request_data(request):
         return HttpResponseRedirect(reverse('request_data_thanks'))
     return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
 
+def request_data_public(request):
+    return render_to_response('frontend/request_data_public.html', context_instance = RequestContext(request))
+
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
 
@@ -489,6 +428,9 @@ def generate_recurly_signature(plan_code, account_code):
     return signature
 
 def subscribe(request, plan):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('login') + "?next=" + request.path)
+
     plans = { 
         'individual' : { 
             'name' : 'Individual', 
@@ -508,6 +450,9 @@ def subscribe(request, plan):
     account_code = "%s-%s" % (request.user.id, request.user.username)
     context['signature'] = generate_recurly_signature(plan_code=plan, account_code=account_code)
     context['account_code'] = account_code
+    context['enable_coupons'] = False
+    if request.user.get_profile().has_feature('Alpha Vault User'):
+        context['enable_coupons'] = True
     return render_to_response('frontend/subscribe.html', context, context_instance = RequestContext(request))
 
 def unpack_recurly_result(request):
@@ -803,5 +748,25 @@ def vault_users(request, vaultid, username, action):
 
 
 
+###############################################################################
+# Corporate mini-site
+###############################################################################
 
+def corporate(request, page=''):
+    if settings.DEBUG and request.user.is_staff:
+        
+        # do they want the index page?
+        if not page:
+            page = 'index'
+        
+        # 404 if requested page doesn't exist
+        # return page if it does  
+        if page not in ['index', 'pricing', 'contact']:
+            raise Http404
+        else:
+            context = {'page':page}
+            return render_to_response('frontend/corporate/' + page + '.html', context, context_instance=RequestContext(request))
+        
+    else:
+        return HttpResponseRedirect(reverse('frontpage'))
 

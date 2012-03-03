@@ -11,6 +11,9 @@ from django.core.mail import send_mail, mail_admins
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 
+from tagging.models import Tag, TaggedItem
+from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
+from tagging.models import Tag, TaggedItem
 from frontend import highrise
 
 class Feature(models.Model):
@@ -100,7 +103,7 @@ class UserProfile(models.Model):
         ordering = ('-created_at',)
     
     def get_absolute_url(self):
-        return ('profiles_profile_detail', (), { 'username': self.user.username })
+        return ('profile', (), { 'username': self.user.username })
     get_absolute_url = models.permalink(get_absolute_url)        
 
     def change_plan(self, plan):
@@ -132,6 +135,14 @@ class UserProfile(models.Model):
         vault.save()
         vault.members.add(self.user)
         return vault
+    
+    # sorts against what the current user can see and what the identity of the profiled_user
+    def owned_code_objects(self, profiled_user):
+        from codewiki.models import scraper_search_query
+        return scraper_search_query(self.user, None).filter(usercoderole__user=profiled_user)
+
+    def emailer_code_objects(self, username, profiled_user):
+        return self.owned_code_objects(profiled_user).filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
 
 # Signal Registrations
 # when a user is created, we want to generate a profile for them
@@ -176,6 +187,20 @@ class Message(models.Model):
         else:
             return "%s [Inactive]" % self.text
 
+class Tags:
+
+    @classmethod
+    def sorted(self):
+        from codewiki.models import Scraper
+        #popular tags
+        #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
+        tags_sorted = sorted([(tag, int(tag.count)) for tag in Tag.objects.usage_for_model(Scraper, counts=True)], key=lambda k:k[1], reverse=True)[:40]
+        tags = []
+        for tag in tags_sorted:
+            # email (for emailers) and test far outweigh other tags :(
+            if tag[0].name not in ['test','email']:
+                tags.append(tag[0])
+        return tags
 
 class DataEnquiry(models.Model):
     date_of_enquiry = models.DateTimeField(auto_now_add=True)

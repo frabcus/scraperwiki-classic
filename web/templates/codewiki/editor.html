@@ -125,7 +125,7 @@
 <input type="hidden" id="codemirrorversion" value="{{codemirrorversion}}/"/>
 
 {# declare all the URLs the javascript is going to want access to #}
-<input type="hidden" id="userprofileurl"    value="{% url profiles_profile_detail 'XXX' %}"/>
+<input type="hidden" id="userprofileurl"    value="{% url profile 'XXX' %}"/>
 <input type="hidden" id="saveurl"           value="{% url handle_editor_save %}"/>
 <input type="hidden" id="proxycachedurl"    value="{% url proxycached %}"/>
 <input type="hidden" id="quickhelpurl"      value="{% url quickhelp %}"/>
@@ -135,7 +135,7 @@
 {% endif %}
 
 {% if scraper.short_name %}
-    <input type="hidden" id="viewrunurl"    value="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}"/>
+    <input type="hidden" id="viewrunurl"    value="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}{% if scraper.access_apikey %}?apikey={{scraper.access_apikey}}{% endif %}"/>
     <input type="hidden" id="editorreloadurl" value="{% url reload scraper.short_name %}"/>
 {% endif %}
 
@@ -182,9 +182,9 @@
         </a>
         {% if request.user.is_authenticated %}
         {% if scraper.owner %}
-          {% if scraper.owner.get_profile.name %}<a href="{% url profiles_profile_detail scraper.owner.username %}">{{scraper.owner.get_profile.name}}</a>{% else %}<a href="{% url profiles_profile_detail scraper.owner.username %}">{{scraper.owner.username}}</a>{% endif %}
+          {% if scraper.owner.get_profile.name %}<a href="{% url profile scraper.owner.username %}">{{scraper.owner.get_profile.name}}</a>{% else %}<a href="{% url profile scraper.owner.username %}">{{scraper.owner.username}}</a>{% endif %}
         {% else %}
-          {% if request.user.get_profile.name %}<a href="{% url profiles_profile_detail request.user.username %}">{{request.user.get_profile.name}}</a>{% else %}<a href="{% url profiles_profile_detail request.user.username %}">{{request.user.username}}</a>{% endif %}
+          {% if request.user.get_profile.name %}<a href="{% url profile request.user.username %}">{{request.user.get_profile.name}}</a>{% else %}<a href="{% url profile request.user.username %}">{{request.user.username}}</a>{% endif %}
         {% endif %}
         / 
         {% endif %}

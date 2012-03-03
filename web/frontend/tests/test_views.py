@@ -29,7 +29,7 @@ class FrontEndViewsTests(TestCase):
 
     def test_profile_view(self):
         user = User(username='test')
-        response = self.client.get(reverse('profiles_profile_detail', 
+        response = self.client.get(reverse('profile', 
                                             kwargs={'username' : user}))
         self.assertEqual(response.status_code, 200)
 

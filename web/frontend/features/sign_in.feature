@@ -9,8 +9,9 @@ Scenario: I can visit the login page
 
 Scenario: I can login with valid details
   Given I am on the login page
-  Given there is a username "test" with password "pass"
+  And there is a username "test" with password "pass"
   When I fill in my username "test" and my password "pass"
   And I click the page's "Log in" button
   Then user "test" is logged in
+  And I should be on my profile page
 

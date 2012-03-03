@@ -1,12 +1,12 @@
 from django.conf.urls.defaults import *
 
-
-from profiles import views as profile_views  # a not very well namespaced django plugin class
+# a not very well namespaced django plugin class
+from profiles import views as profile_views
 from contact_form.views import contact_form
-import frontend.views as frontend_views  # who thinks replacing dots with underscores here is useful?? --JT
+import frontend.views as frontend_views
 import frontend.forms as frontend_forms
 
-from django.views.generic.simple import direct_to_template
+from django.views.generic.simple import redirect_to, direct_to_template
 from frontend.models import Feature
 
 urlpatterns = patterns('',
@@ -14,6 +14,10 @@ urlpatterns = patterns('',
     # profiles
     url(r'^profiles/edit/$', profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm}, name='profiles_edit_profile'),
     url(r'^profiles/(?P<username>.*)/message/$', frontend_views.user_message, name='user_message'),
+    url(r'^profiles/(?P<username>.*)/$', frontend_views.profile_detail, name='profile'),
+    # This duplicate is provided because the standard profiles
+    # plugin requires that 'profiles_profile_detail' work when
+    # using reverse().
     url(r'^profiles/(?P<username>.*)/$', frontend_views.profile_detail, name='profiles_profile_detail'),
     #url(r'^profiles/', include('profiles.urls')), 
 
@@ -25,6 +29,7 @@ urlpatterns = patterns('',
     url(r'^tour/$', direct_to_template, {'template': 'frontend/tour.html'}, name='tour'),                                          
     url(r'^example_data/$', direct_to_template, {'template': 'frontend/example_data.html'}, name='api'),
     url(r'^pricing/$', frontend_views.pricing, name='pricing'),
+    url(r'^subscribe/$', redirect_to, {'url': '/pricing/'}),
     url(r'^subscribe/(?P<plan>individual|business|corporate)/$', frontend_views.subscribe, name='subscribe'),
     url(r'^confirm_subscription/$', frontend_views.confirm_subscription, name='confirm_subscription'),
 
@@ -33,7 +38,6 @@ urlpatterns = patterns('',
     url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
     url(r'^help/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
     
-    url(r'^get_involved/$',frontend_views.get_involved, name='get_involved'),
     url(r'^request_data/$',frontend_views.request_data, name='request_data'),
     url(r'^request_data/thanks/$',frontend_views.request_data_thanks, name='request_data_thanks'),
     
@@ -51,9 +55,8 @@ urlpatterns = patterns('',
     url(r'^vaults/(?P<vaultid>\d+)/removescraper/(?P<shortname>.*)/(?P<newstatus>public|visible)$', frontend_views.vault_scrapers_remove, name='vault_scrapers_remove'),                
     url(r'^vaults/$', frontend_views.view_vault, name='vault'),    
     url(r'^vaults/new/$', frontend_views.new_vault, name='new_vault'),    
-    
-    url(r'^dashboard/(?P<page_number>\d+)?$', frontend_views.dashboard, name='dashboard'),
-    url(r'^stats/$',                  frontend_views.stats, name='stats'),    
+
+    url(r'^stats/$', frontend_views.stats, name='stats'),    
     
     # Example pages to scrape :)
     url(r'^examples/basic_table\.html$', direct_to_template, {'template': 'examples/basic_table.html'}, name='example_basic_table'),
@@ -71,4 +74,8 @@ urlpatterns = patterns('',
     
     #events
     url(r'^events/(?P<e>[^/]+)?/?$', frontend_views.events, name='events'),
+    
+    # corporate minisite
+    url(r'corporate/(?P<page>[^/]+)?/?$', frontend_views.corporate, name='corporate'),
+    
 )

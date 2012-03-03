@@ -577,7 +577,8 @@ def comment_notification(**kwargs):
         return
         
     site = Site.objects.get_current()
-    sender_profile_url = "https://%s%s" % (site.domain,reverse("profiles_profile_detail",kwargs={"username":request.user.username}))
+    sender_profile_url = "https://%s%s" % (
+      site.domain,reverse("profile",kwargs={"username":request.user.username}))
         
     if owner.get_profile().email_on_comments: 
         text_content = render_to_string('emails/new_comment.txt', locals(), context_instance=RequestContext(request) )

@@ -38,8 +38,10 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
     </dd>
 
 <dt>ScraperWiki.<strong>attach</strong>(name[, asname])</dt>
-    <dd>Attaches to the datastore of another scraper of name name.</dd>
-    <dd>asname is an optional alias for the attached datastore.
+    <dd><p>Attaches to the datastore of another scraper named
+    <var>name</var> (which should be the <em>short-name</em> of the scraper, as it
+    appears in the URL of its overview page).</p>
+    <p><var>asname</var> is an optional alias for the attached datastore.</p>
     </dd>
 
 <dt>ScraperWiki.<strong>select</strong>(val1[, val2])</dt>

@@ -6,26 +6,22 @@ from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail, mail_admins
 
+from django.conf import settings
+
 
 from codewiki.models.code import MAGIC_RUN_INTERVAL
 from codewiki.models.vault import VaultRecord
+from codewiki import runsockettotwister
+from codewiki import models
 
-import smtplib
-
-from django.conf import settings
-
-from codewiki import models, runsockettotwister
-import frontend
-import urllib
-import subprocess
-import re
 import base64
-import cgi
 import ConfigParser
 import datetime
+import logging
+import re
+import smtplib
 import sys
 
-import logging
 logger = logging
 
 
@@ -34,7 +30,6 @@ except ImportError: import simplejson as json
 
 config = ConfigParser.ConfigParser()
 config.readfp(open(settings.CONFIGFILE))
-
 
 
 def scraperwikitag(scraper, html, panepresent):
@@ -239,15 +234,21 @@ def Dtwistermakesrunevent(request):
     if not matchingevents:
         event = models.ScraperRunEvent()
         event.scraper = models.Scraper.objects.get(short_name=request.POST.get("scrapername"))
-        clientnumber = request.POST.get("clientnumber")  # would be used to kill it
+        # Would be used to kill it.
+        clientnumber = request.POST.get("clientnumber")
         #event.pid = "client# "+ request.POST.get("clientnumber") # only applies when this runner is active
-        event.pid = (100000000+int(clientnumber)) # only applies when this runner is active
-        event.run_id = run_id               # set by execution status
-        event.run_started = datetime.datetime.now()   # reset by execution status
+        # only applies when this runner is active
+        event.pid = (100000000+int(clientnumber))
+        # Set by execution status.
+        event.run_id = run_id
+        # Reset by execution status.
+        event.run_started = datetime.datetime.now()
 
-        # set the last_run field so we don't select this one again for the overdue scrapers
-        # this field should't exist because we should use the runobjects isntead,
-        # where we can work from a far richer report on what has been happening.
+        # Set the last_run field so we don't select this one again
+        # for the overdue scrapers.
+        # This field should't exist because we should use the
+        # runobjects instead, where we can work from a far richer
+        # report on what has been happening.
         event.scraper.last_run = datetime.datetime.now()
         event.scraper.save()
     else:
@@ -273,7 +274,9 @@ def Dtwistermakesrunevent(request):
 
         event.scraper.status = request.POST.get("exitstatus") == "exceptionmessage" and "sick" or "ok"
         event.scraper.last_run = datetime.datetime.now()
-        event.scraper.update_meta() # enable if views ever have metadata that needs updating each refresh
+        # Enable if views ever have metadata that needs updating
+        # each refresh.
+        event.scraper.update_meta()
         event.scraper.save()
 
     event.save()

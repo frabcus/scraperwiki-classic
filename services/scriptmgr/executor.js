@@ -1,8 +1,8 @@
 /******************************************************************************
 * executor.js
 *
-* A running script is indexed by its run_id but looks similar to the following
-* for both status and kill calls
+* A running script is indexed by its run_id but looks similar to
+* the following for both status and kill calls.
 * 
 *   script = { run_id : request_data.run_id, 
 *               scraper_name : request_data.scrapername,
@@ -14,13 +14,17 @@
 *               ip: ''};
 * 
 ******************************************************************************/
-var _    = require('underscore')._;
+var _   = require('underscore')._;
 var qs  = require('querystring');
 var fs  = require('fs');
-// depending on version we should include sys or util, keep both having the same
-// name
+// depending on version we should include sys or util, keep
+// both having the same name.
 var sysname;
-if ( process.versions.node.indexOf('0.6') == 0 ) { sysname = 'util'; } else { sysname = 'sys'; }
+if ( process.versions.node.indexOf('0.6') == 0 ) {
+    sysname = 'util';
+} else {
+    sysname = 'sys';
+}
 var sys = require(sysname);
 
 var spawn = require('child_process').spawn;
@@ -30,66 +34,57 @@ var util = require( path.join(__dirname,'utils') );
 var crypto = require('crypto');
 
 var use_lxc = true;
-var extra_path;
-var code_folder = '/tmp';
 
-// A list of all of the currently running scripts
-var scripts = [ ];
+// A table of all of the currently running scripts, indexed by
+// their run_id which usually comes from the runid property of
+// the original /Execute request.
+var scripts = {};
+// Number of entries in *scripts* table
+function count_scripts() {
+    return Object.keys(scripts).length
+}
 var scripts_ip = [ ];
 var max_runs = 100;
 var dataproxy = '';
-var httpproxy;
 var secret = '';
 var fstab_tpl;
 
 /******************************************************************************
-* Called to configure the executor, allowing it to determine whether we are
-* using LXC, or whether it is on a local dev machine.
+* Called to configure the executor, allowing it to determine whether
+* we are using LXC, or whether it is on a local dev machine.
 ******************************************************************************/
 exports.init = function( settings ) {
     use_lxc = ! settings.devmode;
 
-    if ( use_lxc ) {
-        lxc.init(settings.vm_start || 1, settings.vm_count, settings.mount_folder);
+    if(!use_lxc) {
+        // Replace with the fakelxc.
+        lxc = require(path.join(__dirname,'fakelxc'));
     }
 
-    if ( settings.devmode ) {
-        httpproxy = settings.httpproxy;
-    };
+    // Consider just passing the *settings* object and nothing else.
+    lxc.init(settings.vm_start || 1,
+      settings.vm_count,
+      settings.mount_folder,
+      settings);
 
     secret = settings.secret || '';
     
-    code_folder = settings.code_folder;
     dataproxy = settings.dataproxy;
-    extra_path = settings.extra_path;
     max_runs = settings.vm_count;
     
     fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");                
 }
 
 
-/******************************************************************************
-* Attempts to kill the script that is running with the specified run id whether 
-* it is an lxc instance (lxc-kill) or a local process (kill by pid)
-******************************************************************************/
-exports.kill_script = function( run_id ) {
+/**********************************************************************
+* Attempts to kill the script by run_id.
+**********************************************************************/
+exports.kill_script = function(run_id) {
     var s = scripts[run_id];    
-    if ( ! use_lxc ) {
-        if ( s ) {
-            pid = s.pid;
-            process.kill(pid, 'SIGKILL');
-            s = scripts[run_id];
-            delete scripts[run_id];
-            delete scripts_ip[s.ip];
-            
-            util.log.debug('Killed process PID: ' + pid);                   
-            return true;
-        };
-    } else {
-        util.log.debug('Attempting to kill LXC ' + s.vm)
-        lxc.kill(s);
-    }
-    
+    var vm = s.lxcVM;
+    util.log.debug('Requested to kill ' + run_id +
+      ' on ' + s.vm)
+    lxc.kill(vm);
     return false;
 }
 
@@ -97,14 +92,15 @@ exports.known_ips = function() {
     return scripts_ip;
 }
 
-/******************************************************************************
-* Iterates through the list of scripts that we know is running and outputs 
-* them in the old format of runID=&scrapername=
-******************************************************************************/
+/**********************************************************************
+* Iterates through the list of scripts that we know is running and
+* outputs them in the old format of runID=&scrapername=
+**********************************************************************/
 exports.get_status = function(response) {
     for(var runID in scripts) {
         var script = scripts[runID];
-        response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
+        response.write('runID=' + runID +
+          "&scrapername=" + script.scraper_name + "\n");
     }   
 }
 
@@ -149,20 +145,23 @@ exports.get_details = function(details) {
 
 
 /******************************************************************************
-* Works out from the incoming request what it is that needs executing, if 
-* we can find it from the post data.
+* Works out from the incoming request what it is that needs executing,
+* if we can find it from the post data.
 ******************************************************************************/
 exports.run_script = function( http_request, http_response ) {
+    var r;
     
-    http_request.setEncoding( 'utf8');
+    http_request.setEncoding('utf8');
     
-    if ( scripts.length > max_runs ) {
-        r = {"error":"Too busy", "headers": http_request.headers , "lengths":  -1 };
+    if ( count_scripts() >= max_runs ) {
+        r = {"error":"Too busy",
+          "headers": http_request.headers,
+          "lengths":  -1 };
         http_response.end( JSON.stringify(r) );
         return;
-    };
+    }
     
-    len = http_request.headers['content-length'] || -1
+    var len = http_request.headers['content-length'] || -1;
     var body = '';
 
     http_request.on('data', function (data) {
@@ -170,8 +169,12 @@ exports.run_script = function( http_request, http_response ) {
     });
     
     http_request.on('end', function () {
-        if ( body == undefined || body.length == 0 || body.length != len ) {
-            r = {"error":"incoming message incomplete", "headers": http_request.headers , "lengths":  len.toString() };
+        if ( body.length == 0 ||
+             body.length != len )
+        {
+            r = {"error":"incoming message incomplete",
+              "headers": http_request.headers,
+              "lengths":  len.toString() };
             http_response.end( JSON.stringify(r) );
             return;
         };
@@ -202,12 +205,32 @@ function writeLaunchFile( f, ds, runid, scrapername, querystring, attachables ) 
 }
 
 /******************************************************************************
-* Actually extracts the code and then checks config to determine whether we 
-* should run this as if on a developer machine or whether to run as if on an
-* actual server.
-* TODO: Refactor executor to be two classes one for local and one for lxc
+* Actually extracts the code and then checks config to determine
+* whether we should run this as if on a developer machine or whether
+* to run as if on an actual server.
+*
+* The *raw_request_data* parameter (which usually comes from the
+* body of the HTTP request) should contain a JSON object with
+* the properties (many optional):
+
+code
+runid
+scrapername
+scraperid
+username
+urlquery
+language
+beta_user
+attachables
+scheduled_run
+permissions
+
+* TODO: Refactor executor to be two classes one for local and
+* one for lxc.
 ******************************************************************************/
 function execute(http_req, http_res, raw_request_data) {
+    var r;
+
     http_res.writeHead(200, {'Content-Type': 'text/plain'});
     
     try {
@@ -217,11 +240,11 @@ function execute(http_req, http_res, raw_request_data) {
         util.dumpError( err );
     }
     
-    var script = { run_id : request_data.runid, 
-                scraper_name : request_data.scrapername || "",
-                scraper_guid : request_data.scraperid,
+    var script = { run_id: request_data.runid, 
+                scraper_name: request_data.scrapername || "",
+                scraper_guid: request_data.scraperid,
                 username: request_data.username || "",
-                query : request_data.urlquery, 
+                query: request_data.urlquery, 
                 pid: -1, 
                 vm: '', 
                 language: request_data.language || 'python',
@@ -233,277 +256,180 @@ function execute(http_req, http_res, raw_request_data) {
                 attachables: request_data.attachables || [],
                 scheduled_run: request_data.scheduled_run || false,
                 permissions: request_data.permissions || [] };
+    script.start_time = new Date();
     
-    if ( ! use_lxc ) {
-        // Execute the code locally using the relevant file (exec.whatever)
-        var tmpfile = path.join( code_folder, "script." + util.extension_for_language(script.language) );
-        fs.writeFile(tmpfile, request_data.code, function(err) {
+    var vm = lxc.alloc(script);
+    if (vm == null) {
+        var r = {"error": "No virtual machines available"}
+        http_res.end( JSON.stringify(r) );
+        return;             
+    }
+    util.log.debug('scraper ' + script.scraper_name +
+      ' running on ' + vm.name);      
             
-            writeLaunchFile( path.join( code_folder, "launch.json"), 
-                             dataproxy, 
-                             script.run_id, 
-                             script.scraper_name, 
-                             script.query, 
-                             script.attachables);
-            
-            if(err) {
-                r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
-                http_res.end( JSON.stringify(r) );
-                return;             
-            } else {
-                var args;
-                if ( script.language == 'ruby' || script.language == 'php' ) {
-                    args = ['--script=' + tmpfile,]
-                } else {
-                    args = ['--script', tmpfile]
-                }
-                
-                var exe = './scripts/exec.' + util.extension_for_language(script.language);
-
-                var startTime = new Date();
-                var environ = util.env_for_language(script.language, extra_path);
-                
-                if (script.query)
-                    environ['QUERY_STRING'] = script.query;
-                
-                if (httpproxy) {
-                    environ['http_proxy'] = 'http://' + httpproxy;
-                };
-                
-                util.log.debug( 'spawning ' + exe + ' args '  + args);
-                var e = spawn(exe, args, { env: environ});
-                script.pid = e.pid;
-                script.ip = '127.0.0.1';
-                
-                scripts[ script.run_id ] = script;
-                scripts_ip[ script.ip ] = script;
-
-                http_req.connection.addListener('close', function () {
-                    // Let's handle the user quitting early it might be a KILL
-                    // command from the dispatcher
-                    if ( e ) e.kill('SIGKILL');
-                    if ( script ) {
-                        delete scripts[script.run_id];                  
-                        delete scripts_ip[ script.ip ];                 
-                    }
-                });
-            
-                util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
-
-                var resp = http_res;
-                e.stdout.on('data', function (data) {
-                    util.write_to_caller( http_res, data.toString());           
-                });             
-
-                e.stderr.on('data', function (data) {
-                    util.write_to_caller( http_res, data.toString());           
-                });             
-                
-                e.on('exit', function (code, signal) {
-                    if ( code == null )
-                        util.log.debug('child process exited badly, we may have killed it');
-                    else 
-                        util.log.debug('child process exited with code ' + code);                   
-                    if ( script ) {
-                        delete scripts[script.run_id];
-                        delete scripts_ip[ script.ip ];
-                    }
-                    
-                    util.log.debug('child process removed from script list');                   
-
-                    var endTime = new Date();
-                    var elapsed = (endTime - startTime) / 1000;
-
-                // If we have something left in the buffer we really should flush it about
-                // now. Suspect this will only be PHP
-                if ( script.response.jsonbuffer && script.response.jsonbuffer.length > 0 ) {
-                    util.log.debug('We still have something left in the buffer');
-                    util.log.debug( script.response.jsonbuffer );
-                
-                    var left = script.response.jsonbuffer.join("");
-                    if ( left && left.length > 0 ) {
-                        // reset the buffer for the final run
-                        script.response.jsonbuffer = [];
-                        var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
-                        if ( m == null ) {
-                            util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
-                            var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
-                            partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";                    
-                            util.write_to_caller( resp, partial );
-                        } else {
-                            util.log.debug( "Looks like the remaining data is JSON soe sending as is");                     
-                            util.write_to_caller( resp, left.toString() );
-                        }                   
-                    }                       
-                }
-
-                // 'CPU_seconds': 1, Temporarily removed
-                var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
-                   'elapsed_seconds' : elapsed };
-                result.exit_status = code;
-
-                    http_res.end( JSON.stringify( result ) + "\n" );
-                                        
-                    util.log.debug('Finished writing responses');
-                });
-            }
-        }); // end of writefile
-    } else {
-        //
-        // We can clearly refactor this into something class-based and easier to understand.
-        // There is more in common with the previous branch than different.
-        //  
-        var res = lxc.exec( script, request_data.code );
-        if ( res == null ) {
-            var r = {"error": "No virtual machines available"}
+    var extension = util.extension_for_language(script.language);
+    
+    var tmpfile = path.join(lxc.code_folder(vm),
+      "script." + extension);
+    fs.writeFile(tmpfile, request_data.code, function(err) {
+        if(err) {
+            var r = {"error": "Failed to write file to local disk",
+              "headers": http_req.headers, "lengths":  -1 };
             http_res.end( JSON.stringify(r) );
             return;             
-        }
-        util.log.debug( 'Running on ' + res );      
-                
-/*                
-        // Write out a new FSTAB for this run using the template, so that we can later 
-        // add/modify the fstab template.
- 	    var ctx = {'name': res, 'scrapername':  script.scraper_name || "__public__" }
-	    var fs_compiled = _.template( fstab_tpl );
-	    var fstab = fs_compiled( ctx );
-        util.log.debug('Writing fstab to ' + '/mnt/' + res + '/fstab')
-	    var f = fs.openSync('/mnt/' + res + '/fstab', 'w');
-	    fs.writeSync(f, fstab);
-	    fs.closeSync( f );
-*/
+        } 
+        util.log.debug('scraper ' + script.scraper_name +
+          ' file written to ' + tmpfile );
 
-        var extension = util.extension_for_language(script.language);
+        // Details such as data proxy and runid are passed
+        // to the script by writing to a launch.json file in
+        // its filesystem.
+        writeLaunchFile( path.join(lxc.code_folder(vm),
+          "launch.json"), 
+          dataproxy, 
+          script.run_id, 
+          script.scraper_name, 
+          script.query,
+          script.attachables);
+
+        // Little bit ugly passing *script*; only fakelxc needs it.
+        var child = lxc.spawn(vm, script);
+
+        util.log.debug(script.scraper_name +
+          ' run id ' + script.run_id +
+          " spawned using " + vm.name);
+
+        // Enable this message?; see
+        // https://bitbucket.org/ScraperWiki/scraperwiki/issue/715/
+        // json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
         
-        // /var/www/scraperwiki/resourcedir/<%= scrapername >/
-        // instead of 
-        // lxc.code_folder(res)
-        var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
-        var rVM = res;
-        fs.writeFile(tmpfile, request_data.code, function(err) {
-            if(err) {
-                r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
-                http_res.end( JSON.stringify(r) );
-                return;             
-            } 
-
-            writeLaunchFile( path.join(lxc.code_folder(res), "launch.json"), 
-                             dataproxy, 
-                             script.run_id, 
-                             script.scraper_name, 
-                             script.query,
-                             script.attachables);
+        // script.vm is the name of the VM.  Will be either
+        // 'vmNN' (for LXC), or 'pidNNN' (for fakelxc).  The
+        // kill_script function requires the actual vm object,
+        // which is stored in script.lxcVM.
+        script.vm = vm.name;
+        script.lxcVM = vm;
+        script.ip = lxc.ip_for_vm(vm);
             
-            util.log.debug('File written to ' + tmpfile );
-            
-            var startTime = new Date();     
+        scripts[ script.run_id ] = script;
+        scripts_ip[ script.ip ] = script;
 
-            // Pass the data proxy and runid to the script that will trigger the exec.py
-            var cfgpath = '/mnt/' + rVM + '/config';
-
-            var args = [ '-n', rVM, '-f', cfgpath, "/home/startup/runscript", extension];
-            var e = spawn(
-              '/var/www/scraperwiki/services/scriptmgr/cleanfd.py',
-              ['/usr/bin/lxc-execute'].concat(args));
-
-            // json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
-            
-            script.vm = rVM;
-            script.ip = lxc.ip_for_vm(rVM);
-                
-            scripts[ script.run_id ] = script;
-            scripts_ip[ script.ip ] = script;
-    
-            http_req.connection.addListener('close', function () {
-                // Let's handle the user quitting early it might be a KILL
-                // command from the dispatcher
-                lxc.kill( rVM );
-            });
-            
-            var resp = http_res;
-            
-            e.stdout.on('data', function (data) {
-                util.write_to_caller( resp, data.toString());
-            });             
-            
-            e.stderr.on('data', function (data) {
-                util.write_to_caller( resp, data.toString());
-            });             
-        
-            var local_script = script;  
-            e.on('exit', function (code, signal) {
-                if ( code == null )
-                    util.log.debug('child process exited badly, ScraperWiki killed it');
-                else 
-                    util.log.debug('child process exited with code ' + code);                   
-
-                // If code is 137 then it is probably an out of memory error which LXC has decided
-                // to just kill it
-                var exitError;
-                if ( code == 137 ) {
-                    // Check signal var to double-check what signal killed us
-                    var exitError = "[Warning] The script was killed, it may have exceeded the memory limit";
-                    if ( local_script.response.jsonbuffer )
-                        local_script.response.jsonbuffer.push(exitError)
-                }
-
-                var endTime = new Date();
-                var elapsed = (endTime - startTime) / 1000;
-                util.log.debug('Elapsed' + elapsed );
-
-                // If we have something left in the buffer we really should flush it about
-                // now. Suspect this will only be PHP
-                if ( local_script.response.jsonbuffer && local_script.response.jsonbuffer.length > 0 ) {
-                    util.log.debug('We still have something left in the buffer');
-                    util.log.debug( local_script.response.jsonbuffer );
-                
-                    var left = local_script.response.jsonbuffer.join("");                       
-                    if ( left && left.length > 0 ) {
-                        // reset the buffer for the final run
-                        local_script.response.jsonbuffer = [];
-                        var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
-                        if ( m == null ) {
-                            util.log.debug( "Looks like the remaining data is not JSON so need to wrap");
-                            var partial = JSON.stringify( {'message_type': 'console', 'content': left} );
-                            partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";                    
-                            util.write_to_caller( resp, partial );
-                        } else {
-                            util.log.debug( "Looks like the remaining data is JSON so sending as is");                      
-                            util.write_to_caller( resp, left.toString() );
-                        }                   
-                    }                       
-                }
-
-                // 'CPU_seconds': 1, Temporarily removed
-                var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
-                   'elapsed_seconds' : elapsed };
-                result.exit_status = code;
-
-                if ( local_script && local_script.response ) {
-                    local_script.response.end( JSON.stringify( result ) + "\n" );
-                    util.log.debug('Have just written end message to the vm ' + local_script.vm );
-                } else { 
-                    util.log.debug('Script is null?' + script);
-                    util.log.debug('Script has been disconnected from caller?' + local_script.response );                   
-                }
-                                
-                lxc.release_vm( local_script, rVM );
-                if ( local_script) {
-                    delete scripts[local_script.run_id];
-                    delete scripts_ip[ local_script.ip ];
-                }
-                util.log.debug('child process removed from script list');                   
-                                
-                if ( local_script) { 
-                    util.log.debug('Finished writing responses for ' + local_script.vm);
-                } else {
-                    util.log.debug('Finished writing a response');
-                }
-            });
+        http_req.connection.addListener('close', function () {
+            // Connection from original requester has closed;
+            // For example, a KILL from the Status panel.
+            util.log.debug(
+              "Issuing KILL for " + script.scraper_name +
+              ' running on ' + vm.name + 
+              ' with id ' + script.run_id);
+            lxc.kill(vm);
         });
-    }
+        
+        var resp = http_res;
+        
+        child.stdout.on('data', function (data) {
+            util.write_to_caller(resp, data.toString());
+        });             
+        
+        child.stderr.on('data', function (data) {
+            util.write_to_caller(resp, data.toString());
+        });             
+    
+        child.on('exit', function (code, signal) {
+            onexit(code, signal, script, function(){
+              lxc.release_vm(script, vm);})
+        });
+    });
 }
 
+// Called when a script exits (in either LXC or local process
+// case).  *code* and *signal* come from the Node 'exit'
+// handler, *script* is the script object, *release* is a function
+// to call to release the VM (only used for LXC).
+function onexit(code, signal, script, release)
+{
+    util.log.debug(script.vm + ' exited with code ' + code);
+
+    // If code is 137 then it is probably an out of memory error;
+    // LXC has decided to just kill it?
+    var exitError;
+    if ( code == 137 ) {
+        // :todo: Check *signal* to double-check what signal killed us
+        var exitError = "[Warning] The script was killed, it may have exceeded the memory limit";
+        if ( script.response.jsonbuffer ) {
+            script.response.jsonbuffer.push(exitError)
+        }
+    }
+
+    var endTime = new Date();
+    var elapsed = (endTime - script.start_time) / 1000;
+    util.log.debug('scraper ' + script.scraper_name +
+      ' on ' + script.vm + ' elapsed ' + elapsed);
+
+    // If we have something left in the buffer we really should flush
+    // it about now. Suspect this will only be PHP (but
+    // actually, all scripts seem to leave a single empty record in
+    // the buffer).
+    if ( script.response.jsonbuffer &&
+      script.response.jsonbuffer.length > 0 )
+    {
+        util.log.debug('Buffer still has ' +
+          script.response.jsonbuffer.length +
+          ' entries');
+        util.log.debug( script.response.jsonbuffer );
+    
+        var left = script.response.jsonbuffer.join("");                       
+        if ( left && left.length > 0 ) {
+            // reset the buffer for the final run
+            script.response.jsonbuffer = [];
+            var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
+            if ( m == null ) {
+                util.log.debug(
+                  "Looks like the remaining data is not JSON so need to wrap");
+                var partial = JSON.stringify(
+                  {'message_type': 'console', 'content': left} );
+                partial = "JSONRECORD(" +
+                  partial.length.toString() + "):" + partial + "\n";                    
+                util.write_to_caller(script.response, partial);
+            } else {
+                util.log.debug(
+                  "Looks like the remaining data is JSON so sending as is");                      
+                util.write_to_caller(script.response, left.toString());
+            }                   
+        }                       
+    }
+
+    // 'CPU_seconds': 1, Temporarily removed
+    var result =  { 'message_type':'executionstatus',
+      'content':'runcompleted', 
+      'elapsed_seconds': elapsed
+    };
+    result.exit_status = code;
+
+    if (script && script.response) {
+        script.response.end( JSON.stringify( result ) + "\n" );
+        util.log.debug('Written end message for ' + script.vm);
+    } else { 
+        util.log.debug('Script is null?' + script);
+        util.log.debug('Script has been disconnected from caller?' +
+          script.response );                   
+    }
+
+    release();
+
+    if (script) {
+        delete scripts[script.run_id];
+        delete scripts_ip[ script.ip ];
+    }
+    util.log.debug('script list now has ' +
+      count_scripts() + ' entries')
+                    
+    if (script) { 
+        util.log.debug('Finished writing responses for ' +
+          script.vm);
+    } else {
+        util.log.debug('Finished writing a response');
+    }
+}
 
 
 
