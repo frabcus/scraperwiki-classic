@@ -127,7 +127,7 @@ exports.dumpError = function(err) {
 exports.cleanup = function(filep) {
 
     //removeDirForce(filep);
-    logger.debug('Cleanup up folder ' + filep);
+    logger.debug('Cleanup folder ' + filep);
 }
 
 function removeDirForce(filep) {
