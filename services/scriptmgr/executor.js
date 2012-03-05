@@ -148,7 +148,7 @@ exports.get_details = function(details) {
 * Works out from the incoming request what it is that needs executing,
 * if we can find it from the post data.
 ******************************************************************************/
-exports.run_script = function( http_request, http_response ) {
+exports.run_script = function(http_request, http_response) {
     var r;
     
     http_request.setEncoding('utf8');
@@ -180,7 +180,7 @@ exports.run_script = function( http_request, http_response ) {
         };
 
         execute(http_request, http_response, body);
-        util.log.debug('Done calling execute');     
+        util.log.debug('End of HTTP request for /Execute');     
     });
         
 };
