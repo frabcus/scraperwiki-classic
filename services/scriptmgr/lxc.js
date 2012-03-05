@@ -209,8 +209,8 @@ exports.release_vm = function(script_, vm) {
     
     // Make sure we have a clean environment after a release.
     try {
-        var cf = get_code_folder(name);
-        util.cleanup( cf );
+        var cf = get_code_folder(vm);
+        util.cleanup(cf);
     } catch(err) {}
 }
 
