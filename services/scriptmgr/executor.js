@@ -125,21 +125,22 @@ exports.script_info = function(response) {
     }   
 }
 
-/******************************************************************************
-* 
-* 
-******************************************************************************/
+/**********************************************************************
+* Get script details by IP or by runid.
+**********************************************************************/
 exports.get_details = function(details) {
     if ( details.ip ) {
-        util.log.debug('Looking for ip ' + details.ip + ' in ' + scripts_ip);
+        util.log.debug('Looking for ip ' + details.ip +
+          ' in ' + Object.keys(scripts_ip));
         return scripts_ip[details.ip];
-    } else if ( details.runid ) {
-        util.log.debug('Looking for runid ' + details.runid + ' in ' + scripts);        
+    } else if (details.runid) {
+        util.log.debug('Looking for runid ' + details.runid +
+          ' in ' + Object.keys(scripts));        
         return scripts[details.runid];
     }
     
-    util.log.debug('Failed to find a script: ' );
-    util.log.debug( details );
+    util.log.debug('Failed to find a script for details: ' +
+      details );
     return null;
 }
 
