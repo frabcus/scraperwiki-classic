@@ -372,7 +372,8 @@ function onexit(code, signal, script, release)
     if ( script.response.jsonbuffer &&
       script.response.jsonbuffer.length > 0 )
     {
-        util.log.debug('Buffer still has ' +
+        util.log.debug('Buffer for ' + script.scraper_name +
+          ' still has ' +
           script.response.jsonbuffer.length +
           ' entries');
         util.log.debug( script.response.jsonbuffer );
