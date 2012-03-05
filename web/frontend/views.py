@@ -753,7 +753,7 @@ def vault_users(request, vaultid, username, action):
 ###############################################################################
 
 def corporate(request, page=''):
-    if settings.DEBUG and request.user.is_staff:
+    if settings.DEBUG:
         
         # do they want the index page?
         if not page:
@@ -761,7 +761,7 @@ def corporate(request, page=''):
         
         # 404 if requested page doesn't exist
         # return page if it does  
-        if page not in ['index', 'pricing', 'contact']:
+        if page not in ['index', 'features', 'contact']:
             raise Http404
         else:
             context = {'page':page}
