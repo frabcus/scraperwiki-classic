@@ -8,18 +8,40 @@ describe Kernel do
       require File.dirname(__FILE__) + '/../scraper_require'
     end
 
-    context "When we require a scraper" do
+    it "converts a scraper name into a class name" do
+      scrapername_to_class_name('scraper_fu2').should == 'ScraperFu2'
+      scrapername_to_class_name('scraper-fu2-u2').should == 'ScraperFu2U2'
+    end
+
+    context "When we require a Ruby scraper" do
+      #use_vcr_cassette
+
       before do
-        @scraper_name = 'require_test'
+        @scraper_name = 'test_require'
         require "scrapers/#{@scraper_name}"
+      end
+      
+      after do
+        Object.send(:remove_const, :TestRequire)
       end
 
       it "fetches the scraper's code from ScraperWiki" do
         a_request(:get, "https://scraperwiki.com/editor/raw/#{@scraper_name}").should have_been_made
       end
 
-      it "loads the scraper as a module" do
-        RequireTest.should_not be_nil
+      it "loads the scraper as a class" do
+        TestRequire.should_not be_nil
+        TestRequire.class.should == Class
+      end
+      
+      it "can call the 'hello' method of the class" do
+        TestRequire.hello.should == 'world'
+      end
+    end
+
+    context "When we require a Python scraper" do
+      it "should raise a LoadError" do
+        lambda { require "scrapers/wirral-globe-letters-scraper-newsquest" }.should raise_error LoadError
       end
     end
 
