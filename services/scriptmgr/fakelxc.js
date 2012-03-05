@@ -30,21 +30,16 @@ exports.alloc = function(script) {
 };
  
 exports.spawn = function(vm, script) {
-    var args;
     var extension = util.extension_for_language(script.language);
     var tmpfile = path.join(exports.code_folder(vm),
       "script." + extension);
 
-    if (script.language == 'ruby' ||
-      script.language == 'php')
-    {
-        args = ['--script=' + tmpfile,]
-    } else {
-        args = ['--script', tmpfile]
-    }
+    // Happily, all supported languages can use the same
+    // convention for passing args: --opt=foo.
+    var args = ['--script=' + tmpfile,
+      '--scraper=' + script.scraper_name];
 
     var exe = './scripts/exec.' + extension
-
     var environ = util.env_for_language(script.language, extra_path);
 
     if (script.query) {
