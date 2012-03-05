@@ -14,6 +14,9 @@ PAGES = {
         'python scraper code editing':  '/scrapers/new/python', 
         'public request':               '/request_data/#public', 
         'request':                      '/request_data/', 
+        'corporate home':               '/corporate/',
+        'corporate features':           '/corporate/features/',
+        'corporate contact':            '/corporate/contact/'
         }
 
 def page_name_is_valid(name):
@@ -22,7 +25,7 @@ def page_name_is_valid(name):
         'check if you misspelled it or add into it' % name
     return True
 
-@step(u'(?:(?:Given|And) I am on|When I visit) the (.+) page')
+@step(u'(?:(?:Given|And) I am on|(?:When|And) I visit) the (.+) page')
 def when_i_visit_the_particular_page(step, name):
     response = world.browser.visit(django_url(PAGES[name]))
 
