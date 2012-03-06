@@ -151,7 +151,7 @@ function create_vm ( name ) {
 		}
 
 		// Mount the code folder
-		var cfolder = get_code_folder(name);
+		var cfolder = get_code_folder(v);
 		path.exists(cfolder, function (exists) {
 	  		if ( ! exists ) fs.mkdirSync( cfolder, "0757" );
 		});
