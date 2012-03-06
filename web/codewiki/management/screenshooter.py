@@ -30,6 +30,8 @@ class ScreenShooter(object):
         try:
             return self.renderers[(width, height)]
         except:
+            if self.verbose:
+                print "about to make WebkitRenderer"
             renderer = WebkitRenderer(scaleRatio='crop', 
                                       scaleTransform='smooth', 
                                       scaleToWidth=width, 
@@ -41,6 +43,8 @@ class ScreenShooter(object):
                                       ignoreAlerts=True,
                                       ignoreConfirms=True,
                                       ignoreConsoleMessages=True)
+            if self.verbose:
+                print "done making WebkitRenderer"
             renderer.qWebSettings[QWebSettings.JavascriptEnabled] = True
             self.renderers[(width, height)] = renderer
             return renderer
