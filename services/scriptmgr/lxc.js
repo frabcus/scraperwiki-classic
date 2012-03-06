@@ -111,78 +111,78 @@ exports.ip_for_vm = function(vm) {
 **********************************************************************/
 function create_vm ( name ) {
 
-	var v = {
-		'name': name,
-		'running': false,
-		'script': null,		
-	}
-	
-	// if name exists then just return, otherwise integrate templates and then
-	// lxc-create.  Bear in mind that currently (and naffly) the IP address 
-	// will be the vm number + 1 (as vm0 has ip 10.0.1.1 )
+    var v = {
+        'name': name,
+        'running': false,
+        'script': null,     
+    }
+    
+    // if name exists then just return, otherwise integrate templates and then
+    // lxc-create.  Bear in mind that currently (and naffly) the IP address 
+    // will be the vm number + 1 (as vm0 has ip 10.0.1.1 )
 
-	// write config and fstab to ...	
-	var folder = path.join(root_folder, name);
-	
-	num = parseInt( name.substring(2) );
-	
-	// TODO: Fix me
-	var ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString(), "scrapername": "__public__" }
+    // write config and fstab to ...    
+    var folder = path.join(root_folder, name);
+    
+    num = parseInt( name.substring(2) );
+    
+    // TODO: Fix me
+    var ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString(), "scrapername": "__public__" }
 
 
-	var compiled = _.template( config_tpl );
-	var cfg = compiled( ctx );
-	
-	var fs_compiled = _.template( fstab_tpl );
-	var fstab = fs_compiled( ctx );
-	
-	path.exists(root_folder, function (exists) {	
-  		if ( ! exists ) {
-			fs.mkdirSync( root_folder, "0777" );
-		}	
-	});
-	
-	
-	path.exists(folder, function (exists) {
-  		if ( ! exists ) {
-			fs.mkdirSync( folder, "0777" );
-		} else {
-			return;
-		}
+    var compiled = _.template( config_tpl );
+    var cfg = compiled( ctx );
+    
+    var fs_compiled = _.template( fstab_tpl );
+    var fstab = fs_compiled( ctx );
+    
+    path.exists(root_folder, function (exists) {    
+        if ( ! exists ) {
+            fs.mkdirSync( root_folder, "0777" );
+        }   
+    });
+    
+    
+    path.exists(folder, function (exists) {
+        if ( ! exists ) {
+            fs.mkdirSync( folder, "0777" );
+        } else {
+            return;
+        }
 
-		// Mount the code folder
-		var cfolder = get_code_folder(v);
-		path.exists(cfolder, function (exists) {
-	  		if ( ! exists ) fs.mkdirSync( cfolder, "0757" );
-		});
+        // Mount the code folder
+        var cfolder = get_code_folder(v);
+        path.exists(cfolder, function (exists) {
+            if ( ! exists ) fs.mkdirSync( cfolder, "0757" );
+        });
 
-		var tgt = path.join( folder, 'config')
-		fs.writeFile(tgt, cfg, function(err) {
-		    if(err) {
-		        sys.puts(err);
-		    } else {
-				// call lxc-create -n name -f folder/config
-			 	e = spawn('/usr/bin/lxc-create', ['-n', name, '-f', tgt]);
-				e.on('exit', function (code, signal) {
-					if ( code && code == 127 ) {
-						util.log.fatal('LXC-Create exited with code ' + code);											
-					} else {
-						util.log.info('LXC-Create exited with code ' + code);																	
-					}
-				});
-		    }
-		});
-					
-		tgt = path.join( folder, 'fstab');
-		fs.writeFile(tgt, fstab, function(err) {
-		    if(err) {
-		        sys.puts(err);
-		    } else {
-		    }
-		});	
-	});
-	
-	return v;
+        var tgt = path.join( folder, 'config')
+        fs.writeFile(tgt, cfg, function(err) {
+            if(err) {
+                sys.puts(err);
+            } else {
+                // call lxc-create -n name -f folder/config
+                e = spawn('/usr/bin/lxc-create', ['-n', name, '-f', tgt]);
+                e.on('exit', function (code, signal) {
+                    if ( code && code == 127 ) {
+                        util.log.fatal('LXC-Create exited with code ' + code);                                          
+                    } else {
+                        util.log.info('LXC-Create exited with code ' + code);                                                                   
+                    }
+                });
+            }
+        });
+                    
+        tgt = path.join( folder, 'fstab');
+        fs.writeFile(tgt, fstab, function(err) {
+            if(err) {
+                sys.puts(err);
+            } else {
+            }
+        }); 
+    });
+    
+    return v;
 }
 
 
