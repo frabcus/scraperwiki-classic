@@ -50,8 +50,8 @@ class ScreenShooter(object):
         for shot in self.shots:
             if self.verbose:
                 print "%d: Taking screenshot %s" % (count,shot['filename'],)
-                print shot['url']
-                print _memsize()
+                print "URL:", shot['url']
+                print "memsize:", _memsize()
             try:
                 image = self._get_renderer(shot['size'][0], shot['size'][1]).render(shot['url'])
                 if self.verbose:
