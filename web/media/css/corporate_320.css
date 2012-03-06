@@ -1,3 +1,5 @@
+/* @override http://localhost:8000/media/css/corporate_320.css */
+
 /* 320.css
    The base CSS style.
    Everything here should look good on a 
@@ -14,12 +16,13 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 	font-size: 100%;
 	font: inherit;
 	vertical-align: baseline;
+	-webkit-text-size-adjust: none;
 }
 article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
 	display: block;
 }
 body {
-	font-family: Helvetica, Arial, sans-serif;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-size: 14px;
 	line-height: 18px;
 }
@@ -39,6 +42,7 @@ table {
 }
 
 
+
 /* HORS D'OUVRE */
 
 * html, html, body {
@@ -46,13 +50,15 @@ table {
 }
 
 body {
-	background: #000 url(http://subtlepatterns.com/patterns/broken_noise.png) top center;
+	background-color: #101112;
 	color: #fff;
+	border-top: 1px solid #101112;
+	margin-top: -1px;
 }
 
 body:after {
 	content: '320px';
-	position: absolute;
+	position: fixed;
 	bottom: 10px;
 	right: 10px;
 	opacity: 0.5;
@@ -68,19 +74,262 @@ a:hover {
 }
 
 header, section, footer {
-	width: 320px;
+	width: 300px;
 	margin: 0 auto;
 }
 
+
+
+/* HEADER */
+
 header {
-	padding-top: 20px;
+	margin-top: 20px;
 	margin-bottom: 20px;
 }
 
+h1 a {
+	display: block;
+	height: 30px;
+	background: transparent url(../images/corporate/corporate_logo.png) top center no-repeat;
+	text-indent: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	margin-bottom: 5px;
+}
+
+nav ul {
+	text-align: center;
+}
+
+nav li {
+	display: inline-block;
+}
+
+nav li a {
+	display: block;
+	color: #ccc;
+	padding: 4px 15px;
+	line-height: 18px;
+	text-shadow: 0 1px 2px #000;
+	font-weight: bold;
+}
+
+nav li:first-child a {
+	margin-left: -10px;
+}
+
+nav li a:hover {
+	color: #eee;
+	text-decoration: none;
+}
+
+nav li.contact a {
+	background-color: #f90;
+	color: #000;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+	-moz-border-radius: 30px;
+	-wekbit-border-radius: 30px;
+	border-radius: 30px;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+	background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
+	background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
+	background-image: -ms-linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
+	background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
+	background-image: linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
+}
+
+nav li.contact a:hover {
+	background-color: #ffb341;
+}
+
+
+
+/* FOOTER */
+
 footer {
 	margin-top: 20px;
-	padding-bottom: 40px;
+	padding: 20px 0 40px 0;
+	border-top: 1px solid #444;
+	font-size: 12px;
+	color: #444;
+	overflow: auto;
+	text-align: center;
 }
+
+footer .name {
+	display: none;
+}
+
+footer a {
+	color: #666;
+}
+
+footer a:hover {
+	color: #999;
+}
+
+footer .vcard {
+	margin-bottom: 15px;
+}
+
+footer .legal li {
+	display: inline-block;
+}
+
+footer li.terms {
+	margin-right: 10px;
+}
+
+
+
+/* HOMEPAGE SLIDER */
+
+#slider {
+	position: relative;
+	width: 300px;
+	height: 210px;
+	overflow: hidden;
+	margin-bottom: 20px;
+}
+
+#slider .pagination {
+	display: none;
+}
+
+#slider .panel {
+	width: 260px;
+	height: 170px;
+	padding: 20px;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	background-color: #666;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+#slider .panel h2 {
+	font-size: 20px;
+	font-weight: bold;
+	text-transform: uppercase;
+	line-height: 22px;
+	text-shadow: 0 1px 5px rgba(0,0,0,0.7);
+	margin-bottom: 7px;
+}
+
+#slider .panel p {
+	font-size: 15px;
+	line-height: 18px;
+	text-shadow: 0 1px 5px rgba(0,0,0,0.7);
+	font-weight: bold;
+}
+
+#slider .panel .more {
+	display: inline-block;
+	margin-top: 12px;
+	padding: 3px 12px;
+	background-color: #ccc;
+	color: #000;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+	-moz-border-radius: 30px;
+	-wekbit-border-radius: 30px;
+	border-radius: 30px;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 5px rgba(0,0,0,0.5);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 5px rgba(0,0,0,0.5);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 5px rgba(0,0,0,0.5);
+}
+
+#slider .panel .more:hover {
+	text-decoration: none;
+	background-color: #ddd;
+}
+
+#competition {
+	background: transparent url(../images/corporate/corporate_server_460.jpg) center center no-repeat;
+}
+
+
+
+/* HOMEPAGE */
+
+#explanation h2 {
+	font-size: 18px;
+	font-weight: bold;
+	line-height: 21px;
+	margin-bottom: 5px;
+}
+
+#explanation p {
+	margin-bottom: 10px;
+}
+
+#actions {
+	margin: 20px 0;
+	text-align: center;
+}
+
+#actions li {
+	display: inline-block;
+}
+
+#actions a {
+	display: block;
+	padding: 5px 10px;
+	margin-right: 20px;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	background-color: #333;
+	color: #ccc;
+}
+
+#actions li.contact a {
+	margin-right: 0;
+	background-color: #f90;
+	color: #000;
+}
+
+#actions a:hover {
+	text-decoration: none;
+}
+
+#customers {
+	display: table;
+	width: 100%;
+}
+
+#customers dt, #customers dd {
+	display: table-cell;
+	text-align: center;
+}
+
+
+
+/* CONTACT PAGE */
+
+body.contact h2 {
+	padding: 10px 15px;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	background: transparent url(../images/corporate/corporate_server_460.jpg) 50% 90% no-repeat;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	text-shadow: 0 1px 5px rgba(0,0,0,0.7);
+	font-size: 18px;
+	font-weight: bold;
+	text-transform: uppercase;
+	line-height: 21px;
+	margin-bottom: 10px;
+}
+
+
+
+
 
 
 
