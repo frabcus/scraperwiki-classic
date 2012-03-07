@@ -292,6 +292,7 @@ footer li.terms {
 #customers {
 	display: table;
 	width: 100%;
+	color: #aaa;
 }
 
 #customers dt, #customers dd {
