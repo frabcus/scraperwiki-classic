@@ -336,7 +336,7 @@ class Code(models.Model):
 
     def screenshot_url(self, size='medium'):
         from django.conf import settings        
-        
+
         if self.has_screenshot(size):
             url = settings.MEDIA_URL + 'screenshots/' + size + '/' + self.get_screenshot_filename(size=size)
         else:

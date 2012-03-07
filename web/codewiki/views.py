@@ -275,13 +275,12 @@ def code_overview(request, wiki_type, short_name):
 
     context["itemlog"] = populate_itemlog(scraper, run_count=10)
             
-    context['url_screenshot'] = None
-    try:
-        s = scraper.scraperrunevent_set.filter(first_url_scraped__isnull=False).order_by('run_started')[0]
-        context['url_screenshot'] = s.first_url_scraped
-    except:
-        pass
-            
+    if scraper.has_screenshot():
+        if scraper.wiki_type == 'scraper':
+            context['url_screenshot'] = scraper.scraper.get_screenshot_url()
+    else:
+        context['url_screenshot'] = None
+
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
