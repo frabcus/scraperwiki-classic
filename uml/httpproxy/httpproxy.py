@@ -721,6 +721,7 @@ if __name__ == '__main__' :
             os.wait()
 
     config = ConfigParser.ConfigParser()
+    print "httpproxy config file:", confname
     config.readfp (open(confnam))
 
     cache_hosts = config.get(varName, 'cache')
