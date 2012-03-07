@@ -126,6 +126,15 @@ body.contact h2, body.features h2 {
 	margin-bottom: 15px;
 }
 
+div.contact {
+	float: right;
+	width: 310px;
+}
+
+div.contact.first {
+	float: left;
+}
+
 
 
 

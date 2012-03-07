@@ -58,5 +58,16 @@ body {
 
 
 
+/* CONTACT PAGE */
+
+div.contact {
+	width: 455px;
+}
+
+#callback p {
+	padding-left: 110px;
+}
+
+
 
 

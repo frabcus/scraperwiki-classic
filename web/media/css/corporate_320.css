@@ -317,7 +317,74 @@ body.contact h2, body.features h2 {
 	font-weight: bold;
 	text-transform: uppercase;
 	line-height: 21px;
+	margin-bottom: 15px;
+}
+
+div.contact {
+	padding: 15px;
+	margin-bottom: 15px;
+	background: #222;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	text-align: center;
+	-webkit-box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0,0,0,0.5);
+	-moz-box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0,0,0,0.5);
+	box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0,0,0,0.5);
+	background: -moz-linear-gradient(top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.1)), color-stop(100%,rgba(255,255,255,0)));
+	background: -webkit-linear-gradient(top, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 100%);
+	background: -o-linear-gradient(top, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 100%);
+	background: -ms-linear-gradient(top, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 100%);
+	background: linear-gradient(top, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 100%);
+}
+
+div.contact h3 {
+	font-size: 21px;
+	line-height: 23px;
 	margin-bottom: 10px;
+}
+
+div.contact p {
+	color: #ccc;
+}
+
+div.contact a.tel, div.contact a.email {
+	display: block;
+	font-size: 18px;
+	margin: 5px 0;
+}
+
+div.contact a.email {
+	font-size: 16px;
+}
+
+#callback p {
+	margin-bottom: 10px;
+	text-align: left;
+	padding-left: 20px;
+}
+
+#callback label {
+	display: block;
+	padding-bottom: 2px;
+}
+
+#callback input.text {
+	width: 215px;
+	font-size: 16px;
+	padding: 4px;
+}
+
+#callback p.last {
+	text-align: center;
+	padding: 0;
+	margin-top: 15px;
+	margin-bottom: 5px;
+}
+
+#callback .submit {
+	font-sizxe: 16px;
 }
 
 
