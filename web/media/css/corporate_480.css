@@ -9,10 +9,6 @@
 
 /* HORS D'OUVRE */
 
-body:after {
-	content: '480px';
-}
-
 header, section, footer {
 	width: 460px;
 }

@@ -9,12 +9,12 @@
 
 /* HORS D'OUVRE */
 
-body:after {
-	content: '992px';
-}
-
 header, section, footer {
 	width: 990px;
+}
+
+body {
+	background-image: url(../images/corporate/corporate_bg_992.jpg);
 }
 
 

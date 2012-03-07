@@ -9,12 +9,12 @@
 
 /* HORS D'OUVRE */
 
-body:after {
-	content: '768px';
-}
-
 header, section, footer {
 	width: 760px;
+}
+
+body {
+	background-image: url(../images/corporate/corporate_bg_768.jpg);
 }
 
 
@@ -30,11 +30,12 @@ header {
 	-webkit-box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
 	-moz-box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
 	box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
-	background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
-	background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
-	background-image: -ms-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
-	background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
-	background-image: linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
+	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
+		background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.3)), color-stop(50%,rgba(255,255,255,0.15)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
+		background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+		background-image: -o-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+		background-image: -ms-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+		background-image: linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
 	overflow: auto;
 }
 
@@ -118,7 +119,7 @@ nav ul {
 
 /* CONTACT PAGE */
 
-body.contact h2 {
+body.contact h2, body.features h2 {
 	font-size: 24px;
 	line-height: 26px;
 	background: transparent url(../images/corporate/corporate_server_960.jpg) 50% 90% no-repeat;

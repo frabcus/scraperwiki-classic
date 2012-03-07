@@ -50,18 +50,10 @@ table {
 }
 
 body {
-	background-color: #101112;
+	background: #101112 url(../images/corporate/corporate_bg_320.jpg) center top no-repeat;
 	color: #fff;
 	border-top: 1px solid #101112;
 	margin-top: -1px;
-}
-
-body:after {
-	content: '320px';
-	position: fixed;
-	bottom: 10px;
-	right: 10px;
-	opacity: 0.5;
 }
 
 a {
@@ -133,11 +125,12 @@ nav li.contact a {
 	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-	background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
-	background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
-	background-image: -ms-linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
-	background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
-	background-image: linear-gradient(top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0));
+	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.6)), color-stop(50%,rgba(255,255,255,0.2)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
+	background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.2) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -o-linear-gradient(top, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.2) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -ms-linear-gradient(top, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.2) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: linear-gradient(top, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.2) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
 }
 
 nav li.contact a:hover {
@@ -310,7 +303,7 @@ footer li.terms {
 
 /* CONTACT PAGE */
 
-body.contact h2 {
+body.contact h2, body.features h2 {
 	padding: 10px 15px;
 	-moz-border-radius: 5px;
 	-wekbit-border-radius: 5px;
