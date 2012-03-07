@@ -5,7 +5,7 @@
         <title>{% block title %}{% endblock %}</title>
         <meta name="HandheldFriendly" content="True">
         <meta name="MobileOptimized" content="320">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         {% block meta %}{% endblock %}
         <link rel="stylesheet" media="screen" href="{{MEDIA_URL}}css/corporate_320.css">
         <link rel="stylesheet" media="only screen and (min-width: 480px)" href="{{MEDIA_URL}}css/corporate_480.css">
@@ -71,16 +71,5 @@
         <script src="{{MEDIA_URL}}js/DD_belatedPNG_0.0.8a-min.js"></script>
     	<script>DD_belatedPNG.fix('.png_bg, img');</script>
     	<![endif]-->
-    	<script type="text/javascript">
-    	if (navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i)) {
-          var viewportmeta = document.querySelector('meta[name="viewport"]');
-          if (viewportmeta) {
-            viewportmeta.content = 'width=device-width, minimum-scale=1.0, maximum-scale=1.0';
-            document.body.addEventListener('gesturestart', function() {
-              viewportmeta.content = 'width=device-width, minimum-scale=0.25, maximum-scale=1.6';
-            }, false);
-          }
-        }
-    	</script>
     </body>
 </html>
