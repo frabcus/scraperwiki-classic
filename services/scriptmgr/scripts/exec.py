@@ -16,7 +16,9 @@ try    : import json
 except : import simplejson as json
 
 
-    # Unfortunately necessary to do this because PYTHONUNBUFFERED=True does nto get good enough results and tends to still concatenate lines when short and rapid
+# Unfortunately necessary to do this because PYTHONUNBUFFERED=True
+# does not get good enough results and tends to still concatenate lines
+# when short and rapid
 class ConsoleStream:
     def __init__(self, fd):
         self.m_text = ''
@@ -43,12 +45,10 @@ class ConsoleStream:
             self.m_fd.flush()
             
     def close(self):
-
         self.m_fd.close()
 
     def fileno(self):
         return self.m_fd.fileno()
-
 
 
 scraperwiki.logfd = sys.stderr
@@ -56,7 +56,11 @@ sys.stdout = ConsoleStream(scraperwiki.logfd)
 sys.stderr = ConsoleStream(scraperwiki.logfd)
 
 parser = optparse.OptionParser()
-parser.add_option("--script", metavar="name")    # not the scraper name, this is tmp file name which we load and execute
+# The script to load and execute (not the scraper name)
+parser.add_option("--script", metavar="name")
+# The scraper name, visible on command line (good for ps | grep)
+# but not otherwise used.
+parser.add_option("--scraper", metavar="scraper")
 options, args = parser.parse_args()
 
 ##############################################################
@@ -70,14 +74,14 @@ verification_key = None
 pathname, _ = os.path.split(options.script)
 pathname = os.path.join( os.path.abspath(pathname), 'launch.json')
 with open(pathname) as f:
-    d = json.loads( f.read() )
-    datastore   = d['datastore']
-    runid       = d['runid']
-    scrapername = d['scrapername']
-    querystring = d['querystring']
-    attachables = d.get('attachables', '')        
-    verification_key = d.get('verification_key', '')
-    
+    d = json.loads(f.read())
+datastore   = d['datastore']
+runid       = d['runid']
+scrapername = d['scrapername']
+querystring = d['querystring']
+attachables = d.get('attachables', '')        
+verification_key = d.get('verification_key', '')
+
 if querystring:
     os.environ['QUERY_STRING'] = querystring
     os.environ['URLQUERY'] = querystring   
@@ -85,17 +89,20 @@ if querystring:
 host, port = string.split(datastore, ':')
 
 # Added two new arguments as this seems to have changed in scraperlibs
+scraperwiki.datastore.create(host, port, scrapername, runid,
+  attachables, verification_key)
 
-scraperwiki.datastore.create(host, port, scrapername, runid, attachables, verification_key)
 
+# CPU limits.
 resource.setrlimit(resource.RLIMIT_CPU, (80, 82,))
-
-#  Set up a CPU time limit handler which simply throws a python so it can be handled cleanly before the hard limit is reached
-def sigXCPU(signum, frame) :
+# The CPU time limit handler simply throws a Python exception
+# so it can be handled cleanly before the hard limit is reached.
+def sigXCPU(signum_, frame_):
     raise Exception("ScraperWiki CPU time exceeded")
 signal.signal(signal.SIGXCPU, sigXCPU)
 
-code = open(options.script).read()
+with open(options.script) as codef:
+    code = codef.read()
 try:
     import imp
     mod = imp.new_module('scraper')
@@ -108,8 +115,9 @@ except SystemExit, se:
     sys.stdout.flush()
     sys.stderr.flush()
 
-    # If we do not temporarily yield a slice of the CPU here then the launching 
-    # process will not be able to read from stderr before we exit.
+    # If we do not temporarily yield a slice of the CPU here then the
+    # launching process will not be able to read from stderr before
+    # we exit.
     import time 
     time.sleep(0)
 

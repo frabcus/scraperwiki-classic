@@ -141,7 +141,10 @@ def api_explorer(request):
         dresult = "Sorry, unable to open:\n%s\n\nThis error has been logged" % url
         #logger.log("api_explorer failed to load from %s" % url)
     
-    if format == "htmltable":  # elements already escaped
+    if format == "base64singleton":
+        return HttpResponse(dresult, mimetype=params.get("mimetype", "text/plain"))
+
+    if format in ["htmltable", "htmltable_unescaped"]:  
         result = dresult
     else:
         result = '<pre style="color:#036;">%s</pre>' % re.sub("<", "&lt;", dresult)    # can't be done by formatting the iframe

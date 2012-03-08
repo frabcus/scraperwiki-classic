@@ -1,3 +1,5 @@
+/* @override http://localhost:8000/media/css/corporate_480.css */
+
 /* 480.css
    Builds on top of 320.css.
    Everything here should look good 
@@ -7,10 +9,61 @@
 
 /* HORS D'OUVRE */
 
-body:after {
-	content: '480px';
+header, section, footer {
+	width: 460px;
 }
 
-.content {
-	width: 480px;
+
+
+/* FOOTER */
+
+footer {
+	font-size: 14px;
+	line-height: 21px;
+	text-align: left;
 }
+
+footer .vcard {
+	float: left;
+}
+
+footer .legal {
+	float: right;
+	text-align: right;
+}
+
+footer .legal li {
+	display: block;
+	margin: 0;
+}
+
+
+
+/* HOMEPAGE SLIDER */
+
+#slider {
+	width: 460px;
+}
+
+#slider .panel {
+	width: 420px;
+}
+
+#slider .panel p {
+	width: 300px;
+}
+
+#slider .panel h2 {
+	width: 320px;
+}
+
+
+
+
+/* CONTACT PAGE */
+
+#callback p {
+	padding-left: 100px;
+}
+
+

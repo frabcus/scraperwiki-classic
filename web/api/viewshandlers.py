@@ -15,10 +15,14 @@ from django.views.decorators.http import condition
 from tagging.models import Tag
 
 from models import APIMetric
+
+from cStringIO import StringIO
+import json
 import csv
 import datetime
 import re
 import PyRSS2Gen
+import base64
 
 from django.utils.encoding import smart_str
 from django.core.serializers.json import DateTimeAwareJSONEncoder
@@ -28,10 +32,6 @@ from frontend.models import UserProfile
 from codewiki.models import Scraper, Code, UserCodeRole, ScraperRunEvent, CodePermission, scraper_search_query, scraper_search_query_unordered, scrapers_overdue
 from codewiki.managers.datastore import DataStore
 import frontend
-from cStringIO import StringIO
-
-try:     import json
-except:  import simplejson as json
 
 
 def getscraperorresponse(short_name):
@@ -82,13 +82,19 @@ def stream_rows(dataproxy, format):
                 fout.write("<tr> <th>%s</th> </tr>\n" % ("</th> <th>".join([ k.encode('utf-8') for k in ret["keys"] ])))
             for row in ret["data"]:
                 fout.write("<tr> <td>%s</td> </tr>\n" % ("</td> <td>".join([ str(stringnot(v)).replace("<", "&lt;")  for v in row ])))
+        elif format == "htmltable_unescaped":
+            if n == 0:
+                fout.write('<table border="1" style="border-collapse:collapse; ">\n')
+                fout.write("<tr> <th>%s</th> </tr>\n" % ("</th> <th>".join([ k.encode('utf-8') for k in ret["keys"] ])))
+            for row in ret["data"]:
+                fout.write("<tr> <td>%s</td> </tr>\n" % ("</td> <td>".join([ str(stringnot(v))  for v in row ])))
         else:
             assert False, "Bad format "+format
         
         yield fout.getvalue()
         n += 1
-        if not ret.get("moredata"):
-            if format == "htmltable":
+        if (not ret.get("moredata")) and (ret.get("stillproducing") != "yes"):
+            if format != "csv":
                 yield "</table>\n"
             break  
         
@@ -121,42 +127,64 @@ def out_csvhtml(dataproxy, short_name, format):
 #response["Content-Length"] = 1000000000
     return response
     
+def out_base64singleton(dataproxy, mimetype):
+    result = dataproxy.receiveonelinenj()  
+    print result
+    
+    try:
+        res = json.loads(result)
+        while res.get('stillproducing') == 'yes':
+            dresult = json.loads(dataproxy.receiveonelinenj())
+            res['data'].extend(dresult['data'])
+            res['stillproducing'] = dresult.get('stillproducing')
+    except ValueError, e:
+        dataproxy.close()            
+        return HttpResponse("Error: %s" % (e.message,))
+        
+        
+    if "error" in res:
+        return HttpResponse("Error2: %s" % res["error"])
+    if len(res["keys"]) != 1:
+        return HttpResponse("Error3: singleton has %d columns instead of 1" % len(res["keys"]))
+    if len(res["data"]) != 1:
+        return HttpResponse("Error4: singleton has %d rows instead of 1" % len(res["data"]))
+    bres = base64.decodestring(res["data"][0][0])
+    dataproxy.close()
+    return HttpResponse(bres, mimetype)
+
 
 # TODO: Fix this so that we can stream the results to either the browser
 # or the download.  Currently this dies on large data ~38k rows (depending
 # on query) with a timeout and so the user gets nothing, but maybe we should
 # do iterating over the results as they come in and part-encoding the
 # stream with each row?
+# NEW TODO!!!  Convert to forwarding requests to jdatastore which doesn't have this problem.
 def out_json(dataproxy, callback, short_name, format):
     # json is not chunked.  The output is of finite fixed bite sizes because
     # it is generally used by browsers which aren't going to survive a huge
     # download; however could chunk the jsondict type stream_wise as above
     # by manually creating the outer bracketing as with htmltable.
 
-    result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
-    
+    result = dataproxy.receiveonelinenj()      
     if not result:
         dataproxy.close()
         return HttpResponse("Error: Dataproxy responded with an invalid response")        
 
-    if format == "jsondict":
-        try:
-            res = json.loads(result)
-
-            while res.get('stillproducing') == 'yes':
-                dresult = json.loads(dataproxy.receiveonelinenj())
-                res['data'].extend(dresult['data'])
-                res['stillproducing'] = dresult.get('stillproducing')
-
-        except ValueError, e:
-            dataproxy.close()            
-            return HttpResponse("Error: %s" % (e.message,))
-            
-        if "error" not in res:
-            dictlist = [ dict(zip(res["keys"], values))  for values in res["data"] ]
-            result = json.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
+    try:
+        res = json.loads(result)
+        while res.get('stillproducing') == 'yes':
+            dresult = json.loads(dataproxy.receiveonelinenj())
+            res['data'].extend(dresult['data'])
+            res['stillproducing'] = dresult.get('stillproducing')
+    except ValueError, e:
+        dataproxy.close()            
+        return HttpResponse("Error: %s" % (e.message,))
+        
+    if format == "jsondict" and "error" not in res:
+        dictlist = [ dict(zip(res["keys"], values))  for values in res["data"] ]
+        result = json.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
     else:
-        assert format == "jsonlist"
+        result = json.dumps(res)
     if callback:
         result = "%s(%s)" % (callback, result)
     response = HttpResponse(result, mimetype='application/json; charset=utf-8')
@@ -169,8 +197,13 @@ def out_rss2(dataproxy, scraper):
     result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
     try:
         res = json.loads(result)
+        while res.get('stillproducing') == 'yes':
+            dresult = json.loads(dataproxy.receiveonelinenj())
+            res['data'].extend(dresult['data'])
+            res['stillproducing'] = dresult.get('stillproducing')
     except ValueError, e:
-        return HttpResponse("Error:%s" % (e.message,))
+        dataproxy.close()            
+        return HttpResponse("Error: %s" % (e.message,))
     if "error" in res:
         return HttpResponse("Error2: %s" % res["error"])
 
@@ -280,15 +313,17 @@ def sqlite_handler(request):
     
     dataproxy.m_socket.sendall(json.dumps(req) + '\n')
     
-    if format not in ["jsondict", "jsonlist", "csv", "htmltable", "rss2"]:
+    if format not in ["jsondict", "jsonlist", "csv", "htmltable", "rss2", "base64singleton", "htmltable_unescaped"]:
         dataproxy.close()
         return HttpResponse("Error: the format '%s' is not supported" % format)
 
 
-    if format in ["csv", 'htmltable']:   
+    if format in ["csv", 'htmltable', 'htmltable_unescaped']:   
         return out_csvhtml(dataproxy, scraper.short_name, format)
     if format == "rss2":
         return out_rss2(dataproxy, scraper)
+    if format == "base64singleton":
+        return out_base64singleton(dataproxy, request.GET.get('mimetype', "text/plain"))
         
     return  out_json(dataproxy, request.GET.get("callback"),
       scraper.short_name, format)

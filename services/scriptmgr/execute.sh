@@ -3,7 +3,7 @@
 # Run a script by passing to the local scriptmgr.
 # scriptmgr should be already running.
 
-usage="execute.sh [-s] [-l php|python|ruby]code"
+usage="execute.sh [-s] [-l php|python|ruby] code"
 
 sync=
 language=python

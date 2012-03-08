@@ -1,3 +1,5 @@
+/* @override http://localhost:8000/media/css/corporate_768.css */
+
 /* 768.css
    Builds on top of 320/480.css.
    Everything here should look good 
@@ -7,10 +9,137 @@
 
 /* HORS D'OUVRE */
 
-body:after {
-	content: '768px';
+header, section, footer {
+	width: 760px;
 }
 
-.content {
-	width: 768px;
+body {
+	background-image: url(../images/corporate/corporate_bg_768.jpg);
 }
+
+
+
+/* HEADER */
+
+header {
+	margin-top: 15px;
+	border: 1px solid #101112;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	-webkit-box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
+	-moz-box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
+	box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
+	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
+		background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.3)), color-stop(50%,rgba(255,255,255,0.15)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
+		background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+		background-image: -o-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+		background-image: -ms-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+		background-image: linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	overflow: auto;
+}
+
+h1 {
+	float: left;
+	width: 274px;
+	height: 30px;
+	margin: 8px 0 5px 15px;
+}
+
+nav ul {
+	float: right;
+	margin: 9px 15px 0 0;
+}
+
+
+
+/* HOMEPAGE SLIDER */
+
+#slider {
+	width: 760px;
+	height: 340px;
+}
+
+#slider .panel {
+	width: 680px;
+	height: 260px;
+	padding: 40px;
+}
+
+#slider .panel h2 {
+	font-size: 32px;
+	line-height: 32px;
+	text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+	margin-bottom: 10px;
+	width: 500px;
+}
+
+#slider .panel p {
+	font-size: 21px;
+	line-height: 25px;
+	width: 420px;
+	text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+
+#slider .panel .more {
+	font-size: 21px;
+	padding: 8px 18px;
+	margin-top: 16px;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
+}
+
+#competition {
+	background: transparent url(../images/corporate/corporate_server_960.jpg) center center no-repeat;
+}
+
+
+
+/* HOMEPAGE */
+
+#explanation h2 {
+	font-size: 24px;
+	font-weight: bold;
+	line-height: 26px;
+	margin-bottom: 8px;
+}
+
+#explanation p {
+	font-size: 18px;
+	line-height: 22px;
+	margin-bottom: 12px;
+}
+
+#actions {
+	margin: 30px 0;
+}
+
+
+
+/* CONTACT PAGE */
+
+body.contact h2, body.features h2 {
+	font-size: 24px;
+	line-height: 26px;
+	background: transparent url(../images/corporate/corporate_server_960.jpg) 50% 90% no-repeat;
+	margin-bottom: 20px;
+}
+
+div.contact {
+	float: right;
+	width: 340px;
+}
+
+div.contact.first {
+	float: left;
+}
+
+#callback p {
+	padding-left: 55px;
+}
+
+
+
+
+

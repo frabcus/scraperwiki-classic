@@ -7,7 +7,7 @@ import re
 
 def kill_running_runid(run_id):
     """
-    Currently this is done by running_scrapers by asking twister to do it, this needs 
+    Currently this is done by /status by asking twister to do it, this needs 
     hooking up the same way.
     """
     pass

@@ -113,7 +113,7 @@ and construct all your schemas explicitly.</p>
 
 <h2>Reading data from other scrapers</h2>
 
-<p>To access data from other scrapers we attach to them.</p>
+<p>To access data from other scrapers we attach to them, using their shortname (the name in the URL).</p>
 <code>scraperwiki.sqlite.attach("new_americ_foundation_drone_strikes")
 print scraperwiki.sqlite.select("* from new_americ_foundation_drone_strikes.swdata limit 2")
 </code>

@@ -60,23 +60,21 @@ opts.parse(options, true);
 
 var config_path = opts.get('config') || './appsettings.scriptmgr.js';
 var settings = require(config_path).settings;
-
-// Load settings and store them locally
-exec.init( settings );
-
-util.setup_logging( settings.logfile, settings.loglevel );
+util.setup_logging(settings.logfile, settings.loglevel);
 if (settings.devmode) {
-	util.log.emitter.addListener('loggedMessage', function(message,levelName) {
-    	console.log(levelName.toUpperCase() + ": " + message);
-  	});
+    util.log.emitter.addListener('loggedMessage',
+      function(message, levelName) {
+        console.log(levelName.toUpperCase() + ": " + message);
+    });
 };
-
 // Handle uncaught exceptions and make sure they get logged
 process.on('uncaughtException', function (err) {
   util.log.fatal('Caught exception: ' + err);
   if ( settings.devmode ) console.log( err.stack );
 });
 
+// Pass settings and initialise exec module.
+exec.init( settings );
 
 http.createServer(function (req, res) {
     // Decide whether we will accept the connection (from twister machine and 
@@ -171,19 +169,19 @@ function handleScriptInfo(req,res) {
 function handleIdent(req,res) {
 	
  	var urlObj = url.parse(req.url, true);	
-	util.log.debug('Ident request')
+	util.log.debug('Ident request ' + req.url);
 	
 	// Why oh why oh why do we use ?sdfsdf instead of a proper 
 	// query string. Sigh.
 	var s;
-	for ( var v in urlObj.query )
-		s = v.substring( 0, v.indexOf(':'))
+	for (var v in urlObj.query) {
+            s = v.substring(0, v.indexOf(':'));
+        }
 	
 	var script = exec.get_details( { ip: s } );
-	util.log.debug(script)
-	if ( script ){
-		util.log.debug(script.run_id);
-		util.log.debug(script.scraper_name);		
+	if (script) {
+		util.log.debug('Found script '+ script.scraper_name +
+                  ' runid ' + script.run_id);
 		
 		res.write( 'scraperid=' + script.scraper_guid + "\n");
 		res.write( 'runid=' + script.run_id  + "\n");		
@@ -195,12 +193,13 @@ function handleIdent(req,res) {
 		if ( script.username != '*SCHEDULED*' ) {
 			res.write( 'option=webcache:10\n');				
 		}
-		
 		res.end('\n')
 	}
 	else {
-		util.log.debug("Unable to find script for IP " + s + " we have " + exec.known_ips());
-		write_error( res, "Unable to find script for IP " + s + " we have " + exec.known_ips());
+		util.log.debug("Unable to find script for IP " + s +
+                  " we have " + exec.known_ips());
+		write_error( res, "Unable to find script for IP " + s
+                  + " we have " + exec.known_ips());
 	}
 }
 

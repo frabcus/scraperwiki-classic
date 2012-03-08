@@ -76,6 +76,6 @@ urlpatterns = patterns('',
     url(r'^events/(?P<e>[^/]+)?/?$', frontend_views.events, name='events'),
     
     # corporate minisite
-    url(r'corporate/', frontend_views.corporate, name='corporate'),
+    url(r'corporate/(?P<page>[^/]+)?/?$', frontend_views.corporate, name='corporate'),
     
 )

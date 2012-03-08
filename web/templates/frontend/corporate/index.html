@@ -1,20 +1,55 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>ScraperWiki Corporate</title>
-        <meta name="HandheldFriendly" content="True">
-        <meta name="MobileOptimized" content="320">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" media="screen" href="{{MEDIA_URL}}css/corporate_320.css">
-        <link rel="stylesheet" media="only screen and (min-width: 480px)" href="{{MEDIA_URL}}css/corporate_480.css">
-        <link rel="stylesheet" media="only screen and (min-width: 768px)" href="{{MEDIA_URL}}css/corporate_768.css">
-        <link rel="stylesheet" media="only screen and (min-width: 992px)" href="{{MEDIA_URL}}css/corporate_992.css">
-        <link rel="stylesheet" media="print" href="{{MEDIA_URL}}css/corporate_print.css">
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
-		<script type="text/javascript" src="{{MEDIA_URL}}js/corporate.js"></script>
-    </head>
-    <body>
-        <h1 style="text-align: center; position: absolute; width: 100%; top: 50%; line-height: 20px; font-size: 16px; opacity: 0.5">Corporate site</h1>
-    </body>
-</hmtl>
+{% extends "frontend/corporate/base.html" %}
+
+{% block title %}ScraperWiki Corporate{% endblock %}
+
+{% block content %}
+<section>
+    <div id="slider">
+        <ol class="pagination">
+            <li><a href="#competition">Competition</a></li>
+            <li><a href="#collaboration">Collaboration</a></li>
+            <li><a href="#control">Control</a></li>
+            <li><a href="#community">Community</a></li>
+        </ol>
+        <div class="panel" id="competition">
+            <h2>Structured&nbsp;data is a&nbsp;game&nbsp;changer.</h2>
+            <p>Don&rsquo;t get left behind. Our unique platform and flexible software agents can help turn your data into a competitive&nbsp;edge.</p>
+            <a class="more" href="/corporate/features/">Find out how</a>
+        </div>
+        <div class="panel" id="collaboration">
+            <h2>Call&nbsp;in&nbsp;the experts. Yours&nbsp;or&nbsp;ours.</h2>
+            <p>Quickly bring together the right people for the job, and monitor their changes from your powerful project&nbsp;dashboard.</p>
+            <a class="more" href="/corporate/features/">Find out more</a>
+        </div>
+        <div class="panel" id="control">
+            <h2>Your&nbsp;data. Your&nbsp;terms.</h2>
+            <p>Take control of your data with a ScraperWiki Vault. Safe, secure and uptime&nbsp;guaranteed.</p>
+            <a class="more" href="/corporate/features/">Find out more</a>
+        </div>
+        <div class="panel" id="community">
+            <h2>You&rsquo;re&nbsp;passionate about your data. So&nbsp;are&nbsp;we.</h2>
+            <p>Tap into a community of talented data diggers from across the globe. Monitor, visualise and iterate faster than ever.</p>
+            <a class="more" href="/corporate/features/">Find out how</a>
+        </div>
+    </div>
+    
+    <div id="explanation">
+        <h2>Some catchy headline goes here</h2>
+        <p>We describe our service here. Something about private vaults, a competitive edge, realtime monitoring, fast and cost-effective solutions. We explain a little about how it works, but not too much &ndash; we can&rsquo;t assume the reader has any technical knowledge.</p>
+    </div>
+    
+    <ul id="actions">
+        <li class="features"><a href="/corporate/features/">See features and pricing</a></li>
+        <li class="contact"><a href="/corporate/contact/">Get in touch</a></li>
+    </ul>
+    
+    <dl id="customers">
+        <dt>As used by</dt>
+        <dd>Channel 4</dd>
+        <dd>The Guardian</dd>
+        <dd>Informa</dd>
+        <dd>Who else?</dd>
+    </dl>
+    
+</section>
+{% endblock %}

@@ -1,7 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-// set the include paths to scraperlibs from an environment variable (what can be done automatically for python and ruby)
+// set the include paths to scraperlibs from an environment variable
+// (this can be done automatically for python and ruby)
 foreach (split(':', getenv('PHPPATH')) as $dir)
     ini_set('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
@@ -25,8 +26,8 @@ for ($idx = 1; $idx < count($argv); $idx += 1)
       $script = substr ($arg, 9);
 }
 
-$contents 	 = file_get_contents( dirname($script) . '/launch.json');
-$launch 	 = json_decode( $contents, true );
+$contents    = file_get_contents( dirname($script) . '/launch.json');
+$launch      = json_decode( $contents, true );
 $datastore   = $launch['datastore'];
 $scrapername = $launch['scrapername'];
 $runid 	     = $launch['runid'];

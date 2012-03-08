@@ -75,8 +75,11 @@ end
 
 options = {}
 OptionParser.new do|opts|
-   opts.on( '--script=[SCRIPT]') do|script|
+   opts.on( '--script=[SCRIPT]') do |script|
      options[:script] = script
+   end
+   opts.on('--scraper=[name]') do |name|
+     # nothing to do
    end
 end.parse(ARGV)
 
