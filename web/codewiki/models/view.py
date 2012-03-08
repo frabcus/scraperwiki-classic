@@ -36,7 +36,14 @@ class View(code.Code):
                     self.relations.add(scraper)
 
     def get_screenshot_url(self, url_prefix):
-        return '%s%s' % (url_prefix, reverse('rpcexecute', args=[self.short_name]))
+        url = '%s%s' % (url_prefix, reverse('rpcexecute', args=[self.short_name]))
+        # Make the screenshots work in a vault.
+        # XXX Can't enable this yet for privacy reasons. Will have to have a
+        # hash in screenshot names or have Django check their privileges or
+        # something.
+        #if self.access_apikey:
+        #    url += "?apikey=" + self.access_apikey
+        return url
 
     def content_type(self):
         return ContentType.objects.get(app_label="codewiki", model="View")
