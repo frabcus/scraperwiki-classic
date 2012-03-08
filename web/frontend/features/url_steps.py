@@ -3,6 +3,7 @@ from lettuce.django import django_url
 
 PAGES = {
         'home':                         '/',
+        'search test':                  '/search/test/',
         'login':                        '/login/',
         'contact':                      '/contact/',
         'pricing':                      '/pricing/',
