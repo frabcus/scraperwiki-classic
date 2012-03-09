@@ -290,15 +290,81 @@ footer li.terms {
 }
 
 #customers {
-	display: table;
-	width: 100%;
-	color: #aaa;
+	color: #888;
+	text-align: center;
+	margin: 30px 0 0 0;
+	line-height: 50px;
 }
 
 #customers dt, #customers dd {
-	display: table-cell;
-	text-align: center;
+	display: inline-block;
+	margin-bottom: 10px;
 }
+
+#customers dt {
+	display: block;
+	margin-bottom: 0;
+}
+
+#customers dd a {
+	display: block;
+	background: transparent url(../images/corporate/client_gannett.gif) 0 0 no-repeat;
+	width: 200px;
+	height: 50px;
+	text-indent: -300px;
+	text-align: left;
+	overflow: hidden;
+}
+
+#customers #agra a {
+	width: 210px;
+	background-image: url(../images/corporate/client_agra.gif);
+}
+
+#customers #guardian a {
+	width: 220px;
+	background-image: url(../images/corporate/client_guardian.gif);
+}
+
+#customers #cabinet a {
+	width: 240px;
+	background-image: url(../images/corporate/client_cabinet.gif);
+}
+
+
+
+
+/* FEATURES PAGE */
+
+#exclusive {
+	margin: 30px 0;
+}
+
+#exclusive h3 {
+	text-align: center;
+	font-size: 18px;
+	line-height: 21px;
+	color: #ccc;
+	margin-bottom: 15px;
+}
+
+#exclusive .feature {
+	margin: 15px 0;
+}
+
+#exclusive .feature h4 {
+	font-size: 16px;
+	padding: 5px 0 5px 34px;
+	background: transparent url(http://placehold.it/24x24) left center no-repeat;
+}
+
+#exclusive .feature p {
+	font-size: 13px;
+	line-height: 17px;
+	padding: 0 0 0 34px;
+	margin-top: 5px;
+}
+
 
 
 
