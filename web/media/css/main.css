@@ -2173,6 +2173,10 @@ body.api .right ul {
 	background-image: url(../images/icons/stack_overflow.png);
 }
 
+#help_content #getting_help ul li.pingdom {
+	background-image: url(../images/icons/pingdom.png);
+}
+
 #help_content #getting_help ul li.google {
 	background-image: url(../images/icons/email.png);
 }
