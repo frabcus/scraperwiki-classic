@@ -36,3 +36,7 @@ Feature: As a site visitor
   Scenario: I should see the latest blog post
     When I visit the home page
     Then I should see "FROM THE BLOG"
+
+  Scenario: I should see a link to the status page
+    When I visit the home page
+    Then I should see the "Status" link
