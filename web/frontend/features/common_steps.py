@@ -4,6 +4,11 @@ from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
 # Steps used in more than one feature's steps file
 
+# Human readable CSS selectors
+SELECTORS = {
+        'need help box':                "div[@id='getting_help']",
+        }
+
 # Features
 @step(u'(?:Given|And) the "([^"]*)" feature exists')
 def and_the_feature_exists(step, feature):
@@ -72,6 +77,10 @@ def i_should_see_the_button(step, text):
 def i_should_not_see_the_button(step, text):
     assert not world.browser.find_link_by_partial_text(text)
 
+@step(u'(?:Then|And) I should see (?:the|a|an) "([^"]*)" (?:link|button) in the (.+)')
+def i_should_see_the_button(step, text, parent_name):
+    xpath = ".//%s//a[text()='%s']" % ( SELECTORS[parent_name], text)
+    assert world.browser.find_by_xpath(xpath)
 # Clicking
 @step(u'(?:And|When) I click "([^"]*)"')
 def and_i_click(step, text):

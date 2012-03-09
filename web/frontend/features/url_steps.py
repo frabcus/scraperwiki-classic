@@ -7,6 +7,7 @@ PAGES = {
         'testalicious tag':             '/tags/testalicious',
         'login':                        '/login/',
         'contact':                      '/contact/',
+        'help':                         '/help/',
         'pricing':                      '/pricing/',
         'individual payment':           '/subscribe/individual/',
         'business payment':             '/subscribe/business/',
