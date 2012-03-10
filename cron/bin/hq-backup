@@ -25,7 +25,5 @@ then
   suffix=.$(date +\%A | tr '[A-Z]' '[a-z]')
   destdir=swbackup@kippax.scraperwiki.com:/home/swbackup/$(hostname)/
 
-  time
-  rsync "-az${quiet}${verbose}" -e 'ssh -i /root/backup-key.rsa' /root/backup/ "$destdir" -b --suffix="$suffix"
-  time
+  time rsync "-az${quiet}${verbose}" -e 'ssh -i /root/backup-key.rsa' /root/backup/ "$destdir" -b --suffix="$suffix"
 fi
