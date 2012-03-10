@@ -1572,7 +1572,7 @@ div.chat {
 	padding-bottom: 0;
 }
 
-div.data {
+table.about + div {
 	background: transparent url(../images/tiny_shadow.gif) 0 0 repeat-x;
 }
 

@@ -1,13 +1,16 @@
 {% extends "frontend/base.html" %}
 
-{% load screen_shot %}
+{% load forking %}
 {% load humanize %}
+
+{% load screen_shot %}
 {% load markup %}
 {% load month_name %}
 {% load gravatar %}
 {% load comments %}
 {% load history %}
-{% load forking %}
+{% load icanhaz %}
+{% load str_replace %}
 
 {% block title %}
 {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}
@@ -27,8 +30,11 @@
 {% endblock %}
 
 {% block javascript %}
+    {% if not debug %}
     <script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
     <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    {% endif %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.dataTables.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.snippet.min.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/codeoverview.js?{{settings.REVISION}}"></script>
 
@@ -42,6 +48,7 @@
 {% endblock %}
 
 {% block header %}
+
     <h2>
         <a href="{% if scraper.owner.username %}{% url profile scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> / 
         {% if user.is_authenticated %}
@@ -72,6 +79,8 @@
 
 {% block content %}
 
+{% if not debug %}
+
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
@@ -81,9 +90,13 @@
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
 
+{% endif %}
+
 <fieldset>
+    <input type="hidden" id="id_wiki_type" value="{{scraper.wiki_type}}" />
     <input type="hidden" id="id_api_base" value="{{api_base}}" />
     <input type="hidden" id="scrapershortname" value="{{scraper.short_name}}"/>
+    <input type="hidden" id="id_data_base" value="{{MAIN_URL}}{% url code_overview scraper.wiki_type scraper.short_name %}data/" />
     {% if scraper.access_apikey %}
         <input type="hidden" id="id_apikey" value="{{scraper.access_apikey}}" />
     {% else %}
@@ -98,6 +111,9 @@
     <li class="share">
         <a><img src="{{ MEDIA_URL }}images/icons/share.png" width="16" height="16" alt="">Share</a>
         <div class="share_popover">
+            {% if debug %}
+            <div>(sharing disabled in DEBUG)</div>
+            {% else %}
             <div class="provider">
                 <div class="fb-like" data-send="false" data-layout="box_count" data-width="55" data-show-faces="true"></div>
             </div>
@@ -107,6 +123,7 @@
             <div class="provider">
                 <g:plusone size="tall"></g:plusone>
             </div>
+            {% endif %}
             <div class="divider"><hr/><span>or</span></div>
             <div class="embed">
                 <a href="#add_view_to_site">Embed into a webpage&hellip;</a>
@@ -276,6 +293,61 @@
     </td>
     </tr>
 </table>
+
+<div class="data">
+    <ul class="titlebar">
+        <li class="first"><h3>This {{scraper.wiki_type}}&rsquo;s datastore</h3></li>
+        <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}{% if scraper.access_apikey %}&apikey_scraper={{scraper.access_apikey}}{% endif %}#sqlite"><img src="{{ MEDIA_URL }}images/icons/hard_hat.png" width="16" height="16" alt="">Explore with API</a></li>
+        <li class="download">
+            <a><img src="{{ MEDIA_URL }}images/icons/arrow_down.png" width="16" height="16" alt="">Download</a>
+            <div class="download_popover">
+                <h6>Download whole datastore&hellip;</h6>
+                <ul>
+                    <li class="database_sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow"><span class="icon"></span> As an SQLite database</a></li>
+                <!--  <li class="database_csv"><a href="#"><span class="icon"></span> As a folder of CSVs</a></li>
+                    <li class="database_json"><a href="#"><span class="icon"></span> As a folder of JSON files</a></li>
+                    <li class="database_excel"><a href="#"><span class="icon"></span> As an Excel file</a></li>  -->
+                </ul>
+                <h6>Download just <span>this table</span>&hellip;</h6>
+                <ul>
+                <!--  <li class="table_sqlite"><a href="#"><span class="icon"></span> As an SQLite table</a></li>  -->
+                    <li class="table_csv"><a href="#"><span class="icon"></span> As a CSV</a></li>
+                    <li class="table_json"><a href="#"><span class="icon"></span> As a JSON file</a></li>
+                <!--  <li class="table_excel"><a href="#"><span class="icon"></span> As an Excel table</a></li>  -->
+                </ul>
+                <span class="arrow"></span>
+            </div>
+        </li>
+        {% if scraper.privacy_status == 'public' %}
+            {% if user.is_authenticated %}<li class="empty">
+                <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore" rel="nofollow">Clear data</a>
+                <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
+                    {% csrf_token %}
+                    <input type="hidden" name="delete_data" value="1" />
+                    <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
+                </form>
+            </li>{% endif %}
+        {% else %}
+            {% if user_edits_it or user.is_staff %}<li class="empty">
+                <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="{% if user.is_staff %}(You can only see this because you&rsquo;re staff) {% endif %}Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore" rel="nofollow">Clear data</a>
+                <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
+                    {% csrf_token %}
+                    <input type="hidden" name="delete_data" value="1" />
+                    <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
+                </form>
+            </li>{% endif %}
+        {% endif %}
+        <li class="clear"></li>
+      </ul>
+
+    {% icanhaz "data_preview" %}
+    {% icanhaz "overview_data_tabs" %}
+    {% icanhaz "data_preview_schema" %}
+   <ul class="data_tabs">
+    </ul>
+    <div id="datapreviews"></div>
+
+</div>
 
 <div class="network">
     <ul class="titlebar">
