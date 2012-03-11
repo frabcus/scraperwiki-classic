@@ -2,10 +2,14 @@ require File.dirname(__FILE__) + '/helper'
 
 WebMock.allow_net_connect!
 
-describe Kernel do 
+describe Kernel do
   context "When we include scraper_require" do
     before do
-      require File.dirname(__FILE__) + '/../scraper_require'
+      require File.dirname(__FILE__) + '/../lib/scraperwiki/scraper_require'
+    end
+
+    after do
+      #Object.send(:remove_const, :TestRequire) if TestRequire
     end
 
     it "converts a scraper name into a class name" do
@@ -20,23 +24,22 @@ describe Kernel do
         @scraper_name = 'test_require'
         require "scrapers/#{@scraper_name}"
       end
-      
-      after do
-        Object.send(:remove_const, :TestRequire)
-      end
 
       it "fetches the scraper's code from ScraperWiki" do
         a_request(:get, "https://scraperwiki.com/editor/raw/#{@scraper_name}").should have_been_made
       end
 
-      it "loads the scraper as a class" do
-        TestRequire.should_not be_nil
-        TestRequire.class.should == Class
+      it "can call the 'hello' method of the included code" do
+        hello.should == 'world'
       end
-      
-      it "can call the 'hello' method of the class" do
-        TestRequire.hello.should == 'world'
+
+      it "find the class TestClass and can call its methods" do
+        TestClass.should_not be_nil
+        TestClass.test.should == 'self test'
+        t = TestClass.new
+        t.test.should == 'test'
       end
+
     end
 
     context "When we require a Python scraper" do

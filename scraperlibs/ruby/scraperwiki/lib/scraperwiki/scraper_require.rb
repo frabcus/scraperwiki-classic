@@ -1,6 +1,6 @@
 require 'net/http'
 
-Kernel.class_eval do 
+Kernel.class_eval do
   alias_method :__old_require, :require
 
   def require(path, *args)
@@ -10,15 +10,15 @@ Kernel.class_eval do
       name = matches[:name]
       code = fetch_code name
       eigenated = "class << self; #{code}; end"
-      klass = Class.new
+      modd = Module.new
       begin
-        klass.module_eval eigenated
+        modd.module_eval code
       rescue SyntaxError
         raise LoadError
       end
-
-      Object.const_set scrapername_to_class_name(name), klass
-    else 
+      rubyized_name = scrapername_to_class_name(name)
+      self.class.send :include, modd
+    else
       raise
     end
   end
@@ -36,9 +36,9 @@ def scrapername_to_class_name(name)
   raise "no name supplied" if name.nil?
 
   name[0] = name[0].capitalize
-  name.enum_for(:scan, /_|-/).each do 
+  name.enum_for(:scan, /_|-/).each do
     i = Regexp.last_match.begin(0)+1
-    name[i] = name[i].capitalize 
+    name[i] = name[i].capitalize
   end
   name.gsub! /_|-/, ''
 end
