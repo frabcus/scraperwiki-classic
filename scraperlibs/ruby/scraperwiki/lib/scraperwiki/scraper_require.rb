@@ -9,14 +9,12 @@ Kernel.class_eval do
     if matches = path.match( /^scrapers?\/(?<name>.+)/ )
       name = matches[:name]
       code = fetch_code name
-      eigenated = "class << self; #{code}; end"
       modd = Module.new
       begin
         modd.module_eval code
       rescue SyntaxError
         raise LoadError
       end
-      rubyized_name = scrapername_to_class_name(name)
       self.class.send :include, modd
     else
       raise
@@ -30,15 +28,4 @@ def fetch_code(scraper_name)
     resp = http.get(uri.request_uri)
     return resp.body
   end
-end
-
-def scrapername_to_class_name(name)
-  raise "no name supplied" if name.nil?
-
-  name[0] = name[0].capitalize
-  name.enum_for(:scan, /_|-/).each do
-    i = Regexp.last_match.begin(0)+1
-    name[i] = name[i].capitalize
-  end
-  name.gsub! /_|-/, ''
 end

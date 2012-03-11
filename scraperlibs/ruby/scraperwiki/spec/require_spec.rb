@@ -8,18 +8,7 @@ describe Kernel do
       require File.dirname(__FILE__) + '/../lib/scraperwiki/scraper_require'
     end
 
-    after do
-      #Object.send(:remove_const, :TestRequire) if TestRequire
-    end
-
-    it "converts a scraper name into a class name" do
-      scrapername_to_class_name('scraper_fu2').should == 'ScraperFu2'
-      scrapername_to_class_name('scraper-fu2-u2').should == 'ScraperFu2U2'
-    end
-
     context "When we require a Ruby scraper" do
-      #use_vcr_cassette
-
       before do
         @scraper_name = 'test_require'
         require "scrapers/#{@scraper_name}"
