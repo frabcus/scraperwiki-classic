@@ -67,26 +67,7 @@ body {
 
 /* FEATURES PAGE */
 
-#exclusive .feature {
-	float: left;
-	width: 370px;
-	margin: 0 0 20px 0;
-}
 
-#exclusive {
-	position: relative;
-	padding: 0 0 0 200px;
-}
-
-#exclusive h3 {
-	position: absolute;
-	top: 0;
-	left: 0;
-	font-size: 24px;
-	line-height: 28px;
-	width: 160px;
-	text-align: left;
-}
 
 
 
