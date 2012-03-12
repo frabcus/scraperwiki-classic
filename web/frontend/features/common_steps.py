@@ -2,7 +2,14 @@ from lettuce import step,before,world,after
 from lettuce.django import django_url
 from django.contrib.auth.models import User
 from frontend.models import UserProfile, Feature
+from nose.tools import assert_equals
+
 # Steps used in more than one feature's steps file
+
+# Human readable CSS selectors
+SELECTORS = {
+        'need help box':                "div[@id='getting_help']",
+        }
 
 # Features
 @step(u'(?:Given|And) the "([^"]*)" feature exists')
@@ -56,21 +63,27 @@ def i_am_on_the_scraper_overview_page(step):
     world.browser.visit(django_url('/scrapers/test_scraper'))
 
 # Seeing matchers
-@step(u'(?:And|Then) I should see "([^"]*)"$')
-def and_i_should_see(step, text):
-    assert world.browser.is_text_present(text)
 
-@step(u'(?:Then|And) I should not see "([^"]*)"')
-def and_i_should_not_see_text(step, text):
-    assert world.browser.is_text_not_present(text)
+@step(u'(?:Then|And) I should (not )?see "([^"]*)"')
+def and_i_should_not_see_text(step, negative, text):
+    x = world.browser.is_text_not_present(text)
+    if not negative:
+        assert x
+    else:
+        assert not x
 
-@step(u'(?:Then|And) I should see (?:the|a|an) "([^"]*)" (?:link|button)$')
-def i_should_see_the_button(step, text):
-    assert world.browser.find_link_by_partial_text(text)
+@step(u'(?:Then|And) I should see (not )?(?:the|a|an) "([^"]*)" (?:link|button)$')
+def i_should_see_the_button(step, negative, text):
+    x = world.browser.find_link_by_partial_text(text)
+    if not negative:
+        assert x
+    else:
+        assert not x
 
-@step(u'(?:Then|And) I should not see (?:the|a|an) "([^"]*)" (?:link|button)$')
-def i_should_not_see_the_button(step, text):
-    assert not world.browser.find_link_by_partial_text(text)
+@step(u'(?:Then|And) I should see (?:the|a|an) "([^"]*)" (?:link|button) in the (.+)')
+def i_should_see_the_button(step, text, parent_name):
+    xpath = ".//%s//a[text()='%s']" % ( SELECTORS[parent_name], text)
+    assert world.browser.find_by_xpath(xpath)
 
 # Clicking
 @step(u'(?:And|When) I click "([^"]*)"')

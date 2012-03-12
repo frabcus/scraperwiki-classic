@@ -3,8 +3,11 @@ from lettuce.django import django_url
 
 PAGES = {
         'home':                         '/',
+        'search test':                  '/search/test/',
+        'testalicious tag':             '/tags/testalicious',
         'login':                        '/login/',
         'contact':                      '/contact/',
+        'help':                         '/help/',
         'pricing':                      '/pricing/',
         'individual payment':           '/subscribe/individual/',
         'business payment':             '/subscribe/business/',

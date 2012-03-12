@@ -153,31 +153,35 @@ function create_vm ( name ) {
         // Mount the code folder
         var cfolder = get_code_folder(v);
         path.exists(cfolder, function (exists) {
-            if ( ! exists ) fs.mkdirSync( cfolder, "0757" );
+            if (!exists) {
+                fs.mkdirSync( cfolder, "0757" );
+	    }
         });
 
-        var tgt = path.join( folder, 'config')
+        var tgt = path.join(folder, 'config')
         fs.writeFile(tgt, cfg, function(err) {
             if(err) {
-                sys.puts(err);
+                util.log.fatal('Failed to write config file, err: ' + err);
             } else {
                 // call lxc-create -n name -f folder/config
                 e = spawn('/usr/bin/lxc-create', ['-n', name, '-f', tgt]);
+		e.stderr.on('data', function(stuff) {
+		    util.log.debug('stderr from lxc-create: ' + stuff);
+	        });
                 e.on('exit', function (code, signal) {
                     if ( code && code == 127 ) {
-                        util.log.fatal('LXC-Create exited with code ' + code);                                          
+                        util.log.fatal('LXC-Create exited with code ' + code);
                     } else {
-                        util.log.info('LXC-Create exited with code ' + code);                                                                   
+                        util.log.info('LXC-Create exited with code ' + code);
                     }
                 });
             }
         });
                     
-        tgt = path.join( folder, 'fstab');
+        tgt = path.join(folder, 'fstab');
         fs.writeFile(tgt, fstab, function(err) {
             if(err) {
-                sys.puts(err);
-            } else {
+                util.log.fatal('Failed to write fstab file, err: ' + err);
             }
         }); 
     });

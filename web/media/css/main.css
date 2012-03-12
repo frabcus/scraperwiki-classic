@@ -542,7 +542,6 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	background-image: url(../images/header_icon_vault.gif);
 }
 
-.running_scrapers #header_inner,
 .status #header_inner {
 	background-image: url(../images/header_icon_stopwatch.gif);
 }
@@ -2172,6 +2171,10 @@ body.api .right ul {
 
 #help_content #getting_help ul li.stack {
 	background-image: url(../images/icons/stack_overflow.png);
+}
+
+#help_content #getting_help ul li.pingdom {
+	background-image: url(../images/icons/pingdom.png);
 }
 
 #help_content #getting_help ul li.google {

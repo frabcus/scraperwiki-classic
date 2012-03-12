@@ -275,13 +275,12 @@ def code_overview(request, wiki_type, short_name):
 
     context["itemlog"] = populate_itemlog(scraper, run_count=10)
             
-    context['url_screenshot'] = None
-    try:
-        s = scraper.scraperrunevent_set.filter(first_url_scraped__isnull=False).order_by('run_started')[0]
-        context['url_screenshot'] = s.first_url_scraped
-    except:
-        pass
-            
+    if scraper.has_screenshot():
+        if scraper.wiki_type == 'scraper':
+            context['url_screenshot'] = scraper.scraper.get_screenshot_url()
+    else:
+        context['url_screenshot'] = None
+
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
@@ -808,10 +807,10 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
             return ""
         return escape(s)
     
-    if not wiki_type == 'scraper':
+    #if not wiki_type == 'scraper':
         # 415 - Unsupported Media Type
         # The entity of the request is in a format not supported by the requested resource
-        return HttpResponse( status=415 )
+        #return HttpResponse( status=415 )
     
     scraper,resp = getscraperorresponse( request, wiki_type, short_name, 
                                     "code_overview", "overview")    

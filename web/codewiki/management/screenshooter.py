@@ -30,6 +30,8 @@ class ScreenShooter(object):
         try:
             return self.renderers[(width, height)]
         except:
+            if self.verbose:
+                print "about to make WebkitRenderer"
             renderer = WebkitRenderer(scaleRatio='crop', 
                                       scaleTransform='smooth', 
                                       scaleToWidth=width, 
@@ -41,6 +43,8 @@ class ScreenShooter(object):
                                       ignoreAlerts=True,
                                       ignoreConfirms=True,
                                       ignoreConsoleMessages=True)
+            if self.verbose:
+                print "done making WebkitRenderer"
             renderer.qWebSettings[QWebSettings.JavascriptEnabled] = True
             self.renderers[(width, height)] = renderer
             return renderer
@@ -50,8 +54,8 @@ class ScreenShooter(object):
         for shot in self.shots:
             if self.verbose:
                 print "%d: Taking screenshot %s" % (count,shot['filename'],)
-                print shot['url']
-                print _memsize()
+                print "URL:", shot['url']
+                print "memsize:", _memsize()
             try:
                 image = self._get_renderer(shot['size'][0], shot['size'][1]).render(shot['url'])
                 if self.verbose:

@@ -1,3 +1,5 @@
+/* @override http://localhost:8000/media/css/corporate_768.css */
+
 /* 768.css
    Builds on top of 320/480.css.
    Everything here should look good 
@@ -7,10 +9,243 @@
 
 /* HORS D'OUVRE */
 
-body:after {
-	content: '768px';
+header, section, footer {
+	width: 760px;
 }
 
-header, section, footer {
-	width: 768px;
+body {
+	background-image: url(../images/corporate/corporate_bg_768.jpg);
 }
+
+
+
+/* HEADER */
+
+header {
+	margin-top: 15px;
+	border: 1px solid #101112;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	-webkit-box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
+	-moz-box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
+	box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
+	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
+		background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.3)), color-stop(50%,rgba(255,255,255,0.15)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
+		background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+		background-image: -o-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+		background-image: -ms-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+		background-image: linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	overflow: auto;
+}
+
+h1 {
+	float: left;
+	width: 274px;
+	height: 30px;
+	margin: 8px 0 5px 15px;
+}
+
+nav ul {
+	float: right;
+	margin: 9px 15px 0 0;
+}
+
+nav ul a:active {
+	position: relative;
+	top: 1px;
+}
+
+
+
+/* HOMEPAGE SLIDER */
+
+#slider {
+	width: 760px;
+	height: 340px;
+}
+
+#slider .panel {
+	width: 680px;
+	height: 260px;
+	padding: 40px;
+}
+
+#slider .panel h2 {
+	font-size: 32px;
+	line-height: 32px;
+	text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+	margin-bottom: 10px;
+	width: 500px;
+}
+
+#slider .panel p {
+	font-size: 21px;
+	line-height: 25px;
+	width: 420px;
+	text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+
+#slider .panel .more {
+	font-size: 21px;
+	padding: 8px 18px;
+	margin-top: 16px;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
+}
+
+#competition {
+	background: transparent url(../images/corporate/corporate_server_960.jpg) center center no-repeat;
+}
+
+
+
+/* HOMEPAGE */
+
+#explanation h2 {
+	font-size: 24px;
+	font-weight: bold;
+	line-height: 26px;
+	margin-bottom: 8px;
+}
+
+#explanation p {
+	font-size: 18px;
+	line-height: 22px;
+	margin-bottom: 12px;
+}
+
+#actions {
+	margin: 30px 0;
+}
+
+
+
+/* FEATURES PAGE */
+
+.h2box {
+	background-image: url(http://placehold.it/990x240/444);
+	padding: 25px 30px;
+}
+
+.h2box h2 {
+	font-size: 24px;
+	line-height: 26px;
+}
+
+.h2box p {
+	font-size: 18px;
+	line-height: 24px;
+	width: 500px;
+}
+
+.features h3 {
+	text-align: left;
+}
+
+.features h3 a {
+	display: inline;
+	float: right;
+	margin: -10px 0 0 0;
+	font-size: 14px;
+	padding: 10px 0 10px 20px;
+}
+
+.feature {
+	margin-bottom: 30px;
+	font-size: 16px;
+	line-height: 21px;
+}
+
+.feature.dashboard {
+	padding-left: 400px;
+	background-image: url(http://placehold.it/360x200);
+	min-height: 200px;
+}
+
+.feature.pdf {
+	padding-left: 0;
+	padding-right: 400px;
+	background: transparent url(http://placehold.it/360x200) top right no-repeat;
+	min-height: 200px;
+}
+
+.feature.dashboard h4, .feature.pdf h4 {
+	padding-top: 12px;
+}
+
+.feature.dashboard p, .feature.pdf p {
+	margin-top: 10px;
+}
+
+#howitworks h3 {
+	text-align: left;
+}
+
+#howitworks a {
+	float: none;
+	display: block;
+	margin: 10px 0 0 0;
+	padding: 0;
+	width: 100%;
+	height: 240px;
+	background: transparent url(http://placehold.it/768x240/222426) center center no-repeat;
+	text-indent: -500px;
+}
+
+div.table {
+	display: table;
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 30px;
+	font-size: 16px;
+	line-height: 21px;
+}
+
+div.table .col {
+	display: table-cell;
+	width: 30%;
+	margin: 0;
+}
+
+div.table .col p, div.table .col li {
+	margin: 15px 20px;
+}
+
+div.table .col li {
+	margin-left: 30px;
+}
+
+div.table .col h4 {
+	padding: 15px 20px;
+}
+
+
+
+/* CONTACT PAGE */
+
+body.contact h2 {
+	font-size: 24px;
+	line-height: 26px;
+	background: transparent url(../images/corporate/corporate_server_960.jpg) 50% 90% no-repeat;
+	margin-bottom: 20px;
+}
+
+div.contact {
+	float: right;
+	width: 340px;
+}
+
+div.contact.first {
+	float: left;
+}
+
+#callback p {
+	padding-left: 55px;
+}
+
+
+
+
+

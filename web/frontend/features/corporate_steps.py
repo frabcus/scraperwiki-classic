@@ -30,11 +30,21 @@ def i_am_using_an_iphone(step):
 
 @step(u'(?:Then|And) I should see a mobile optimized site')
 def i_should_see_a_mobile_optimized_site(step):
-    r = False
-    r = world.browser.find_by_xpath("//meta[@name='HandheldFriendly' and @content='True']")
-    r = world.browser.find_by_xpath("//meta[@name='MobileOptimized']")
-    r = world.browser.find_by_xpath("//meta[@name='viewport' and contains(@content, 'width=device-width')]")
-    assert r
+    tags = ["//meta[@name='HandheldFriendly' and @content='True']",
+            "//meta[@name='MobileOptimized']",
+            "//meta[@name='viewport' and contains(@content, 'width=device-width')]"]
+    for t in tags:
+        if not world.browser.find_by_xpath(t):
+            assert False
+    assert True
+
+@step(u'(?:Then|And) I should see all the corporate services')
+def i_should_see_all_the_corporate_services(step):
+    terms = ['dashboard', 'PDF extractor', 'SLA', 'vault', 'integration']
+    for t in terms:
+        if not world.browser.is_text_present(t):
+            assert False
+    assert True
 
 @step(u'(?:Then|And) the phone number should automatically start a call')
 def the_phone_number_should_automatically_start_a_call(step):

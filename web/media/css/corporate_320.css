@@ -1,3 +1,5 @@
+/* @override http://localhost:8000/media/css/corporate_320.css */
+
 /* 320.css
    The base CSS style.
    Everything here should look good on a 
@@ -14,12 +16,13 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 	font-size: 100%;
 	font: inherit;
 	vertical-align: baseline;
+	-webkit-text-size-adjust: none;
 }
 article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
 	display: block;
 }
 body {
-	font-family: Helvetica, Arial, sans-serif;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-size: 14px;
 	line-height: 18px;
 }
@@ -39,6 +42,7 @@ table {
 }
 
 
+
 /* HORS D'OUVRE */
 
 * html, html, body {
@@ -46,16 +50,10 @@ table {
 }
 
 body {
-	background: #000 url(http://subtlepatterns.com/patterns/broken_noise.png) top center;
+	background: #101112 url(../images/corporate/corporate_bg_320.jpg) center top no-repeat;
 	color: #fff;
-}
-
-body:after {
-	content: '320px';
-	position: absolute;
-	bottom: 10px;
-	right: 10px;
-	opacity: 0.5;
+	border-top: 1px solid #101112;
+	margin-top: -1px;
 }
 
 a {
@@ -68,19 +66,445 @@ a:hover {
 }
 
 header, section, footer {
-	width: 320px;
+	width: 300px;
 	margin: 0 auto;
 }
 
+
+
+/* HEADER */
+
 header {
-	padding-top: 20px;
+	margin-top: 20px;
 	margin-bottom: 20px;
 }
 
+h1 a {
+	display: block;
+	height: 30px;
+	background: transparent url(../images/corporate/corporate_logo.png) top center no-repeat;
+	text-indent: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	margin-bottom: 5px;
+}
+
+nav ul {
+	text-align: center;
+}
+
+nav li {
+	display: inline-block;
+}
+
+nav li a {
+	display: block;
+	color: #ccc;
+	padding: 4px 15px;
+	line-height: 18px;
+	text-shadow: 0 1px 2px #000;
+	font-weight: bold;
+}
+
+nav li:first-child a {
+	margin-left: -10px;
+}
+
+nav li a:hover {
+	color: #eee;
+	text-decoration: none;
+}
+
+nav li.contact a {
+	background-color: #f90;
+	color: #000;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+	-moz-border-radius: 30px;
+	-wekbit-border-radius: 30px;
+	border-radius: 30px;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.6)), color-stop(50%,rgba(255,255,255,0.2)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
+	background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.2) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -o-linear-gradient(top, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.2) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -ms-linear-gradient(top, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.2) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: linear-gradient(top, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.2) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+}
+
+nav li.contact a:hover {
+	background-color: #ffb341;
+}
+
+
+
+/* FOOTER */
+
 footer {
 	margin-top: 20px;
-	padding-bottom: 40px;
+	padding: 20px 0 40px 0;
+	border-top: 1px solid #333;
+	font-size: 12px;
+	color: #444;
+	overflow: auto;
+	text-align: center;
 }
+
+footer .name {
+	display: none;
+}
+
+footer a {
+	color: #666;
+}
+
+footer a:hover {
+	color: #999;
+}
+
+footer .vcard {
+	margin-bottom: 15px;
+}
+
+footer .legal li {
+	display: inline-block;
+}
+
+footer li.terms {
+	margin-right: 10px;
+}
+
+
+
+/* HOMEPAGE SLIDER */
+
+#slider {
+	position: relative;
+	width: 300px;
+	height: 210px;
+	overflow: hidden;
+	margin-bottom: 20px;
+}
+
+#slider .pagination {
+	display: none;
+}
+
+#slider .panel {
+	width: 260px;
+	height: 170px;
+	padding: 20px;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	background-color: #666;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+#slider .panel h2 {
+	font-size: 20px;
+	font-weight: bold;
+	text-transform: uppercase;
+	line-height: 22px;
+	text-shadow: 0 1px 5px rgba(0,0,0,0.7);
+	margin-bottom: 7px;
+}
+
+#slider .panel p {
+	font-size: 15px;
+	line-height: 18px;
+	text-shadow: 0 1px 5px rgba(0,0,0,0.7);
+	font-weight: bold;
+}
+
+#slider .panel .more {
+	display: inline-block;
+	margin-top: 12px;
+	padding: 3px 12px;
+	background-color: #ccc;
+	color: #000;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+	-moz-border-radius: 30px;
+	-wekbit-border-radius: 30px;
+	border-radius: 30px;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 5px rgba(0,0,0,0.5);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 5px rgba(0,0,0,0.5);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 5px rgba(0,0,0,0.5);
+}
+
+#slider .panel .more:hover {
+	text-decoration: none;
+	background-color: #ddd;
+}
+
+#competition {
+	background: transparent url(../images/corporate/corporate_server_460.jpg) center center no-repeat;
+}
+
+
+
+/* HOMEPAGE */
+
+#explanation h2 {
+	font-size: 18px;
+	font-weight: bold;
+	line-height: 21px;
+	margin-bottom: 5px;
+}
+
+#explanation p {
+	margin-bottom: 10px;
+}
+
+#actions {
+	margin: 20px 0;
+	text-align: center;
+}
+
+#actions li {
+	display: inline-block;
+}
+
+#actions a {
+	display: block;
+	padding: 5px 10px;
+	margin-right: 20px;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	background-color: #333;
+	color: #ccc;
+}
+
+#actions li.contact a {
+	margin-right: 0;
+	background-color: #f90;
+	color: #000;
+}
+
+#actions a:hover {
+	text-decoration: none;
+}
+
+#customers {
+	color: #888;
+	text-align: center;
+	margin: 30px 0 0 0;
+	line-height: 50px;
+}
+
+#customers dt, #customers dd {
+	display: inline-block;
+	margin-bottom: 10px;
+}
+
+#customers dt {
+	display: block;
+	margin-bottom: 0;
+}
+
+#customers dd a {
+	display: block;
+	background: transparent url(../images/corporate/client_gannett.gif) 0 0 no-repeat;
+	width: 200px;
+	height: 50px;
+	text-indent: -300px;
+	text-align: left;
+	overflow: hidden;
+}
+
+#customers #agra a {
+	width: 210px;
+	background-image: url(../images/corporate/client_agra.gif);
+}
+
+#customers #guardian a {
+	width: 220px;
+	background-image: url(../images/corporate/client_guardian.gif);
+}
+
+#customers #cabinet a {
+	width: 240px;
+	background-image: url(../images/corporate/client_cabinet.gif);
+}
+
+
+
+
+/* FEATURES PAGE */
+
+.h2box {
+	padding: 15px 20px;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	background: transparent url(http://placehold.it/460x200/444) 50% 90% no-repeat;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	text-shadow: 0 1px 5px rgba(0,0,0,0.7);
+	margin: 30px 0;
+	font-weight: bold;
+}
+
+.h2box h2 {
+	font-size: 18px;
+	text-transform: uppercase;
+	line-height: 21px;
+}
+
+.h2box p {
+	margin-top: 8px;
+	font-size: 16px;
+	line-height: 20px;
+}
+
+.features h3 {
+	font-size: 21px;
+	line-height: 25px;
+	font-weixght: lighter;
+	margin: 20px 0;
+	color: #666;
+	text-shadow: 0 1px 1px #000;
+	text-align: center;
+}
+
+.features h3 a {
+	display: none;
+}
+
+.feature {
+	padding-left: 60px;
+	background: transparent url(http://placehold.it/48x48) 0 2px no-repeat;
+	margin-bottom: 20px;
+}
+
+.feature h4 {
+	font-size: 21px;
+	line-height: 25px;
+	margin-bottom: -2px;
+}
+
+.feature p {
+	margin-top: 7px;
+	color: #ddd;
+}
+
+#howitworks {
+	margin: 30px 0;
+	border-top: 1px solid #444;
+	border-bottom: 1px solid #444;
+}
+
+#howitworks a {
+	display: block;
+	font-size: 14px;
+	line-height: 21px;
+	padding: 5px 0;
+	margin-bottom: -5px;
+}
+
+div.table .col {
+	margin-bottom: 20px;
+	border: 1px solid #333639;
+	color: #ddd;
+}
+
+div.table .col h4 {
+	padding: 10px 15px;
+	background-color: #222426;
+	border-bottom: 1px solid #333639;
+	font-weight: bold;
+	text-align: center;
+	color: #fff;
+}
+
+div.table .col p, div.table .col li {
+	margin: 10px 15px;
+}
+
+
+div.table .col li {
+	list-style: disc;
+	margin-left: 30px;
+}
+
+
+/* CONTACT PAGE */
+
+div.contact {
+	padding: 15px;
+	margin-bottom: 15px;
+	background: #222;
+	-moz-border-radius: 5px;
+	-wekbit-border-radius: 5px;
+	border-radius: 5px;
+	text-align: center;
+	-webkit-box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0,0,0,0.5);
+	-moz-box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0,0,0,0.5);
+	box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0,0,0,0.5);
+	background: -moz-linear-gradient(top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.1)), color-stop(100%,rgba(255,255,255,0)));
+	background: -webkit-linear-gradient(top, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 100%);
+	background: -o-linear-gradient(top, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 100%);
+	background: -ms-linear-gradient(top, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 100%);
+	background: linear-gradient(top, rgba(255,255,255,0.1) 0%,rgba(255,255,255,0) 100%);
+}
+
+div.contact h3 {
+	font-size: 21px;
+	line-height: 23px;
+	margin-bottom: 10px;
+}
+
+div.contact p {
+	color: #ccc;
+}
+
+div.contact a.tel, div.contact a.email {
+	display: block;
+	font-size: 18px;
+	margin: 5px 0;
+}
+
+div.contact a.email {
+	font-size: 16px;
+}
+
+#callback p {
+	margin-bottom: 10px;
+	text-align: left;
+	padding-left: 20px;
+}
+
+#callback label {
+	display: block;
+	padding-bottom: 2px;
+}
+
+#callback input.text {
+	width: 215px;
+	font-size: 16px;
+	padding: 4px;
+}
+
+#callback p.last {
+	text-align: center;
+	padding: 0;
+	margin-top: 15px;
+	margin-bottom: 5px;
+}
+
+#callback .submit {
+	font-sizxe: 16px;
+}
+
+
+
+
 
 
 

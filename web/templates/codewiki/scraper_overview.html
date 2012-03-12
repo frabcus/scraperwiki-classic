@@ -3,8 +3,8 @@
 {% load forking %}
 {% load humanize %}
 {% load schedule %}
-{% load markup %}
 {% load screen_shot %}
+{% load markup %}
 {% load month_name %}
 {% load gravatar %}
 {% load comments %}
@@ -12,7 +12,9 @@
 {% load icanhaz %}
 {% load str_replace %}
 
-{% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
+{% block title %}
+{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}
+{% endblock %}
 
 {% block meta %}
     <meta name="description" content="{% if scraper.description_safepart %}{{ scraper.description_safepart }}{% else %}A {{scraper.language}} {{scraper.wiki_type}} by {% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}" />
@@ -92,6 +94,7 @@
 {% endif %}
 
 <fieldset>
+    <input type="hidden" id="id_wiki_type" value="{{scraper.wiki_type}}" />
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
     <input type="hidden" id="id_api_base" value="{{api_base}}" />
     <input type="hidden" id="id_data_base" value="{{MAIN_URL}}{% url code_overview scraper.wiki_type scraper.short_name %}data/" />
