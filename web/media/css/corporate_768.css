@@ -225,13 +225,6 @@ div.table .col h4 {
 
 /* CONTACT PAGE */
 
-body.contact h2 {
-	font-size: 24px;
-	line-height: 26px;
-	background: transparent url(../images/corporate/corporate_server_960.jpg) 50% 90% no-repeat;
-	margin-bottom: 20px;
-}
-
 div.contact {
 	float: right;
 	width: 340px;
