@@ -59,7 +59,16 @@ footer .legal li {
 
 
 
+/* FEATURES */
 
+.feature {
+	margin-bottom: 25px;
+}
+
+
+#howitworks h3 {
+	text-align: center;
+}
 
 
 
