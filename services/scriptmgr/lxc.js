@@ -72,10 +72,11 @@ exports.alloc = function(script) {
 exports.spawn = function(vm, script) {
     var extension = util.extension_for_language(script.language);
     var cfgpath = '/mnt/' + vm.name + '/config';
+    var scraper_name = script.scraper_name || "@noscrapername@";
 
-    var args = [ '-n', vm.name, '-f', cfgpath,
+    var args = [ '-n', vm.name, '-f', cfgpath, '--',
       "/home/startup/runscript", extension,
-        "--scraper", script.scraper_name];
+        "--scraper=" + scraper_name];
     var e = spawn(
       '/var/www/scraperwiki/services/scriptmgr/cleanfd.py',
       ['/usr/bin/lxc-execute'].concat(args));
