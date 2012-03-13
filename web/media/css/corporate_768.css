@@ -22,7 +22,7 @@ body {
 /* HEADER */
 
 header {
-	margin-top: 15px;
+	margin-bottom: 25px;
 	border: 1px solid #101112;
 	-moz-border-radius: 5px;
 	-wekbit-border-radius: 5px;
@@ -31,11 +31,11 @@ header {
 	-moz-box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
 	box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
 	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
-		background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.3)), color-stop(50%,rgba(255,255,255,0.15)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
-		background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
-		background-image: -o-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
-		background-image: -ms-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
-		background-image: linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.3)), color-stop(50%,rgba(255,255,255,0.15)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
+	background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -o-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -ms-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
 	overflow: auto;
 }
 
@@ -87,8 +87,9 @@ nav ul a:active {
 }
 
 #slider .panel .more {
-	font-size: 21px;
-	padding: 8px 18px;
+	font-size: 18px;
+	line-height: 21px;
+	padding: 6px 14px;
 	margin-top: 16px;
 	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
 	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
@@ -103,6 +104,10 @@ nav ul a:active {
 
 /* HOMEPAGE */
 
+#explanation {
+	margin: 40px 0;
+}
+
 #explanation h2 {
 	font-size: 24px;
 	font-weight: bold;
@@ -112,7 +117,7 @@ nav ul a:active {
 
 #explanation p {
 	font-size: 18px;
-	line-height: 22px;
+	line-height: 24px;
 	margin-bottom: 12px;
 }
 
@@ -160,7 +165,7 @@ nav ul a:active {
 }
 
 .feature {
-	margin-bottom: 30px;
+	margin-bottom: 40px;
 	font-size: 16px;
 	line-height: 21px;
 }
@@ -212,7 +217,7 @@ div.table {
 	display: table;
 	width: 100%;
 	border-collapse: collapse;
-	margin-bottom: 30px;
+	margin-bottom: 40px;
 	font-size: 16px;
 	line-height: 21px;
 }
@@ -242,7 +247,8 @@ div.table .col h4 {
 div.contact {
 	float: right;
 	width: 325px;
-	padding: 20px;
+	padding: 25px 20px;
+	margin-bottom: 35px;
 }
 
 div.contact.first {
