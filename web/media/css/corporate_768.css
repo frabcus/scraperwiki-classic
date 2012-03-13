@@ -96,7 +96,7 @@ nav ul a:active {
 }
 
 #competition {
-	background: transparent url(../images/corporate/corporate_server_960.jpg) center center no-repeat;
+	background: transparent url(../images/corporate/corporate_server_990.jpg) center center no-repeat;
 }
 
 
@@ -186,19 +186,24 @@ nav ul a:active {
 	margin-top: 10px;
 }
 
+#howitworks {
+	margin: 40px 0;
+}
+
 #howitworks h3 {
-	text-align: left;
+	margin: 40px 0;
+	
 }
 
 #howitworks a {
 	float: none;
 	display: block;
-	margin: 10px 0 0 0;
-	padding: 0;
+	margin: 10px 0;
+	padding: 260px 0 0 0;
 	width: 100%;
-	height: 240px;
-	background: transparent url(http://placehold.it/768x240/222426) center center no-repeat;
-	text-indent: -500px;
+	height: 0;
+	background: transparent url(../images/corporate/process.gif) center center no-repeat;
+	overflow: hidden;
 }
 
 div.table {
