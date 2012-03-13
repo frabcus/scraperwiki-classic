@@ -39,7 +39,7 @@ footer .legal li {
 
 
 
-/* HOMEPAGE SLIDER */
+/* HOMEPAGE */
 
 #slider {
 	width: 460px;
@@ -55,6 +55,19 @@ footer .legal li {
 
 #slider .panel h2 {
 	width: 320px;
+}
+
+
+
+/* FEATURES */
+
+.feature {
+	margin-bottom: 25px;
+}
+
+
+#howitworks h3 {
+	text-align: center;
 }
 
 

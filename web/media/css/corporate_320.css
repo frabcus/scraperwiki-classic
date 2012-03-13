@@ -144,7 +144,7 @@ nav li.contact a:hover {
 footer {
 	margin-top: 20px;
 	padding: 20px 0 40px 0;
-	border-top: 1px solid #444;
+	border-top: 1px solid #333;
 	font-size: 12px;
 	color: #444;
 	overflow: auto;
@@ -290,36 +290,150 @@ footer li.terms {
 }
 
 #customers {
-	display: table;
-	width: 100%;
-	color: #aaa;
+	color: #888;
+	text-align: center;
+	margin: 30px 0 0 0;
+	line-height: 50px;
 }
 
 #customers dt, #customers dd {
-	display: table-cell;
-	text-align: center;
+	display: inline-block;
+	margin-bottom: 10px;
+}
+
+#customers dt {
+	display: block;
+	margin-bottom: 0;
+}
+
+#customers dd a {
+	display: block;
+	background: transparent url(../images/corporate/client_gannett.gif) 0 0 no-repeat;
+	width: 200px;
+	height: 50px;
+	text-indent: -300px;
+	text-align: left;
+	overflow: hidden;
+}
+
+#customers #agra a {
+	width: 210px;
+	background-image: url(../images/corporate/client_agra.gif);
+}
+
+#customers #guardian a {
+	width: 220px;
+	background-image: url(../images/corporate/client_guardian.gif);
+}
+
+#customers #cabinet a {
+	width: 240px;
+	background-image: url(../images/corporate/client_cabinet.gif);
 }
 
 
 
-/* CONTACT PAGE */
 
-body.contact h2, body.features h2 {
-	padding: 10px 15px;
+/* FEATURES PAGE */
+
+.h2box {
+	padding: 15px 20px;
 	-moz-border-radius: 5px;
 	-wekbit-border-radius: 5px;
 	border-radius: 5px;
-	background: transparent url(../images/corporate/corporate_server_460.jpg) 50% 90% no-repeat;
+	background: transparent url(http://placehold.it/460x200/444) 50% 90% no-repeat;
 	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 	text-shadow: 0 1px 5px rgba(0,0,0,0.7);
-	font-size: 18px;
+	margin: 30px 0;
 	font-weight: bold;
+}
+
+.h2box h2 {
+	font-size: 18px;
 	text-transform: uppercase;
 	line-height: 21px;
-	margin-bottom: 15px;
 }
+
+.h2box p {
+	margin-top: 8px;
+	font-size: 16px;
+	line-height: 20px;
+}
+
+.features h3 {
+	font-size: 21px;
+	line-height: 25px;
+	font-weixght: lighter;
+	margin: 20px 0;
+	color: #666;
+	text-shadow: 0 1px 1px #000;
+	text-align: center;
+}
+
+.features h3 a {
+	display: none;
+}
+
+.feature {
+	padding-left: 60px;
+	background: transparent url(http://placehold.it/48x48) 0 2px no-repeat;
+	margin-bottom: 20px;
+}
+
+.feature h4 {
+	font-size: 21px;
+	line-height: 25px;
+	margin-bottom: -2px;
+}
+
+.feature p {
+	margin-top: 7px;
+	color: #ddd;
+}
+
+#howitworks {
+	margin: 30px 0;
+	border-top: 1px solid #444;
+	border-bottom: 1px solid #444;
+}
+
+#howitworks a {
+	display: block;
+	font-size: 14px;
+	line-height: 21px;
+	padding: 5px 0;
+	margin-bottom: -5px;
+}
+
+div.table .col {
+	margin-bottom: 20px;
+	border: 1px solid #333639;
+	color: #ddd;
+}
+
+div.table .col h4 {
+	padding: 10px 15px;
+	background-color: #222426;
+	border-bottom: 1px solid #333639;
+	font-weight: bold;
+	text-align: center;
+	color: #fff;
+}
+
+div.table .col p, div.table .col li {
+	margin: 10px 15px;
+}
+
+
+div.table .col li {
+	list-style: disc;
+	margin-left: 30px;
+}
+
+
+/* CONTACT PAGE */
 
 div.contact {
 	padding: 15px;

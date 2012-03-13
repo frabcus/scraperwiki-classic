@@ -643,8 +643,12 @@ function getTableNames(callback){
 		        }, {});
 		        callback(tables);
 		    } else {
-		        setDataPreviewWarning("This scraper has no data", true);
-		        $('#header_inner span.totalrows').text("No data");
+				if($('#id_wiki_type').val() == 'scraper'){
+		        	setDataPreviewWarning("This " + $('#id_wiki_type').val() + " has no data", true);
+		        	$('#header_inner span.totalrows').text("No data");
+				} else {
+					$('div.data').remove();
+				}
 		    }
 		}, error: function(){
 			setDataPreviewWarning("Sorry, we couldn\u2019t connect to the datastore");
@@ -796,7 +800,7 @@ function highlightSql(html) {
 }
 
 function setupDataPreviews() {  
-	$('.data h3').text('Loading this scraper\u2019s datastore\u2026');
+	$('.data h3').text('Loading this ' + $('#id_wiki_type').val() + '\u2019s datastore\u2026');
 	var tab_src = $('#data-tab-template').html();
 	getTableNames(
 		function(tables){
@@ -815,7 +819,7 @@ function setupDataPreviews() {
 					i++;
 				});
 				$('li.data_tab').eq(0).switchTab();
-				$('.data h3').text('This scraper\u2019s datastore');
+				$('.data h3').text('This ' + $('#id_wiki_type').val() + '\u2019s datastore');
 
 			    $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
 			    $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());

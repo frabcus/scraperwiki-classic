@@ -807,10 +807,10 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
             return ""
         return escape(s)
     
-    if not wiki_type == 'scraper':
+    #if not wiki_type == 'scraper':
         # 415 - Unsupported Media Type
         # The entity of the request is in a format not supported by the requested resource
-        return HttpResponse( status=415 )
+        #return HttpResponse( status=415 )
     
     scraper,resp = getscraperorresponse( request, wiki_type, short_name, 
                                     "code_overview", "overview")    
