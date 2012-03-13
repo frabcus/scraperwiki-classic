@@ -70,6 +70,19 @@ header, section, footer {
 	margin: 0 auto;
 }
 
+abbr {
+	cursor: help;
+	border-bottom: 1px dotted #666;
+}
+
+abbr:hover {
+	border-bottom-color: #888;
+}
+
+span.colorTip {
+	font-size: 14px;
+}
+
 
 
 /* HEADER */
@@ -262,6 +275,9 @@ footer li.terms {
 #actions {
 	margin: 20px 0;
 	text-align: center;
+	padding: 15px 0;
+	border-top: 1px solid #333639;
+	border-bottom: 1px solid #333639;
 }
 
 #actions li {
@@ -270,11 +286,11 @@ footer li.terms {
 
 #actions a {
 	display: block;
-	padding: 5px 10px;
-	margin-right: 20px;
-	-moz-border-radius: 5px;
-	-wekbit-border-radius: 5px;
-	border-radius: 5px;
+	padding: 5px 12px;
+	margin-right: 15px;
+	-moz-border-radius: 20px;
+	-wekbit-border-radius: 20px;
+	border-radius: 20px;
 	background-color: #333;
 	color: #ccc;
 }
@@ -292,7 +308,7 @@ footer li.terms {
 #customers {
 	color: #888;
 	text-align: center;
-	margin: 30px 0 0 0;
+	margin: 20px 0 0 0;
 	line-height: 50px;
 }
 
@@ -342,9 +358,9 @@ footer li.terms {
 	-wekbit-border-radius: 5px;
 	border-radius: 5px;
 	background: transparent url(http://placehold.it/460x200/444) 50% 90% no-repeat;
-	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 5px 0 rgba(0,0,0,0.6);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 5px 0 rgba(0,0,0,0.6);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 5px 0 rgba(0,0,0,0.6);
 	text-shadow: 0 1px 5px rgba(0,0,0,0.7);
 	margin: 30px 0;
 	font-weight: bold;
