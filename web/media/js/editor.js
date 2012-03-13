@@ -592,6 +592,7 @@ $(document).ready(function()
 
         //clear the tabs
         clearOutput();
+        writeToConsole('*** Job advert! Write scrapers for ScraperWiki in Liverpool: http://bit.ly/z6y16C ***'); 
         writeToConsole('Starting run ... ' + (isstaff ? " ["+lxc+"]" : "")); 
         writeToChat('<i>' + lchatname + ' runs scraper</i>'); 
 
