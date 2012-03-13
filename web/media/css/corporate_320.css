@@ -398,6 +398,18 @@ footer li.terms {
 	margin-bottom: 20px;
 }
 
+.feature.integration {
+	background-image: url(../images/corporate/feature_integration.gif);
+}
+
+.feature.sla {
+	background-image: url(../images/corporate/feature_sla.gif);
+}
+
+.feature.consultancy {
+	background-image: url(../images/corporate/feature_consultancy.gif);
+}
+
 .feature h4 {
 	font-size: 21px;
 	line-height: 25px;

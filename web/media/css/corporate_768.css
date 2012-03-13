@@ -166,16 +166,18 @@ nav ul a:active {
 }
 
 .feature.dashboard {
-	padding-left: 400px;
-	background-image: url(http://placehold.it/360x200);
-	min-height: 200px;
+	padding-left: 380px;
+	background-image: url(../images/corporate/feature_dashboard_hero.gif);
+	min-height: 210px;
 }
 
 .feature.pdf {
 	padding-left: 0;
-	padding-right: 400px;
-	background: transparent url(http://placehold.it/360x200) top right no-repeat;
+	padding-right: 380px;
+	background-image: url(../images/corporate/feature_pdf_hero.gif);
+	background-position: top right;
 	min-height: 200px;
+	margin-right: 20px;
 }
 
 .feature.dashboard h4, .feature.pdf h4 {
