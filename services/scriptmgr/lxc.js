@@ -74,7 +74,8 @@ exports.spawn = function(vm, script) {
     var cfgpath = '/mnt/' + vm.name + '/config';
 
     var args = [ '-n', vm.name, '-f', cfgpath,
-      "/home/startup/runscript", extension];
+      "/home/startup/runscript", extension,
+        "--scraper", script.scraper_name];
     var e = spawn(
       '/var/www/scraperwiki/services/scriptmgr/cleanfd.py',
       ['/usr/bin/lxc-execute'].concat(args));

@@ -1,4 +1,12 @@
 #!/bin/sh
+# This script is run from inside an LXC, it starts the language
+# specific script.  Usually spawned from lxc.js via lxc-execute.
+
+# Usage:
+# runscript [php|py|ruby] [...]
+# First argument is language extension;
+# All remaining arguments are passed as is.
+
 route add default gw 10.0.0.1 eth0 > /dev/null
 export RUBYLIB='/home/scraperwiki/ruby/scraperwiki/lib'
 export PYTHONPATH='/home/scraperwiki/python'
@@ -9,4 +17,6 @@ export TMPDIR='/tmp'
 # and the same again for the script we run inside the su
 # environment.  We can run just fine without the 'exec's; it's
 # just tidier.
-exec su scriptrunner -c "cd ~;exec /home/startup/exec.$1 --script=/home/scriptrunner/script.$1"
+extension=$1
+shift
+exec su scriptrunner -c "cd ~;exec /home/startup/exec.$extension --script=/home/scriptrunner/script.$extension $@"
