@@ -13,9 +13,11 @@
         <link rel="stylesheet" media="only screen and (min-width: 992px)" href="{{MEDIA_URL}}css/corporate_992.css">
         <link rel="stylesheet" media="only screen and (-webkit-min-device-pixel-ratio: 2)" href="{{MEDIA_URL}}css/corporate_@2x.css">
         <link rel="stylesheet" media="print" href="{{MEDIA_URL}}css/corporate_print.css">
+        <link rel="stylesheet" media="screen" href="{{MEDIA_URL}}css/jquery.colortip.css">
         {% block css %}{% endblock %}
     	{% block rss %}{% endblock %}
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+		<script type="text/javascript" src="{{MEDIA_URL}}js/jquery.colortip.js"></script>
 		<script type="text/javascript" src="{{MEDIA_URL}}js/corporate.js"></script>
 		{% block script %}{% endblock %}
 		{% if not debug %}

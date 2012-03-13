@@ -6,11 +6,11 @@
 
 {% block javascript %}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>
-    <script src="{{ MEDIA_URL }}js/jquery.qtip.min.js" type="text/javascript"></script>
+    <script src="{{ MEDIA_URL }}js/jquery.colortip.js" type="text/javascript"></script>
 {% endblock %}
 
 {% block css %}
-    <link href="{{ MEDIA_URL }}css/jquery.qtip.min.css" rel="stylesheet" type="text/css" />
+    <link href="{{ MEDIA_URL }}css/jquery.colortip.css" rel="stylesheet" type="text/css" />
 {% endblock css %}
 
 {% block run_script %}
@@ -52,22 +52,7 @@
 
     // popup bubbles on index page doclinks
     $(document).ready(function(){
-            //create a bubble popup for each DOM element with class attribute as "text", "button" or "link" and LI, P, IMG elements.
-            $(".doclink a").each(function() {
-                var span = $(this).parent().find('span');
-                var bubble_text = span.html().replace(/^- /, "");
-                $(this).qtip({
-                    content: bubble_text,
-                    style: {
-                          classes: 'ui-tooltip-dark ui-tooltip-rounded'
-                    },
-                    position: {
-                          my: 'middle left',  
-                          at: 'middle right' 
-                    }
-                });
-                span.hide();
-            })
+        $('.doclink a[title]').colorTip();
     });
 
 {% endblock %}
