@@ -24,7 +24,8 @@ end
 
 def fetch_code(scraper_name)
   uri = URI("https://scraperwiki.com/editor/raw/#{scraper_name}")
-  Net::HTTP.start uri.host, uri.port, use_ssl: true do |http|
+  Net::HTTP.start uri.host, uri.port, use_ssl: true,
+    verify_mode: OpenSSL::SSL::VERIFY_NONE do |http|
     resp = http.get(uri.request_uri)
     return resp.body
   end
