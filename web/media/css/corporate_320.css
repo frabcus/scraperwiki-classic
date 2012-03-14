@@ -200,10 +200,6 @@ footer li.terms {
 	margin-bottom: 20px;
 }
 
-#slider .pagination {
-	display: none;
-}
-
 #slider .panel {
 	width: 260px;
 	height: 170px;
@@ -215,6 +211,9 @@ footer li.terms {
 	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+	position: absolute;
+	top: 0;
+	left: 0;
 }
 
 #slider .panel h2 {

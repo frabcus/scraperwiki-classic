@@ -62,12 +62,12 @@ nav ul a:active {
 
 #slider {
 	width: 760px;
-	height: 340px;
+	height: 300px;
 }
 
 #slider .panel {
 	width: 680px;
-	height: 260px;
+	height: 220px;
 	padding: 40px;
 }
 
@@ -98,6 +98,18 @@ nav ul a:active {
 
 #competition {
 	background: transparent url(../images/corporate/corporate_server_990.jpg) center center no-repeat;
+}
+
+#collaboration {
+	background: transparent url(../images/corporate/corporate_traders_990.jpg) center center no-repeat;
+}
+
+#community {
+	background: transparent url(../images/corporate/corporate_collaborators_990.jpg) center center no-repeat;
+}
+
+#control {
+	background: transparent url(../images/corporate/corporate_vault_990.jpg) center center no-repeat;
 }
 
 
