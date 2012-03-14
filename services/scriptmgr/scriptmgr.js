@@ -33,7 +33,7 @@ var exec = require( path.join(__dirname,'executor') );
 var util = require( path.join(__dirname,'utils'))
 
 _routemap = {
-	'/Execute'   : handleRun,
+	'/Execute'   : handleExecute,
 	'/Kill'  : handleKill,
 	'/Status': handleStatus,
 	'/ScriptInfo': handleScriptInfo,
@@ -108,13 +108,25 @@ util.log.info('Server started listening on port ' + settings.port );
 * Handles a run request when a client POSTs code to be executed.
 * See exec.js for details.
 ******************************************************************************/
-function handleRun(req,res) {
-    util.log.debug( 'Starting run request' );
+function handleExecute(req,res) {
+    var address = req.connection.address().address;
+    var port = req.connection.address().port;
+
+    util.log.debug('/Execute request.  Address ' +
+      req.connection.address().address + ' port ' +
+      req.connection.address().port + ' remote ' +
+      req.connection.remoteAddress)
+    req.connection.addListener('close', function () {
+        util.log.debug(
+          '/Execute connection closed before child exit.  ' +
+          'Address ' + address + ' port ' + port);
+    });
+
     // A 1-day timeout for running scripts.  If we don't set
     // this, we get a 2 minute timeout provided by Node's
     // http library; which is too short.  See ticket #864.
     req.connection.setTimeout(24*3600*1000);
-    exec.run_script( req, res);
+    exec.run_script(req, res);
 }
 
 /******************************************************************************
