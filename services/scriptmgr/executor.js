@@ -429,7 +429,7 @@ function onexit(code, signal, script)
           script.response );                   
     }
 
-    lxc.release_vm(script, script.vm);
+    lxc.release_vm(script, script.lxcVM);
 
     if (script) {
         delete scripts[script.run_id];
