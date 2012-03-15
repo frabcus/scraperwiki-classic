@@ -35,6 +35,6 @@ case "$1" in
   	do_start
 	;;
   *)
-	echo "Usage: orbited {start|stop|restart}" >&2
+	echo "Usage: $NAME {start|stop|restart}" >&2
 	;;
 esac

@@ -1,9 +1,9 @@
 #!/bin/sh
 
 DESC="Orbited"
-NAME=orbited
+NAME=$NAME
 DAEMON=/bin/sh
-DAEMON_ARGS="/var/www/scraperwiki/uml/twister/orbited.sh -d -s -v ./var"
+DAEMON_ARGS="/var/www/scraperwiki/uml/twister/$NAME.sh -d -s -v ./var"
 PIDFILE=./var/run/$NAME.pid
 
 do_start()
@@ -33,6 +33,6 @@ case "$1" in
   	do_start
 	;;
   *)
-	echo "Usage: orbited {start|stop|restart}" >&2
+	echo "Usage: $NAME {start|stop|restart}" >&2
 	;;
 esac
