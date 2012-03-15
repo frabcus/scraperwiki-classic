@@ -77,10 +77,10 @@ exports.spawn = function(vm, script) {
     var args = [ '-n', vm.name, '-f', cfgpath, '--',
       "/home/startup/runscript", extension,
         "--scraper=" + scraper_name];
-    var e = spawn(
+    var child = spawn(
       '/var/www/scraperwiki/services/scriptmgr/cleanfd.py',
       ['/usr/bin/lxc-execute'].concat(args));
-    return e;
+    return child;
 }
 
 

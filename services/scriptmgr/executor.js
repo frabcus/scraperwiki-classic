@@ -27,7 +27,6 @@ if ( process.versions.node.indexOf('0.6') == 0 ) {
 }
 var sys = require(sysname);
 
-var spawn = require('child_process').spawn;
 var path  = require('path');
 var lxc = require( path.join(__dirname,'lxc') );
 var util = require( path.join(__dirname,'utils') );
@@ -261,19 +260,23 @@ function execute(http_req, http_res, raw_request_data) {
     
     var vm = lxc.alloc(script);
     if (vm == null) {
-        var r = {"error": "No virtual machines available"}
+        util.log.warning('scraper ' + script.scraper_name +
+          ' failed to allocate VM');
+        var r = {"error": "No virtual machines available"};
         http_res.end( JSON.stringify(r) );
         return;             
     }
     util.log.debug('scraper ' + script.scraper_name +
       ' running on ' + vm.name);      
-            
+
     var extension = util.extension_for_language(script.language);
     
     var tmpfile = path.join(lxc.code_folder(vm),
       "script." + extension);
     fs.writeFile(tmpfile, request_data.code, function(err) {
         if(err) {
+            util.log.debug("scraper " + script.scraper_name +
+              " failed to write code");
             var r = {"error": "Failed to write file to local disk",
               "headers": http_req.headers, "lengths":  -1 };
             http_res.end( JSON.stringify(r) );
@@ -285,15 +288,28 @@ function execute(http_req, http_res, raw_request_data) {
         // Details such as data proxy and runid are passed
         // to the script by writing to a launch.json file in
         // its filesystem.
-        writeLaunchFile( path.join(lxc.code_folder(vm),
-          "launch.json"), 
+        writeLaunchFile( path.join(lxc.code_folder(vm), "launch.json"), 
           dataproxy, 
           script.run_id, 
           script.scraper_name, 
           script.query,
           script.attachables);
 
-        // Little bit ugly passing *script*; only fakelxc needs it.
+
+        // Set up a close handler to kill the child; we spawn
+        // the child just after this.
+        
+        var kill_on_close = function() {
+            // Connection from original requester has closed;
+            // For example, a KILL from the Status panel.
+            util.log.debug(
+              "Issuing KILL for " + script.scraper_name +
+              ' running on ' + vm.name + 
+              ' with id ' + script.run_id);
+            lxc.kill(vm);
+        };
+        http_req.connection.addListener('close', kill_on_close);
+
         var child = lxc.spawn(vm, script);
 
         util.log.debug(script.scraper_name +
@@ -315,41 +331,38 @@ function execute(http_req, http_res, raw_request_data) {
         scripts[ script.run_id ] = script;
         scripts_ip[ script.ip ] = script;
 
-        http_req.connection.addListener('close', function () {
-            // Connection from original requester has closed;
-            // For example, a KILL from the Status panel.
-            util.log.debug(
-              "Issuing KILL for " + script.scraper_name +
-              ' running on ' + vm.name + 
-              ' with id ' + script.run_id);
-            lxc.kill(vm);
-        });
-        
         var resp = http_res;
         
         child.stdout.on('data', function (data) {
             util.write_to_caller(resp, data.toString());
         });             
-        
         child.stderr.on('data', function (data) {
             util.write_to_caller(resp, data.toString());
         });             
     
-        child.on('exit', function (code, signal) {
-            onexit(code, signal, script, function(){
-              lxc.release_vm(script, vm);})
+        child.addListener('exit', function (code, signal) {
+            util.log.debug(script.vm + ' exited with code ' + code);
+            http_req.removeListener('close', kill_on_close);
+            var conn = http_req.connection;
+            if(conn.writable) {
+                var address = http_req.connection.address().address;
+                var port = http_req.connection.address().port;
+                http_req.connection.addListener('close', function () {
+                    util.log.debug(
+                      '/Execute connection closed after child exit.  ' +
+                      'Address ' + address + ' port ' + port);
+                });
+            }
+            onexit(code, signal, script);
         });
     });
 }
 
-// Called when a script exits (in either LXC or local process
-// case).  *code* and *signal* come from the Node 'exit'
-// handler, *script* is the script object, *release* is a function
-// to call to release the VM (only used for LXC).
-function onexit(code, signal, script, release)
+// Called when a script (child process) exits.
+// *code* and *signal* come from the Node 'exit'
+// handler, *script* is the script object.
+function onexit(code, signal, script)
 {
-    util.log.debug(script.vm + ' exited with code ' + code);
-
     // If code is 137 then it is probably an out of memory error;
     // LXC has decided to just kill it?
     var exitError;
@@ -416,7 +429,7 @@ function onexit(code, signal, script, release)
           script.response );                   
     }
 
-    release();
+    lxc.release_vm(script, script.lxcVM);
 
     if (script) {
         delete scripts[script.run_id];
