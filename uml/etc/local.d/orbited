@@ -1,7 +1,7 @@
 #!/bin/sh
 
 DESC="Orbited"
-NAME=$NAME
+NAME=orbited
 DAEMON=/bin/sh
 DAEMON_ARGS="/var/www/scraperwiki/uml/twister/$NAME.sh -d -s -v ./var"
 PIDFILE=./var/run/$NAME.pid
