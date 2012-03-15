@@ -65,15 +65,13 @@ class RunnerProtocol(protocol.Protocol):
     def connectionMade(self):
         logger.info("connection client# %d" % self.factory.clientcount)
         
-        # this returns localhost and is unable to distinguish between orbited or django source
-        try:
-            socket = self.transport.getHandle()
-            if not socket.getpeername()[0] in allowed_ips:
-                logger.info('Refused connection from %s' % (socket.getpeername()[0],))                
-                self.transport.loseConnection()
-                return
-        except Exception, e:
-            raise e
+        # This returns localhost and is unable to distinguish
+        # between orbited or django source.
+        socket = self.transport.getHandle()
+        if not socket.getpeername()[0] in allowed_ips:
+            logger.info('Refused connection from %s' % (socket.getpeername()[0],))                
+            self.transport.loseConnection()
+            return
             
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand
