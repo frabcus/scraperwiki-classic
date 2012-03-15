@@ -9,6 +9,14 @@ def load_twister():
     return twister
 
 def ensure_can_load_twister():
-    """Check that we can load twister as a module."""
+    """Ensure that we can load twister as a module."""
 
     twister = load_twister()
+
+def ensure_can_instantiate_RunnerProtocol():
+    """Ensure that we can create a RunnerProtocol instance."""
+
+    twister = load_twister()
+    runner = twister.RunnerProtocol()
+    assert runner
+
