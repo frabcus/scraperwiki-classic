@@ -1,16 +1,17 @@
-#!/bin/sh -
-
-"exec" "python" "-O" "$0" "$@"
+#!/usr/bin/env python
 
 """
-This script is the interface between the LXC set up and the frontend Orbited TCP socket.  
+This script is the interface between the LXC set up and the frontend
+Orbited TCP socket.
 
 There is one client object (class RunnerProtocol) per editor window
 These recieve and send all messages between the browser and the UML
 
-The RunnerFactory organizes lists of these clients and manages their states
-There is one UserEditorsOnOneScraper per user per scraper to handle one user opening multiple windows onto the same scraper
-There is one EditorsOnOneScraper per scraper which bundles logged in users into a list of UserEditorsOnOneScrapers
+The RunnerFactory organizes lists of these clients and manages their
+states. There is one UserEditorsOnOneScraper per user per scraper to
+handle one user opening multiple windows onto the same scraper. There
+is one EditorsOnOneScraper per scraper which bundles logged in users
+into a list of UserEditorsOnOneScrapers.
 
 """
 
@@ -40,7 +41,7 @@ from twisterrunner import MakeRunner
 agent = Agent(reactor)
 
 # There's one of these 'clients' per editor window open.  All connecting to same factory
-class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a LineReceiver?
+class RunnerProtocol(protocol.Protocol):
 
     def __init__(self):
         # Set if a run is currently taking place, to make sure we don't run 
@@ -923,9 +924,7 @@ def sigTerm(signum, frame):
         pass  # no such file
     sys.exit (1)
 
-
-
-if __name__ == "__main__":
+def main():
     # daemon mode
     if os.fork() == 0 :
         os.setsid()
@@ -976,3 +975,6 @@ if __name__ == "__main__":
     reactor.listenTCP(port, runnerfactory)
     logger.info("Twister listening on port %d" % port)
     reactor.run()   # this function never returns
+
+if __name__ == "__main__":
+    main()
