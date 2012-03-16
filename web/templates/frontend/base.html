@@ -61,6 +61,14 @@
 		{{ message|safe }}
 	{% endfor %}
 {% endif %}
+{% if request.impersonated_by %}
+<p class="message_popup">
+You are impersonating <a href="{% url profile user.username %}">{{ user.get_profile.name }}</a>;
+you are really <a href="{% url profile request.impersonated_by.username %}">{{ request.impersonated_by.get_profile.name }}</a>.
+Before you do anything silly, <a href="?__unimpersonate">stop impersonating them</a>.
+</p>
+{% endif %}
+
     <noscript>
         <div id="alert_outer" class="error">
         	<div id="alert_inner">
@@ -99,7 +107,7 @@
 				<li class="events"><a href="{% url events %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Events']); }">Events</a></li>
 				{% if user.is_authenticated %}
 				<li class="user loggedin">
-					<a href="{% url profile user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
+                <a href="{% url profile user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
 					<ul>
 						<li class="profile"><a href="{% url profile user.username %}">Your profile</a></li>
 						{% if user.vaults.count > 0 or request.user.vault_membership.count %}
@@ -189,6 +197,7 @@
                   {% else %}
                       {% if profile.user.pk %}
                         <li><a href="/admin/auth/user/{{profile.user.pk}}">Django admin (this user)</a></li>
+                        <li><a href="?__impersonate={{profile.user.username}}">Impersonate (this user)</a></li>
                       {% else %}
                         <li><a href="/admin/">Django admin</a></li>
                       {% endif %}

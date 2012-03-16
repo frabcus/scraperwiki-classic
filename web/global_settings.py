@@ -70,6 +70,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'middleware.impersonate.ImpersonateMiddleware', # must be after AuthenticationMiddleware, of course!
     'django.contrib.messages.middleware.MessageMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
     'pagination.middleware.PaginationMiddleware',    
