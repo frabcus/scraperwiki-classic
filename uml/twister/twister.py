@@ -151,8 +151,7 @@ class RunnerProtocol(protocol.Protocol):
 
     # messages from the client
     def dataReceived(self, data):
-            # probably should be using LineReceiver
-        #logger.debug("rrrr %s" % [data])
+        # probably should be using LineReceiver
         lines  = (self.bufferclient+data).split("\r\n")
         self.bufferclient = lines.pop(-1)
         for lline in lines:

@@ -78,7 +78,7 @@ class spawnRunner(protocol.ProcessProtocol):
                     self.httpheaders.append((mheader.group(1), mheader.group(2)))
                 continue
 
-            logger.info("Received and will write: "+str([line]))
+            logger.debug("Received and will write: "+str([line]))
             self.client.writeall(line)
             if self.runobjectmaker:
                 self.runobjectmaker.receiveline(line)
@@ -165,16 +165,15 @@ def MakeRunner(scrapername, guid, language, urlquery, username, code, client, be
     jdata["runid"] = '%.6f_%s' % (time.time(), uuid.uuid4())
     if jdata.get("draft"):
        jdata["runid"] = "draft|||%s" % jdata["runid"]
-    #logger.info("jjjjjjj "+str(jdata))
     
     srunner.jdata = jdata
     if bmakerunobject:
         srunner.runobjectmaker = ScheduledRunMessageLoopHandler(client, username, agent,  jdata["runid"],rev)
-        logger.info("Making run object on %s client# %d" % (scrapername, client.clientnumber))
+        logger.debug("Making run object on %s client# %d" % (scrapername, client.clientnumber))
 
     target = 'scheduled' if scheduled else 'live'
     nodename, nodehost, nodeport = choose_controller( target )
-    logger.info('Running code on %s:%s (%s/%s)' % (nodehost,str(nodeport),nodename,target) )
+    logger.debug('Running code on %s:%s (%s/%s)' % (nodehost,str(nodeport),nodename,target) )
     
     deferred = clientcreator.connectTCP(nodehost, nodeport)
     deferred.addCallbacks(srunner.gotcontrollerconnectionprotocol, srunner.controllerconnectionrequestFailure)
