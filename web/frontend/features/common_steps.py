@@ -1,3 +1,4 @@
+import splinter
 from lettuce import step,before,world,after
 from lettuce.django import django_url
 from django.contrib.auth.models import User
@@ -93,4 +94,8 @@ def and_i_click(step, text):
 
 @step(u'(?:When|And) I click the "([^"]*)" (?:link|button)$')
 def i_click_the_button(step, text):
-    world.browser.find_link_by_partial_text(text).first.click()
+    try:
+        world.browser.find_link_by_partial_text(text).first.click()
+    except splinter.exceptions.ElementDoesNotExist:
+        # Sometimes we have an actual button, in which case we end up here.
+        world.browser.find_by_value(text).first.click()
