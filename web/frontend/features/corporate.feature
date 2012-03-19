@@ -10,7 +10,7 @@ Feature: As a corporate buyer
     And I should see how ScraperWiki helps me with "Collaboration"
     And I should see how ScraperWiki helps me with "Control"
     And I should see how ScraperWiki helps me with "Community"
-    And I should see the "features and pricing" link
+    And I should see the "features & services" link
     And I should see the "Get in touch" link
     And I should see a phone number
     And I should see an email address
