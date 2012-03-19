@@ -57,14 +57,15 @@ footer .legal li {
 	width: 320px;
 }
 
+#actions a {
+	
+	font-size: 14px;
+	line-height: 16px;
+}
+
 
 
 /* FEATURES */
-
-.feature {
-	margin-bottom: 25px;
-}
-
 
 #howitworks h3 {
 	text-align: center;

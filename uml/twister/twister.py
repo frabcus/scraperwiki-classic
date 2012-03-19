@@ -1,16 +1,17 @@
-#!/bin/sh -
-
-"exec" "python" "-O" "$0" "$@"
+#!/usr/bin/env python
 
 """
-This script is the interface between the LXC set up and the frontend Orbited TCP socket.  
+This script is the interface between the LXC set up and the frontend
+Orbited TCP socket.
 
 There is one client object (class RunnerProtocol) per editor window
 These recieve and send all messages between the browser and the UML
 
-The RunnerFactory organizes lists of these clients and manages their states
-There is one UserEditorsOnOneScraper per user per scraper to handle one user opening multiple windows onto the same scraper
-There is one EditorsOnOneScraper per scraper which bundles logged in users into a list of UserEditorsOnOneScrapers
+The RunnerFactory organizes lists of these clients and manages their
+states. There is one UserEditorsOnOneScraper per user per scraper to
+handle one user opening multiple windows onto the same scraper. There
+is one EditorsOnOneScraper per scraper which bundles logged in users
+into a list of UserEditorsOnOneScrapers.
 
 """
 
@@ -40,7 +41,7 @@ from twisterrunner import MakeRunner
 agent = Agent(reactor)
 
 # There's one of these 'clients' per editor window open.  All connecting to same factory
-class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a LineReceiver?
+class RunnerProtocol(protocol.Protocol):
 
     def __init__(self):
         # Set if a run is currently taking place, to make sure we don't run 
@@ -64,15 +65,13 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
     def connectionMade(self):
         logger.info("connection client# %d" % self.factory.clientcount)
         
-        # this returns localhost and is unable to distinguish between orbited or django source
-        try:
-            socket = self.transport.getHandle()
-            if not socket.getpeername()[0] in allowed_ips:
-                logger.info('Refused connection from %s' % (socket.getpeername()[0],))                
-                self.transport.loseConnection()
-                return
-        except Exception, e:
-            raise e
+        # This returns localhost and is unable to distinguish
+        # between orbited or django source.
+        socket = self.transport.getHandle()
+        if not socket.getpeername()[0] in allowed_ips:
+            logger.info('Refused connection from %s' % (socket.getpeername()[0],))                
+            self.transport.loseConnection()
+            return
             
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand
@@ -152,8 +151,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
     # messages from the client
     def dataReceived(self, data):
-            # probably should be using LineReceiver
-        #logger.debug("rrrr %s" % [data])
+        # probably should be using LineReceiver
         lines  = (self.bufferclient+data).split("\r\n")
         self.bufferclient = lines.pop(-1)
         for lline in lines:
@@ -923,9 +921,7 @@ def sigTerm(signum, frame):
         pass  # no such file
     sys.exit (1)
 
-
-
-if __name__ == "__main__":
+def main():
     # daemon mode
     if os.fork() == 0 :
         os.setsid()
@@ -976,3 +972,6 @@ if __name__ == "__main__":
     reactor.listenTCP(port, runnerfactory)
     logger.info("Twister listening on port %d" % port)
     reactor.run()   # this function never returns
+
+if __name__ == "__main__":
+    main()

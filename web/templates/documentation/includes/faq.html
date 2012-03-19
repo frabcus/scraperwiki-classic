@@ -187,28 +187,22 @@
                   <p>In a <strong>Python view</strong> you
                   can use the <var>cgi</var> module:</p>
 
-<code>import cgi
-import os
-
+<code>import cgi, os
 paramdict = dict(cgi.parse_qsl(os.getenv("QUERY_STRING", "")))
+print paramdict
 </code>
 
-                  <p>
-                  See also a slightly longer example that
-                  <a
-                  href="https://scraperwiki.com/views/echo/edit/">echoes the CGI
-                  parameters</a>.</p>
+                  <p>See also a slightly longer example that
+                  <a href="https://scraperwiki.com/views/echo/edit/">echoes the CGI parameters</a>.</p>
 
 				<p>With a <strong>Ruby view</strong> you can use:
 					<code>require 'cgi'
-param_dict = CGI::parse( ENV['QUERY_STRING'] )
+paramdict = CGI::parse( ENV['QUERY_STRING'] )
+p paramdict
 </code></p>				
 				
-				<p><strong>PHP views</strong> can get
-                                access to the query using
-                                <var>parse_str</var>:
-					<code>parse_str( $_ENV["QUERY_STRING"], $output);
-print_r($output);
+				<p><strong>PHP views</strong> can access the query string using <var>$_GET</var>:
+					<code>print_r($_GET);
 </code></p>								
            </dd>
 

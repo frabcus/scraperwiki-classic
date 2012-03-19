@@ -22,7 +22,7 @@ body {
 /* HEADER */
 
 header {
-	margin-top: 15px;
+	margin-bottom: 25px;
 	border: 1px solid #101112;
 	-moz-border-radius: 5px;
 	-wekbit-border-radius: 5px;
@@ -31,11 +31,11 @@ header {
 	-moz-box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
 	box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 1px 0 rgba(255, 255, 255, 0.3);
 	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
-		background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.3)), color-stop(50%,rgba(255,255,255,0.15)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
-		background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
-		background-image: -o-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
-		background-image: -ms-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
-		background-image: linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.3)), color-stop(50%,rgba(255,255,255,0.15)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
+	background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -o-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -ms-linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: linear-gradient(top, rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
 	overflow: auto;
 }
 
@@ -62,12 +62,12 @@ nav ul a:active {
 
 #slider {
 	width: 760px;
-	height: 340px;
+	height: 300px;
 }
 
 #slider .panel {
 	width: 680px;
-	height: 260px;
+	height: 220px;
 	padding: 40px;
 }
 
@@ -87,8 +87,9 @@ nav ul a:active {
 }
 
 #slider .panel .more {
-	font-size: 21px;
-	padding: 8px 18px;
+	font-size: 18px;
+	line-height: 21px;
+	padding: 6px 14px;
 	margin-top: 16px;
 	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
 	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.6);
@@ -99,9 +100,25 @@ nav ul a:active {
 	background: transparent url(../images/corporate/corporate_server_990.jpg) center center no-repeat;
 }
 
+#collaboration {
+	background: transparent url(../images/corporate/corporate_traders_990.jpg) center center no-repeat;
+}
+
+#community {
+	background: transparent url(../images/corporate/corporate_collaborators_990.jpg) center center no-repeat;
+}
+
+#control {
+	background: transparent url(../images/corporate/corporate_vault_990.jpg) center center no-repeat;
+}
+
 
 
 /* HOMEPAGE */
+
+#explanation {
+	margin: 40px 0;
+}
 
 #explanation h2 {
 	font-size: 24px;
@@ -112,7 +129,7 @@ nav ul a:active {
 
 #explanation p {
 	font-size: 18px;
-	line-height: 22px;
+	line-height: 24px;
 	margin-bottom: 12px;
 }
 
@@ -132,7 +149,7 @@ nav ul a:active {
 /* FEATURES PAGE */
 
 .h2box {
-	background-image: url(http://placehold.it/990x240/444);
+	background-image: url(../images/corporate/corporate_ticker_990.jpg);
 	padding: 25px 30px;
 }
 
@@ -160,22 +177,24 @@ nav ul a:active {
 }
 
 .feature {
-	margin-bottom: 30px;
+	margin-bottom: 40px;
 	font-size: 16px;
 	line-height: 21px;
 }
 
 .feature.dashboard {
-	padding-left: 400px;
-	background-image: url(http://placehold.it/360x200);
-	min-height: 200px;
+	padding-left: 380px;
+	background-image: url(../images/corporate/feature_dashboard_hero.gif);
+	min-height: 210px;
 }
 
 .feature.pdf {
 	padding-left: 0;
-	padding-right: 400px;
-	background: transparent url(http://placehold.it/360x200) top right no-repeat;
+	padding-right: 380px;
+	background-image: url(../images/corporate/feature_pdf_hero.gif);
+	background-position: top right;
 	min-height: 200px;
+	margin-right: 20px;
 }
 
 .feature.dashboard h4, .feature.pdf h4 {
@@ -210,7 +229,7 @@ div.table {
 	display: table;
 	width: 100%;
 	border-collapse: collapse;
-	margin-bottom: 30px;
+	margin-bottom: 40px;
 	font-size: 16px;
 	line-height: 21px;
 }
@@ -237,10 +256,16 @@ div.table .col h4 {
 
 /* CONTACT PAGE */
 
+.contact .h2box {
+	background-image: url(../images/corporate/corporate_businessman_990.jpg);
+	background-position: 50% 85%;
+}
+
 div.contact {
 	float: right;
 	width: 325px;
-	padding: 20px;
+	padding: 25px 20px;
+	margin-bottom: 35px;
 }
 
 div.contact.first {

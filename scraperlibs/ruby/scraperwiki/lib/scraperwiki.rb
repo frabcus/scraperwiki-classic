@@ -3,6 +3,7 @@ require	'uri'
 require	'net/http'
 require 'scraperwiki/datastore'
 require 'httpclient'
+require 'scraperwiki/scraper_require'
 
 class SqliteException < RuntimeError
 end
