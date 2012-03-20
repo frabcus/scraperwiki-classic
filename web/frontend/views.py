@@ -761,7 +761,7 @@ def corporate(request, page=''):
         
         # 404 if requested page doesn't exist
         # return page if it does  
-        if page not in ['index', 'features', 'contact']:
+        if page not in ['index', 'features']:
             raise Http404
         else:
             context = {'page':page}
@@ -771,8 +771,12 @@ def corporate(request, page=''):
         return HttpResponseRedirect(reverse('frontpage'))
 
 def corporate_contact(request):
-    """Corporate contact form filled in.  Send e-mail.
+    """Corporate contact form.  Send e-mail.
     """
+    if request.method == "GET":
+        context = {'page':'contact'}
+        return render_to_response('frontend/corporate/contact.html', context, context_instance=RequestContext(request))
+
     # https://docs.djangoproject.com/en/dev/ref/templates/api/
     from django.template.loader import get_template
     from django.template import Context
@@ -788,4 +792,5 @@ def corporate_contact(request):
       subject='Corporate Contact from %(name)s at %(company)s' % locals(),
       message=message,
       from_email='Corporate Contact Form <corporate-contact@scraperwiki.com>',
-      recipients_list=['corporate-contact@scraperwiki.com'])
+      recipient_list=['corporate-contact@scraperwiki.com'],
+      fail_silently=False)

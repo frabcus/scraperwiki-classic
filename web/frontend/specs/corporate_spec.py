@@ -7,13 +7,13 @@ from frontend.views import corporate_contact
 import helper
 
 sent_mail_content = {}
-def mock_sendmail(subject,message,from_email,recipients_list, **kwargs):
+def mock_sendmail(subject,message,from_email,recipient_list, **kwargs):
     global sent_mail_content
     sent_mail_content = dict(
         subject=subject,
         message=message,
         from_email=from_email,
-        recipients_list=recipients_list)
+        recipient_list=recipient_list)
 
 old_sendmail = django.core.mail.send_mail
 django.core.mail.send_mail = mock_sendmail

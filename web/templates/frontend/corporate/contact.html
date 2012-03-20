@@ -18,6 +18,7 @@
     <div class="contact second">
         <h3>Request a call-back</h3>
         <form id="callback" method="post" action="./">
+            {% csrf_token %}
             <p><label for="callback_name">Name</label> <input type="text" class="text" id="callback_name" name="callback_name" placeholder="Name" /></p>
             <p><label for="callback_company">Company</label> <input type="text" class="text" id="callback_company" name="callback_company" placeholder="Company" /></p>
             <p><label for="callback_number">Phone number</label> <input type="tel" class="text tel" id="callback_number" name="callback_number" placeholder="Phone number" /></p>
