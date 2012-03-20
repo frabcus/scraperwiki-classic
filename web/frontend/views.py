@@ -771,8 +771,21 @@ def corporate(request, page=''):
         return HttpResponseRedirect(reverse('frontpage'))
 
 def corporate_contact(request):
+    """Corporate contact form filled in.  Send e-mail.
+    """
+    # https://docs.djangoproject.com/en/dev/ref/templates/api/
+    from django.template.loader import get_template
+    from django.template import Context
+
     name = request.POST['callback_name']
     company = request.POST['callback_company']
     number = request.POST['callback_number']
+
+    template = get_template('emails/corporate_contact_email.txt')
+    message = template.render(Context(request.POST))
     
-    django.core.mail.send_mail(subject='ss', message='iasdasd', from_email='asdasd', recipients_list=[])
+    django.core.mail.send_mail(
+      subject='Corporate Contact from %(name)s at %(company)s' % locals(),
+      message=message,
+      from_email='Corporate Contact Form <corporate-contact@scraperwiki.com>',
+      recipients_list=['corporate-contact@scraperwiki.com'])
