@@ -55,3 +55,5 @@ syntax: regexp
 ^services/switchboard/appsettings.switchboard.js$
 ^services/datastore/appfiles/config.xml$
 .db$
+mail.out$
+mail.err$
