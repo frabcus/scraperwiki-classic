@@ -57,12 +57,23 @@ module ScraperWiki
         client = HTTPClient.new
       end
       client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      client.transparent_gzip_decompression = true
-
+      if HTTPClient.respond_to?("client.transparent_gzip_decompression=")
+        client.transparent_gzip_decompression = true
+      end
+      
       if params.nil? 
-        return client.get_content(url)
+        html = client.get_content(url)
       else
-        return client.post_content(url, params)
+        html = client.post_content(url, params)
+      end
+      
+      unless HTTPClient.respond_to?("client.transparent_gzip_decompression=")
+        begin
+          gz = Zlib::GzipReader.new(StringIO.new(html))    
+          return gz.read
+        rescue
+          return html
+        end
       end
     end
 
