@@ -770,3 +770,9 @@ def corporate(request, page=''):
     else:
         return HttpResponseRedirect(reverse('frontpage'))
 
+def corporate_contact(request):
+    name = request.POST['callback_name']
+    company = request.POST['callback_company']
+    number = request.POST['callback_number']
+    
+    django.core.mail.send_mail(subject='ss', message='iasdasd', from_email='asdasd', recipients_list=[])
