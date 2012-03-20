@@ -42,6 +42,13 @@ Feature: As a corporate buyer
     And I should be on the corporate contact thanks page
     And I should see "Thank you"
     
+  Scenario: I fill in rubbish in the contact form
+    Given I am a "free" user
+    And I visit the corporate contact page
+    And I click the "Call me back" button
+    And I should be on the corporate contact page
+    And I should see "Invalid details"
+
   Scenario: I will love the corporate site on an iPhone
     Given I am a "free" user
     And I am using an iPhone
