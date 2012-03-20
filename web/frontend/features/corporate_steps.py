@@ -62,16 +62,7 @@ def when_i_fill_in_my_corporate_contact_details(step):
     browser.find_by_css('#callback_company').first.fill('T Testerson Inc.')
     browser.find_by_css('#callback_number').first.fill('614-555-TEST')
 
-    # This should really be somewhere else, but drj and cjb couldn't work out
-    # where else to put it.
-    import os
-
-    os.system("../runmailserver.sh > mail.out 2> mail.err")
-
 @step(u'Then an e-mail should be sent')
 def then_an_e_mail_should_be_sent(step):
-    try:
-        assert "Test Testerson" in open('mail.out').read()
-    finally:
-        os.system("kill $(ps auxww | grep 'python.*smtpd')")
+    assert "Test Testerson" in open('mail.out').read()
 
