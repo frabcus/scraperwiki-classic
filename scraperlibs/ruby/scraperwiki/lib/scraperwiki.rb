@@ -45,13 +45,19 @@ module ScraperWiki
     #
     # * _url_ = The URL to fetch
     # * _params_ = The parameters to send with a POST request
+    # * _agent = A manually supplied useragent string
     #
     # === Example
     # ScraperWiki::scrape('http://scraperwiki.com')
     #
-    def ScraperWiki.scrape(url, params = nil)
-      client = HTTPClient.new
+    def ScraperWiki.scrape(url, params = nil, agent = nil)
+      if agent
+        client = HTTPClient.new(:agent_name => agent)
+      else
+        client = HTTPClient.new
+      end
       client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      client.transparent_gzip_decompression = true
 
       if params.nil? 
         return client.get_content(url)
