@@ -774,8 +774,7 @@ def corporate_contact(request):
     """Corporate contact form.  Send e-mail.
     """
     if request.method == "GET":
-        context = {'page':'contact'}
-        return render_to_response('frontend/corporate/contact.html', context, context_instance=RequestContext(request))
+        return render_to_response('frontend/corporate/contact.html', {}, context_instance=RequestContext(request))
 
     # https://docs.djangoproject.com/en/dev/ref/templates/api/
     from django.template.loader import get_template
