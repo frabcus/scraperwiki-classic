@@ -40,6 +40,7 @@ Feature: As a corporate buyer
     And I click the "Call me back" button
     Then an e-mail should be sent
     And I should be on the corporate contact thanks page
+    And I should see "Thank you"
     
   Scenario: I will love the corporate site on an iPhone
     Given I am a "free" user
