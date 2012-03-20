@@ -793,3 +793,5 @@ def corporate_contact(request):
       from_email='Corporate Contact Form <corporate-contact@scraperwiki.com>',
       recipient_list=['corporate-contact@scraperwiki.com'],
       fail_silently=False)
+
+    return HttpResponseRedirect(reverse('corporate_contact_thanks'))
