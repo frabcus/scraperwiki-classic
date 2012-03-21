@@ -427,6 +427,14 @@ footer li.terms {
 	margin-bottom: 30px;
 }
 
+.feature.dashboard {
+	background-image: url(../images/corporate/feature_dashboard.gif);
+}
+
+.feature.pdf {
+	background-image: url(../images/corporate/feature_pdf.gif);
+}
+
 .feature.integration {
 	background-image: url(../images/corporate/feature_integration.gif);
 }
