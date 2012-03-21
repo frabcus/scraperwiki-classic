@@ -798,8 +798,8 @@ def corporate_contact(request):
     django.core.mail.send_mail(
       subject='Corporate Contact from %(name)s at %(company)s' % locals(),
       message=message,
-      from_email='Corporate Contact Form <corporate-contact@scraperwiki.com>',
-      recipient_list=['corporate-contact@scraperwiki.com'],
+      from_email='Corporate Contact Form <corporate@scraperwiki.com>',
+      recipient_list=['corporate@scraperwiki.com'],
       fail_silently=False)
 
     return HttpResponseRedirect(reverse('corporate_contact_thanks'))

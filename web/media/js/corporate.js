@@ -20,5 +20,27 @@ $(function(){
 	}
 	
 	$('abbr').colorTip({color: 'white'});
+
+	$('#callback_submit').bind('click', function(e){
+        
+        var valid = true;
+    	$('#callback input.text').each(function(){
+    		if(!$(this).val().length){
+    			valid = false;
+    		}
+    	});
+
+    	if(!valid){
+    		$('#callback input.text:text[value=""]').first().focus();
+    		e.preventDefault();
+    	} else {
+    		return true;
+    	}
+
+    });
+
+    $('#callback label em').each(function(){
+    	$(this).parent().attr('title',$(this).text()).css('cursor','help');
+    });
 	
 });

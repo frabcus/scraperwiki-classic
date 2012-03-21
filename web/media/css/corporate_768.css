@@ -272,7 +272,7 @@ div.contact.first {
 	float: left;
 }
 
-#callback p {
+.contact.second p {
 	padding-left: 55px;
 }
 
