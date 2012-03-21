@@ -61,12 +61,14 @@
 		{{ message|safe }}
 	{% endfor %}
 {% endif %}
+
 {% if request.impersonated_by %}
-<p class="message_popup">
-You are impersonating <a href="{% url profile user.username %}">{{ user.get_profile.name }}</a>;
-you are really <a href="{% url profile request.impersonated_by.username %}">{{ request.impersonated_by.get_profile.name }}</a>.
-Before you do anything silly, <a href="?__unimpersonate">stop impersonating them</a>.
-</p>
+    <div id="alert_outer" class="info">
+    	<div id="alert_inner">
+    	    {{ request.impersonated_by.get_profile.name }}, <b>you are impersonating {{ user.get_profile.name }}</b>
+    	    <a href="?__unimpersonate">Okay, I&rsquo;m done impersonating now</a>
+        </div>
+    </div>
 {% endif %}
 
     <noscript>
@@ -197,7 +199,7 @@ Before you do anything silly, <a href="?__unimpersonate">stop impersonating them
                   {% else %}
                       {% if profile.user.pk %}
                         <li><a href="/admin/auth/user/{{profile.user.pk}}">Django admin (this user)</a></li>
-                        <li><a href="?__impersonate={{profile.user.username}}">Impersonate (this user)</a></li>
+                        <li><a href="?__impersonate={{profile.user.username}}">Impersonate this user</a></li>
                       {% else %}
                         <li><a href="/admin/">Django admin</a></li>
                       {% endif %}
