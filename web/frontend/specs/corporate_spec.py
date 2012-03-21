@@ -41,20 +41,20 @@ def ensure_email_contains_contact_details():
     for item in data.values():
         assert item in sent_mail_content['message']
 
-@raises(ValidationError)
 def ensure_missing_name_errors():
     del data['callback_name']
     mock_request = rf.post('/corporate/contact/', data)
     response = corporate_contact(mock_request)
+    assert response.status_code == 400
 
-@raises(ValidationError)
 def ensure_missing_company_errors():
     del data['callback_company']
     mock_request = rf.post('/corporate/contact/', data)
     response = corporate_contact(mock_request)
+    assert response.status_code == 400
 
-@raises(ValidationError)
 def ensure_missing_number_errors():
     del data['callback_number']
     mock_request = rf.post('/corporate/contact/', data)
     response = corporate_contact(mock_request)
+    assert response.status_code == 400
