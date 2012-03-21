@@ -19,7 +19,8 @@ PAGES = {
         'request':                      '/request_data/', 
         'corporate home':               '/corporate/',
         'corporate features':           '/corporate/features/',
-        'corporate contact':            '/corporate/contact/'
+        'corporate contact':            '/corporate/contact/',
+        'corporate contact thanks':     '/corporate/contact/thanks'
         }
 
 def page_name_is_valid(name):

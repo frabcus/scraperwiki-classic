@@ -1,5 +1,7 @@
 from django import forms
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseForbidden
+from django.http import (HttpResponseRedirect, HttpResponse,
+                         HttpResponseBadRequest, Http404, 
+                         HttpResponseForbidden)
 from django.shortcuts import render_to_response, redirect
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
@@ -14,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 # https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ValidationError
 
 
 from tagging.models import Tag, TaggedItem
@@ -761,7 +764,7 @@ def corporate(request, page=''):
         
         # 404 if requested page doesn't exist
         # return page if it does  
-        if page not in ['index', 'features', 'contact']:
+        if page not in ['index', 'features']:
             raise Http404
         else:
             context = {'page':page}
@@ -770,3 +773,41 @@ def corporate(request, page=''):
     else:
         return HttpResponseRedirect(reverse('frontpage'))
 
+def corporate_contact(request):
+    """Corporate contact form.  Send e-mail.
+    """
+    if request.method == "GET":
+        return render_to_response('frontend/corporate/contact.html', {}, context_instance=RequestContext(request))
+
+    # https://docs.djangoproject.com/en/dev/ref/templates/api/
+    from django.template.loader import get_template
+    from django.template import Context
+
+    try:
+        validate_contact_fields(request.POST)
+    except ValidationError as e:
+        return HttpResponseBadRequest()
+
+    name = request.POST['callback_name']
+    company = request.POST['callback_company']
+    number = request.POST['callback_number']
+
+    template = get_template('emails/corporate_contact_email.txt')
+    message = template.render(Context(request.POST))
+    
+    django.core.mail.send_mail(
+      subject='Corporate Contact from %(name)s at %(company)s' % locals(),
+      message=message,
+      from_email='Corporate Contact Form <corporate@scraperwiki.com>',
+      recipient_list=['corporate@scraperwiki.com'],
+      fail_silently=False)
+
+    return HttpResponseRedirect(reverse('corporate_contact_thanks'))
+
+def validate_contact_fields(post):
+    if not post.get('callback_name'):
+        raise ValidationError('Name not supplied')
+    if not post.get('callback_company'):
+        raise ValidationError('Company not supplied')
+    if not post.get('callback_number'):
+        raise ValidationError('Number not supplied')

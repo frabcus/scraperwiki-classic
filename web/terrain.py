@@ -1,3 +1,5 @@
+import os
+
 from lettuce import before,after,world
 from django.contrib.auth import authenticate, login
 from django.conf import settings
@@ -25,6 +27,15 @@ def sync_db(variables):
 def set_browser(variables):
     #world.browser = Browser('chrome')
     world.browser = Browser()
+
+@before.harvest
+def launch_debugging_smtp(variables):
+    kill_debugging_smtp(variables)
+    os.system("../runmailserver.sh > mail.out 2> mail.err")
+    
+@after.harvest
+def kill_debugging_smtp(variables):
+    os.system("kill $(pgrep -f 'python.*smtpd')")
 
 @after.harvest
 def close_browser(totals):

@@ -1,7 +1,8 @@
 from lettuce import step,before,world,after
 from lettuce.django import django_url
 from django.contrib.auth.models import User
-import re
+
+import os
 
 @step(u'(?:Then|And) I should see how ScraperWiki helps me with "([^"]*)"')
 def i_should_see_how_scraperwiki_helps_me_with(step, subject):
@@ -54,9 +55,14 @@ def the_phone_number_should_automatically_start_a_call(step):
 def the_field_should_bring_up_the_numeric_keypad(step, fieldname):
     assert world.browser.find_by_xpath("//input[contains(@name,%s) and @type='tel']" % fieldname)
 
+@step(u'When I fill in my corporate contact details')
+def when_i_fill_in_my_corporate_contact_details(step):
+    browser = world.browser
+    browser.find_by_css('#callback_name').first.fill('Test Testerson')
+    browser.find_by_css('#callback_company').first.fill('T Testerson Inc.')
+    browser.find_by_css('#callback_number').first.fill('614-555-TEST')
 
-
-
-
-
+@step(u'Then an e-mail should be sent')
+def then_an_e_mail_should_be_sent(step):
+    assert "Test Testerson" in open('mail.out').read()
 

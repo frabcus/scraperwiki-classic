@@ -427,6 +427,14 @@ footer li.terms {
 	margin-bottom: 30px;
 }
 
+.feature.dashboard {
+	background-image: url(../images/corporate/feature_dashboard.gif);
+}
+
+.feature.pdf {
+	background-image: url(../images/corporate/feature_pdf.gif);
+}
+
 .feature.integration {
 	background-image: url(../images/corporate/feature_integration.gif);
 }
@@ -531,36 +539,47 @@ div.contact a.email {
 	font-size: 16px;
 }
 
-#callback p {
+.contact.second p {
 	margin-bottom: 10px;
 	text-align: left;
 	padding-left: 20px;
 }
 
-#callback label {
+.contact.second label {
 	display: block;
 	padding-bottom: 2px;
 }
 
-#callback input.text {
+.contact.second input.text {
 	width: 215px;
 	font-size: 16px;
 	padding: 4px;
 }
 
-#callback p.last {
+.contact.second p.last {
 	text-align: center;
 	padding: 0;
 	margin-top: 15px;
 	margin-bottom: 5px;
 }
 
-#callback .submit {
+.contact.second .submit {
 	font-sizxe: 16px;
 }
 
+.contact.second.thanks p {
+	padding: 0;
+	text-align: center;
+}
 
+.contact.second label:after {
+	content: ' *';
+	color: orange;
+}
 
+.contact.second label em {
+	display: none;
+}
 
 
 
