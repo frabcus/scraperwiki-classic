@@ -15,6 +15,9 @@ urlpatterns = patterns('',
     url(r'^profiles/edit/$', profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm}, name='profiles_edit_profile'),
     url(r'^profiles/(?P<username>.*)/message/$', frontend_views.user_message, name='user_message'),
     url(r'^profiles/(?P<username>.*)/$', frontend_views.profile_detail, name='profile'),
+    url(r'^dashboard/$',
+      frontend_views.redirect_dashboard_to_profile,
+      name='dashboard'),
     # This duplicate is provided because the standard profiles
     # plugin requires that 'profiles_profile_detail' work when
     # using reverse().

@@ -65,6 +65,13 @@ def profile_detail(request, username):
                     }
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
+def redirect_dashboard_to_profile(request):
+    user = request.user
+    if not user.is_authenticated():
+        return HttpResponseRedirect(reverse('login'))
+    return HttpResponseRedirect(reverse('profile',
+                                kwargs=dict(username=user.username)))
+
 
 def user_message(request, username):
     """
