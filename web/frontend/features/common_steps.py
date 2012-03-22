@@ -1,3 +1,5 @@
+import time
+
 import splinter
 from lettuce import step,before,world,after
 from lettuce.django import django_url
@@ -73,7 +75,7 @@ def and_i_should_not_see_text(step, negative, text):
     else:
         assert not x
 
-@step(u'(?:Then|And) I should see (not )?(?:the|a|an) "([^"]*)" (?:link|button)$')
+@step(u'(?:Then|And) I should (not )?see (?:the|a|an) "([^"]*)" (?:link|button)$')
 def i_should_see_the_button(step, negative, text):
     x = world.browser.find_link_by_partial_text(text)
     if not negative:
@@ -82,7 +84,7 @@ def i_should_see_the_button(step, negative, text):
         assert not x
 
 @step(u'(?:Then|And) I should see (?:the|a|an) "([^"]*)" (?:link|button) in the (.+)')
-def i_should_see_the_button(step, text, parent_name):
+def i_should_see_the_button_in_parent(step, text, parent_name):
     xpath = ".//%s//a[text()='%s']" % ( SELECTORS[parent_name], text)
     assert world.browser.find_by_xpath(xpath)
 
