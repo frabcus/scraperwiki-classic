@@ -65,6 +65,13 @@ def profile_detail(request, username):
                     }
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
+def redirect_dashboard_to_profile(request):
+    user = request.user
+    if not user.is_authenticated():
+        return HttpResponseRedirect(reverse('login'))
+    return HttpResponseRedirect(reverse('profile',
+                                kwargs=dict(username=user.username)))
+
 
 def user_message(request, username):
     """
@@ -353,32 +360,26 @@ def stats(request):
 def tags(request):
     all_tags = {}
     
-    # Want 2.7 for the collections.Counter :(
+    # Python 2.7 would clean this up by using collections.Counter
     def update_tags(tag):
         existing = all_tags.get(tag.name, None)
         if existing:
             existing.count += tag.count
         else:
             all_tags[tag.name] = tag
-        
-    scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
-    view_tags = Tag.objects.usage_for_model(View, counts=True, filters={'privacy_status':'public', 'privacy_status':'visible'})
+
+    scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True,
+      filters={'privacy_status':'public'})
+    view_tags = Tag.objects.usage_for_model(View, counts=True,
+      filters={'privacy_status':'public'})
     for tag in itertools.chain(scraper_tags, view_tags):
         update_tags(tag)
     
-    # Use UserCodeRole objects to get code objects that are private but 
-    # accessible to this user and then use update_tags to update the 
-    # dictionary
-    if request.user.is_authenticated():
-        privatescraper_ids = [u.code.id for u in UserCodeRole.objects.filter(code__privacy_status='private', user=request.user)]
-        qs = Code.objects.filter(pk__in=privatescraper_ids)
-        extra_tags = Tag.objects.usage_for_queryset(qs, counts=True)
-        for tag in extra_tags:
-            update_tags(tag)
-        
-    tags = calculate_cloud(all_tags.values(), steps=4, distribution=LOGARITHMIC)
+    tags = calculate_cloud(all_tags.values(),
+      steps=4, distribution=LOGARITHMIC)
 
-    return render_to_response('frontend/tags.html', {'tags':tags}, context_instance=RequestContext(request))
+    return render_to_response('frontend/tags.html', {'tags':tags},
+      context_instance=RequestContext(request))
     
 def tag(request, tag):
     ttag = get_tag(tag)
