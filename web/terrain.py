@@ -86,6 +86,10 @@ def wait_for_ajax(timeout=5):
       world.browser.evaluate_script('jQuery.active == 0'))
 
 @world.absorb
+def disable_fx():
+    world.browser.execute_script('jQuery.fx.off = true')
+
+@world.absorb
 def wait_for_element_by_css(css, timeout=5):
     WebDriverWait(world.browser.driver, timeout).until(lambda _d:
       len(world.browser.find_by_css(css)) != 0)
