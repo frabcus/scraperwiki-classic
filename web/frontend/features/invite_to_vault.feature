@@ -6,8 +6,8 @@ Feature: As a salesperson, I want to invite people to a vault by email
     Given I am a "Corporate" user
     And I have a vault
     And I am on the vaults page
-    When I click the "member" link
-    And I click the "Add another user" link
-    Then I type in "t.test@testersonandsons.com" in the email box
-    And I click the "Add" button
-    And an invitation email gets sent to "t.test@testersonandsons.com"
+    When I click the vault members button
+    And I click the "Add another user" button
+    And I type "t.test@testersonandsons.com" into the username box
+    And I click the "Add!" button
+    Then an invitation email gets sent to "t.test@testersonandsons.com"
