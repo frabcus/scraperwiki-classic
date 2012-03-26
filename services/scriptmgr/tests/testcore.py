@@ -49,7 +49,10 @@ class testCore(unittest.TestCase):
         return self.url + command
 
     def testAlive(self):
-        """Simple Is scriptmgr Alive test.  If this fails then
+        """Should check scripmgr is already running."""
+        
+        """
+        If this fails then
         it may be that scriptmgr is not running already; which
         it should be to run the tests.
         """
@@ -57,6 +60,7 @@ class testCore(unittest.TestCase):
         pass
     
     def testPython(self):
+        """Should be able to run Python code."""
         stuff = self.Execute(
           """print 'hell'+'o'*3""", language='python')
         output = console(stuff)
