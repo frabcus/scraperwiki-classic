@@ -700,7 +700,7 @@ def vault_scrapers_add(request, vaultid, shortname):
 @login_required
 def vault_users(request, vaultid, username, action):
     """
-    View wch allows a user to add/remove users from their vault. Will
+    View which allows a user to add/remove users from their vault. Will
     only work on the current user's vault so if they don't have one then
     it won't work.
     """
@@ -713,24 +713,31 @@ def vault_users(request, vaultid, username, action):
      
     vault = get_object_or_404( Vault, id=vaultid)
     if vault.user.id != request.user.id:
-        return HttpResponse('{"status": "fail", "error": "Not your vault"}', mimetype=mime)                    
-        
+        return HttpResponse('{"status": "fail", "error": "Not your vault"}', mimetype=mime)
+
+    # Validate an 'adduser' command.
+    if action == 'adduser':
+        current_plan = request.user.get_profile().plan
+        if current_plan not in ('business','corporate',):
+            return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
+
+    if action == 'adduser' and '@' in username:
+        return invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
+
     try:
-        user = User.objects.get( username=username )    
+        user = User.objects.get(username=username)    
     except User.DoesNotExist:
-        return HttpResponse('{"status": "fail", "error":"Username not found"}', mimetype=mime)            
+        return HttpResponse('{"status": "fail", "error":"Username not found"}',
+          mimetype=mime)            
 
     result = {"status": "ok", "error":""}                    
     
     editor = request.user == vault.user
     
-    if action =='adduser':
+    if action == 'adduser':
         if not user in vault.members.all():
-            current_plan = request.user.get_profile().plan
-            if current_plan not in ('business','corporate',):
-                return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
-                
-            result['fragment'] = render_to_string( 'frontend/includes/vault_member.html', { 'm' : user, 'vault': vault, 'editor' : editor })                 
+            result['fragment'] = render_to_string( 'frontend/includes/vault_member.html',
+              { 'm': user, 'vault': vault, 'editor': editor })                 
             vault.members.add(user) 
             vault.add_user_rights(user)
         else:
@@ -747,9 +754,19 @@ def vault_users(request, vaultid, username, action):
         
     vault.save()        
                 
-    
     return HttpResponse( json.dumps(result), mimetype=mime)
 
+def invite_to_vault(vault_owner, email, vault):
+    """Send an e-mail to address *mail* inviting them to *vault*."""
+
+    text_content = render_to_string('emails/vault_invite.txt', locals())
+    html_content = render_to_string('emails/vault_invite.html', locals())
+    subject='You have been invited to a ScraperWiki vault: %s' % vault.name
+        
+    msg = EmailMultiAlternatives(subject, text_content, vault_owner.email,
+      to=[email], bcc=[vault_owner.email])
+    msg.attach_alternative(html_content, "text/html")
+    msg.send(fail_silently=True)
 
 
 ###############################################################################
