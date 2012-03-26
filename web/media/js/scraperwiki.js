@@ -553,7 +553,7 @@ $(function(){
 			$.getJSON(url, function(data) {
 				if(data.status == 'ok'){
 					$('.username', closure).autocomplete("close");
-					$('ul', closure).append(data.fragment).next('a').slideDown(150);
+					$('ul', closure).append(data.fragment).next('a').delay(50).slideDown(150);
 					closure.updateUserCount(1);
 				} else if(data.status == 'fail'){
 					$('ul', closure).append('<li class="error">' + data.error + '</li>');

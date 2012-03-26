@@ -63,6 +63,6 @@ def when_i_fill_in_my_corporate_contact_details(step):
     browser.find_by_css('#callback_number').first.fill('614-555-TEST')
 
 @step(u'Then an e-mail should be sent')
-def then_an_e_mail_should_be_sent(step):
+def then_an_email_should_be_sent(step):
     assert "Test Testerson" in open('mail.out').read()
 
