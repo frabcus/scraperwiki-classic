@@ -473,40 +473,6 @@ $(function(){
 	
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
 	
-	
-	
-	$('div.vault_usage_popover').each(function(i,el){
-		//	This centres the Usage Popover underneath the Usage progressbar
-		var popo = $(this);
-		var prog = $(this).prevAll('.usage').children('.progressbar');
-		var anchor = prog.position().left + (0.5 * prog.outerWidth());
-		popo.css('left', anchor - (popo.outerWidth() / 2) );
-	});
-	
-	$('body.vaults .usage').bind('click', function(e){
-		var $a = $(this).addClass('hover');
-		var $p = $a.siblings('div.vault_usage_popover');
-		if($p.is(':visible')){
-			$p.fadeOut(400);
-			$a.removeClass('hover');
-			$('html').unbind('click');
-		} else {
-			$p.fadeIn(150);
-			$('html').bind('click', function(e){
-				if( $(e.target).parents().index($a) == -1 ) {
-					if( $(e.target).parents().index($p) == -1 ) {
-						$p.filter(':visible').fadeOut(400);
-						$a.removeClass('hover');
-						$('html').unbind('click');
-					}
-				}
-			});
-		}
-	});
-	
-	
-	
-	
 	$('div.vault_users_popover').each(function(i,el){
 		//	This centres the Users Popover underneath the Users toolbar button
 		var popo = $(this);
@@ -515,17 +481,21 @@ $(function(){
 		popo.css('left', anchor - (popo.outerWidth() / 2) );
 	});
 	
+	function clean_up_users_popover($popover){
+		$popover.filter(':visible').fadeOut(400, function(){
+			$('li.error', $popover).remove();
+			$('a.add_user', $popover).show();
+			$('.new_user', $popover).hide().find('input:text').val('');
+		});
+		$popover.siblings('a.vault_users').removeClass('hover');
+		$('html').unbind('click');
+	}
+	
 	$('body.vaults a.vault_users').bind('click', function(e){
 		var $a = $(this).addClass('hover');
 		var $p = $a.siblings('div.vault_users_popover');
 		if($p.is(':visible')){
-			$p.fadeOut(400, function(){
-				$p.find('li.error').remove();
-				$p.find('.new_user').hide().find('.username').val('');
-				$p.find('a.add_user').show();
-			});
-			$a.removeClass('hover');
-			$('html').unbind('click');
+			clean_up_users_popover($p);
 		} else {
 			$p.fadeIn(150);
 			$('html').bind('click', function(e){
@@ -534,13 +504,7 @@ $(function(){
 						if( $(e.target).parents().index($('.ui-autocomplete')) == -1 ) {
 							if($(e.target).not('[class*="ui-"]').length){
 								// they didn't click on the users link or the popover or the autocomplete
-								$p.filter(':visible').fadeOut(400, function(){
-									$p.find('li.error').remove();
-									$p.find('a.add_user').show();
-									$p.find('.new_user').hide().find('.username').val('');
-								});
-								$a.removeClass('hover');
-								$('html').unbind('click');
+								clean_up_users_popover($p);
 							}
 						}
 					}
@@ -597,7 +561,7 @@ $(function(){
 				}
 			});
 		});
-		$(this).slideUp(250).prev().slideDown(250).find('.username').focus();
+		$(this).slideUp(250).next().slideDown(250).find('.username').focus();
 	});
 	
 	
