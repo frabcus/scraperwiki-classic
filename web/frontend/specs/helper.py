@@ -1,3 +1,5 @@
+import mock
+
 from django.http import HttpRequest
 from django.test import Client
 from django.core.handlers.wsgi import WSGIRequest

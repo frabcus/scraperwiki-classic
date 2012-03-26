@@ -17,7 +17,8 @@ from django.contrib.sites.models import Site
 # https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ValidationError
-
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
@@ -704,10 +705,6 @@ def vault_users(request, vaultid, username, action):
     only work on the current user's vault so if they don't have one then
     it won't work.
     """
-    if not request.is_ajax():
-        return HttpResponseForbidden('This page cannot be called directly')
-    
-    from django.template.loader import render_to_string
     from codewiki.models import Vault
     mime = 'application/json'
      
@@ -720,7 +717,6 @@ def vault_users(request, vaultid, username, action):
         current_plan = request.user.get_profile().plan
         if current_plan not in ('business','corporate',):
             return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
-
     if action == 'adduser' and '@' in username:
         return invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
 
@@ -766,7 +762,7 @@ def invite_to_vault(vault_owner, email, vault):
     msg = EmailMultiAlternatives(subject, text_content, vault_owner.email,
       to=[email], bcc=[vault_owner.email])
     msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=True)
+    msg.send(fail_silently=False)
 
 
 ###############################################################################
