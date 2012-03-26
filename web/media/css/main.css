@@ -6621,24 +6621,25 @@ body.vaults .vault_header a.upgrade_to_add_user img {
 	vertical-align: -2px;
 }
 
-body.vaults .vault_header .vault_users_popover .new_user_li {
-	cursor: default;
-	padding-right: 10px;
+body.vaults p.new_user {
+	display: none;
+	text-align: center;
+	margin: 10px 0 0 0;
 }
 
-body.vaults .new_user_li label {
+body.vaults p.new_user label {
 	font-size: 13px;
 	color: #999;
 }
 
-body.vaults .new_user_li #username {
+body.vaults p.new_user .username {
 	line-height: 16px;
 	width: 155px;
 	margin-left: 5px;
 }
 
-body.vaults .vault_header .vault_users_popover .new_user_li a,
-body.vaults .vault_header .vault_users_popover .new_user_li a:hover {
+body.vaults .vault_header .vault_users_popover .new_user a,
+body.vaults .vault_header .vault_users_popover .new_user a:hover {
 	float: right;
 	background-color: #bad9b3;
 	padding: 1px 5px;

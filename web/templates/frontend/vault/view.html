@@ -44,6 +44,7 @@
     	        	{% include 'frontend/includes/vault_member.html' %}
     			{% endfor %}
                 </ul>
+                <p class="new_user"><label for="username_{{vault.id}}">Username:</label> <input type="text" id="username_{{vault.id}}" class="username text" /> <a rel="{{vault.id}}">Add!</a></p>
                 {% if can_add_vault_members %}
                 <a class="add_user" rel="{{ vault.id }}"><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16"> Add another user</a>
                 {% else %}

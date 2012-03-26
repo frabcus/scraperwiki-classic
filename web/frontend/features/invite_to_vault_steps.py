@@ -8,4 +8,4 @@ def i_click_the_vault_members_button(step):
 
 @step(u'(?:Then|And) I type "([^"]*)" into the username box$')
 def i_type_into_the_username_box(step, text):
-    world.browser.find_by_css('div.vault').first.find_by_css('#username').first.fill(text)
+    world.browser.find_by_css('div.vault').first.find_by_css('input.username').first.fill(text)

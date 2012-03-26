@@ -520,8 +520,9 @@ $(function(){
 		var $p = $a.siblings('div.vault_users_popover');
 		if($p.is(':visible')){
 			$p.fadeOut(400, function(){
-				$p.find('li.new_user_li, li.error').remove();
-				$p.children('a.add_user').show();
+				$p.find('li.error').remove();
+				$p.find('.new_user').hide().find('.username').val('');
+				$p.find('a.add_user').show();
 			});
 			$a.removeClass('hover');
 			$('html').unbind('click');
@@ -534,8 +535,9 @@ $(function(){
 							if($(e.target).not('[class*="ui-"]').length){
 								// they didn't click on the users link or the popover or the autocomplete
 								$p.filter(':visible').fadeOut(400, function(){
-									$p.find('li.new_user_li, li.error').remove();
+									$p.find('li.error').remove();
 									$p.find('a.add_user').show();
+									$p.find('.new_user').hide().find('.username').val('');
 								});
 								$a.removeClass('hover');
 								$('html').unbind('click');
@@ -547,8 +549,8 @@ $(function(){
 		}
 	});
 	
-	$('body.vaults a.add_user').bind('click', function(){
-		var input = $('<input>').attr('id','username').attr('type','text').attr('class','text').bind('keydown', function(e){
+	$('body.vaults a.add_user').bind('click', function(){		
+		$('input.username').bind('keydown', function(e){
 			// handle Enter/Return key as a click on the Add button
 			if((e.keyCode || e.which) == 13){
 				$(this).next('a').trigger('click');
@@ -578,26 +580,26 @@ $(function(){
 				//	submit the name
 				//	$(this).next('a').trigger('click');
 			}
-		});
-	
-		var confirm = $('<a>').text('Add!').bind('click', function(){
-			var closure = $(this).prev();
-			closure.parents('ul').children('.error').slideUp(150);
-			var username = closure.val();
-			var vault_id = closure.parents('div').find('a.add_user').attr('rel');
+		}).next().bind('click', function(){
+			var closure = $(this).parents('div.vault_users_popover');
+			$('.error', closure).slideUp(150);
+			var username = $('.username', closure).val();
+			var vault_id = $('a.add_user', closure).attr('rel');
 			var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
 			$.getJSON(url, function(data) {
 				if(data.status == 'ok'){
-					closure.autocomplete("close").parents('ul').next('a').slideDown(150);
-					closure.updateUserCount(1).parent().before( data.fragment ).remove();
+					$('.username', closure).autocomplete("close");
+					$('ul', closure).append(data.fragment).next('a').slideDown(150);
+					closure.updateUserCount(1);
 				} else if(data.status == 'fail'){
-					closure.autocomplete("close").parents('ul').append('<li class="error">' + data.error + '</li>');
+					$('ul', closure).append('<li class="error">' + data.error + '</li>');
+					$('.username', closure).autocomplete("close");
 				}
 			});
 		});
-		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input).append(confirm);
-		$(this).slideUp(250).prev().append(li).children(':last').slideDown(250).find('#username').focus();
+		$(this).slideUp(250).prev().slideDown(250).find('.username').focus();
 	});
+	
 	
 	$('body.vaults a.user_delete').live('click', function(e){
 		e.preventDefault();
