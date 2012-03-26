@@ -37,7 +37,7 @@ def launch_debugging_smtp(variables):
 def kill_debugging_smtp(variables):
     os.system("""kill $(ps auxww |
                         grep 'python.*smtpd' |
-                        awk '{print $1}')""")
+                        awk '{print $2}')""")
 
 @after.harvest
 def close_browser(totals):
