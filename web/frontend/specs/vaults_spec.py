@@ -1,10 +1,12 @@
 from nose.tools import assert_equals, raises
+import urllib
 
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 
 from frontend.models import UserProfile
 from codewiki.models import Vault
+import helper
 
 def setup():
     global profile
@@ -34,3 +36,12 @@ def user_plan_create_vault(plan):
     vault = profile.create_vault(name='avault')
     assert_equals(vault.user, user)
     
+def ensure_vault_owner_can_invite_new_member_by_email():
+    vault = profile.create_vault(name='invitevault')
+    email = 'test@example.com'
+    factory = helper.RequestFactory()
+    url = '/vaults/%s/adduser/%s/' % (vault.id, urllib.quote(email))
+    request = factory.get(url,
+      dict(HTTP_X_REQUESTED_WITH='XMLHttpRequest'))
+    assert email in helper.sent_mail_content.get('recipient_list', '')
+

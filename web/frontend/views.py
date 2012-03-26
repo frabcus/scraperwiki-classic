@@ -700,7 +700,7 @@ def vault_scrapers_add(request, vaultid, shortname):
 @login_required
 def vault_users(request, vaultid, username, action):
     """
-    View which allows a user to add/remove users from their vault. Will
+    View wch allows a user to add/remove users from their vault. Will
     only work on the current user's vault so if they don't have one then
     it won't work.
     """
