@@ -718,7 +718,9 @@ def vault_users(request, vaultid, username, action):
         if current_plan not in ('business','corporate',):
             return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
     if action == 'adduser' and '@' in username:
-        return invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
+        invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
+        return HttpResponse({"status": "ok", "error":""},
+                            mimetype=mime)
 
     try:
         user = User.objects.get(username=username)    

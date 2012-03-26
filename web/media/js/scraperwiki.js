@@ -497,20 +497,19 @@ $(function(){
 		if($p.is(':visible')){
 			clean_up_users_popover($p);
 		} else {
-			$p.fadeIn(150);
-			$('html').bind('click', function(e){
-				if( $(e.target).parents().index($a) == -1 ) {
-					if( $(e.target).parents().index($p) == -1 ) {
-						if( $(e.target).parents().index($('.ui-autocomplete')) == -1 ) {
-							if($(e.target).not('[class*="ui-"]').length){
-								// they didn't click on the users link or the popover or the autocomplete
-								clean_up_users_popover($p);
-							}
-						}
-					}
-				}
+			$p.fadeIn(150, function(e) {
+                $('html').bind('click', function(e){
+                    if( $(e.target).parents().index($a) == -1 &&
+                        $(e.target).parents().index($p) == -1 &&
+                        $(e.target).parents().index($('.ui-autocomplete')) == -1 &&
+                        $(e.target).not('[class*="ui-"]').length) {
+                            // they didn't click on the users link or the popover or the autocomplete
+                            clean_up_users_popover($p);
+                        }
+                    
 			});
-		}
+		});
+        }
 	});
 	
 	$('body.vaults a.add_user').bind('click', function(){		
