@@ -11,3 +11,4 @@ Feature: As a salesperson, I want to invite people to a vault by email
     And I type "t.test@testersonandsons.com" into the username box
     And I click the "Add!" button
     Then an invitation email gets sent to "t.test@testersonandsons.com"
+    And I should see "(t.test@testersonandsons.com) (invited)"

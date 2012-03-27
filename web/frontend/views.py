@@ -707,6 +707,7 @@ def vault_users(request, vaultid, username, action):
     """
     from codewiki.models import Vault
     mime = 'application/json'
+    result = {"status": "ok", "error":""}                    
      
     vault = get_object_or_404( Vault, id=vaultid)
     if vault.user.id != request.user.id:
@@ -718,8 +719,14 @@ def vault_users(request, vaultid, username, action):
         if current_plan not in ('business','corporate',):
             return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
     if action == 'adduser' and '@' in username:
+        dummy_user = User(username=username)
         invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
-        return HttpResponse({"status": "ok", "error":""},
+        result['fragment'] = render_to_string( 
+                                    'frontend/includes/vault_member.html',
+                                     { 'm': dummy_user, 'vault': vault, 
+                                       'editor': True,
+                                       'invited' : True})                 
+        return HttpResponse(json.dumps(result),
                             mimetype=mime)
 
     try:
@@ -728,7 +735,6 @@ def vault_users(request, vaultid, username, action):
         return HttpResponse('{"status": "fail", "error":"Username not found"}',
           mimetype=mime)            
 
-    result = {"status": "ok", "error":""}                    
     
     editor = request.user == vault.user
     
