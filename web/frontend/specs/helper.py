@@ -1,9 +1,25 @@
+import mock
+
 from django.http import HttpRequest
 from django.test import Client
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.handlers.base import BaseHandler
+import django.core.mail
 
 from frontend.views import subscribe
+
+sent_mail_content = {}
+
+def mock_sendmail(subject,message,from_email,recipient_list, **kwargs):
+    global sent_mail_content
+    sent_mail_content = dict(
+        subject=subject,
+        message=message,
+        from_email=from_email,
+        recipient_list=recipient_list)
+
+old_sendmail = django.core.mail.send_mail
+django.core.mail.send_mail = mock_sendmail
 
 ##
 ## From http://djangosnippets.org/snippets/963/ and comments

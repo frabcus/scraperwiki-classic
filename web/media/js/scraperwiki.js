@@ -473,40 +473,6 @@ $(function(){
 	
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
 	
-	
-	
-	$('div.vault_usage_popover').each(function(i,el){
-		//	This centres the Usage Popover underneath the Usage progressbar
-		var popo = $(this);
-		var prog = $(this).prevAll('.usage').children('.progressbar');
-		var anchor = prog.position().left + (0.5 * prog.outerWidth());
-		popo.css('left', anchor - (popo.outerWidth() / 2) );
-	});
-	
-	$('body.vaults .usage').bind('click', function(e){
-		var $a = $(this).addClass('hover');
-		var $p = $a.siblings('div.vault_usage_popover');
-		if($p.is(':visible')){
-			$p.fadeOut(400);
-			$a.removeClass('hover');
-			$('html').unbind('click');
-		} else {
-			$p.fadeIn(150);
-			$('html').bind('click', function(e){
-				if( $(e.target).parents().index($a) == -1 ) {
-					if( $(e.target).parents().index($p) == -1 ) {
-						$p.filter(':visible').fadeOut(400);
-						$a.removeClass('hover');
-						$('html').unbind('click');
-					}
-				}
-			});
-		}
-	});
-	
-	
-	
-	
 	$('div.vault_users_popover').each(function(i,el){
 		//	This centres the Users Popover underneath the Users toolbar button
 		var popo = $(this);
@@ -515,40 +481,39 @@ $(function(){
 		popo.css('left', anchor - (popo.outerWidth() / 2) );
 	});
 	
+	function clean_up_users_popover($popover){
+		$popover.filter(':visible').fadeOut(400, function(){
+			$('li.error', $popover).remove();
+			$('a.add_user', $popover).show();
+			$('.new_user', $popover).hide().find('input:text').val('');
+		});
+		$popover.siblings('a.vault_users').removeClass('hover');
+		$('html').unbind('click');
+	}
+	
 	$('body.vaults a.vault_users').bind('click', function(e){
 		var $a = $(this).addClass('hover');
 		var $p = $a.siblings('div.vault_users_popover');
 		if($p.is(':visible')){
-			$p.fadeOut(400, function(){
-				$p.find('li.new_user_li, li.error').remove();
-				$p.children('a.add_user').show();
-			});
-			$a.removeClass('hover');
-			$('html').unbind('click');
+			clean_up_users_popover($p);
 		} else {
-			$p.fadeIn(150);
-			$('html').bind('click', function(e){
-				if( $(e.target).parents().index($a) == -1 ) {
-					if( $(e.target).parents().index($p) == -1 ) {
-						if( $(e.target).parents().index($('.ui-autocomplete')) == -1 ) {
-							if($(e.target).not('[class*="ui-"]').length){
-								// they didn't click on the users link or the popover or the autocomplete
-								$p.filter(':visible').fadeOut(400, function(){
-									$p.find('li.new_user_li, li.error').remove();
-									$p.find('a.add_user').show();
-								});
-								$a.removeClass('hover');
-								$('html').unbind('click');
-							}
-						}
-					}
-				}
+			$p.fadeIn(150, function(e) {
+                $('html').bind('click', function(e){
+                    if( $(e.target).parents().index($a) == -1 &&
+                        $(e.target).parents().index($p) == -1 &&
+                        $(e.target).parents().index($('.ui-autocomplete')) == -1 &&
+                        $(e.target).not('[class*="ui-"]').length) {
+                            // they didn't click on the users link or the popover or the autocomplete
+                            clean_up_users_popover($p);
+                        }
+                    
 			});
-		}
+		});
+        }
 	});
 	
-	$('body.vaults a.add_user').bind('click', function(){
-		var input = $('<input>').attr('id','username').attr('type','text').attr('class','text').bind('keydown', function(e){
+	$('body.vaults a.add_user').bind('click', function(){		
+		$('input.username').bind('keydown', function(e){
 			// handle Enter/Return key as a click on the Add button
 			if((e.keyCode || e.which) == 13){
 				$(this).next('a').trigger('click');
@@ -578,26 +543,26 @@ $(function(){
 				//	submit the name
 				//	$(this).next('a').trigger('click');
 			}
-		});
-	
-		var confirm = $('<a>').text('Add!').bind('click', function(){
-			var closure = $(this).prev();
-			closure.parents('ul').children('.error').slideUp(150);
-			var username = closure.val();
-			var vault_id = closure.parents('div').find('a.add_user').attr('rel');
+		}).next().bind('click', function(){
+			var closure = $(this).parents('div.vault_users_popover');
+			$('.error', closure).slideUp(150);
+			var username = $('.username', closure).val();
+			var vault_id = $('a.add_user', closure).attr('rel');
 			var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
 			$.getJSON(url, function(data) {
 				if(data.status == 'ok'){
-					closure.autocomplete("close").parents('ul').next('a').slideDown(150);
-					closure.updateUserCount(1).parent().before( data.fragment ).remove();
+					$('.username', closure).autocomplete("close");
+					$('ul', closure).append(data.fragment).next('a').delay(50).slideDown(150);
+					closure.updateUserCount(1);
 				} else if(data.status == 'fail'){
-					closure.autocomplete("close").parents('ul').append('<li class="error">' + data.error + '</li>');
+					$('ul', closure).append('<li class="error">' + data.error + '</li>');
+					$('.username', closure).autocomplete("close");
 				}
 			});
 		});
-		var li = $('<li>').hide().addClass("new_user_li").append('<label for="username">Username:</label>').append(input).append(confirm);
-		$(this).slideUp(250).prev().append(li).children(':last').slideDown(250).find('#username').focus();
+		$(this).slideUp(250).next().slideDown(250).find('.username').focus();
 	});
+	
 	
 	$('body.vaults a.user_delete').live('click', function(e){
 		e.preventDefault();
