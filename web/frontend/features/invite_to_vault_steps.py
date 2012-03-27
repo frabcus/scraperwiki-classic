@@ -1,4 +1,5 @@
 import sys
+import time
 
 import splinter
 from lettuce import step,before,world,after
@@ -17,5 +18,5 @@ def i_type_into_the_username_box(step, text):
 @step(u'Then an invitation email gets sent to "([^"]*)"')
 def then_an_invitation_email_gets_sent_to(step, address):
     # Could check RE here, something like ("To:.*%s" % address).
-    print >> sys.stderr, open('mail.out').read()
+    time.sleep(0.5) # need to wait a little bit for the mail, refactor!
     assert address in open('mail.out').read()
