@@ -2,8 +2,7 @@ Hi,
 
 I've just invited you to {{vault.name}} on ScraperWiki.
 
-Please click here to sign up and we'll add you to it
-automatically.
+Please visit https://www.scraperwiki.com/login/?t={{token}} to sign up and we'll add you to it automatically.
 
 Thanks,
 
