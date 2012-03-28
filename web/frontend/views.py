@@ -192,7 +192,11 @@ def login(request):
 
     # Add token as hidden field
     if request.GET.has_key('t'):
-        context['token'] = request.GET['t']
+        token = request.GET['t']
+        # Will error if token is invalid.
+        invite = Invite.objects.get(token=token)
+        context['invite'] = invite
+        context['registration_form'].initial = {'email':invite.email}
 
     return render_to_response('registration/extended_login.html', context,
                                context_instance = RequestContext(request))
