@@ -6,6 +6,7 @@ PAGES = {
         'search test':                  '/search/test/',
         'testalicious tag':             '/tags/testalicious',
         'login':                        '/login/',
+        'sign up':                      '/login/',
         'contact':                      '/contact/',
         'help':                         '/help/',
         'pricing':                      '/pricing/',

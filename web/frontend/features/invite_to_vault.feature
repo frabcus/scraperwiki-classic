@@ -17,7 +17,9 @@ Feature: As a salesperson, I want to invite people to a vault by email
     Given I have been invited to scraperwiki
     And there is a sign up link in the invitation email
     When I go to the invitation link in the email
-    Then I should be on the login page
+    Then I should be on the sign up page
+    And I should see "My #1 Vault"
+    And I should see "t.test@testersonandsons.com"
     When I fill in the registration form
     And I click the "Create my account" button
     Then I should be on the vaults page
