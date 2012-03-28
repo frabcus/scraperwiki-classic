@@ -96,133 +96,87 @@
         </div>
     <![endif]-->
 
-	{% block nav_outer %}
-	<div id="nav_outer">
-		<div id="nav_inner">
-			{% block nav %}
-			<h1><a href="{% url frontpage %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Home: logo']); }">ScraperWiki</a></h1>
-			<ul>
-				<!-- <li class="frontpage"><a href="{% url frontpage %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Home: Home']); }">Home</a></li> -->
-				<li class="about"><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'About']); }">About</a></li>
-				<li class="about"><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Browse']); }">Browse</a></li>
-				<li class="blog"><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Blog']); }">Blog</a></li>
-				<li class="events"><a href="{% url events %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Navbar links', 'Events']); }">Events</a></li>
-				{% if user.is_authenticated %}
-				<li class="user loggedin">
-                <a href="{% url profile user.username %}"><span>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</span></a>
-					<ul>
-						<li class="profile"><a href="{% url profile user.username %}">Your profile</a></li>
-						{% if user.vaults.count > 0 or request.user.vault_membership.count %}
-						<li class="vaults"><a href="{% url vault %}">Your vaults</a></li>
-						{% endif %}
-						<li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
-						<li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
-					</ul>
-				</li>
-				{% else %}
-				<li class="user login">
-                <a href="{% url login %}">Log in</a>
-				    <ul>
-						<li class="login_form">
-						    <form method="post" action="{% url login %}" id="nav_login_form">
-                                {% csrf_token %}
-                                <label for="id_nav_user_or_email">Username or email:</label>
-                                <input type="text" id="id_nav_user_or_email" name="user_or_email" />
-                                <label for="id_nav_password">Password:</label>
-                                <input type="password" id="id_nav_password" name="password" />
-                                <a id="forgotten" href="/accounts/password/reset/">Forgotten?</a>
-                                <input type="submit" class="submit" id="nav_login_submit" name="login" value="Log in" />
-                                <span class="clear"></span>
-                            </form>
-						</li>
-						<li class="signup"><a href="{% url login %}">Create an account</a></li>
-					</ul>
-				</li>
-				{% endif %}
-				<li class="search">
-					<form id="navSearch" action="/search/" method="post">
-                        {% csrf_token %}
-		            	<input type="text" id="nav_search_q" name="q" value="{% block searchbox %}{% endblock %}"/>
-		            	<input type="submit" id="nav_search_go" value="Go" />
-					</form>
-				</li>
-			</ul>
-			{% endblock %}
-		</div>
-	</div>
-	{% endblock %}
+	<div id="nav">
+        <h1><a href="{% url frontpage %}">ScraperWiki</a></h1>
+        <ul class="supernav">
+            <li class="code"><a href="{% url frontpage %}">Code</a></li>
+            <li class="dataservices"><a href="/dataservices/">Data Services</a></li>
+            <li class="about"><a href="{% url about %}">About</a></li>
+            <li class="admin"><a>Admin</a></li>
+            {% if user.is_authenticated %}
+            <li class="user"><a href="{% url profile user.username %}">{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
+            {% else %}
+            <li class="signup"><a href="{% url login %}">Sign Up</a></li>
+            <li class="login"><a href="{% url login %}">Log In</a></li>
+            {% endif %}
+        </ul>
+        <ul class="subnav code">
+            <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">Create Code</a></li>
+            <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
+            <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
+            <li class="api"><a href="{% url docsexternal %}">API</a></li>
+            <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="search" name="q" value="{% block searchbox %}{% endblock %}"/></form></li>
+        </ul>
+        <ul class="subnav dataservices">
+            <li class="datahub"><a href="">What is a Data Hub?</a></li>
+            <li class="consultancy"><a href="">Data Consultancy</a></li>
+            <li class="request"><a href="{% url request_data %}">Request Data</a></li>
+        </ul>
+        <ul class="subnav about">
+            <li class="about"><a href="{% url about %}">About ScraperWiki</a></li>
+            <li class="events"><a href="{% url events %}">Events</a></li>
+            <li class="contact"><a href="{% url contact_form %}">Contact</a></li>
+        </ul>
+        {% if user.is_staff %}
+        <ul class="subnav admin">
+            {% if scraper.pk %}
+                <li class="django"><a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}">Django Admin (this scraper)</a></li>
+            {% else %}
+                {% if profile.user.pk %}
+                    <li class="django"><a href="/admin/auth/user/{{profile.user.pk}}">Django Admin (this user)</a></li>
+                    <li class="django"><a href="?__impersonate={{profile.user.username}}">Impersonate User</a></li>
+                {% else %}
+                    <li class="django"><a href="/admin/">Django Admin</a></li>
+                {% endif %}
+            {% endif %}
+            <li class="status"><a href="{% url status %}" title="Interact with current sandbox status">System Status</a></li>
+            <li class="munin"><a href="/munin/" title="Server usage monitoring">Munin</a></li>
+            <li class="kpi"><a href="{% url kpi %}" title="Key performance indicators">KPIs</a></li>
+        </ul>
+        {% endif %}
+        {% if user.is_authenticated %}
+        <ul class="subnav user">
+            <li class="profile"><a href="{% url profile user.username %}">Your profile</a></li>
+            {% if user.vaults.count > 0 or request.user.vault_membership.count %}
+            <li class="vaults"><a href="{% url vault %}">Your vaults</a></li>
+            {% endif %}
+            <li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
+            <li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
+        </ul>
+        {% else %}
+        <ul class="subnav login">
+            <li class="login_help"><a>Need help?</a></li>
+            <li class="username"><label for="login_username">Username</label> <input type="text" id="login_username" name="login_username" /></li>
+            <li class="password"><label for="login_password">Password</label> <input type="password" id="login_password" name="login_password" /></li>
+            <li class="login_submit"><a>Log In</a></li>                
+        </ul>
+        {% endif %}
+    </div>​
 
 
 	{% block header_outer %}
-	<div id="header_outer">
-		<div id="header_inner">
+	<div id="header">
 {% block header %}
-			<h2>Page header</h2>
+		<h2>Page header</h2>
 {% endblock %}
-		</div>
 	</div>
 	{% endblock %}
+	
+	{% block tabs %}{% endblock %}
 
 	{% block content_outer %}
-	<div id="page_outer">
-		<div id="page_inner">
-
-		{% block menu %}
-
-		<div id="divMenu">
-              <ul class="main_menu">
-				{% if user.is_authenticated %}
-                <li><a href="{% url profile username=user.username %}" title="Manage your scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Profile']); }">Your Profile</a></li>
-                {% endif %}
-                <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Browse']); }">Browse</a></li>
-                <li>
-                    <a data-wiki_type="scraper" href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'New scraper']); }">New scraper</a> /
-                    <a data-wiki_type="view" href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'New view']); }">view</a>
-                </li>
-                <li><a href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Request data']); }">Request data</a></li>
-                <li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Documentation']); }">Documentation</a></li>
-              </ul>
-
-              <ul class="sub_menu">
-                   <li class="survey"><a href="http://sw.zarino.co.uk" title="ScraperWiki Developer Survey" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Take our survey']); }"><span class="unimportant">Take our</span> survey!</a></li>
-                 <li><a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Read our blog']); }"><span class="unimportant">Read our</span> blog</a></li>
-                 <li><a href="http://groups.google.com/group/scraperwiki" title="Google groups" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Join our email list']); }"><span class="unimportant">Join our</span> email list</a></li>
-                 <li><a href="{% url contact_form %}" title="Feedback form"><span class="unimportant" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Send us feedback']); }">Send us</span> Feedback</a></li>
-                 <li><a href="http://twitter.com/scraperwiki" title="Follow us on Twitter" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Twitter']); }"><span class="unimportant">Follow us on</span> Twitter</a></li>
-                 <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Sidebar links', 'Facebook']); }"><span class="unimportant">Find on</span> Facebook</a></li>
-              </ul>
-
-              {% if user.is_staff %}
-              <ul class="sub_menu staff">
-                  {% if scraper.pk %}
-                    <li><a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}">Django admin (this scraper)</a></li>
-                  {% else %}
-                      {% if profile.user.pk %}
-                        <li><a href="/admin/auth/user/{{profile.user.pk}}">Django admin (this user)</a></li>
-                        <li><a href="?__impersonate={{profile.user.username}}">Impersonate this user</a></li>
-                      {% else %}
-                        <li><a href="/admin/">Django admin</a></li>
-                      {% endif %}
-                  {% endif %}
-                  <li><a href="{% url status %}" title="Interact with current sandbox status">Status</a></li>
-                  <li><a href="/munin/" title="Server usage monitoring">Munin</a></li>
-                  <li><a href="{% url kpi %}" title="Key performance indicators">KPIs</a></li>
-              </ul>
-              {% endif %}
-            </div>
-
-		{% endblock %}
-
-		{% block above_page %}{% endblock %}
-
-		<div id="divPage">
-    		{% block tabs %}{% endblock %}
-		    <div id="divContent">
-
-  		        {% block content %}{% endblock %}
-  		        <br class="clear"/>
-		    </div>
-		</div>
+	<div id="content">
+{% block content %}{% endblock %}
 		<br class="clear" />
 	</div>
 	{% endblock %}
