@@ -300,6 +300,24 @@ function getCookie(c_name){
 
 
 $(function(){
+    
+    $('.supernav li.code').addClass('hover default');
+    $('.supernav li').bind('mouseenter', function(){
+        var $sub = $('ul.subnav.' + $(this).attr('class').split(" ")[0]);
+        if($sub.length){
+            $(this).addClass('hover').siblings().removeClass('hover');
+            $sub.show().siblings('.subnav').hide();
+        } else {
+            $(this).siblings().removeClass('hover');
+            // $('.supernav').trigger('mouseleave');
+        }
+    });
+    $('#nav').bind('mouseleave', function(){
+        $def = $(this).find('li.default');
+        $defsub = $('ul.subnav.' + $def.attr('class').split(" ")[0]);
+        $def.addClass('hover').siblings().removeClass('hover');
+        $defsub.show().siblings('.subnav').hide();
+    });
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
 		e.preventDefault();

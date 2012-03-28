@@ -102,7 +102,9 @@
             <li class="code"><a href="{% url frontpage %}">Code</a></li>
             <li class="dataservices"><a href="/dataservices/">Data Services</a></li>
             <li class="about"><a href="{% url about %}">About</a></li>
+            {% if user.is_staff %}
             <li class="admin"><a>Admin</a></li>
+            {% endif %}
             {% if user.is_authenticated %}
             <li class="user"><a href="{% url profile user.username %}">{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
             {% else %}
@@ -161,25 +163,19 @@
             <li class="login_submit"><a>Log In</a></li>                
         </ul>
         {% endif %}
-    </div>​
-
-
-	{% block header_outer %}
+    </div>
+    
+{% block header_outer %}
 	<div id="header">
-{% block header %}
+    {% block header %}
 		<h2>Page header</h2>
+    {% endblock %}
+	</div>
 {% endblock %}
-	</div>
-	{% endblock %}
-	
-	{% block tabs %}{% endblock %}
 
-	{% block content_outer %}
-	<div id="content">
+{% block content_outer %}<div id="content">
 {% block content %}{% endblock %}
-		<br class="clear" />
-	</div>
-	{% endblock %}
+</div>{% endblock %}
 
 	{% block footer_outer %}
 	<div id="footer_outer">

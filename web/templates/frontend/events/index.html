@@ -85,9 +85,7 @@ type="text/javascript"></script>
 	<span class="icon_month">{% now "M" %}</span>
 {% endblock %}
 
-{% block content_outer %}
-<div id="page_outer">
-	<div id="page_inner">
+{% block content %}
         <div id="event_sidebar">
             <ul class="events">
                 <li><a href="/events/jdcdc/" id="jdcdc">
@@ -120,8 +118,6 @@ type="text/javascript"></script>
             <div id="googlemap" style="width: 100%; height: 400px"></div>
         </div>
         <br class="clear" />
-    </div>
-</div>
 {% endblock %}
 
 
