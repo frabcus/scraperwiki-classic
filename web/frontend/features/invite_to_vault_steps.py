@@ -48,6 +48,17 @@ def when_i_go_to_the_invitation_link_in_the_email(step):
                 open('mail.out').read()).group(1)
     world.browser.visit(django_url('/login/?t=%s' % token))
 
+@step(u'And I should see the vault name')
+def and_i_should_see_the_vault_name(step):
+    step.behave_as("""
+        Then I should see "My #1 Vault"
+        """)
+
+@step(u'And I should see my email already filled in')
+def and_i_should_see_my_email_already_filled_in(step):
+    email = "t.test@testersonandsons.com"
+    assert email in world.browser.find_by_css('#id_email').first.value
+
 @step(u'When I fill in the registration form')
 def when_i_fill_in_the_registration_form(step):
     world.browser.find_by_css('#id_name').first.fill('Lord Test Testington')
