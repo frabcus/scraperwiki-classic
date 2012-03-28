@@ -557,6 +557,9 @@ $(function(){
 				} else if(data.status == 'fail'){
 					$('ul', closure).append('<li class="error">' + data.error + '</li>');
 					$('.username', closure).autocomplete("close");
+				} else if(data.status == 'invited'){
+					$('ul', closure).append('<li class="error">' + data.message + '</li>');
+					$('.username', closure).autocomplete("close");
 				}
 			});
 		});

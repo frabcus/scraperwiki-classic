@@ -69,7 +69,7 @@ def i_am_on_the_scraper_overview_page(step):
 
 @step(u'(?:Then|And) I should (not )?see "([^"]*)"')
 def and_i_should_not_see_text(step, negative, text):
-    x = world.browser.is_text_not_present(text)
+    x = world.browser.is_text_present(text)
     if not negative:
         assert x
     else:
@@ -81,7 +81,7 @@ def i_should_see_the_button(step, negative, text):
     if not negative:
         assert x
     else:
-        assert not x
+        assert x == []
 
 @step(u'(?:Then|And) I should see (?:the|a|an) "([^"]*)" (?:link|button) in the (.+)')
 def i_should_see_the_button_in_parent(step, text, parent_name):

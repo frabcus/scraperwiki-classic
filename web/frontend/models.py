@@ -32,7 +32,6 @@ class Feature(models.Model):
     def __unicode__(self):
         return self.name
 
-
 class UserProfile(models.Model):
     """
     This model holds the additional fields to be associated with a user in the

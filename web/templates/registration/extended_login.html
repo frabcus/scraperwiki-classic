@@ -75,6 +75,9 @@
         {% endif %}
 	    <fieldset>
 	       <input type="hidden" name="redirect" value="{{redirect}}"/>
+         {% if token %}
+          <input type="hidden" name="token" value="{{token}}"/>
+         {% endif %}
 	    </fieldset>
        	<div id="divSignupTerms">
            	<h4>Terms and conditions <a href="{% url terms %}" target="_new">Open in a new window</a></h4>
