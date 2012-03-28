@@ -171,6 +171,7 @@ def login(request):
                     invite = Invite.objects.get(token=request.POST['token'])
                     if invite:
                         invite.vault.members.add(new_user)
+                        redirect = reverse('vault')
 
                 #sign straight in
                 signed_in_user = auth.authenticate(username=request.POST['username'], password=request.POST['password1'])
