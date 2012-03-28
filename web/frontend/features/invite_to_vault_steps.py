@@ -32,7 +32,7 @@ def given_i_have_been_invited_to_scraperwiki(step):
         And I am on the vaults page
         When I click the vault members button
         And I click the "Add another user" button
-        And I type "test@test.com" into the username box
+        And I type "t.test@testersonandsons.com" into the username box
         And I click the "Add!" button
         """)
 
@@ -76,7 +76,8 @@ def and_i_should_have_a_vault(step):
 
 @step("And the vault owner has been emailed")
 def vault_owner_emailed(step):
-    m = re.match(r"^To:\s+test@example.com",
+    time.sleep(0.5)
+    m = re.search(r"^To:\s+test@example.com",
       open('mail.out').read(),
       re.M)
     assert m

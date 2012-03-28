@@ -171,6 +171,7 @@ def login(request):
                     invite = Invite.objects.get(token=request.POST['token'])
                     if invite:
                         invite.vault.members.add(new_user)
+                        profile = new_user.get_profile()
                         redirect = reverse('vault')
                         message = render_to_string('emails/invitation_accepted.txt', locals())
                         django.core.mail.send_mail(
