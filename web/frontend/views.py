@@ -779,7 +779,8 @@ def invite_to_vault(vault_owner, email, vault):
     """Send an e-mail to address *mail* inviting them to *vault*."""
     from codewiki.models import Invite
 
-    token = str(uuid.uuid1().hex)[:20]
+    # Truncated to avoid annoying Django/e-mail/Quoted-Printable madness.
+    token = str(uuid.uuid4().hex)[:20]
     context = locals()
     context.update({'token': token})
 
@@ -792,7 +793,7 @@ def invite_to_vault(vault_owner, email, vault):
     msg.attach_alternative(html_content, "text/html")
     msg.send(fail_silently=False)
 
-    invite = Invite(token=context['token'], vault=vault)
+    invite = Invite(token=context['token'], email=email, vault=vault)
     invite.save()
 
 ###############################################################################
