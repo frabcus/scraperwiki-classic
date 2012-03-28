@@ -1,16 +1,20 @@
 #!/usr/bin/python -W ignore::DeprecationWarning
 
-import  sys
-import  os
-import  socket
-import  signal
-import  string
-import  time
-import  resource
-import  urllib2, urllib
-import  optparse
-import  scraperwiki
 import base64
+import optparse
+import os
+import resource
+import signal
+import socket
+import string
+import sys
+import time
+
+# ScraperWiki
+import scraperwiki
+
+# Local
+import swutil
 
 try    : import json
 except : import simplejson as json
@@ -24,17 +28,8 @@ class ConsoleStream:
         self.m_text = ''
         self.m_fd = fd
 
-    def saveunicode(self, text):
-        try:    return unicode(text)
-        except UnicodeDecodeError:     pass
-        try:    return unicode(text, encoding='utf8')
-        except UnicodeDecodeError:     pass
-        try:    return unicode(text, encoding='latin1')
-        except UnicodeDecodeError:     pass
-        return unicode(text, errors='replace')
-    
     def write(self, text):
-        self.m_text += self.saveunicode(text)
+        self.m_text += swutil.as_unicode(text)
         if self.m_text and self.m_text[-1] == '\n' :
             self.flush()
 
@@ -108,7 +103,7 @@ try:
     mod = imp.new_module('scraper')
     exec code.rstrip() + "\n" in mod.__dict__
 except Exception, e:
-    etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
+    etb = swutil.getExceptionTraceback(code)  
     assert etb.get('message_type') == 'exception'
     scraperwiki.dumpMessage(etb)
 except SystemExit, se:

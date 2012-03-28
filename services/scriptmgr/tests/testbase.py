@@ -63,6 +63,16 @@ def console(response):
       if j['message_type'] == 'console' ]
     return ''.join(l)
 
+def exceptions(response):
+    """*response* is the entire response stream returned from
+    scriptmgr (as for *console()*).  Parse out the exception
+    messages, and return them all, converted using str,
+    concatenated into a single string.
+    """
+    l = [ j for j in mjson(response) ]
+    l = [ str(j) for j in l if j['message_type'] == 'exception' ]
+    return ''.join(l)
+
 def mjson(s):
     """*s* is a string holding one or more JSON objects that
     have been concatenated (multi-JSON); yield each JSON object

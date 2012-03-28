@@ -36,6 +36,6 @@ class testConsole(testbase.testBase):
     def testBinaryAssert(self):
         """Should be able to see assert text, even when non UTF-8."""
         stuff = self.Execute(r"""assert '','\xabAsserted\xbb'""")
-        output = testbase.console(stuff)
+        output = testbase.exceptions(stuff)
         assert 'Asserted' in output
 
