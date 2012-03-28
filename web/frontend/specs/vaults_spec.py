@@ -71,7 +71,7 @@ def ensure_invitation_email_contains_invite_token(mock_email):
                         repr(mock_email.call_args_list))
 
 @patch.object(EmailMultiAlternatives, 'attach_alternative')
-def it_should_save_an_invite_token_and_vault_id(mock_email):
+def it_should_save_an_invite_token_and_vault_id_and_email_address(mock_email):
     vault = profile.create_vault(name='invitevault')
     email = 'test@example.com'
     response = invite_to_vault(user, email, vault)
@@ -80,7 +80,8 @@ def it_should_save_an_invite_token_and_vault_id(mock_email):
                         repr(mock_email.call_args_list)).group(1)
     invite = Invite.objects.get(token=token)
     assert invite
-    assert invite.vault.id == vault.id
+    assert_equals(invite.vault.id, vault.id)
+    assert_equals(invite.email, email)
 
 @patch.object(EmailMultiAlternatives, 'attach_alternative')
 def it_should_add_the_user_to_the_vault_on_sign_up(mock_email):

@@ -141,6 +141,7 @@ class Invite(models.Model):
 
     token = models.CharField(max_length=32)
     vault = models.ForeignKey(Vault)
+    email = models.CharField(max_length=200)
 
     class Meta:
         app_label = 'codewiki'
