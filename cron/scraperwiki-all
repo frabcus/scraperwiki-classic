@@ -7,6 +7,6 @@ SHELL=/bin/bash
 0 6 * * * root tar cfP - /etc | gzip --rsyncable > /root/backup/etc.tar.gz
 
 # Copy everything to headquarters (one hour later than bytemark backups)
-0 8 * * * root /var/www/scraperwiki/cron/bin/hq-backup
+0 8 * * * root /var/www/scraperwiki/cron/bin/hq-backup -v
 
 
