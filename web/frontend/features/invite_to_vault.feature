@@ -24,3 +24,5 @@ Feature: As a salesperson, I want to invite people to a vault by email
     And I click the "Create my account" button
     Then I should be on the vaults page
     And I should have access to the vault I was invited to
+    And the vault owner has been emailed
+

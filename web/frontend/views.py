@@ -172,6 +172,13 @@ def login(request):
                     if invite:
                         invite.vault.members.add(new_user)
                         redirect = reverse('vault')
+                        message = render_to_string('emails/invitation_accepted.txt', locals())
+                        django.core.mail.send_mail(
+                            subject='%s has accepted your invitation to %s' % (invite.email, invite.vault.name),
+                            message=message,
+                            from_email='Vault Notification <noreply@scraperwiki.com>',
+                            recipient_list=[invite.vault.user.email],
+                            fail_silently=False)
 
                 #sign straight in
                 signed_in_user = auth.authenticate(username=request.POST['username'], password=request.POST['password1'])

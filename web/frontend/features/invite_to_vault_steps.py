@@ -74,3 +74,9 @@ def and_i_should_have_a_vault(step):
                    Then I should see "My #1 Vault"
                    """)
 
+@step("And the vault owner has been emailed")
+def vault_owner_emailed(step):
+    m = re.match(r"^To:\s+test@example.com",
+      open('mail.out').read(),
+      re.M)
+    assert m
