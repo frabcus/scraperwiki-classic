@@ -1,34 +1,6 @@
 {% load doc_links %}
 
-<div class="content half left index">
-    
-<p class="intro">ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
-scheduled to scrape and refine data. 
-<!-- Edit and debug the scripts entirely in your browser, no setup required. A built
-in SQL API gets the data out as JSON, CSV or RSS files.  -->
-</p>
-
-<h3>First steps (anyone)</h3>
-<ul>
-    {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
-    <li class="doclink"> {% doc_link_full 'intro_screencast' language 'Step by step guide to using ScraperWiki (15 mins)' %}</li>
-    <li class="doclink"> {% doc_link_full 'LANG_intro_tutorial' language 'Write a real scraper by copying and pasting code (30 mins)' %}</li>
-    <li class="doclink"> {% doc_link_full 'LANG_view_guide' language 'Make a view by copying and pasting code (30 mins)' %}</li>
-    <li class="doclink"> <a href='{% url tutorials language %}' title="A series of tutorials that run in our online code editor">Live tutorials</a></li>
-</ul>
-
-<h3>Reference (programmers)</h3>
-<ul>
-  {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
-  <li class="doclink"> {% doc_link_full 'LANG_help_documentation' language 'ScraperWiki-specific functions you can use inside a scraper' %}</li>  
-  <li class="doclink"> {% doc_link_full 'LANG_datastore_guide' language 'Everything you can do with the ScraperWiki datastore' %}</li>
-  <li class="doclink"> {% doc_link_full 'LANG_libraries' language 'eg: Mechanize, Beautiful Soup, Geopy' %}</li>
-  <li class="doclink"> <a href="{% url docsexternal %}" title="Build an API query to get data out of ScraperWiki">Web API docs</a></li>
-</ul>
-	
-</div>
-
-<div class="content half right" id="getting_help">
+<div id="getting_help">
     <h3>Need help?</h3>
 	<p>If you can't find what you want here&hellip;</p>
 	<ul>
@@ -42,9 +14,35 @@ in SQL API gets the data out as JSON, CSV or RSS files.  -->
 	</ul>	
 </div>
 
-<br class="clear" />
+<div class="first even">
 
-<div class="content half left index">
+    <p class="intro">ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
+    scheduled to scrape and refine data. 
+    <!-- Edit and debug the scripts entirely in your browser, no setup required. A built
+    in SQL API gets the data out as JSON, CSV or RSS files.  -->
+    </p>
+
+    <h3>First steps (anyone)</h3>
+    <ul>
+        {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
+        <li class="doclink"> {% doc_link_full 'intro_screencast' language 'Step by step guide to using ScraperWiki (15 mins)' %}</li>
+        <li class="doclink"> {% doc_link_full 'LANG_intro_tutorial' language 'Write a real scraper by copying and pasting code (30 mins)' %}</li>
+        <li class="doclink"> {% doc_link_full 'LANG_view_guide' language 'Make a view by copying and pasting code (30 mins)' %}</li>
+        <li class="doclink"> <a href='{% url tutorials language %}' title="A series of tutorials that run in our online code editor">Live tutorials</a></li>
+    </ul>
+
+    <h3>Reference (programmers)</h3>
+    <ul>
+      {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
+      <li class="doclink"> {% doc_link_full 'LANG_help_documentation' language 'ScraperWiki-specific functions you can use inside a scraper' %}</li>  
+      <li class="doclink"> {% doc_link_full 'LANG_datastore_guide' language 'Everything you can do with the ScraperWiki datastore' %}</li>
+      <li class="doclink"> {% doc_link_full 'LANG_libraries' language 'eg: Mechanize, Beautiful Soup, Geopy' %}</li>
+      <li class="doclink"> <a href="{% url docsexternal %}" title="Build an API query to get data out of ScraperWiki">Web API docs</a></li>
+    </ul>
+	
+</div>
+
+<div class="second even">
     <h3>Scraping guides</h3>
     <ul>
      <li class="doclink">{% doc_link_full 'LANG_csv_guide' language 'Get data from comma-separated spreadsheets' %}</li>
@@ -73,7 +71,7 @@ in SQL API gets the data out as JSON, CSV or RSS files.  -->
 
 </div>
 
-<div class="content half right index">
+<div class="third odd">
     <h3>Viewing guides</h3>
     <ul>
         <li><a href="/docs/html/html_views/">HTML Views 101</a></li>
@@ -91,7 +89,7 @@ in SQL API gets the data out as JSON, CSV or RSS files.  -->
 </div>
 
 {% if user.is_staff %}
-<div class="content half right index">
+<div class="fourth even">
     <h3 class="staff">View tools</h3>
     <ul class="staff">
      <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>

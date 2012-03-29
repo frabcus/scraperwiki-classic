@@ -131,7 +131,7 @@ $(function()
             $("#overviewreturn").show(); 
         }
         else
-            $("#overviewreturn").hide(); 
+            $("#overviewreturn").text('(as it appears in the URL)'); 
 
         var t = setTimeout(resizeZO, 500);
     }
@@ -351,7 +351,7 @@ $(function()
                 </select>
         	</li> 
         	<li class="name">
-                <label for="id_name">name<span class="desc"> of the scraper</span> <span id="overviewreturn">(go to <a href="{% url code_overview 'scraper' 'XXX' %}">scraper</a>)</label>
+                <label for="id_name">shortname<span class="desc"> of the scraper <span id="overviewreturn">(go to <a href="{% url code_overview 'scraper' 'XXX' %}">scraper</a>)</span></span></label>
                 <input type="text" name="name" id="id_name" value="{{scrapername}}">
         	</li> 
         	<li class="apikey_scraper">

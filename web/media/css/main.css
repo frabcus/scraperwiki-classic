@@ -1618,7 +1618,10 @@ body.api .right ul {
 	padding: 15px;
 	font-size: 14px;
 	padding-bottom: 10px;
-	margin-top: 30px;
+	margin-top: 20px;
+	float: right;
+    width: 300px;
+    margin-left: 40px;
 }
 
 #help_content #getting_help ul {
@@ -1670,9 +1673,8 @@ body.api .right ul {
 
 
 #help_content p.intro {
-	margin-top: 30px;
+	margin-top: 20px;
 	line-height: 1.2em;
-	padding-left: 30px;
 }
 
 #help_content .index h3 {
@@ -4458,14 +4460,6 @@ a.api_link:hover span {
 
 
 
-/* Programmer API */
-
-.programmer_api {
-	
-}
-
-
-
 /* Comments */
 
 form.add_comment {
@@ -5329,6 +5323,10 @@ dl.tutoriallist dd {
 
 
 
+div.documentationpage {
+    padding: 20px;
+}
+
 div.documentationpage h2 {
     margin-top: 1.25em;
     padding-top:0;
@@ -5429,7 +5427,10 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 }
 
 
-
+body.docs.api #content {
+    padding: 20px 80px;
+    width: 798px;
+}
 
 #api_explorer {
 	background-color: #f3f3f3;
@@ -5452,7 +5453,7 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	display: block;
 	padding: 12px 15px;
 	font-size: 14px;
-	width: 240px;
+	width: 290px;
 	color: #39c;
 	border-bottom: 1px solid #ececec;
 	border-top: 1px solid #f9f9f9;
