@@ -138,7 +138,7 @@ def login(request):
     
     if request.method == 'POST':
         #Existing user is logging in
-        if request.POST.has_key('login'):
+        if request.POST.has_key('submit'):
 
             login_form = SigninForm(data=request.POST)
             if login_form.is_valid():

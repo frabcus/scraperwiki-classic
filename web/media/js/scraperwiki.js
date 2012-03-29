@@ -303,20 +303,27 @@ $(function(){
     
     $('.supernav li.code').addClass('hover default');
     $('.supernav li').bind('mouseenter', function(){
-        var $sub = $('ul.subnav.' + $(this).attr('class').split(" ")[0]);
+        var $sub = $('.subnav.' + $(this).attr('class').split(" ")[0]);
         if($sub.length){
             $(this).addClass('hover').siblings().removeClass('hover');
             $sub.show().siblings('.subnav').hide();
-        } else {
-            $(this).siblings().removeClass('hover');
-            // $('.supernav').trigger('mouseleave');
         }
     });
     $('#nav').bind('mouseleave', function(){
         $def = $(this).find('li.default');
-        $defsub = $('ul.subnav.' + $def.attr('class').split(" ")[0]);
+        $defsub = $('.subnav.' + $def.attr('class').split(" ")[0]);
         $def.addClass('hover').siblings().removeClass('hover');
         $defsub.show().siblings('.subnav').hide();
+    });
+    $loginbutton = $('<a>Log In</a>').bind('click', function(){
+        $(this).parents('form').find(':submit').trigger('click');
+    })
+    $('li.login_submit :submit').hide().after($loginbutton).parents('form').find(':text, :password').bind('keyup', function(e){
+        console.log(e.keyCode);
+        console.log($(this).parents('form').find(':submit'));
+        if((e.keyCode || e.which) == 13){
+			$(this).parents('form').find(':submit').trigger('click');
+		}
     });
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {

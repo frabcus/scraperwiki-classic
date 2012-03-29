@@ -89,7 +89,7 @@ body {
     overflow: hidden;
 }
 
-ul.supernav {
+.supernav {
     position: absolute;
     right: 7px;
     top: 10px;
@@ -99,11 +99,11 @@ ul.supernav {
     margin: 0;
 }
 
-ul.supernav li {
+.supernav li {
     display: inline-block;
 }
 
-ul.supernav a {
+.supernav a {
     display: inline-block;
     height: 36px;
     line-height: 38px;
@@ -116,11 +116,11 @@ ul.supernav a {
     cursor: pointer;
 }
 
-ul.supernav li:hover a {
+.supernav li:hover a {
     color: #666;
 }
 
-ul.supernav li.hover a {
+.supernav li.hover a {
     padding: 0 12px 1px 12px;
     border: 1px solid #d8d8d8;
     background: #fff;
@@ -134,11 +134,8 @@ ul.supernav li.hover a {
     border-top-right-radius: 4px;
 }
 
-ul.subnav.code {
-    display: block;
-}
-
-ul.subnav {
+.subnav {
+    display: none;
     border: 1px solid #d8d8d8;
     background: #fff;
     position: absolute;
@@ -157,18 +154,27 @@ ul.subnav {
     box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
 }
 
-ul.subnav li {
+.subnav.code {
+    display: block;
+}
+
+.subnav ul {
+    padding: 0;
+    margin: 0;
+}
+
+.subnav li {
     display: inline-block;
 }
 
-ul.subnav a {
+.subnav a {
     display: inline-block;
     padding: 0 10px;
     color: #6c8699;
     text-decoration: none;
 }
 
-ul.subnav a:hover {
+.subnav a:hover {
     text-decoration: underline;
 }
 

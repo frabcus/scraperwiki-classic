@@ -156,12 +156,18 @@
             <li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
         </ul>
         {% else %}
-        <ul class="subnav login">
-            <li class="login_help"><a>Need help?</a></li>
-            <li class="username"><label for="login_username">Username</label> <input type="text" id="login_username" name="login_username" /></li>
-            <li class="password"><label for="login_password">Password</label> <input type="password" id="login_password" name="login_password" /></li>
-            <li class="login_submit"><a>Log In</a></li>                
+        <ul class="subnav signup">
+            <li class="empty"><a>empty!!</a></li>
         </ul>
+        <form class="subnav login" action="{% url login %}" method="post">
+            {% csrf_token %}
+            <ul>
+                <li class="login_help"><a>Need help?</a></li>
+                <li class="username"><label for="login_username">Username or email</label> <input type="text" id="login_username" name="user_or_email" /></li>
+                <li class="password"><label for="login_password">Password</label> <input type="password" id="login_password" name="password" /></li>
+                <li class="login_submit"><input type="submit" class="submit" name="submit" value="Log In" /></li>
+            </ul>
+        </form>
         {% endif %}
     </div>
     
