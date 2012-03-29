@@ -376,6 +376,15 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	color: #369;
 }
 
+#header h2 small {
+	font-size: 1em;
+	color: #92b5d8;
+}
+
+#header h2 small {
+	color: #5e8ab6;
+}
+
 #header p, #header ul {
 	position: absolute;
 	right: 20px;
@@ -3547,12 +3556,7 @@ dl.faq dd {
 
 /* EVENTS: shared */
 
-body.events #header_inner em {
-	font-style: normal;
-	color: #fbebbf;
-}
-
-body.events #header_inner a {
+body.events #header a {
 	display: inline-block;
 	line-height: 18px;
 	font-size: 18px;
@@ -3576,39 +3580,36 @@ body.events #header_inner a {
 	background-image: linear-gradient(top,  rgba(255,255,255,0.5) 0%,rgba(255,255,255,0) 100%);
 }
 
-body.events #header_inner a:hover {
+body.events #header a:hover {
 	color: #a14e1d;
 	background-color: #ffeebf;
 }
 
-body.events #header_inner .findoutmore {
+body.events #header .findoutmore {
 	background-color: #ddedf6;
 	color: #317fa5;
 }
 
-body.events #header_inner a em {
+body.events #header a em {
 	color: #b18c58;
 }
 
-body.events #header_inner .findoutmore:hover {
+body.events #header .findoutmore:hover {
 	background-color: #eaf7ff;
 	color: #0082d8;
-}
-
-body.events #page_inner {
-	padding-top: 25px;
 }
 
 body.events #event_sidebar {
 	float: right;
 	width: 290px;
+	margin: 20px 20px 0 0;
 }
 
 body.events #event_details {
 	float: left;
-	width: 630px;
+	width: 600px;
 	line-height: 21px;
-	padding-bottom: 40px;
+	margin: 20px 0 40px 20px;
 }
 
 body.events #description p.first {
@@ -3962,36 +3963,7 @@ body.events #tickets em {
 	100% {transform:rotate(0deg);}
 }
 
-body.events #header_inner {
-	position: relative;
-}
-
-body.events #header_inner .icon_date {
-	position: absolute;
-	top: 50%;
-	margin-top: 1px;
-	left: 20px;
-	font-weight: bold;
-	font-size: 19px;
-	line-height: 19px;
-	width: 42px;
-	text-align: center;
-}
-
-body.events #header_inner .icon_month {
-	position: absolute;
-	top: 50%;
-	margin-top: -11px;
-	left: 20px;
-	font-weight: bold;
-	color: #39c;
-	text-transform: uppercase;
-	font-size: 8px !important;
-	line-height: 8px;
-}
-
 body.events #event_details #googlemap {
-	margin: 15px 0 0 10px;
 	-webkit-box-shadow: 0 1px 5px rgba(0,0,0,0.5);
 	-moz-box-shadow: 0 1px 5px rgba(0,0,0,0.5);
 	box-shadow: 0 1px 5px rgba(0,0,0,0.5);
@@ -4001,6 +3973,7 @@ body.events #event_details #googlemap {
 body.events ul.events {
 	padding: 0;
 	margin-bottom: 0;
+	margin-top: 0;
 }
 
 body.events ul.events a {
@@ -4086,43 +4059,49 @@ body.events ul.past .location {
 
 /* EVENTS: individual event */
 
-body.event #header_inner {
+body.event #header:after {
+	display: block;
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 355px;
+	content: " ";
 	background: transparent url(../images/event_columbia_2012.png) 100% 100% no-repeat;
-	padding: 25px 0;
 }
 
-body.event #header_inner h2,
-body.event #header_inner p {
+body.event #header h2,
+body.event #header p {
 	margin: 0;
 }
 
-body.event #header_inner h2,
-body.event #header_inner h3 {
+body.event #header h2,
+body.event #header h3 {
 	font-size: 28px;
 	margin: 0;
 }
 
-body.event #header_inner p {
+body.event #header p {
+	position: static;
 	font-size: 18px;
 	line-height: 18px;
 	margin-top: 15px;
-	color: #f2f8fc;
 	font-weight: normal;
 }
 
-body.event #header_inner p.links {
+body.event #heade p.links {
 	margin-top: 20px;
 }
 
-body.event #header_inner p.deets {
-	margin-top: 5px;
+body.event #header p.deets {
+	margin-top: 10px;
 }
 
-body.event #header_inner p.deets span {
+body.event #header p.deets span {
 	margin-right: 20px;
 }
 
-body.event #header_inner p.deets span:before {
+body.event #header p.deets span:before {
 	content: ".";
 	display: inline-block;
 	width: 16px;
@@ -4134,12 +4113,12 @@ body.event #header_inner p.deets span:before {
 	vertical-align: -1px;
 }
 
-body.event #header_inner p.deets span.price:before {
+body.event #header p.deets span.price:before {
 	background-position: 0 -32px;
 	vertical-align: -2px;
 }
 
-body.event #header_inner p.deets span.twitter:before {
+body.event #header p.deets span.twitter:before {
 	background-position: -48px -32px;
 	vertical-align: -2px;
 }
