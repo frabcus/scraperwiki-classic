@@ -1,9 +1,11 @@
-Hi,
+ScraperWiki
+___________
 
-I've just invited you to {{vault.name}} on ScraperWiki.
+{{ vault_owner.username }} has just invited you to {{ vault.name }} on ScraperWiki.
 
-Please visit https://www.scraperwiki.com/login/?t={{token}} to sign up and we'll add you to it automatically.
+To sign up and automatically access the vault, click the link:
+https://www.scraperwiki.com/login/?t={{token}}
 
-Thanks,
+___________
+You're receiving this email because the ScraperWiki user {{ vault_owner.username }} wants to add you to their vault.  If you don't know them, just ignore this email.
 
-{{vault_owner.username}}
