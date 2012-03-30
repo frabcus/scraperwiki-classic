@@ -1145,6 +1145,11 @@ body.profiles.edit #features li input {
 
 /* REQUEST DATA PAGES */
 
+body.request_data #content {
+	padding: 40px 84px;
+	width: 790px;
+}
+
 #request_options {
 	width: 365px;
 	float: left;
@@ -1153,7 +1158,7 @@ body.profiles.edit #features li input {
 
 #request_form,
 body.request_data #public_request {
-	width: 363px;
+	width: 393px;
 	float: right;
 	background-color: #F4F8FB;
 	display: none;
@@ -1317,21 +1322,22 @@ body.request_data #public_request {
 	background-image: url(../images/request_data_icon_etl.gif);
 }
 
-#page_inner #request_options p.paid {
+#content #request_options p.paid {
 	background-image: url(../images/request_data_icon_paid_dammit.gif);
 }
 
-#page_inner #request_options p.free {
+#content #request_options p.free {
 	background-image: url(../images/request_data_icon_free.gif);
 }
 
 
 
 body.request_data #public_request {
-	width: 333px;
+	width: 363px;
 	padding: 0 15px;
 	font-size: 14px;
 	line-height: 20px;
+	min-height: 500px;
 }
 
 body.request_data #public_request ul {
@@ -1362,36 +1368,26 @@ body.request_data #public_request li {
 
 #request_form li input,
 #request_form li select {
-	width: 328px;
+	width: 358px;
 	line-height: 20px;
 	margin-bottom: 10px;
 	text-indent: 5px;
 }
 
 #request_form li select {
-	width: 250px;
+	width: 270px;
 	margin-top: 5px;
 	text-indent: 0;
 }
 
 #request_form textarea {
-	width: 318px;
+	width: 348px;
 	padding: 7px;
 	height: 60px;
 }
 
-#request_form li.broadcast input {
-	float: left;
-	margin: 10px 12px 5px 50px;
-	width: auto;
-}
-
-#request_form li.broadcast label {
-	padding-right: 50px;
-}
-
 #request_form #id_due_date {
-	width: 200px;
+	width: 220px;
 }
 
 #request_form .due_date a {
@@ -1478,18 +1474,17 @@ body.request_data #public_request li {
 
 #request_scrapbook {
 	clear: both;
-	padding-top: 70px;
+	padding-top: 60px;
 }
 
 #request_scrapbook h2 {
-	margin: 30px 0;
+	margin-bottom: 30px;
 	text-align: center;
 	font-size: 16px;
 	text-transform: uppercase;
 	color: #666;
 	font-weight: normal;
 	background: #fff url(../images/subheading_line.gif) no-repeat center center;
-	margin-top: 20px;
 }
 
 #request_scrapbook h2 a {
@@ -1989,10 +1984,11 @@ body.shared p.language_chooser a.shared {
 /* CONTACT PAGE */
 
 body.contact .content form {
-	margin-left: 65px;
-	width: 312px;
-	margin-top: 20px;
+	margin-left: 110px;
+	width: 400px;
+	padding-top: 20px;
 	position: relative;
+	min-height: 500px;
 }
 
 body.contact .content form select {
@@ -2002,7 +1998,7 @@ body.contact .content form select {
 body.contact form ul label {
 	font-weight: normal;
 	float: none;
-	width: 300px;
+	width: 400px;
 	color: #666;
 	font-size: 14px;
 	margin-bottom: 4px;
@@ -2014,16 +2010,16 @@ body.contact form ul li {
 
 body.contact form ul input {
 	padding: 3px 5px;
-	width: 300px;
+	width: 386px;
 }
 
 body.contact form ul input#id_captcha_1 {
-	width: 100px;
+	width: 120px;
 	margin-left: 10px;
 }
 
 body.contact form ul textarea {
-	width: 308px;
+	width: 394px;
 }
 
 body.contact form p.tip {
@@ -2049,7 +2045,7 @@ body.contact p.last {
 
 body.contact form img#postman {
 	position: absolute;
-	top: 20px;
+	top: 40px;
 	right: -280px;
 }
 
@@ -2057,7 +2053,7 @@ body.contact form .postphone {
 	background-color: #F8FBFD;
 	padding: 5px 10px 15px 10px;
 	position: absolute;
-	top: 310px;
+	top: 320px;
 	right: -295px;
 	width: 210px;
 	text-align: center;
@@ -2406,6 +2402,13 @@ div.scroll {
 
 /* Terms & conditions */
 
+body.terms_and_conditions #content,
+body.privacy #content {
+	padding: 20px;
+	width: 918px;
+	line-height: 1.5em;
+}
+
 #terms_change_notice {
 	background: #ffffd7;
 	padding: 1em 1em 0.6em 1em;
@@ -2454,10 +2457,6 @@ dl.terms dd {
 	padding-left: 0;
 	margin-left: 0;
 	font-size: 0.8em;
-}
-
-div.terms {
-	line-height: 1.5em;
 }
 
 div.terms ul dl, div.terms ul ul {
@@ -2796,7 +2795,7 @@ ul.scraper_list .code_about .about_sick a {
 
 body.about a#help {
 	display: block;
-	margin: 40px 20px 0 20px;
+	margin: 40px 0 0 0;
 	text-align: center;
 	background-color: #ffd;
 	padding: 9px 0 7px 0;
@@ -2815,9 +2814,11 @@ body.about a#help:hover {
 	color: #169;
 }
 
-body.about #divContent {
-	line-height: 21px;
-	font-size: 14px;
+body.about #content {
+	line-height: 23px;
+	font-size: 16px;
+	width: 878px;
+	padding: 20px 40px;
 }
 
 body.about .column-left .first {
@@ -2829,18 +2830,15 @@ body.about .column-left .first {
 body.about .column-left,
 body.about .column-right {
 	float: left;
-	width: 340px;
+	width: 420px;
 	text-align: justify;
-	margin-left: 20px;
 }
 
 body.about .column-right {
 	float: right;
-	margin-left: 0;
-	margin-right: 20px;
 }
 
-body.about #divContent h2 {
+body.about #content h2 {
 	margin: 10px 0 10px 0;
 	text-align: center;
 	font-size: 16px;
@@ -2851,14 +2849,14 @@ body.about #divContent h2 {
 	padding: 0;
 }
 
-body.about #divContent h2 a {
+body.about #content h2 a {
 	background-color: #fff;
 	padding: 0 10px;
 	color: #666;
 	text-decoration: none;
 }
 
-body.about #divContent h2.inline {
+body.about #content h2.inline {
 	background: none;
 	margin: 15px 0 25px 0;
 	padding: 0;
@@ -2879,12 +2877,16 @@ body.about .about_image {
 }
 
 body.about #about_hover {
-    margin-left: 15%;
+    margin-left: 68px;
     text-align: center;
-    width: 70%;
+    width: 710px;
 	background-color: #F4F8FB;
     padding: 1em;
-    display:none; 
+    display: none;
+}
+
+body.about #scrapbook {
+	margin: 0 60px;
 }
 
 body.about #scrapbook h2 {
@@ -2975,13 +2977,12 @@ body.about #people {
 }
 
 body.about #people p {
-	margin: 1em 20px;
+	margin: 20px 70px;
 }
 
 #about_specifics {
 	background-color: #F4F8FB;
-	margin-top: 60px;
-	margin-bottom: -20px;
+	margin: 60px 10px 20px 10px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	font-size: 13px;
@@ -2992,7 +2993,7 @@ body.about #people p {
 #about_specifics .logos,
 #about_specifics .opensource {
 	padding: 5px 20px 5px 20px;
-	width: 330px;
+	width: 385px;
 	float: left;
 }
 
@@ -3066,25 +3067,26 @@ div.feature img {
 body.pricing .column-left,
 body.pricing .column-right {
 	float: left;
-	width: 340px;
+	width: 420px;
 	text-align: justify;
-	margin-left: 20px;
+	margin-left: 40px;
+	margin-top: 20px;
 	line-height: 22px;
 }
 
 body.pricing .column-right {
 	float: right;
 	margin-left: 0;
-	margin-right: 20px;
+	margin-right: 40px;
 }
 
 #pricing_chart {
-	margin: 20px 0 30px 20px;
+	margin: 20px 0 30px 60px;
 }
 
 #pricing_chart div.col {
 	float: left;
-	width: 174px;
+	width: 200px;
 	font-size: 12px;
 	text-align: center;
 	position: relative;
@@ -3092,9 +3094,9 @@ body.pricing .column-right {
 }
 
 #pricing_chart .footnote {
-	width: 174px;
+	width: 170px;
 	text-align: center;
-	margin-left: 532px;
+	margin-left: 625px;
 	font-size: 11px;
 	color: #888;
 	line-height: 14px;
@@ -3126,7 +3128,7 @@ body.pricing .column-right {
 	-webkit-box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
 	-moz-box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
 	box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
-	width: 176px;
+	width: 200px;
 }
 
 #pricing_chart #corporate {
@@ -3296,7 +3298,7 @@ body.pricing a#buy {
 	color: #9b7461;
 	text-align: center;
 	padding: 10px;
-	margin: 0 20px;
+	margin: 0 40px 20px 40px;
 }
 
 body.pricing a#buy:hover {
@@ -3328,43 +3330,47 @@ body.pricing a#buy:hover em {
 
 /* LOGIN / SIGNUP PAGE */
 
-body.login #divContent {
-	padding: 20px 40px;
-	width: 708px;
+body.login #content {
+	padding: 40px;
+	width: 878px;
 }
 
-body.login #divContent .login {
+body.login #content .login {
 	background-color: #F4F8FB;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
-	padding: 20px 20px 20px 20px;
+	padding: 20px 20px 15px 20px;
 	margin: 10px 0 40px 0;
 }
 
-body.login #divContent .login div.last {
+body.login #content .login div.last {
 	text-align: center;
-	padding-right: 40px;
+	padding-right: 130px;
 	padding-top: 10px;
 }
 
-body.login #divContent .login ul {
+body.login #content .login ul {
 	float: left;
 	margin-left: 80px;
-	padding-right: 10px;
+	padding-right: 40px;
 	border-right: 2px solid #fff;
 }
 
-body.login #divContent .login li {
+body.login #content .login li {
 	margin-bottom: 10px;
 }
 
-body.login #divContent .login input {
+body.login #content .login input {
 	padding: 2px 5px;
 	font-size: 14px;
 	line-height: 18px;
 }
 
-body.login #divContent .login label {
+body.login #content .login li input {
+	width: 200px;
+}
+
+body.login #content .login label {
 	color: #28c;
 	font-weight: normal;
 	text-align: right;
@@ -3374,7 +3380,7 @@ body.login #divContent .login label {
 	display: inline-block;
 }
 
-body.login #divContent .forgotten {
+body.login #content .forgotten {
 	display: block;
 	font-size: 12px;
 	color: #b66;
@@ -3384,25 +3390,29 @@ body.login #divContent .forgotten {
 	width: 14em;
 }
 
-body.login #divContent .forgotten:hover {
+body.login #content .forgotten:hover {
 	color: #d33;
 }
 
-body.login #divContent .remember_me {
+body.login #content .remember_me {
 	font-size: 12px;
 	margin-left: 14.7em;
 	margin: 0;
 }
 
-body.login #divContent .remember_me label {
+body.login #content .remember_me label {
 	line-height: 12px;
 }
 
-body.login #divContent .signup .last {
-	width: 430px;
+body.login #registration_form small.error_hint {
+	display: block;
+	margin-bottom: 10px;
+	margin-top: 3px;
+}
+
+body.login #content .signup .last {
+	width: 380px;
 	text-align: center;
-	border-top: 2px solid #fff;
-	padding-top: 10px;
 	margin-bottom: 0;
 }
 
@@ -3421,7 +3431,7 @@ body.login div.signup:hover {
 
 body.login .signup #divSignupTerms {
 	float: right;
-	width: 310px;
+	width: 390px;
 }
 
 body.login .signup h3 {
@@ -3480,7 +3490,7 @@ body.login .signup .form label {
 }
 
 body.login .signup .form input {
-	width: 270px;
+	width: 370px;
 	font-size: 13px;
 	margin-bottom: 12px;
 	padding: 3px 4px;
@@ -3502,7 +3512,7 @@ body.login .signup .form .tip a {
 	color: #666;
 }
 
-body.login #divContent .signup .last {
+body.login #content .signup .last {
 	margin: 15px 0 0 0;
 	width: auto;
 	border-top: 2px solid #F4F8FB;
@@ -3512,12 +3522,12 @@ body.login .signup .form .error input {
 	margin-bottom: 2px;
 }
 
-body.login #divContent .error_hint {
+body.login #content .error_hint {
 	display: block;
 	margin-bottom: 10px;
 }
 
-body.login #divContent .login .error_hint {
+body.login #content .login .error_hint {
 	margin-left: 180px;
 }
 
@@ -6249,10 +6259,10 @@ body.vaults .empty_vault p + p {
 
 /* PASSWORD RESET */
 
-body.password #divContent {
+body.password #content {
 	text-align: center;
 	width: 548px;
-	padding: 20px 120px;
+	padding: 20px 205px;
 }
 
 body.password ul.form li label {
@@ -6281,7 +6291,7 @@ body.password ul.form li.last input {
 	margin: 0;
 }
 
-body.password.reset #divContent p {
+body.password.reset #content p {
 	padding: 0 50px;
 }
 
@@ -6289,7 +6299,7 @@ body.password #divErrors {
 	margin-bottom: 15px;
 }
 
-body.password.reset.confirm #divContent ul.form li label {
+body.password.reset.confirm #content ul.form li label {
 	width: 10em;
 	display: inline-block;
 	text-align: right;
