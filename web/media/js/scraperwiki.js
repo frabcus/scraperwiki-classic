@@ -334,7 +334,7 @@ $(function(){
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
 		$('#more_developer_div').fadeIn(500);
-		$('#blob_developer').animate({left: 760}, 500, 'easeOutCubic').addClass('active');
+		$('#blob_developer').animate({left: 740}, 500, 'easeOutCubic').addClass('active');
 	}
 	
 	function developer_hide(){

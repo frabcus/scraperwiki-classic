@@ -441,29 +441,69 @@ body.search .no_results {
 
 /* FRONTPAGE HEADER */
 
+body.frontpage #header {
+	position: relative;
+	height: 410px;
+	background-image: url(../images/header_darkblue.gif);
+	border: 1px solid #456f85;
+	padding: 0;
+	width: 958px;
+	
+}
+
+body.frontpage #content {
+	margin-top: 20px;
+	border-top: 1px solid #cdcdcd;
+}
+
+body.frontpage #header:before {
+	display: none;
+}
+
+#frontpage_intro {
+	height: 82px;
+	position: absolute;
+	top: -1px;
+	left: -1px;
+	right: -1px;
+	background-color: rgba(255,255,255,0.4);
+	border: 1px solid #39c;
+	border-bottom: none;
+	background-clip: content-box;
+	-webkit-background-clip: content-box;
+}
+
+#frontpage_intro:after {
+	content: " ";
+	display: block;
+	position: absolute;
+	bottom: -10px;
+	left: 0;
+	right: 0;
+	background-color: rgba(255,255,255,0.2);
+	height: 10px;
+}
+
 #frontpage_intro p {
 	margin: 0;
-	padding: 20px 0 0 10px;
+	padding: 0;
 	color: #fff;
-	text-shadow: 0px 1px 5px #325a78;
-	font-weight: bold;
-	font-size: 22px;
-	line-height: 26px;
+	text-shadow: 0px 1px 3px #39c;
+	font-size: 26px;
+	line-height: 60px;
+	top: 12px;
+	left: 40px;
+	right: auto;
 }
 
 #frontpage_intro a {
 	float: right;
 	width: 225px;
 	height: 60px;
-	margin: 15px 10px 0 0;
+	margin: 10px 10px 0 0;
 	text-decoration: none;
 	text-indent: -9000px;
-	background: transparent url(../images/frontpage_intro_buttons.png) no-repeat 0 0;
-}
-
-/* Temporary override */
-#frontpage_intro a {
-	background-image: url(../images/frontpage_intro_buttons_alt.png);
+	background: transparent url(../images/frontpage_intro_buttons_alt.png) no-repeat 0 0;
 }
 
 #frontpage_intro a.create {
@@ -489,6 +529,8 @@ body.search .no_results {
 
 #frontpage_slider {
 	position: relative;
+	color: #fff;
+	text-shadow: 0 1px 0 #456f85;
 }
 
 #frontpage_slider #intro_developer,
@@ -503,13 +545,13 @@ body.search .no_results {
 #frontpage_slider #intro_developer {
 	text-align: right;
 	width: 320px;
-	top: 80px;
+	top: 160px;
 }
 
 #frontpage_slider #intro_requester {
 	width: 320px;
 	left: 640px;
-	top: 80px;
+	top: 160px;
 }
 
 #frontpage_slider #more_developer_div,
@@ -520,7 +562,7 @@ body.search .no_results {
 #frontpage_slider #blob_developer,
 #frontpage_slider #blob_requester {
 	position: absolute;
-	top: 15px;
+	top:75px;
 	left: 310px;
 	z-index: 100;
 }
@@ -530,7 +572,7 @@ body.search .no_results {
 }
 
 #frontpage_slider #blob_requester {
-	top: 60px;
+	top: 120px;
 	left: 460px;
 	z-index: 99;
 }
@@ -538,6 +580,7 @@ body.search .no_results {
 #frontpage_slider h3 {
 	font-size: 30px;
 	margin-bottom: 20px;
+	color: #fff;
 }
 
 #frontpage_slider p {
@@ -546,15 +589,18 @@ body.search .no_results {
 	line-height: 24px;
 	font-weight: normal;
 	color: #EFF7FB;
+	margin-top: 0;
+	position: static;
 }
 
 #frontpage_slider #more_developer,
 #frontpage_slider #more_requester {
 	display: inline-block;
-	margin-top: 30px;
+	margin-top: 20px;
 	text-decoration: none;
 	font-size: 20px;
 	text-shadow: 0px 0px 5px #3399cc;
+	color: #fff;
 }
 
 #frontpage_slider #more_developer:hover,
@@ -565,7 +611,7 @@ body.search .no_results {
 #frontpage_slider #more_developer_div,
 #frontpage_slider #more_requester_div {
 	width: 780px;
-	margin: 60px 0 20px 10px;
+	margin: 130px 0 20px 10px;
 	text-align: center;
 }
 
@@ -636,8 +682,8 @@ body.search .no_results {
 	margin-bottom: 40px;
 }
 
-body.frontpage #page_inner h2 {
-	margin: 30px 0;
+body.frontpage #content h2 {
+	margin: 30px 0 10px 0;
 	text-align: center;
 	font-size: 16px;
 	text-transform: uppercase;
@@ -646,7 +692,7 @@ body.frontpage #page_inner h2 {
 	background: #fff url(../images/frontpage_subheading_line.gif) no-repeat center center;
 }
 
-body.frontpage #page_inner h2 a {
+body.frontpage #content h2 a {
 	background-color: #fff;
 	padding: 0 10px;
 	color: #666;
@@ -655,28 +701,26 @@ body.frontpage #page_inner h2 a {
 
 body.frontpage .tags {
 	float: left;
-	width: 480px;
+	width: 479px;
 }
 
 body.frontpage .activity {
 	float: right;
-	width: 480px;
+	width: 479px;
 }
 
-body.frontpage .tags h2 {
+body.frontpage #content .tags h2 {
 	background-position: left center;
 	text-align: right;
-	margin-bottom: 10px;
 }
 
-body.frontpage .activity h2 {
+body.frontpage #content .activity h2 {
 	background-position: right center;
 	text-align: left;
-	margin-bottom: 10px;
 }
 
-body.frontpage .tags h2 a,
-body.frontpage .activity h2 a {
+body.frontpage #content .tags h2 a,
+body.frontpage #content .activity h2 a {
 	margin: 0 20px;
 }
 
@@ -5729,6 +5773,11 @@ a.your-own {
 
 /* VAULTS */
 
+body.vaults #content {
+	width: 898px;
+	padding: 30px;
+}
+
 body.vaults .vault ul,
 body.vaults .vault p {
 	margin: 0;
@@ -5753,21 +5802,6 @@ body.vaults .content h4 {
 body.vaults .content h2 {
 	color: #39c;
 	margin-bottom: -5px;
-}
-
-xbody.vaults .content h2 a {
-	float: right;
-	font-size: 14px;
-	line-height: 26px;
-	padding: 0px 10px 0 30px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-	background: #F4F8FB url(../images/icons/add.png) 8px center no-repeat;
-	cursor: pointer;
-	margin-top: -2px;
-	border: 1px solid #D3E7F5;
-	font-weight: normal;
 }
 
 body.vaults .content h2 a {
