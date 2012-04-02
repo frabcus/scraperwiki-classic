@@ -63,8 +63,8 @@ def profile_detail(request, username):
     profile = profiled_user.get_profile()
     
     extra_context = {
-                     'owned_code_objects' : profile.owned_code_objects(profiled_user),
-                     'emailer_code_objects' : profile.emailer_code_objects(username, profiled_user)
+                     'owned_code_objects' : profile.owned_code_objects(user),
+                     'emailer_code_objects' : profile.emailer_code_objects(username, user)
                     }
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
