@@ -555,11 +555,12 @@ $(function(){
 					$('ul', closure).append(data.fragment).next('a').delay(50).slideDown(150);
 					closure.updateUserCount(1);
 				} else if(data.status == 'fail'){
-					$('ul', closure).append('<li class="error">' + data.error + '</li>');
+					$('ul', closure).append('<li class="message error">' + data.error + '</li>');
 					$('.username', closure).autocomplete("close");
 				} else if(data.status == 'invited'){
-					$('ul', closure).append('<li class="error">' + data.message + '</li>');
+					$('ul', closure).append('<li class="message invite">' + data.message + '</li>');
 					$('.username', closure).autocomplete("close");
+                    $('input.username').val('');
 				}
 			});
 		});
