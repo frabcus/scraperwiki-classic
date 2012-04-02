@@ -1,5 +1,6 @@
 {% extends "frontend/base.html" %}
 {% load formhelper %}
+{% load gravatar %}
 
 {% block css %}{% endblock %}
 
@@ -15,22 +16,23 @@
 {% endblock %}
 
 {% block header %}
-	<h2>Edit your profile</h2>
-	<p>Update your details and control email alert settings</p>
+	<h2>{% show_gravatar user 'medium' %} <em>Profiles</em> / <a href="{% url profile user.username %}">{{profile.display_name}}</a> / <a href="{% url profiles_edit_profile %}">Edit</a></h2>
+	<p><a href="{% url profile user.username %}">Back to Profile</a></p>
 {% endblock %}
 
 {% block content %}
     <div class="content">
+        
     	<form method="post">
         {% csrf_token %}
-
-            <div class="profilepic">
-                <a href="http://en.gravatar.com" target="_blank">{% load gravatar %}
-                {% show_gravatar profile.user 'large' %}
-                <span>Change profile image using Gravatar</span></a>
+        
+            <div class="save top">
+                <input type="hidden" name="success_url" value="/" />
+                <a href="{% url profile user.username %}" class="discard"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Discard Changes</a><input type="submit" class="button" value="Save changes" /><a href="#" class="submit_link save"><img src="{{ MEDIA_URL }}images/icons/tick.png" width="16" height="16" alt="" /> Save Changes</a>
             </div>
 
-            <div class="profilebio">
+            <div id="profileform">
+                <h3>Your profile</h3>
                 <p class="name">
                     {{ form.name.label_tag }}
                     {{ form.name }}
@@ -46,27 +48,36 @@
                     {{ form.bio }}
                     {% field_errors form.bio %}
                 </p>
+                <p class="password">
+                    <a href="{% url auth_password_change %}"><img src="{{ MEDIA_URL }}images/icons/key.png" width="16" height="16" alt="" /> Change&nbsp;your&nbsp;password</a>
+                </p>
+                <p class="profilepic">
+                    <a href="http://en.gravatar.com" target="_blank">{% show_gravatar profile.user 'small' %} Change profile image</a>
+                </p>
+            </div>
                 
+            <div id="settingsform">
+                <h3>Your settings</h3>
                 <div id="alerts">
                     <h4>Alerts</h4>
                     
                     <p class="alert_frequency">
-                        <label for="id_alert_frequency">Email me when my scrapers stop working or someone edits them:</label>
                         {{ form.alert_frequency }}
+                        <label for="id_alert_frequency">Email me when my scrapers stop working or someone edits them</label>
                         <br class="clear" />
                         {% field_errors form.alert_frequency %}
                     </p>
                   
                     <p class="email_on_comments">
-                        <label for="id_email_on_comments">Email me when someone comments on one of my scrapers:</label>
                         {{ form.email_on_comments }}
+                        <label for="id_email_on_comments">Email me when someone comments on one of my scrapers</label>
                         <br class="clear" />
                         {% field_errors form.email_on_comments %}
                     </p>
 
                     <p class="messages">
-                        <label for="id_messages" style="cursor:help" title="Don&rsquo;t worry, nobody will see your email address: Messages are sent from feedback@scraperwiki.com">I&rsquo;d like to send and receive messages via ScraperWiki:</span></label>
                         {{ form.messages }}
+                        <label for="id_messages" style="cursor:help" title="Don&rsquo;t worry, nobody will see your email address: Messages are sent from feedback@scraperwiki.com">I&rsquo;d like to send and receive messages via ScraperWiki</span></label>
                         <br class="clear" />
                         {% field_errors form.messages %}
                     </p>
@@ -80,16 +91,24 @@
                     {{ form.features }}
                 </div>
 				{% endif %}
+				
+				<!-- THIS WON'T WORK UNTIL views.py PASSES emailer_code_objects TO THE TEMPLATE -->
+				{% if emailer_code_objects %}
+                  <div id="emailers">Your emailer scripts: 
+                    {% for code in emailer_code_objects %}
+                      <a href="{% url code_overview code.wiki_type code.short_name %}">
+                         {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
+                      </a>
+                    {% endfor %}
+                  </div>
+                {% endif %}
                 
             </div>
 
             <br class="clear" />
             
-            <div class="profilesettings">
-                <input type="hidden" name="success_url" value="/" />
-                <p class="cancel"><a href="{% url profile user.username %}"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Cancel Changes</a></p>
-                <p class="save"><input type="submit" class="button" value="Save changes" /><a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/tick.png" width="16" height="16" alt="" /> Save Changes</a></p>
-                <br class="clear" />
+            <div class="save bottom">
+                <a href="{% url profile user.username %}" class="discard"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Discard Changes</a><input type="submit" class="button" value="Save changes" /><a href="#" class="submit_link save"><img src="{{ MEDIA_URL }}images/icons/tick.png" width="16" height="16" alt="" /> Save Changes</a>
             </div>
             
             
