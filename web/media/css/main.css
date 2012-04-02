@@ -6359,11 +6359,7 @@ body.kpi tr.this_month {
 
 /* STATUS (LXCs) */
 
-body.status #page_inner {
-	width: 920px;
-}
-
-body.status #page_inner h2 {
+body.status #content h2 {
 	font-size: 14px;
 	font-weight: normal;
 	text-transform: uppercase;
