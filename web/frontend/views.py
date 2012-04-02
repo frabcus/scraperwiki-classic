@@ -189,8 +189,8 @@ def login(request):
                }
 
     # Add token as hidden field
-    if request.GET.has_key('t'):
-        token = request.GET['t']
+    if request.GET.has_key('t') or request.POST.has_key('token'):
+        token = request.GET.get('t', None) or request.POST.get('token', None)
         # Will error if token is invalid.
         invite = Invite.objects.get(token=token)
         context['invite'] = invite
