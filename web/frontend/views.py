@@ -171,6 +171,8 @@ def login(request):
                     invite = Invite.objects.get(token=request.POST['token'])
                     if invite:
                         invite.vault.members.add(new_user)
+                        # Invitation used up; delete it.
+                        invite.delete()
                         profile = new_user.get_profile()
                         redirect = reverse('vault')
                         message = render_to_string('emails/invitation_accepted.txt', locals())
