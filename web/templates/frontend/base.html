@@ -106,7 +106,8 @@
             <li class="admin"><a>Admin</a></li>
             {% endif %}
             {% if user.is_authenticated %}
-            <li class="user"><a href="{% url profile user.username %}">{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
+            {% load gravatar %}
+            <li class="user"><a href="{% url profile user.username %}"><span class="gravatar_outer">{% show_gravatar user 'medium' %}</span> {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
             {% else %}
             <li class="signup"><a href="{% url login %}">Sign Up</a></li>
             <li class="login"><a href="{% url login %}">Log In</a></li>
