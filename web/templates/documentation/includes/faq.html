@@ -36,12 +36,11 @@
      <ul>
            <li><a href="#licence">Who owns the code I write on ScraperWiki?</a></li>                                        
            <li><a href="#data_ownership">Who owns the data in ScraperWiki?</a></li>                                
-           <li><a href="#data_types">What sort of data can/can't I scrape?</a></li>   
+           <li><a href="#scraping_legality">What's your policy on what's legal to scrape?</a></li>
            <li><a href="#source_code">Can I get a copy of the ScraperWiki source code?</a></li>
      </ul>
      <h2>Everything else</h2>
      <ul>
-           <li><a href="#security">How secure is your system? Can I try to break it?</a></li>
            <li><a href="#contact">How do I get in touch with you?</a></li>
      </ul>
 
@@ -381,14 +380,68 @@ print urllib.urlopen(url).read()
               <p>It depends where the data originally came from and how it was derived.</p>
            </dd>
 
-           <dt id="data_types">What sort of data can/can't I scrape?</dt>
+           <dt id="scraping_legality">What's your policy on what's legal to scrape?</dt>
 
            <dd>
-                <p>The focus of the public version of ScraperWiki is opening up
-                public data. You need to make sure that you conform to our <a
-                    href="/terms_and_conditions/">terms and conditions</a>. In
-                short: play nice, and don't do to someone else's website what
-                you wouldn't like done to your own.  </p>
+                <p>In short, play nice, and don't do to someone else's website
+                what you wouldn't like done to your own.</p>
+
+                <h3>General</h3>
+                <p>It is our view that, where a web server responds to an
+                unauthenticated HTTP request, there is an implied licence to use the
+                HTML that is returned for reading and automatically extracting that
+                information. This, in our view, is how the web is designed to operate.
+                If the proprietor of a web host wishes (for example) to charge for use
+                of their site, HTTP provides mechanisms to require payment or
+                authentication for use. They may also make use of the <a href="http://en.wikipedia.org/wiki/Robots_exclusion_standard">robots exclusion
+                protocol</a> to prevent scraping and spidering of any kind.</p>
+
+                <p>Of course we may be wrong about this. The question has not been tested
+                in any UK court and, we understand, there is not much more clarity
+                world-wide. If you are in doubt about whether what you are doing is
+                lawful, you should seek your own legal advice, rather than relying on
+                our best guess.</p>
+
+                <h3>Platform</h3>
+
+                <p>Users doing scraping themselves are using us as a hosting service
+                (whether public or private, it makes no difference).</p>
+                
+                <p>We will obey the law, for example legal takedown notices. Other than
+                that, it is none of our business what they do.</p>
+                 
+                <p>We won't add features to the platform whose only purpose is to avoid
+                technical measures that prevent scraping. It is, however, not our
+                business whether users do so themselves using standard tools.</p>
+                </p>
+
+                <h3>Data services</h3>
+ 
+                <p>Where we are ourselves handling data requests or doing other
+                consultancy, our policy is two fold.</p>
+
+                <p>1) If it is a Government site (any Government), and we aren't just
+                performing technical measures to get data which the Government
+                otherwise sells, then we consider it in the public interest for it to
+                be scraped. We will do so.</p>
+                
+                <p>2) For non-Government sites, we check the robots.txt file. If the site
+                permits robots in general to scrape their site (NOT just GoogleBot!),
+                then we will do so. We will make no effort to look for other terms and
+                conditions as well.</p>
+
+                <h3>Developer introductions</h3>
+
+                <p>Where we introduce someone to a developer who does scraping for them,
+                the same situation as described in "platform" above applies.
+                </p>        
+
+                <p>It is up to you to ensure that your scraping activity does not break
+                the law. While some standard libraries may check robots.txt others may
+                not. Even if you are permitted to use a site, you should ensure that
+                what you do is not disruptive or breaks the law in some other way.</p>
+
+                <p>See also our <a href="/terms_and_conditions/">terms and conditions</a>. </p>
            </dd>
 
            <dt id="source_code">Can I get a copy of the ScraperWiki source code?</dt>
@@ -396,17 +449,6 @@ print urllib.urlopen(url).read()
            <dd>
                <p>Yes, the source code for the ScraperWiki site is available under the GNU Affero General Public License. You can 
                <a href="https://bitbucket.org/ScraperWiki/scraperwiki">download the source here</a>.</p>
-           </dd>
-
-           <dt id="security">How secure is your system? Can I try to break it?</dt>
-
-           <dd>
-               <p>The code you write runs in a separate sandboxed system with controlled resources. 
-               If you try to write malicious code ... </p>
-               <code>while True:
-    pass</code>
-               <p>... you'll just be breaking your own scraper and annoying people, so please don't.
-               </p>
            </dd>
 
            <dt id="contact">How do I get in touch with you?</dt>

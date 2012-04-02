@@ -308,17 +308,20 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         if not scraper.actionauthorized(request.user, "readcodeineditor"):
             return HttpResponseForbidden(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "readcodeineditor"), context_instance=RequestContext(request)))
        
-        # link from history page can take us to "rollback" mode and see earlier revision
+        # Link from history page can take us to "rollback" mode,
+        # and see earlier revision.
         rollback_rev = request.GET.get('rollback_rev', '')
-        if rollback_rev != "":
+        try:
             get_rev = int(rollback_rev)
-            assert get_rev >= 0 # too confusing for now otherwise!
+        except ValueError:
+            rollback_rev = ''
+        if rollback_rev:
             context['rollback_rev'] = rollback_rev
             use_commit = 'currcommit'
         else:
-            # default to getting most recent (from file should it have changed
+            # Default to getting most recent (from file should it have changed
             # but not been committed), hence the revision is always previous
-            # commit
+            # commit.
             get_rev = -1
             use_commit = 'prevcommit'
 

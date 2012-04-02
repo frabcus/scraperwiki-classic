@@ -134,8 +134,17 @@ class VaultRecord(models.Model):
     class Meta:
         app_label = 'codewiki'
         
-        
-        
+class Invite(models.Model):
+    """
+    Represents an invite to a vault
+    """
+
+    token = models.CharField(max_length=32)
+    vault = models.ForeignKey(Vault)
+    email = models.CharField(max_length=200)
+
+    class Meta:
+        app_label = 'codewiki'
         
         
 

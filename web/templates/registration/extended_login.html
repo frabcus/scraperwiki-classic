@@ -1,12 +1,34 @@
 {% extends "frontend/base.html" %}
 
 {% load formhelper %}
+{% load gravatar %}
 
-{% block title %}Log in or create an account{% endblock %}
+{% block title %}
+    {% if not invite %}
+        Log in or create an account
+    {% else %}
+        Create an account to access 
+        {% if invite.vault.user.get_profile.name %}
+            {{invite.vault.user.get_profile.name}}{% else %}
+            {{invite.vault.user.username}}{% endif %}'s vault
+    {% endif %}
+{% endblock %}
 
 {% block header %}
-	<h2>Log in or create an account</h2>
-	<p>If you are an existing user please log in, if not create a new account</a>.</p>
+    {% if not invite %}
+        <h2>Log in or create an account</h2>
+        <p>If you are an existing user please log in, if not create a new account.</p>
+    {% else %}
+        {% show_gravatar invite.vault.user 'medium' %}
+        <h2><a href="{% url profile invite.vault.user.username %}">
+        {% if invite.vault.user.get_profile.name %}
+            {{invite.vault.user.get_profile.name}}
+        {% else %}
+            {{invite.vault.user.username}}
+        {% endif %}</a>
+        has invited you to the vault <em>{{ invite.vault.name }}</em></h2>
+        <p>Please create a new account to access the vault.</p>
+    {% endif %}
 {% endblock %}
 
 {% block errors %}
@@ -27,6 +49,7 @@
 
 
 {% block content %}
+{% if not invite %}
 <div class="login">
     <form method="post" action="." id="login_form">
         {% csrf_token %}
@@ -62,12 +85,17 @@
 		<br class="clear" />
 	</form>
 </div>
+{% endif %}
 
 <div class="signup">
 
 	<form method="post" action="." id="registration_form">
         {% csrf_token %}
-        <h3>Sign up for a free account</h3>
+        {% if invite %}
+            <h3>Sign up to access the vault</h3>
+        {% else %}
+            <h3>Sign up for a free account</h3>
+        {% endif %}
         {% if registration_form.non_field_errors %}
             <div id="main_error">
                 {% for error in registration_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
@@ -75,6 +103,9 @@
         {% endif %}
 	    <fieldset>
 	       <input type="hidden" name="redirect" value="{{redirect}}"/>
+         {% if invite.token %}
+          <input type="hidden" name="token" value="{{invite.token}}"/>
+         {% endif %}
 	    </fieldset>
        	<div id="divSignupTerms">
            	<h4>Terms and conditions <a href="{% url terms %}" target="_new">Open in a new window</a></h4>

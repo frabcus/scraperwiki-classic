@@ -59,7 +59,9 @@ class RunnerProtocol(protocol.Protocol):
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # autosave, autoload, or draft when guid is not set
-        self.clienttype = None # 'editing', 'umlmonitoring', 'rpcrunning', 'scheduledrun', 'stimulate_run', 'httpget'
+        # 'editing', 'umlmonitoring', 'rpcrunning',
+        # 'scheduledrun', 'stimulate_run', 'httpget'
+        self.clienttype = None
         self.bufferclient = '' # incoming messages from the client
 
     def connectionMade(self):
@@ -402,25 +404,25 @@ class RunnerProtocol(protocol.Protocol):
         self.writeline(json.dumps(data))
 
     def writeall(self, line, otherline=""):
-        if line: 
-            self.writeline(line)  
-        
-        if self.guidclienteditors:
-            if not otherline:
-                otherline = line
-            
-            for client in self.guidclienteditors.anonymouseditors:
+        if line:
+            self.writeline(line)
+
+        if not self.guidclienteditors:
+            return
+
+        if not otherline:
+            otherline = line
+
+        for client in self.guidclienteditors.anonymouseditors:
+            if client != self:
+                client.writeline(otherline)
+
+        for usereditor in self.guidclienteditors.usereditormap.values():
+            for client in usereditor.userclients:
                 if client != self:
-                    client.writeline(otherline); 
-            
-            for usereditor in self.guidclienteditors.usereditormap.values():
-                for client in usereditor.userclients:
-                    if client != self:
-                        client.writeline(otherline); 
-        else:
-            assert not self.guid
-            
-            
+                    client.writeline(otherline)
+
+
     def kill_run(self, reason=''):
         msg = 'Script cancelled'
         if reason:
@@ -649,12 +651,12 @@ class RunnerFactory(protocol.ServerFactory):
             if scrapername in self.scheduledrunners:
                 continue
             
-                    # avoids scheduling cases where someone is editing
+            # Avoids scheduling cases where someone is editing.
             guid = scraperoverdue.get('guid', '')
             if guid in self.guidclientmap:
                 continue
 
-                # fabricate a new client (not actually connected to a socket or made by the factory)
+            # Fabricate a new client (not actually connected to a socket or made by the factory)
             sclient = RunnerProtocol()
             sclient.factory = self
             sclient.guid = guid
@@ -668,7 +670,8 @@ class RunnerFactory(protocol.ServerFactory):
             code = scraperoverdue.get('code', '')
             urlquery = scraperoverdue.get('envvars', {}).get("QUERY_STRING", "")
 
-            self.clientConnectionMade(sclient)  # allocates the client number
+            # Allocates the client number.
+            self.clientConnectionMade(sclient)
             self.scheduledrunners[scrapername] = sclient
             self.clientConnectionRegistered(sclient)  
 
@@ -798,12 +801,11 @@ class RunnerFactory(protocol.ServerFactory):
             
 
     def clientConnectionMade(self, client):
-        assert client.clienttype == None
         client.clientnumber = self.clientcount
         self.clients.append(client)
         self.connectedclients.append(client)
         self.clientcount += 1
-            # next function will be called when some actual data gets sent
+        # next function will be called when some actual data gets sent
 
     def clientConnectionRegistered(self, client):
         # Can't remove from the list if it isn't in there so we need to check
@@ -821,7 +823,9 @@ class RunnerFactory(protocol.ServerFactory):
             client.chatname = "Anonymous"
         client.cchatname = "%s|%s" % (client.username, client.chatname)
 
-        assert client.clienttype in ["umlmonitoring", "editing", "rpcrunning", "stimulate_run", "httpget"]
+        assert client.clienttype in [
+          "umlmonitoring", "editing", "rpcrunning",
+          "scheduledrun", "stimulate_run", "httpget"]
         
         if client.clienttype == "umlmonitoring":
             self.umlmonitoringclients.append(client)

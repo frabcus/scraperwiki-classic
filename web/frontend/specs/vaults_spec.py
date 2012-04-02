@@ -1,13 +1,15 @@
 from nose.tools import assert_equals, raises
+import sys
 import urllib
+import re
 
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 
 from frontend.models import UserProfile
-from codewiki.models import Vault
-from frontend.views import vault_users, invite_to_vault
+from codewiki.models import Vault, Invite
+from frontend.views import vault_users, invite_to_vault, login
 
 import helper
 from mock import Mock, patch
@@ -60,3 +62,52 @@ def ensure_invite_new_member_sends_email(mock_send):
     response = invite_to_vault(user, email, vault)
     assert mock_send.called
 
+@patch.object(EmailMultiAlternatives, 'attach_alternative')
+def ensure_invitation_email_contains_invite_token(mock_email):
+    vault = profile.create_vault(name='invitevault')
+    email = 'test@example.com'
+    response = invite_to_vault(user, email, vault)
+    assert re.search("/login/\?t=[a-fA-F0-9]{20}",
+                        repr(mock_email.call_args_list))
+
+@patch.object(EmailMultiAlternatives, 'attach_alternative')
+def it_should_save_an_invite_token_and_vault_id_and_email_address(mock_email):
+    vault = profile.create_vault(name='invitevault')
+    email = 'test@example.com'
+    response = invite_to_vault(user, email, vault)
+
+    token = re.search("/login/\?t=([a-fA-F0-9]{20})",
+                        repr(mock_email.call_args_list)).group(1)
+    invite = Invite.objects.get(token=token)
+    assert invite
+    assert_equals(invite.vault.id, vault.id)
+    assert_equals(invite.email, email)
+
+@patch.object(EmailMultiAlternatives, 'attach_alternative')
+def it_should_add_the_user_to_the_vault_on_sign_up(mock_email):
+    vault = profile.create_vault(name='invitevault')
+    email = 'test@example.com'
+    response = invite_to_vault(user, email, vault)
+
+    token = re.search("/login/\?t=([a-fA-F0-9]{20})",
+                        repr(mock_email.call_args_list)).group(1)
+
+    factory = helper.RequestFactory()
+    params = {'name': 'Testier Monsenur',
+              'username': 'testier',
+              'email': 'testier@closedblueprints.com',
+              'password1': 'pass',
+              'password2': 'pass',
+              'tos': 'checked',
+              'token': token,
+              'register': 'yes',
+             }
+    request = factory.post('/login/', params)
+
+    response = login(request)
+    
+    testier = User.objects.get(username='testier')
+    assert testier
+    assert testier in vault.members.all()
+
+# test that token is required

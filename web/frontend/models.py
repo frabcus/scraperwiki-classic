@@ -32,7 +32,6 @@ class Feature(models.Model):
     def __unicode__(self):
         return self.name
 
-
 class UserProfile(models.Model):
     """
     This model holds the additional fields to be associated with a user in the
@@ -137,12 +136,12 @@ class UserProfile(models.Model):
         return vault
     
     # sorts against what the current user can see and what the identity of the profiled_user
-    def owned_code_objects(self, profiled_user):
+    def owned_code_objects(self, user):
         from codewiki.models import scraper_search_query
-        return scraper_search_query(self.user, None).filter(usercoderole__user=profiled_user)
+        return scraper_search_query(user, None).filter(usercoderole__user=self.user)
 
-    def emailer_code_objects(self, username, profiled_user):
-        return self.owned_code_objects(profiled_user).filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
+    def emailer_code_objects(self, username, user):
+        return self.owned_code_objects(user).filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
 
 # Signal Registrations
 # when a user is created, we want to generate a profile for them

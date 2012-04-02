@@ -6653,13 +6653,21 @@ body.vaults .vault_header .vault_users_popover .new_user a:hover {
 	cursor: pointer;
 }
 
-body.vaults .vault_header .vault_users_popover li.error {
-	color: #a73c23;
-	background-color: #f9d5d4;
+body.vaults .vault_header .vault_users_popover li.message {
 	font-size: 13px;
 	text-align: center;
 	line-height: 16px;
 	cursor: default;
+}
+
+body.vaults .vault_header .vault_users_popover li.error {
+	background-color: #f9d5d4;
+	color: #a73c23;
+}
+
+body.vaults .vault_header .vault_users_popover li.invite {
+	background-color: #AEE1A2;
+	color: #1B4D11;
 }
 
 body.vaults .ui-autocomplete {
