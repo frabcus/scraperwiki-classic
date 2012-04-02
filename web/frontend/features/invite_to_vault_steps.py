@@ -71,6 +71,19 @@ def when_i_sign_up(step):
     world.browser.find_by_css('#id_tos').first.check()
     world.browser.find_by_value("Create my account").first.click()
 
+@step(u'When I mess my sign up')
+def mess_sign_up(step):
+    step.behave_as("""
+        And there is a sign up link in the invitation email
+        When I go to the invitation link in the email
+        Then I should be on the sign up page
+        """)
+    # Clicking without filling anything else in should be enough
+    # to provoke an invalid form.
+    step.behave_as("""
+        And I click the "Create my account" button
+        """)
+
 @step(u'And I should have access to the vault I was invited to')
 def and_i_should_have_a_vault(step):
     step.behave_as("""

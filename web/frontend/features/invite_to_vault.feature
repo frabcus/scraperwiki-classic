@@ -28,3 +28,9 @@ Feature: As a salesperson, I want to invite people to a vault by email
     And I should have access to the vault I was invited to
     And the vault owner has been emailed
 
+  Scenario: An invited person messes up their sign up
+    Given I have been invited to scraperwiki
+    When I mess my sign up
+    Then I should be on the login page
+    And I should see the vault name
+    And I should see my email already filled in
