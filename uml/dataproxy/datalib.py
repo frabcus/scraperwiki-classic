@@ -17,6 +17,11 @@ import logging
 import urllib
 import traceback
 
+try:
+    import cloghandler
+except:
+    pass
+
 import logging
 import logging.config
 from sqlite_functions import distance_on_spherical_earth
