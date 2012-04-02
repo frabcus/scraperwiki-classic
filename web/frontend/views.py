@@ -166,22 +166,10 @@ def login(request):
                 backend = get_backend(settings.REGISTRATION_BACKEND)             
                 new_user = backend.register(request, **registration_form.cleaned_data)
 
-                # Add user to invited vault if there's a corresponding token
-                if request.POST.has_key('token'):
-                    invite = Invite.objects.get(token=request.POST['token'])
-                    if invite:
-                        invite.vault.members.add(new_user)
-                        # Invitation used up; delete it.
-                        invite.delete()
-                        profile = new_user.get_profile()
-                        redirect = reverse('vault')
-                        message = render_to_string('emails/invitation_accepted.txt', locals())
-                        django.core.mail.send_mail(
-                            subject='%s has accepted your invitation to %s' % (invite.email, invite.vault.name),
-                            message=message,
-                            from_email='Vault Notification <noreply@scraperwiki.com>',
-                            recipient_list=[invite.vault.user.email],
-                            fail_silently=False)
+                # Check for any invitations.
+                r = handle_signup_invites(new_user)
+                if r:
+                    redirect = r
 
                 #sign straight in
                 signed_in_user = auth.authenticate(username=request.POST['username'], password=request.POST['password1'])
@@ -208,8 +196,35 @@ def login(request):
         context['invite'] = invite
         context['registration_form'].initial = {'email':invite.email}
 
-    return render_to_response('registration/extended_login.html', context,
-                               context_instance = RequestContext(request))
+    return render_to_response('registration/extended_login.html',
+      context, context_instance = RequestContext(request))
+
+def handle_signup_invites(user):
+    """Handle any outstanding invites for a user (that has just
+    signed up).  For each invite, we add to vault and email
+    owner."""
+
+    invites = Invite.objects.filter(email=user.email)
+    # Freeze the list of invites, so we can in two passes edit
+    # the model, then send all the emails.
+    invites = list(invites)
+
+    for invite in invites:
+        invite.vault.members.add(user)
+        # Invitation used up; delete it.
+        invite.delete()
+
+    for invite in invites:
+        message = render_to_string('emails/invitation_accepted.txt', locals())
+        django.core.mail.send_mail(
+            subject='%s has accepted your invitation to %s' % (invite.email, invite.vault.name),
+            message=message,
+            from_email='Vault Notification <noreply@scraperwiki.com>',
+            recipient_list=[invite.vault.user.email],
+            fail_silently=False)
+
+    if invites:
+        return reverse('vault')
 
 def help(request, mode=None, language=None):
     tutorials = {}

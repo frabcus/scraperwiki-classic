@@ -1,6 +1,6 @@
 Hi, 
 
-{{profile.display_name}} ({{new_user.email}}) has accepted your invitation to join vault {{invite.vault.name}}. 
+{{profile.display_name}} ({{user.email}}) has accepted your invitation to join vault {{invite.vault.name}}. 
 
 Thanks,
 

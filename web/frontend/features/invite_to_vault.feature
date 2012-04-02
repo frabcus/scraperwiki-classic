@@ -13,15 +13,17 @@ Feature: As a salesperson, I want to invite people to a vault by email
     Then an invitation email gets sent to "t.test@testersonandsons.com"
     And I should see "Invitation sent!"
 
-  Scenario: An invited person can sign up to scraperwiki
+  Scenario: An invite takes one to the sign up page
     Given I have been invited to scraperwiki
     And there is a sign up link in the invitation email
     When I go to the invitation link in the email
     Then I should be on the sign up page
     And I should see the vault name
     And I should see my email already filled in
-    When I fill in the registration form
-    And I click the "Create my account" button
+
+  Scenario: An invited person can access the vault after sign up
+    Given I have been invited to scraperwiki
+    When I sign up
     Then I should be on the vaults page
     And I should have access to the vault I was invited to
     And the vault owner has been emailed

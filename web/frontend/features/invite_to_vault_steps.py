@@ -59,13 +59,17 @@ def and_i_should_see_my_email_already_filled_in(step):
     email = "t.test@testersonandsons.com"
     assert email in world.browser.find_by_css('#id_email').first.value
 
-@step(u'When I fill in the registration form')
-def when_i_fill_in_the_registration_form(step):
+
+@step(u'When I sign up')
+def when_i_sign_up(step):
+    world.browser.visit(django_url('/login/'))
+
     world.browser.find_by_css('#id_name').first.fill('Lord Test Testington')
-    world.browser.find_by_css('#id_email').first.fill('tt@lords.co.uk')
+    world.browser.find_by_css('#id_email').first.fill('t.test@testersonandsons.com')
     world.browser.find_by_css('#id_password1').first.fill('pass')
     world.browser.find_by_css('#id_password2').first.fill('pass')
     world.browser.find_by_css('#id_tos').first.check()
+    world.browser.find_by_value("Create my account").first.click()
 
 @step(u'And I should have access to the vault I was invited to')
 def and_i_should_have_a_vault(step):
