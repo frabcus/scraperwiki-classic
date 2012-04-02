@@ -17,6 +17,11 @@ import traceback
 import urllib
 import urlparse
 
+try:
+    import cloghandler
+except:
+    pass
+
 import logging
 import logging.config
 
