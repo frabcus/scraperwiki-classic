@@ -398,6 +398,8 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	top: 50%;
 	line-height: 20px;
 	margin-top: -10px;
+	max-width: 50%;
+	text-align: right;
 }
 
 #header li {
@@ -421,7 +423,7 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 
 body.search .search_section {
 	padding: 5px 8px;
-	margin-bottom: 5px;
+	margin-bottom: 20px;
 	background-color: #F4F8FB;
 	margin-top: 30px;
 	color: #456;
@@ -600,6 +602,8 @@ body.frontpage #header:before {
 	color: #EFF7FB;
 	margin-top: 0;
 	position: static;
+	max-width: none;
+	text-align: inherit;
 }
 
 #frontpage_slider #more_developer,
@@ -708,14 +712,14 @@ body.frontpage #content h2 a {
 	text-decoration: none;
 }
 
-body.frontpage .tags {
+body.frontpage div.tags {
 	float: left;
-	width: 479px;
+	width: 459px;
 }
 
-body.frontpage .activity {
+body.frontpage div.activity {
 	float: right;
-	width: 479px;
+	width: 459px;
 }
 
 body.frontpage #content .tags h2 {
@@ -734,7 +738,7 @@ body.frontpage #content .activity h2 a {
 }
 
 body.frontpage .tags ul {
-	padding: 0 0 0 50px;
+	padding: 0 0 0 30px;
 	width: 420px;
 	margin: 10px 0;
 }
@@ -3074,7 +3078,7 @@ body.pricing .column-right {
 	float: left;
 	width: 420px;
 	text-align: justify;
-	margin-left: 40px;
+	margin-left: 20px;
 	margin-top: 20px;
 	line-height: 22px;
 }
@@ -3082,11 +3086,11 @@ body.pricing .column-right {
 body.pricing .column-right {
 	float: right;
 	margin-left: 0;
-	margin-right: 40px;
+	margin-right: 20px;
 }
 
 #pricing_chart {
-	margin: 20px 0 30px 60px;
+	margin: 20px 0 30px 40px;
 }
 
 #pricing_chart div.col {
@@ -3617,14 +3621,12 @@ body.events #header .findoutmore:hover {
 body.events #event_sidebar {
 	float: right;
 	width: 290px;
-	margin: 20px 20px 0 0;
 }
 
 body.events #event_details {
 	float: left;
 	width: 600px;
 	line-height: 21px;
-	margin: 20px 0 40px 20px;
 }
 
 body.events #description p.first {
@@ -4085,6 +4087,10 @@ body.event #header:after {
 	background: transparent url(../images/event_columbia_2012.png) 100% 100% no-repeat;
 }
 
+body.events #header h2 {
+	color: #369;
+}
+
 body.event #header h2,
 body.event #header p {
 	margin: 0;
@@ -4102,6 +4108,8 @@ body.event #header p {
 	line-height: 18px;
 	margin-top: 15px;
 	font-weight: normal;
+	max-width: none;
+	text-align: left;
 }
 
 body.event #heade p.links {
@@ -4968,6 +4976,22 @@ ul#chooser li a.active em {
 
 #hCodeTitle form {
 	display: inline;
+}
+
+#hCodeTitle input {
+	line-height: 18px;
+	font-size: 18px;
+	font-weight: inherit;
+	color: inherit;
+	font-family: inherit;
+	padding: 0px 6px;
+	margin: -5px 5px;
+	vertical-align: 2px;
+}
+
+#hCodeTitle button {
+	vertical-align: 4px;
+	margin-left: 10px;
 }
 
 #spnRunInterval form {

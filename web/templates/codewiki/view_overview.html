@@ -47,15 +47,19 @@
 
 {% endblock %}
 
+{% block body_class_extra %} overview{% endblock %}
+
 {% block header %}
+    
+    <span id="scraper_screenshot">{% screen_shot scraper 'medium' %}</span>
 
     <h2>
         <a href="{% if scraper.owner.username %}{% url profile scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> / 
         {% if user.is_authenticated %}
-            <span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span> 
+            <em id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</em> 
             <a id="aEditTitle" title="Edit title">Edit title</a>
         {% else %}
-            {{ scraper.title }}
+            <em>{{ scraper.title }}</em>
         {% endif %}
     </h2>
     <p>

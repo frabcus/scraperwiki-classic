@@ -59,7 +59,7 @@ def docmain(request, language=None, path=None):
         if not os.path.exists(os.path.join(settings.SCRAPERWIKI_DIR, "templates", context["docpage"])):
             raise Http404
     else:
-        context["para"] = "Tutorials, references and guides for programmers coding on ScraperWiki"
+        context["para"] = "Tutorials, references and guides for coders on ScraperWiki"
         context["docindex"] = 1
             
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
