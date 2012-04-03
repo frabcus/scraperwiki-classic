@@ -113,25 +113,32 @@
             <li class="login"><a href="{% url login %}">Log In</a></li>
             {% endif %}
         </ul>
-        <ul class="subnav code">
-            <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">Create Code</a></li>
-            <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
-            <li class="pricing"><a href="{% url pricing %}">Premium Accounts</a></li>
-            <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
-            <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
-        </ul>
-        <ul class="subnav data_services">
-            <li class="datahub"><a href="">What is a Data Hub?</a></li>
-            <li class="consultancy"><a href="">Data Consultancy</a></li>
-            <li class="request"><a href="{% url request_data %}">Request Data</a></li>
-        </ul>
-        <ul class="subnav about">
-            <li class="about"><a href="{% url about %}">About ScraperWiki</a></li>
-            <li class="events"><a href="{% url events %}">Events</a></li>
-            <li class="contact"><a href="{% url contact_form %}">Contact</a></li>
-        </ul>
+        <div class="subnav code">
+            <ul>
+                <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">Create Code</a></li>
+                <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
+                <li class="pricing"><a href="{% url pricing %}">Premium Accounts</a></li>
+                <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
+                <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
+            </ul>
+        </div>
+        <div class="subnav data_services">
+            <ul>
+                <li class="datahub"><a href="">What is a Data Hub?</a></li>
+                <li class="consultancy"><a href="">Data Consultancy</a></li>
+                <li class="request"><a href="{% url request_data %}">Request Data</a></li>
+            </ul>
+        </div>
+        <div class="subnav about">
+            <ul>
+                <li class="about"><a href="{% url about %}">About ScraperWiki</a></li>
+                <li class="events"><a href="{% url events %}">Events</a></li>
+                <li class="contact"><a href="{% url contact_form %}">Contact</a></li>
+            </ul>
+        </div>
         {% if user.is_staff %}
-        <ul class="subnav admin">
+        <div class="subnav admin">
+            <ul>
             {% if scraper.pk %}
                 <li class="django"><a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}">Django Admin (this scraper)</a></li>
             {% else %}
@@ -142,24 +149,25 @@
                     <li class="django"><a href="/admin/">Django Admin</a></li>
                 {% endif %}
             {% endif %}
-            <li class="status"><a href="{% url status %}" title="Interact with current sandbox status">System Status</a></li>
-            <li class="munin"><a href="/munin/" title="Server usage monitoring">Munin</a></li>
-            <li class="kpi"><a href="{% url kpi %}" title="Key performance indicators">KPIs</a></li>
-        </ul>
+                <li class="status"><a href="{% url status %}" title="Interact with current sandbox status">System Status</a></li>
+                <li class="munin"><a href="/munin/" title="Server usage monitoring">Munin</a></li>
+                <li class="kpi"><a href="{% url kpi %}" title="Key performance indicators">KPIs</a></li>
+            </ul>
+        </div>
         {% endif %}
         {% if user.is_authenticated %}
-        <ul class="subnav user">
-            <li class="profile"><a href="{% url profile user.username %}">Your profile</a></li>
-            {% if user.vaults.count > 0 or request.user.vault_membership.count %}
-            <li class="vaults"><a href="{% url vault %}">Your vaults</a></li>
-            {% endif %}
-            <li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
-            <li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
-        </ul>
+        <div class="subnav user">
+            <ul>
+                <li class="profile"><a href="{% url profile user.username %}">Your profile</a></li>
+                {% if user.vaults.count > 0 or request.user.vault_membership.count %}
+                <li class="vaults"><a href="{% url vault %}">Your vaults</a></li>
+                {% endif %}
+                <li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
+                <li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
+            </ul>
+        </div>
         {% else %}
-        <ul class="subnav signup">
-            <li class="empty"><a>empty!!</a></li>
-        </ul>
+        <div class="subnav signup"></div>
         <form class="subnav login" action="{% url login %}" method="post">
             {% csrf_token %}
             <ul>

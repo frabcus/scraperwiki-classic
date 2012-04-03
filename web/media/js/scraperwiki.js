@@ -338,36 +338,36 @@ $(function(){
         $(this).parents('form').find(':submit').trigger('click');
     })
     $('li.login_submit :submit').hide().after($loginbutton).parents('form').find(':text, :password').bind('keyup', function(e){
-        console.log(e.keyCode);
-        console.log($(this).parents('form').find(':submit'));
         if((e.keyCode || e.which) == 13){
 			$(this).parents('form').find(':submit').trigger('click');
 		}
     });
     
-    
     if($('#nav .search input.text').val() == 'Search code...'){
-        $('#nav .search input.text').val('').bind('focus', function(){
-            console.log('focus // val(' + $(this).val() + ')');
-            if($(this).val() === ''){
-                $(this).next().css({opaacity: 0.5});
-            } else {
-                $(this).next().hide();
-            }
-        }).bind('blur', function(){
-            console.log('blur // val(' + $(this).val() + ')');
-            if($(this).val() === ''){
-                $(this).next().show();
-            }
-        }).bind('keydown', function(e){
-            console.log('keydown // val(' + $(this).val() + ')');
-            if((e.keyCode || e.which) == 13){
-    			alert('submit search query');
-    		} else if($(this).val() === '') {
-    		    $(this).next().css({opaacity: 0.5});
-    		}
-        }).after('<span class="placeholder">Search code...</span>');
+        $('#nav .search input.text').val('').after('<span class="placeholder">Search code...</span>');
+    } else {
+        $('#nav .search input.text').after('<span class="placeholder" style="display:none">Search code...</span>');
     }
+    $('#nav .search input.text').bind('focus', function(){
+        $(this).parent().addClass('focussed');
+        if($(this).val() === ''){
+            $(this).next().show().css('opacity', 0.5);
+        }
+    }).bind('blur', function(){
+        $(this).parent().removeClass('focussed');
+        if($(this).val() === ''){
+            $(this).next().show().css('opacity', 1);
+        }
+    }).bind('keyup', function(e){
+        /*if((e.keyCode || e.which) == 13){
+            // somehow this is already done by magic!?
+			alert('submit search query');
+		} else */if($(this).val() === '') {
+		    $(this).next().show().css({opacity: 0.5});
+		} else {
+		    $(this).next().hide();
+		}
+    });
     
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {

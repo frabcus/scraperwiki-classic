@@ -169,9 +169,9 @@ body {
     height: 38px;
     line-height: 38px;
     font-size: 15px;
-    text-align: right;
     padding: 0 10px;
     margin: 0;
+    overflow: auto;
     -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
@@ -211,10 +211,12 @@ body {
 .subnav ul {
     padding: 0;
     margin: 0;
+    float: right;
+    overflow: auto;
 }
 
 .subnav li {
-    display: inline-block;
+    float: left;
 }
 
 .subnav a {
@@ -241,13 +243,18 @@ li.search form {
     background: transparent url(../images/nav_search.png) 0 0 no-repeat;
     width: 180px;
     height: 38px;
+    position: relative;
 }
 
-li.search.focussed form {
+li.search form.focussed {
 	background-position: 0 -38px;
 }
 
-li.search input.text {
+li.search input.text,
+li.search .placeholder {
+	position: absolute;
+	top: 11px;
+	left: 32px;
 	outline: none;
 	border: none;
 	background: transparent;
@@ -255,24 +262,16 @@ li.search input.text {
 	width: 130px;
 	height: 18px;
 	margin-right: 18px;
-	vertical-align: 0px;
 	text-align: left;
 	color: #6c8699;
 	font-family: inherit;
 	font-size: 13px;
 	line-height: 18px;
+	text-align: left;
 }
 
-li.search .placeholder {
-	position: absolute;
-	top: 11px;
-	right: 25px;
-	width: 130px;
-	text-align: left;
-	color: #6c8699;
-	font-size: 13px;
-	line-height: 18px;
-	height: 18px;
+li.search input.text {
+	z-index: 10;
 }
 
 .supernav img.gravatar {
