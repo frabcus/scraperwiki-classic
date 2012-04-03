@@ -753,6 +753,9 @@ def vault_users(request, vaultid, username, action):
     View which allows a user to add/remove users from their vault. Will
     only work on the current user's vault so if they don't have one then
     it won't work.
+
+    *username* (used for 'adduser' etc) can be a username or an
+    email address.
     """
     from codewiki.models import Vault
     mime = 'application/json'
@@ -768,10 +771,16 @@ def vault_users(request, vaultid, username, action):
         if current_plan not in ('business','corporate',):
             return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
     if action == 'adduser' and '@' in username:
-        invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
-        return HttpResponse("""{"status": "invited",
-                              "message": "Invitation sent!"}""",
-                            mimetype=mime)
+        user = vault.members.filter(email=username)
+        if not user:
+            invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
+            result = { 'status' : 'invited',
+              'message' : "Invitation sent!" }
+        else:
+            result = { 'error' :
+              'User is already a member of this vault',
+              'status' : 'fail' }
+        return HttpResponse(json.dumps(result), mimetype=mime)
 
     try:
         user = User.objects.get(username=username)    
