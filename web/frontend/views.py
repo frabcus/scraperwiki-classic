@@ -771,16 +771,15 @@ def vault_users(request, vaultid, username, action):
         if current_plan not in ('business','corporate',):
             return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
     if action == 'adduser' and '@' in username:
-        user = vault.members.filter(email=username)
-        if not user:
+        if User.objects.filter(email=username):
+            # They're already a ScraperWiki user.
+            username = User.objects.get(email=username).username
+            # Fall all the way out of the two nested 'if's
+        else:
             invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
             result = { 'status' : 'invited',
               'message' : "Invitation sent!" }
-        else:
-            result = { 'error' :
-              'User is already a member of this vault',
-              'status' : 'fail' }
-        return HttpResponse(json.dumps(result), mimetype=mime)
+            return HttpResponse(json.dumps(result), mimetype=mime)
 
     try:
         user = User.objects.get(username=username)    
