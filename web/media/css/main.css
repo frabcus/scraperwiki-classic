@@ -251,7 +251,9 @@ li.search form.focussed {
 }
 
 li.search input.text,
-li.search .placeholder {
+li.search .placeholder,
+.subnav.login label,
+.subnav.login input.text {
 	position: absolute;
 	top: 11px;
 	left: 32px;
@@ -261,18 +263,117 @@ li.search .placeholder {
 	padding: 0;
 	width: 130px;
 	height: 18px;
-	margin-right: 18px;
 	text-align: left;
 	color: #6c8699;
 	font-family: inherit;
 	font-size: 13px;
 	line-height: 18px;
-	text-align: left;
 }
 
-li.search input.text {
+li.search input.text,
+.subnav.login input.text {
 	z-index: 10;
 }
+
+.subnav.login label i {
+	font-style: normal;
+	color: #9bb3c5;
+}
+
+.subnav.login li.login_help a {
+	font-family: Georgia, Times, "Times New Roman", serif;
+	font-style: italic;
+	font-size: 12px;
+	line-height: 36px;
+	cursor: help;
+	padding-right: 20px;
+}
+
+.subnav.login li.username,
+.subnav.login li.password {
+	position: relative;
+	width: 170px;
+	height: 38px;
+	background: transparent url(../images/nav_login.png);
+	margin-right: 5px;
+}
+
+.subnav.login li.username.focussed {
+	background-position: 0 -38px;
+}
+
+.subnav.login li.password {
+	background-position: 0 -76px;
+}
+
+.subnav.login li.password.focussed {
+	background-position: 0 -114px;
+}
+
+.subnav.login li.password input:-webkit-autofill,
+.subnav.login li.username input:-webkit-autofill {
+    background-color: #fff !important;
+}
+
+.subnav.login li.login_submit a,
+.subnav.data_services li.request a {
+	margin-left: 3px;
+	height: 22px;
+	line-height: 22px;
+	border: 1px solid #75b54c;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	color: #fff;
+	text-shadow: 0 1px 2px rgba(106,63,168,0.8);
+	font-weight: bold;
+	background-color: #83c954;
+	background-image: -moz-linear-gradient(top, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.9) 2%, rgba(255,255,255,0.6) 2%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.9)), color-stop(2%,rgba(255,255,255,0.9)), color-stop(2%,rgba(255,255,255,0.6)), color-stop(50%,rgba(255,255,255,0.25)), color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0)));
+	background-image: -webkit-linear-gradient(top, rgba(255,255,255,0.9) 0%,rgba(255,255,255,0.9) 2%,rgba(255,255,255,0.6) 2%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -o-linear-gradient(top, rgba(255,255,255,0.9) 0%,rgba(255,255,255,0.9) 2%,rgba(255,255,255,0.6) 2%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: -ms-linear-gradient(top, rgba(255,255,255,0.9) 0%,rgba(255,255,255,0.9) 2%,rgba(255,255,255,0.6) 2%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	background-image: linear-gradient(top, rgba(255,255,255,0.9) 0%,rgba(255,255,255,0.9) 2%,rgba(255,255,255,0.6) 2%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 100%);
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.subnav.login li.login_submit a:hover {
+	background-color: #95d358;
+}
+
+.subnav.login li.login_submit a:active {
+	position: relative;
+	top: 1px;
+	-webkit-box-shadow: 0 1px 0 #fff;
+	-moz-box-shadow: 0 1px 0 #fff;
+	box-shadow: 0 1px 0 #fff;
+}
+
+.subnav.data_services li.request a {
+	background-color: #f9d250;
+	border-color: #f0ce5e;
+	font-weight: normal;
+	color: #333;
+	text-shadow: 0 1px 0 #fff;
+	-webkit-border-radius: 30px;
+	-moz-border-radius: 30px;
+	border-radius: 30px;
+	padding: 0 13px;
+}
+
+.subnav.data_services li.request a:hover {
+	background-color: #ffe181;
+}
+
+.subnav.data_services li.request a:active {
+	position: relative;
+	top: 1px;
+}
+
 
 .supernav img.gravatar {
 	position: absolute;
@@ -296,7 +397,7 @@ li.search input.text {
 	border-radius: 4px;
 	vertical-align: -3px;
 	-webkit-box-shadow: 0 1px 0 #fff;
-	-moz-box-shadow: 0 1px 0 #fff);
+	-moz-box-shadow: 0 1px 0 #fff;
 	box-shadow: 0 1px 0 #fff;
 }
 
@@ -3583,7 +3684,7 @@ body.login #content .signup .last {
 	margin-bottom: 0;
 }
 
-body.login div.signup {
+body.login #content div.signup {
 	border: 2px solid #F4F8FB;
 	-moz-border-radius: 5px;
 	border-radius: 5px;

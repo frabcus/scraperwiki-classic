@@ -344,30 +344,39 @@ $(function(){
     });
     
     if($('#nav .search input.text').val() == 'Search code...'){
-        $('#nav .search input.text').val('').after('<span class="placeholder">Search code...</span>');
+        $('#nav .search input.text').val('').before('<span class="placeholder">Search code...</span>');
     } else {
-        $('#nav .search input.text').after('<span class="placeholder" style="display:none">Search code...</span>');
+        $('#nav .search input.text').before('<span class="placeholder" style="display:none">Search code...</span>');
     }
-    $('#nav .search input.text').bind('focus', function(){
+    $('#nav .search input.text, #nav .login input.text').bind('focus', function(){
         $(this).parent().addClass('focussed');
         if($(this).val() === ''){
-            $(this).next().show().css('opacity', 0.5);
+            $(this).prev().show().css('opacity', 0.5);
         }
     }).bind('blur', function(){
         $(this).parent().removeClass('focussed');
         if($(this).val() === ''){
-            $(this).next().show().css('opacity', 1);
+            $(this).prev().show().css('opacity', 1);
         }
     }).bind('keyup', function(e){
-        /*if((e.keyCode || e.which) == 13){
-            // somehow this is already done by magic!?
-			alert('submit search query');
-		} else */if($(this).val() === '') {
-		    $(this).next().show().css({opacity: 0.5});
+        if($(this).val() === '') {
+		    $(this).prev().show().css({opacity: 0.5});
 		} else {
-		    $(this).next().hide();
+		    $(this).prev().hide();
 		}
     });
+    
+    // clever hack removes the yellow background on auto-filled inputs in Chrome
+    if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
+        setTimeout(function(){
+            $('#nav .login input:-webkit-autofill').each(function(){
+                var $o = $(this);
+                var $n = $o.clone(true);
+                $o.siblings('label').hide();
+                $o.after($n).remove();
+            });
+        }, 500);
+    }
     
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
