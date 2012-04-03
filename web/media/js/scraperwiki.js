@@ -301,7 +301,26 @@ function getCookie(c_name){
 
 $(function(){
     
-    $('.supernav li.code').addClass('hover default');
+    // If you ever find this comment and you're adding a new page
+    // add a new regular expression here and make sure it selects
+    // the right .supernav tab :-)
+    var urls = {
+        '/(about|events|contact)/' : 'about',
+        '/status/' : 'admin',
+        '/request_data/': 'data_services',
+        '/(profiles|vaults)/' : 'user',
+        '/login/' : 'login',
+        '.*' : 'code'
+    }
+    $.each(urls, function(index, value){
+        var regexp = RegExp(index);
+        if(document.URL.match(regexp)){
+            $('.supernav li.' + value).addClass('hover default');
+            $('.subnav.' + value).show();
+            return false;
+        }
+    });
+    
     $('.supernav li').bind('mouseenter', function(){
         var $sub = $('.subnav.' + $(this).attr('class').split(" ")[0]);
         if($sub.length){

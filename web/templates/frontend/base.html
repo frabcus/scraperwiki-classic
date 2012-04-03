@@ -100,7 +100,7 @@
         <h1><a href="{% url frontpage %}">ScraperWiki</a></h1>
         <ul class="supernav">
             <li class="code"><a href="{% url frontpage %}">Code</a></li>
-            <li class="dataservices"><a href="/dataservices/">Data Services</a></li>
+            <li class="data_services"><a href="/data_services/">Data Services</a></li>
             <li class="about"><a href="{% url about %}">About</a></li>
             {% if user.is_staff %}
             <li class="admin"><a>Admin</a></li>
@@ -120,7 +120,7 @@
             <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
             <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
         </ul>
-        <ul class="subnav dataservices">
+        <ul class="subnav data_services">
             <li class="datahub"><a href="">What is a Data Hub?</a></li>
             <li class="consultancy"><a href="">Data Consultancy</a></li>
             <li class="request"><a href="{% url request_data %}">Request Data</a></li>

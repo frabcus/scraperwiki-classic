@@ -145,7 +145,7 @@ body {
 	color: #735e1c;
 }
 
-.supernav li.dataservices.hover a {
+.supernav li.data_services.hover a {
 	background: #8e9092;
 	background: -moz-linear-gradient(top, #8e9092 2%, #686b6d 2%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(2%,#8e9092), color-stop(2%,#686b6d));
@@ -186,10 +186,6 @@ body {
     text-shadow: 0 1px 1px #fff;
 }
 
-.subnav.code {
-    display: block;
-}
-
 .subnav.admin {
 	border-color: #ebcf7d;
 	background: #f9efcd;
@@ -201,7 +197,7 @@ body {
 	background: linear-gradient(top, #f9efcd 0%,#eed27e 100%);
 }
 
-.subnav.dataservices {
+.subnav.data_services {
 	background: #686b6d;
 	background: -moz-linear-gradient(top, #686b6d 0%, #2e3234 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#686b6d), color-stop(100%,#2e3234));
@@ -232,7 +228,7 @@ body {
 	color: #735e1c;
 }
 
-.subnav.dataservices a {
+.subnav.data_services a {
 	color: #f9eab7;
 	text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
