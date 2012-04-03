@@ -34,3 +34,14 @@ Feature: As a salesperson, I want to invite people to a vault by email
     Then I should be on the login page
     And I should see the vault name
     And I should see my email already filled in
+
+  Scenario: I invite someone who is already a member
+    Given I am a "Corporate" user
+    And I have a vault
+    And I am on the vaults page
+    When I click the vault members button
+    And I click the "Add another user" button
+    And I type "test@example.com" into the username box
+    And I click the "Add!" button
+    Then I should see "is already a member of this vault"
+
