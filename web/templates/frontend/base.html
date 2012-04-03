@@ -118,7 +118,7 @@
             <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
             <li class="pricing"><a href="{% url pricing %}">Premium Accounts</a></li>
             <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
-            <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="search" name="q" value="{% block searchbox %}{% endblock %}"/></form></li>
+            <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
         </ul>
         <ul class="subnav dataservices">
             <li class="datahub"><a href="">What is a Data Hub?</a></li>

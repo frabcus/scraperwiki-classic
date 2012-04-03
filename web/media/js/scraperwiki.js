@@ -325,6 +325,31 @@ $(function(){
 			$(this).parents('form').find(':submit').trigger('click');
 		}
     });
+    
+    
+    if($('#nav .search input.text').val() == 'Search code...'){
+        $('#nav .search input.text').val('').bind('focus', function(){
+            console.log('focus // val(' + $(this).val() + ')');
+            if($(this).val() === ''){
+                $(this).next().css({opaacity: 0.5});
+            } else {
+                $(this).next().hide();
+            }
+        }).bind('blur', function(){
+            console.log('blur // val(' + $(this).val() + ')');
+            if($(this).val() === ''){
+                $(this).next().show();
+            }
+        }).bind('keydown', function(e){
+            console.log('keydown // val(' + $(this).val() + ')');
+            if((e.keyCode || e.which) == 13){
+    			alert('submit search query');
+    		} else if($(this).val() === '') {
+    		    $(this).next().css({opaacity: 0.5});
+    		}
+        }).after('<span class="placeholder">Search code...</span>');
+    }
+    
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
 		e.preventDefault();
@@ -396,9 +421,6 @@ $(function(){
 		e.preventDefault();
 		requester_hide();
 	});
-	
-	
-	
 	
 	$('a.submit_link').each(function(){
 		id = $(this).siblings(':submit').attr('id');
