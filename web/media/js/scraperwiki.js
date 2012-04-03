@@ -553,7 +553,7 @@ $(function(){
 				if(data.status == 'ok'){
 					$('.username', closure).autocomplete("close");
 					$('ul', closure).append(data.fragment).next('a').delay(50).slideDown(150);
-					closure.updateUserCount(1);
+					closure.updateUserCount();
 				} else if(data.status == 'fail'){
 					$('ul', closure).append('<li class="message error">' + data.error + '</li>');
 					$('.username', closure).autocomplete("close");
@@ -591,7 +591,9 @@ $(function(){
 	});
 	
 	jQuery.fn.updateUserCount = function(increment) {
+        // *increment* is optional, defaults to 0.
 		//	Must be called from an element within <div class="vault_header"></div>
+        increment = increment|0;
 		return this.each(function() {
 		    var $el = $(this);
 			var number_of_users = Number($el.parents('.vault_header').find('.vault_users_popover li').not('.new_user_li').length) + increment;
