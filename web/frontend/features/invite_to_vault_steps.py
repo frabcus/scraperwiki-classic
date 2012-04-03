@@ -43,9 +43,12 @@ def and_there_is_a_sign_up_link_in_the_invitation_email(step):
 
 @step(u'When I go to the invitation link in the email')
 def when_i_go_to_the_invitation_link_in_the_email(step):
-    # 3D is quoted printable nastiness
-    token = re.search("/login/\?t=3D([a-fA-F0-9]{20})",
-                open('mail.out').read()).group(1)
+    # "3D" is quoted printable nastiness.
+    # The '.*' and re.DOTALL conspire to mean that we find the
+    # last occurence of a token, which is the one we want when
+    # there are many email messages in the file.
+    token = re.search(".*/login/\?t=3D([a-fA-F0-9]{20})",
+                open('mail.out').read(), re.DOTALL).group(1)
     world.browser.visit(django_url('/login/?t=%s' % token))
 
 @step(u'And I should see the vault name')
