@@ -35,7 +35,7 @@ Feature: As a salesperson, I want to invite people to a vault by email
     And I should see the vault name
     And I should see my email already filled in
 
-  Scenario: I invite someone who is already a member
+  Scenario: I try to invite someone who is already a member
     Given I am a "Corporate" user
     And I have a vault
     And I am on the vaults page
@@ -45,3 +45,14 @@ Feature: As a salesperson, I want to invite people to a vault by email
     And I click the "Add!" button
     Then I should see "is already a member of this vault"
 
+  Scenario: I try to invite an existing ScraperWiki user
+    Given I am a "Corporate" user
+    And I have a vault
+    And I am on the vaults page
+    When I click the vault members button
+    And I click the "Add another user" button
+    And I type "test+subject@example.com" into the username box
+    And I click the "Add!" button
+    # 'subject' is the existing ScraperWiki user for test+subject@
+    Then I should see "(subject)"
+    
