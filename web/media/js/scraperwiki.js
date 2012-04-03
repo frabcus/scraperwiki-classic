@@ -581,11 +581,11 @@ $(function(){
 						$(this).remove();
 					});
 				} else if(data.status == 'fail'){
-					closure.parents('ul').append('<li class="error">Error: ' + data.error + '</li>');
+					closure.parents('ul').append('<li class="message error">Error: ' + data.error + '</li>');
 				}
 			}, 
 			error: function(data){
-				closure.parents('ul').append('<li class="error">There was an error loading the json delete action</li>');
+				closure.parents('ul').append('<li class="message error">Sorry, couldn&rsquo;t remove user</li>');
 			}
 		});
 	});
