@@ -19,7 +19,7 @@
         <h2>Log in or create an account</h2>
         <p>If you are an existing user please log in, if not create a new account.</p>
     {% else %}
-        {% show_gravatar invite.vault.user 'medium' %}
+    <!-- {% show_gravatar invite.vault.user 'medium' %} -->
         <h2><a href="{% url profile invite.vault.user.username %}">
         {% if invite.vault.user.get_profile.name %}
             {{invite.vault.user.get_profile.name}}
