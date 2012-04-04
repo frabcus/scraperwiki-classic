@@ -1,22 +1,22 @@
 {% load doc_links %}
 
-<div class="toc" id="first_steps">
+<div class="toc odd" id="first_steps">
     <h3>First steps</h3>
     <dl>
         {# the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
         {% doc_link_toc 'intro_screencast' language 'Step by step guide to using ScraperWiki (15 mins)' %}
-        {% doc_link_toc 'LANG_intro_tutorial' language 'Write a real scraper by copying and pasting code (30 mins)' %}
+        {% doc_link_toc 'LANG_intro_tutorial' language 'Write a real scraper by copying and pasting code (30&nbsp;mins)' %}
         {% doc_link_toc 'LANG_view_guide' language 'Make a view by copying and pasting code (30 mins)' %}
         <dt><a href="{% url tutorials language %}">Live tutorials</a></dt><dd><a href="{% url tutorials language %}">A series of tutorials that run in our online code editor</a></dd>
     </dl>
 </div>
 
-<div class="toc" id="help">
+<div class="toc even" id="help">
     <h3>Need help?</h3>
 	<dl>
 		<dt class="faq"><a href="/docs/{{language}}/faq">Try the Frequently Asked Questions</a></dt>
-        <dt class="irc"><a href="irc://chat.freenode.net/scraperwiki">Chat to other developers on IRC: #scraperwiki on &nbsp;freenode</a></dt>
-	    <dt class="google"><a href="http://groups.google.com/group/scraperwiki">Email your question to the ScraperWiki&nbsp;Google&nbsp;Group</a></dt>
+        <dt class="irc"><a href="irc://chat.freenode.net/scraperwiki">Chat to other developers on IRC: #scraperwiki on&nbsp;freenode</a></dt>
+	    <dt class="google"><a href="http://groups.google.com/group/scraperwiki">Email your question to the ScraperWiki Google&nbsp;Group</a></dt>
 	    <dt class="pingdom"><a href="http://status.scraperwiki.com/">Something not working? Check our status page</a></dt>
         <dt class="stack"><a href="http://stackoverflow.com/questions/tagged/scraperwiki">Search for answers or ask new questions on Stack&nbsp;Overflow</a></dt>
 	    <dt class="bugs"><a href='http://bitbucket.org/ScraperWiki/scraperwiki/issues'>Check out our bug&nbsp;list and source&nbsp;code on&nbsp;BitBucket</a></dt>
@@ -24,7 +24,7 @@
 	</dl>	
 </div>
 
-<div class="toc" id="scraping_guides">
+<div class="toc odd" id="scraping_guides">
     <h3>Scraping guides</h3>
     <dl>
         {% doc_link_toc 'LANG_csv_guide' language 'Get data from comma-separated spreadsheets' %}</li>
@@ -37,7 +37,7 @@
     </dl>
 </div>
 
-<div class="toc" id="reference">
+<div class="toc even" id="reference">
     <h3>Coders reference</h3>
     <dl>
         {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
@@ -48,7 +48,7 @@
     </dl>
 </div>
 
-<div class="toc" id="viewing_guides">
+<div class="toc odd" id="viewing_guides">
     <h3>Viewing guides</h3>
     <dl>
         <dt><a href="/docs/html/html_views/">HTML Views 101</a></dt>
@@ -66,7 +66,7 @@
 </div>
 
 {% if user.is_staff %}
-<div class="toc staff" id="scraper_tools">
+<div class="toc staff even" id="scraper_tools">
     <h3>Scraper tools</h3>
     <dl>
         <dt><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml document model viewer</a></dt>
@@ -77,7 +77,7 @@
     </dl>
 </div>
 
-<div class="toc staff" id="view_tools">
+<div class="toc staff odd" id="view_tools">
     <h3>View tools</h3>
     <dl>
         <dt><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></dt>
