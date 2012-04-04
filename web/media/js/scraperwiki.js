@@ -315,7 +315,7 @@ $(function(){
     $.each(urls, function(index, value){
         var regexp = RegExp(index);
         if(document.URL.match(regexp)){
-            $('.supernav li.' + value).addClass('hover default');
+            $('.supernav li.' + value).addClass('active default');
             $('.subnav.' + value).show();
             return false;
         }
@@ -324,14 +324,14 @@ $(function(){
     $('.supernav li').bind('mouseenter', function(){
         var $sub = $('.subnav.' + $(this).attr('class').split(" ")[0]);
         if($sub.length){
-            $(this).addClass('hover').siblings().removeClass('hover');
+            $(this).addClass('active').siblings().removeClass('active');
             $sub.show().siblings('.subnav').hide();
         }
     });
     $('#nav').bind('mouseleave', function(){
         $def = $(this).find('li.default');
         $defsub = $('.subnav.' + $def.attr('class').split(" ")[0]);
-        $def.addClass('hover').siblings().removeClass('hover');
+        $def.addClass('active').siblings().removeClass('active');
         $defsub.show().siblings('.subnav').hide();
     });
     $loginbutton = $('<a>Log In</a>').bind('click', function(){

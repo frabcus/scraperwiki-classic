@@ -125,7 +125,7 @@ body {
     color: #666;
 }
 
-.supernav li.hover a {
+.supernav li.active a {
     padding: 0 12px 1px 12px;
     border: 1px solid #d8d8d8;
     background-color: #fff;
@@ -139,13 +139,13 @@ body {
     border-top-right-radius: 4px;
 }
 
-.supernav li.admin.hover a {
+.supernav li.admin.active a {
 	border-color: #ebcf7d;
 	background-color: #f9efcd;
 	color: #735e1c;
 }
 
-.supernav li.data_services.hover a {
+.supernav li.data_services.active a {
 	background: #8e9092;
 	background: -moz-linear-gradient(top, #8e9092 2%, #686b6d 2%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(2%,#8e9092), color-stop(2%,#686b6d));
