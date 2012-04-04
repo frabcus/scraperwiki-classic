@@ -505,66 +505,66 @@ $(function(){
                         $(e.target).not('[class*="ui-"]').length) {
                             // they didn't click on the users link or the popover or the autocomplete
                             clean_up_users_popover($p);
-                        }
-                    
-			});
-		});
+                    }
+    			});
+    		});
         }
 	});
 	
-	$('body.vaults a.add_user').bind('click', function(){		
-		$('input.username').bind('keydown', function(e){
-			// handle Enter/Return key as a click on the Add button
-			if((e.keyCode || e.which) == 13){
-				$(this).next('a').trigger('click');
-			}
-		}).autocomplete({
-			minLength: 2,
-			source: function( request, response ) {
-				$.ajax({
-					url: $('#id_api_base').val() + "scraper/usersearch",
-					dataType: "jsonp",
-					data: {
-						format:"jsondict", 
-						maxrows:10, 
-						searchquery:request.term
-					},
-					success: function( data ) {
-						response( $.map( data, function( item ) {
-							return {
-								label: item.profilename + ' (' + item.username + ')',
-								value: item.username
-							}
-						}));
-					}
-				});
-			},
-			select: function( event, ui ) {
-				//	submit the name
-				//	$(this).next('a').trigger('click');
-			}
-		}).next().bind('click', function(){
-			var closure = $(this).parents('div.vault_users_popover');
-			$('.error', closure).slideUp(150);
-			var username = $('.username', closure).val();
-			var vault_id = $('a.add_user', closure).attr('rel');
-			var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
-			$.getJSON(url, function(data) {
-				if(data.status == 'ok'){
-					$('.username', closure).autocomplete("close");
-					$('ul', closure).append(data.fragment).next('a').delay(50).slideDown(150);
-					closure.updateUserCount(1);
-				} else if(data.status == 'fail'){
-					$('ul', closure).append('<li class="message error">' + data.error + '</li>');
-					$('.username', closure).autocomplete("close");
-				} else if(data.status == 'invited'){
-					$('ul', closure).append('<li class="message invite">' + data.message + '</li>');
-					$('.username', closure).autocomplete("close");
-                    $('input.username').val('');
+	$('body.vaults a.add_user').bind('click', function(){
+		$(this).slideUp(250).next().slideDown(250).find('.username').focus();
+	});
+	
+	$('input.username').bind('keydown', function(e){
+		// handle Enter/Return key as a click on the Add button
+		if((e.keyCode || e.which) == 13){
+			$(this).next('a').trigger('click');
+		}
+	}).autocomplete({
+		minLength: 2,
+		source: function( request, response ) {
+			$.ajax({
+				url: $('#id_api_base').val() + "scraper/usersearch",
+				dataType: "jsonp",
+				data: {
+					format:"jsondict", 
+					maxrows:10, 
+					searchquery:request.term
+				},
+				success: function( data ) {
+					response( $.map( data, function( item ) {
+						return {
+							label: item.profilename + ' (' + item.username + ')',
+							value: item.username
+						}
+					}));
 				}
 			});
+		},
+		select: function( event, ui ) {
+			//	submit the name
+			//	$(this).next('a').trigger('click');
+		}
+	}).next().bind('click', function(){
+		var closure = $(this).parents('div.vault_users_popover');
+		$('.error', closure).slideUp(150);
+		var username = $('.username', closure).val();
+		var vault_id = $('a.add_user', closure).attr('rel');
+		var url = '/vaults/' + vault_id + '/adduser/' + username + '/';
+		$.getJSON(url, function(data) {
+			if(data.status == 'ok'){
+				$('.username', closure).autocomplete("close");
+				$('ul', closure).append(data.fragment).next('a').delay(50).slideDown(150);
+				closure.updateUserCount();
+			} else if(data.status == 'fail'){
+				$('ul', closure).append('<li class="message error">' + data.error + '</li>');
+				$('.username', closure).autocomplete("close");
+			} else if(data.status == 'invited'){
+				$('ul', closure).append('<li class="message invite">' + data.message + '</li>');
+				$('.username', closure).autocomplete("close");
+                $('input.username').val('');
+			}
 		});
-		$(this).slideUp(250).next().slideDown(250).find('.username').focus();
 	});
 	
 	
@@ -581,17 +581,19 @@ $(function(){
 						$(this).remove();
 					});
 				} else if(data.status == 'fail'){
-					closure.parents('ul').append('<li class="error">Error: ' + data.error + '</li>');
+					closure.parents('ul').append('<li class="message error">Error: ' + data.error + '</li>');
 				}
 			}, 
 			error: function(data){
-				closure.parents('ul').append('<li class="error">There was an error loading the json delete action</li>');
+				closure.parents('ul').append('<li class="message error">Sorry, couldn&rsquo;t remove user</li>');
 			}
 		});
 	});
 	
 	jQuery.fn.updateUserCount = function(increment) {
+        // *increment* is optional, defaults to 0.
 		//	Must be called from an element within <div class="vault_header"></div>
+        increment = increment|0;
 		return this.each(function() {
 		    var $el = $(this);
 			var number_of_users = Number($el.parents('.vault_header').find('.vault_users_popover li').not('.new_user_li').length) + increment;

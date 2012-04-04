@@ -753,6 +753,9 @@ def vault_users(request, vaultid, username, action):
     View which allows a user to add/remove users from their vault. Will
     only work on the current user's vault so if they don't have one then
     it won't work.
+
+    *username* (used for 'adduser' etc) can be a username or an
+    email address.
     """
     from codewiki.models import Vault
     mime = 'application/json'
@@ -768,10 +771,13 @@ def vault_users(request, vaultid, username, action):
         if current_plan not in ('business','corporate',):
             return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
     if action == 'adduser' and '@' in username:
-        invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
-        return HttpResponse("""{"status": "invited",
-                              "message": "Invitation sent!"}""",
-                            mimetype=mime)
+        if User.objects.filter(email=username):
+            # They're already a ScraperWiki user.
+            username = User.objects.get(email=username).username
+            # Fall all the way out of the two nested 'if's
+        else:
+            result = invite_to_vault(vault_owner=vault.user, email=username, vault=vault)
+            return HttpResponse(json.dumps(result), mimetype=mime)
 
     try:
         user = User.objects.get(username=username)    
@@ -805,8 +811,13 @@ def vault_users(request, vaultid, username, action):
     return HttpResponse( json.dumps(result), mimetype=mime)
 
 def invite_to_vault(vault_owner, email, vault):
-    """Send an e-mail to address *mail* inviting them to *vault*."""
-    from codewiki.models import Invite
+    """Send an e-mail to address *mail* inviting them to *vault*.
+    Returns a dict to use as the JSON result.
+    """
+
+    # May get overwritten if there is an error.
+    result = { 'status' : 'invited',
+      'message' : "Invitation sent!" }
 
     # Truncated to avoid annoying Django/e-mail/Quoted-Printable madness.
     token = str(uuid.uuid4().hex)[:20]
@@ -820,10 +831,15 @@ def invite_to_vault(vault_owner, email, vault):
     msg = EmailMultiAlternatives(subject, text_content, vault_owner.email,
       to=[email], bcc=[vault_owner.email])
     msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=False)
+    try:
+        msg.send(fail_silently=False)
+    except EnvironmentError as e:
+        result = { 'status' : 'fail',
+          'error' : "Couldn't send email" }
 
     invite = Invite(token=context['token'], email=email, vault=vault)
     invite.save()
+    return result
 
 ###############################################################################
 # Corporate mini-site
