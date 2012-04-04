@@ -2088,6 +2088,7 @@ p.language_chooser a {
 	border-left: 2px solid #fff;
 	margin: 0;
 	line-height: 16px;
+	color: #369;
 }
 
 p.language_chooser strong {
@@ -2116,7 +2117,6 @@ p.language_chooser a.php {
 }
 
 p.language_chooser strong {
-	color: #28c;
 	font-weight: normal;
 }
 
@@ -4485,6 +4485,7 @@ body.docs .toc {
 	margin-top: 40px;
 	margin-right: 40px;
 	border: 1px solid #d8d8d8;
+	border-bottom: none;
 }
 
 body.docs #help_content {
@@ -4497,15 +4498,15 @@ body.docs .toc.even {
 }
 
 body.docs .toc h3,
-body.docs .toc dl,
-body.docs .toc dt,
-body.docs .toc dd {
+body.docs .toc ul,
+body.docs .toc li {
 	margin: 0;
 	padding: 0;
 	background: transparent;
 	font-size: 16px;
 	line-height: 20px;
 	font-weight: normal;
+	list-style: none;
 }
 
 body.docs .toc h3 {
@@ -4513,7 +4514,7 @@ body.docs .toc h3 {
 	border-bottom: 1px solid #d8d8d8;
 	text-transfrm: uppercase;
     color: #6c8699;
-    background: #fff;
+    background: #e8edf1;
 	background: -moz-linear-gradient(top,  #ffffff 0%, #e8edf1 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#e8edf1));
 	background: -webkit-linear-gradient(top,  #ffffff 0%,#e8edf1 100%);
@@ -4525,32 +4526,89 @@ body.docs .toc h3 {
 
 body.docs .toc a {
 	display: block;
-	padding: 6px 10px;
+	padding: 8px 10px;
 	text-decoration: none;
 	color: #369;
-}
-
-body.docs .toc dt:hover a {
-	
-}
-
-body.docs .toc dt a {
-	font-weight: bold;
-	padding-bottom: 0;
-}
-
-body.docs .toc dd a {
 	border-bottom: 1px solid #ccc;
-	padding-top: 0;
+}
+
+body.docs .toc a:hover {
+	background-color: #f6f8fa;
+	color: #147;
+}
+
+body.docs .staff li,
+body.docs li.staff {
+	background: transparent url(../images/staff.png) 0 0 repeat;
+}
+
+body.docs .staff li a:hover,
+body.docs li.staff a:hover {
+	background-color: rgba(232,237,241,0.5);
+}
+
+body.docs #help {
+	border-color: #bfccc1;
+}
+
+body.docs #help h3 {
+	background: #fff;
+	background: -moz-linear-gradient(top,  #ffffff 0%, #ebf5d3 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#ebf5d3));
+	background: -webkit-linear-gradient(top,  #ffffff 0%,#ebf5d3 100%);
+	background: -o-linear-gradient(top,  #ffffff 0%,#ebf5d3 100%);
+	background: -ms-linear-gradient(top,  #ffffff 0%,#ebf5d3 100%);
+	background: linear-gradient(top,  #ffffff 0%,#ebf5d3 100%);
+	color: #571;
+}
+
+body.docs #help a {
+	padding-left: 38px;
+	background: #fafdf2 url(../images/icons/help.png) 10px 45% no-repeat;
+	border-color: #bfccc1;
 	font-size: 14px;
+	line-height: 18px;
+	border-top: 1px solid #fff;
 }
 
-body.docs .toc dt + dt a {
-	padding-bottom: 6px;
+body.docs #help a:hover {
+	background-color: #eef3e2;
 }
 
-body.docs .toc dd:last-child a {
-	border-bottom: none;
+body.docs #help .irc a {
+	background-image: url(../images/icons/irc.png);
+}
+
+body.docs #help .google a {
+	background-image: url(../images/icons/email.png);
+}
+
+body.docs #help .pingdom a {
+	background-image: url(../images/icons/pingdom.png);
+}
+
+body.docs #help .stack a {
+	background-image: url(../images/icons/stack_overflow.png);
+}
+
+body.docs #help .bugs a {
+	background-image: url(../images/icons/bug.png);
+}
+
+body.docs #help .request a {
+	background-image: url(../images/icons/balloon_ellipsis.png);
+}
+
+body.docs .toc h4 {
+	font-weight: bold;
+	font-size: 16px;
+	line-height: 20px;
+}
+
+body.docs .toc span {
+	display: block;
+	font-size: 14px;
+	line-height: 18px;
 }
 
 div.example {
