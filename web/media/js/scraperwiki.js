@@ -321,18 +321,24 @@ $(function(){
         }
     });
     
-    $('.supernav li').bind('mouseenter', function(){
-        var $sub = $('.subnav.' + $(this).attr('class').split(" ")[0]);
+    $('.supernav li a').bind('click', function(e){
+        e.preventDefault();
+        var $li = $(this).parent();
+        var $sub = $('.subnav.' + $li.attr('class').split(" ")[0]);
         if($sub.length){
-            $(this).addClass('active').siblings().removeClass('active');
+            $li.addClass('active').siblings().removeClass('active');
             $sub.show().siblings('.subnav').hide();
         }
     });
-    $('#nav').bind('mouseleave', function(){
-        $def = $(this).find('li.default');
-        $defsub = $('.subnav.' + $def.attr('class').split(" ")[0]);
-        $def.addClass('active').siblings().removeClass('active');
-        $defsub.show().siblings('.subnav').hide();
+    $('#nav').bind('mouseenter', function(){
+        clearTimeout(navReset);
+    }).bind('mouseleave', function(){
+        navReset = setTimeout(function(){
+            $def = $('#nav li.default');
+            $defsub = $('.subnav.' + $def.attr('class').split(" ")[0]);
+            $def.addClass('active').siblings().removeClass('active');
+            $defsub.show().siblings('.subnav').hide();
+        }, 1000);
     });
     $loginbutton = $('<a>Log In</a>').bind('click', function(){
         $(this).parents('form').find(':submit').trigger('click');
