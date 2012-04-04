@@ -321,7 +321,7 @@ $(function(){
         }
     });
     
-    $('.supernav li a').bind('click', function(e){
+    $('.supernav li a').not('.signup a').bind('click', function(e){
         e.preventDefault();
         var $li = $(this).parent();
         var $sub = $('.subnav.' + $li.attr('class').split(" ")[0]);

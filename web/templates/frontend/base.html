@@ -171,7 +171,7 @@
         <form class="subnav login" action="{% url login %}" method="post">
             {% csrf_token %}
             <ul>
-                <li class="login_help"><a>Need help?</a></li>
+                <li class="login_help"><a href="/accounts/password/reset/" title="Click here to reset your password">Forgotten?</a></li>
                 <li class="username"><label for="login_username">Username <i>or</i> email</label> <input type="text" class="text" id="login_username" name="user_or_email" /></li>
                 <li class="password"><label for="login_password">Password</label> <input type="password" class="text password" id="login_password" name="password" /></li>
                 <li class="login_submit"><input type="submit" class="submit" name="submit" value="Log In" /></li>
