@@ -129,12 +129,20 @@
 
 {% block run_script %}
 $(function(){
+
+    if(window.location.hash == '#signup'){
+		$('#header h2').html('<em>Sign up</em> for a free account');
+		$('#registration_form h3').remove();
+		$('#content div.signup').css('margin-bottom', 40).after($('#content div.login'));
+		$('#id_name').focus();
+	}
+
     $('#id_name').bind('keyup', function(){
 		var username = $(this).val();
 		var username = username.toLowerCase().replace(/\W/g, '');
 		$('#id_username').val(username);
 	});
-	
+
 	$('#id_username').bind('keyup', function(){
 	    $(this).unbind('keyup');
 		$('#id_name').unbind('keyup');

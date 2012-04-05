@@ -3597,7 +3597,10 @@ body.login #registration_form small.error_hint {
 body.login #content .signup .last {
 	width: 380px;
 	text-align: center;
-	margin-bottom: 0;
+	margin: 15px 0 0 0;
+	padding-top: 10px;
+	width: auto;
+	border-top: 2px solid #F4F8FB;
 }
 
 body.login #content div.signup {
@@ -3694,12 +3697,6 @@ body.login .signup .form .tip {
 
 body.login .signup .form .tip a {
 	color: #666;
-}
-
-body.login #content .signup .last {
-	margin: 15px 0 0 0;
-	width: auto;
-	border-top: 2px solid #F4F8FB;
 }
 
 body.login .signup .form .error input {

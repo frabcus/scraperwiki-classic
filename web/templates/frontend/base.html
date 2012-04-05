@@ -111,7 +111,7 @@
             {% load gravatar %}
             <li class="user"><a href="{% url profile user.username %}"><span class="gravatar_outer">{% show_gravatar user 'medium' %}</span> {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
             {% else %}
-            <li class="signup"><a href="{% url login %}">Sign Up</a></li>
+            <li class="signup"><a href="{% url login %}#signup">Sign Up</a></li>
             <li class="login"><a href="{% url login %}">Log In</a></li>
             {% endif %}
         </ul>
@@ -168,7 +168,7 @@
                 <li class="vaults"><a href="{% url vault %}">Your vaults</a></li>
                 {% endif %}
                 <li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
-                <li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
+                <li class="logout"><a href="{% url logout %}?next_page=/">Log out</a></li>
             </ul>
         </div>
         {% else %}
