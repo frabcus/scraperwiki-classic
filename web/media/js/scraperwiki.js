@@ -314,13 +314,6 @@ $(function(){
     });
     $('#nav').bind('mouseenter', function(){
         clearTimeout(navReset);
-    }).bind('mouseleave', function(){
-        navReset = setTimeout(function(){
-            $def = $('#nav li.default');
-            $defsub = $('.subnav.' + $def.attr('class').split(" ")[0]);
-            $def.addClass('active').siblings().removeClass('active');
-            $defsub.show().siblings('.subnav').hide();
-        }, 1000);
     });
     $loginbutton = $('<a>Log In</a>').bind('click', function(){
         $(this).parents('form').find(':submit').trigger('click');
