@@ -16,8 +16,7 @@
 
 {% block header %}
     {% if not invite %}
-        <h2>Log in or create an account</h2>
-        <p>If you are an existing user please log in, if not create a new account.</p>
+        <h2><em>Log in</em> or <em>create an account</em></h2>
     {% else %}
     <!-- {% show_gravatar invite.vault.user 'medium' %} -->
         <h2><a href="{% url profile invite.vault.user.username %}">
@@ -27,7 +26,6 @@
             {{invite.vault.user.username}}
         {% endif %}</a>
         has invited you to the vault <em>{{ invite.vault.name }}</em></h2>
-        <p>Please create a new account to access the vault.</p>
     {% endif %}
 {% endblock %}
 
@@ -79,7 +77,7 @@
             {{ login_form.remember_me }}&nbsp;{{ login_form.remember_me.label_tag }}
         </p>
         <p class="last">
-		    <input type="submit" id="login_submit" name="login" value="Log in" />
+		    <input type="submit" id="login_submit" name="submit" value="Log in" />
 		</p>
 		</div>
 		<br class="clear" />
@@ -158,12 +156,20 @@
 
 {% block run_script %}
 $(function(){
+
+    if(window.location.hash == '#signup'){
+		$('#header h2').html('<em>Sign up</em> for a free account');
+		$('#registration_form h3').remove();
+		$('#content div.signup').css('margin-bottom', 40).after($('#content div.login'));
+		$('#id_name').focus();
+	}
+
     $('#id_name').bind('keyup', function(){
 		var username = $(this).val();
 		var username = username.toLowerCase().replace(/\W/g, '');
 		$('#id_username').val(username);
 	});
-	
+
 	$('#id_username').bind('keyup', function(){
 	    $(this).unbind('keyup');
 		$('#id_name').unbind('keyup');

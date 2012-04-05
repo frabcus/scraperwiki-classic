@@ -47,20 +47,29 @@
 
 {% endblock %}
 
+{% block body_class_extra %} overview{% endblock %}
+
 {% block header %}
+
+    {% if url_screenshot %}
+        <a href="{{ url_screenshot }}" target="_blank" id="scraper_screenshot" rel="nofollow">{% screen_shot scraper %}</a>
+    {% else %}
+        <a href="#" id="scraper_screenshot" rel="nofollow"><img src="{{ MEDIA_URL }}images/screenshot_placeholder.png" alt="Run this scraper to generate a screenshot"></a>
+    {% endif %}
 
 	<h2>
       <a href="{% if scraper.owner.username %}{% url profile scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> / 
        {% if user.is_authenticated %}
-         <span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span> 
+         <em id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</em> 
          <a id="aEditTitle" title="Edit title">Edit title</a>
        {% else %}
-         {{ scraper.title }}
+         <em>{{ scraper.title }}</em>
        {% endif %}
     </h2>
 	<p>
 	    <span class="language {{scraper.language|lower}}" rel="{{scraper.language|lower}}">{% if scraper.language == 'php' %}PHP{% else %}{{ scraper.language|capfirst }}{% endif %}</span>
 	    <span class="latestdomain">{% if scraper.last_runevent.first_url_scraped %}<a href="{{ scraper.last_runevent.first_url_scraped }}" title="{{scraper.last_runevent.first_url_scraped}}" target="_blank">{% str_replace "(https?://)([^/]+)(.+)?" "\2" scraper.last_runevent.first_url_scraped %}</a>{% else %}{% if scraper.last_runevent %}No pages scraped{% else %}Hasn&rsquo;t run yet{% endif %}{% endif %}</span>
+	    <span class="runinterval">{% if scraper.scraper.next_run.year != 9999 and scraper.scraper.run_interval != 1000000000%}{{scraper.scraper.run_interval|schedule}}{% else %}No schedule set{% endif %}</span>
         {% if scraper.privacy_status == 'public' %}
     	    <span class="privacystatus public" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">Public</span>
         {% endif %}
@@ -185,12 +194,6 @@
             {% endif %}
         </p>
         
-        
-        {% if url_screenshot %}
-            <a href="{{ url_screenshot }}" target="_blank" id="scraper_screenshot" rel="nofollow">{% screen_shot scraper %}</a>
-        {% else %}
-            <a href="#" id="scraper_screenshot" rel="nofollow"><img src="{{ MEDIA_URL }}images/screenshot_placeholder.png" alt="Run this scraper to generate a screenshot"></a>
-        {% endif %}
         <h3 class="last_run">Last run{% if scraper.last_runevent.exception_message %} <em class="fail" title="This scraper generated the following error on its last run: {{scraper.last_runevent.exception_message}}">Failed!</em>{% endif %}</h3>
         {% if scraper.last_runevent %}
             <p><a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}" rel="nofollow">{{scraper.last_runevent.run_started|timesince}} ago</a></p>

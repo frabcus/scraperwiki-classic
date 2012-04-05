@@ -420,92 +420,87 @@ $(document).ready(function()
 
 
 {% block header %}
-<h2>ScraperWiki<span style="opacity: 0.5"> / </span>Status</h2>
+<h2><em>ScraperWiki</em> / <em>Status</em></h2>
 <p>What's going on in twister and the LXCs</p>
 {% endblock %}
 
-{% block content_outer  %}
+{% block content  %}
 
-<div id="page_outer">
-    <div id="page_inner">
+    <form>
+        <fieldset>
+            {# Hidden inputs for passing to js #}
+            <input type="hidden" id="username" value="{{ user.username }}"/>
+            <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
+            <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
+        </fieldset>
+    </form>
 
-        <form>
-            <fieldset>
-                {# Hidden inputs for passing to js #}
-                <input type="hidden" id="username" value="{{ user.username }}"/>
-                <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
-                <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
-            </fieldset>
-        </form>
-
-        <h2>Users currently editing code (from twister)</h2>
-        <div id="monitoroutput">
-            <div id="monitorvisible">
-                <div id="draftscraperusers">
-                    <ul class="rows">
-                        <li class="row">
-                            <a class="title">Drafts</a>
-                            <ul class="users"></ul>
-                        </li>
-                    </ul>
-                </div>
-                <div id="scraperusers">
-                    <ul class="rows"></ul>
-                </div>
-                <div id="rpcrunningclients">
-                    <ul class="rows">
-                        <li class="row">
-                            <a class="title">Running views</a>
-                            <ul class="users"></ul>
-                        </li>
-                    </ul>
-                </div>
-                <div id="monitoringusers">
-                    <ul class="rows">
-                        <li class="row">
-                            <a class="title">Monitoring</a>
-                            <ul class="users"></ul>
-                        </li>
-                    </ul>
-                </div>
-                <div id="maxscheduledscrapers">
-                    {% if user.is_staff %}<a id="killallscheduled" title="Kill all scheduled runs">Kill all scheduled scrapers</a>{% endif %}
-                    Number of overdue scrapers: <strong id="overdue">{{overdue_count}}</strong>
-                    <label>Max scheduled scrapers</label>
-                    <input type="text" value="0">
-                </div>
+    <h2>Users currently editing code (from twister)</h2>
+    <div id="monitoroutput">
+        <div id="monitorvisible">
+            <div id="draftscraperusers">
+                <ul class="rows">
+                    <li class="row">
+                        <a class="title">Drafts</a>
+                        <ul class="users"></ul>
+                    </li>
+                </ul>
             </div>
-
-            <div id="connectionstatusdiv">
-                <a id="showmonitoradmin" href="#">Toggle connection admin</a>
-                <span id="connectionstatus">...</span> <strong>Server time:</strong> <span id="servernowtime"></span>
+            <div id="scraperusers">
+                <ul class="rows"></ul>
             </div>
-            <div id="monitoradmin">
-                <div id="jdatareceived"></div>
+            <div id="rpcrunningclients">
+                <ul class="rows">
+                    <li class="row">
+                        <a class="title">Running views</a>
+                        <ul class="users"></ul>
+                    </li>
+                </ul>
+            </div>
+            <div id="monitoringusers">
+                <ul class="rows">
+                    <li class="row">
+                        <a class="title">Monitoring</a>
+                        <ul class="users"></ul>
+                    </li>
+                </ul>
+            </div>
+            <div id="maxscheduledscrapers">
+                {% if user.is_staff %}<a id="killallscheduled" title="Kill all scheduled runs">Kill all scheduled scrapers</a>{% endif %}
+                Number of overdue scrapers: <strong id="overdue">{{overdue_count}}</strong>
+                <label>Max scheduled scrapers</label>
+                <input type="text" value="0">
             </div>
         </div>
 
-        <div id="runevents">
-            <h2>{{eventsmax}} most recent run events</h2>
-            <table>
-                <tr>
-                    <th>Scraper</th>
-                    <th>Started</th>
-                    <th>Duration</th>
-                    <th>Output summary</th>
-                </tr>
-            {% for run_event in events %}
-                <tr>
-                    <td {% ifnotequal run_event.pid -1 %}style="color:white; background:black"{% endifnotequal %}><a href="{% url code_overview run_event.scraper.wiki_type run_event.scraper.short_name %}">{{run_event.scraper.title}}</a></td> 
-                    <td><abbr title="{{run_event.run_started}}">{{run_event.run_started|timesince}} ago</td> 
-                    <td>{{run_event.getduration}}</td> 
-                    <td><a href="{% url scraper_history run_event.scraper.wiki_type run_event.scraper.short_name %}#run_{{ run_event.id }}">{{run_event.outputsummary}}</a></td>
-                </tr>
-            {% endfor %}
-            </table>
+        <div id="connectionstatusdiv">
+            <a id="showmonitoradmin" href="#">Toggle connection admin</a>
+            <span id="connectionstatus">...</span> <strong>Server time:</strong> <span id="servernowtime"></span>
+        </div>
+        <div id="monitoradmin">
+            <div id="jdatareceived"></div>
         </div>
     </div>
-</div>
+
+    <div id="runevents">
+        <h2>{{eventsmax}} most recent run events</h2>
+        <table>
+            <tr>
+                <th>Scraper</th>
+                <th>Started</th>
+                <th>Duration</th>
+                <th>Output summary</th>
+            </tr>
+        {% for run_event in events %}
+            <tr>
+                <td {% ifnotequal run_event.pid -1 %}style="color:white; background:black"{% endifnotequal %}><a href="{% url code_overview run_event.scraper.wiki_type run_event.scraper.short_name %}">{{run_event.scraper.title}}</a></td> 
+                <td><abbr title="{{run_event.run_started}}">{{run_event.run_started|timesince}} ago</td> 
+                <td>{{run_event.getduration}}</td> 
+                <td><a href="{% url scraper_history run_event.scraper.wiki_type run_event.scraper.short_name %}#run_{{ run_event.id }}">{{run_event.outputsummary}}</a></td>
+            </tr>
+        {% endfor %}
+        </table>
+    </div>
 
 {% endblock %}
 

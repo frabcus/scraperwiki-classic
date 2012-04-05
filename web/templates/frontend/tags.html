@@ -3,24 +3,19 @@
 {% block title %}Tags{% endblock %}
 
 {% block header %}
-	<h2>Browse by tag</h2>
-	<p>Showing tags for all scrapers &amp; views you can access</p>
-{% endblock %}
-
-{% block tabs %}
-    <div class="page_tabs">
-        <ul>
-            <li class="selected"> 
-                <a id="tags" href="/tags/">Browse by tag</a> 
-            </li>
-            <li> 
-                <a id="views" href="{% url scraper_list %}views">Views</a> 
-            </li>
-            <li> 
-                <a id="scrapers" href="{% url scraper_list %}scrapers">Scrapers</a> 
-            </li>
-        </ul>
-    </div>
+	<h2><a href="/tags/">Browse by tag</a></h2>
+	<!--<p>Showing tags for all scrapers &amp; views you can access</p>-->
+    <ul>    
+        <li> 
+            <a id="scrapers" href="{% url scraper_list %}scrapers">Scrapers</a> 
+        </li>
+        <li> 
+            <a id="views" href="{% url scraper_list %}views">Views</a> 
+        </li>
+        <li class="selected"> 
+            <a id="tags" href="/tags/" class="selected">Browse by tag</a> 
+        </li>
+    </ul>
 {% endblock %}
 
 {% block content %}

@@ -58,7 +58,7 @@
 {% endblock %}
 
 {% block header %}
-<h2>{% if title %}<a href="{% url docs language %}">Documentation</a> / {{title}}{% else %}Documentation{% endif %}</h2>
+<h2><a href="{% url docs language %}">Documentation</a>{% if title %} / <em>{{title}}</em>{% endif %}</h2>
 	{% if para %}<p>{{ para|safe}}</p>{% endif %}
 	{% endblock %}
 
