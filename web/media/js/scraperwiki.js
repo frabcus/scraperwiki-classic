@@ -376,17 +376,21 @@ $(function(){
 		}
     });
     
-    // clever hack removes the yellow background on auto-filled inputs in Chrome
-    if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
-        setTimeout(function(){
+    setTimeout(function(){
+        // clever hack removes the yellow background on auto-filled inputs in Chrome
+        if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
             $('#nav .login input:-webkit-autofill').each(function(){
                 var $o = $(this);
                 var $n = $o.clone(true);
                 $o.siblings('label').hide();
                 $o.after($n).remove();
             });
-        }, 500);
-    }
+        }
+
+        if ($('#nav .login input.text').val() != '') {
+            $('#nav .login label').hide();
+        }
+    }, 500);
     
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
