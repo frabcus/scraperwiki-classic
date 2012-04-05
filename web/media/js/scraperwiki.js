@@ -131,28 +131,6 @@ function newCodeObject($a){
 							}
 						}
 					});
-					function hide_javascript_crap(){
-						$('li.javascript').removeClass('first').siblings().slideDown(200);
-						$('#chooser_vaults', dialog.data).slideDown(200);
-						$('#javascript', dialog.data).slideUp(200);
-					}
-					$('li.javascript a', dialog.data).bind('click', function(e){
-						var userid = $(this).data('userid') || '';
-						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Curious', userid]); }
-						$(this).parent().addClass('first').prevAll().slideUp(200);
-						$('#chooser_vaults', dialog.data).slideUp(200);
-						$('#javascript', dialog.data).slideDown(200);
-					});
-					$('#javascript_meh', dialog.data).bind('click', function(e){
-						var userid = $('li.javascript a', dialog.data).data('userid') || '';
-						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Javascript, Meh', userid]); }
-						hide_javascript_crap();
-					});
-					$('#i_heart_javascript').bind('click', function(e){
-						var userid = $('li.javascript a', dialog.data).data('userid') || '';
-						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'I HEART JAVASCRIPT!', userid]); }
-						$(this).unbind('click').html('Thanks!').addClass('smiley').animate({opacity:1}, 2000, hide_javascript_crap);
-					});
 				},
 				onClose: function(dialog) {
 					dialog.container.fadeOut(200);
