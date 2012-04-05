@@ -595,7 +595,9 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	text-shadow: 0 1px 0 #fff;
 }
 
-body.request_data #header {
+/* TEMPORARY DEBUG THING */
+
+body.debug.request_data #header {
 	color: #a59970;
 	text-shadow: 0 1px 1px #000;
 	background-color: #393d40;
@@ -614,7 +616,9 @@ body.request_data #header {
 	background-color: #fff;
 }
 
-body.request_data #header:before {
+/* TEMPORARY DEBUG THING */
+
+body.debug.request_data #header:before {
 	background-color: rgba(255,255,255,0.4);
 }
 
@@ -623,7 +627,9 @@ body.request_data #header:before {
 	font-style: normal;
 }
 
-body.request_data #header a, body.request_data #header p, body.request_data #header h2 em {
+/* TEMPORARY DEBUG THING AGAIN */
+
+body.debug.request_data #header a, body.debug.request_data #header p, body.debug.request_data #header h2 em {
 	color: #fff;
 }
 
@@ -631,7 +637,9 @@ body.request_data #header a, body.request_data #header p, body.request_data #hea
 	color: #92b5d8;
 }
 
-body.request_data #header h2 {
+/* TEMPORARY DEBUG THING AGAIN */
+
+body.debug.request_data #header h2 {
 	color: #a59970;
 }
 
@@ -947,10 +955,6 @@ body.frontpage #header:before {
 	width: 918px;
 	background: #fff;
 	margin-bottom: 40px;
-}
-
-body.request_data #content {
-	border-color: #aaa;
 }
 
 body.frontpage #content h2 {
@@ -1410,9 +1414,15 @@ body.profiles.edit #features li input {
 
 /* REQUEST DATA PAGES */
 
+/* TEMPORARY DEBUG THING AGAIN */
+
 body.request_data #content {
 	padding: 40px 84px;
 	width: 790px;
+}
+
+body.debug.request_data #content {
+	border-color: #aaa;
 }
 
 #request_options {
@@ -1421,8 +1431,10 @@ body.request_data #content {
     margin-left: 192px;
 }
 
+/* TEMPORARY DEBUG THING AGAIN */
+
 #request_form,
-body.request_data #public_request {
+body.debug.request_data #public_request {
 	width: 393px;
 	float: right;
 	background-color: #F4F8FB;
