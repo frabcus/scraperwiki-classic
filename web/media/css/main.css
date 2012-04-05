@@ -125,6 +125,14 @@ body {
     color: #666;
 }
 
+.supernav li.default a {
+	color: #4a80a8;
+}
+
+.supernav li.default:hover a {
+	color: #28506e;
+}
+
 .supernav li.active a {
     padding: 0 12px 1px 12px;
     border: 1px solid #d8d8d8;
