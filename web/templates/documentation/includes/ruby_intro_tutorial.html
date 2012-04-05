@@ -21,7 +21,7 @@ above). You'll get a web based code editor.
 type Ctrl+R.
 </p>
 
-<code>puts "Hello, coding in the cloud!"
+<code>p "Hello, coding in the cloud!"
 </code>
 
 <p>(As we go through this tutorial, you can copy and paste each 
@@ -39,7 +39,7 @@ There is also a simple built in {% doc_link_full 'LANG_help_documentation' langu
 </p>
 
 <code>html = ScraperWiki.scrape("http://web.archive.org/web/20110514112442/http://unstats.un.org/unsd/demographic/products/socind/education.htm")
-puts html
+p html
 </code>
 
 <p>When you print something quite large, click "more" in the console
@@ -54,11 +54,11 @@ everything that has been downloaded.</p>
 <code>require 'nokogiri'
 
 doc = Nokogiri::HTML(html)
-for v in doc.search("div[@align='left'] tr.tcont")
+doc.search("div[@align='left'] tr.tcont").each do |v|
   cells = v.search('td')
   data = {
-    'country' =&gt; cells[0].inner_html,
-    'years_in_school' =&gt; cells[4].inner_html.to_i
+    country: cells[0].inner_html,
+    years_in_school: cells[4].inner_html.to_i
   }
   puts data.to_json
 end
@@ -77,10 +77,11 @@ a schema up front.</p>
 <p>Replace "puts data.to_json" in the Nokogiri loop (just before the "end" line)
 with this save command:</p>
 
-<code>  ScraperWiki.save_sqlite(unique_keys=['country'], data=data)
+<code>  ScraperWiki.save_sqlite(['country'], data)
 </code>
 
-<p>The unique keys (just country in this case) identify each piece of data.
+<p>The first argument is the unique keys (just "country" in this case)
+which identify each piece of data.
 When the scraper runs again, existing data with the same values for the
 unique keys is replaced.</p>
 
