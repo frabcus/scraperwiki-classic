@@ -312,9 +312,6 @@ $(function(){
             $sub.show().siblings('.subnav').hide();
         }
     });
-    $('#nav').bind('mouseenter', function(){
-        clearTimeout(navReset);
-    });
     $loginbutton = $('<a>Log In</a>').bind('click', function(){
         $(this).parents('form').find(':submit').trigger('click');
     })
