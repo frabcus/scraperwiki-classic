@@ -25,7 +25,6 @@ class testBase(unittest.TestCase):
 
     def Execute(self, code, language='python'):
         """Execute a script on the configured scriptmgr.
-        Potentionally of some general use; could move.
         """
 
         # http://docs.python.org/release/2.6.7/library/uuid.html
