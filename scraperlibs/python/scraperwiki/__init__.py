@@ -11,6 +11,14 @@ def dumpMessage(d):
     logfd.write( "JSONRECORD(%d):%s\n" % (len(val), val,) )
     logfd.flush()
 
+class Error(Exception):
+    """All ScraperWiki exceptions are instances of this class
+    (usually via a subclass)."""
+    pass
+
+class CPUException(Error):
+    """CPU time limit exceeded."""
+    pass
 
 from utils import log, scrape, pdftoxml, swimport
 import geo

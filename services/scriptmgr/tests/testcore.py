@@ -56,7 +56,7 @@ try:
     while True:
         print a
         a = a*a
-except scraperwiki.Exception as e:
+except scraperwiki.Error as e:
     if 'CPU' in str(e):
         print "CPU exception caught"
     else:
