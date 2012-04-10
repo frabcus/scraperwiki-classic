@@ -4,7 +4,8 @@ from lettuce.django import django_url
 
 @step("When I click the login link")
 def when_i_click_the_login_link(step):
-    world.browser.click_link_by_text("Log in")
+    world.browser.find_by_css('.login a').first.click()
+    world.browser.find_by_css('.login_submit a').first.click()
 
 @step('(?:Given|And) there is a username "([^"]*)" with password "([^"]*)"')
 def make_user(step, username, password):
@@ -18,12 +19,12 @@ def make_user(step, username, password):
 
 @step(r'When I fill in my username "([^"]*)" and my password "([^"]*)"')
 def fill_in(step, username, password):
-    world.browser.find_by_css('div#divContent [name=user_or_email]').first.fill(username)
-    world.browser.find_by_css('div#divContent [name=password]').first.fill(password)
+    world.browser.find_by_css('div.login input[name=user_or_email]').first.fill(username)
+    world.browser.find_by_css('div.login input[name=password]').first.fill(password)
 
 @step(r'''And I click the page's "([^"]*)" button''')
 def click_button(step, button):
-    world.browser.find_by_css('div#divContent').first.find_by_value(button).first.click()
+    world.browser.find_by_css('.login').first.find_by_value(button).first.click()
 
 @step('Then user "([^"]*)" is logged in')
 def logged_in(step, username):
