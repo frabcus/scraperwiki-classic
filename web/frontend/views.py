@@ -211,6 +211,8 @@ def handle_signup_invites(user):
 
     for invite in invites:
         invite.vault.members.add(user)
+        invite.vault.members.add(user) 
+        invite.vault.add_user_rights(user)
         # Invitation used up; delete it.
         invite.delete()
 
