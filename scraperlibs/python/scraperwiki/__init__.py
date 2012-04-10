@@ -1,8 +1,6 @@
-import base64
 
 try    : import json
 except : import simplejson as json
-
 
 logfd = None   # set to os.fdopen(3, 'w', 0) for consuming json objects
 
