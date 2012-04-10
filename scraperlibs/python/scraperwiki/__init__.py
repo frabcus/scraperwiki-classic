@@ -16,7 +16,7 @@ class Error(Exception):
     (usually via a subclass)."""
     pass
 
-class CPUException(Error):
+class CPUTimeExceededError(Error):
     """CPU time limit exceeded."""
     pass
 
