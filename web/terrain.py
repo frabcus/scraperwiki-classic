@@ -1,4 +1,5 @@
 import os
+import sys
 
 from lettuce import before,after,world
 from django.contrib.auth import authenticate, login
@@ -47,6 +48,11 @@ def close_browser(totals):
             failed = True
     if not failed:
         world.browser.quit()
+
+@after.each_step
+def take_screenshot_if_error(step):
+    if step.failed:
+        world.browser.driver.save_screenshot('/tmp/%s.png' % step.sentence)
 
 @world.absorb
 class FakeLogin(Client):

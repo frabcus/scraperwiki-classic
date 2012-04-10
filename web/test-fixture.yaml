@@ -118,6 +118,46 @@
   model: codewiki.scraper
   pk: 1
 
+# Code in vault
+- fields: 
+    access_apikey: 
+    created_at: 2012-04-15 16:38:27
+    description: ""
+    featured: false
+    forked_from: 
+    guid: caa91e3290db2d13bcf8f2bc403b70d0
+    has_screen_shot: false
+    istutorial: false
+    language: python
+    line_count: 4
+    previous_privacy: 
+    privacy_status: public
+    relations: []
+    short_name: vault_scraper
+    status: ok
+    title: Vault scraper
+    vault: 1
+    wiki_type: scraper
+  model: codewiki.code
+  pk: 2
+
+# User code role for vault scraper
+- fields: 
+    code: 2
+    role: owner
+    user: 1
+  model: codewiki.usercoderole
+  pk: 1
+
+# Scraper in vault
+- fields: 
+    last_run: 
+    record_count: 0
+    relations: []
+    run_interval: -1
+  model: codewiki.scraper
+  pk: 2
+
 # Tag
 - fields:
     name: testalicious
