@@ -93,7 +93,7 @@ resource.setrlimit(resource.RLIMIT_CPU, (80, 82,))
 # The CPU time limit handler simply throws a Python exception
 # so it can be handled cleanly before the hard limit is reached.
 def sigXCPU(signum_, frame_):
-    raise Exception("ScraperWiki CPU time exceeded")
+    raise scraperwiki.CPUException("ScraperWiki CPU time exceeded")
 signal.signal(signal.SIGXCPU, sigXCPU)
 
 with open(options.script) as codef:
