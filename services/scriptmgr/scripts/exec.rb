@@ -69,7 +69,7 @@ $stderr = ConsoleStream.new($logfd)
 Process.setrlimit(Process::RLIMIT_CPU, 80, 82) 
  
 Signal.trap("XCPU") do
-    raise Exception, "ScraperWiki CPU time exceeded"
+    raise ScraperWiki::CPUTimeExceededError, "ScraperWiki CPU time exceeded"
 end
 
 
