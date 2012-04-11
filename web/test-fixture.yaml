@@ -156,7 +156,7 @@
     role: owner
     user: 1
   model: codewiki.usercoderole
-  pk: 1
+  pk: 2
 
 # Scraper in vault
 - fields: 
