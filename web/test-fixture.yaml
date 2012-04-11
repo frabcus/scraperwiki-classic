@@ -141,6 +141,15 @@
   model: codewiki.code
   pk: 2
 
+# Vault
+- fields:
+    id: 1
+    user: 2
+    name: Prefab Vault
+    plan: individual
+  model: codewiki.vault
+  pk: 1
+
 # User code role for vault scraper
 - fields: 
     code: 2
