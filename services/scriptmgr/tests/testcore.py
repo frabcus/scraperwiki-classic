@@ -83,7 +83,7 @@ begin
   while true do
     a = x**x
   end
-rescue Exception => ex
+rescue ScraperWiki::Error => ex
   if ex.message.match('CPU')
     puts "CPU exception caught"
   else

@@ -18,6 +18,11 @@ module ScraperWiki
     $metadatamessagedone = false
     $attachlist = [ ]
 
+    class Error < RuntimeError
+    end
+    class CPUTimeExceededError < Error
+    end
+
     def ScraperWiki.dumpMessage(hash)
         msg = JSON.generate(hash)
         $logfd.write( "JSONRECORD(" + msg.length.to_s() + "):" + msg + "\n")
