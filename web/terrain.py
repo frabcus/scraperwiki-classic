@@ -21,8 +21,7 @@ def sync_db(variables):
             call_command('flush', interactive=False)
         except DatabaseError:
             pass # This will occur if the tests are run for the first time
-        call_command('syncdb', interactive=False, verbosity=0)
-        call_command('loaddata', 'test-fixture.yaml')
+        load_data()
 
 @before.harvest
 def set_browser(variables):
@@ -106,6 +105,11 @@ def wait_for_element_by_css(css, timeout=5):
 def wait_for_url(url, timeout=5):
     WebDriverWait(world.browser.driver, timeout).until(lambda _d:
       (url in world.browser.url))
+
+@world.absorb
+def load_data():
+    call_command('syncdb', interactive=False, verbosity=0)
+    call_command('loaddata', 'test-fixture.yaml')
    
 # Not currently used
 def clear_obscuring_popups(browser):
