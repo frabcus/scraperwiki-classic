@@ -209,15 +209,32 @@ p paramdict
            <dd>
                <p>Each scraper run has a limit of roughly 80 seconds of processing time. 
                After that, in Python and Ruby you will get an exception
-               "ScraperWiki CPU time exceeded". In PHP it will end "terminated by SIGXCPU".
+               (scraperwiki.CPUTimeExceededError in Python, and
+               ScraperWiki::CPUTimeExceededError in Ruby).
+               In PHP it will end "terminated by SIGXCPU".
                </p>
+
+                <p>This exception can be caught, and it can be useful to
+                do that if you have some state to save or other cleaning
+                up to do before exiting.  You will have a small amount
+                (2 seconds) of additional CPU time before the process
+                is killed without warning. </p>
+
                <p>In many cases this happens when you are first scraping a site, catching
                up with the backlog of existing data. The best way to handle it is to make
-               your scraper do a chunk at a time using the save_var and get_var functions
+               your script do a chunk at a time using the save_var and get_var functions
                in the {% doc_link_full 'LANG_help_documentation' language %} to remember your
                place.
+               This technique also lets you recover more easily from other parsing errors.
                </p>
-               <p>That also lets you recover more easily from other parsing errors.
+
+               <p>Note that CPU time is not the same as
+               wall-clock time.  Most scripts use only a little
+               CPU time when they are scraping, they are mostly
+               waiting for web pages to be downloaded, which
+               takes essentially no CPU time.  A typical script
+               can scraper thousands of pages before hitting
+               this CPU limit.
                </p>
            </dd>
 
