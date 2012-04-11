@@ -4,16 +4,17 @@
   <p>The Ruby environment in ScraperWiki comes with the ScraperWiki module loaded.</p>
 
   <p>The source code implementation of these functions can be found 
-  <a href="https://bitbucket.org/ScraperWiki/scraperwiki/src/efd21ea1c875/scraperlibs/scraperwiki.rb">here</a>.</p>
+  <a href="https://bitbucket.org/ScraperWiki/scraperwiki/src/tip/scraperlibs/ruby/scraperwiki/lib">in
+  our bitbucket repository</a>.</p>
 </div>
 
 <h3>Scraping</h3>
-<p>You can also use any Ruby HTTP library.</p>
+<p>You can also use any Ruby HTTP library, such as <em>httpclient</em>.</p>
 
 <dl>
 <dt>ScraperWiki.<strong>scrape</strong>(url[, params])</dt>
     <dd>Returns the downloaded string from the given url.</dd>
-    <dd>params are send as a POST if set.
+    <dd><var>params</var> are sent using POST if set.
     </dd>
 </dl>
 
@@ -30,8 +31,9 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
 <dl>
 <dt>ScraperWiki.<strong>save_sqlite</strong>(unique_keys, data[, table_name="swdata", verbose=2])</dt>
     <dd>Saves a data record into the datastore into the table given by table_name.  </dd>
-    <dd>data is a hash with string or symbol field names as keys, unique_keys is an array
-        that is a subset of data.keys which determines when a record is to be
+    <dd><var>data</var> is a hash with string or symbol field names as keys;
+    <var>unique_keys</var> is an array
+        that is a subset of <var>data.keys</var> which determines when a record is to be
         over-written.
     <dd>For large numbers of records data can be a list of hashes.
     <dd>verbose alters what is shown in the Data tab of the editor.
@@ -45,16 +47,18 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
     </dd>
 
 <dt>ScraperWiki.<strong>select</strong>(val1[, val2])</dt>
-    <dd>Executes a select command on the datastore, e.g. select("* from swdata limit 10")</dd>
+    <dd>Executes a select command on the datastore, for example select("* from swdata limit 10")</dd>.
     <dd>Returns an array of hashes for the records that have been selected.</dd>
-    <dd>val2 is an optional array of parameters when the select command contains '?'s.
+    <dd><var>val2</var> is an optional array of parameters used when the select command contains '?'s.
     </dd>
 
 
-<dt>ScraperWiki.<strong>sqliteexecute</strong>(val1[, val2])</dt>
-    <dd>Executes any arbitrary sqlite command (except attach), e.g. create, delete, insert or drop.</dd>
-    <dd>val2 is an optional array of parameters if the command in val1 contains question marks.</dd>
-    <dd>(e.g. "insert into swdata values (?,?,?)").
+<dt>ScraperWiki.<strong>sqliteexecute</strong>(cmd[, parms])</dt>
+    <dd>Executes any arbitrary sqlite command (except attach), for
+    example create, delete, insert or drop.</dd>
+    <dd><var>parms</var> is an optional array of parameters used
+    when the command in <var>cmd</var> contains question marks.</dd>
+    <dd>(for example, "insert into swdata values (?,?,?)").
     </dd>
 
 <dt>ScraperWiki.<strong>commit</strong>()</dt>
@@ -68,12 +72,12 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
     <dd>Returns an array of attributes for each element of the table.</dd>
 
 <dt>ScraperWiki.<strong>save_var</strong>(key, value)</dt>
-    <dd>Saves an arbitrary single-value into a sqlite table called "swvariables". 
-        e.g. Can be used to make scrapers able to continue after an interruption.
+    <dd>Saves an arbitrary single value into a sqlite table called "swvariables". 
+        Can be used to make scrapers able to continue after an interruption.
     </dd>
 
 <dt>ScraperWiki.<strong>get_var</strong>(key[, default])</dt>
-    <dd>Retrieves a single value that was saved by save_var.
+    <dd>Retrieves a single value that was saved by <var>save_var</var>.
     </dd>
 
 </dl>
@@ -82,7 +86,7 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
 
 <dt>ScraperWiki.<strong>httpresponseheader</strong>(headerkey, headervalue)</dt>
     <dd>Set the content-type header to something other than HTML when using a ScraperWiki "view"</dd>
-    <dd>(e.g. "Content-Type", "image/png")
+    <dd>(for example "Content-Type", "image/png").
     </dd>
 
 
