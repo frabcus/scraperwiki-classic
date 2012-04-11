@@ -41,7 +41,7 @@ def create_and_login(step, username, password):
     cookie_data = l.login(username, password) 
     world.browser.driver.add_cookie(cookie_data)
 
-@step(u'Given I am not logged in')
+@step(u'(?:Given|And) I am not logged in')
 def given_i_am_not_logged_in(step):
     world.browser.driver.delete_all_cookies()
 
