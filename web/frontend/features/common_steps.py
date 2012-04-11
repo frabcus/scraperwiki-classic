@@ -11,7 +11,7 @@ from nose.tools import assert_equals
 
 # Human readable CSS selectors
 SELECTORS = {
-        'need help box':                "div[@id='getting_help']",
+        'need help box':                "div[@id='help']",
         }
 
 # Features
@@ -85,7 +85,8 @@ def i_should_see_the_button(step, negative, text):
 
 @step(u'(?:Then|And) I should see (?:the|a|an) "([^"]*)" (?:link|button) in the (.+)')
 def i_should_see_the_button_in_parent(step, text, parent_name):
-    xpath = ".//%s//a[text()='%s']" % ( SELECTORS[parent_name], text)
+    xpath = ".//%s//a[contains(.,'%s')]" % (
+      SELECTORS[parent_name], text)
     assert world.browser.find_by_xpath(xpath)
 
 # Clicking
