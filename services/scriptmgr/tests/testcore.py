@@ -33,3 +33,66 @@ class testCore(testbase.testBase):
           """print 'hell'+'o'*3""", language='python')
         output = testbase.console(stuff)
         assert 'hellooo' in output
+
+    def testCPUPython(self):
+        """Should be able to catch CPU Exception (in Python)."""
+
+        # This test intentionally takes a few seconds to run.
+
+        # code is originally from
+        # https://scraperwiki.com/scrapers/cpu-py_1/edit/
+        code = """
+import resource
+import scraperwiki
+import sys
+
+# We artificially lower the soft CPU limit to 2 seconds, so that we
+# can run this scraper and see the exception in reasonable time.
+resource.setrlimit(resource.RLIMIT_CPU, (2, 4))
+
+# A loop that consumes CPU
+a=2
+try:
+    while True:
+        print a
+        a = a*a
+except scraperwiki.Error as e:
+    if 'CPU' in str(e):
+        print "CPU exception caught"
+    else:
+        print "Error, unexpected exception"
+
+"""
+
+        stuff = self.Execute(code)
+        output = testbase.console(stuff)
+        assert 'CPU exception' in output
+
+    def testCPURuby(self):
+        """Should be able to catch CPU Exception (in Ruby)."""
+
+        # This test intentionally takes a few seconds to run.
+
+        # Code is originally from
+        # https://scraperwiki.com/scrapers/cpu-rb/edit/
+        code = """
+Process.setrlimit(Process::RLIMIT_CPU, 1, 2)
+
+x = 2
+begin
+  while true do
+    a = x**x
+  end
+rescue Exception => ex
+  if ex.message.match('CPU')
+    puts "CPU exception caught"
+  else
+    puts "Error, unexpected exception"
+  end
+end
+"""
+
+        stuff = self.Execute(code, language='ruby')
+        output = testbase.console(stuff)
+        assert 'CPU exception' in output
+

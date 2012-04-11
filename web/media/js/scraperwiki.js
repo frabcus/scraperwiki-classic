@@ -59,27 +59,6 @@ function rtrim(stringToTrim) {
 	return stringToTrim.replace(/\s+$/,"");
 }
 
-
-function setupNavSearchBoxHint(){
-    $('#nav_search_q').bind('focus', function() {
-        if ($(this).val() == 'Search datasets') {
-            $(this).val('');
-            $(this).removeClass('hint');
-        }
-		$('#navSearch').addClass('focus');
-    }).bind('blur', function() {
-        if($(this).val() == '') {
-            $(this).val('Search datasets');
-            $(this).addClass('hint');
-        }
-		$('#navSearch').removeClass('focus');
-    });
-	if($('#nav_search_q').val() == ''){
-		$('#nav_search_q').val('Search datasets').addClass('hint');
-		$('#navSearch').removeClass('focus');
-	}
-}
-
 function newCodeObject($a){
 	if($a){	
 		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'New Code Object', $a.data('wiki_type')]); }
@@ -151,28 +130,6 @@ function newCodeObject($a){
 								location.href = $('#chooser_vault').val().replace('/python/', '/' + $(this).attr('href').replace(/.*\//, '') + '/') + '?name=' + encodeURIComponent($('#chooser_name_box').val());								
 							}
 						}
-					});
-					function hide_javascript_crap(){
-						$('li.javascript').removeClass('first').siblings().slideDown(200);
-						$('#chooser_vaults', dialog.data).slideDown(200);
-						$('#javascript', dialog.data).slideUp(200);
-					}
-					$('li.javascript a', dialog.data).bind('click', function(e){
-						var userid = $(this).data('userid') || '';
-						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Curious', userid]); }
-						$(this).parent().addClass('first').prevAll().slideUp(200);
-						$('#chooser_vaults', dialog.data).slideUp(200);
-						$('#javascript', dialog.data).slideDown(200);
-					});
-					$('#javascript_meh', dialog.data).bind('click', function(e){
-						var userid = $('li.javascript a', dialog.data).data('userid') || '';
-						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'Javascript, Meh', userid]); }
-						hide_javascript_crap();
-					});
-					$('#i_heart_javascript').bind('click', function(e){
-						var userid = $('li.javascript a', dialog.data).data('userid') || '';
-						if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Javascript scrapers', 'I HEART JAVASCRIPT!', userid]); }
-						$(this).unbind('click').html('Thanks!').addClass('smiley').animate({opacity:1}, 2000, hide_javascript_crap);
 					});
 				},
 				onClose: function(dialog) {
@@ -300,51 +257,6 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 	
 }
 
-function openSurvey(){
-	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Open modal window']); }
-	var url = 'http://sw.zarino.co.uk/';
-	if($('#nav_inner .loggedin').length){
-		regexp_username = new RegExp('/profiles/([^/]+)/');
-		var url = url + '?username=' + $('#nav_inner .loggedin a').attr('href').replace(regexp_username, '$1');
-	}
-	$.modal('<h1 class="modalheader">ScraperWiki Developer Survey</h1><iframe src="' + url + '" height="500" width="500" style="border:0">', {
-        overlayClose: true, 
-        autoResize: true,
-        overlayCss: { cursor:"auto" },
-		onOpen: function(dialog) {
-			dialog.data.show();
-			dialog.overlay.fadeIn(200);
-			dialog.container.fadeIn(200);
-		},
-		onShow: function(dialog){
-			$('#simplemodal-container').css('height', 'auto');
-		},
-		onClose: function(dialog) {
-			if($('#alert_close').length){
-				$('#alert_inner .message').text('Thanks!').siblings('a').not('#alert_close').remove();
-				var t = setTimeout(function(){
-					$('#alert_close').trigger('click');
-				}, 1000);
-			}
-			// developerSurveyDone();
-			dialog.container.fadeOut(200);
-			dialog.overlay.fadeOut(200, function(){
-				$.modal.close();
-			});
-		}
-    });
-}
-
-/* function developerSurveyDone(){
-	setCookie("developerSurveyDone", '1', 365);
-	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Leave modal window']); }
-}
-
-function developerSurveySkipped(){
-	setCookie("developerSurveySkipped", '1', 365);
-	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Ignore alert bar']); }
-} */
-
 function setCookie(c_name,value,exdays){
 	var exdate = new Date();
 	exdate.setDate(exdate.getDate() + exdays);
@@ -366,28 +278,88 @@ function getCookie(c_name){
 
 
 $(function(){
-	
-	/* regexp_baseurl = new RegExp('(https?://[^/]+).*');
-	if(document.referrer.replace(regexp_baseurl, '$1') == document.URL.replace(regexp_baseurl, '$1')){
-		survey_alert_slide = null;
-	} else {
-		survey_alert_slide = 250;
-	}
-	
-	if(typeof(getCookie('developerSurveyDone')) != 'undefined' || typeof(getCookie('developerSurveySkipped')) != 'undefined'){
-		// console.log('You&rsquo;ve either skipped or completed the survey');
-	} else {
-		newAlert('Help us make ScraperWiki even better for you!', null, {'onclick': openSurvey, 'text': 'Take our speedy survey'}, survey_alert_slide, developerSurveySkipped);
-		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Alert shown']); }
-	} */
-	
-	$('#divMenu ul li.survey a').bind('click', function(e){
-		e.preventDefault();
-		openSurvey();
-		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Developer survey', 'Open modal window']); }
-	});
-	
-    setupNavSearchBoxHint();
+    
+    // If you ever find this comment and you're adding a new page
+    // add a new regular expression here and make sure it selects
+    // the right .supernav tab :-)
+    var urls = {
+        '/(about|events|contact)/' : 'about',
+        '/status/' : 'admin',
+        '/request_data/': 'data_services',
+        '/(profiles|vaults)/' : 'user',
+        '/login/' : 'login',
+        '.*' : 'code'
+    }
+    //  TEMPORARY DEBUG THING WHILE WE'RE WORKING ON THE CORPORATE SITE
+    if( ! $('body.debug').length ){
+        delete urls['/request_data/'];
+    }
+    $.each(urls, function(index, value){
+        var regexp = RegExp(index);
+        if(document.URL.match(regexp)){
+            $('.supernav li.' + value).addClass('active default');
+            $('.subnav.' + value).show();
+            return false;
+        }
+    });
+    
+    $('.supernav li a').not('.signup a').bind('click', function(e){
+        e.preventDefault();
+        var $li = $(this).parent();
+        var $sub = $('.subnav.' + $li.attr('class').split(" ")[0]);
+        if($sub.length){
+            $li.addClass('active').siblings().removeClass('active');
+            $sub.show().siblings('.subnav').hide();
+        }
+    });
+    $loginbutton = $('<a>Log In</a>').bind('click', function(){
+        $(this).parents('form').find(':submit').trigger('click');
+    })
+    $('li.login_submit :submit').hide().after($loginbutton).parents('form').find(':text, :password').bind('keyup', function(e){
+        if((e.keyCode || e.which) == 13){
+			$(this).parents('form').find(':submit').trigger('click');
+		}
+    });
+    
+    if($('#nav .search input.text').val() == 'Search code...'){
+        $('#nav .search input.text').val('').before('<span class="placeholder">Search code...</span>');
+    } else {
+        $('#nav .search input.text').before('<span class="placeholder" style="display:none">Search code...</span>');
+    }
+    $('#nav .search input.text, #nav .login input.text').bind('focus', function(){
+        $(this).parent().addClass('focussed');
+        if($(this).val() === ''){
+            $(this).prev().show().css('opacity', 0.5);
+        }
+    }).bind('blur', function(){
+        $(this).parent().removeClass('focussed');
+        if($(this).val() === ''){
+            $(this).prev().show().css('opacity', 1);
+        }
+    }).bind('keyup', function(e){
+        if($(this).val() === '') {
+		    $(this).prev().show().css({opacity: 0.5});
+		} else {
+		    $(this).prev().hide();
+		}
+    });
+    
+    setTimeout(function(){
+        // clever hack removes the yellow background on auto-filled inputs in Chrome
+        if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
+            $('#nav .login input:-webkit-autofill').each(function(){
+                var $o = $(this);
+                var $n = $o.clone(true);
+                $o.siblings('label').hide();
+                $o.after($n).remove();
+            });
+        }
+
+        if ($('#nav .login input.text').val() != '') {
+            $('#nav .login label').hide();
+        }
+    }, 500);
+    
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
 		e.preventDefault();
@@ -397,7 +369,7 @@ $(function(){
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
 		$('#more_developer_div').fadeIn(500);
-		$('#blob_developer').animate({left: 760}, 500, 'easeOutCubic').addClass('active');
+		$('#blob_developer').animate({left: 740}, 500, 'easeOutCubic').addClass('active');
 	}
 	
 	function developer_hide(){
@@ -459,9 +431,6 @@ $(function(){
 		e.preventDefault();
 		requester_hide();
 	});
-	
-	
-	
 	
 	$('a.submit_link').each(function(){
 		id = $(this).siblings(':submit').attr('id');

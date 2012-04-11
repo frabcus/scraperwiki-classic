@@ -1,105 +1,97 @@
 {% load doc_links %}
 
-<div class="content half left index">
-    
-<p class="intro">ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
-scheduled to scrape and refine data. 
-<!-- Edit and debug the scripts entirely in your browser, no setup required. A built
-in SQL API gets the data out as JSON, CSV or RSS files.  -->
-</p>
-
-<h3>First steps (anyone)</h3>
-<ul>
-    {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
-    <li class="doclink"> {% doc_link_full 'intro_screencast' language 'Step by step guide to using ScraperWiki (15 mins)' %}</li>
-    <li class="doclink"> {% doc_link_full 'LANG_intro_tutorial' language 'Write a real scraper by copying and pasting code (30 mins)' %}</li>
-    <li class="doclink"> {% doc_link_full 'LANG_view_guide' language 'Make a view by copying and pasting code (30 mins)' %}</li>
-    <li class="doclink"> <a href='{% url tutorials language %}' title="A series of tutorials that run in our online code editor">Live tutorials</a></li>
-</ul>
-
-<h3>Reference (programmers)</h3>
-<ul>
-  {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
-  <li class="doclink"> {% doc_link_full 'LANG_help_documentation' language 'ScraperWiki-specific functions you can use inside a scraper' %}</li>  
-  <li class="doclink"> {% doc_link_full 'LANG_datastore_guide' language 'Everything you can do with the ScraperWiki datastore' %}</li>
-  <li class="doclink"> {% doc_link_full 'LANG_libraries' language 'eg: Mechanize, Beautiful Soup, Geopy' %}</li>
-  <li class="doclink"> <a href="{% url docsexternal %}" title="Build an API query to get data out of ScraperWiki">Web API docs</a></li>
-</ul>
-	
+<div class="toc odd" id="first_steps">
+    <h3>First steps</h3>
+    <ul>
+        {# the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
+        {% doc_link_toc 'intro_screencast' language 'Step by step guide to using ScraperWiki (15 mins)' %}
+        {% doc_link_toc 'LANG_intro_tutorial' language 'Write a real scraper by copying and pasting code (30&nbsp;mins)' %}
+        {% doc_link_toc 'LANG_view_guide' language 'Make a view by copying and pasting code (30 mins)' %}
+        <li><a href="{% url tutorials language %}">
+            <h4>Live tutorials</h4>
+            <span>A series of tutorials that run in our online code editor</span>
+        </a></li>
+    </ul>
 </div>
 
-<div class="content half right" id="getting_help">
+<div class="toc even" id="help">
     <h3>Need help?</h3>
-	<p>If you can't find what you want here&hellip;</p>
 	<ul>
-		<li class="faq">Try the <a href="/docs/{{language}}/faq">Frequently Asked Questions</a></li>
-        <li class="irc">Chat to other developers on IRC, <a href="irc://chat.freenode.net/scraperwiki">#scraperwiki</a> on freenode</li>
-	    <li class="google">Email your question to the ScraperWiki&nbsp;<a href="http://groups.google.com/group/scraperwiki">Google&nbsp;Group</a></li>
-	    <li class="pingdom">Something not working? Check our <a href="http://status.scraperwiki.com/">status page</a></li>
-      <li class="stack">Search for answers or ask new questions on <a href="http://stackoverflow.com/questions/tagged/scraperwiki">Stack Overflow</a></li>
-	    <li class="bugs">Go to BitBucket and check out the <a href='http://bitbucket.org/ScraperWiki/scraperwiki/issues'>bug&nbsp;list</a> and <a href="http://bitbucket.org/ScraperWiki/scraperwiki/src">source&nbsp;code</a></li>
-	    <li class="request">Fill out the <a href="{% url request_data %}">request&nbsp;form</a> and we&rsquo;ll get the data for you</li>
+		<li class="faq"><a href="/docs/{{language}}/faq">Try the <strong>Frequently Asked Questions</strong></a></li>
+        <li class="irc"><a href="irc://chat.freenode.net/scraperwiki">Chat to other developers on IRC: <strong>#scraperwiki</strong> on&nbsp;freenode</a></li>
+	    <li class="google"><a href="http://groups.google.com/group/scraperwiki">Email your question to the ScraperWiki <strong>Google&nbsp;Group</strong></a></li>
+	    <li class="pingdom"><a href="http://status.scraperwiki.com/">Something not working? Check our <strong>status page</strong></a></li>
+        <li class="stack"><a href="http://stackoverflow.com/questions/tagged/scraperwiki">Search for answers or ask new questions on <strong>Stack&nbsp;Overflow</strong></a></li>
+	    <li class="bugs"><a href='http://bitbucket.org/ScraperWiki/scraperwiki/issues'>Check out our <strong>bug&nbsp;list and source&nbsp;code</strong> on&nbsp;BitBucket</a></li>
+	    <li class="request"><a href="{% url request_data %}"><strong>Request data</strong>, and we&rsquo;ll get it for&nbsp;you</a></li>
 	</ul>	
 </div>
 
-<br class="clear" />
-
-<div class="content half left index">
+<div class="toc odd" id="scraping_guides">
     <h3>Scraping guides</h3>
     <ul>
-     <li class="doclink">{% doc_link_full 'LANG_csv_guide' language 'Get data from comma-separated spreadsheets' %}</li>
-     <li class="doclink">{% doc_link_full 'LANG_excel_guide' language 'Get data from Excel spreadsheets' %} </li>
-     <li class="doclink">{% doc_link_full 'LANG_css_guide' language 'Get data from web pages using CSS selectors' %}</li>
-     <li class="doclink">{% doc_link_full 'LANG_time_guide' language 'Parse and save dates and times' %}</li>
-     {% if user.is_staff %}
-        {% ifequal language 'python' %}
-            <li class="staff"><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
-        {% endifequal %}
-      {% endif %}
+        {% doc_link_toc 'LANG_csv_guide' language 'Get data from comma-separated spreadsheets' %}</li>
+        {% doc_link_toc 'LANG_excel_guide' language 'Get data from Excel spreadsheets' %} </li>
+        {% doc_link_toc 'LANG_css_guide' language 'Get data from web pages using CSS selectors' %}</li>
+        {% doc_link_toc 'LANG_time_guide' language 'Parse and save dates and times' %}</li>
+        {% if user.is_staff and language == 'python' %}
+            <li class="staff"><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">
+                <h4>Using Mechanize with Python</h4>
+            </a></li>
+        {% endif %}
     </ul>
-
-{% if user.is_staff %}
-    <h3 class="staff">Scraper tools</h3>
-    <ul class="staff">
-     <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml document model viewer</a></li>
-    {% comment %} Not found
-     <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
-    {% endcomment %}
-     <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">Preview of PDF-HTML Tool</a></li>
-     <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">Sqlite Tool</a></li>
-     <li><a href="{% url docscontrib 'postcode_and_geo_cheat_sheet' %}">Postcodes and grid coordinates</a></li>
-    </ul>
-{% endif %}
-
 </div>
 
-<div class="content half right index">
+<div class="toc even" id="reference">
+    <h3>Coders reference</h3>
+    <ul>
+        {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
+        {% doc_link_toc 'LANG_help_documentation' language 'ScraperWiki-specific functions you can use inside a scraper' %}
+        {% doc_link_toc 'LANG_datastore_guide' language 'Everything you can do with the ScraperWiki datastore' %}
+        {% doc_link_toc 'LANG_libraries' language 'eg: Mechanize, Beautiful Soup, Geopy' %}
+        <li><a href="{% url docsexternal %}">
+            <h4>ScraperWiki Web API docs</h4>
+            <span>Build an API query to get data out of ScraperWiki</span>
+        </a></li>
+    </ul>
+</div>
+
+<div class="toc odd" id="viewing_guides">
     <h3>Viewing guides</h3>
     <ul>
-        <li><a href="/docs/html/html_views/">HTML Views 101</a></li>
-        <li><a href="/docs/javascript/ajax_topic_guide/">Using AJAX with ScraperWiki</a></li>
+        <li><a href="/docs/html/html_views/"><h4>HTML Views 101</h4></a></li>
+        <li><a href="/docs/javascript/ajax_topic_guide/"><h4>Using AJAX with ScraperWiki</h4></a></li>
         {% if user.is_staff %}
-        <li class="staff"><a href="/docs/javascript/jquery_topic_guide/">Introduction to jQuery</a></li>
-        <li class="staff"><a href="{% url docs 'gmap_topic_guide' %}">Google maps</a></li>
-        <li class="staff"><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
-        <li class="staff"><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Vector Graphics with Raphaeljs</a></li>
+        <li class="staff"><a href="/docs/javascript/jquery_topic_guide/"><h4>Introduction to jQuery</h4></a></li>
+        <li class="staff"><a href="{% url docs 'gmap_topic_guide' %}"><h4>Google maps</h4></a></li>
+        <li class="staff"><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}"><h4>sqlite_html_cheat_sheet</h4></a></li>
+        <li class="staff"><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}"><h4>Vector Graphics with Raphael.js</h4></a></li>
         {% if language == 'python' %}
-        <li class="staff"><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">Reading querystring parameters</a></li>
+        <li class="staff"><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}"><h4>Reading querystring parameters</h4></a></li>
         {% endif %}
         {% endif %}
     </ul>
 </div>
 
 {% if user.is_staff %}
-<div class="content half right index">
-    <h3 class="staff">View tools</h3>
-    <ul class="staff">
-     <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
+<div class="toc staff even" id="scraper_tools">
+    <h3>Scraper tools</h3>
+    <ul>
+        <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}"><h4>lxml document model viewer</h4></a></li>
+        <!-- <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li> -->
+        <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}"><h4>Preview of PDF-HTML Tool</h4></a></li>
+        <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}"><h4>SQLite Tool</h4></a></li>
+        <li><a href="{% url docscontrib 'postcode_and_geo_cheat_sheet' %}"><h4>Postcodes and grid coordinates</h4></a></li>        
+    </ul>
+</div>
+
+<div class="toc staff odd" id="view_tools">
+    <h3>View tools</h3>
+    <ul>
+        <li><a href="{% url docscontrib 'quickcheck_datastore' %}"><h4>Quickcheck datastore</h4></a></li>
     </ul>
 </div>
 {% endif %}
-
-</div>
 
 
 

@@ -7,13 +7,9 @@
 {% block searchbox %}{{ query }}{% endblock %}
 
 {% block header %}
-	<h2>Search results for <form id="frmSearchResults" class="inline_form" action="/search/" method="POST">
-        {% csrf_token %}        
-        {{ form.q }}
-        <input type="submit" value="Go" />
-    </form></h2>
+	<h2><em>Search</em> / <em>{{ query }}</em></h2>
     <p>
-      {{ scrapers_num_results }} result{{scrapers_num_results|pluralize}} found &bull; <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">Create RSS feed for this search term</a>
+      {{ scrapers_num_results }} result{{scrapers_num_results|pluralize}} found</a>
     </p>
 {% endblock %}
 

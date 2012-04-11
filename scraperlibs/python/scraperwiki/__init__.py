@@ -1,8 +1,6 @@
-import base64
 
 try    : import json
 except : import simplejson as json
-
 
 logfd = None   # set to os.fdopen(3, 'w', 0) for consuming json objects
 
@@ -11,6 +9,14 @@ def dumpMessage(d):
     logfd.write( "JSONRECORD(%d):%s\n" % (len(val), val,) )
     logfd.flush()
 
+class Error(Exception):
+    """All ScraperWiki exceptions are instances of this class
+    (usually via a subclass)."""
+    pass
+
+class CPUTimeExceededError(Error):
+    """CPU time limit exceeded."""
+    pass
 
 from utils import log, scrape, pdftoxml, swimport
 import geo

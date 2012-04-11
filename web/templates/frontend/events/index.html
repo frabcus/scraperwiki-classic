@@ -79,17 +79,16 @@ type="text/javascript"></script>
 {% endblock %}
 
 {% block header %}
-	<h2>ScraperWiki <em>Journalism Data Camps</em></h2>
+	<h2><small>ScraperWiki</small> Journalism Data Camps</h2>
 	<p>Scraping, exploring and liberating data in a city near you.</p>
-	<span class="icon_date">{% now "d" %}</span>
-	<span class="icon_month">{% now "M" %}</span>
 {% endblock %}
 
-{% block content_outer %}
-<div id="page_outer">
-	<div id="page_inner">
+{% block content %}
         <div id="event_sidebar">
-            <ul class="events">
+            <!--<ul class="events">
+            </ul>-->
+            <h2>Past events:</h2>
+            <ul class="events past">
                 <li><a href="/events/jdcdc/" id="jdcdc">
                     <h3>Journalism Data Camp DC</h3>
                     <h4>
@@ -97,9 +96,6 @@ type="text/javascript"></script>
                         <span class="location">Washington, DC</span>
                     </h4>
                 </a></li>
-            </ul>
-            <h2>Past events:</h2>
-            <ul class="events past">
                 <li><a href="/events/ltdmo/" id="ltdmo">
                     <h3>Liberate the Data!</h3>
                     <h4>
@@ -120,8 +116,6 @@ type="text/javascript"></script>
             <div id="googlemap" style="width: 100%; height: 400px"></div>
         </div>
         <br class="clear" />
-    </div>
-</div>
 {% endblock %}
 
 
