@@ -207,11 +207,13 @@ p paramdict
 
            <dt id="cpu_limit">What is the CPU limit, and what do I do if my scraper reaches it?</dt>
            <dd>
-               <p>Each scraper run has a limit of roughly 80 seconds of processing time. 
+               <p>Each script run has a limit of roughly 80 seconds of processing time. 
                After that, in Python and Ruby you will get an exception
                (scraperwiki.CPUTimeExceededError in Python, and
                ScraperWiki::CPUTimeExceededError in Ruby).
-               In PHP it will end "terminated by SIGXCPU".
+               In PHP the script is terminated with the fatal error
+               "Maximum execution time [&hellip;] exceeded". We would love to convert this to an
+               exception, but sadly we can&rsquo;t due to a limitation in PHP.
                </p>
 
                 <p>This exception can be caught, and it can be useful to
@@ -233,7 +235,7 @@ p paramdict
                CPU time when they are scraping, they are mostly
                waiting for web pages to be downloaded, which
                takes essentially no CPU time.  A typical script
-               can scraper thousands of pages before hitting
+               can scrape thousands of pages before hitting
                this CPU limit.
                </p>
            </dd>
