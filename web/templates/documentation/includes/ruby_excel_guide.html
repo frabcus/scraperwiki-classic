@@ -70,7 +70,7 @@ p keys
 
   # only save if it is a full row (rather than a blank line or a note)
   if data['DATE'] != 'DATE' and data['DATE'] != nil and data['FLEET NO'] != nil
-    ScraperWiki.save_sqlite(unique_keys=['rownumber'], data)
+    ScraperWiki::save_sqlite(unique_keys=['rownumber'], data)
   end
 end
 </code>

@@ -49,7 +49,7 @@ data = {
     :birth_datetime =&gt; birth_date,
     :birth_date =&gt; birth_time
 }
-ScraperWiki.save_sqlite(unique_keys=['name'], data=data)
+ScraperWiki::save_sqlite(unique_keys=['name'], data=data)
 </code>
 
 <p>Times are saved as UTC, as SQLite doesn't parse explicit timezones.</p>

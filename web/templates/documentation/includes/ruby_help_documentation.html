@@ -12,7 +12,7 @@
 <p>You can also use any Ruby HTTP library, such as <em>httpclient</em>.</p>
 
 <dl>
-<dt>ScraperWiki.<strong>scrape</strong>(url[, params])</dt>
+<dt>ScraperWiki::<strong>scrape</strong>(url[, params])</dt>
     <dd>Returns the downloaded string from the given url.</dd>
     <dd><var>params</var> are sent using POST if set.
     </dd>
@@ -29,7 +29,7 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
 </p>
 
 <dl>
-<dt>ScraperWiki.<strong>save_sqlite</strong>(unique_keys, data[, table_name="swdata", verbose=2])</dt>
+<dt>ScraperWiki::<strong>save_sqlite</strong>(unique_keys, data[, table_name="swdata", verbose=2])</dt>
     <dd>Saves a data record into the datastore into the table given by table_name.  </dd>
     <dd><var>data</var> is a hash with string or symbol field names as keys;
     <var>unique_keys</var> is an array
@@ -39,21 +39,21 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
     <dd>verbose alters what is shown in the Data tab of the editor.
     </dd>
 
-<dt>ScraperWiki.<strong>attach</strong>(name[, asname])</dt>
+<dt>ScraperWiki::<strong>attach</strong>(name[, asname])</dt>
     <dd><p>Attaches to the datastore of another scraper named
     <var>name</var> (which should be the <em>short-name</em> of the scraper, as it
     appears in the URL of its overview page).</p>
     <p><var>asname</var> is an optional alias for the attached datastore.</p>
     </dd>
 
-<dt>ScraperWiki.<strong>select</strong>(val1[, val2])</dt>
+<dt>ScraperWiki::<strong>select</strong>(val1[, val2])</dt>
     <dd>Executes a select command on the datastore, for example select("* from swdata limit 10").</dd>
     <dd>Returns an array of hashes for the records that have been selected.</dd>
     <dd><var>val2</var> is an optional array of parameters used when the select command contains '?'s.
     </dd>
 
 
-<dt>ScraperWiki.<strong>sqliteexecute</strong>(cmd[, parms])</dt>
+<dt>ScraperWiki::<strong>sqliteexecute</strong>(cmd[, parms])</dt>
     <dd>Executes any arbitrary sqlite command (except attach), for
     example create, delete, insert or drop.</dd>
     <dd><var>parms</var> is an optional array of parameters used
@@ -61,22 +61,22 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
     <dd>(for example, "insert into swdata values (?,?,?)").
     </dd>
 
-<dt>ScraperWiki.<strong>commit</strong>()</dt>
+<dt>ScraperWiki::<strong>commit</strong>()</dt>
     <dd>Commits to the file after a series of execute commands.  (save_sqlite() auto-commits after every action).
     </dd>
 
-<dt>ScraperWiki.<strong>show_tables</strong>([dbname])</dt>
+<dt>ScraperWiki::<strong>show_tables</strong>([dbname])</dt>
     <dd>Returns an array of tables and their schemas in either the current or an attached database.</dd>
 
-<dt>ScraperWiki.<strong>table_info</strong>(name)</dt>
+<dt>ScraperWiki::<strong>table_info</strong>(name)</dt>
     <dd>Returns an array of attributes for each element of the table.</dd>
 
-<dt>ScraperWiki.<strong>save_var</strong>(key, value)</dt>
+<dt>ScraperWiki::<strong>save_var</strong>(key, value)</dt>
     <dd>Saves an arbitrary single value into a sqlite table called "swvariables". 
         Can be used to make scrapers able to continue after an interruption.
     </dd>
 
-<dt>ScraperWiki.<strong>get_var</strong>(key[, default])</dt>
+<dt>ScraperWiki::<strong>get_var</strong>(key[, default])</dt>
     <dd>Retrieves a single value that was saved by <var>save_var</var>.
     </dd>
 
@@ -84,7 +84,7 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
 
 <h3>Views</h3>
 
-<dt>ScraperWiki.<strong>httpresponseheader</strong>(headerkey, headervalue)</dt>
+<dt>ScraperWiki::<strong>httpresponseheader</strong>(headerkey, headervalue)</dt>
     <dd>Set the content-type header to something other than HTML when using a ScraperWiki "view"</dd>
     <dd>(for example "Content-Type", "image/png").
     </dd>
@@ -94,7 +94,7 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
 
 <dl>
 
-<dt>ScraperWiki.<strong>gb_postcode_to_latlng</strong>(postcode)</dt>
+<dt>ScraperWiki::<strong>gb_postcode_to_latlng</strong>(postcode)</dt>
     <dd>Returns an array [lat, lng] in WGS84 coordinates representing the central point of a UK postcode area.
     </dd>
 

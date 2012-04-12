@@ -6,7 +6,7 @@ register = template.Library()
 from documentation.titles import page_titles
 
 @register.simple_tag
-def doc_link_full(template_name, language, title = None, text = None):
+def doc_link_full(template_name, language, title=None, text=None):
     template_name = template_name.replace('LANG', language)
     if not text:
         text = page_titles[template_name][0]
@@ -16,7 +16,7 @@ def doc_link_full(template_name, language, title = None, text = None):
         return '''<a href="/docs/%s/%s">%s</a>''' % (language, template_name, text)
 
 @register.simple_tag
-def doc_link_toc(template_name, language, description = None, text = None):
+def doc_link_toc(template_name, language, description=None, text=None):
     template_name = template_name.replace('LANG', language)
     text = text or page_titles[template_name][0]
     html = '''<a href="/docs/%s/%s"><h4>%s</h4>''' % (language, template_name, text)
