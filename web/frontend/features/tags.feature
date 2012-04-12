@@ -4,7 +4,8 @@ Feature: As a user
   so that others can find them
 
   Scenario: I can click on a tag while on the homepage
-    Given I am on the home page
+    Given the "test_scraper" has the tag "testalicious"
+    And I am on the home page
     When I click the "testalicious" button 
     Then I should be on the testalicious tag page
 

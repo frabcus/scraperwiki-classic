@@ -9,7 +9,7 @@ def when_i_fill_in_the_search_box_with_text(step, text):
     element.fill(text)
     element.type('\n')
 
-@step(u'Given a the "([^"]*)" has the tag "([^"]*)"')
+@step(u'Given the "([^"]*)" has the tag "([^"]*)"')
 def given_a_the_scraper_has_the_tag(step, scraper, tag):
     scraper = Scraper.objects.get(short_name=scraper)
     scraper.settags(tag)

@@ -19,7 +19,7 @@ Feature: As a site visitor
     And I should see a "Request data!" link
 
   Scenario: I should see the popular tags of scrapers
-    Given a the "test_scraper" has the tag "testalicious"
+    Given the "test_scraper" has the tag "testalicious"
     When I visit the home page
     Then I should see "POPULAR TAGS"
     And I should see a "testalicious" link
