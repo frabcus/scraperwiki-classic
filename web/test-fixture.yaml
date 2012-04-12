@@ -166,17 +166,3 @@
     run_interval: -1
   model: codewiki.scraper
   pk: 2
-
-# Tag
-- fields:
-    name: testalicious
-  model: tagging.tag
-  pk: 1
-
-# Tagged item
-- fields:
-    tag: 1
-    object_id: 1
-    content_type: 27
-  model: tagging.taggeditem
-  pk: 1
