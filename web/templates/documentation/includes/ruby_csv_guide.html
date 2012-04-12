@@ -17,7 +17,7 @@ href="http://www.ruby-doc.org/core-1.9.3/String.html#method-i-gsub">.gsub
 method</a>)
 </p>
 
-<code>data = ScraperWiki.scrape("http://s3-eu-west-1.amazonaws.com/ukhmgdata-cabinetoffice/Spend-data-2010-11-01/Spend-Transactions-with-descriptions-HMT-09-Sep-2010.csv")
+<code>data = ScraperWiki::scrape("http://s3-eu-west-1.amazonaws.com/ukhmgdata-cabinetoffice/Spend-data-2010-11-01/Spend-Transactions-with-descriptions-HMT-09-Sep-2010.csv")
 </code>
 
 <p>Load it into the standard Ruby CSV reader. It needs to be an array of lines.</p>
@@ -53,7 +53,7 @@ so that it can then be added and sorted.</p>
 <code>for row in csv
   if row['Transaction Number']
     row['Amount'] = row['Amount'].to_f
-    ScraperWiki.save_sqlite(unique_keys=['Transaction Number', 'Expense Type', 'Expense Area'], row.to_hash)
+    ScraperWiki::save_sqlite(unique_keys=['Transaction Number', 'Expense Type', 'Expense Area'], row.to_hash)
   end
 end
 </code>

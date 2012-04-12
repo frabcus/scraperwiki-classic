@@ -27,13 +27,13 @@ Half way down, in the views section, choose "create a new view" and pick Ruby as
 <p>Before you can read the scraper's datastore from the view, you 
 need to attach to it, using its shortname (the name in its URL).</p>
 
-<code>ScraperWiki.attach("school_life_expectancy_in_years")
+<code>ScraperWiki::attach("school_life_expectancy_in_years")
 </code>
 
 <p>You can attach to as many datastores as you like. Then you can access their
 tables directly from queries.</p>
 
-<code>data = ScraperWiki.select(
+<code>data = ScraperWiki::select(
     "* from school_life_expectancy_in_years.swdata 
     order by years_in_school desc limit 10"
 )

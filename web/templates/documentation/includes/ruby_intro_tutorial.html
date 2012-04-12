@@ -38,7 +38,7 @@ or Mechanize.
 There is also a simple built in {% doc_link_full 'LANG_help_documentation' language 'ScraperWiki function' %} which may be easier to use.
 </p>
 
-<code>html = ScraperWiki.scrape("http://web.archive.org/web/20110514112442/http://unstats.un.org/unsd/demographic/products/socind/education.htm")
+<code>html = ScraperWiki::scrape("http://web.archive.org/web/20110514112442/http://unstats.un.org/unsd/demographic/products/socind/education.htm")
 p html
 </code>
 
@@ -53,9 +53,9 @@ everything that has been downloaded.</p>
 
 <code>require 'nokogiri'
 
-doc = Nokogiri::HTML(html)
+doc = Nokogiri::HTML html
 doc.search("div[@align='left'] tr.tcont").each do |v|
-  cells = v.search('td')
+  cells = v.search 'td'
   data = {
     country: cells[0].inner_html,
     years_in_school: cells[4].inner_html.to_i
@@ -77,7 +77,7 @@ a schema up front.</p>
 <p>Replace "puts data.to_json" in the Nokogiri loop (just before the "end" line)
 with this save command:</p>
 
-<code>  ScraperWiki.save_sqlite(['country'], data)
+<code>  ScraperWiki::save_sqlite(['country'], data)
 </code>
 
 <p>The first argument is the unique keys (just "country" in this case)

@@ -141,13 +141,22 @@
   model: codewiki.code
   pk: 2
 
+# Vault
+- fields:
+    id: 1
+    user: 2
+    name: Prefab Vault
+    plan: individual
+  model: codewiki.vault
+  pk: 1
+
 # User code role for vault scraper
 - fields: 
     code: 2
     role: owner
     user: 1
   model: codewiki.usercoderole
-  pk: 1
+  pk: 2
 
 # Scraper in vault
 - fields: 
@@ -157,17 +166,3 @@
     run_interval: -1
   model: codewiki.scraper
   pk: 2
-
-# Tag
-- fields:
-    name: testalicious
-  model: tagging.tag
-  pk: 1
-
-# Tagged item
-- fields:
-    tag: 1
-    object_id: 1
-    content_type: 27
-  model: tagging.taggeditem
-  pk: 1

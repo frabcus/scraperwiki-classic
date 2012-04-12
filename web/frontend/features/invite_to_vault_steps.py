@@ -92,7 +92,6 @@ def and_i_should_have_a_vault(step):
     step.behave_as("""
                    When I visit the vaults page
                    Then I should see "My #1 Vault"
-                   And I should see "Vault scraper"
                    """)
 
 @step("And the vault owner has been emailed")

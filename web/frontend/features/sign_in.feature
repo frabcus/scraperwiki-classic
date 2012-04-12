@@ -3,7 +3,8 @@ Feature: As someone from the internet
   So that I can start being awesome.
 
 Scenario: I can visit the login page
-  Given I am on the home page
+  Given I am not logged in
+  And I am on the home page
   When I click the login link
   Then I should be on the login page
 

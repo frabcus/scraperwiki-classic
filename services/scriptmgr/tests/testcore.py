@@ -83,7 +83,7 @@ begin
   while true do
     a = x**x
   end
-rescue Exception => ex
+rescue ScraperWiki::Error => ex
   if ex.message.match('CPU')
     puts "CPU exception caught"
   else
@@ -95,4 +95,26 @@ end
         stuff = self.Execute(code, language='ruby')
         output = testbase.console(stuff)
         assert 'CPU exception' in output
+
+
+    def testCPUPHP(self):
+        """Should be able to note CPU fatal error (in PHP)."""
+
+        # This test intentionally takes a few seconds to run.
+
+        # Code is originally from
+        # https://scraperwiki.com/scrapers/cpu-php/edit/
+        code = """<?php
+echo "php started\n";
+set_time_limit(1);
+$x=2;
+while(true) {
+    $a = $x*$x;
+}
+?>
+"""
+
+        stuff = self.Execute(code, language='php')
+        output = testbase.exceptions(stuff)
+        assert 'Maximum execution time' in output
 

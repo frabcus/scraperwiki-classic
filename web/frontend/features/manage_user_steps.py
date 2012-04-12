@@ -5,8 +5,8 @@ from lettuce.django import django_url
 def profile_page(step):
     step.behave_as("""
         And I am on the contact page
-        And I click the "Your Profile" button
         """)
+    world.browser.visit(django_url('/profiles/test'))
 
 @step('Then I should be on my edit profile page')
 def edit_profile_page(step):
