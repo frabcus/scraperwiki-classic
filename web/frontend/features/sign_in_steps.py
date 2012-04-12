@@ -36,7 +36,7 @@ def create_and_login(step, username, password):
     step.behave_as("""
     Given there is a username "%(username)s" with password "%(password)s"
     """ % locals())
-    world.browser.visit(django_url('/contact/'))
+    world.browser.visit(django_url('/docs/'))
     l = world.FakeLogin()
     cookie_data = l.login(username, password) 
     world.browser.driver.add_cookie(cookie_data)
