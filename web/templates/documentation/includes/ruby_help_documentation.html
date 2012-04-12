@@ -104,13 +104,13 @@ scrapers, or extract it <a href="{% url docsexternal %}">through the API</a>.
 
 <dl>
 
-<dt>ScraperWiki.<strong>Error</strong></dt>
+<dt>ScraperWiki::<strong>Error</strong></dt>
     <dd>This is the base class for all exceptions raised by the
     ScraperWiki library code.  Currently there is only one
     subclass used (see below), but we like to leave room for
     future expansion.</dd>
 
-<dt>ScraperWiki.<strong>CPUTimeExceededError</strong></dt>
+<dt>ScraperWiki::<strong>CPUTimeExceededError</strong></dt>
     <dd><p>This is raised when a script running on ScraperWiki has used
     too much CPU time.  This is implemented in a similar fashion
     across all our supported languages and is explained in a bit
