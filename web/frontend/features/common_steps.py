@@ -63,7 +63,6 @@ def and_i_am_on_the_plan(step, plan):
 # Scrapers
 @step(u"(?:When|And) I visit my scraper's overview page$")
 def i_am_on_the_scraper_overview_page(step):
-    world.load_data()
     world.browser.visit(django_url('/scrapers/test_scraper'))
 
 # Seeing matchers

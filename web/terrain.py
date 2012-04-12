@@ -17,11 +17,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 def sync_db(variables):
     if getattr(settings, 'LETTUCE_TESTING', False):
         patch_for_test_db_setup()
-        try:
-            call_command('flush', interactive=False)
-        except DatabaseError:
-            pass # This will occur if the tests are run for the first time
-        load_data()
+        call_command('syncdb', interactive=False, verbosity=0)
 
 @before.harvest
 def set_browser(variables):
@@ -106,9 +102,13 @@ def wait_for_url(url, timeout=5):
     WebDriverWait(world.browser.driver, timeout).until(lambda _d:
       (url in world.browser.url))
 
-@world.absorb
-def load_data():
-    call_command('syncdb', interactive=False, verbosity=0)
+@before.each_scenario
+def load_data(variables):
+    try:
+        call_command('flush', interactive=False)
+    except DatabaseError:
+        pass # This will occur if the tests are run for the first time
+
     call_command('loaddata', 'test-fixture.yaml')
    
 # Not currently used
