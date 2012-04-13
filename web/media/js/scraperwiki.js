@@ -231,11 +231,11 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 			onclose();
 		}
 		$('#alert_outer').slideUp(250);
-		$('#nav_outer').animate({marginTop:0}, 250);
+		$('#nav').animate({marginTop:0}, 250);
 	}).appendTo($alert_inner);
 	if(typeof(duration) == 'string' || typeof(duration) == 'number'){
-		$('#nav_outer').animate({'marginTop': $alert_outer.outerHeight()}, duration);
-		$alert_outer.hide().insertBefore($('#nav_outer'));
+		$('#nav').animate({'marginTop': $alert_outer.outerHeight()}, duration);
+		$alert_outer.hide().insertBefore($('#nav'));
 		$alert_outer.append($alert_inner).animate({
 			height: "show",
 			marginTop: "show",
@@ -244,15 +244,15 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 		    paddingBottom: "show"
 		}, { 
 			step: function(now, fx){
-				$('#nav_outer').css('margin-top', $(fx.elem).outerHeight());
+				$('#nav').css('margin-top', $(fx.elem).outerHeight());
 			}, complete: function(){
-				$('#nav_outer').css('margin-top', $('#alert_outer').outerHeight());
+				$('#nav').css('margin-top', $('#alert_outer').outerHeight());
 			},
 			duration: duration
 		});
 	} else {
-		$alert_outer.append($alert_inner).insertBefore($('#nav_outer'));
-		$('#nav_outer').css('margin-top', $alert_outer.outerHeight());
+		$alert_outer.append($alert_inner).insertBefore($('#nav'));
+		$('#nav').css('margin-top', $alert_outer.outerHeight());
 	}
 	
 }
@@ -630,9 +630,9 @@ $(function(){
 	if($('#alert_outer').length && (!$('#alert_close').length)){
 		$('<a>').attr('id','alert_close').bind('click', function(){ 
 			$('#alert_outer').slideUp(250);
-			$('#nav_outer').animate({marginTop:0}, 250);
+			$('#nav').animate({marginTop:0}, 250);
 		}).appendTo('#alert_inner');
-		$('#nav_outer').css('margin-top', $('#alert_outer').outerHeight());
+		$('#nav').css('margin-top', $('#alert_outer').outerHeight());
 	}
 	
 	$('#compose_user_message').bind('click', function(e){
