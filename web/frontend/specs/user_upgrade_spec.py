@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 def setup():
     global user
-    username,password = 'test','pass'
+    username,password = 'tester','pass'
     user = User.objects.create_user(username, '%s@example.com' % username, password)
 
 def ensure_can_upgrade_account():
@@ -22,7 +22,7 @@ def ensure_can_upgrade_account():
 def ensure_account_upgraded():
     profile = user.get_profile()
     profile.change_plan('corporate')
-    db_user = User.objects.filter(username='test')[0]
+    db_user = User.objects.filter(username=user.username)[0]
     profile = db_user.get_profile()
     
     assert_equals(profile.plan, 'corporate')
@@ -31,5 +31,3 @@ def ensure_account_upgraded():
 def it_should_not_allow_an_invalid_plan():
     profile = user.get_profile()
     profile.change_plan('h0h0h0')
-
-
