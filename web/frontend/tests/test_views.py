@@ -18,11 +18,15 @@ class FrontEndViewsTests(TestCase):
         self.client.login(username='test', password='pass')
         response = self.client.post(reverse('profiles_edit_profile',), 
                                     {'bio' : 'updated bio',
-                                    'alert_frequency' : 99})
+                                    'email' : 'test@example.com',
+                                    'name' : 'Test Testerson',
+                                    'email_on_comments' : 'on',
+                                    'messages' : 'on',
+                                    'alert_frequency' : 2678400})
+        print repr(response.content)
         self.assertEqual(response.status_code, 302)
 
     def test_profile_view(self):
-        user = User(username='test')
         response = self.client.get(reverse('profile', 
                                             kwargs={'username' : 'test'}))
         self.assertEqual(response.status_code, 200)
