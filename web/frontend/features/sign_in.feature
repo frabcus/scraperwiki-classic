@@ -13,6 +13,6 @@ Scenario: I can login with valid details
   And there is a username "test" with password "pass"
   When I fill in my username "test" and my password "pass"
   And I click the page's "Log in" button
-  Then user "test" is logged in
+  Then user "Mr Test" is logged in
   And I should be on my profile page
 
