@@ -18,11 +18,15 @@ class FrontEndViewsTests(TestCase):
         self.client.login(username='test', password='pass')
         response = self.client.post(reverse('profiles_edit_profile',), 
                                     {'bio' : 'updated bio',
-                                    'alert_frequency' : 99})
+                                    'email' : 'test@example.com',
+                                    'name' : 'Test Testerson',
+                                    'email_on_comments' : 'on',
+                                    'messages' : 'on',
+                                    'alert_frequency' : 2678400})
+        print repr(response.content)
         self.assertEqual(response.status_code, 302)
 
     def test_profile_view(self):
-        user = User(username='test')
         response = self.client.get(reverse('profile', 
                                             kwargs={'username' : 'test'}))
         self.assertEqual(response.status_code, 200)
@@ -111,7 +115,7 @@ class FrontEndViewsSearchTests(TestCase):
     def test_scraper_search(self):
         response = self.client.get(reverse('search', kwargs={'q':'test'}))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['scrapers_num_results'], 2)
+        self.assertEqual(response.context['scrapers_num_results'], 1)
     
     def test_user_search_by_human_name(self):
         response = self.client.get(reverse('search', kwargs={'q':'Generalpurpose'}))

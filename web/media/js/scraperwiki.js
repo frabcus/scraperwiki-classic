@@ -278,7 +278,8 @@ function getCookie(c_name){
 
 
 $(function(){
-    
+    if ($('body').hasClass('debug')) showPremiumAccountAlert();	
+
     // If you ever find this comment and you're adding a new page
     // add a new regular expression here and make sure it selects
     // the right .supernav tab :-)
@@ -344,6 +345,7 @@ $(function(){
 		}
     });
     
+    
     setTimeout(function(){
         // clever hack removes the yellow background on auto-filled inputs in Chrome
         if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
@@ -366,6 +368,24 @@ $(function(){
 		newCodeObject($(this));
     });
 	
+    function showPremiumAccountAlert(){
+        status = typeof(getCookie('premiumBuy')) == 'undefined' ? 'new' : getCookie('premiumBuy')
+        alert_slide_time = status == 'shown' ? 0 : 250
+
+        if (status == 'closed' || status == 'clicked') return
+
+        newAlert('Interested in a premium account?', null,
+                {'onclick': function() {
+                               setCookie("premiumBuy", 'clicked', 365)
+                               window.location.replace('/pricing/')
+                            },
+                 'text': '<b>Buy one!</b>'},
+                alert_slide_time,
+                function() { setCookie("premiumBuy", 'closed', 365)}
+        );
+        setCookie("premiumBuy", 'shown', 365)
+    }
+
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
 		$('#more_developer_div').fadeIn(500);
