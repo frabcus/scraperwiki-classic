@@ -86,7 +86,7 @@ function setupCodeOverview(short_name){
 
 function setupCollaborationUI(){
 	$('#privacy_status, #contributors').hide();
-	$('#collaboration ul.buttons a, #header_inner .privacystatus').bind('click', function(e){
+	$('#collaboration ul.buttons a, #header .privacystatus').bind('click', function(e){
 		e.preventDefault();
 		var href = $(this).attr('href');
 		if($(href).is(':visible')){
@@ -253,7 +253,7 @@ function reloadCollaborationUI(auto_enable_tab){
 		if (status == "error") {
 			alert('There was an error refreshing the collaboration UI: ' + xhr.status + " " + xhr.statusText);
 		} else {
-			$("#header_inner p").load(document.location + ' #header_inner p>*', function(response, status, xhr){
+			$("#header p").load(document.location + ' #header p>*', function(response, status, xhr){
 				if (status == "error") {
 					alert('There was an error refreshing the collaboration UI: ' + xhr.status + " " + xhr.statusText);
 				}
@@ -630,7 +630,7 @@ function getTableNames(callback){
 			var count_url, tables;
 		    if (typeof(data) == 'object' && data.error) {
 		        setDataPreviewWarning(data.error); 
-		        $('#header_inner span.totalrows').text("Datastore error");
+		        $('#header span.totalrows').text("Datastore error");
 		    } else if (data.length) {
 		        tables = _.reduce(_.map(data, function(d) {
 		            var t = {}
@@ -645,14 +645,14 @@ function getTableNames(callback){
 		    } else {
 				if($('#id_wiki_type').val() == 'scraper'){
 		        	setDataPreviewWarning("This " + $('#id_wiki_type').val() + " has no data", true);
-		        	$('#header_inner span.totalrows').text("No data");
+		        	$('#header span.totalrows').text("No data");
 				} else {
 					$('div.data').remove();
 				}
 		    }
 		}, error: function(){
 			setDataPreviewWarning("Sorry, we couldn\u2019t connect to the datastore");
-		    $('#header_inner span.totalrows').hide();
+		    $('#header span.totalrows').hide();
 		}
 	});
 }
@@ -676,7 +676,7 @@ function getTableColumnNames(table_name, callback){
 		success: function(data){
 			if (data.error) {
 		        setDataPreviewWarning(data.error); 
-		        $('#header_inner span.totalrows').text("Datastore error");
+		        $('#header span.totalrows').text("Datastore error");
 		    } else {
 		    	callback(data.keys);
 			}
@@ -698,7 +698,7 @@ function getTableRowCounts(tables, callback){
 		success: function(resp){
 			if (resp.error) {
 		        setDataPreviewWarning(resp.error); 
-		        $('#header_inner span.totalrows').text("Datastore error");
+		        $('#header span.totalrows').text("Datastore error");
 		    } else {
 	        	var zipped = _.zip(resp.keys, resp.data[0]);
 	        	callback(_.map(zipped, function(z){
