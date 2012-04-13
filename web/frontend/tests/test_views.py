@@ -13,15 +13,9 @@ import frontend
 from codewiki.models import Scraper, Code
 
 class FrontEndViewsTests(TestCase):
-    fixtures = ['./fixtures/test_data.json']
     
-    def setUp(self):
-        # make a dummy user...
-        user = User(username='test', password='123')
-        user.save()
-        
     def test_profile_edit(self):
-        self.client.login(username='test', password='123')
+        self.client.login(username='test', password='pass')
         response = self.client.post(reverse('profiles_edit_profile',), 
                                     {'bio' : 'updated bio',
                                     'alert_frequency' : 99})
@@ -30,12 +24,12 @@ class FrontEndViewsTests(TestCase):
     def test_profile_view(self):
         user = User(username='test')
         response = self.client.get(reverse('profile', 
-                                            kwargs={'username' : user}))
+                                            kwargs={'username' : 'test'}))
         self.assertEqual(response.status_code, 200)
 
     def test_login(self):
         response = self.client.post(reverse('login'), {'username': 'test',
-                                                       'password': '123'})
+                                                       'password': 'pass'})
         self.assertEqual(response.status_code, 200)
 
     def test_terms(self):
