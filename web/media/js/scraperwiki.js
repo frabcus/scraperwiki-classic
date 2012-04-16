@@ -461,7 +461,7 @@ $(function(){
 		$(this).siblings(':submit').trigger('click');
 	}).siblings(':submit').hide();
 	
-	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
+	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", "").replace(" fourohfour", ""));
 	
 	$('div.vault_users_popover').each(function(i,el){
 		//	This centres the Users Popover underneath the Users toolbar button

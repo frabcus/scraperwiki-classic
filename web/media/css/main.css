@@ -603,6 +603,12 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 	text-shadow: 0 1px 0 #fff;
 }
 
+body.fourohfour #header {
+	background: #ccc url(../images/header_404.jpg) 0 0 no-repeat;
+	height: 158px;
+	text-shadow: 0 1px 10px rgba(0,0,0,0.8);
+}
+
 /* TEMPORARY DEBUG THING */
 
 body.debug.request_data #header {
@@ -643,6 +649,13 @@ body.debug.request_data #header a, body.debug.request_data #header p, body.debug
 
 #header h2 {
 	color: #92b5d8;
+}
+body.fourohfour #header h2 {
+	color: #fff;
+	position: absolute;
+	bottom: 20px;
+	left: 20px;
+	font-size: 28px;
 }
 
 /* TEMPORARY DEBUG THING AGAIN */
@@ -963,6 +976,10 @@ body.frontpage #header:before {
 	width: 918px;
 	background: #fff;
 	margin-bottom: 40px;
+}
+
+body.fourohfour #content {
+	text-align: center;
 }
 
 body.frontpage #content h2 {
