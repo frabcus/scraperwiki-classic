@@ -8,12 +8,12 @@ Feature: Premium Account Alert
     Given I am not logged in
     And I am a "Free" user
     When I visit the home page
-    Then I should see "Interested in a premium account?"
+    Then I should see "new premium accounts"
 
   Scenario: As an anonymous user I should see an alert purveying premium accounts
     Given I am not logged in
     When I visit the home page
-    Then I should see "Interested in a premium account?"
+    Then I should see "new premium accounts"
 
   Scenario: I should be able to stop being shown the premium accounts alert
     Given I am not logged in
@@ -21,7 +21,7 @@ Feature: Premium Account Alert
     When I visit the home page
     And I close the alert
     And I visit the home page
-    Then I should not see "Interested in a premium account?"
+    Then I should not see "new premium accounts"
 
   Scenario: If I click on the Buy button on the premium account alert
     Given I am not logged in
@@ -29,4 +29,4 @@ Feature: Premium Account Alert
     When I visit the home page
     And I click the "Buy one!" button
     And I visit the home page
-    Then I should not see "Interested in a premium account?"
+    Then I should not see "new premium accounts"

@@ -374,15 +374,16 @@ $(function(){
 
         if (status == 'closed' || status == 'clicked') return
 
-        newAlert('Interested in a premium account?', null,
-                {'onclick': function() {
-                               setCookie("premiumBuy", 'clicked', 365)
-                               window.location.replace('/pricing/')
-                            },
-                 'text': '<b>Buy one!</b>'},
-                alert_slide_time,
-                function() { setCookie("premiumBuy", 'closed', 365)}
-        );
+        newAlert('Get private code and hourly scheduling with our <b>new premium accounts</b>&hellip;', null, {
+            'onclick': function() {
+                setCookie("premiumBuy", 'clicked', 365)
+                window.location.replace('/pricing/')
+                if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
+            },
+            'text': '<b>Buy one!</b>'
+        }, alert_slide_time, function() {
+            setCookie("premiumBuy", 'closed', 365)
+        });
         setCookie("premiumBuy", 'shown', 365)
     }
 
