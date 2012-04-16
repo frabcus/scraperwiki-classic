@@ -3556,6 +3556,8 @@ body.data_consultancy #content {
 
 body.data_hub #content {
 	background: #fff url(http://placehold.it/400x240/eee) 0 0 no-repeat;
+	font-size: 18px;
+	line-height: 24px;
 }
 
 body.data_hub .intro {
@@ -3582,7 +3584,9 @@ body.data_hub #content p.first {
 }
 
 body.data_hub .aside,
-body.data_hub blockquote {
+body.data_hub blockquote,
+body.data_hub a.dont_miss_out {
+	display: block;
 	position: relative;
 	width: 360px;
 	padding: 16px 20px 14px 20px;
@@ -3621,8 +3625,6 @@ body.data_hub .features {
 	width: 480px;
 	background: transparent url(http://placehold.it/480x110/eee) 0 20px no-repeat;
 	padding-top: 160px;
-	font-size: 18px;
-	line-height: 24px;
 	color: #333;
 }
 
@@ -3631,12 +3633,13 @@ body.data_hub .features p {
 	margin-bottom: 20px;
 }
 
-body.data_hub blockquote {
+body.data_hub blockquote,
+body.data_hub a.dont_miss_out {
 	float: left;
 	position: relative;
 	width: 450px;
 	padding: 21px 25px 21px 25px;
-	margin-top: 40px;
+	margin: 0 0 20px 0;
 	left: -55px;
 	right: auto;
 	font-size: 20px;
@@ -3661,17 +3664,39 @@ body.data_hub cite:before {
 	opacity: 0.6;
 }
 
-body.data_hub blockquote.microsoft {
-	margin-top: 40px;
+body.data_hub a.dont_miss_out {
+	margin-bottom: 60px;
+	text-align: center;
+	text-indent: 0;
+	text-decoration: none;
+	font-size: 18px;
+	line-height: 26px;
+}
+
+body.data_hub a.dont_miss_out em {
+	font-style: normal;
+	color: #fff;
+	display: inline-block;
+	padding: 2px 15px 2px 15px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	background-color: #e1865a;
+	border-bottom: 1px solid #b2ab86;
+	margin: -4px 0 -3px 5px;
+}
+
+body.data_hub a.dont_miss_out:hover em {
+	background-color: #c36639;
 }
 
 body.data_hub .collaboration {
 	float: right;
-	width: 370px;
+	width: 360px;
 	font-size: 18px;
 	line-height: 24px;
 	color: #333;
-	margin-bottom: 40px;
+	margin-bottom: 50px;
 }
 
 h3.different {
@@ -3683,6 +3708,7 @@ body.data_hub blockquote.rushkoff {
 	right: -55px;
 	float: right;
 	margin: 0;
+	width: 440px;
 }
 
 
