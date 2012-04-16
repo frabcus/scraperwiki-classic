@@ -321,6 +321,9 @@ $(function(){
 			$(this).parents('form').find(':submit').trigger('click');
 		}
     });
+    $('form.subnav.login li.username, form.subnav.login li.password').bind('click', function(){
+        $(this).children('input').focus();
+    });
     
     if($('#nav .search input.text').val() == 'Search code...'){
         $('#nav .search input.text').val('').before('<span class="placeholder">Search code...</span>');
