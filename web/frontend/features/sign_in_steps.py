@@ -10,7 +10,7 @@ def when_i_click_the_login_link(step):
 
 @step('(?:Given|And) there is a username "([^"]*)" with password "([^"]*)"')
 def make_user(step, username, password):
-    if username == 'test':
+    if username in ['test', 'subject']:
         # Should already have been created in the test-fixture
         # fixture file; so no need to create it here.
         return
