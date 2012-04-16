@@ -616,8 +616,8 @@ body.debug.data_consultancy #header,
 body.debug.data_hub #header {
 	color: #a59970;
 	text-shadow: 0 1px 1px #000;
-	background-color: #393d40;
 	background: url(../images/header_businessman.png) 100% 50% no-repeat, url(../images/header_black_gradient.gif) 4px 0px repeat-x;
+	background-color: #393d40;
 	border-color: #3b3e41;
 }
 
@@ -3543,6 +3543,147 @@ body.pricing a#buy:hover em {
 }
 
 
+
+
+/* DATA SERVICES */
+
+body.data_hub #content,
+body.data_consultancy #content {
+	line-height: 1.4em;
+	width: 878px;
+	padding: 40px;
+}
+
+body.data_hub #content {
+	background: #fff url(http://placehold.it/400x240/eee) 0 0 no-repeat;
+}
+
+body.data_hub .intro {
+	margin: 0 0 40px 380px;
+}
+
+body.data_hub .intro h3,
+h3.different {
+	font-weight: normal;
+	font-size: 28px;
+	line-height: 32px;
+	margin-bottom: 10px;
+}
+
+body.data_hub .intro p {
+	font-size: 20px;
+	line-height: 26px;
+	color: #666;
+	margin: 0;
+}
+
+body.data_hub #content p.first {
+	margin-top: 0;
+}
+
+body.data_hub .aside,
+body.data_hub blockquote {
+	position: relative;
+	width: 360px;
+	padding: 16px 20px 14px 20px;
+	margin: 0 0 40px 0;
+	background-color: #fcf9ec;
+	border: 1px solid #f3e7be;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+body.data_hub .aside {
+	float: right;
+	right: -55px;
+	font-size: 15px;
+}
+
+body.data_hub .aside h3 {
+	margin-bottom: 10px;
+	text-align: center;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #e0c052;
+}
+
+body.data_hub .aside li {
+	list-style: disc;
+	padding: 0 0 8px 0;
+}
+
+body.data_hub .aside ul {
+	padding: 0 0 0 20px;
+	margin: 0;
+}
+
+body.data_hub .features {
+	width: 480px;
+	background: transparent url(http://placehold.it/480x110/eee) 0 20px no-repeat;
+	padding-top: 160px;
+	font-size: 18px;
+	line-height: 24px;
+	color: #333;
+}
+
+body.data_hub .features p {
+	margin-top: 0;
+	margin-bottom: 20px;
+}
+
+body.data_hub blockquote {
+	float: left;
+	position: relative;
+	width: 450px;
+	padding: 21px 25px 21px 25px;
+	margin-top: 40px;
+	left: -55px;
+	right: auto;
+	font-size: 20px;
+	line-height: 28px;
+	color: #666;
+	text-indent: -0.3em;
+}
+
+body.data_hub blockquote a {
+	color: #c36639;
+}
+
+body.data_hub cite {
+	float: right;
+	margin-top: 1em;
+	font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+	font-size: 0.8em;
+}
+
+body.data_hub cite:before {
+	content: "~ ";
+	opacity: 0.6;
+}
+
+body.data_hub blockquote.microsoft {
+	margin-top: 40px;
+}
+
+body.data_hub .collaboration {
+	float: right;
+	width: 370px;
+	font-size: 18px;
+	line-height: 24px;
+	color: #333;
+	margin-bottom: 40px;
+}
+
+h3.different {
+	clear: both;
+}
+
+body.data_hub blockquote.rushkoff {
+	left: auto;
+	right: -55px;
+	float: right;
+	margin: 0;
+}
 
 
 /* LOGIN / SIGNUP PAGE */
