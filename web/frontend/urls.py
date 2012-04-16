@@ -41,8 +41,11 @@ urlpatterns = patterns('',
     url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
     url(r'^help/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
     
+    url(r'^data_services/$', redirect_to, {'url': '/data_hub/'}),
     url(r'^request_data/$',frontend_views.request_data, name='request_data'),
     url(r'^request_data/thanks/$',frontend_views.request_data_thanks, name='request_data_thanks'),
+    url(r'^data_hub/$',frontend_views.data_hub, name='data_hub'),
+    url(r'^data_consultancy/$',frontend_views.data_consultancy, name='data_consultancy'),
     
     #hello world
     url(r'^hello_world.html', direct_to_template, {'template': 'frontend/hello_world.html'}, name='help_hello_world'),

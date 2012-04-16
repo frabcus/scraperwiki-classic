@@ -286,14 +286,14 @@ $(function(){
     var urls = {
         '/(about|events|contact)/' : 'about',
         '/status/' : 'admin',
-        '/request_data/': 'data_services',
+        '/(request_data|data_hub|data_consultancy)/': 'data_services',
         '/(profiles|vaults)/' : 'user',
         '/login/' : 'login',
         '.*' : 'code'
     }
     //  TEMPORARY DEBUG THING WHILE WE'RE WORKING ON THE CORPORATE SITE
     if( ! $('body.debug').length ){
-        delete urls['/request_data/'];
+        delete urls['/(request_data|data_hub|data_consultancy)/'];
     }
     $.each(urls, function(index, value){
         var regexp = RegExp(index);

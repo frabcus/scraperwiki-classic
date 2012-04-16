@@ -323,7 +323,7 @@ li.search input.text,
 }
 
 .subnav.login li.login_submit a,
-.subnav.data_services li.request a {
+.subnav.data_services li.request_data a {
 	margin-left: 3px;
 	height: 22px;
 	line-height: 22px;
@@ -360,7 +360,7 @@ li.search input.text,
 	box-shadow: 0 1px 0 #fff;
 }
 
-.subnav.data_services li.request a {
+.subnav.data_services li.request_data a {
 	background-color: #f9d250;
 	border-color: #f0ce5e;
 	font-weight: normal;
@@ -372,11 +372,11 @@ li.search input.text,
 	padding: 0 13px;
 }
 
-.subnav.data_services li.request a:hover {
+.subnav.data_services li.request_data a:hover {
 	background-color: #ffe181;
 }
 
-.subnav.data_services li.request a:active {
+.subnav.data_services li.request_data a:active {
 	position: relative;
 	top: 1px;
 }
@@ -611,7 +611,9 @@ body.fourohfour #header {
 
 /* TEMPORARY DEBUG THING */
 
-body.debug.request_data #header {
+body.debug.request_data #header,
+body.debug.data_consultancy #header,
+body.debug.data_hub #header {
 	color: #a59970;
 	text-shadow: 0 1px 1px #000;
 	background-color: #393d40;
@@ -632,7 +634,9 @@ body.debug.request_data #header {
 
 /* TEMPORARY DEBUG THING */
 
-body.debug.request_data #header:before {
+body.debug.request_data #header:before,
+body.debug.data_consultancy #header:before,
+body.debug.data_hub #header:before {
 	background-color: rgba(255,255,255,0.4);
 }
 
@@ -643,7 +647,9 @@ body.debug.request_data #header:before {
 
 /* TEMPORARY DEBUG THING AGAIN */
 
-body.debug.request_data #header a, body.debug.request_data #header p, body.debug.request_data #header h2 em {
+body.debug.request_data #header a, body.debug.request_data #header p, body.debug.request_data #header h2 em,
+body.debug.data_consultancy #header a, body.debug.data_consultancy #header p, body.debug.data_consultancy #header h2 em,
+body.debug.data_hub #header a, body.debug.data_hub #header p, body.debug.data_hub #header h2 em {
 	color: #fff;
 }
 
@@ -660,7 +666,9 @@ body.fourohfour #header h2 {
 
 /* TEMPORARY DEBUG THING AGAIN */
 
-body.debug.request_data #header h2 {
+body.debug.request_data #header h2,
+body.debug.data_consultancy #header h2,
+body.debug.data_hub #header h2 {
 	color: #a59970;
 }
 

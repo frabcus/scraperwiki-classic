@@ -479,6 +479,12 @@ def request_data_public(request):
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
 
+def data_hub(request):
+    return render_to_response('frontend/data_hub.html', context_instance = RequestContext(request))
+
+def data_consultancy(request):
+    return render_to_response('frontend/data_consultancy.html', context_instance = RequestContext(request))
+
 def generate_recurly_signature(plan_code, account_code):
     signature = recurly.js.sign_subscription(plan_code, account_code)
     return signature
