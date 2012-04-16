@@ -58,7 +58,7 @@
     email_on_comments: false
     features: []
     messages: false
-    name: ""
+    name: "Mr Test"
     plan: individual
     user: 1
   model: frontend.userprofile

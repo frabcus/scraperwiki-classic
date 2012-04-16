@@ -17,7 +17,7 @@ from mock import Mock, patch
 def setup():
     global profile
     global user
-    username,password = 'test','pass'
+    username,password = 'testing','pass'
     user = User.objects.create_user(username, '%s@example.com' % username, password)
     profile = user.get_profile()
 
@@ -44,9 +44,10 @@ def user_plan_create_vault(plan):
     
 @patch('frontend.views.invite_to_vault')
 def ensure_vault_owner_can_invite_new_member_by_email(mock_invite):
+    mock_invite.return_value = 'ok'
     profile.change_plan('corporate')
     vault = profile.create_vault(name='invitevault')
-    email = 'test@example.com'
+    email = 'newuser@example.com'
     factory = helper.RequestFactory()
     url = '/vaults/%s/adduser/%s/' % (vault.id, urllib.quote(email))
     request = factory.get(url, 
@@ -58,14 +59,14 @@ def ensure_vault_owner_can_invite_new_member_by_email(mock_invite):
 @patch.object(EmailMultiAlternatives, 'send')
 def ensure_invite_new_member_sends_email(mock_send):
     vault = profile.create_vault(name='invitevault')
-    email = 'test@example.com'
+    email = 'testing@example.com'
     response = invite_to_vault(user, email, vault)
     assert mock_send.called
 
 @patch.object(EmailMultiAlternatives, 'attach_alternative')
 def ensure_invitation_email_contains_invite_token(mock_email):
     vault = profile.create_vault(name='invitevault')
-    email = 'test@example.com'
+    email = 'testing@example.com'
     response = invite_to_vault(user, email, vault)
     assert re.search("/login/\?t=[a-fA-F0-9]{20}",
                         repr(mock_email.call_args_list))
@@ -86,7 +87,7 @@ def it_should_save_an_invite_token_and_vault_id_and_email_address(mock_email):
 @patch.object(EmailMultiAlternatives, 'attach_alternative')
 def it_should_add_the_user_to_the_vault_on_sign_up(mock_email):
     vault = profile.create_vault(name='invitevault')
-    email = 'test@example.com'
+    email = 'testier@closedblueprints.com'
     response = invite_to_vault(user, email, vault)
 
     token = re.search("/login/\?t=([a-fA-F0-9]{20})",

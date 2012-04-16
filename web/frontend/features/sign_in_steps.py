@@ -10,7 +10,7 @@ def when_i_click_the_login_link(step):
 
 @step('(?:Given|And) there is a username "([^"]*)" with password "([^"]*)"')
 def make_user(step, username, password):
-    if username == 'test':
+    if username in ['test', 'subject']:
         # Should already have been created in the test-fixture
         # fixture file; so no need to create it here.
         return
@@ -36,7 +36,7 @@ def create_and_login(step, username, password):
     step.behave_as("""
     Given there is a username "%(username)s" with password "%(password)s"
     """ % locals())
-    world.browser.visit(django_url('/contact/'))
+    world.browser.visit(django_url('/docs/'))
     l = world.FakeLogin()
     cookie_data = l.login(username, password) 
     world.browser.driver.add_cookie(cookie_data)

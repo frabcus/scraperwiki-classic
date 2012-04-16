@@ -128,9 +128,9 @@
         {% if debug %}
         <div class="subnav data_services">
             <ul>
-                <li class="datahub"><a href="">What is a Data Hub?</a></li>
-                <li class="consultancy"><a href="">Data Consultancy</a></li>
-                <li class="request"><a href="{% url request_data %}">Request Data</a></li>
+                <li class="data_hub"><a href="{% url data_hub %}">What is a Data Hub?</a></li>
+                <li class="data_consultancy"><a href="{% url data_consultancy %}">Data Consultancy</a></li>
+                <li class="request_data"><a href="{% url request_data %}">Request Data</a></li>
             </ul>
         </div>
         {% endif %}

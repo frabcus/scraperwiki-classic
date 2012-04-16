@@ -188,7 +188,8 @@ def webserver(buildout='yes', restart='no'):
     if restart:
         restart_daemon('twister', 'twister.py')
 
-    update_crons()
+    if 'CI' not in os.environ:
+        update_crons()
     deploy_done()
 
 # Currently this is just for the live site, to make the screenshots run

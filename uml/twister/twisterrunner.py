@@ -150,7 +150,7 @@ def MakeRunner(scrapername, guid, language, urlquery, username, code, client, be
 
     jdata = { }
     jdata["code"] = code.replace('\r', '')
-    jdata["cpulimit"] = 80
+    jdata["cpulimit"] = 80 # XXX I don't think this is used at all - FAI
     jdata["draft"] = (not scrapername)
     jdata["username"] = username   # comes through when done with stimulate_run, and we can use this for the dataproxy permissions (whether it can add to the attachables list)
     jdata["language"] = language

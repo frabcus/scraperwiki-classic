@@ -45,7 +45,7 @@ def feature_not_enabled(step, feature):
 
 
 # Payment plan
-@step(u'Given I am an? "([^"]*)" user') 
+@step(u'(?:Given|And) I am an? "([^"]*)" user') 
 def given_i_am_a_plan_user(step, plan):
     plan = plan.replace(' ', '').lower()
     step.behave_as("""
@@ -102,3 +102,9 @@ def i_click_the_button(step, text):
     except splinter.exceptions.ElementDoesNotExist:
         # Sometimes we have an actual button, in which case we end up here.
         world.browser.find_by_value(text).first.click()
+
+# Alerts
+@step(u'(?:Then|And) I close the alert')
+def and_i_close_the_alert(step):
+    world.browser.find_by_css('#alert_close').first.click()
+

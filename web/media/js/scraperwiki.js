@@ -231,11 +231,11 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 			onclose();
 		}
 		$('#alert_outer').slideUp(250);
-		$('#nav_outer').animate({marginTop:0}, 250);
+		$('#nav').animate({marginTop:0}, 250);
 	}).appendTo($alert_inner);
 	if(typeof(duration) == 'string' || typeof(duration) == 'number'){
-		$('#nav_outer').animate({'marginTop': $alert_outer.outerHeight()}, duration);
-		$alert_outer.hide().insertBefore($('#nav_outer'));
+		$('#nav').animate({'marginTop': $alert_outer.outerHeight()}, duration);
+		$alert_outer.hide().insertBefore($('#nav'));
 		$alert_outer.append($alert_inner).animate({
 			height: "show",
 			marginTop: "show",
@@ -244,15 +244,15 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 		    paddingBottom: "show"
 		}, { 
 			step: function(now, fx){
-				$('#nav_outer').css('margin-top', $(fx.elem).outerHeight());
+				$('#nav').css('margin-top', $(fx.elem).outerHeight());
 			}, complete: function(){
-				$('#nav_outer').css('margin-top', $('#alert_outer').outerHeight());
+				$('#nav').css('margin-top', $('#alert_outer').outerHeight());
 			},
 			duration: duration
 		});
 	} else {
-		$alert_outer.append($alert_inner).insertBefore($('#nav_outer'));
-		$('#nav_outer').css('margin-top', $alert_outer.outerHeight());
+		$alert_outer.append($alert_inner).insertBefore($('#nav'));
+		$('#nav').css('margin-top', $alert_outer.outerHeight());
 	}
 	
 }
@@ -278,21 +278,22 @@ function getCookie(c_name){
 
 
 $(function(){
-    
+    if ($('body').hasClass('debug')) showPremiumAccountAlert();	
+
     // If you ever find this comment and you're adding a new page
     // add a new regular expression here and make sure it selects
     // the right .supernav tab :-)
     var urls = {
         '/(about|events|contact)/' : 'about',
         '/status/' : 'admin',
-        '/request_data/': 'data_services',
+        '/(request_data|data_hub|data_consultancy)/': 'data_services',
         '/(profiles|vaults)/' : 'user',
         '/login/' : 'login',
         '.*' : 'code'
     }
     //  TEMPORARY DEBUG THING WHILE WE'RE WORKING ON THE CORPORATE SITE
     if( ! $('body.debug').length ){
-        delete urls['/request_data/'];
+        delete urls['/(request_data|data_hub|data_consultancy)/'];
     }
     $.each(urls, function(index, value){
         var regexp = RegExp(index);
@@ -320,6 +321,9 @@ $(function(){
 			$(this).parents('form').find(':submit').trigger('click');
 		}
     });
+    $('form.subnav.login li.username, form.subnav.login li.password').bind('click', function(){
+        $(this).children('input').focus();
+    });
     
     if($('#nav .search input.text').val() == 'Search code...'){
         $('#nav .search input.text').val('').before('<span class="placeholder">Search code...</span>');
@@ -344,6 +348,7 @@ $(function(){
 		}
     });
     
+    
     setTimeout(function(){
         // clever hack removes the yellow background on auto-filled inputs in Chrome
         if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
@@ -366,6 +371,25 @@ $(function(){
 		newCodeObject($(this));
     });
 	
+    function showPremiumAccountAlert(){
+        status = typeof(getCookie('premiumBuy')) == 'undefined' ? 'new' : getCookie('premiumBuy')
+        alert_slide_time = status == 'shown' ? 0 : 250
+
+        if (status == 'closed' || status == 'clicked') return
+
+        newAlert('Get private code and hourly scheduling with our <b>new premium accounts</b>&hellip;', null, {
+            'onclick': function() {
+                setCookie("premiumBuy", 'clicked', 365)
+                window.location.replace('/pricing/')
+                if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
+            },
+            'text': '<b>Buy one!</b>'
+        }, alert_slide_time, function() {
+            setCookie("premiumBuy", 'closed', 365)
+        });
+        setCookie("premiumBuy", 'shown', 365)
+    }
+
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
 		$('#more_developer_div').fadeIn(500);
@@ -440,7 +464,7 @@ $(function(){
 		$(this).siblings(':submit').trigger('click');
 	}).siblings(':submit').hide();
 	
-	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
+	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", "").replace(" fourohfour", ""));
 	
 	$('div.vault_users_popover').each(function(i,el){
 		//	This centres the Users Popover underneath the Users toolbar button
@@ -630,9 +654,9 @@ $(function(){
 	if($('#alert_outer').length && (!$('#alert_close').length)){
 		$('<a>').attr('id','alert_close').bind('click', function(){ 
 			$('#alert_outer').slideUp(250);
-			$('#nav_outer').animate({marginTop:0}, 250);
+			$('#nav').animate({marginTop:0}, 250);
 		}).appendTo('#alert_inner');
-		$('#nav_outer').css('margin-top', $('#alert_outer').outerHeight());
+		$('#nav').css('margin-top', $('#alert_outer').outerHeight());
 	}
 	
 	$('#compose_user_message').bind('click', function(e){
