@@ -381,13 +381,15 @@ $(function(){
             'onclick': function() {
                 setCookie("premiumBuy", 'clicked', 365)
                 window.location.replace('/pricing/')
-                if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
+                if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Upgrade Alert', 'Buy Now']); }
             },
             'text': '<b>Buy one!</b>'
         }, alert_slide_time, function() {
             setCookie("premiumBuy", 'closed', 365)
+            if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Upgrade Alert', 'Closed']); }
         });
         setCookie("premiumBuy", 'shown', 365)
+        if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Upgrade Alert', 'Shown']); }
     }
 
 	function developer_show(){
