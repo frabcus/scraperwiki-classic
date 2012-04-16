@@ -3711,6 +3711,44 @@ body.data_hub blockquote.rushkoff {
 	width: 440px;
 }
 
+body.data_hub #content div.data_scientists,
+body.data_hub #content div.code,
+body.data_hub #content div.editor {
+	width: 236px;
+	float: left;
+	margin: 30px 55px 40px 0;
+	font-size: 16px;
+	line-height: 22px;
+	padding-top: 160px;
+	background: transparent url(http://placehold.it/220x150/eee) center top no-repeat;
+}
+
+body.data_hub #content div.data_scientists {
+	margin-left: 30px;
+}
+
+body.data_hub #content div.editor {
+	margin-right: 0;
+}
+
+body.data_hub p.consultancy {
+	clear: left;
+	font-size: 16px;
+	line-height: 22px; 
+}
+
+body.data_hub p.consultancy strong {
+	display: block;
+	font-weight: normal;
+	font-size: 21px;
+	line-height: 26px;
+	margin-bottom: 10px;
+	width: 365px;
+	background: transparent url(http://placehold.it/46x46/eee) left center no-repeat;
+	padding-left: 60px;
+}
+
+
 
 /* LOGIN / SIGNUP PAGE */
 
