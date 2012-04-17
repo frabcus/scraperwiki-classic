@@ -3555,7 +3555,7 @@ body.data_consultancy #content {
 }
 
 body.data_hub #content {
-	background: #fff url(http://placehold.it/400x240/eee) 0 0 no-repeat;
+	background: #fff url(../images/data_hub_swoosh.jpg) 0 0 no-repeat;
 	font-size: 18px;
 	line-height: 24px;
 }
@@ -3751,7 +3751,15 @@ body.data_hub #content div.editor {
 	font-size: 16px;
 	line-height: 22px;
 	padding-top: 160px;
-	background: transparent url(http://placehold.it/220x150/eee) center top no-repeat;
+	background: transparent url(../images/data_hub_scientists.jpg) center top no-repeat;
+}
+
+body.data_hub #content div.code {
+	background-image: url(../images/data_hub_code.jpg);
+}
+
+body.data_hub #content div.editor {
+	background-image: url(../images/data_hub_ide.jpg);
 }
 
 body.data_hub #content div.data_scientists {
