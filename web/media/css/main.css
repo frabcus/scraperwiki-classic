@@ -3567,7 +3567,7 @@ body.data_hub .intro {
 body.data_consultancy .intro {
 	text-align: center;
 	padding: 0 140px;
-	margin-bottom: 40px;
+	margin-bottom: 60px;
 }
 
 body.data_hub .intro h3,
@@ -3620,7 +3620,9 @@ body.data_consultancy #agricultural {
 	font-size: 15px;
 }
 
-body.data_consultancy #legal {
+body.data_consultancy #legal,
+body.data_consultancy #sla {
+	clear: left;
 	float: left;
 	left: -55px;
 	font-size: 15px;
@@ -3676,7 +3678,8 @@ body.data_hub a.dont_miss_out {
 	text-indent: -0.3em;
 }
 
-body.data_hub blockquote a {
+body.data_hub blockquote a,
+body.data_consultancy .aside a {
 	color: #c36639;
 }
 
@@ -3774,6 +3777,47 @@ body.data_hub p.consultancy strong {
 	width: 365px;
 	background: transparent url(http://placehold.it/46x46/eee) left center no-repeat;
 	padding-left: 60px;
+}
+
+body.data_consultancy #extraction {
+	padding-top: 20px;
+	width: 470px;
+}
+
+body.data_consultancy #extraction ol {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+body.data_consultancy #extraction li {
+	margin: 20px 0;
+	padding-left: 50px;
+	background: transparent url(http://placehold.it/36/eee) left center no-repeat;
+	font-size: 14px;
+	line-height: 20px;
+}
+
+body.data_consultancy .step h3 {
+	line-height: 36px;
+	background: transparent url(http://placehold.it/36/eee) left center no-repeat;
+	padding-left: 50px;
+	font-size: 24px;
+}
+
+body.data_consultancy #cleaning {
+	clear: both;
+	margin-bottom: 60px;
+}
+
+body.data_consultancy #integration,
+body.data_consultancy #visualisations {
+	float: right;
+	width: 470px;
+}
+
+body.data_consultancy #integration {
+	margin: 30px 0 70px 0;
 }
 
 
