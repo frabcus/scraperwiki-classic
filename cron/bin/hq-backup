@@ -17,6 +17,8 @@ do
   esac
 done
 
+exit
+
 # Only backup to kippax if not on kippax...
 if [ "$host" != "kippax" ]
 then
@@ -25,5 +27,14 @@ then
   suffix=.$(date +\%A | tr '[A-Z]' '[a-z]')
   destdir=swbackup@kippax.scraperwiki.com:/home/swbackup/$(hostname)/
 
-  time rsync "-az${quiet}${verbose}" -e 'ssh -i /root/backup-key.rsa' /root/backup/ "$destdir" -b --suffix="$suffix"
+  if [ "$verbose" == "v" ]
+  then
+    date
+  fi
+  rsync "-az${quiet}${verbose}" -e 'ssh -i /root/backup-key.rsa' /root/backup/ "$destdir" -b --suffix="$suffix"
+  if [ "$verbose" == "v" ]
+  then
+    date
+  fi
 fi
+

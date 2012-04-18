@@ -54,7 +54,7 @@ a.more_link {
 body {
 	padding: 0;
 	margin: 0;
-	min-width: 960px;
+	min-width: 1000px;
 	font-family: Helvetica, Arial, sans-serif;
 	text-align: center;
 	background: #fcfcfc url(../images/f3f3f3_grain.gif) 0 0;
@@ -616,8 +616,8 @@ body.debug.data_consultancy #header,
 body.debug.data_hub #header {
 	color: #a59970;
 	text-shadow: 0 1px 1px #000;
-	background-color: #393d40;
 	background: url(../images/header_businessman.png) 100% 50% no-repeat, url(../images/header_black_gradient.gif) 4px 0px repeat-x;
+	background-color: #393d40;
 	border-color: #3b3e41;
 }
 
@@ -3543,6 +3543,302 @@ body.pricing a#buy:hover em {
 }
 
 
+
+
+/* DATA SERVICES */
+
+body.data_hub #content,
+body.data_consultancy #content {
+	line-height: 1.4em;
+	width: 878px;
+	padding: 40px;
+}
+
+body.data_hub #content {
+	background: #fff url(../images/data_hub_swoosh.jpg) 0 0 no-repeat;
+	font-size: 18px;
+	line-height: 24px;
+}
+
+body.data_hub .intro {
+	margin: 0 0 40px 380px;
+}
+
+body.data_consultancy .intro {
+	text-align: center;
+	padding: 0 140px;
+	margin-bottom: 60px;
+}
+
+body.data_hub .intro h3,
+body.data_consultancy .intro h3,
+h3.different {
+	font-weight: normal;
+	font-size: 28px;
+	line-height: 32px;
+	margin-bottom: 10px;
+}
+
+body.data_hub .intro p,
+body.data_consultancy .intro p {
+	font-size: 20px;
+	line-height: 26px;
+	color: #666;
+	margin: 0;
+}
+
+body.data_consultancy .intro p {
+	font-size: 18px;
+	line-height: 24px;
+	margin: 10px 0 0 0;
+}
+
+body.data_hub #content p.first {
+	margin-top: 0;
+}
+
+body.data_hub .aside,
+body.data_consultancy .aside,
+body.data_hub blockquote,
+body.data_hub a.dont_miss_out {
+	display: block;
+	position: relative;
+	width: 360px;
+	padding: 16px 20px 14px 20px;
+	margin: 0 0 40px 0;
+	background-color: #fcf9ec;
+	border: 1px solid #f3e7be;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+body.data_hub .aside,
+body.data_consultancy #agricultural {
+	float: right;
+	right: -55px;
+	font-size: 15px;
+}
+
+body.data_consultancy #legal,
+body.data_consultancy #sla {
+	clear: left;
+	float: left;
+	left: -55px;
+	font-size: 15px;
+}
+
+body.data_consultancy .aside h4 {
+	font-size: 12px;
+	text-transform: uppercase;
+	color: #c36639;
+}
+
+body.data_hub .aside h3 {
+	margin-bottom: 10px;
+	text-align: center;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #e0c052;
+}
+
+body.data_hub .aside li {
+	list-style: disc;
+	padding: 0 0 8px 0;
+}
+
+body.data_hub .aside ul {
+	padding: 0 0 0 20px;
+	margin: 0;
+}
+
+body.data_hub .features {
+	width: 480px;
+	background: transparent url(http://placehold.it/480x110/eee) 0 20px no-repeat;
+	padding-top: 160px;
+	color: #333;
+}
+
+body.data_hub .features p {
+	margin-top: 0;
+	margin-bottom: 20px;
+}
+
+body.data_hub blockquote,
+body.data_hub a.dont_miss_out {
+	float: left;
+	position: relative;
+	width: 450px;
+	padding: 21px 25px 21px 25px;
+	margin: 0 0 20px 0;
+	left: -55px;
+	right: auto;
+	font-size: 20px;
+	line-height: 28px;
+	color: #666;
+	text-indent: -0.3em;
+}
+
+body.data_hub blockquote a,
+body.data_consultancy .aside a {
+	color: #c36639;
+}
+
+body.data_hub cite {
+	float: right;
+	margin-top: 1em;
+	font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+	font-size: 0.8em;
+}
+
+body.data_hub cite:before {
+	content: "~ ";
+	opacity: 0.6;
+}
+
+body.data_hub a.dont_miss_out {
+	margin-bottom: 60px;
+	text-align: center;
+	text-indent: 0;
+	text-decoration: none;
+	font-size: 18px;
+	line-height: 26px;
+}
+
+body.data_hub a.dont_miss_out em {
+	font-style: normal;
+	color: #fff;
+	display: inline-block;
+	padding: 2px 15px 2px 15px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	background-color: #e1865a;
+	border-bottom: 1px solid #b2ab86;
+	margin: -4px 0 -3px 5px;
+}
+
+body.data_hub a.dont_miss_out:hover em {
+	background-color: #c36639;
+}
+
+body.data_hub .collaboration {
+	float: right;
+	width: 360px;
+	font-size: 18px;
+	line-height: 24px;
+	color: #333;
+	margin-bottom: 50px;
+}
+
+h3.different {
+	clear: both;
+}
+
+body.data_hub blockquote.rushkoff {
+	left: auto;
+	right: -55px;
+	float: right;
+	margin: 0;
+	width: 440px;
+}
+
+body.data_hub #content div.data_scientists,
+body.data_hub #content div.code,
+body.data_hub #content div.editor {
+	width: 236px;
+	float: left;
+	margin: 30px 55px 40px 0;
+	font-size: 16px;
+	line-height: 22px;
+	padding-top: 160px;
+	background: transparent url(../images/data_hub_scientists.jpg) center top no-repeat;
+}
+
+body.data_hub #content div.code {
+	background-image: url(../images/data_hub_code.jpg);
+}
+
+body.data_hub #content div.editor {
+	background-image: url(../images/data_hub_ide.jpg);
+}
+
+body.data_hub #content div.data_scientists {
+	margin-left: 30px;
+}
+
+body.data_hub #content div.editor {
+	margin-right: 0;
+}
+
+body.data_hub p.consultancy {
+	clear: left;
+	font-size: 16px;
+	line-height: 22px; 
+}
+
+body.data_hub p.consultancy strong {
+	display: block;
+	font-weight: normal;
+	font-size: 21px;
+	line-height: 26px;
+	margin-bottom: 10px;
+	width: 365px;
+	background: transparent url(../images/data_hub_plus.jpg) left center no-repeat;
+	padding-left: 60px;
+}
+
+body.data_consultancy #extraction {
+	padding-top: 20px;
+	width: 470px;
+}
+
+body.data_consultancy #extraction ol {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+body.data_consultancy #extraction li {
+	margin: 20px 0;
+	padding-left: 50px;
+	background: transparent url(http://placehold.it/36/eee) left center no-repeat;
+	font-size: 14px;
+	line-height: 20px;
+}
+
+body.data_consultancy .step h3 {
+	line-height: 36px;
+	background: transparent url(../images/data_hub_number_1.gif) 4px center no-repeat;
+	padding-left: 50px;
+	font-size: 24px;
+}
+
+body.data_consultancy #cleaning h3 {
+    background-image: url(../images/data_hub_number_2.gif);
+}
+
+body.data_consultancy #integration h3 {
+    background-image: url(../images/data_hub_number_3.gif);
+}
+
+body.data_consultancy #visualisations h3 {
+    background-image: url(../images/data_hub_number_4.gif);
+}
+
+body.data_consultancy #cleaning {
+	clear: both;
+	margin-bottom: 60px;
+}
+
+body.data_consultancy #integration,
+body.data_consultancy #visualisations {
+	float: right;
+	width: 470px;
+}
+
+body.data_consultancy #integration {
+	margin: 30px 0 70px 0;
+}
 
 
 /* LOGIN / SIGNUP PAGE */
