@@ -3560,6 +3560,10 @@ body.data_hub #content {
 	line-height: 24px;
 }
 
+body.data_consultancy #content {
+    background: #fff url(../images/data_consultancy_swoosh.jpg) 0 20px no-repeat;
+}
+
 body.data_hub .intro {
 	margin: 0 0 40px 380px;
 }
@@ -3568,6 +3572,7 @@ body.data_consultancy .intro {
 	text-align: center;
 	padding: 0 140px;
 	margin-bottom: 60px;
+	text-shadow: 0 0 20px #fff;
 }
 
 body.data_hub .intro h3,
@@ -3653,14 +3658,13 @@ body.data_hub .aside ul {
 
 body.data_hub .features {
 	width: 480px;
-	background: transparent url(http://placehold.it/480x110/eee) 0 20px no-repeat;
-	padding-top: 160px;
 	color: #333;
+	margin-top: 110px;
 }
 
 body.data_hub .features p {
 	margin-top: 0;
-	margin-bottom: 20px;
+	margin-bottom: 40px;
 }
 
 body.data_hub blockquote,
@@ -3799,11 +3803,16 @@ body.data_consultancy #extraction ol {
 }
 
 body.data_consultancy #extraction li {
-	margin: 20px 0;
-	padding-left: 50px;
-	background: transparent url(http://placehold.it/36/eee) left center no-repeat;
-	font-size: 14px;
-	line-height: 20px;
+	padding: 15px 0 10px 50px;
+	background: transparent url(../images/data_hub_tick.gif) left center no-repeat;
+	color: #666;
+	font-size: 15px;
+    line-height: 19px;
+}
+
+body.data_consultancy #extraction li strong {
+    font-weight: normal;
+    color: #c36639;
 }
 
 body.data_consultancy .step h3 {
