@@ -120,7 +120,7 @@
                 <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">Create Code</a></li>
                 <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
                 <li class="pricing"><a href="{% url pricing %}">Premium Accounts</a></li>
-                <li class="request"><a href="{% url request_data %}">Request Data</a></li>
+                {% if not debug %}<li class="request"><a href="{% url request_data %}">Request Data</a></li>{% endif %}
                 <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
                 <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
             </ul>
