@@ -3783,7 +3783,7 @@ body.data_hub p.consultancy strong {
 	line-height: 26px;
 	margin-bottom: 10px;
 	width: 365px;
-	background: transparent url(http://placehold.it/46x46/eee) left center no-repeat;
+	background: transparent url(../images/data_hub_plus.jpg) left center no-repeat;
 	padding-left: 60px;
 }
 
@@ -3808,9 +3808,21 @@ body.data_consultancy #extraction li {
 
 body.data_consultancy .step h3 {
 	line-height: 36px;
-	background: transparent url(http://placehold.it/36/eee) left center no-repeat;
+	background: transparent url(../images/data_hub_number_1.gif) 4px center no-repeat;
 	padding-left: 50px;
 	font-size: 24px;
+}
+
+body.data_consultancy #cleaning h3 {
+    background-image: url(../images/data_hub_number_2.gif);
+}
+
+body.data_consultancy #integration h3 {
+    background-image: url(../images/data_hub_number_3.gif);
+}
+
+body.data_consultancy #visualisations h3 {
+    background-image: url(../images/data_hub_number_4.gif);
 }
 
 body.data_consultancy #cleaning {
