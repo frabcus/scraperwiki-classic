@@ -278,7 +278,7 @@ function getCookie(c_name){
 
 
 $(function(){
-    if ($('body').hasClass('debug')) showPremiumAccountAlert();	
+    showPremiumAccountAlert();	
 
     // If you ever find this comment and you're adding a new page
     // add a new regular expression here and make sure it selects
