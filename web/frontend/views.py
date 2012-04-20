@@ -583,12 +583,10 @@ def confirm_subscription(request):
     return redirect('vault')
 
 def pricing(request):        
-    context = {'self_service_vaults':False, 'anonymous':True}
+    context = {'anonymous':True}
     if request.user.is_authenticated():
         context['anonymous'] = False
-        if request.user.get_profile().has_feature('Self Service Vaults'):
-            context['self_service_vaults'] = True
-            context['current_plan'] = request.user.get_profile().plan
+        context['current_plan'] = request.user.get_profile().plan
     return render_to_response('frontend/pricing.html', context,
       context_instance=RequestContext(request))
 
@@ -666,13 +664,10 @@ def view_vault(request, username=None):
     context['vault_membership']  = request.user.vault_membership.all().exclude(user__id=request.user.id)
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
-    context['self_service_vaults'] = False
-    if request.user.get_profile().has_feature('Self Service Vaults'):
-        context['self_service_vaults'] = True
-        context['current_plan'] = request.user.get_profile().plan
-        context['vaults_remaining_in_plan'] = max(0, maximum_vaults[context['current_plan']] - context['vaults'].count())
-        context['can_add_vault_members'] = ( context['current_plan'] in ('business','corporate',) )
-    
+    context['current_plan'] = request.user.get_profile().plan
+    context['vaults_remaining_in_plan'] = max(0, maximum_vaults[context['current_plan']] - context['vaults'].count())
+    context['can_add_vault_members'] = ( context['current_plan'] in ('business','corporate',) )
+
     context['has_upgraded'] = False
     if request.session.get('recently_upgraded'):
         context['has_upgraded'] = True
