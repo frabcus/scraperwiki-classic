@@ -23,7 +23,7 @@ from django.contrib.auth.models import User
 User._meta.ordering = ['username']
 
 
-from frontend.feeds import LatestCodeObjects, LatestCodeObjectsBySearchTerm, LatestCodeObjectsByTag, CommentsForCode, LatestViewObjects, LatestScraperObjects
+from frontend.feeds import LatestCodeObjects, LatestCodeObjectsBySearchTerm, LatestCodeObjectsByTag, LatestViewObjects, LatestScraperObjects
 
 feeds = {
     'all_code_objects': LatestCodeObjects,
@@ -31,8 +31,6 @@ feeds = {
     'all_views':   LatestViewObjects,        
     'latest_code_objects_by_search_term': LatestCodeObjectsBySearchTerm,
     'latest_code_objects_by_tag': LatestCodeObjectsByTag,
-    'code_object_comments': CommentsForCode,
-    'scraper_comments': CommentsForCode, # Don't remove this, breaks subscribers feeds 
 }
 
 
@@ -46,7 +44,6 @@ urlpatterns = patterns('',
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name="logout"), 
     url(r'^accounts/', include('registration.urls')),
     url(r'^accounts/resend_activation_email/', frontend_views.resend_activation_email, name="resend_activation_email"),
-    url(r'^comments/', include('django.contrib.comments.urls')),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^attachauth', codewiki.views.attachauth), 
     

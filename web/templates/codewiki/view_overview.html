@@ -7,7 +7,6 @@
 {% load markup %}
 {% load month_name %}
 {% load gravatar %}
-{% load comments %}
 {% load history %}
 {% load icanhaz %}
 {% load str_replace %}
@@ -445,45 +444,6 @@
     
 </div>
 {% endcomment %}
-
-<div class="chat" id="chat">
-    {% get_comment_list for scraper as comment_list %}
-    <ul class="titlebar">
-        <li class="first"><h3>{% if comment_list %}This {{scraper.wiki_type}}&rsquo;s chat{% else %}This {{scraper.wiki_type}} has no chat&hellip; yet{% endif %}</h3></li>
-        <li class="clear"></li>
-    </ul>
-        {% if user.is_authenticated %}
-            {% get_comment_form for scraper as form %}
-        <form action="{% comment_form_target %}" method="post" class="add_comment">
-            <input type="hidden" name="next" value="{% url code_overview scraper.wiki_type scraper.short_name %}#chat" />
-           {% show_gravatar user 'medium' %}
-           <div>
-            	<textarea name="comment" id="id_comment" rows="3">Make a comment or ask a question about this {{scraper.wiki_type}}</textarea>
-                {% csrf_token %}
-            	{{ form.content_type }} 
-            	{{ form.object_pk }} 
-            	{{ form.timestamp }} 
-            	{{ form.security_hash }}
-            	<input type="submit" class="button" value="Add" id="id_submit" /> 
-            </div>
-        </form>
-        {% endif %}
-
-    {% if comment_list %}
-      {% for comment in comment_list reversed %} 
-        <div class="user_comment">  
-
-            <p id="comment_{{ comment.id }}">
-                {% show_gravatar comment.user 'medium' %} 
-                {{ comment.comment|escape|urlizetrunc:"100"|linebreaks }}
-            </p>
-            <small>
-                Added by <a href="{% url profile comment.user.username %}">{{ comment.name|escape }}</a>, {{ comment.submit_date|timesince }} ago
-            </small>
-        </div>
-     {% endfor %}
-    {% endif %}
-</div>
 
 <div id="add_view_to_site" style="display:none;">
     <h3>Add this view to your site <span id="copy"></span></h3>
