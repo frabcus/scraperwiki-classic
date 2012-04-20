@@ -286,7 +286,7 @@ $(function(){
     var urls = {
         '/(about|events|contact)/' : 'about',
         '/status/' : 'admin',
-        '/(request_data|data_hub|data_consultancy)/': 'data_services',
+        '/(request_data|data_hub|data_consultancy|pricing)/': 'data_services',
         '/(profiles|vaults)/' : 'user',
         '/login/' : 'login',
         '.*' : 'code'

@@ -611,7 +611,8 @@ body.fourohfour #header {
 
 body.request_data #header,
 body.data_consultancy #header,
-body.data_hub #header {
+body.data_hub #header,
+body.pricing #header {
 	color: #a59970;
 	text-shadow: 0 1px 1px #000;
 	background: url(../images/header_black_gradient.gif) 4px 0px repeat-x;
@@ -633,7 +634,8 @@ body.data_hub #header {
 
 body.request_data #header:before,
 body.data_consultancy #header:before,
-body.data_hub #header:before {
+body.data_hub #header:before,
+body.pricing #header:before {
 	background-color: rgba(255,255,255,0.4);
 }
 
@@ -644,7 +646,8 @@ body.data_hub #header:before {
 
 body.request_data #header a, body.request_data #header p, body.request_data #header h2 em,
 body.data_consultancy #header a, body.data_consultancy #header p, body.data_consultancy #header h2 em,
-body.data_hub #header a, body.data_hub #header p, body.data_hub #header h2 em {
+body.data_hub #header a, body.data_hub #header p, body.data_hub #header h2 em,
+body.pricing #header a, body.pricing #header p, body.pricing #header h2 em {
 	color: #fff;
 }
 
@@ -661,7 +664,8 @@ body.fourohfour #header h2 {
 
 body.request_data #header h2,
 body.data_consultancy #header h2,
-body.data_hub #header h2 {
+body.data_hub #header h2,
+body.pricing #header h2 {
 	color: #a59970;
 }
 
