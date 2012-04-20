@@ -3565,7 +3565,7 @@ body.data_consultancy #content {
 }
 
 body.data_hub .intro {
-	margin: 0 0 40px 380px;
+	margin: 0 0 50px 380px;
 }
 
 body.data_consultancy .intro {
@@ -3618,11 +3618,31 @@ body.data_hub a.dont_miss_out {
 	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
+body.data_hub blockquote {
+	float: left;
+	position: relative;
+	width: 450px;
+	padding: 21px 25px 21px 25px;
+	margin: 0 0 20px 0;
+	left: -55px;
+	right: auto;
+}
+
+body.data_hub blockquote,
+body.data_hub a.dont_miss_out {
+	font-size: 20px;
+	line-height: 28px;
+	color: #666;
+	text-indent: -0.3em;
+}
+
 body.data_hub .aside,
-body.data_consultancy #agricultural {
+body.data_consultancy #agricultural,
+body.data_hub a.dont_miss_out {
 	float: right;
 	right: -55px;
 	font-size: 15px;
+	clear: right;
 }
 
 body.data_consultancy #legal,
@@ -3656,33 +3676,26 @@ body.data_hub .aside ul {
 	margin: 0;
 }
 
-body.data_hub .features {
+body.data_hub .features,
+body.data_hub .collaboration {
 	width: 480px;
 	color: #333;
-	margin-top: 110px;
+	margin-top: 50px;
 }
 
-body.data_hub .features p {
+body.data_hub .collaboration {
 	margin-top: 0;
-	margin-bottom: 40px;
+	margin-bottom: 60px;
 }
 
-body.data_hub blockquote,
-body.data_hub a.dont_miss_out {
-	float: left;
-	position: relative;
-	width: 450px;
-	padding: 21px 25px 21px 25px;
-	margin: 0 0 20px 0;
-	left: -55px;
-	right: auto;
-	font-size: 20px;
-	line-height: 28px;
-	color: #666;
-	text-indent: -0.3em;
+body.data_hub .features p,
+body.data_hub .collaboration p {
+	margin-top: 0;
+	margin-bottom: 30px;
 }
 
 body.data_hub blockquote a,
+body.data_hub .consultancy a,
 body.data_consultancy .aside a {
 	color: #c36639;
 }
@@ -3704,7 +3717,7 @@ body.data_hub a.dont_miss_out {
 	text-align: center;
 	text-indent: 0;
 	text-decoration: none;
-	font-size: 18px;
+	font-size: 16px;
 	line-height: 26px;
 }
 
@@ -3712,7 +3725,7 @@ body.data_hub a.dont_miss_out em {
 	font-style: normal;
 	color: #fff;
 	display: inline-block;
-	padding: 2px 15px 2px 15px;
+	padding: 1px 12px 0 12px;
 	-webkit-border-radius: 20px;
 	-moz-border-radius: 20px;
 	border-radius: 20px;
@@ -3725,7 +3738,7 @@ body.data_hub a.dont_miss_out:hover em {
 	background-color: #c36639;
 }
 
-body.data_hub .collaboration {
+Xbody.data_hub .collaboration {
 	float: right;
 	width: 360px;
 	font-size: 18px;
