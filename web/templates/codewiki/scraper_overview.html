@@ -333,6 +333,7 @@
                                 </td>
                             </tr>
                         	{% else %}
+                        	    {% if self_service_vaults %}
                             <tr class="premium">
                                 <td class="radio"><input type="radio" name="privacy_status" value="vault" id="privacy_vault" disabled="disabled" /></td>
                                 <td>
@@ -341,6 +342,7 @@
                                     <a href="/pricing/" class="upgrade_to_activate">Upgrade to activate &raquo;</a>
                                 </td>
                             </tr>
+                        	    {% endif %}
                             {% endif %}
                         </table>
                         {% if scraper.vault.id %}<input type="hidden" id="current_vault_id" value="{{scraper.vault.id}}" />{% endif %}

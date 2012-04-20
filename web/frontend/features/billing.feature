@@ -11,6 +11,7 @@ Feature: As a person who writes code on ScraperWiki
 
   Scenario: I can choose to purchase the Individual plan
     Given I am a "Free" user
+    And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
     And I click on the "Individual" "Buy now" button
     Then I should be on the individual payment page
@@ -19,6 +20,8 @@ Feature: As a person who writes code on ScraperWiki
   
   Scenario: I can choose to purchase the Business plan
     Given user "test" with password "pass" is logged in
+    And the "Self Service Vaults" feature exists
+    And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
     And I click on the "Business" "Buy now" button
     Then I should be on the business payment page
@@ -27,6 +30,8 @@ Feature: As a person who writes code on ScraperWiki
 
   Scenario: I can choose to purchase the Corporate plan
     Given user "test" with password "pass" is logged in
+    And the "Self Service Vaults" feature exists
+    And I have the "Self Service Vaults" feature enabled
     When I visit the pricing page
     And I click on the "Corporate" "Buy now" button
     Then I should be on the corporate payment page
@@ -56,12 +61,16 @@ Feature: As a person who writes code on ScraperWiki
 
   Scenario: I can see my current plan
     Given user "test" with password "pass" is logged in
+    And the "Self Service Vaults" feature exists
+    And I have the "Self Service Vaults" feature enabled
     And I already have the individual plan
     When I visit the pricing page
     Then I should see "Current plan" in the individual box
     
   Scenario: I can buy a Business plan with a coupon code
     Given user "test" with password "pass" is logged in
+    And the "Self Service Vaults" feature exists
+    And I have the "Self Service Vaults" feature enabled
     And the "Alpha Vault User" feature exists
     And I have the "Alpha Vault User" feature enabled
     When I visit the pricing page

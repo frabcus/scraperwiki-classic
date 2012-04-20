@@ -215,12 +215,18 @@ def code_overview(request, wiki_type, short_name):
 
 
     context['user_can_set_hourly'] = False
+    context['self_service_vaults'] = False
     if request.user.is_authenticated():
         context['user_plan'] = request.user.get_profile().plan
         if context['user_plan'] == 'business' or context['user_plan'] == 'corporate':
             context['user_can_set_hourly'] = True
+        if request.user.get_profile().has_feature('Self Service Vaults'):
+            context['self_service_vaults'] = True
+        else:
+            del(context["schedule_options"][4])
     else:
         context['user_plan'] = None
+        del(context["schedule_options"][4])
 
 
     context["PRIVACY_STATUSES"] = PRIVACY_STATUSES_UI[0:2]  

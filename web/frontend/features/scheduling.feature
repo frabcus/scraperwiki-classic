@@ -45,4 +45,11 @@ Feature: As a person who writes code on ScraperWiki
     When I click the "Edit" button in the scheduling panel
     And I should see "Upgrade to activate"
 
-   # TODO: Scenario for NOT logged in
+ Scenario: If I have a Free account, but no self service feature, then I don't see the hourly option
+    Given I am a "Free" user
+    And I do not have the "Self Service Vaults" feature enabled
+    And I visit my scraper's overview page
+    When I click the "Edit" button in the scheduling panel
+    And I should not see "Run every hour"
+
+  # TODO: Scenario for NOT logged in
