@@ -162,36 +162,6 @@ def code_overview(request, wiki_type, short_name):
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if resp: return resp
     
-    alert_test = request.GET.get('alert', '')
-    if alert_test:
-        from frontend.utilities.messages import send_message        
-        if alert_test == '1':
-            actions = [
-                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),            
-            ]
-            level = 'info'
-        elif alert_test == '2':
-            actions =  [ 
-                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
-            ]
-            level = 'warning'
-        elif alert_test == '3':
-            actions =  [ 
-                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
-            ]
-            level = 'error'
-        else:
-            actions = []
-            
-        send_message( request,{
-            "message": "This is an example " + level + " alert",
-            "level"  :  level,
-            "actions":  actions,
-        })        
-    
     context = {'selected_tab':'overview', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
     context["userrolemap"] = scraper.userrolemap()
