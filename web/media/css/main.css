@@ -154,7 +154,7 @@ body {
 }
 
 .supernav li.data_services.active a {
-	background: #8e9092;
+	background: #393d40;
 	background: -moz-linear-gradient(top, #8e9092 2%, #686b6d 2%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(2%,#8e9092), color-stop(2%,#686b6d));
 	background: -webkit-linear-gradient(top, #8e9092 2%,#686b6d 2%);
@@ -609,11 +609,9 @@ body.fourohfour #header {
 	text-shadow: 0 1px 10px rgba(0,0,0,0.8);
 }
 
-/* TEMPORARY DEBUG THING */
-
-body.debug.request_data #header,
-body.debug.data_consultancy #header,
-body.debug.data_hub #header {
+body.request_data #header,
+body.data_consultancy #header,
+body.data_hub #header {
 	color: #a59970;
 	text-shadow: 0 1px 1px #000;
 	background: url(../images/header_businessman.png) 100% 50% no-repeat, url(../images/header_black_gradient.gif) 4px 0px repeat-x;
@@ -632,11 +630,9 @@ body.debug.data_hub #header {
 	background-color: #fff;
 }
 
-/* TEMPORARY DEBUG THING */
-
-body.debug.request_data #header:before,
-body.debug.data_consultancy #header:before,
-body.debug.data_hub #header:before {
+body.request_data #header:before,
+body.data_consultancy #header:before,
+body.data_hub #header:before {
 	background-color: rgba(255,255,255,0.4);
 }
 
@@ -645,11 +641,9 @@ body.debug.data_hub #header:before {
 	font-style: normal;
 }
 
-/* TEMPORARY DEBUG THING AGAIN */
-
-body.debug.request_data #header a, body.debug.request_data #header p, body.debug.request_data #header h2 em,
-body.debug.data_consultancy #header a, body.debug.data_consultancy #header p, body.debug.data_consultancy #header h2 em,
-body.debug.data_hub #header a, body.debug.data_hub #header p, body.debug.data_hub #header h2 em {
+body.request_data #header a, body.request_data #header p, body.request_data #header h2 em,
+body.data_consultancy #header a, body.data_consultancy #header p, body.data_consultancy #header h2 em,
+body.data_hub #header a, body.data_hub #header p, body.data_hub #header h2 em {
 	color: #fff;
 }
 
@@ -664,11 +658,9 @@ body.fourohfour #header h2 {
 	font-size: 28px;
 }
 
-/* TEMPORARY DEBUG THING AGAIN */
-
-body.debug.request_data #header h2,
-body.debug.data_consultancy #header h2,
-body.debug.data_hub #header h2 {
+body.request_data #header h2,
+body.data_consultancy #header h2,
+body.data_hub #header h2 {
 	color: #a59970;
 }
 
@@ -1447,14 +1439,9 @@ body.profiles.edit #features li input {
 
 /* REQUEST DATA PAGES */
 
-/* TEMPORARY DEBUG THING AGAIN */
-
 body.request_data #content {
 	padding: 40px 84px;
 	width: 790px;
-}
-
-body.debug.request_data #content {
 	border-color: #aaa;
 }
 
@@ -1464,10 +1451,8 @@ body.debug.request_data #content {
     margin-left: 192px;
 }
 
-/* TEMPORARY DEBUG THING AGAIN */
-
 #request_form,
-body.debug.request_data #public_request {
+body.request_data #public_request {
 	width: 393px;
 	float: right;
 	background-color: #F4F8FB;
