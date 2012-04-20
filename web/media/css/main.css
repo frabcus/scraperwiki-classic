@@ -154,7 +154,7 @@ body {
 }
 
 .supernav li.data_services.active a {
-	background: #8e9092;
+	background-color: #686b6d;
 	background: -moz-linear-gradient(top, #8e9092 2%, #686b6d 2%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(2%,#8e9092), color-stop(2%,#686b6d));
 	background: -webkit-linear-gradient(top, #8e9092 2%,#686b6d 2%);
@@ -609,13 +609,13 @@ body.fourohfour #header {
 	text-shadow: 0 1px 10px rgba(0,0,0,0.8);
 }
 
-/* TEMPORARY DEBUG THING */
-
-body.debug.request_data #header,
-body.debug.data_consultancy #header,
-body.debug.data_hub #header {
+body.request_data #header,
+body.data_consultancy #header,
+body.data_hub #header,
+body.pricing #header {
 	color: #a59970;
 	text-shadow: 0 1px 1px #000;
+	background: url(../images/header_black_gradient.gif) 4px 0px repeat-x;
 	background: url(../images/header_businessman.png) 100% 50% no-repeat, url(../images/header_black_gradient.gif) 4px 0px repeat-x;
 	background-color: #393d40;
 	border-color: #3b3e41;
@@ -632,11 +632,10 @@ body.debug.data_hub #header {
 	background-color: #fff;
 }
 
-/* TEMPORARY DEBUG THING */
-
-body.debug.request_data #header:before,
-body.debug.data_consultancy #header:before,
-body.debug.data_hub #header:before {
+body.request_data #header:before,
+body.data_consultancy #header:before,
+body.data_hub #header:before,
+body.pricing #header:before {
 	background-color: rgba(255,255,255,0.4);
 }
 
@@ -645,11 +644,10 @@ body.debug.data_hub #header:before {
 	font-style: normal;
 }
 
-/* TEMPORARY DEBUG THING AGAIN */
-
-body.debug.request_data #header a, body.debug.request_data #header p, body.debug.request_data #header h2 em,
-body.debug.data_consultancy #header a, body.debug.data_consultancy #header p, body.debug.data_consultancy #header h2 em,
-body.debug.data_hub #header a, body.debug.data_hub #header p, body.debug.data_hub #header h2 em {
+body.request_data #header a, body.request_data #header p, body.request_data #header h2 em,
+body.data_consultancy #header a, body.data_consultancy #header p, body.data_consultancy #header h2 em,
+body.data_hub #header a, body.data_hub #header p, body.data_hub #header h2 em,
+body.pricing #header a, body.pricing #header p, body.pricing #header h2 em {
 	color: #fff;
 }
 
@@ -664,11 +662,10 @@ body.fourohfour #header h2 {
 	font-size: 28px;
 }
 
-/* TEMPORARY DEBUG THING AGAIN */
-
-body.debug.request_data #header h2,
-body.debug.data_consultancy #header h2,
-body.debug.data_hub #header h2 {
+body.request_data #header h2,
+body.data_consultancy #header h2,
+body.data_hub #header h2,
+body.pricing #header h2 {
 	color: #a59970;
 }
 
@@ -1447,14 +1444,9 @@ body.profiles.edit #features li input {
 
 /* REQUEST DATA PAGES */
 
-/* TEMPORARY DEBUG THING AGAIN */
-
 body.request_data #content {
 	padding: 40px 84px;
 	width: 790px;
-}
-
-body.debug.request_data #content {
 	border-color: #aaa;
 }
 
@@ -1464,10 +1456,8 @@ body.debug.request_data #content {
     margin-left: 192px;
 }
 
-/* TEMPORARY DEBUG THING AGAIN */
-
 #request_form,
-body.debug.request_data #public_request {
+body.request_data #public_request {
 	width: 393px;
 	float: right;
 	background-color: #F4F8FB;
@@ -3560,14 +3550,19 @@ body.data_hub #content {
 	line-height: 24px;
 }
 
+body.data_consultancy #content {
+    background: #fff url(../images/data_consultancy_swoosh.jpg) 0 20px no-repeat;
+}
+
 body.data_hub .intro {
-	margin: 0 0 40px 380px;
+	margin: 0 0 50px 380px;
 }
 
 body.data_consultancy .intro {
 	text-align: center;
 	padding: 0 140px;
 	margin-bottom: 60px;
+	text-shadow: 0 0 20px #fff;
 }
 
 body.data_hub .intro h3,
@@ -3613,11 +3608,31 @@ body.data_hub a.dont_miss_out {
 	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
+body.data_hub blockquote {
+	float: left;
+	position: relative;
+	width: 450px;
+	padding: 21px 25px 21px 25px;
+	margin: 0 0 20px 0;
+	left: -55px;
+	right: auto;
+}
+
+body.data_hub blockquote,
+body.data_hub a.dont_miss_out {
+	font-size: 20px;
+	line-height: 28px;
+	color: #666;
+	text-indent: -0.3em;
+}
+
 body.data_hub .aside,
-body.data_consultancy #agricultural {
+body.data_consultancy #agricultural,
+body.data_hub a.dont_miss_out {
 	float: right;
 	right: -55px;
 	font-size: 15px;
+	clear: right;
 }
 
 body.data_consultancy #legal,
@@ -3651,34 +3666,26 @@ body.data_hub .aside ul {
 	margin: 0;
 }
 
-body.data_hub .features {
+body.data_hub .features,
+body.data_hub .collaboration {
 	width: 480px;
-	background: transparent url(http://placehold.it/480x110/eee) 0 20px no-repeat;
-	padding-top: 160px;
 	color: #333;
+	margin-top: 50px;
 }
 
-body.data_hub .features p {
+body.data_hub .collaboration {
 	margin-top: 0;
-	margin-bottom: 20px;
+	margin-bottom: 60px;
 }
 
-body.data_hub blockquote,
-body.data_hub a.dont_miss_out {
-	float: left;
-	position: relative;
-	width: 450px;
-	padding: 21px 25px 21px 25px;
-	margin: 0 0 20px 0;
-	left: -55px;
-	right: auto;
-	font-size: 20px;
-	line-height: 28px;
-	color: #666;
-	text-indent: -0.3em;
+body.data_hub .features p,
+body.data_hub .collaboration p {
+	margin-top: 0;
+	margin-bottom: 30px;
 }
 
 body.data_hub blockquote a,
+body.data_hub .consultancy a,
 body.data_consultancy .aside a {
 	color: #c36639;
 }
@@ -3700,7 +3707,7 @@ body.data_hub a.dont_miss_out {
 	text-align: center;
 	text-indent: 0;
 	text-decoration: none;
-	font-size: 18px;
+	font-size: 16px;
 	line-height: 26px;
 }
 
@@ -3708,7 +3715,7 @@ body.data_hub a.dont_miss_out em {
 	font-style: normal;
 	color: #fff;
 	display: inline-block;
-	padding: 2px 15px 2px 15px;
+	padding: 1px 12px 0 12px;
 	-webkit-border-radius: 20px;
 	-moz-border-radius: 20px;
 	border-radius: 20px;
@@ -3721,7 +3728,7 @@ body.data_hub a.dont_miss_out:hover em {
 	background-color: #c36639;
 }
 
-body.data_hub .collaboration {
+Xbody.data_hub .collaboration {
 	float: right;
 	width: 360px;
 	font-size: 18px;
@@ -3799,11 +3806,16 @@ body.data_consultancy #extraction ol {
 }
 
 body.data_consultancy #extraction li {
-	margin: 20px 0;
-	padding-left: 50px;
-	background: transparent url(http://placehold.it/36/eee) left center no-repeat;
-	font-size: 14px;
-	line-height: 20px;
+	padding: 15px 0 10px 50px;
+	background: transparent url(../images/data_hub_tick.gif) left center no-repeat;
+	color: #666;
+	font-size: 15px;
+    line-height: 19px;
+}
+
+body.data_consultancy #extraction li strong {
+    font-weight: normal;
+    color: #c36639;
 }
 
 body.data_consultancy .step h3 {

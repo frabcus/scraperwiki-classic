@@ -26,7 +26,7 @@
 
 {% if vaults.count %}
 <div id="my_vaults">
-    <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: {% if self_service_vaults and vaults_remaining_in_plan %}<a id="new_vault" href="/vaults/new/">Create a new vault</a>{% else %}{%if self_service_vaults %}<a id="upgrade_plan" href="/pricing/">Upgrade to create more vaults</a>{% endif %}{% endif %}</h2>
+    <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: {% if vaults_remaining_in_plan %}<a id="new_vault" href="/vaults/new/">Create a new vault</a>{% else %}<a id="upgrade_plan" href="/pricing/">Upgrade to create more vaults</a>{% endif %}</h2>
     {% for vault in vaults.all %}
     <div class="vault">
         
@@ -91,7 +91,7 @@
     {% endfor %}
 </div>
 {% else %}
-{% if self_service_vaults and vaults_remaining_in_plan %}
+{% if vaults_remaining_in_plan %}
 <div id="my_vaults">
     <h2>You don&rsquo;t have any vaults of your own <a id="new_vault" href="/vaults/new/">Create a new vault</a></h2>
 </div>

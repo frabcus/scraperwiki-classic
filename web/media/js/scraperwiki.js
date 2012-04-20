@@ -278,7 +278,7 @@ function getCookie(c_name){
 
 
 $(function(){
-    if ($('body').hasClass('debug')) showPremiumAccountAlert();	
+    showPremiumAccountAlert();	
 
     // If you ever find this comment and you're adding a new page
     // add a new regular expression here and make sure it selects
@@ -286,14 +286,10 @@ $(function(){
     var urls = {
         '/(about|events|contact)/' : 'about',
         '/status/' : 'admin',
-        '/(request_data|data_hub|data_consultancy)/': 'data_services',
+        '/(request_data|data_hub|data_consultancy|pricing)/': 'data_services',
         '/(profiles|vaults)/' : 'user',
         '/login/' : 'login',
         '.*' : 'code'
-    }
-    //  TEMPORARY DEBUG THING WHILE WE'RE WORKING ON THE CORPORATE SITE
-    if( ! $('body.debug').length ){
-        delete urls['/(request_data|data_hub|data_consultancy)/'];
     }
     $.each(urls, function(index, value){
         var regexp = RegExp(index);
