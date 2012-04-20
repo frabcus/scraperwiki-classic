@@ -154,7 +154,7 @@ body {
 }
 
 .supernav li.data_services.active a {
-	background: #393d40;
+	background-color: #686b6d;
 	background: -moz-linear-gradient(top, #8e9092 2%, #686b6d 2%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(2%,#8e9092), color-stop(2%,#686b6d));
 	background: -webkit-linear-gradient(top, #8e9092 2%,#686b6d 2%);
@@ -614,6 +614,7 @@ body.data_consultancy #header,
 body.data_hub #header {
 	color: #a59970;
 	text-shadow: 0 1px 1px #000;
+	background: url(../images/header_black_gradient.gif) 4px 0px repeat-x;
 	background: url(../images/header_businessman.png) 100% 50% no-repeat, url(../images/header_black_gradient.gif) 4px 0px repeat-x;
 	background-color: #393d40;
 	border-color: #3b3e41;
