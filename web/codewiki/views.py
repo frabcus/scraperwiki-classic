@@ -91,12 +91,6 @@ def getscraperor404(request, short_name, action, do_check=True):
     return scraper
 
 
-def comments(request, wiki_type, short_name):
-    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
-    if resp: return resp
-    return HttpResponseRedirect(reverse('code_overview', kwargs={'wiki_type':wiki_type,'short_name':short_name}) + '#chat') 
-
-
 def populate_itemlog(scraper, run_count=-1):
     itemlog = [ ]
     if run_count != -1:

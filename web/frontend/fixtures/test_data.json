@@ -108,69 +108,6 @@
         }
     }, 
     {
-        "pk": 25, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_comment", 
-            "name": "Can add comment", 
-            "content_type": 9
-        }
-    }, 
-    {
-        "pk": 29, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_commentflag", 
-            "name": "Can add comment flag", 
-            "content_type": 10
-        }
-    }, 
-    {
-        "pk": 28, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "can_moderate", 
-            "name": "Can moderate comments", 
-            "content_type": 9
-        }
-    }, 
-    {
-        "pk": 26, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_comment", 
-            "name": "Can change comment", 
-            "content_type": 9
-        }
-    }, 
-    {
-        "pk": 30, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_commentflag", 
-            "name": "Can change comment flag", 
-            "content_type": 10
-        }
-    }, 
-    {
-        "pk": 27, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_comment", 
-            "name": "Can delete comment", 
-            "content_type": 9
-        }
-    }, 
-    {
-        "pk": 31, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_commentflag", 
-            "name": "Can delete comment flag", 
-            "content_type": 10
-        }
-    }, 
-    {
         "pk": 13, 
         "model": "auth.permission", 
         "fields": {

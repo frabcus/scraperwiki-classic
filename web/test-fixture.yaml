@@ -47,7 +47,6 @@
     beta_user: false
     bio: 
     created_at: 2012-02-15 17:15:23
-    email_on_comments: false
     features: []
     messages: false
     name: "Mr Test"
@@ -61,7 +60,6 @@
     beta_user: false
     bio: 
     created_at: 2012-02-15 17:15:23
-    email_on_comments: false
     features: []
     messages: false
     name: ""

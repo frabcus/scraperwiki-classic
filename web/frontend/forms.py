@@ -59,8 +59,6 @@ class UserProfileForm(forms.ModelForm):
                                         choices = email_intervals)
     bio = forms.CharField(label="A bit about you", widget=forms.Textarea(), required=False)
     email = forms.EmailField(label="Email Address")
-    email_on_comments = forms.BooleanField(required=False, 
-                                        label="Do you wish to receive email notifications when someone comments on your scrapers?", )    
     messages = forms.BooleanField(required=False, 
                                         label="Would you like to be able to send and receive messages through ScraperWiki?", )
     features = forms.ModelMultipleChoiceField(required=False,
@@ -75,7 +73,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('bio', 'name', 'email_on_comments', 'messages', 'features')
+        fields = ('bio', 'name', 'messages', 'features')
 
     def save(self, *args, **kwargs):
         self.user.email = self.cleaned_data['email']
