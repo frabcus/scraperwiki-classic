@@ -210,20 +210,10 @@ def code_overview(request, wiki_type, short_name):
 
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
-    try:
-        beta_user = request.user.get_profile().beta_user
-    except frontend.models.UserProfile.DoesNotExist:
-        beta_user = False
-    except AttributeError:  # happens with AnonymousUser which has no get_profile function!
-        beta_user = False
-
     context['forked_to'] = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').order_by('-created_at')[:5]
     context['forked_to_total'] = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').count()
 
     context['forked_to_remainder'] = int(models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').count()) - 5;    
-
-    #if dataproxy:
-    #    dataproxy.close()
 
     try:
         event = ScraperRunEvent.objects.filter(scraper=scraper).order_by('-last_run')[0]
