@@ -100,9 +100,7 @@
         <h1><a href="{% url frontpage %}">ScraperWiki</a></h1>
         <ul class="supernav">
             <li class="code"><a href="{% url frontpage %}">Code</a></li>
-            {% if debug %}
             <li class="data_services"><a href="/data_services/">Data Services</a></li>
-            {% endif %}
             <li class="about"><a href="{% url about %}">About</a></li>
             {% if user.is_staff %}
             <li class="admin"><a>Admin</a></li>
@@ -120,12 +118,10 @@
                 <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">Create Code</a></li>
                 <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
                 <li class="pricing"><a href="{% url pricing %}">Premium Accounts</a></li>
-                {% if not debug %}<li class="request"><a href="{% url request_data %}">Request Data</a></li>{% endif %}
                 <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
                 <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
             </ul>
         </div>
-        {% if debug %}
         <div class="subnav data_services">
             <ul>
                 <li class="data_hub"><a href="{% url data_hub %}">What is a Data Hub?</a></li>
@@ -133,7 +129,6 @@
                 <li class="request_data"><a href="{% url request_data %}">Request Data</a></li>
             </ul>
         </div>
-        {% endif %}
         <div class="subnav about">
             <ul>
                 <li class="about"><a href="{% url about %}">About ScraperWiki</a></li>
