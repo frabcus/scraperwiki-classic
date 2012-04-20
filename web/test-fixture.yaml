@@ -8,14 +8,6 @@
   model: sessions.session
   pk: 588c189e47a6799773e2c667c7917453
 
-# Feature
-- fields: 
-    description: 
-    name: Self Service Vaults
-    public: true
-  model: frontend.feature
-  pk: 1
-
 # User
 - fields: 
     date_joined: 2012-02-15 16:41:17

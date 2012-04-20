@@ -50,7 +50,6 @@ def given_i_am_a_plan_user(step, plan):
     plan = plan.replace(' ', '').lower()
     step.behave_as("""
     Given user "test" with password "pass" is logged in
-    And I have the "Self Service Vaults" feature enabled
     And I am on the "%s" plan
     """ % plan)
 

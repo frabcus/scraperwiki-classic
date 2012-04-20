@@ -12,8 +12,6 @@ Feature: As a scraper owner
 
   Scenario: I can see the upgrade button (Free user)
     Given I am a "Free" user
-    And the "Self Service Vaults" feature exists
-    And I have the "Self Service Vaults" feature enabled
     And I visit my scraper's overview page
     When I click the privacy button
     And I click the change privacy button
@@ -22,8 +20,6 @@ Feature: As a scraper owner
   # Picking Business as an example of a paid-up user.
   Scenario: I can't see the upgrade button (Business user)
     Given I am a "Business" user
-    And the "Self Service Vaults" feature exists
-    And I have the "Self Service Vaults" feature enabled
     And I visit my scraper's overview page
     When I click the privacy button
     And I click the change privacy button
