@@ -11,6 +11,7 @@
 
 	{% compress js %}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.12.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
@@ -117,7 +118,7 @@
             <ul>
                 <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">New Scraper</a></li>
                 <li class="create"><a data-wiki_type="view" href="#" class="editor_scraper">New View</a></li>
-                <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Scrapers &amp; Views</a></li>
+                <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Scrapers</a></li>
                 <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
                 <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
             </ul>
@@ -126,7 +127,7 @@
             <ul>
                 <li class="data_hub"><a href="{% url data_hub %}">What is a Data Hub?</a></li>
                 <li class="data_consultancy"><a href="{% url data_consultancy %}">Data Consultancy</a></li>
-                    <li class="pricing"><a href="{% url pricing %}">Premium Accounts</a></li>
+                <li class="pricing"><a href="{% url pricing %}">Premium Accounts</a></li>
                 <li class="request_data"><a href="{% url request_data %}">Request Data</a></li>
             </ul>
         </div>
@@ -160,12 +161,12 @@
         {% if user.is_authenticated %}
         <div class="subnav user">
             <ul>
-                <li class="profile"><a href="{% url profile user.username %}">Your profile</a></li>
+                <li class="profile"><a href="{% url profile user.username %}">Your Scrapers</a></li>
                 {% if user.vaults.count > 0 or request.user.vault_membership.count %}
-                <li class="vaults"><a href="{% url vault %}">Your vaults</a></li>
+                <li class="vaults"><a href="{% url vault %}">Your Vaults</a></li>
                 {% endif %}
-                <li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
-                <li class="logout"><a href="{% url logout %}?next_page=/">Log out</a></li>
+                <li class="feedback"><a href="{% url contact_form %}">Give Feedback</a></li>
+                <li class="logout"><a href="{% url logout %}?next_page=/">Log Out</a></li>
             </ul>
         </div>
         {% else %}
@@ -206,18 +207,19 @@
 				<dt>Business</dt>
 				<dd>
 					<ul>
-						<li><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Browse data']); }">Browse data</a></li>
-						<li><a href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Request data']); }">Request data</a></li>
-						<li><a href="{% url pricing %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Pricing']); }">Pricing</a></li>
+						<li><a href="{% url data_hub %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'What is a data hub?']); }">What is a Data Hub?</a></li>
+                        <li><a href="{% url data_consultancy %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Data consultancy']); }">Data Consultancy</a></li>
+                        <li><a href="{% url pricing %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Pricing']); }">Premium Accounts</a></li>
+                        <li><a href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Request data']); }">Request Data</a></li>
 					</ul>
 				</dd>
 				<dt>Developers</dt>
 				<dd>
 					<ul>
 					    <li><a data-wiki_type="scraper" href="#" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new scraper']); }">Create new scraper</a> / <a data-wiki_type="view" href="#" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new view']); }">view</a></li>
+    					<li><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Browse scrapers']); }">Browse scrapers</a></li>
+						<li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Docs &amp; tutorials']); }">Help &amp; Docs</a></li>
 						<li><a href="{% url docsexternal %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'API']); }">API</a></li>
-						<li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Docs &amp; tutorials']); }">Docs &amp; tutorials</a></li>
-						<li><a href="{% url docs 'faq' %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'FAQ']); }">FAQ</a></li>
 						<li><a href="http://groups.google.com/group/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Discussion group']); }">Discussion group</a></li>
 						<li><a href="http://status.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Status page']); }">Status</a></li>
 					</ul>

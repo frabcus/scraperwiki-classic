@@ -91,12 +91,6 @@ def getscraperor404(request, short_name, action, do_check=True):
     return scraper
 
 
-def comments(request, wiki_type, short_name):
-    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
-    if resp: return resp
-    return HttpResponseRedirect(reverse('code_overview', kwargs={'wiki_type':wiki_type,'short_name':short_name}) + '#chat') 
-
-
 def populate_itemlog(scraper, run_count=-1):
     itemlog = [ ]
     if run_count != -1:
@@ -168,36 +162,6 @@ def code_overview(request, wiki_type, short_name):
     scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if resp: return resp
     
-    alert_test = request.GET.get('alert', '')
-    if alert_test:
-        from frontend.utilities.messages import send_message        
-        if alert_test == '1':
-            actions = [
-                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),            
-            ]
-            level = 'info'
-        elif alert_test == '2':
-            actions =  [ 
-                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
-            ]
-            level = 'warning'
-        elif alert_test == '3':
-            actions =  [ 
-                ("Secondary", reverse('code_overview', args=[wiki_type, short_name]), True,),
-                ("Primary", reverse('code_overview', args=[wiki_type, short_name]), False,),                
-            ]
-            level = 'error'
-        else:
-            actions = []
-            
-        send_message( request,{
-            "message": "This is an example " + level + " alert",
-            "level"  :  level,
-            "actions":  actions,
-        })        
-    
     context = {'selected_tab':'overview', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
     context["userrolemap"] = scraper.userrolemap()
@@ -246,20 +210,10 @@ def code_overview(request, wiki_type, short_name):
 
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
-    try:
-        beta_user = request.user.get_profile().beta_user
-    except frontend.models.UserProfile.DoesNotExist:
-        beta_user = False
-    except AttributeError:  # happens with AnonymousUser which has no get_profile function!
-        beta_user = False
-
     context['forked_to'] = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').order_by('-created_at')[:5]
     context['forked_to_total'] = models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').count()
 
     context['forked_to_remainder'] = int(models.Scraper.objects.filter(forked_from=scraper).exclude(privacy_status='deleted').exclude(privacy_status='private').count()) - 5;    
-
-    #if dataproxy:
-    #    dataproxy.close()
 
     try:
         event = ScraperRunEvent.objects.filter(scraper=scraper).order_by('-last_run')[0]

@@ -7,10 +7,10 @@ Feature: As a user
     And I am on my profile page
     When I click the "Edit Profile & Settings" button
     Then I should be on my edit profile page
-    And I should see "YOUR PROFILE"
+    And I should see "Back to your scrapers"
 
    Scenario: I can see my profile if I have no scrapers
     Given user "subject" with password "pass" is logged in
     And I am on my profile page
     # on the nav bar
-    Then I should see "Your profile"
+    Then I should see "Your Scrapers"

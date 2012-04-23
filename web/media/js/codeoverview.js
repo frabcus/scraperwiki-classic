@@ -335,34 +335,7 @@ $(function(){
 
     setupDataPreviews();	
 	setupCollaborationUI();
-	setupScheduleUI();	
-	
-    $('li.viewsource a').bind('click', function(e){
-		e.preventDefault();
-		var url = $(this).attr('href');
-		$.get(url, function(data){
-	        $.modal('<pre id="viewsource">' + htmlEscape(data) + '</pre>', {
-	            overlayClose: true, 
-	            autoResize: true,
-	            overlayCss: { cursor:"auto" },
-				onShow: function(dialog){
-					/* should this go in onOpen? */
-					dialog.data.find('pre').snippet($('span.language').attr('rel'), {style:"vim", clipboard: "/media/js/ZeroClipboard.swf"});
-				},
-				onOpen: function(dialog) {
-					dialog.data.show();
-					dialog.overlay.fadeIn(200);
-					dialog.container.fadeIn(200);
-				},
-				onClose: function(dialog) {
-					dialog.container.fadeOut(200);
-					dialog.overlay.fadeOut(200, function(){
-						$.modal.close();
-					});
-				}
-	        });
-	    });
-	});
+	setupScheduleUI();
 	
 	$('li.share .embed a').bind('click', function(e){
 		e.preventDefault();
@@ -541,24 +514,6 @@ $(function(){
 			cache: false
 		});
 	});
-	
-	//	Only do magic placeholder stuff if there's actually a
-	//	comment box to work with (box only present for logged in users)
-	if($('#id_comment').length){
-		$('#id_comment').bind('focus', function(){
-			console.log($(this).data('placeholder'));
-			if($(this).val() == $(this).data('placeholder')){
-				$(this).val('').css('color', '#000');
-			} else {
-				$(this).css('color', '#000');
-			}
-		}).bind('blur', function(){
-			if($(this).val() == ''){
-				$(this).val($(this).data('placeholder')).css('color','#666');
-			}
-		}).data('placeholder', $('#id_comment').val()).css('color', '#666');
-	}
-	
 });
 
 function setupTabFolding(){

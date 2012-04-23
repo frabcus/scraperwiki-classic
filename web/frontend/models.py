@@ -61,9 +61,6 @@ class UserProfile(models.Model):
     
     features         = models.ManyToManyField( "Feature", related_name='features', null=True, blank=True )
     
-    # If someone comments on an item this user owns, this specifies whether they 
-    # should receive the email
-    email_on_comments = models.BooleanField( default=False )
     messages = models.BooleanField( default=False )
         
     objects = models.Manager()

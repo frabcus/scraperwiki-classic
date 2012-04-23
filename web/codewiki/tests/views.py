@@ -53,15 +53,6 @@ class ScraperViewsTests(TestCase):
         self.assertEqual(response.status_code, 302) 
         
     
-    def test_scraper_comments(self):
-        self._ensure_repo_exists( 'test_scraper')
-            
-        response = self.client.get(reverse('scraper_comments',
-                            kwargs={'wiki_type':'scraper',
-                                    'short_name': 'test_scraper'}))
-        # this redirects to the overview page now
-        self.assertEqual(response.status_code, 302) 
-
     def test_scraper_all_tags(self):
         response = self.client.get(reverse('all_tags'))
         self.assertEqual(response.status_code, 200)

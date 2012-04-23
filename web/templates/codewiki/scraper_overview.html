@@ -7,7 +7,6 @@
 {% load markup %}
 {% load month_name %}
 {% load gravatar %}
-{% load comments %}
 {% load history %}
 {% load icanhaz %}
 {% load str_replace %}
@@ -26,8 +25,6 @@
 
 {% block css %}<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/code_overview.css" />
 <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-dataTables.css" />{% endblock %}
-
-{% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/code_object_comments/{{ scraper.short_name }}" />{% endblock %}
 
 {% block javascript %}
     {% if not debug %}
@@ -118,7 +115,7 @@
 <ul class="toolbar">
     <li class="edit"><a href="{% url editor_edit scraper.wiki_type scraper.short_name %}" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Edit</a></li>
     <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
-    <li class="viewsource"><a href="/editor/raw/{{ scraper.short_name }}" rel="nofollow">View Source</a></li>
+    <li class="viewsource"><!--[if !IE]> --><a href="view-source:{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><!-- <![endif]--><!-- [if IE]><a href="{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><![endif]--></li>
     <li class="share">
         <a><img src="{{ MEDIA_URL }}images/icons/share.png" width="16" height="16" alt="">Share</a>
         <div class="share_popover">
@@ -517,46 +514,6 @@
     </div>
     
 </div>
-
-<div class="chat" id="chat">
-    {% get_comment_list for scraper as comment_list %}
-    <ul class="titlebar">
-        <li class="first"><h3>{% if comment_list %}This {{scraper.wiki_type}}&rsquo;s chat{% else %}This {{scraper.wiki_type}} has no chat&hellip; yet{% endif %}</h3></li>
-        <li class="clear"></li>
-    </ul>
-        {% if user.is_authenticated %}
-            {% get_comment_form for scraper as form %}
-        <form action="{% comment_form_target %}" method="post" class="add_comment">
-            <input type="hidden" name="next" value="{% url code_overview scraper.wiki_type scraper.short_name %}#chat" />
-           {% show_gravatar user 'medium' %}
-           <div>
-            	<textarea name="comment" id="id_comment" rows="3">Make a comment or ask a question about this scraper</textarea>
-                {% csrf_token %}
-            	{{ form.content_type }} 
-            	{{ form.object_pk }} 
-            	{{ form.timestamp }} 
-            	{{ form.security_hash }}
-            	<input type="submit" class="button" value="Add" id="id_submit" /> 
-            </div>
-        </form>
-        {% endif %}
-
-    {% if comment_list %}
-      {% for comment in comment_list reversed %} 
-        <div class="user_comment">  
-
-            <p id="comment_{{ comment.id }}">
-                {% show_gravatar comment.user 'medium' %} 
-                {{ comment.comment|escape|urlizetrunc:"100"|linebreaks }}
-            </p>
-            <small>
-                Added by <a href="{% url profile comment.user.username %}">{{ comment.name|escape }}</a>, {{ comment.submit_date|timesince }} ago
-            </small>
-        </div>
-     {% endfor %}
-    {% endif %}
-</div>
-
 
 {% endblock %}
 

@@ -20,7 +20,6 @@ class FrontEndViewsTests(TestCase):
                                     {'bio' : 'updated bio',
                                     'email' : 'test@example.com',
                                     'name' : 'Test Testerson',
-                                    'email_on_comments' : 'on',
                                     'messages' : 'on',
                                     'alert_frequency' : 2678400})
         print repr(response.content)
