@@ -17,7 +17,7 @@
 
 {% block header %}
 	<h2>{% show_gravatar user 'medium' %} <em>Profiles</em> / <a href="{% url profile user.username %}">{{profile.display_name}}</a> / <a href="{% url profiles_edit_profile %}">Edit</a></h2>
-	<p><a href="{% url profile user.username %}">Back to Profile</a></p>
+	<p><a href="{% url profile user.username %}">Back to your scrapers</a></p>
 {% endblock %}
 
 {% block content %}
