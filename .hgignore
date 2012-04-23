@@ -30,6 +30,7 @@ syntax: regexp
 ^web/editor/code_runner.py$
 ^web/python$
 ^web/pip-log.txt$
+^web/recuro/xerokey.py$
 ^web/media/src/scraperwiki.tar.gz
 ^share/doc/urlgrabber-3.1.0/
 ^services/scriptmgr/test/
