@@ -335,34 +335,7 @@ $(function(){
 
     setupDataPreviews();	
 	setupCollaborationUI();
-	setupScheduleUI();	
-	
-    $('li.viewsource a').bind('click', function(e){
-		e.preventDefault();
-		var url = $(this).attr('href');
-		$.get(url, function(data){
-	        $.modal('<pre id="viewsource">' + htmlEscape(data) + '</pre>', {
-	            overlayClose: true, 
-	            autoResize: true,
-	            overlayCss: { cursor:"auto" },
-				onShow: function(dialog){
-					/* should this go in onOpen? */
-					dialog.data.find('pre').snippet($('span.language').attr('rel'), {style:"vim", clipboard: "/media/js/ZeroClipboard.swf"});
-				},
-				onOpen: function(dialog) {
-					dialog.data.show();
-					dialog.overlay.fadeIn(200);
-					dialog.container.fadeIn(200);
-				},
-				onClose: function(dialog) {
-					dialog.container.fadeOut(200);
-					dialog.overlay.fadeOut(200, function(){
-						$.modal.close();
-					});
-				}
-	        });
-	    });
-	});
+	setupScheduleUI();
 	
 	$('li.share .embed a').bind('click', function(e){
 		e.preventDefault();
