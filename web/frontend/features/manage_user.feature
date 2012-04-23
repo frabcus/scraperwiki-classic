@@ -13,4 +13,4 @@ Feature: As a user
     Given user "subject" with password "pass" is logged in
     And I am on my profile page
     # on the nav bar
-    Then I should see "Your scrapers"
+    Then I should see "Your Scrapers"
