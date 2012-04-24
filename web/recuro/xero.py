@@ -58,6 +58,7 @@ class XeroPrivateClient(oauth2.Client):
         oauth2.Client.__init__(self, consumer, token, proxy_info=proxy_info)
         self.set_signature_method(SignatureMethod_RSA(rsa_key))
 
-    def request(self, path, method='GET'):
+    def request(self, path, **k):
         sup = super(XeroPrivateClient, self)
-        return sup.request("https://api.xero.com/api.xro/2.0%s" % path, method)
+        return sup.request("https://api.xero.com/api.xro/2.0%s" % path,
+          **k)
