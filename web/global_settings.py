@@ -111,6 +111,7 @@ SCRAPERWIKI_APPS = [
     'cropper',
     'kpi',
     'documentation',
+    'recuro',
     #'devserver',
 ]
 
