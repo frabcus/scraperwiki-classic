@@ -1,12 +1,9 @@
 from recuro import xero
-from django.conf import settings
 
 session = None
 def setup():
     global session
-    session = xero.XeroPrivateClient(settings.XERO_CONSUMER_KEY,
-                             settings.XERO_CONSUMER_SECRET,
-                             settings.XERO_RSA_KEY)
+    session = xero.XeroPrivateClient()
 
 def it_can_import_xero():
     from recuro import xero
@@ -29,9 +26,7 @@ def it_can_post_an_xml_contact():
               <Name>Test Testerson</Name>
             </Contact>
             """
-    client = Contact(settings.XERO_CONSUMER_KEY,
-                             settings.XERO_CONSUMER_SECRET,
-                             settings.XERO_RSA_KEY)
+    client = Contact()
     resp, content = client.save()
     print repr(content)
     assert resp['status'] == '200'

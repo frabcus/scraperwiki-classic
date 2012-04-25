@@ -6,15 +6,19 @@ from StringIO import StringIO
 from M2Crypto import RSA
 from M2Crypto.BIO import MemoryBuffer
 import oauth2
+from django.conf import settings
 
 class XeroPrivateClient(oauth2.Client):
     """
     Xero client for Private Application integration
     """
-    def __init__(self, consumer_key, consumer_secret,
-                rsa_key, proxy_host=None, proxy_port=None):
+    def __init__(self, proxy_host=None, proxy_port=None):
         """Instantiate an authorised session to xero.
         """
+        consumer_key = settings.XERO_CONSUMER_KEY
+        consumer_secret = settings.XERO_CONSUMER_SECRET
+        rsa_key = settings.XERO_RSA_KEY
+
         if proxy_host and proxy_port:
             proxy_info = httplib2.ProxyInfo(socks.PROXY_TYPE_HTTP, proxy_host,
                      proxy_port)
