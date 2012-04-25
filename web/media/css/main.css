@@ -610,7 +610,7 @@ body.fourohfour #header {
 }
 
 body.request_data #header,
-body.data_consultancy #header,
+body.data_consulting #header,
 body.data_hub #header,
 body.pricing #header {
 	color: #a59970;
@@ -633,7 +633,7 @@ body.pricing #header {
 }
 
 body.request_data #header:before,
-body.data_consultancy #header:before,
+body.data_consulting #header:before,
 body.data_hub #header:before,
 body.pricing #header:before {
 	background-color: rgba(255,255,255,0.4);
@@ -645,7 +645,7 @@ body.pricing #header:before {
 }
 
 body.request_data #header a, body.request_data #header p, body.request_data #header h2 em,
-body.data_consultancy #header a, body.data_consultancy #header p, body.data_consultancy #header h2 em,
+body.data_consulting #header a, body.data_consulting #header p, body.data_consulting #header h2 em,
 body.data_hub #header a, body.data_hub #header p, body.data_hub #header h2 em,
 body.pricing #header a, body.pricing #header p, body.pricing #header h2 em {
 	color: #fff;
@@ -663,7 +663,7 @@ body.fourohfour #header h2 {
 }
 
 body.request_data #header h2,
-body.data_consultancy #header h2,
+body.data_consulting #header h2,
 body.data_hub #header h2,
 body.pricing #header h2 {
 	color: #a59970;
@@ -3538,7 +3538,7 @@ body.pricing a#buy:hover em {
 /* DATA SERVICES */
 
 body.data_hub #content,
-body.data_consultancy #content {
+body.data_consulting #content {
 	line-height: 1.4em;
 	width: 878px;
 	padding: 40px;
@@ -3550,15 +3550,15 @@ body.data_hub #content {
 	line-height: 24px;
 }
 
-body.data_consultancy #content {
-    background: #fff url(../images/data_consultancy_swoosh.jpg) 0 20px no-repeat;
+body.data_consulting #content {
+    background: #fff url(../images/data_consulting_swoosh.jpg) 0 20px no-repeat;
 }
 
 body.data_hub .intro {
 	margin: 0 0 50px 380px;
 }
 
-body.data_consultancy .intro {
+body.data_consulting .intro {
 	text-align: center;
 	padding: 0 140px;
 	margin-bottom: 60px;
@@ -3566,7 +3566,7 @@ body.data_consultancy .intro {
 }
 
 body.data_hub .intro h3,
-body.data_consultancy .intro h3,
+body.data_consulting .intro h3,
 h3.different {
 	font-weight: normal;
 	font-size: 28px;
@@ -3575,14 +3575,14 @@ h3.different {
 }
 
 body.data_hub .intro p,
-body.data_consultancy .intro p {
+body.data_consulting .intro p {
 	font-size: 20px;
 	line-height: 26px;
 	color: #666;
 	margin: 0;
 }
 
-body.data_consultancy .intro p {
+body.data_consulting .intro p {
 	font-size: 18px;
 	line-height: 24px;
 	margin: 10px 0 0 0;
@@ -3593,7 +3593,7 @@ body.data_hub #content p.first {
 }
 
 body.data_hub .aside,
-body.data_consultancy .aside,
+body.data_consulting .aside,
 body.data_hub blockquote,
 body.data_hub a.dont_miss_out {
 	display: block;
@@ -3627,7 +3627,7 @@ body.data_hub a.dont_miss_out {
 }
 
 body.data_hub .aside,
-body.data_consultancy #agricultural,
+body.data_consulting #agricultural,
 body.data_hub a.dont_miss_out {
 	float: right;
 	right: -55px;
@@ -3635,15 +3635,15 @@ body.data_hub a.dont_miss_out {
 	clear: right;
 }
 
-body.data_consultancy #legal,
-body.data_consultancy #sla {
+body.data_consulting #legal,
+body.data_consulting #sla {
 	clear: left;
 	float: left;
 	left: -55px;
 	font-size: 15px;
 }
 
-body.data_consultancy .aside h4 {
+body.data_consulting .aside h4 {
 	font-size: 12px;
 	text-transform: uppercase;
 	color: #c36639;
@@ -3685,8 +3685,8 @@ body.data_hub .collaboration p {
 }
 
 body.data_hub blockquote a,
-body.data_hub .consultancy a,
-body.data_consultancy .aside a {
+body.data_hub .consulting a,
+body.data_consulting .aside a {
 	color: #c36639;
 }
 
@@ -3777,13 +3777,13 @@ body.data_hub #content div.editor {
 	margin-right: 0;
 }
 
-body.data_hub p.consultancy {
+body.data_hub p.consulting {
 	clear: left;
 	font-size: 16px;
 	line-height: 22px; 
 }
 
-body.data_hub p.consultancy strong {
+body.data_hub p.consulting strong {
 	display: block;
 	font-weight: normal;
 	font-size: 21px;
@@ -3794,18 +3794,18 @@ body.data_hub p.consultancy strong {
 	padding-left: 60px;
 }
 
-body.data_consultancy #extraction {
+body.data_consulting #extraction {
 	padding-top: 20px;
 	width: 470px;
 }
 
-body.data_consultancy #extraction ol {
+body.data_consulting #extraction ol {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-body.data_consultancy #extraction li {
+body.data_consulting #extraction li {
 	padding: 15px 0 10px 50px;
 	background: transparent url(../images/data_hub_tick.gif) left center no-repeat;
 	color: #666;
@@ -3813,42 +3813,42 @@ body.data_consultancy #extraction li {
     line-height: 19px;
 }
 
-body.data_consultancy #extraction li strong {
+body.data_consulting #extraction li strong {
     font-weight: normal;
     color: #c36639;
 }
 
-body.data_consultancy .step h3 {
+body.data_consulting .step h3 {
 	line-height: 36px;
 	background: transparent url(../images/data_hub_number_1.gif) 4px center no-repeat;
 	padding-left: 50px;
 	font-size: 24px;
 }
 
-body.data_consultancy #cleaning h3 {
+body.data_consulting #cleaning h3 {
     background-image: url(../images/data_hub_number_2.gif);
 }
 
-body.data_consultancy #integration h3 {
+body.data_consulting #integration h3 {
     background-image: url(../images/data_hub_number_3.gif);
 }
 
-body.data_consultancy #visualisations h3 {
+body.data_consulting #visualisations h3 {
     background-image: url(../images/data_hub_number_4.gif);
 }
 
-body.data_consultancy #cleaning {
+body.data_consulting #cleaning {
 	clear: both;
 	margin-bottom: 60px;
 }
 
-body.data_consultancy #integration,
-body.data_consultancy #visualisations {
+body.data_consulting #integration,
+body.data_consulting #visualisations {
 	float: right;
 	width: 470px;
 }
 
-body.data_consultancy #integration {
+body.data_consulting #integration {
 	margin: 30px 0 70px 0;
 }
 
