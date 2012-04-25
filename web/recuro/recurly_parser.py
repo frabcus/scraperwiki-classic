@@ -2,11 +2,13 @@ import string
 
 from lxml import etree,html
 
+from recuro.xero import XeroPrivateClient
+
 def parse(body):
     if '<new_account_notification>' in body:
         return Contact(body)
 
-class Contact():
+class Contact(XeroPrivateClient):
     def __init__(self, xml):
         doc = html.fromstring(xml.encode('UTF-8'))
         self.number = doc.xpath('//account_code')[0].text

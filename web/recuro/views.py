@@ -4,5 +4,6 @@ from recuro import recurly_parser
 
 @csrf_exempt
 def notify(request):
-    recurly_parser.parse(request.raw_post_data)
+    obj = recurly_parser.parse(request.raw_post_data)
+    obj.save()
     return HttpResponse("ok", mimetype="text/plain")

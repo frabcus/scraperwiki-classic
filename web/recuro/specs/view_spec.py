@@ -1,4 +1,5 @@
 from recuro.views import notify
+from recuro.xero import XeroPrivateClient
 
 import helper
 from mock import Mock, patch
@@ -12,6 +13,12 @@ def it_should_pass_the_notification_to_the_notification_parser(mock_parse):
     rf = helper.RequestFactory()
     mock_request = rf.post('/notify/', dict(body=recurly_xml))
     response = notify(mock_request)
-    print repr(mock_parse.called)
     assert mock_parse.called
+
+@patch.object(XeroPrivateClient, 'save')
+def it_should_call_save_on_the_contact(mock_save):
+    rf = helper.RequestFactory()
+    mock_request = rf.post('/notify/', dict(body=recurly_xml))
+    response = notify(mock_request)
+    assert mock_save.called
 
