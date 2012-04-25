@@ -32,19 +32,19 @@ class XeroPrivateClient(oauth2.Client):
         return sup.request("https://api.xero.com/api.xro/2.0%s" % path,
           **k)
 
-    def contact_add(self, xml):
+    def save(self):
         """Add contact.  *xml* is a piece of XML in a string
-        that specifies the <Contact> or <Contacts> to add.  
-        See http://blog.xero.com/developer/api/Contacts/#POST
+        that specifies the Xero object to add.
+        See http://blog.xero.com/developer/api/
 
         Return a (response, body) pair.  response['status']
         will give the HTTP status (as a string; '200' for okay).
         *body* is the body of the response.
         """
 
-        body = urllib.urlencode(dict(xml=xml))
-        return self._xero_request("/Contacts", body=body,
-          method="POST")
+        body = urllib.urlencode(dict(xml=self.to_xml()))
+        return self._xero_request("/%ss" % self.__class__.__name__
+                                  , body=body, method="POST")
 
 # Helpers
 

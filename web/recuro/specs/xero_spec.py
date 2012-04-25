@@ -22,11 +22,16 @@ def it_can_call_a_xero_function():
     print repr(content)
     assert resp['status'] == '200'
 
-def it_can_add_a_contact():
-    body="""<Contact>
-      <Name>Test Testerson</Name>
-    </Contact>
-    """
-    resp, content = session.contact_add(body)
+def it_can_post_an_xml_contact():
+    class Contact(xero.XeroPrivateClient):
+        def to_xml(self):
+            return """<Contact>
+              <Name>Test Testerson</Name>
+            </Contact>
+            """
+    client = Contact(settings.XERO_CONSUMER_KEY,
+                             settings.XERO_CONSUMER_SECRET,
+                             settings.XERO_RSA_KEY)
+    resp, content = client.save()
     print repr(content)
     assert resp['status'] == '200'
