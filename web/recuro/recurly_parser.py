@@ -7,6 +7,8 @@ from recuro.xero import XeroPrivateClient
 def parse(body):
     if '<new_account_notification>' in body:
         return Contact(body)
+    if '<new_subscription_notification>' in body:
+        return Invoice(body)
 
 class Contact(XeroPrivateClient):
     def __init__(self, xml):
@@ -33,3 +35,12 @@ class Contact(XeroPrivateClient):
         return template.substitute(number=self.number, name=self.name,
                         first_name=self.first_name, last_name=self.last_name,
                         email=self.email)
+
+class Invoice(XeroPrivateClient):
+    def __init__(self, xml):
+        doc = html.fromstring(xml.encode('UTF-8'))
+        self.contact = None # contact ID
+        self.amount_in_cents = int(doc.xpath("//total_amount_in_cents")[0].text)
+
+    def to_xml(self):
+        return None
