@@ -11,7 +11,7 @@ def parse(body):
         return Invoice(body)
 
 class Contact(XeroPrivateClient):
-    def __init__(self, xml):
+    def __init__(self, xml=None, **k):
         # Example XML in specs/recurly_parse_spec.py
         doc = html.fromstring(xml.encode('UTF-8'))
         self.number = doc.xpath('//account_code')[0].text
@@ -22,6 +22,8 @@ class Contact(XeroPrivateClient):
 
         if self.name is None:
             self.name = "%s %s" % (self.first_name, self.last_name)
+        super(Contact, self).__init__(**k)
+
 
     def to_xml(self):
         template = string.Template( """
@@ -46,9 +48,9 @@ class Invoice(XeroPrivateClient):
         self.amount_in_cents = int(
           doc.xpath("//amount_in_cents")[0].text)
         self.invoice_date = doc.xpath('//date')[0].text
-        self.type = 'UNKNOWN'
+        self.status = 'UNKNOWN'
         if 'successful_payment_notification' in xml:
-            self.type = 'PAID'
+            self.status = 'PAID'
         self.invoice_number = ('RECURLY' +
           doc.xpath('//invoice_number')[0].text)
 
@@ -58,13 +60,14 @@ class Invoice(XeroPrivateClient):
         template = string.Template("""
           <Invoice>
             <InvoiceNumber>$invoice_number</InvoiceNumber>
-            <Type>$type</Type>
+            <Type>ACCREC</Type>
+            <Status>AUTHORISED</Status>
             <Contact>
               <ContactNumber>$contact_number</ContactNumber>
             </Contact>
             <Date>$short_date</Date>
             <DueDate>$short_date</DueDate>
-            <DefaultCurrency>USD</DefaultCurrency>
+            <CurrencyCode>USD</CurrencyCode>
             <LineItems>
               <LineItem>
                 <Description>ScraperWiki Vault</Description>

@@ -35,7 +35,7 @@ def it_translates_successful_payment_in_to_invoice_object():
     assert_equals(xero_invoice.amount_in_cents, 1080)
     assert_equals(xero_invoice.contact_number, "3-test-20120424T152301")
     assert_equals(xero_invoice.invoice_date, "2012-04-25T11:59:44Z")
-    assert_equals(xero_invoice.type, 'PAID')
+    assert_equals(xero_invoice.status, 'PAID')
     assert_equals(xero_invoice.invoice_number, 'RECURLY1324')
 
 def it_should_output_xero_invoice_xml():
@@ -49,10 +49,10 @@ def it_should_output_xero_invoice_xml():
     # their content, and no nested XML elements.
     simple_elements = dict(
         InvoiceNumber='RECURLY1324',
-        Type='PAID',
+        Type='ACCREC',
         Date="2012-04-25",
         DueDate="2012-04-25",
-        DefaultCurrency='USD'
+        CurrencyCode='USD'
     )
     for element,value in simple_elements.items():
         assert_equals(doc.xpath("//%s" % element)[0].text, value)
