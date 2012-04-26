@@ -35,9 +35,32 @@ def it_translates_successful_payment_in_to_invoice_object():
     assert_equals(xero_invoice.amount_in_cents, 1080)
     assert_equals(xero_invoice.contact_number, "3-test-20120424T152301")
     assert_equals(xero_invoice.invoice_date, "2012-04-25T11:59:44Z")
-    assert_equals(xero_invoice.due_date, "2012-04-25T11:59:44Z")
     assert_equals(xero_invoice.type, 'PAID')
-    assert_equals(xero_invoice.invoice_number, 'RECURLY-1324')
+    assert_equals(xero_invoice.invoice_number, 'RECURLY1324')
+
+def it_should_output_xero_invoice_xml():
+    # See http://blog.xero.com/developer/api/invoices/
+    xero_invoice = Invoice(recurly_successful_payment)
+    xero_xml = xero_invoice.to_xml()
+    doc = etree.fromstring(xero_xml)
+    assert len(doc) > 0
+
+    # Check the simple elements, which just have plain text as
+    # their content, and no nested XML elements.
+    simple_elements = dict(
+        InvoiceNumber='RECURLY1324',
+        Type='PAID',
+        Date="2012-04-25",
+        DueDate="2012-04-25",
+        DefaultCurrency='USD'
+    )
+    for element,value in simple_elements.items():
+        assert_equals(doc.xpath("//%s" % element)[0].text, value)
+
+    # Check the more complex, nested, elements.
+    assert_equals(doc.xpath("//Contact/ContactNumber")[0].text,
+        "3-test-20120424T152301")
+    assert_equals(len(doc.xpath("//LineItem")), 1)
 
 def it_replaces_company_name_with_customer_name_if_not_present():
     xero_contact = Contact(recurly_contact)

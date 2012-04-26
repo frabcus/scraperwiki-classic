@@ -46,12 +46,34 @@ class Invoice(XeroPrivateClient):
         self.amount_in_cents = int(
           doc.xpath("//amount_in_cents")[0].text)
         self.invoice_date = doc.xpath('//date')[0].text
-        self.due_date = self.invoice_date
         self.type = 'UNKNOWN'
         if 'successful_payment_notification' in xml:
             self.type = 'PAID'
-        self.invoice_number = ('RECURLY-' +
+        self.invoice_number = ('RECURLY' +
           doc.xpath('//invoice_number')[0].text)
 
     def to_xml(self):
-        return None
+        template = string.Template("""
+          <Invoice>
+            <InvoiceNumber>$invoice_number</InvoiceNumber>
+            <Type>$type</Type>
+            <Contact>
+              <ContactNumber>$contact_number</ContactNumber>
+            </Contact>
+            <Date>$short_date</Date>
+            <DueDate>$short_date</DueDate>
+            <DefaultCurrency>USD</DefaultCurrency>
+            <LineItems>
+              <LineItem>
+                <Description>ScraperWiki Vault</Description>
+                <Quantity>1</Quantity>
+                <UnitAmount>$price</UnitAmount>
+                <AccountCode>200</AccountCode>
+              </LineItem>
+            </LineItems>
+          </Invoice>
+          """)
+        price = "%.2f" % (self.amount_in_cents/100.0)
+        short_date = self.invoice_date[:10]
+        return template.substitute(price=price, short_date=short_date,
+          **self.__dict__)
