@@ -1,13 +1,13 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}Data Consultancy{% endblock %}
+{% block title %}Data Consulting{% endblock %}
 
 {% block meta %}
     <meta name="description" content="ScraperWiki is the data hub for professional data scientists. Our Corporate Services enable you to tap into that thriving community so you always find the right person for the job. ScraperWiki also helps organise data across your enterprise, combining the flexibility of general purpose code with a rock-solid API and granular permissions over precisely who sees what." />
 {% endblock %}
 
 {% block header %}
-    <h2><em>Business</em> / <a href="{% url data_consultancy %}">Data Consultancy</a></h2>
+    <h2><em>Business</em> / <a href="{% url data_consulting %}">Data Consulting</a></h2>
 {% endblock %}
 
 {% block content %}
@@ -47,8 +47,8 @@
     <h4>Case Study</h4>
     <h3>Extracting live legal data from&nbsp;state&nbsp;PDFs</h3>
     <p>Every week a firm of Lawyers in Minnesota receives a &lsquo;Judgement Abstract Report&rsquo; as a PDF from the state. The report is used to identify potential clients for the law firm. It has a regular layout but it is not machine readable and reuse requires manual retyping.</p>
-    <p>A ScraperWiki data scientist has written a script that automatically receives the PDF, converts it into the ScraperWiki datastore, schedules the script to run weekly to collect the incremental data, and makes the data available privately to the lawyers. For the lawyers, is a single click operation to get the data for other purposes such as mailmerge.</p>
-    <p>The data provides access to new pipeline of clients. It is readily available without any manual intervention. The&nbsp;data can be easily reused for other purposes.</p>
+    <p>A ScraperWiki data scientist has written a script that automatically receives the PDF, converts it into the ScraperWiki datastore, schedules the script to run weekly to collect the incremental data, and makes the data available privately to the lawyers. For the lawyers, it is a single click operation to get the data for other purposes such as mailmerge.</p>
+    <p>The data provides access to a new pipeline of clients, it is refreshed weekly and it can be easily re-purposed.</p>
 </div>
 
 <div class="step third" id="integration">
