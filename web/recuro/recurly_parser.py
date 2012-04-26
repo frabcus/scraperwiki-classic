@@ -38,7 +38,7 @@ class Contact(XeroPrivateClient):
                         email=self.email)
 
 class Invoice(XeroPrivateClient):
-    def __init__(self, xml):
+    def __init__(self, xml=None, **k):
         # Example XML in specs/recurly_parse_spec.py
         doc = html.fromstring(xml.encode('UTF-8'))
         # Map recurly account code to xero contact number.
@@ -51,6 +51,8 @@ class Invoice(XeroPrivateClient):
             self.type = 'PAID'
         self.invoice_number = ('RECURLY' +
           doc.xpath('//invoice_number')[0].text)
+
+        super(Invoice, self).__init__(**k)
 
     def to_xml(self):
         template = string.Template("""

@@ -22,3 +22,11 @@ def it_should_call_save_on_the_contact(mock_save):
     response = notify(mock_request)
     assert mock_save.called
 
+@patch.object(XeroPrivateClient, 'save')
+def it_should_call_save_on_the_invoice(mock_save):
+    from recurly_parse_spec import recurly_successful_payment
+    rf = helper.RequestFactory()
+    mock_request = rf.post('/notify/',
+      dict(body=recurly_successful_payment))
+    response = notify(mock_request)
+    assert mock_save.called

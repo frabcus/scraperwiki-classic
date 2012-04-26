@@ -30,3 +30,11 @@ def it_can_post_an_xml_contact():
     resp, content = client.save()
     print repr(content)
     assert resp['status'] == '200'
+
+def it_can_post_an_xml_invoice():
+    from recuro.recurly_parser import Invoice
+    from recurly_parse_spec import recurly_successful_payment
+    invoice = Invoice(recurly_successful_payment)
+    resp, content = invoice.save()
+    print repr(content)
+    assert resp['status'] == '200'
