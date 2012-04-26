@@ -12,6 +12,7 @@ def parse(body):
 
 class Contact(XeroPrivateClient):
     def __init__(self, xml):
+        # Example XML in specs/recurly_parse_spec.py
         doc = html.fromstring(xml.encode('UTF-8'))
         self.number = doc.xpath('//account_code')[0].text
         self.name = doc.xpath('//company_name')[0].text
@@ -38,9 +39,12 @@ class Contact(XeroPrivateClient):
 
 class Invoice(XeroPrivateClient):
     def __init__(self, xml):
+        # Example XML in specs/recurly_parse_spec.py
         doc = html.fromstring(xml.encode('UTF-8'))
-        self.contact = None # contact ID
-        self.amount_in_cents = int(doc.xpath("//total_amount_in_cents")[0].text)
+        # Map recurly account code to xero contact number.
+        self.contact_number = doc.xpath('//account_code')[0].text
+        self.amount_in_cents = int(
+          doc.xpath("//total_amount_in_cents")[0].text)
 
     def to_xml(self):
         return None

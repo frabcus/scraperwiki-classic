@@ -8,7 +8,7 @@ recurly_contact = """
       """
 
 recurly_new_sub = """
-<?xml version="1.0" encoding="UTF-8"?> <new_subscription_notification> <account> <account_code>3-test-20120425T082932</account_code> <username nil="true"></username> <email>test@testerson.com</email> <first_name>Test</first_name> <last_name>Testerson</last_name> <company_name></company_name> </account> <subscription> <plan> <plan_code>individual</plan_code> <name>Individual</name> </plan> <uuid>1857330d579ebf7a6468454b2bbc812e</uuid> <state>active</state> <quantity type="integer">1</quantity> <total_amount_in_cents type="integer">1080</total_amount_in_cents> <activated_at type="datetime">2012-04-25T07:29:38Z</activated_at> <canceled_at type="datetime"></canceled_at> <expires_at type="datetime"></expires_at> <current_period_started_at type="datetime">2012-04-25T07:29:38Z</current_period_started_at> <current_period_ends_at type="datetime">2012-05-25T07:29:38Z</current_period_ends_at> <trial_started_at type="datetime"></trial_started_at> <trial_ends_at type="datetime"></trial_ends_at> </subscription> </new_subscription_notification>
+<?xml version="1.0" encoding="UTF-8"?> <new_subscription_notification> <account> <account_code>3-test-20120424T152301</account_code> <username nil="true"></username> <email>test@testerson.com</email> <first_name>Test</first_name> <last_name>Testerson</last_name> <company_name></company_name> </account> <subscription> <plan> <plan_code>individual</plan_code> <name>Individual</name> </plan> <uuid>1857330d579ebf7a6468454b2bbc812e</uuid> <state>active</state> <quantity type="integer">1</quantity> <total_amount_in_cents type="integer">1080</total_amount_in_cents> <activated_at type="datetime">2012-04-25T07:29:38Z</activated_at> <canceled_at type="datetime"></canceled_at> <expires_at type="datetime"></expires_at> <current_period_started_at type="datetime">2012-04-25T07:29:38Z</current_period_started_at> <current_period_ends_at type="datetime">2012-05-25T07:29:38Z</current_period_ends_at> <trial_started_at type="datetime"></trial_started_at> <trial_ends_at type="datetime"></trial_ends_at> </subscription> </new_subscription_notification>
     """
 
 def it_detects_a_new_account_notification_and_creates_a_contact():
@@ -29,6 +29,7 @@ def it_should_translate_new_account_in_to_contact_object():
 def it_translates_new_subscription_in_to_invoice_object():
     xero_invoice = Invoice(recurly_new_sub)
     assert_equals(xero_invoice.amount_in_cents, 1080)
+    assert_equals(xero_invoice.contact_number, "3-test-20120424T152301")
 
 def it_replaces_company_name_with_customer_name_if_not_present():
     xero_contact = Contact(recurly_contact)
