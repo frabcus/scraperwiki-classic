@@ -7,7 +7,7 @@ from recuro.xero import XeroPrivateClient
 def parse(body):
     if '<new_account_notification>' in body:
         return Contact(body)
-    if '<new_subscription_notification>' in body:
+    if '<successful_payment_notification>' in body:
         return Invoice(body)
 
 class Contact(XeroPrivateClient):
@@ -44,7 +44,14 @@ class Invoice(XeroPrivateClient):
         # Map recurly account code to xero contact number.
         self.contact_number = doc.xpath('//account_code')[0].text
         self.amount_in_cents = int(
-          doc.xpath("//total_amount_in_cents")[0].text)
+          doc.xpath("//amount_in_cents")[0].text)
+        self.invoice_date = doc.xpath('//date')[0].text
+        self.due_date = self.invoice_date
+        self.type = 'UNKNOWN'
+        if 'successful_payment_notification' in xml:
+            self.type = 'PAID'
+        self.invoice_number = ('RECURLY-' +
+          doc.xpath('//invoice_number')[0].text)
 
     def to_xml(self):
         return None
