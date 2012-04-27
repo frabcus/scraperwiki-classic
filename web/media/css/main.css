@@ -3688,7 +3688,7 @@ body.data_hub a.dont_miss_out {
 }
 
 body.data_hub .aside,
-body.data_consulting #agricultural,
+body.data_consulting #legal,
 body.data_hub a.dont_miss_out {
 	float: right;
 	right: -55px;
@@ -3696,7 +3696,7 @@ body.data_hub a.dont_miss_out {
 	clear: right;
 }
 
-body.data_consulting #legal,
+body.data_consulting #agricultural,
 body.data_consulting #sla {
 	clear: left;
 	float: left;
@@ -3856,7 +3856,7 @@ body.data_hub p.consulting strong {
 }
 
 body.data_consulting #extraction {
-	padding-top: 20px;
+	padding-top: 10px;
 	width: 470px;
 }
 
