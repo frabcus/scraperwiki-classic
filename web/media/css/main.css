@@ -1053,6 +1053,67 @@ body.frontpage .tags li a {
 
 
 
+/* NEW HOMEPAGE */
+
+body.homepage #content {
+    border-top: 1px solid #cdcdcd;
+    clear: both;
+    -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+}
+
+body.homepage #feature {
+    width: 960px;
+	margin: 0 auto;
+}
+
+body.homepage #for_coders {
+    position: relative;
+    float: left;
+    width: 598px;
+    height: 338px;
+    background: #dceefb url(../images/header.gif) 0 0;
+    border: 1px solid #cdcdcd;
+    color: #369;
+    -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+}
+
+body.homepage #for_businesses {
+    position: relative;
+    float: right;
+    width: 338px;
+    height: 338px;
+    background: #3b3f41 url(../images/header_black.gif) 0 0;
+    border: 1px solid #bdbdbd;
+    color: #fff;
+    margin-bottom: 20px;
+    -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+}
+
+body.homepage #for_coders:before,
+body.homepage #for_businesses:before {
+    content: ' ';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: block;
+    height: 1px;
+    background: #fff;
+}
+
+body.homepage #for_businesses:before {
+    background: #6e7172;
+    background: rgba(255,255,255,0.3);
+}
+
+
+
 /* PROFILE PAGE */
 
 body.profiles #header .gravatar {
@@ -3627,7 +3688,7 @@ body.data_hub a.dont_miss_out {
 }
 
 body.data_hub .aside,
-body.data_consulting #agricultural,
+body.data_consulting #legal,
 body.data_hub a.dont_miss_out {
 	float: right;
 	right: -55px;
@@ -3635,7 +3696,7 @@ body.data_hub a.dont_miss_out {
 	clear: right;
 }
 
-body.data_consulting #legal,
+body.data_consulting #agricultural,
 body.data_consulting #sla {
 	clear: left;
 	float: left;
@@ -3795,7 +3856,7 @@ body.data_hub p.consulting strong {
 }
 
 body.data_consulting #extraction {
-	padding-top: 20px;
+	padding-top: 10px;
 	width: 470px;
 }
 

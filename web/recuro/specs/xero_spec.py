@@ -20,13 +20,9 @@ def it_can_call_a_xero_function():
     assert resp['status'] == '200'
 
 def it_can_post_an_xml_contact():
-    class Contact(xero.XeroPrivateClient):
-        def to_xml(self):
-            return """<Contact>
-              <Name>Test Testerson</Name>
-            </Contact>
-            """
-    client = Contact()
+    from recuro.recurly_parser import Contact
+    from recurly_parse_spec import recurly_contact
+    client = Contact(recurly_contact)
     resp, content = client.save()
     print repr(content)
     assert resp['status'] == '200'
