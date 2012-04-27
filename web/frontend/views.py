@@ -49,7 +49,7 @@ from utilities import location
 
 def frontpage(request, public_profile_field=None):
     user = request.user
-    if not user.is_anonymous and user.get_profile().has_feature('New Homepage'):
+    if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
         return render_to_response('frontend/homepage.html', context_instance=RequestContext(request))
     else:
         data = {
