@@ -3,8 +3,11 @@ import hashlib
 import urllib
 
 from StringIO import StringIO
-from M2Crypto import RSA
-from M2Crypto.BIO import MemoryBuffer
+try:
+    from M2Crypto import RSA
+    from M2Crypto.BIO import MemoryBuffer
+except:
+    print "Could not import M2Crypto (in /web/recuro/xero.py)"
 import oauth2
 from django.conf import settings
 
