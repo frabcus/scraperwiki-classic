@@ -61,7 +61,6 @@ class Invoice(XeroPrivateClient):
           <Invoice>
             <InvoiceNumber>$invoice_number</InvoiceNumber>
             <Type>ACCREC</Type>
-            <Status>AUTHORISED</Status>
             <Contact>
               <ContactNumber>$contact_number</ContactNumber>
             </Contact>
