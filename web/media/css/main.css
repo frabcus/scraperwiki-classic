@@ -1080,6 +1080,7 @@ body.homepage #for_coders {
     -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 body.homepage #for_businesses {
@@ -1201,6 +1202,169 @@ body.homepage #for_businesses a:active {
 	-webkit-box-shadow: 0px 1px 6px #35383b;
 	-moz-box-shadow: 0px 1px 6px #35383b;
 	box-shadow: 0px 1px 6px #35383b;
+}
+
+body.homepage #for_coders * {
+	position: relative;
+	z-index: 10;
+}
+
+body.homepage #for_coders .gear {
+	position: absolute;
+	display: block;
+}
+
+body.homepage #for_coders #gear_1 {
+	width: 390px;
+	height: 390px;
+	top: 47px;
+	left: -187px;
+	background: transparent url(../images/homepage_feature_gear_1.gif) 0 0 no-repeat;
+	z-index: 1;
+	-webkit-animation: rotate 90s linear 0s infinite normal;
+	-moz-animation: rotate 90s linear 0s infinite normal;
+	-o-animation: rotate 90s linear 0s infinite normal;
+	-ms-animation: rotate 90s linear 0s infinite normal;
+	animation: rotate 90s linear 0s infinite normal;
+}
+
+body.homepage #for_coders #gear_2 {
+	width:420px;
+	height: 420px;
+	top: -240px;
+	left: 286px;
+	background: transparent url(../images/homepage_feature_gear_2.gif) 0 0 no-repeat;
+	z-index: 1;
+	-webkit-animation: rotateanti 85.1s linear 0s infinite normal;
+	-moz-animation: rotateanti 85.1s linear 0s infinite normal;
+	-o-animation: rotateanti 85.1s linear 0s infinite normal;
+	-ms-animation: rotateanti 85.1s linear 0s infinite normal;
+	animation: rotateanti 85.1s linear 0s infinite normal;
+}
+
+body.homepage #for_coders #gear_3 {
+	width: 320px;
+	height: 320px;
+	top: 159px;
+	left: 381px;
+	background: transparent url(../images/homepage_feature_gear_3.gif) 0 0 no-repeat;
+	z-index: 1;
+	-webkit-animation: rotate 60s linear 0s infinite normal;
+	-moz-animation: rotate 60s linear 0s infinite normal;
+	-o-animation: rotate 60s linear 0s infinite normal;
+	-ms-animation: rotate 60s linear 0s infinite normal;
+	animation: rotate 60s linear 0s infinite normal;
+}
+
+body.homepage #for_coders #arrow_1 {
+	position: absolute;
+	top: 190px;
+	left: 367px;
+	z-index: 1;
+	display: block;
+	width: 60px;
+	height: 230px;
+	background: transparent url(../images/homepage_feature_arrow_1.gif) 0 0 no-repeat;
+}
+
+@-webkit-keyframes rotate {
+  from {
+    -webkit-transform: rotate(0deg);
+
+  }
+  to { 
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@-moz-keyframes rotate {
+  from {
+    -moz-transform: rotate(0deg);
+
+  }
+  to { 
+    -moz-transform: rotate(360deg);
+  }
+}
+
+@-o-keyframes rotate {
+  from {
+    -o-transform: rotate(0deg);
+
+  }
+  to { 
+    -o-transform: rotate(360deg);
+  }
+}
+
+@-ms-keyframes rotate {
+  from {
+    -ms-transform: rotate(0deg);
+
+  }
+  to { 
+    -ms-transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+
+  }
+  to { 
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes rotateanti {
+  from {
+    -webkit-transform: rotate(0deg);
+
+  }
+  to { 
+    -webkit-transform: rotate(-360deg);
+  }
+}
+
+@-moz-keyframes rotateanti {
+  from {
+    -moz-transform: rotate(0deg);
+
+  }
+  to { 
+    -moz-transform: rotate(-360deg);
+  }
+}
+
+@-o-keyframes rotateanti {
+  from {
+    -o-transform: rotate(0deg);
+
+  }
+  to { 
+    -o-transform: rotate(-360deg);
+  }
+}
+
+@-ms-keyframes rotateanti {
+  from {
+    -ms-transform: rotate(0deg);
+
+  }
+  to { 
+    -ms-transform: rotate(-360deg);
+  }
+}
+
+@keyframes rotateanti {
+  from {
+    transform: rotate(0deg);
+
+  }
+  to { 
+    transform: rotate(-360deg);
+  }
 }
 
 
