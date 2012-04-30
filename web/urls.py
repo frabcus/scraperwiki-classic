@@ -85,7 +85,7 @@ urlpatterns = patterns('',
     url(r'^', include('frontend.urls')),
 
     # Recuro recurly -> xero
-    url(r'^notify/$', recuro.views.notify, name='recuro_notify'),
+    url(r'^notify/(?<apikey>.*)$', recuro.views.notify, name='recuro_notify'),
 
     # redirects from old version
     (r'^editor/$', lambda request: HttpResponseRedirect('/scrapers/new/python?template=tutorial_python_trivial')),

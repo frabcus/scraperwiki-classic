@@ -26,6 +26,14 @@ class Contact(XeroPrivateClient):
         self.last_name = doc.xpath('//last_name')[0].text
         self.email = doc.xpath('//email')[0].text
 
+        self.address1 = None
+        self.address2 = None
+        self.city = None
+        self.state = None
+        self.country =  None
+        self.zip = None
+        self.vat_number = None
+
         if self.name is None:
             self.name = "%s %s" % (self.first_name, self.last_name)
         super(Contact, self).__init__(**k)
@@ -71,6 +79,11 @@ class Invoice(XeroPrivateClient):
             self.status = 'PAID'
         self.invoice_number = doc.xpath('//invoice_number')[0].text
         self.invoice_ref = 'RECURLY' + self.invoice_number
+
+        self.vat_number = None
+        self.subtotal_in_cents = 0
+        self.tax_in_cents = 0
+        self.total_in_cents = 0
 
         super(Invoice, self).__init__(**k)
 

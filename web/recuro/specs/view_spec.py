@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from recuro.views import notify
 from recuro.xero import XeroPrivateClient
 
@@ -12,14 +14,16 @@ recurly_xml = """
 def it_should_pass_the_notification_to_the_notification_parser(mock_parse):
     rf = helper.RequestFactory()
     mock_request = rf.post('/notify/', dict(body=recurly_xml))
-    response = notify(mock_request)
+    response = notify(mock_request, settings.RECURLY_API_KEY)
+    assert response.status_code == 200
     assert mock_parse.called
 
 @patch.object(XeroPrivateClient, 'save')
 def it_should_call_save_on_the_contact(mock_save):
     rf = helper.RequestFactory()
     mock_request = rf.post('/notify/', dict(body=recurly_xml))
-    response = notify(mock_request)
+    response = notify(mock_request, settings.RECURLY_API_KEY)
+    assert response.status_code == 200
     assert mock_save.called
 
 @patch.object(XeroPrivateClient, 'save')
@@ -28,5 +32,14 @@ def it_should_call_save_on_the_invoice(mock_save):
     rf = helper.RequestFactory()
     mock_request = rf.post('/notify/',
       dict(body=recurly_successful_payment))
-    response = notify(mock_request)
+    response = notify(mock_request, settings.RECURLY_API_KEY)
+    assert response.status_code == 200
     assert mock_save.called
+
+def it_errors_if_apikey_wrong():
+    from recurly_parse_spec import recurly_successful_payment
+    rf = helper.RequestFactory()
+    mock_request = rf.post('/notify/',
+      dict(body=recurly_successful_payment))
+    response = notify(mock_request, "sdfsdfsd")
+    assert response.status_code == 403
