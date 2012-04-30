@@ -12,13 +12,31 @@
 {% block content_outer %}
 <div id="feature">
     <div id="for_coders">
-
+        <h3>ScraperWiki Data Hub</h3>
+        <h2>Code and Data. Together. At&nbsp;last.</h2>
+        <p>Write code in your browser to turn web&nbsp;pages <br/>and APIs into structured, reusable data&nbsp;feeds. <br/>No sysadmin. No fuss.</p>
+        <p>Process everything, from Pinterest to <br/>Twitter to parliaments to train&nbsp;times.</p>
+        <a href="{% url docsroot %}" class="secondary" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Find out more (coders)']); }">Find out more</a> <a data-wiki_type="scraper" class="create editor_scraper" href="{% url choose_template 'scraper' %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Try it out for free']); }">Try it out for free <span class="arrow">&#9654;</span></a>
+        <span class="gear" id="gear_1"></span>
+        <span class="gear" id="gear_2"></span>
+        <span class="gear" id="gear_3"></span>
+        <span class="arrow" id="arrow_1"></span>
     </div>
     <div id="for_businesses">
-    
+        <h3>ScraperWiki Data Services</h3>
+        <h2>Super-charge your&nbsp;business with bespoke data&nbsp;feeds.</h2>
+        <a href="{% url data_consulting %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Find out how (business)']); }">Find out how <span class="arrow">&#9654;</span></a>
     </div>
 </div>
 <div id="content">
-    
+    <div id="customers">
+        <h2><strong>ScraperWiki.</strong> Trusted by some of the biggest names in media and government.</h2>
+        <ul>
+            <li><a href="http://www.channel4.com/programmes/dispatches/" target="_blank"><img src="{{MEDIA_URL}}images/logo_dispatches.gif" width="220" height="70" alt="Dispatches"></a></li>
+            <li><a href="http://www.guardian.co.uk/" target="_blank"><img src="{{MEDIA_URL}}images/logo_theguardian.gif" width="240" height="70" alt="The Guardian"></a></li>
+            <li><a href="http://www.agra-net.com/" target="_blank"><img src="{{MEDIA_URL}}images/logo_agrainforma.gif" width="150" height="70" alt="Agra Informa"></a></li>
+            <li><a href="http://www.cabinetoffice.gov.uk/" target="_blank"><img src="{{MEDIA_URL}}images/logo_cabinetoffice.gif" width="260" height="70" alt="Dispatches"></a></li>
+        </ul>
+    </div>
 </div>
 {% endblock %}
