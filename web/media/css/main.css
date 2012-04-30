@@ -1083,6 +1083,22 @@ body.homepage #for_coders {
     overflow: hidden;
 }
 
+body.homepage #for_coders:before {
+    content: ' ';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: block;
+    height: 1px;
+    background: #fff;
+}
+
+body.homepage #for_coders * {
+	position: relative;
+	z-index: 10;
+}
+
 body.homepage #for_businesses {
     position: relative;
     float: right;
@@ -1094,17 +1110,6 @@ body.homepage #for_businesses {
     -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
-}
-
-body.homepage #for_coders:before {
-    content: ' ';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: block;
-    height: 1px;
-    background: #fff;
 }
 
 body.homepage #feature h3 {
@@ -1135,8 +1140,14 @@ body.homepage #for_businesses h2 {
 }
 
 body.homepage #for_coders h2 {
-	width: 380px;
 	text-shadow: 0 1px 0 #fff;
+}
+
+body.homepage #for_coders p {
+	font-size: 20px;
+	line-height: 25px;
+	text-shadow: 0 1px 0 #fff;
+	margin: 10px 0 0 20px;
 }
 
 body.homepage #for_coders a,
@@ -1155,7 +1166,22 @@ body.homepage #for_businesses a {
 body.homepage #for_coders a {
 	color: #fff;
 	text-shadow: 0 1px 0 rgba(0,0,0,0.6);
-	border: 1px solid #3b7dbf;
+	border: 1px solid #459714;
+	background-color: #64b228;
+	background: -moz-linear-gradient(top, #c5e69b 0%, #c5e69b 4%, #89ca36 4%, #4fa41f 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#c5e69b), color-stop(4%,#c5e69b), color-stop(4%,#89ca36), color-stop(100%,#4fa41f));
+	background: -webkit-linear-gradient(top, #c5e69b 0%,#c5e69b 4%,#89ca36 4%,#4fa41f 100%);
+	background: -o-linear-gradient(top, #c5e69b 0%,#c5e69b 4%,#89ca36 4%,#4fa41f 100%);
+	background: -ms-linear-gradient(top, #c5e69b 0%,#c5e69b 4%,#89ca36 4%,#4fa41f 100%);
+	background: linear-gradient(top, #c5e69b 0%,#c5e69b 4%,#89ca36 4%,#4fa41f 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#89ca36', endColorstr='#4fa41f',GradientType=0 );
+	-webkit-box-shadow: 0px 2px 5px rgba(51,102,153,0.25);
+	-moz-box-shadow: 0px 2px 5px rgba(51,102,153,0.25);
+	box-shadow: 0px 2px 5px rgba(51,102,153,0.25);
+}
+
+body.homepage #for_coders a.secondary {
+	border-color: #3b7dbf;
 	background-color: #5094d0;
 	background: -moz-linear-gradient(top, #afd5ed 0%, #afd5ed 4%, #5da9d9 4%, #356bbe 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#afd5ed), color-stop(4%,#afd5ed), color-stop(4%,#5da9d9), color-stop(100%,#356bbe));
@@ -1164,9 +1190,6 @@ body.homepage #for_coders a {
 	background: -ms-linear-gradient(top, #afd5ed 0%,#afd5ed 4%,#5da9d9 4%,#356bbe 100%);
 	background: linear-gradient(top, #afd5ed 0%,#afd5ed 4%,#5da9d9 4%,#356bbe 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5da9d9', endColorstr='#356bbe',GradientType=0 );
-	-webkit-box-shadow: 0px 2px 5px rgba(51,102,153,0.25);
-	-moz-box-shadow: 0px 2px 5px rgba(51,102,153,0.25);
-	box-shadow: 0px 2px 5px rgba(51,102,153,0.25);
 }
 
 body.homepage #for_businesses a {
@@ -1191,22 +1214,26 @@ body.homepage #for_businesses a:hover {
 }
 
 body.homepage #for_coders a:active {
-	margin-top: 16px;
+	position: relative;
+	top: 1px;
 	-webkit-box-shadow: 0px 1px 3px rgba(51,102,153,0.25);
 	-moz-box-shadow: 0px 1px 3px rgba(51,102,153,0.25);
 	box-shadow: 0px 1px 3px rgba(51,102,153,0.25);
 }
 
 body.homepage #for_businesses a:active {
-	margin-top: 16px;
+	position: relative;
+	top: 1px;
 	-webkit-box-shadow: 0px 1px 6px #35383b;
 	-moz-box-shadow: 0px 1px 6px #35383b;
 	box-shadow: 0px 1px 6px #35383b;
 }
 
-body.homepage #for_coders * {
-	position: relative;
-	z-index: 10;
+body.homepage #for_coders a .arrow,
+body.homepage #for_businesses a .arrow {
+	font-size: 13px;
+	line-height: 13px;
+	margin-left: 3px;
 }
 
 body.homepage #for_coders .gear {
@@ -1365,6 +1392,36 @@ body.homepage #for_coders #arrow_1 {
   to { 
     transform: rotate(-360deg);
   }
+}
+
+body.homepage #customers h2 {
+	font-size: 16px;
+	font-weight: normal;
+	text-align: center;
+	color: #666;
+	margin: 10px 0;
+}
+
+body.homepage #customers h2 strong {
+	color: #333;
+	font-weight: normal;
+}
+
+body.homepage #customers ul {
+	padding: 0;
+	margin: 0;
+	text-align: center;
+	font-size: 0px;
+	line-height: 0px;
+	margin-bottom: 10px;
+}
+
+body.homepage #customers li {
+	display: inline;
+}
+
+body.homepage #customers li a {
+	padding: 0 5px;
 }
 
 
