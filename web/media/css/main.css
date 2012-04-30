@@ -1262,11 +1262,11 @@ body.homepage #for_coders #gear_2 {
 	left: 286px;
 	background: transparent url(../images/homepage_feature_gear_2.gif) 0 0 no-repeat;
 	z-index: 1;
-	-webkit-animation: rotateanti 85.05s linear 0s infinite normal;
-	-moz-animation: rotateanti 85.05s linear 0s infinite normal;
-	-o-animation: rotateanti 85.05s linear 0s infinite normal;
-	-ms-animation: rotateanti 85.05s linear 0s infinite normal;
-	animation: rotateanti 85.05s linear 0s infinite normal;
+	-webkit-animation: rotateanti 85.01s linear 0s infinite normal;
+	-moz-animation: rotateanti 85.01s linear 0s infinite normal;
+	-o-animation: rotateanti 85.01s linear 0s infinite normal;
+	-ms-animation: rotateanti 85.01s linear 0s infinite normal;
+	animation: rotateanti 85.01s linear 0s infinite normal;
 }
 
 body.homepage #for_coders #gear_3 {
