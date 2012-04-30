@@ -122,7 +122,7 @@ class Invoice(XeroPrivateClient):
         tax = "%.2f" % (self.tax_in_cents/100.0)
         short_date = self.invoice_date[:10]
         tax_type = "OUTPUT2"
-        if self.vat_number or self.tax_in_cents == 0:
+        if self.tax_in_cents == 0:
             tax_type = "NONE"
 
         return template.substitute(price=price, short_date=short_date,
