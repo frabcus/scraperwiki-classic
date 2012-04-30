@@ -121,7 +121,7 @@ class Invoice(XeroPrivateClient):
         price = "%.2f" % (self.subtotal_in_cents/100.0)
         tax = "%.2f" % (self.tax_in_cents/100.0)
         short_date = self.invoice_date[:10]
-        tax_type = "CAPEXINPUT2"
+        tax_type = "OUTPUT2"
         if self.vat_number or self.tax_in_cents == 0:
             tax_type = "NONE"
 
