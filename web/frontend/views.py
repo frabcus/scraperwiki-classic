@@ -41,6 +41,8 @@ import datetime
 import urllib
 import itertools
 import json
+import random
+
 import recurly
 recurly.js.PRIVATE_KEY = settings.RECURLY_PRIVATE_KEY
 
@@ -53,7 +55,11 @@ def frontpage(request, public_profile_field=None):
             'tags': Tags.sorted(),
             'language': 'python'
            }
-    if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
+
+    if 'homepage_ab' not in request.session:
+        request.session['homepage_ab'] = random.randint(0,1)
+#    if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
+    if request.session['homepage_ab'] == 1:
         return render_to_response('frontend/homepage.html', data, context_instance=RequestContext(request))
     else:
         return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
