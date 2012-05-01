@@ -59,11 +59,24 @@ class Contact(XeroPrivateClient):
                 <LastName>$last_name</LastName>
                 <EmailAddress>$email</EmailAddress>
                 <TaxNumber>$vat_number</TaxNumber>
+                <Addresses>
+                    <Address>
+                        <AddressLine1>$address1</AddressLine1>
+                        <AddressLine2>$address2</AddressLine2>
+                        <City>$city</City>
+                        <Region>$state</Region>
+                        <Country>$country</Country>
+                        <PostalCode>$zip</PostalCode>
+                    </Address>
+                </Addresses>
             </Contact>
             """ )
         return template.substitute(number=self.number, name=self.name,
                         first_name=self.first_name, last_name=self.last_name,
-                        email=self.email, vat_number=self.vat_number)
+                        email=self.email, vat_number=self.vat_number,
+                        address1=self.address1, address2=self.address2,
+                        city=self.city, state=self.state, country=self.country,
+                        zip=self.zip)
 
 class Invoice(XeroPrivateClient):
     def __init__(self, xml=None, **k):
