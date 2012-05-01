@@ -27,7 +27,7 @@ def it_can_post_an_xml_contact():
     resp, content = contact.save()
     assert resp['status'] == '200'
 
-def it_can_post_an_xml_invoice_with_vat_number():
+def it_can_post_an_xml_invoice_with_tax():
     from recuro.recurly_parser import Invoice
     from recurly_parse_spec import recurly_successful_payment
     invoice = Invoice(recurly_successful_payment)
@@ -35,12 +35,13 @@ def it_can_post_an_xml_invoice_with_vat_number():
     resp, content = invoice.save()
     assert resp['status'] == '200'
 
-def it_can_post_an_xml_invoice_without_vat_number():
+def it_can_post_an_xml_invoice_without_tax():
     from recuro.recurly_parser import Invoice
     from recurly_parse_spec import recurly_successful_payment
     invoice = Invoice(recurly_successful_payment)
     invoice.get_tax_details()
     invoice.vat_number = None
+    invoice.tax_in_cents = 0
     resp, content = invoice.save()
     print repr(content)
     assert resp['status'] == '200'
