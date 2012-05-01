@@ -61,6 +61,7 @@ class Contact(XeroPrivateClient):
                 <TaxNumber>$vat_number</TaxNumber>
                 <Addresses>
                     <Address>
+                        <AddressType>STREET</AddressType>
                         <AddressLine1>$address1</AddressLine1>
                         <AddressLine2>$address2</AddressLine2>
                         <City>$city</City>
