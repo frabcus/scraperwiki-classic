@@ -93,6 +93,7 @@ class Invoice(XeroPrivateClient):
             self.status = 'PAID'
         self.invoice_number = doc.xpath('//invoice_number')[0].text
         self.invoice_ref = 'RECURLY' + self.invoice_number
+        self.account_code = settings.XERO_ACCOUNT_CODE
 
         self.vat_number = None
         self.subtotal_in_cents = 0
@@ -125,7 +126,7 @@ class Invoice(XeroPrivateClient):
                 <Description>ScraperWiki Vault</Description>
                 <Quantity>1</Quantity>
                 <UnitAmount>$price</UnitAmount>
-                <AccountCode>200</AccountCode>
+                <AccountCode>$account_code</AccountCode>
                 <TaxType>$tax_type</TaxType>
               </LineItem>
             </LineItems>
