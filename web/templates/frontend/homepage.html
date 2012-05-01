@@ -28,15 +28,34 @@
         <a href="{% url data_consulting %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Find out how (business)']); }">Find out how <span class="arrow">&#9654;</span></a>
     </div>
 </div>
+<div id="customers">
+    <h2><strong>ScraperWiki.</strong> Trusted by some of the biggest names in media and government.</h2>
+    <ul>
+        <li><a href="http://www.channel4.com/programmes/dispatches/" target="_blank"><img src="{{MEDIA_URL}}images/logo_dispatches.gif" width="220" height="70" alt="Dispatches"></a></li>
+        <li><a href="http://www.guardian.co.uk/" target="_blank"><img src="{{MEDIA_URL}}images/logo_theguardian.gif" width="240" height="70" alt="The Guardian"></a></li>
+        <li><a href="http://www.agra-net.com/" target="_blank"><img src="{{MEDIA_URL}}images/logo_agrainforma.gif" width="150" height="70" alt="Agra Informa"></a></li>
+        <li><a href="http://www.cabinetoffice.gov.uk/" target="_blank"><img src="{{MEDIA_URL}}images/logo_cabinetoffice.gif" width="260" height="70" alt="Dispatches"></a></li>
+    </ul>
+</div>
 <div id="content">
-    <div id="customers">
-        <h2><strong>ScraperWiki.</strong> Trusted by some of the biggest names in media and government.</h2>
-        <ul>
-            <li><a href="http://www.channel4.com/programmes/dispatches/" target="_blank"><img src="{{MEDIA_URL}}images/logo_dispatches.gif" width="220" height="70" alt="Dispatches"></a></li>
-            <li><a href="http://www.guardian.co.uk/" target="_blank"><img src="{{MEDIA_URL}}images/logo_theguardian.gif" width="240" height="70" alt="The Guardian"></a></li>
-            <li><a href="http://www.agra-net.com/" target="_blank"><img src="{{MEDIA_URL}}images/logo_agrainforma.gif" width="150" height="70" alt="Agra Informa"></a></li>
-            <li><a href="http://www.cabinetoffice.gov.uk/" target="_blank"><img src="{{MEDIA_URL}}images/logo_cabinetoffice.gif" width="260" height="70" alt="Dispatches"></a></li>
+    <div class="tags">
+        <h2><a href="{% url all_tags %}" title="Browse by tag">Popular tags</a></h2>
+        <ul class="tags">
+            {% for tag in tags %}
+            <li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
+            {% endfor %}
         </ul>
     </div>
+	
+	<div class="activity">
+	    <h2><a href="http://blog.scraperwiki.com">From the Blog</a></h2>
+        {% if not debug %}
+	        {% load blog_latest %}
+            {% blog_latest %}
+        {% else %}
+            <div class="blog_latest">Blog not displayed on dev</div>
+        {% endif %}
+    </div>		
+	<br class="clear"/>
 </div>
 {% endblock %}

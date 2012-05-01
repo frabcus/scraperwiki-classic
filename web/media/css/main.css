@@ -1020,22 +1020,41 @@ body.frontpage #content h2 a {
 	text-decoration: none;
 }
 
-body.frontpage div.tags {
+body.homepage #content h2 a {
+    display: block;
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #69c;
+    text-decoration: none;
+    padding: 10px;
+    margin: 0 2px 10px 10px;
+}
+
+body.homepage #content h2 a:hover {
+    color: #369;
+}
+
+body.frontpage div.tags,
+body.homepage div.tags {
 	float: left;
 	width: 459px;
 }
 
-body.frontpage div.activity {
+body.frontpage div.activity,
+body.homepage div.activity {
 	float: right;
 	width: 459px;
 }
 
-body.frontpage #content .tags h2 {
+body.frontpage #content .tags h2,
+body.homepage #content .tags h2 {
 	background-position: left center;
 	text-align: right;
 }
 
-body.frontpage #content .activity h2 {
+body.frontpage #content .activity h2,
+body.homepage #content .activity h2 {
 	background-position: right center;
 	text-align: left;
 }
@@ -1045,18 +1064,21 @@ body.frontpage #content .activity h2 a {
 	margin: 0 20px;
 }
 
-body.frontpage .tags ul {
+body.frontpage .tags ul,
+body.homepage .tags ul {
 	padding: 0 0 0 30px;
 	width: 420px;
 	margin: 10px 0;
 }
 
-body.frontpage .tags li {
+body.frontpage .tags li,
+body.homepage .tags li {
 	list-style: none;
 	float: right;
 }
 
-body.frontpage .tags li a {
+body.frontpage .tags li a,
+body.homepage .tags li a {
 	display: block;
 	margin: 0 0 5px 5px;
 	covlor: #666;
@@ -1071,12 +1093,22 @@ body.frontpage .tags li a {
 
 /* NEW HOMEPAGE */
 
-body.homepage #content {
-    border-top: 1px solid #cdcdcd;
-    clear: both;
+body.homepage #content,
+body.homepage #customers {
+    width: 918px;
+	padding: 20px;
+    margin: 20px auto;
+    border: 1px solid #cdcdcd;
+	background: #fff;
     -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+	text-align: left;
+    clear: both;
+}
+
+body.homepage #content {
+    margin-bottom: 60px;
 }
 
 body.homepage #feature {
@@ -1438,6 +1470,10 @@ body.homepage #for_coders #arrow_1 {
   to { 
     transform: rotate(-360deg);
   }
+}
+
+body.homepage #customers {
+    text-align: center;
 }
 
 body.homepage #customers h2 {
@@ -1830,7 +1866,7 @@ body.profiles.edit #features li input {
 #footer img {
 	position: absolute;
 	top: -10px;
-	right: 20px;
+	right: 30px;
 	-webkit-transform-style: preserve-3d;
 }
 
