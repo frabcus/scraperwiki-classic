@@ -626,7 +626,7 @@ body.fourohfour #header {
 }
 
 body.request_data #header,
-body.data_consulting #header,
+body.business #header,
 body.data_hub #header,
 body.pricing #header {
 	color: #a59970;
@@ -649,7 +649,7 @@ body.pricing #header {
 }
 
 body.request_data #header:before,
-body.data_consulting #header:before,
+body.business #header:before,
 body.data_hub #header:before,
 body.pricing #header:before {
 	background-color: rgba(255,255,255,0.4);
@@ -661,7 +661,7 @@ body.pricing #header:before {
 }
 
 body.request_data #header a, body.request_data #header p, body.request_data #header h2 em,
-body.data_consulting #header a, body.data_consulting #header p, body.data_consulting #header h2 em,
+body.business #header a, body.business #header p, body.business #header h2 em,
 body.data_hub #header a, body.data_hub #header p, body.data_hub #header h2 em,
 body.pricing #header a, body.pricing #header p, body.pricing #header h2 em {
 	color: #fff;
@@ -679,7 +679,7 @@ body.fourohfour #header h2 {
 }
 
 body.request_data #header h2,
-body.data_consulting #header h2,
+body.business #header h2,
 body.data_hub #header h2,
 body.pricing #header h2 {
 	color: #a59970;
@@ -3980,7 +3980,7 @@ body.pricing a#buy:hover em {
 /* DATA SERVICES */
 
 body.data_hub #content,
-body.data_consulting #content {
+body.business #content {
 	line-height: 1.4em;
 	width: 878px;
 	padding: 40px;
@@ -3992,7 +3992,7 @@ body.data_hub #content {
 	line-height: 24px;
 }
 
-body.data_consulting #content {
+body.business #content {
     background: #fff url(../images/data_consulting_swoosh.jpg) 0 20px no-repeat;
 }
 
@@ -4000,7 +4000,7 @@ body.data_hub .intro {
 	margin: 0 0 50px 380px;
 }
 
-body.data_consulting .intro {
+body.business .intro {
 	text-align: center;
 	padding: 0 140px;
 	margin-bottom: 50px;
@@ -4008,7 +4008,7 @@ body.data_consulting .intro {
 }
 
 body.data_hub .intro h3,
-body.data_consulting .intro h3,
+body.business .intro h3,
 h3.different {
 	font-weight: normal;
 	font-size: 28px;
@@ -4017,14 +4017,14 @@ h3.different {
 }
 
 body.data_hub .intro p,
-body.data_consulting .intro p {
+body.business .intro p {
 	font-size: 20px;
 	line-height: 26px;
 	color: #666;
 	margin: 0 0 10px 0;
 }
 
-body.data_consulting .intro p {
+body.business .intro p {
 	font-size: 18px;
 	line-height: 24px;
 	margin: 10px 0 0 0;
@@ -4035,7 +4035,7 @@ body.data_hub #content p.first {
 }
 
 body.data_hub .aside,
-body.data_consulting .aside,
+body.business .aside,
 body.data_hub blockquote,
 body.data_hub a.dont_miss_out {
 	display: block;
@@ -4050,7 +4050,7 @@ body.data_hub a.dont_miss_out {
 	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
-body.data_consulting #legal {
+body.business #legal {
 	margin-bottom: 20px;
 }
 
@@ -4073,7 +4073,7 @@ body.data_hub a.dont_miss_out {
 	text-indent: -0.3em;
 }
 
-body.data_consulting .aside blockquote {
+body.business .aside blockquote {
 	margin: 0;
 	font-family: Georgia, Times, "Times New Roman", serif;
 	font-style: italic;
@@ -4082,22 +4082,22 @@ body.data_consulting .aside blockquote {
 }
 
 body.data_hub .aside,
-body.data_consulting #legal {
+body.business #legal {
 	float: right;
 	right: -55px;
 	font-size: 15px;
 	clear: right;
 }
 
-body.data_consulting #agricultural,
-body.data_consulting #sla {
+body.business #agricultural,
+body.business #sla {
 	clear: left;
 	float: left;
 	left: -55px;
 	font-size: 15px;
 }
 
-body.data_consulting .aside h4 {
+body.business .aside h4 {
 	font-size: 12px;
 	text-transform: uppercase;
 	color: #c36639;
@@ -4110,7 +4110,7 @@ body.data_hub .aside h3 {
 	border-bottom: 1px solid #e0c052;
 }
 
-body.data_consulting .aside .hgroup {
+body.business .aside .hgroup {
 	background: #5b3b22 url(../images/data_consulting_courtroom.jpg) no-repeat center center;
 	width: 360px;
 	padding: 16px 20px 19px 20px;
@@ -4120,12 +4120,12 @@ body.data_consulting .aside .hgroup {
 	position: relative;
 }
 
-body.data_consulting #agricultural .hgroup {
+body.business #agricultural .hgroup {
 	background-color: #334061;
 	background-image: url(../images/data_consulting_stocks.jpg);
 }
 
-body.data_consulting .aside .hgroup h4 {
+body.business .aside .hgroup h4 {
 	color: #ec9b73;
 }
 
@@ -4141,7 +4141,7 @@ body.data_hub .aside ul {
 
 body.data_hub blockquote a,
 body.data_hub .consulting a,
-body.data_consulting .aside a {
+body.business .aside a {
 	color: #c36639;
 }
 
@@ -4167,7 +4167,7 @@ body.data_hub a.dont_miss_out {
 }
 
 body.data_hub a.dont_miss_out em,
-body.data_consulting .call_to_action em {
+body.business .call_to_action em {
 	font-style: normal;
 	color: #fff;
 	display: inline-block;
@@ -4181,7 +4181,7 @@ body.data_consulting .call_to_action em {
 }
 
 body.data_hub a.dont_miss_out:hover em,
-body.data_consulting .call_to_action:hover em {
+body.business .call_to_action:hover em {
 	background-color: #c36639;
 }
 
@@ -4243,7 +4243,7 @@ body.data_hub p.consulting strong {
 	padding-left: 60px;
 }
 
-body.data_consulting a.call_to_action {
+body.business a.call_to_action {
 	display: block;
 	text-align: center;
 	color: #000;
@@ -4252,18 +4252,18 @@ body.data_consulting a.call_to_action {
 	border-top: 1px solid #eadba6;
 }
 
-body.data_consulting #extraction {
+body.business #extraction {
 	padding-top: 20px;
 	width: 470px;
 }
 
-body.data_consulting #extraction ol {
+body.business #extraction ol {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-body.data_consulting #extraction li {
+body.business #extraction li {
 	padding: 15px 0 10px 50px;
 	background: transparent url(../images/data_hub_tick.gif) left center no-repeat;
 	color: #666;
@@ -4271,42 +4271,42 @@ body.data_consulting #extraction li {
     line-height: 19px;
 }
 
-body.data_consulting #extraction li strong {
+body.business #extraction li strong {
     font-weight: normal;
     color: #c36639;
 }
 
-body.data_consulting .step h3 {
+body.business .step h3 {
 	line-height: 36px;
 	background: transparent url(../images/data_hub_number_1.gif) 4px center no-repeat;
 	padding-left: 50px;
 	font-size: 24px;
 }
 
-body.data_consulting #cleaning h3 {
+body.business #cleaning h3 {
     background-image: url(../images/data_hub_number_2.gif);
 }
 
-body.data_consulting #integration h3 {
+body.business #integration h3 {
     background-image: url(../images/data_hub_number_3.gif);
 }
 
-body.data_consulting #visualisations h3 {
+body.business #visualisations h3 {
     background-image: url(../images/data_hub_number_4.gif);
 }
 
-body.data_consulting #cleaning {
+body.business #cleaning {
 	clear: both;
 	margin-bottom: 60px;
 }
 
-body.data_consulting #integration,
-body.data_consulting #visualisations {
+body.business #integration,
+body.business #visualisations {
 	float: right;
 	width: 470px;
 }
 
-body.data_consulting #integration {
+body.business #integration {
 	margin: 30px 0 70px 0;
 }
 
