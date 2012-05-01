@@ -4003,7 +4003,7 @@ body.data_hub .intro {
 body.data_consulting .intro {
 	text-align: center;
 	padding: 0 140px;
-	margin-bottom: 60px;
+	margin-bottom: 50px;
 	text-shadow: 0 0 20px #fff;
 }
 
@@ -4041,13 +4041,17 @@ body.data_hub a.dont_miss_out {
 	display: block;
 	position: relative;
 	width: 360px;
-	padding: 16px 20px 14px 20px;
+	padding: 16px 19px 14px 19px;
 	margin: 0 0 40px 0;
 	background-color: #fcf9ec;
 	border: 1px solid #f3e7be;
 	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 	-moz-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+body.data_consulting #legal {
+	margin-bottom: 20px;
 }
 
 body.data_hub blockquote,
@@ -4067,6 +4071,14 @@ body.data_hub a.dont_miss_out {
 	line-height: 28px;
 	color: #666;
 	text-indent: -0.3em;
+}
+
+body.data_consulting .aside blockquote {
+	margin: 0;
+	font-family: Georgia, Times, "Times New Roman", serif;
+	font-style: italic;
+	color: #c36639;
+	padding: 0 15px 0 15px;
 }
 
 body.data_hub .aside,
@@ -4096,6 +4108,25 @@ body.data_hub .aside h3 {
 	text-align: center;
 	padding-bottom: 10px;
 	border-bottom: 1px solid #e0c052;
+}
+
+body.data_consulting .aside .hgroup {
+	background: #5b3b22 url(../images/data_consulting_courtroom.jpg) no-repeat center center;
+	width: 360px;
+	padding: 16px 20px 19px 20px;
+	color: #fff;
+	text-shadow: 0 0 5px #000;
+	margin: -17px 0 0 -20px;
+	position: relative;
+}
+
+body.data_consulting #agricultural .hgroup {
+	background-color: #334061;
+	background-image: url(../images/data_consulting_stocks.jpg);
+}
+
+body.data_consulting .aside .hgroup h4 {
+	color: #ec9b73;
 }
 
 body.data_hub .aside li {
@@ -4135,7 +4166,8 @@ body.data_hub a.dont_miss_out {
 	line-height: 26px;
 }
 
-body.data_hub a.dont_miss_out em {
+body.data_hub a.dont_miss_out em,
+body.data_consulting .call_to_action em {
 	font-style: normal;
 	color: #fff;
 	display: inline-block;
@@ -4148,17 +4180,9 @@ body.data_hub a.dont_miss_out em {
 	margin: -4px 0 -3px 5px;
 }
 
-body.data_hub a.dont_miss_out:hover em {
+body.data_hub a.dont_miss_out:hover em,
+body.data_consulting .call_to_action:hover em {
 	background-color: #c36639;
-}
-
-Xbody.data_hub .collaboration {
-	float: right;
-	width: 360px;
-	font-size: 18px;
-	line-height: 24px;
-	color: #333;
-	margin-bottom: 50px;
 }
 
 h3.different {
@@ -4219,8 +4243,17 @@ body.data_hub p.consulting strong {
 	padding-left: 60px;
 }
 
+body.data_consulting a.call_to_action {
+	display: block;
+	text-align: center;
+	color: #000;
+	text-decoration: none;
+	padding: 15px 0 2px 0;
+	border-top: 1px solid #eadba6;
+}
+
 body.data_consulting #extraction {
-	padding-top: 10px;
+	padding-top: 20px;
 	width: 470px;
 }
 
