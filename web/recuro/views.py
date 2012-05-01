@@ -9,6 +9,9 @@ def notify(request, apikey):
     if apikey != settings.RECURLY_API_KEY:
         return HttpResponseForbidden()
     obj = recurly_parser.parse(request.raw_post_data)
+    if obj == None:
+        return HttpResponse("unsupported", mimetype="text/plain")
+
     resp, content = obj.save()
 
     if resp['status'] != '200':

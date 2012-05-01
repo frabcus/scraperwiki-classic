@@ -3,6 +3,7 @@ import string
 from django.conf import settings
 from lxml import etree,html
 import recurly
+from jinja2 import Template
 
 from recuro.xero import XeroPrivateClient
 
@@ -51,19 +52,37 @@ class Contact(XeroPrivateClient):
         self.vat_number = billing.vat_number
 
     def to_xml(self):
-        template = string.Template( """
+        template = Template( """
             <Contact>
-                <ContactNumber>$number</ContactNumber>
-                <Name>$name</Name>
-                <FirstName>$first_name</FirstName>
-                <LastName>$last_name</LastName>
-                <EmailAddress>$email</EmailAddress>
-                <TaxNumber>$vat_number</TaxNumber>
+                <ContactNumber>{{number}}</ContactNumber>
+                <Name>{{name}}</Name>
+                <FirstName>{{first_name}}</FirstName>
+                <LastName>{{last_name}}</LastName>
+                <EmailAddress>{{email}}</EmailAddress>
+                {% if vat_number %}
+                <TaxNumber>{{vat_number}}</TaxNumber>
+                {% endif %}
+                <Addresses>
+                    <Address>
+                        <AddressType>STREET</AddressType>
+                        <AddressLine1>{{address1}}</AddressLine1>
+                        {% if address2 %}
+                        <AddressLine2>{{address2}}</AddressLine2>
+                        {% endif %}
+                        <City>{{city}}</City>
+                        <Region>{{state}}</Region>
+                        <Country>{{country}}</Country>
+                        <PostalCode>{{zip}}</PostalCode>
+                    </Address>
+                </Addresses>
             </Contact>
             """ )
-        return template.substitute(number=self.number, name=self.name,
+        return template.render(number=self.number, name=self.name,
                         first_name=self.first_name, last_name=self.last_name,
-                        email=self.email, vat_number=self.vat_number)
+                        email=self.email, vat_number=self.vat_number,
+                        address1=self.address1, address2=self.address2,
+                        city=self.city, state=self.state, country=self.country,
+                        zip=self.zip)
 
 class Invoice(XeroPrivateClient):
     def __init__(self, xml=None, **k):
@@ -79,6 +98,7 @@ class Invoice(XeroPrivateClient):
             self.status = 'PAID'
         self.invoice_number = doc.xpath('//invoice_number')[0].text
         self.invoice_ref = 'RECURLY' + self.invoice_number
+        self.account_code = settings.XERO_ACCOUNT_CODE
 
         self.vat_number = None
         self.subtotal_in_cents = 0
@@ -96,23 +116,23 @@ class Invoice(XeroPrivateClient):
         self.total_in_cents = invoice.total_in_cents
 
     def to_xml(self):
-        template = string.Template("""
+        template = Template("""
           <Invoice>
-            <InvoiceNumber>$invoice_ref</InvoiceNumber>
+            <InvoiceNumber>{{invoice_ref}}</InvoiceNumber>
             <Type>ACCREC</Type>
             <Contact>
-              <ContactNumber>$contact_number</ContactNumber>
+              <ContactNumber>{{contact_number}}</ContactNumber>
             </Contact>
-            <Date>$short_date</Date>
-            <DueDate>$short_date</DueDate>
+            <Date>{{short_date}}</Date>
+            <DueDate>{{short_date}}</DueDate>
             <CurrencyCode>USD</CurrencyCode>
             <LineItems>
               <LineItem>
                 <Description>ScraperWiki Vault</Description>
                 <Quantity>1</Quantity>
-                <UnitAmount>$price</UnitAmount>
-                <AccountCode>200</AccountCode>
-                <TaxType>$tax_type</TaxType>
+                <UnitAmount>{{price}}</UnitAmount>
+                <AccountCode>{{account_code}}</AccountCode>
+                <TaxType>{{tax_type}}</TaxType>
               </LineItem>
             </LineItems>
           </Invoice>
@@ -125,5 +145,5 @@ class Invoice(XeroPrivateClient):
         if self.tax_in_cents == 0:
             tax_type = "NONE"
 
-        return template.substitute(price=price, short_date=short_date,
+        return template.render(price=price, short_date=short_date,
           tax_type=tax_type, **self.__dict__)

@@ -122,3 +122,10 @@ if DEBUG:
 # Go to https://scraperwiki.recurly.com/developer/recurly_js to find this.
 RECURLY_SUBDOMAIN = "scraperwiki-test"
 RECURLY_PRIVATE_KEY = None
+RECURLY_API_KEY = None
+
+# Used for Xero integration
+XERO_ACCOUNT_CODE = 200
+XERO_CONSUMER_KEY = None
+XERO_CONSUMER_SECRET = None
+XERO_RSA_KEY = None
