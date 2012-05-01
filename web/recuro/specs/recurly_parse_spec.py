@@ -89,6 +89,7 @@ def it_replaces_company_name_with_customer_name_if_not_present():
 
 def it_should_output_xero_contact_xml():
     xero_contact = Contact(recurly_contact)
+    xero_contact.get_address()
     xero_xml = xero_contact.to_xml()
     doc = etree.fromstring(xero_xml)
     assert len(doc) > 0
@@ -99,3 +100,13 @@ def it_should_output_xero_contact_xml():
     assert_equals(doc.xpath("//Contact/LastName")[0].text, "Testerson")
     assert_equals(doc.xpath("//Contact/EmailAddress")[0].text,
                     "test@testerson.com")
+    assert_equals(doc.xpath("//Address/AddressLine1")[0].text                    , "ScraperWiki Limited")
+    assert_equals(doc.xpath("//Address/AddressLine2")[0].text                    , "146 Brownlow Hill")
+    assert_equals(doc.xpath("//Address/City")[0].text,
+                    "Liverpool")
+    assert_equals(doc.xpath("//Address/Region")[0].text,
+                    "MERSEYSIDE")
+    assert_equals(doc.xpath("//Address/Country")[0].text,
+                    "GB")
+    assert_equals(doc.xpath("//Address/PostalCode")[0].text,
+                    "L3 5RF")
