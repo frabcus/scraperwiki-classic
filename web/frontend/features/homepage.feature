@@ -7,17 +7,6 @@ Feature: As a site visitor
     When I enter "test" in the search box
     Then I should be on the search test page
 
-  Scenario: If I'm a Data Developer, I should find out more about what SW offers me
-    Given I am on the home page
-    When I click the "« Find out more" link
-    Then I should see "Why developers love ScraperWiki" 
-
-  Scenario: If I'm a Data Requester, I should find out about how to request data
-    Given I am on the home page
-    When I click the "Find out more »" link
-    Then I should see "Why people who need data love ScraperWiki"
-    And I should see a "Request data!" link
-
   Scenario: I should see the popular tags of scrapers
     Given the "test_scraper" has the tag "testalicious"
     When I visit the home page
