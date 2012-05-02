@@ -56,9 +56,11 @@ def frontpage(request, public_profile_field=None):
             'language': 'python'
            }
 
-    if 'ab_new_homepage' not in request.session:
+    if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
+        request.session['ab_new_homepage'] = 1
+    elif 'ab_new_homepage' not in request.session:
         request.session['ab_new_homepage'] = random.randint(0,1)
-#    if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
+        
     if request.session['ab_new_homepage'] == 1:
         return render_to_response('frontend/homepage.html', data, context_instance=RequestContext(request))
     else:
