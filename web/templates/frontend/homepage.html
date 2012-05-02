@@ -5,6 +5,10 @@
     <meta name="description" content="ScraperWiki helps coders make data do stuff across the web. Our expert data services also help businesses everywhere use data to gain a competitive edge."/>
 {% endblock %}
 
+{% block custom_vars %}
+    _gaq.push(['_setCustomVar', 2, 'ab_new_homepage', '1', 2]);
+{% endblock %}
+
 {% block body_class %}homepage{% endblock %}
 
 {% block header_outer %}{% endblock %}

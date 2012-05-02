@@ -11,6 +11,10 @@
     <meta property="og:site_name" content="ScraperWiki" />
 {% endblock %}
 
+{% block custom_vars %}
+    _gaq.push(['_setCustomVar', 2, 'ab_new_homepage', '0', 2]);
+{% endblock %}
+
 {% block header %}
 	<div id="frontpage_intro">
 	    <a data-wiki_type="scraper" class="create editor_scraper" href="{% url choose_template 'scraper' %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Create a scraper']); }">Create a scraper</a>
