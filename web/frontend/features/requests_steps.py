@@ -29,3 +29,23 @@ def then_i_should_see_a_link(step, url):
 @step(u'(?:And|Then) I should see "([^"]*)"$')
 def then_i_should_see(step, text):
     assert world.browser.is_text_present(text)
+
+@step(u'(?:And|Then) I should see a form to request data')
+def then_i_should_see_a_form_to_request_data(step):
+    assert world.browser.find_by_css("form#request")
+
+@step(u'(?:And|When) I say I want "([^"]*)"')
+def when_i_say_i_want(step, description):
+    world.browser.find_by_css('#request #description').first.fill(description)
+
+@step(u'(?:And|When) I enter my name "([^"]*)"')
+def and_i_enter_my_name(step, name):
+    world.browser.find_by_css('#request #name').first.fill(name)
+
+@step(u'(?:And|When) I enter my phone number "([^"]*)"')
+def and_i_enter_my_phone_number(step, phone_number):
+    world.browser.find_by_css('#request #phone').first.fill(phone_number)
+
+
+
+
