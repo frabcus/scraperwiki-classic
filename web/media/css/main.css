@@ -357,47 +357,6 @@ li.search input.text,
 	box-shadow: 0 1px 0 #fff;
 }
 
-.subnav.data_services li.request_data a {
-	height: 24px;
-	line-height: 24px;
-	padding: 0 13px;
-	margin-left: 3px;
-	color: #333;
-	text-shadow: 0 1px 0 rgba(255,255,255,0.6);
-	-webkit-border-radius: 30px;
-	-moz-border-radius: 30px;
-	border-radius: 30px;
-	background-color: #f8d653;
-	background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 4%, #f9dc5c 4%, #f5c033 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(4%,#ffffff), color-stop(4%,#f9dc5c), color-stop(100%,#f5c033));
-	background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 4%,#f9dc5c 4%,#f5c033 100%);
-	background: -o-linear-gradient(top, #ffffff 0%,#ffffff 4%,#f9dc5c 4%,#f5c033 100%);
-	background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 4%,#f9dc5c 4%,#f5c033 100%);
-	background: linear-gradient(top, #ffffff 0%,#ffffff 4%,#f9dc5c 4%,#f5c033 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9dc5c', endColorstr='#f5c033',GradientType=0 );
-	-webkit-box-shadow: 0px 2px 10px #35383b;
-	-moz-box-shadow: 0px 2px 10px #35383b;
-	box-shadow: 0px 2px 10px #35383b;
-}
-
-.subnav.data_services li.request_data a:hover {
-	text-decoration: none;
-	background-color: #fdde68;
-	background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 4%, #fde471 4%, #fbca47 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(4%,#ffffff), color-stop(4%,#fde471), color-stop(100%,#fbca47));
-	background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 4%,#fde471 4%,#fbca47 100%);
-	background: -o-linear-gradient(top, #ffffff 0%,#ffffff 4%,#fde471 4%,#fbca47 100%);
-	background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 4%,#fde471 4%,#fbca47 100%);
-	background: linear-gradient(top, #ffffff 0%,#ffffff 4%,#fde471 4%,#fbca47 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fde471', endColorstr='#fbca47',GradientType=0 );
-}
-
-.subnav.data_services li.request_data a:active {
-	position: relative;
-	top: 1px;
-}
-
-
 .supernav img.gravatar {
 	position: absolute;
 	top: 0;
