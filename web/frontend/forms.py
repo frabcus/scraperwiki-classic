@@ -145,35 +145,10 @@ class ResendActivationEmailForm(forms.Form):
     email_address = forms.EmailField()
 
 class DataEnquiryForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DataEnquiryForm, self).__init__(*args, **kwargs)
-        self.fields['frequency'].initial = 'daily'
-
-    urls = forms.CharField(required=False, label='At which URL(s) can we find the data currently?')
-    columns = forms.CharField(required=False, widget=forms.Textarea, label='What information do you want scraped?')
-    due_date = forms.DateField(required=False, label='When do you need it by?')
-    first_name = forms.CharField(label='First name:')
-    last_name = forms.CharField(label='Last name:')
-    email = forms.CharField(label='Your email address:')
-    telephone = forms.CharField(required=False, label='Your telephone number:')
-    company_name = forms.CharField(required=False, label='Your company name:')
-    broadcast = forms.BooleanField(initial=True, required=False, label='I\'m happy for this request to be posted on Twitter/Facebook')
-    description = forms.CharField(required=False, widget=forms.Textarea, label='What are your ETL needs?')
-    visualisation = forms.CharField(required=False, widget=forms.Textarea, label='What visualisation do you need?')
-    application = forms.CharField(required=False, widget=forms.Textarea, label='What application do you want built?')
-    frequency = forms.ChoiceField(label='How often does the data need to be scraped?', choices=DataEnquiry.FREQUENCY_CHOICES)
-    why = forms.CharField(required=False, widget=forms.Textarea, label='Why do you want to liberate this data?')
-
-    def clean(self):
-        cleaned_data = self.cleaned_data
-
-        if not cleaned_data.get('first_name') or not cleaned_data.get('last_name') or not cleaned_data.get('email'):
-            raise forms.ValidationError("So we can get back to you, please fill in your name and email.")
-
-        if cleaned_data['category'] == 'public' and cleaned_data['broadcast'] == False:
-            raise forms.ValidationError("Sorry, we can only help with free public data requests if you're happy for us to post it on social networks.")
-
-        return cleaned_data
+    name = forms.CharField(label='Name:')
+    email = forms.CharField(required=False, label='Email:')
+    phone = forms.CharField(required=False, label='Phone:')
+    description = forms.CharField(widget=forms.Textarea, label='What data do you want?')
 
     class Meta:
         model = DataEnquiry

@@ -200,38 +200,10 @@ class Tags:
 
 class DataEnquiry(models.Model):
     date_of_enquiry = models.DateTimeField(auto_now_add=True)
-    urls = models.TextField()
-    columns = models.TextField(null=True, blank=True)
-    due_date = models.DateField(null=True, blank=True)
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
-    email = models.EmailField()
-    telephone = models.CharField(max_length=32, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    visualisation = models.TextField(null=True, blank=True)
-    application = models.TextField(null=True, blank=True)
-    company_name = models.CharField(max_length=128, null=True, blank=True)
-    broadcast = models.BooleanField()
-    why = models.TextField(null=True, blank=True)
-
-    FREQUENCY_CHOICES = (
-      ('once', 'Once only'),
-      ('monthly', 'Monthly'),
-      ('weekly', 'Weekly'),
-      ('daily', 'Daily'),
-      ('hourly', 'Hourly'),
-      ('realtime', 'Real-time')
-    )
-    frequency = models.CharField(max_length=32, choices=FREQUENCY_CHOICES)
-
-    CATEGORY_CHOICES = (
-        ('private', 'private'),
-        ('viz', 'viz'),
-        ('app', 'app'),
-        ('etl', 'etl'),
-        ('public', 'public')
-    )
-    category = models.CharField(max_length=32, choices=CATEGORY_CHOICES)
+    name = models.CharField(max_length=64)
+    email = models.EmailField(null=True, blank=True)
+    phone = models.CharField(max_length=32, null=True, blank=True)
+    description = models.TextField()
 
     class Meta:
         verbose_name_plural = "data enquiries"
@@ -239,60 +211,7 @@ class DataEnquiry(models.Model):
     def __unicode__(self):
         return u"%s %s <%s>" % (self.first_name, self.last_name, self.email)
 
-    def email_message(self):
-        msg =  u"""
-            Category: %s
-            -----
-            Name: %s %s
-            Email address: %s
-            Telephone number: %s
-            Company name: %s
-            -----
-            At which URL(s) can we find the data currently?
-            > %s
-            
-            What information do you want scraped?
-            > %s
-            
-            When do you need it by?
-            > %s
-            
-            How often does the data need to be scraped?
-            > %s
-            
-            What are your ETL needs?
-            > %s
-            
-            What visualisation do you need?
-            > %s
-            
-            What application do you want built?
-            > %s
-            
-            Why do you want to liberate this data?
-            > %s
-            
-            Are you happy for this to be broadcasted on Twitter/Facebook?
-            > %s
-            
-        """ % (self.category,
-               self.first_name,
-               self.last_name,
-               self.email,
-               self.telephone or '(not specified)',
-               self.company_name or '(not specified)',
-               self.urls or '(not specified)',
-               self.columns or '(not specified)',
-               self.due_date or '(none)',
-               self.frequency or '(not specified)',
-               self.description or '(not specified)',
-               self.visualisation or '(not specified)',
-               self.application or '(not specified)',
-               self.why or '(not specified)',
-               self.broadcast or '(not specified)')
-
-        return msg.encode('utf-8')
-
+# XXX this doesn't work
 def data_enquiry_post_save(sender, **kwargs):
     if kwargs['created']:
         instance = kwargs['instance']

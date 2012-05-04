@@ -11,7 +11,7 @@ Feature: As a person who wants to pay ScraperWiki to get data for me
     When I say I want "Every cheese on http://www.cheese.com/. For each one the name, description, country, milk type, texture and fat content."
     And I enter my name "Stilton Mouse"
     And I enter my phone number "+44 1234 56789"
-    And I click the "send request" button
+    And I click the "Send your request" button
     Then I should see "Thank you"
 
 
