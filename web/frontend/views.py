@@ -57,7 +57,7 @@ def frontpage(request, public_profile_field=None):
            }
 
     if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
-        request.session['ab_new_homepage'] = 2
+        request.session['ab_new_homepage'] = 3
     elif 'ab_new_homepage' not in request.session:
         request.session['ab_new_homepage'] = random.choice([0,2])
         
