@@ -61,10 +61,7 @@ def frontpage(request, public_profile_field=None):
     elif 'ab_new_homepage' not in request.session:
         request.session['ab_new_homepage'] = random.choice([0,2])
         
-    if request.session['ab_new_homepage'] == 2:
-        return render_to_response('frontend/homepage.html', data, context_instance=RequestContext(request))
-    else:
-        return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
+    return render_to_response('frontend/homepage_%s.html' % request.session['ab_new_homepage'], data, context_instance=RequestContext(request))
 
 
 def profile_detail(request, username):
