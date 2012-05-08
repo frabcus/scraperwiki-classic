@@ -1941,6 +1941,102 @@ body.profiles.edit #features li input {
 
 /* REQUEST DATA PAGES */
 
+#process {
+	position: relative;
+	width: 958px;
+	height: 180px;
+	background: transparent url(http://placehold.it/958x180) 0 0 no-repeat;
+	margin: -20px -20px 20px -20px;
+}
+
+#process .stage {
+	position: absolute;
+	width: 190px;
+	top: 20px;
+}
+
+#process .stage.first {
+	left: 20px;
+}
+
+#process .stage.second {
+	left: 264px;
+}
+
+#process .stage.third {
+	left: auto;
+	right: 264px;
+}
+
+#process .stage.fourth {
+	left: auto;
+	right: 20px;
+}
+
+#process h3 {
+	margin-bottom: 10px;
+}
+
+#process span.cost {
+	float: right;
+	display: inline-block;
+	font-size: 12px;
+	line-height: 12px;
+	background: #999;
+	color: #fff;
+	padding: 4px 7px 3px 7px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	margin-top: 1px;
+	text-shadow: 0 1px 0 #666;
+	-webkit-box-shadow: 0 1px 0 #eee;
+	-moz-box-shadow: 0 1px 0 #eee;
+	box-shadow: 0 1px 0 #eee;
+}
+
+#process p {
+	margin: 0;
+	line-height: 21px;
+}
+
+form#request label {
+	display: block;
+	margin-bottom: 3px;
+}
+
+form#request div {
+	margin: 20px 0;
+}
+
+form#request div.tips {
+	margin: 0;
+}
+
+form#request input,
+form#request textarea {
+	width: 400px;
+	padding: 5px;
+	line-height: 20px;
+	font-size: 16px;
+}
+
+form#request textarea {
+	height: 160px;
+}
+
+form#request #send {
+	width: auto;
+	font-size: 14px;
+	line-height: 18px;
+}
+
+form#request .error input,
+form#request .error textarea {
+	border: none;
+}
+
+
 
 /* SUSPICIOUS!!! */
 
