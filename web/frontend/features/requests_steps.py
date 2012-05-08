@@ -3,9 +3,11 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals,assert_less
+from django.core import mail
 
 import time
 import re
+import sys
 
 service_xpath = "//h3[a[contains(strong,'%s')]]"
 
@@ -51,15 +53,15 @@ def and_i_enter_my_phone_number(step, phone_number):
 
 @step(u'Then it should send an email to the feedback address')
 def then_it_should_send_an_email_to_the_feedback_address(step):
-    time.sleep(0.5)
+    assert world.mails_len() == 1, world.mails_file()
     m = re.search(r"^To:\s+%s" % settings.FEEDBACK_EMAIL,
-      open('mail.out').read(),
+      world.mails_body()[0],
       re.M)
     assert m
 
 @step(u'Then it should not send an email to the feedback address')
 def then_it_should_not_send_an_email_to_the_feedback_address(step):
-    assert False
+    assert world.mails_len() == 0
 
 
 

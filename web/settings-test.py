@@ -9,3 +9,4 @@ OVERDUE_SQL = "julianday(strftime(?,last_run) + run_interval,'unixepoch') < juli
 OVERDUE_SQL_PARAMS = ['%s']
 LETTUCE_TESTING = True
 
+
