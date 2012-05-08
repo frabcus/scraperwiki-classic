@@ -100,7 +100,7 @@ def and_i_should_have_a_vault(step):
 def vault_owner_emailed(step):
     time.sleep(0.5)
     m = re.search(r"^To:\s+test@example.com",
-      world.mails_body()[0],
+      world.mails_body()[-1],
       re.M)
-    assert m, world.mails_body()[0]
+    assert m, world.mails_file()
 
