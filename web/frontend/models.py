@@ -10,6 +10,8 @@ from django.dispatch import dispatcher
 from django.core.mail import send_mail, mail_admins
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
@@ -213,6 +215,20 @@ class DataEnquiry(models.Model):
 def data_enquiry_post_save(sender, **kwargs):
     if kwargs['created']:
         instance = kwargs['instance']
-        #send_mail('Data Request', instance.email_message(), instance.email, [settings.FEEDBACK_EMAIL], fail_silently=False)
+
+        subject = "Data request from %s" % instance.name
+
+        text_content = render_to_string('emails/request_data.txt', locals())
+        html_content = render_to_string('emails/request_data.html', locals())
+
+        msg = EmailMultiAlternatives(subject, text_content, instance.email, [settings.FEEDBACK_EMAIL])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+
 
 post_save.connect(data_enquiry_post_save, sender=DataEnquiry)
+
+
+
+
+
