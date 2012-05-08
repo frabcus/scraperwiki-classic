@@ -213,6 +213,6 @@ class DataEnquiry(models.Model):
 def data_enquiry_post_save(sender, **kwargs):
     if kwargs['created']:
         instance = kwargs['instance']
-        send_mail('Data Request', instance.email_message(), instance.email, [settings.FEEDBACK_EMAIL], fail_silently=False)
+        #send_mail('Data Request', instance.email_message(), instance.email, [settings.FEEDBACK_EMAIL], fail_silently=False)
 
 post_save.connect(data_enquiry_post_save, sender=DataEnquiry)
