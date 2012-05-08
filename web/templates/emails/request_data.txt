@@ -1,5 +1,5 @@
-Requested data from {{ instance.name }} <{{ instance.email }}>
+Request for data from {{ instance.name }} <{{ instance.email }}>
 
 "{{ instance.description }}"
 
-Phone number: {{ instance.phone }}
+Phone them on: {{ instance.phone }}
