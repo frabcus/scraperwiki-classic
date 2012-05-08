@@ -13,6 +13,26 @@
 {% block content %}
 
 
+<div id="process">
+    <div class="stage first">
+        <h3>Request some data</h3>
+        <p>We can scrape web pages, call APIs or access your legacy data. Tell us roughly what you need.</p>
+    </div>
+    <div class="stage second">
+        <h3>We&rsquo;ll call you</h3>
+        <p>To discuss your requirements in finer detail.</p>
+    </div>
+    <div class="stage third">
+        <h3>Investigation! <span class="cost">$150</span></h3>
+        <p>We match your business needs to the technical issues, and write a report detailing final deliverables and cost.</p>
+    </div>
+    <div class="stage fourth last">
+        <h3>Delivery! <span class="cost">$1000+</span></h3>
+        <p>Get the data in the form you need, or integrated into your systems.</p>
+    </div>
+</div>
+
+
 <div id="public_request" style="display: none">
     <p>
         If you&rsquo;ve found a cool dataset that you don't know how to liberate,
@@ -39,31 +59,39 @@
 </div>
 
 <form action="." method="post" id="request">
+    <h3>Request some data: Tell us what you need</h3>
     {% csrf_token %}
     {% if form.non_field_errors %}
         <div id="main_error">{{form.non_field_errors.0}}</div>
     {% endif %}
-	<ul>
-	<li class="description">
+	<div class="description{% if form.description.errors %} error{% endif %}">
         {{form.description.label_tag}}
         {{form.description}}
-	</li>
-	<li class="name {% if form.name.errors %}error{% endif %}">
+        <div class="tips">
+        {% if form.description.errors %}<p>{{ form.description.errors }}</p>{% endif %}
+            <p>Make sure to tell us the URL or web address where we can find the data, what details you need, and what format you want the output delivered in.</p>
+            <p>eg: "Hi. I need all the cheese listed on http://www.cheese.com. I need the name or each cheese, along with its country of origin and its description. I need the data delivered as a CSV."</p>
+        </div>
+	</div>
+	<div class="name {% if form.name.errors %} error{% endif %}">
         {{form.name.label_tag}}
         {{form.name}}
-	</li> 
-	<li class="email {% if form.email.errors %}error{% endif %}">
-        {{form.email.label_tag}}
-        {{form.email}}
-	</li> 
-	<li class="phone">
+        {% if form.name.errors %}<div class="tips">{{ form.name.errors }}</div>{% endif %}
+	</div>
+	<div class="phone {% if form.phone.errors or form.no_contact_details %}error{% endif %}">
         {{form.phone.label_tag}}
         {{form.phone}}
-	</li> 
-	</ul>
-	<p class="last">
+        {% if form.no_contact_details %}<div class="tips">Please tell us how to contact you.</div>{% endif %}
+        {% if form.phone.errors %}<div class="tips">{{ form.phone.errors }}</div>{% endif %}
+	</div>
+	<div class="email {% if form.email.errors or form.no_contact_details %}error{% endif %}">
+        {{form.email.label_tag}}
+        {{form.email}}
+        {% if form.email.errors %}<div class="tips">{{ form.email.errors }}</div>{% endif %}
+	</div>
+	<div class="last">
 		<input type="submit" value="Send your request" id="send" />
-	</p>
+	</div>
 </form>
 
 {% endblock %}

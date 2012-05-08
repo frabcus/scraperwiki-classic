@@ -57,6 +57,9 @@ def then_it_should_send_an_email_to_the_feedback_address(step):
       re.M)
     assert m
 
+@step(u'Then it should not send an email to the feedback address')
+def then_it_should_not_send_an_email_to_the_feedback_address(step):
+    assert False
 
 
 
