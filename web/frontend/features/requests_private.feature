@@ -12,6 +12,7 @@ Feature: As a person who wants to pay ScraperWiki to get data for me
     And I enter my name "Stilton Mouse"
     And I enter my phone number "+44 1234 56789"
     And I click the "Send your request" button
-    Then I should see "Thank you"
+    Then it should send an email to the feedback address
+    And I should see "Thank you"
 
 

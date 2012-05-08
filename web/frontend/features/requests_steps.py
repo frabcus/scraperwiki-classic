@@ -1,8 +1,11 @@
 from lettuce import step,before,world
 from django.contrib.auth.models import User
+from django.conf import settings
 from frontend.models import UserProfile, Feature
 from nose.tools import assert_equals,assert_less
+
 import time
+import re
 
 service_xpath = "//h3[a[contains(strong,'%s')]]"
 
@@ -45,6 +48,14 @@ def and_i_enter_my_name(step, name):
 @step(u'(?:And|When) I enter my phone number "([^"]*)"')
 def and_i_enter_my_phone_number(step, phone_number):
     world.browser.find_by_css('#request #id_phone').first.fill(phone_number)
+
+@step(u'Then it should send an email to the feedback address')
+def then_it_should_send_an_email_to_the_feedback_address(step):
+    time.sleep(0.5)
+    m = re.search(r"^To:\s+%s" % settings.FEEDBACK_EMAIL,
+      open('mail.out').read(),
+      re.M)
+    assert m
 
 
 
