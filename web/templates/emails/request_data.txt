@@ -1,5 +1,8 @@
-Request for data from {{ instance.name }} <{{ instance.email }}>
+ScraperWiki
+___________
+
+Request for data from {{ instance.name }} <{{ instance.email }}>:
 
 "{{ instance.description }}"
 
-Phone them on: {{ instance.phone }}
+Phone them on {{ instance.phone }}.
