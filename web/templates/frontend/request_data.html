@@ -95,7 +95,7 @@
 
 {% block run_script %}
     $(function(){
-        if($('#request .error').length == 0){
+        if($('#request .error').length == 0 && $('#id_description').val == '' ){
             $('#request').addClass('collapsed');
             $('#request .description').one('click', function(){
                 $(this).find('.tips').slideDown(250);
