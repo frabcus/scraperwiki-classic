@@ -56,7 +56,9 @@ def frontpage(request, public_profile_field=None):
             'language': 'python'
            }
 
-    selection = [ 2, 3 ]
+    # just using homepage 3 for now
+    # List here: https://docs.google.com/a/scraperwiki.com/spreadsheet/ccc?key=0AmgaEqd-YKjXdGNENndyR1BScFMtdG45OEJyQXZaR2c#gid=0
+    selection = [ 3 ] 
     if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
         ab_new_homepage = 3
     elif 'ab_new_homepage' not in request.session or request.session['ab_new_homepage'] not in selection:
