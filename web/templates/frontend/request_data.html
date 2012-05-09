@@ -12,86 +12,98 @@
 
 {% block content %}
 
+<div id="sidebar">
+    <div id="data_consulting">
+        <h3>How do you get my data?</h3>
+        <p>Our <a href="{% url data_consulting %}">data consulting page</a> gives details about:</p>
+        <ul>
+            <li>The kinds of data we can extract</li>
+            <li>How we clean your data</li>
+            <li>Integration with your systems</li>
+            <li>Visualisations and applications</li>
+        </ul>
+        <p>There are case studies too! It&rsquo;s ace!</p>
+    </div>
+    <div id="public_requests">
+        <h3>I can&rsquo;t afford to pay!</h3>
+        <p>If you&rsquo;ve found a cool dataset that you don't know how to liberate, you should post it on <a href="http://groups.google.com/group/scraperwiki?hl=en">our community Google Group</a>. Someone might be able to give you some tips or even write the scraper for you. Here are some things you should include.</p>
+        <ul>
+            <li>Why you want to liberate this data</li>
+            <li>URLs or source documents</li>
+            <li>How often the site gets updated (if you know)</li>
+        </ul>
+        <p>It can also help developers if you provide a walkthrough of how you would get the data if you needed to resort to copy-and-paste. For complicated websites, annotated screenshots are sometimes nice.</p>
+        <p>If your request sounds boring or overly commercial, people probably won&rsquo;t respond;please consider our <a href="{% url request_data %}">premium services</a> if that is the case.</p>
+    </div>
+</div>
 
 <div id="process">
     <div class="stage first">
-        <h3>Request some data</h3>
-        <p>We can scrape web pages, call APIs or access your legacy data. Tell us roughly what you need.</p>
+        <h3>1. Send us your initial request</h3>
+        <p class="summary">We can scrape web pages, call APIs or access your legacy data. Tell us roughly what you&nbsp;need.</p>
+        <form action="." method="post" id="request">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <p class="error">{{form.non_field_errors.0}}</p>
+            {% endif %}
+        	<div class="question description{% if form.description.errors %} error{% endif %}">
+                <p>{{form.description.label_tag}}
+                {{form.description}}</p>
+                {% if form.description.errors %}<p class="error">{{ form.description.errors }}</p>{% endif %}
+                <div class="tips">
+                    <p class="first">Make sure to tell us the URL or web address where we can find the data, what details you need, and what format you want the output delivered in.</p>
+                    <p class="last">eg: "I need all the cheeses listed on <a href="http://www.cheese.com">http://www.cheese.com</a>. I need the name of each cheese, along with its country of origin and its description. I need the data delivered as a CSV."</p>
+                </div>
+        	</div>
+        	<div class="question name {% if form.name.errors %} error{% endif %}">
+                <p>{{form.name.label_tag}}
+                {{form.name}}</p>
+                {% if form.name.errors %}<p class="error">{{ form.name.errors }}</p>{% endif %}
+        	</div>
+        	<div class="question phone {% if form.phone.errors or form.no_contact_details %}error{% endif %}">
+                <p>{{form.phone.label_tag}}
+                {{form.phone}}</p>
+                {% if form.phone.errors %}<p class="error">{{ form.phone.errors }}</p>{% endif %}
+        	</div>
+        	<div class="question email {% if form.email.errors or form.no_contact_details %}error{% endif %}">
+                <p>{{form.email.label_tag}}
+                {{form.email}}</p>
+        	    {% if form.email.errors %}<p class="error">{{ form.email.errors }}</p>{% endif %}
+            </div>
+            {% if form.no_contact_details %}<p class="error" id="contact_error">Please tell us how to contact you.</p>{% endif %}
+        	<div class="last">
+        		<input type="submit" value="Send your request" id="send" />
+        	</div>
+        </form>
     </div>
     <div class="stage second">
-        <h3>We&rsquo;ll call you</h3>
-        <p>To discuss your requirements in finer detail.</p>
+        <h3>2. We&rsquo;ll phone you</h3>
+        <p class="summary">Discuss your requirements in finer detail, and confirm you&rsquo;re happy to pay for an investigation.</p>
     </div>
     <div class="stage third">
-        <h3>Investigation! <span class="cost">$150</span></h3>
-        <p>We match your business needs to the technical issues, and write a report detailing final deliverables and cost.</p>
+        <h3>3. We investigate your request <span class="cost">$150</span></h3>
+        <p class="summary">Our expert data scientists write investigatory scrapers and find new data sources, matching what is technically possible with your business needs.</p>
+        <p class="summary">You&rsquo;ll get a detailed report of the best solution, with our cost.</p>
     </div>
     <div class="stage fourth last">
-        <h3>Delivery! <span class="cost">$1000+</span></h3>
-        <p>Get the data in the form you need, or integrated into your systems.</p>
+        <h3>4. We write code to get your data <span class="cost">$1000+</span></h3>
+        <p class="summary">The code and data are securely stored in your ScraperWiki Vault. We can maintain the code with an SLA for an extra cost.</p>
     </div>
 </div>
+<br class="clear" />
+{% endblock %}
 
-
-<div id="public_request" style="display: none">
-    <p>
-        If you&rsquo;ve found a cool dataset that you don't know how to liberate,
-        you should post it on <a href="http://groups.google.com/group/scraperwiki?hl=en">our community Google Group</a>.
-        Someone might be able to give you some tips or even write the scraper for you.
-        Here are some things you should include.
-    </p>
-    <ul class="bulleted">
-        <li>Why you want to liberate this data</li>
-        <li>URLs or source documents</li>
-        <li>How often the site gets updated (if you know)</li>
-    </ul>
-    <p>
-        It can also help developers if you provide a walkthrough
-        of how you would get the data if you needed to resort to
-        copy-and-paste. For complicated websites, annotated
-        screenshots are sometimes nice.
-        {# Column names of the resulting tables #}
-    </p> 
-    <p>
-        If your request sounds boring or overly commercial, people probably won&rsquo;t respond;
-        please consider our <a href="{% url request_data %}">premium services</a> if that is the case.
-    </p>
-</div>
-
-<form action="." method="post" id="request">
-    <h3>Request some data: Tell us what you need</h3>
-    {% csrf_token %}
-    {% if form.non_field_errors %}
-        <div id="main_error">{{form.non_field_errors.0}}</div>
-    {% endif %}
-	<div class="description{% if form.description.errors %} error{% endif %}">
-        {{form.description.label_tag}}
-        {{form.description}}
-        <div class="tips">
-        {% if form.description.errors %}<p>{{ form.description.errors }}</p>{% endif %}
-            <p>Make sure to tell us the URL or web address where we can find the data, what details you need, and what format you want the output delivered in.</p>
-            <p>eg: "Hi. I need all the cheese listed on http://www.cheese.com. I need the name or each cheese, along with its country of origin and its description. I need the data delivered as a CSV."</p>
-        </div>
-	</div>
-	<div class="name {% if form.name.errors %} error{% endif %}">
-        {{form.name.label_tag}}
-        {{form.name}}
-        {% if form.name.errors %}<div class="tips">{{ form.name.errors }}</div>{% endif %}
-	</div>
-	<div class="phone {% if form.phone.errors or form.no_contact_details %}error{% endif %}">
-        {{form.phone.label_tag}}
-        {{form.phone}}
-        {% if form.no_contact_details %}<div class="tips">Please tell us how to contact you.</div>{% endif %}
-        {% if form.phone.errors %}<div class="tips">{{ form.phone.errors }}</div>{% endif %}
-	</div>
-	<div class="email {% if form.email.errors or form.no_contact_details %}error{% endif %}">
-        {{form.email.label_tag}}
-        {{form.email}}
-        {% if form.email.errors %}<div class="tips">{{ form.email.errors }}</div>{% endif %}
-	</div>
-	<div class="last">
-		<input type="submit" value="Send your request" id="send" />
-	</div>
-</form>
-
+{% block run_script %}
+    $(function(){
+        if($('#request .error').length == 0){
+            $('#request').addClass('collapsed');
+            $('#request .description').one('click', function(){
+                $(this).find('.tips').slideDown(250);
+                $(this).find('textarea').animate({'height':160, 'margin-bottom': 10}, 250);
+                $(this).nextAll().slideDown(250, function(){
+                    $('#request').removeClass('collapsed');
+                });
+            });
+        }
+    });
 {% endblock %}
