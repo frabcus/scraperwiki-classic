@@ -1972,6 +1972,10 @@ body.profiles.edit #features li input {
 	background-color: #f2f7fc;
 }
 
+#process .stage.completed {
+    background-color: #cfc;
+}
+
 #process .stage.last {
 	border-bottom: none;
 }

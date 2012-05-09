@@ -38,9 +38,11 @@
 </div>
 
 <div id="process">
+{% block first_stage %}
     <div class="stage first">
         <h3>1. Send us your initial request</h3>
         <p class="summary">We can scrape web pages, call APIs or access your legacy data. Tell us roughly what you&nbsp;need.</p>
+
         <form action="." method="post" id="request">
             {% csrf_token %}
             {% if form.non_field_errors %}
@@ -76,6 +78,7 @@
         	</div>
         </form>
     </div>
+{% endblock %}
     <div class="stage second">
         <h3>2. We&rsquo;ll phone you</h3>
         <p class="summary">Discuss your requirements in finer detail, and confirm you&rsquo;re happy to pay for an investigation.</p>
