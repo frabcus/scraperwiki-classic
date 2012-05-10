@@ -95,9 +95,6 @@ if DEBUG:
     ]
     SQL_DEBUG = False
 
-HIGHRISE_ENABLED = False
-SHOW_APIKEY_UI = True
-
 if DEBUG:
     # Django-nose: https://github.com/jbalogh/django-nose
     INSTALLED_APPS += ['lettuce.django', 'django_nose']

@@ -1,5 +1,7 @@
 import os
 import sys
+import shutil
+import glob
 
 from lettuce import before,after,world
 from django.contrib.auth import authenticate, login
@@ -23,17 +25,6 @@ def sync_db(variables):
 def set_browser(variables):
     #world.browser = Browser('chrome')
     world.browser = Browser()
-
-@before.harvest
-def launch_debugging_smtp(variables):
-    kill_debugging_smtp(variables)
-    os.system("../runmailserver.sh > mail.out 2> mail.err")
-    
-@after.harvest
-def kill_debugging_smtp(variables):
-    os.system("""kill $(ps auxww |
-                        grep 'python.*smtpd' |
-                        awk '{print $2}')""")
 
 @after.harvest
 def close_browser(totals):
@@ -110,6 +101,44 @@ def load_data(variables):
         pass # This will occur if the tests are run for the first time
 
     call_command('loaddata', 'test-fixture.yaml')
+
+# Because Django is threaded, and the way Lettuce coopts the subprocess, we can't
+# use the normal mail.outbox in tests to get to emails. Instead we use the
+# filebased backend, and some special functions here.
+#   https://github.com/gabrielfalcao/lettuce/issues/215
+# We need to override both before everything, and each request, don't really know why.
+@before.harvest
+def override_mail_settings_before_all(variables):
+    settings.EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    settings.EMAIL_FILE_PATH = '/tmp/sw_lettuce_terrain_emails'
+@before.handle_request
+def override_mail_settings(httpd, server):
+    settings.EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    settings.EMAIL_FILE_PATH = '/tmp/sw_lettuce_terrain_emails'
+# Clear the mails out each scenario
+@before.each_scenario
+def override_mail_settings_before_scenario(scenario):
+    if not os.path.isdir(settings.EMAIL_FILE_PATH):
+        os.mkdir(settings.EMAIL_FILE_PATH)
+    for f in glob.glob(settings.EMAIL_FILE_PATH + "/*.log"):
+        os.unlink(f)
+
+@world.absorb
+def mails_len():
+    if os.path.exists(settings.EMAIL_FILE_PATH):
+        return len(glob.glob(settings.EMAIL_FILE_PATH + "/*.log"))
+    else:
+        return 0
+
+@world.absorb
+def mails_file():
+    mailfiles = glob.glob(settings.EMAIL_FILE_PATH + "/*.log")
+    sorted_mailfiles = sorted(mailfiles, key=lambda p: os.stat(p).st_mtime)
+    return sorted_mailfiles
+
+@world.absorb
+def mails_body():
+    return map(lambda f: open(f).read(), world.mails_file())
    
 # Not currently used
 def clear_obscuring_popups(browser):
