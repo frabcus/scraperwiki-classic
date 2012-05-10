@@ -11,15 +11,14 @@ import sys
 
 service_xpath = "//h3[a[contains(strong,'%s')]]"
 
-@step(u'And I click on "([^"]*)"')
+@step(u'(?:Given|When|And) I click on "([^"]*)"')
 def and_i_click_on_group1(step, text):
     el = world.browser.find_by_xpath("//a[text()='%s']" % text).first
     el.click()
-
-@step(u'And I click the "([^"]*)" services button')
-def and_i_click_the_group1_services_button(step, service):
-    el = world.browser.find_by_xpath((service_xpath % service)+'/a').first
-    el.click()
+    
+@step(u'(?:Given|When|And) I click on the first step')
+def and_i_click_on_the_first_step(step):
+    world.browser.find_by_css('#id_description').first.click()
 
 @step(u'(?:Then|And) I should see the "([^"]*)" service')
 def then_i_should_see_the_services(step, plan):

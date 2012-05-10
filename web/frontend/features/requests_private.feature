@@ -4,10 +4,12 @@ Feature: As a person who wants to pay ScraperWiki to get data for me
 
   Scenario: I should see the data request form
     When I visit the request page
+    And I click on the first step
     Then I should see a form to request data
 
   Scenario: I make a valid data request
     Given I am on the request page
+    And I click on the first step
     When I say I want "Every cheese on http://www.cheese.com/. For each one the name, description, country, milk type, texture and fat content."
     And I enter my name "Stilton Mouse"
     And I enter my phone number "+44 1234 56789"
@@ -17,6 +19,7 @@ Feature: As a person who wants to pay ScraperWiki to get data for me
 
   Scenario: I submit a request without a description
     Given I am on the request page
+    And I click on the first step
     And I enter my name "Stilton Mouse"
     And I enter my phone number "+44 1234 56789"
     When I click the "Send your request" button
@@ -25,6 +28,7 @@ Feature: As a person who wants to pay ScraperWiki to get data for me
 
   Scenario: I submit a request without my name
     Given I am on the request page
+    And I click on the first step
     And I say I want "Every cheese on http://www.cheese.com/. For each one the name, description, country, milk type, texture and fat content."
     And I enter my phone number "+44 1234 56789"
     When I click the "Send your request" button
@@ -33,6 +37,7 @@ Feature: As a person who wants to pay ScraperWiki to get data for me
 
   Scenario: I submit a request without a phone or email
     Given I am on the request page
+    And I click on the first step
     And I say I want "Every cheese on http://www.cheese.com/. For each one the name, description, country, milk type, texture and fat content."
     And I enter my name "Stilton Mouse"
     When I click the "Send your request" button
