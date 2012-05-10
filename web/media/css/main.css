@@ -2014,27 +2014,36 @@ body.profiles.edit #features li input {
 	content: "1";
 	display: inline-block;
 	text-align: center;
-	margin-right: 13px;
+	margin-right: 15px;
 	width: 28px;
 	line-height: 28px;
-	color: #c36639;
+	color: #926910;
 	text-shadow: 0 1px 0 #fff;
-	background: #ccc;
-	background: #f5efd6;
-	background: -moz-linear-gradient(top,  #fcf9ec 0%, #f1e8c5 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fcf9ec), color-stop(100%,#f1e8c5));
-	background: -webkit-linear-gradient(top,  #fcf9ec 0%,#f1e8c5 100%);
-	background: -o-linear-gradient(top,  #fcf9ec 0%,#f1e8c5 100%);
-	background: -ms-linear-gradient(top,  #fcf9ec 0%,#f1e8c5 100%);
-	background: linear-gradient(top,  #fcf9ec 0%,#f1e8c5 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcf9ec', endColorstr='#f1e8c5',GradientType=0 );
 	-webkit-border-radius: 20px;
 	-moz-border-radius: 20px;
 	border-radius: 20px;
-	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 0 3px #fff inset;
-	-moz-box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 0 3px #fff inset;
-	box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 0 3px #fff inset;
-	border: 2px solid #dbba5e;
+	border: 1px solid #e4d7a4;
+	background-color: #fcf2cb;
+	background: -moz-linear-gradient(top, #fcf2cb 0%, #fff 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fcf2cb), color-stop(100%,#fff));
+	background: -webkit-linear-gradient(top, #fcf2cb 0%, #fff 100%);
+	background: -o-linear-gradient(top, #fcf2cb 0%,#fff 100%);
+	background: -ms-linear-gradient(top, #fcf2cb 0%,#fff 100%);
+	background: linear-gradient(top, #fcf2cb 0%,#fff 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcf2cb', endColorstr='#ffffff',GradientType=0 );
+}
+
+#process .first h3:before {
+	background: #ead485;
+background: -moz-linear-gradient(top, #ead485 0%, #fcf2cb 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ead485), color-stop(100%,#fcf2cb));
+background: -webkit-linear-gradient(top, #ead485 0%,#fcf2cb 100%);
+background: -o-linear-gradient(top, #ead485 0%,#fcf2cb 100%);
+background: -ms-linear-gradient(top, #ead485 0%,#fcf2cb 100%);
+background: linear-gradient(top, #ead485 0%,#fcf2cb 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ead485', endColorstr='#fcf2cb',GradientType=0 );
+	border: 1px solid #d9bd5b;
+	color: #000;
 }
 
 #process .second h3:before {
@@ -2050,14 +2059,22 @@ body.profiles.edit #features li input {
 	display: inline-block;
 	font-size: 14px;
 	line-height: 14px;
-	background-color: #e1865a;
-	color: #fff;
 	padding: 4px 8px;
+	margin-top: 4px;
+	color: #a98819;
+	text-shadow: 0 1px 0 #fff;
 	-webkit-border-radius: 20px;
 	-moz-border-radius: 20px;
 	border-radius: 20px;
-	margin-top: 4px;
-	text-shadow: #813c1a 0 1px 0;
+	border: 1px solid #e4d7a4;
+	background-color: #fcf2cb;
+	background: -moz-linear-gradient(top, #fcf2cb 0%, #fff 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fcf2cb), color-stop(100%,#fff));
+	background: -webkit-linear-gradient(top, #fcf2cb 0%, #fff 100%);
+	background: -o-linear-gradient(top, #fcf2cb 0%,#fff 100%);
+	background: -ms-linear-gradient(top, #fcf2cb 0%,#fff 100%);
+	background: linear-gradient(top, #fcf2cb 0%,#fff 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcf2cb', endColorstr='#ffffff',GradientType=0 );
 }
 
 #process .summary {
@@ -2107,7 +2124,7 @@ form#request .tips a {
 form#request label {
 	display: block;
 	margin-bottom: 3px;
-	color: #c36639;
+	color: #ba7a00;
 }
 
 form#request input,
@@ -2144,13 +2161,64 @@ form#request .email {
 form#request div.last {
 	clear: left;
 	text-align: center;
-	padding-top: 15px;
+	padding-top: 10px;
 }
 	
 form#request #send {
 	width: auto;
 	font-size: 14px;
 	line-height: 18px;
+}
+
+form#request .submit {
+	display: inline-block;
+	cursor: pointer;
+	padding: 7px 10px 5px 10px;
+	font-size: 16px;
+	line-height: 16px;
+	font-weight: bold;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	border: 1px solid #d6a82c;
+	color: #373b3e;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+	background-color: #f8d653;
+	background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 4%, #f9dc5c 4%, #f5c033 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(4%,#ffffff), color-stop(4%,#f9dc5c), color-stop(100%,#f5c033));
+	background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 4%,#f9dc5c 4%,#f5c033 100%);
+	background: -o-linear-gradient(top, #ffffff 0%,#ffffff 4%,#f9dc5c 4%,#f5c033 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 4%,#f9dc5c 4%,#f5c033 100%);
+	background: linear-gradient(top, #ffffff 0%,#ffffff 4%,#f9dc5c 4%,#f5c033 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9dc5c', endColorstr='#f5c033',GradientType=0 );
+	-webkit-box-shadow: 0px 1px 2px rgba(0,0,0,0.4);
+	-moz-box-shadow: 0px 1px 2px rgba(0,0,0,0.4);
+	box-shadow: 0px 1px 2px rgba(0,0,0,0.4);
+}
+
+form#request .submit:hover {
+	text-decoration: none;
+	background-color: #fdde68;
+	background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 4%, #fde471 4%, #fbca47 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(4%,#ffffff), color-stop(4%,#fde471), color-stop(100%,#fbca47));
+	background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 4%,#fde471 4%,#fbca47 100%);
+	background: -o-linear-gradient(top, #ffffff 0%,#ffffff 4%,#fde471 4%,#fbca47 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 4%,#fde471 4%,#fbca47 100%);
+	background: linear-gradient(top, #ffffff 0%,#ffffff 4%,#fde471 4%,#fbca47 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fde471', endColorstr='#fbca47',GradientType=0 );
+}
+
+form#request .submit:active {
+	position: relative;
+	top: 1px;
+	-webkit-box-shadow: 0px 0px 1px rgba(0,0,0,0.7);
+	-moz-box-shadow: 0px 0px 1px rgba(0,0,0,0.7);
+	box-shadow: 0px 0px 1px rgba(0,0,0,0.7);
+}
+
+form#request .submit span {
+	font-size: 14px;
+	margin: 0 0 0 3px;
 }
 
 form#request.collapsed .question,

@@ -110,5 +110,9 @@
                 });
             });
         }
+
+        $('<a>').addClass('submit').html($('#send').val() + ' <span>&#x25BA;</span>').bind('click', function(){
+            $(this).prev().trigger('click');
+        }).insertAfter($('#send')).prev().hide();
     });
 {% endblock %}
