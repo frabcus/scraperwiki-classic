@@ -20,7 +20,7 @@ def parse(body):
 class Contact(XeroPrivateClient):
     def __init__(self, xml=None, **k):
         # Example XML in specs/recurly_parse_spec.py
-        doc = html.fromstring(xml.encode('UTF-8'))
+        doc = html.fromstring(xml)
         self.number = doc.xpath('//account_code')[0].text
         self.name = doc.xpath('//company_name')[0].text
         self.first_name = doc.xpath('//first_name')[0].text
