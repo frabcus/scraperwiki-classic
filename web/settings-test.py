@@ -9,3 +9,6 @@ OVERDUE_SQL = "julianday(strftime(?,last_run) + run_interval,'unixepoch') < juli
 OVERDUE_SQL_PARAMS = ['%s']
 LETTUCE_TESTING = True
 
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = '/tmp/sw_lettuce_terrain_emails'
+

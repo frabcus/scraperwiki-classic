@@ -40,8 +40,7 @@ def remove_beta(modeladmin, request, queryset):
 remove_beta.short_description = 'Mark user as NOT beta user'
 
 class DataEnquiryAdmin(admin.ModelAdmin):
-    list_display = ('date_of_enquiry', 'category', 'email', 'first_name', 'last_name', 'telephone',)
-    list_filter = ('category', 'broadcast' )
+    list_display = ('date_of_enquiry', 'description', 'email', 'name', 'phone',)
     ordering = ('-date_of_enquiry',)
 
 class FeaturesAdmin(admin.ModelAdmin):
