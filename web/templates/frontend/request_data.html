@@ -15,7 +15,7 @@
 <div id="sidebar">
     <div id="data_consulting">
         <h3>How do you get my data?</h3>
-        <p>Our <a href="{% url data_consulting %}">data consulting page</a> has case studies and details about:</p>
+        <p>Our <a href="{% url data_consulting %}">data consulting page</a> has case studies and&nbsp;details about:</p>
         <ul>
             <li>The kinds of data we can extract</li>
             <li>How we clean your data</li>
@@ -26,7 +26,7 @@
     <div id="public_requests">
         <h3>I can&rsquo;t afford to pay!</h3>
         <p>If you're a non-profit or don't have a budget, post your data request
-        on <a href="http://groups.google.com/group/scraperwiki?hl=en">our community email list</a>. 
+        on <a href="http://groups.google.com/group/scraperwiki?hl=en">our community email&nbsp;list</a>. 
         Make sure to mention:</p>
         <ul>
             <li>Why you want to liberate this data</li>
@@ -42,7 +42,7 @@
 <div id="process">
 {% block first_stage %}
     <div class="stage first">
-        <h3>1. Send us your initial request</h3>
+        <h3>Please explain the data you require</h3>
         <p class="summary">We can scrape web pages, call APIs or access your legacy data.</p>
 
         <form action="." method="post" id="request">
@@ -55,8 +55,8 @@
                 {{form.description}}</p>
                 {% if form.description.errors %}<p class="error">{{ form.description.errors }}</p>{% endif %}
                 <div class="tips">
-                    <p class="first">Make sure to tell us the URL or web address where we can find the data, what details you need, and what format you want the output delivered in.</p>
-                    <p class="last">eg: "I need all the cheeses listed on <a href="http://www.cheese.com">http://www.cheese.com</a>. I need the name of each cheese, along with its country of origin and its description. I need the data delivered as a CSV."</p>
+                    <p class="first">Make sure to tell us where we can find the data, what details you need, and what format you want the output delivered in.</p>
+                    <p class="last">eg: "I need all the cheeses listed on <a href="http://www.cheese.com">http://www.cheese.com</a>. I&nbsp;need the name of each cheese, along with its country of origin and its&nbsp;description. I&nbsp;need it delivered as a&nbsp;CSV."</p>
                 </div>
         	</div>
         	<div class="question name {% if form.name.errors %} error{% endif %}">
@@ -81,18 +81,18 @@
         </form>
     </div>
 {% endblock %}
+    <!-- <div class="stage second">
+            <h3>We&rsquo;ll phone you</h3>
+            <p class="summary">Discuss your requirements in finer detail, and confirm you&rsquo;re happy to pay for an investigation.</p>
+        </div> -->
     <div class="stage second">
-        <h3>2. We&rsquo;ll phone you</h3>
-        <p class="summary">Discuss your requirements in finer detail, and confirm you&rsquo;re happy to pay for an investigation.</p>
+        <h3>We investigate your request <span class="cost">$150</span></h3>
+        <p class="summary">Once we understand your data request, we will do an investigation and provide you with a report outlining the best way to get the data, how we&rsquo;ll supply it to you, and the cost involved.</p>
+        <p class="summary">This investigation will take some time, and we make a nominal charge of $150 for doing this work.</p>
     </div>
-    <div class="stage third">
-        <h3>3. We investigate your request <span class="cost">$150</span></h3>
-        <p class="summary">Our expert data scientists write investigatory scrapers and find new data sources, matching what is technically possible with your business needs.</p>
-        <p class="summary">You&rsquo;ll get a detailed report of the best solution, with our cost.</p>
-    </div>
-    <div class="stage fourth last">
-        <h3>4. We write code to get your data <span class="cost">$1000+</span></h3>
-        <p class="summary">The code and data are securely stored in your ScraperWiki Vault. We can maintain the code with an SLA for an extra cost.</p>
+    <div class="stage third last">
+        <h3>We write code to get your data</h3>
+        <p class="summary">Armed with your report, if you wish to proceed to the next stage, you can commission us to complete the request, at which point we will give you a delivery date and agree a payment schedule.</p>
     </div>
 </div>
 <br class="clear" />

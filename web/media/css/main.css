@@ -1943,19 +1943,24 @@ body.profiles.edit #features li input {
 
 #process {
 	width: 558px;
-	border: 1px solid #ccc;
 }
 
 #sidebar {
 	float: right;
-	width: 338px;
+	width: 325px;
+	font-size: 14px;
+	line-height: 20px;
 }
 
 #sidebar div {
-	margin-bottom: 20px;
-	background-color: #f3f3f3;
-	padding: 15px;
-	line-height: 20px;
+	margin-right: 15px;
+	padding: 20px 5px;
+	border-bottom: 1px solid #ddd;
+	color: #666;
+}
+
+#sidebar h3 {
+	color: #333;
 }
 
 #sidebar ul li {
@@ -1963,13 +1968,33 @@ body.profiles.edit #features li input {
 	margin-left: 20px;
 }
 
+#sidebar div>:last-child {
+	margin-bottom: 0;
+}
+
+#sidebar #data_consulting li:last-child {
+	padding-bottom: 0;
+}
+
 #process .stage {
-	padding: 15px;
-	border-bottom: 1px solid #ccc;
+	padding: 20px;
+	border: 1px solid #ccc;
+	border-bottom: none;
+	width: 503px;
+	margin-left: 10px;
 }
 
 #process .stage.first {
-	background-color: #f2f7fc;
+	width: 513px;
+	padding: 25px 30px 25px 20px;
+	margin-left: 0;
+	margin-bottom: -1px;
+	background-color: #fcf9ec;
+	border: 1px solid #f3e7be;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	border: 1px solid #ccc;
 }
 
 #process .stage.completed {
@@ -1977,35 +2002,76 @@ body.profiles.edit #features li input {
 }
 
 #process .stage.last {
-	border-bottom: none;
+	border-bottom: 1px solid #ccc;
 }
 
 #process h3 {
-	
+	line-height: 28px;
+	font-size: 18px;
+}
+
+#process h3:before {
+	content: "1";
+	display: inline-block;
+	text-align: center;
+	margin-right: 13px;
+	width: 28px;
+	line-height: 28px;
+	color: #c36639;
+	text-shadow: 0 1px 0 #fff;
+	background: #ccc;
+	background: #f5efd6;
+	background: -moz-linear-gradient(top,  #fcf9ec 0%, #f1e8c5 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fcf9ec), color-stop(100%,#f1e8c5));
+	background: -webkit-linear-gradient(top,  #fcf9ec 0%,#f1e8c5 100%);
+	background: -o-linear-gradient(top,  #fcf9ec 0%,#f1e8c5 100%);
+	background: -ms-linear-gradient(top,  #fcf9ec 0%,#f1e8c5 100%);
+	background: linear-gradient(top,  #fcf9ec 0%,#f1e8c5 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcf9ec', endColorstr='#f1e8c5',GradientType=0 );
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 0 3px #fff inset;
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 0 3px #fff inset;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 0 3px #fff inset;
+	border: 2px solid #dbba5e;
+}
+
+#process .second h3:before {
+	content: "2";
+}
+
+#process .third h3:before {
+	content: "3";
 }
 
 #process span.cost {
 	float: right;
 	display: inline-block;
-	font-size: 12px;
-	line-height: 12px;
-	background: #999;
+	font-size: 14px;
+	line-height: 14px;
+	background-color: #e1865a;
 	color: #fff;
-	padding: 4px 7px 3px 7px;
+	padding: 4px 8px;
 	-webkit-border-radius: 20px;
 	-moz-border-radius: 20px;
 	border-radius: 20px;
-	margin-top: 1px;
-	text-shadow: 0 1px 0 #666;
-	-webkit-box-shadow: 0 1px 0 #eee;
-	-moz-box-shadow: 0 1px 0 #eee;
-	box-shadow: 0 1px 0 #eee;
+	margin-top: 4px;
+	text-shadow: #813c1a 0 1px 0;
 }
 
 #process .summary {
-	margin: 10px 60px 0 0;
+	margin: 5px 60px 0 45px;
 	line-height: 20px;
 	color: #333;
+}
+
+#process .summary+.summary {
+	margin-top: 10px;
+}
+
+form#request {
+	margin-left: 45px;
 }
 
 form#request .description {
@@ -2016,59 +2082,9 @@ form#request p {
 	margin: 0;
 }
 
-form#request label {
-	display: block;
-	margin-bottom: 3px;
-	color: #486fa1;
-}
-
-form#request input,
-form#request textarea {
-	width: 514px;
-	padding: 5px;
-	line-height: 20px;
-	font-size: 16px;
-	margin-bottom: 20px;
-}
-
-form#request textarea {
-	width: 517px;
-	height: 160px;
-	margin-top: 3px;
-	margin-bottom: 10px;
-}
-
-form#request .phone,
-form#request .email {
-	width: 250px;
-	float: left;
-}
-
-form#request .phone input,
-form#request .email input {
-	width: 239px;
-}
-
-form#request div.last {
-	clear: left;
-	text-align: center;
-	padding-top: 15px;
-}
-
-form#request .email {
-	margin-left: 25px;
-}
-	
-form#request #send {
-	width: auto;
-	font-size: 14px;
-	line-height: 18px;
-}
-
 form#request .tips {
-	padding-right: 5px;
-	font-size: 14px;
-	line-height: 18px;
+	font-size: 13px;
+	line-height: 17px;
 	color: #999;
 	overflow: auto;
 	margin-bottom: 20px;
@@ -2077,7 +2093,7 @@ form#request .tips {
 form#request .tips p {
 	margin: 0;
 	float: left;
-	width: 250px;
+	width: 220px;
 }
 
 form#request .tips p.last {
@@ -2086,6 +2102,55 @@ form#request .tips p.last {
 
 form#request .tips a {
 	color: #666;
+}
+
+form#request label {
+	display: block;
+	margin-bottom: 3px;
+	color: #c36639;
+}
+
+form#request input,
+form#request textarea {
+	width: 455px;
+	padding: 5px;
+	line-height: 20px;
+	font-size: 16px;
+	margin-bottom: 20px;
+}
+
+form#request textarea {
+	width: 456px;
+	height: 160px;
+	margin-top: 3px;
+	margin-bottom: 10px;
+}
+
+form#request .phone,
+form#request .email {
+	width: 218px;
+	float: left;
+}
+
+form#request .phone input,
+form#request .email input {
+	width: 207px;
+}
+
+form#request .email {
+	margin-left: 30px;
+}
+
+form#request div.last {
+	clear: left;
+	text-align: center;
+	padding-top: 15px;
+}
+	
+form#request #send {
+	width: auto;
+	font-size: 14px;
+	line-height: 18px;
 }
 
 form#request.collapsed .question,
@@ -2113,7 +2178,7 @@ form#request .error input {
 }
 
 form#request .error textarea {
-	width: 514px;
+	width: 454px;
 }
 
 form#request .errorlist,
@@ -2122,6 +2187,7 @@ form#request #contact_error {
 	margin: 10px 0;
 	background-color: #fcc;
 	color: #600;
+	font-size: 14px;
 }
 
 form#request .description .errorlist,
@@ -2133,7 +2199,7 @@ form#request .name .errorlist {
 form#request .email .errorlist,
 form#request .phone .errorlist {
 	margin-top: 5px;
-	width: 237px;
+	width: 207px;
 }
 
 form#request .name .errorlist {
