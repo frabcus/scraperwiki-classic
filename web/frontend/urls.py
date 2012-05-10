@@ -45,8 +45,9 @@ urlpatterns = patterns('',
     url(r'^request_data/$',frontend_views.request_data, name='request_data'),
     url(r'^request_data/thanks/$',frontend_views.request_data_thanks, name='request_data_thanks'),
     url(r'^data_hub/$',frontend_views.data_hub, name='data_hub'),
-    url(r'^data_consulting/$',frontend_views.data_consulting, name='data_consulting'),
-    url(r'^data_consultancy/$', redirect_to, {'url': '/data_consulting/'}),
+    url(r'^business/$',frontend_views.data_consulting, name='data_consulting'),
+    url(r'^data_consultancy/$', redirect_to, {'url': '/business/'}),
+    url(r'^data_consulting/$', redirect_to, {'url': '/business/'}),
     
     #hello world
     url(r'^hello_world.html', direct_to_template, {'template': 'frontend/hello_world.html'}, name='help_hello_world'),

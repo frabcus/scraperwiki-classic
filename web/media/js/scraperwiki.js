@@ -258,15 +258,13 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 }
 
 $(function(){
-    showPremiumAccountAlert();	
-
     // If you ever find this comment and you're adding a new page
     // add a new regular expression here and make sure it selects
     // the right .supernav tab :-)
     var urls = {
         '/(about|events|contact)/' : 'about',
         '/status/' : 'admin',
-        '/(request_data|data_hub|data_consulting|pricing)/': 'data_services',
+        '/(request_data|data_hub|business)/': 'data_services',
         '/(profiles|vaults)/' : 'user',
         '/login/' : 'login',
         '.*' : 'code'
@@ -347,27 +345,6 @@ $(function(){
 		newCodeObject($(this));
     });
 	
-    function showPremiumAccountAlert(){
-        status = typeof($.cookie('premiumBuy')) == 'undefined' ? 'new' : $.cookie('premiumBuy')
-        alert_slide_time = status == 'shown' ? 0 : 250
-
-        if (status == 'closed' || status == 'clicked') return
-
-        newAlert('Get private code and hourly scheduling with our <b>new premium accounts</b>&hellip;', null, {
-            'onclick': function() {
-                $.cookie("premiumBuy", 'clicked', { expires: 365, path: "/" })
-                window.location.replace('/pricing/')
-                if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Upgrade Alert', 'Buy Now']); }
-            },
-            'text': '<b>Buy one!</b>'
-        }, alert_slide_time, function() {
-            $.cookie("premiumBuy", 'closed', { expires: 365, path: "/" })
-            if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Upgrade Alert', 'Closed']); }
-        });
-        $.cookie("premiumBuy", 'shown', { expires: 365, path: "/" })
-        if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Upgrade Alert', 'Shown']); }
-    }
-
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
 		$('#more_developer_div').fadeIn(500);
