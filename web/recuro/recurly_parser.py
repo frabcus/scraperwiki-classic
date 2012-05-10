@@ -20,7 +20,7 @@ def parse(body):
 class Contact(XeroPrivateClient):
     def __init__(self, xml=None, **k):
         # Example XML in specs/recurly_parse_spec.py
-        doc = html.fromstring(xml.encode('UTF-8'))
+        doc = html.fromstring(xml)
         self.number = doc.xpath('//account_code')[0].text
         self.name = doc.xpath('//company_name')[0].text
         self.first_name = doc.xpath('//first_name')[0].text
@@ -82,7 +82,7 @@ class Contact(XeroPrivateClient):
                         email=self.email, vat_number=self.vat_number,
                         address1=self.address1, address2=self.address2,
                         city=self.city, state=self.state, country=self.country,
-                        zip=self.zip)
+                        zip=self.zip).encode('utf-8')
 
 class Invoice(XeroPrivateClient):
     def __init__(self, xml=None, **k):
@@ -146,4 +146,4 @@ class Invoice(XeroPrivateClient):
             tax_type = "NONE"
 
         return template.render(price=price, short_date=short_date,
-          tax_type=tax_type, **self.__dict__)
+          tax_type=tax_type, **self.__dict__).encode('utf-8')
