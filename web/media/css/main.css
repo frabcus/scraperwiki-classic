@@ -1998,7 +1998,8 @@ body.profiles.edit #features li input {
 }
 
 #process .stage.completed {
-    background-color: #cfc;
+    background-color: #eff8e6;
+    border-color: #b6cd9f;
 }
 
 #process .stage.last {
@@ -2035,15 +2036,28 @@ body.profiles.edit #features li input {
 
 #process .first h3:before {
 	background: #ead485;
-background: -moz-linear-gradient(top, #ead485 0%, #fcf2cb 100%);
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ead485), color-stop(100%,#fcf2cb));
-background: -webkit-linear-gradient(top, #ead485 0%,#fcf2cb 100%);
-background: -o-linear-gradient(top, #ead485 0%,#fcf2cb 100%);
-background: -ms-linear-gradient(top, #ead485 0%,#fcf2cb 100%);
-background: linear-gradient(top, #ead485 0%,#fcf2cb 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ead485', endColorstr='#fcf2cb',GradientType=0 );
+	background: -moz-linear-gradient(top, #ead485 0%, #fcf2cb 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ead485), color-stop(100%,#fcf2cb));
+	background: -webkit-linear-gradient(top, #ead485 0%,#fcf2cb 100%);
+	background: -o-linear-gradient(top, #ead485 0%,#fcf2cb 100%);
+	background: -ms-linear-gradient(top, #ead485 0%,#fcf2cb 100%);
+	background: linear-gradient(top, #ead485 0%,#fcf2cb 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ead485', endColorstr='#fcf2cb',GradientType=0 );
 	border: 1px solid #d9bd5b;
 	color: #000;
+}
+
+#process .completed h3:before {
+	background: #d0e8b7;
+	background: -moz-linear-gradient(top, #d0e8b7 0%, #e7f2dc 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d0e8b7), color-stop(100%,#e7f2dc));
+	background: -webkit-linear-gradient(top, #d0e8b7 0%,#e7f2dc 100%);
+	background: -o-linear-gradient(top, #d0e8b7 0%,#e7f2dc 100%);
+	background: -ms-linear-gradient(top, #d0e8b7 0%,#e7f2dc 100%);
+	background: linear-gradient(top, #d0e8b7 0%,#e7f2dc 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e8b7', endColorstr='#e7f2dc',GradientType=0 );
+	border: 1px solid #b6cd9f;
+	color: #458703;
 }
 
 #process .second h3:before {
