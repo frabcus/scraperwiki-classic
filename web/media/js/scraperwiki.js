@@ -421,6 +421,31 @@ $(function(){
 	
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", "").replace(" fourohfour", ""));
 	
+	$('body.vaults div.vault').each(function(){
+	    id = $(this).attr('id');
+	    if(location.hash == '#' + id){
+	        $(this).addClass('highlighted');
+	    } else {
+    	    if($.cookie('hide_' + id)){
+    	        $(this).children('.vault_header').addClass('collapsed').nextAll().hide();
+    	    }
+	    }
+	});
+
+	$('body.vaults div.vault_header h3').bind('click', function(e){
+	    $h = $(this).parent();
+	    id = $h.parent().attr('id');
+	    if( $h.is('.collapsed') ){
+	        $.cookie("hide_" + id, null, { path: '/' });
+	        $h.removeClass('collapsed').nextAll().slideDown();
+	    } else {
+	        $.cookie("hide_" + id, "1", { path: '/' });
+	        $h.nextAll().slideUp(function(){
+	            $h.addClass('collapsed');
+	        });
+	    }
+	});
+
 	$('div.vault_users_popover').each(function(i,el){
 		//	This centres the Users Popover underneath the Users toolbar button
 		var popo = $(this);

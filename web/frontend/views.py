@@ -56,11 +56,10 @@ def frontpage(request, public_profile_field=None):
             'language': 'python'
            }
 
-    # just using homepage 3 for now
     # List here: https://docs.google.com/a/scraperwiki.com/spreadsheet/ccc?key=0AmgaEqd-YKjXdGNENndyR1BScFMtdG45OEJyQXZaR2c#gid=0
-    selection = [ 3 ] 
+    selection = [ 3, 4 ] 
     if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
-        ab_new_homepage = 3
+        ab_new_homepage = 4
     elif 'ab_new_homepage' not in request.session or request.session['ab_new_homepage'] not in selection:
         ab_new_homepage = random.choice(selection)
     else:
@@ -481,7 +480,7 @@ def resend_activation_email(request):
     return render_to_response(template, {'form': form}, context_instance = RequestContext(request))
 
 def request_data(request):
-    form = DataEnquiryForm(request.POST or None)
+    form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
     if form.is_valid():
         form.save()
         return HttpResponseRedirect(reverse('request_data_thanks'))

@@ -2166,6 +2166,7 @@ form#request .email {
 form#request .phone input,
 form#request .email input {
 	width: 207px;
+	margin-bottom: 0;
 }
 
 form#request .email {
@@ -2175,7 +2176,7 @@ form#request .email {
 form#request div.last {
 	clear: left;
 	text-align: center;
-	padding-top: 10px;
+	padding-top: 25px;
 }
 	
 form#request #send {
@@ -2288,14 +2289,15 @@ form#request .name .errorlist {
 	margin-top: 5px;
 }
 
-form#request .phone.error input {
+form#request .phone.error input,
+form#request .email.error input {
 	margin-bottom: 5px;
 }
 
 form#request #contact_error {
 	clear: left;
 	padding: 0.5em;
-	margin-top: 0;
+	margin: 0;
 }
 
 
@@ -6731,6 +6733,15 @@ body.vaults div.vault {
 	margin: 25px 0;
 }
 
+body.vaults div.vault.highlighted {
+	-webkit-box-shadow: 0 0 20px #9cf;
+	-moz-box-shadow: 0 0 20px #9cf;
+	box-shadow: 0 0 20px #9cf;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+
 div#my_vaults + div#shared_vaults {
 	margin-top: 50px;
 }
@@ -6826,6 +6837,12 @@ body.vaults .vault_header {
 	background: -ms-linear-gradient(top, #e8e8e8 0%,#cccccc 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8e8e8', endColorstr='#cccccc',GradientType=0 );
 	background: linear-gradient(top, #e8e8e8 0%,#cccccc 100%);
+}
+
+body.vaults .vault_header.collapsed {
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
 }
 
 body.vaults .vault_header .shineyshiney {

@@ -13,6 +13,7 @@ Feature: As a person who wants to pay ScraperWiki to get data for me
     When I say I want "Every cheese on http://www.cheese.com/. For each one the name, description, country, milk type, texture and fat content."
     And I enter my name "Stilton Mouse"
     And I enter my phone number "+44 1234 56789"
+    And I enter my email address "stilton@flourish.org"
     And I click the "Send your request" button
     Then it should send an email to the feedback address
     And I should see "Thank you"
@@ -22,6 +23,7 @@ Feature: As a person who wants to pay ScraperWiki to get data for me
     And I click on the first step
     And I enter my name "Stilton Mouse"
     And I enter my phone number "+44 1234 56789"
+    And I enter my email address "stilton@flourish.org"
     When I click the "Send your request" button
     Then it should not send an email to the feedback address
     And I should see "Please tell us what data you need"
@@ -31,6 +33,7 @@ Feature: As a person who wants to pay ScraperWiki to get data for me
     And I click on the first step
     And I say I want "Every cheese on http://www.cheese.com/. For each one the name, description, country, milk type, texture and fat content."
     And I enter my phone number "+44 1234 56789"
+    And I enter my email address "stilton@flourish.org"
     When I click the "Send your request" button
     Then it should not send an email to the feedback address
     And I should see "Please tell us your name"

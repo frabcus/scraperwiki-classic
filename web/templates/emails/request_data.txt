@@ -5,4 +5,6 @@ Request for data from {{ instance.name }} <{{ instance.email }}>:
 
 "{{ instance.description }}"
 
-Phone them on {{ instance.phone }}.
+Email address: {{ instance.email }}
+Phone or Skype: {{ instance.phone }}
+IP address: {{ instance.ip }} <http://www.infosniper.net/index.php?ip_address={{ instance.ip }}>

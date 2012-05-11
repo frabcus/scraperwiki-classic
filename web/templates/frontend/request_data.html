@@ -64,18 +64,19 @@
                 {{form.name}}</p>
                 {% if form.name.errors %}<p class="error">{{ form.name.errors }}</p>{% endif %}
         	</div>
-        	<div class="question phone {% if form.phone.errors or form.no_contact_details %}error{% endif %}">
+        	<div class="question phone {% if form.phone.errors or form.no_phone %}error{% endif %}">
                 <p>{{form.phone.label_tag}}
                 {{form.phone}}</p>
                 {% if form.phone.errors %}<p class="error">{{ form.phone.errors }}</p>{% endif %}
         	</div>
-        	<div class="question email {% if form.email.errors or form.no_contact_details %}error{% endif %}">
+        	<div class="question email {% if form.email.errors or form.no_email %}error{% endif %}">
                 <p>{{form.email.label_tag}}
                 {{form.email}}</p>
         	    {% if form.email.errors %}<p class="error">{{ form.email.errors }}</p>{% endif %}
             </div>
-            {% if form.no_contact_details %}<p class="error" id="contact_error">Please tell us how to contact you.</p>{% endif %}
+            {% if form.no_phone or form.no_email %}<p class="error" id="contact_error">Please tell us how to contact you.</p>{% endif %}
         	<div class="last">
+        	    {{form.ip}}
         		<input type="submit" value="Send your request" id="send" />
         	</div>
         </form>
@@ -99,16 +100,18 @@
 {% endblock %}
 
 {% block run_script %}
+    function unfoldRequestForm(){
+        if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Request Page', 'request form unfolded']); }
+        $('#request .description .tips').slideDown(250);
+        $('#id_description').animate({'height':160, 'margin-bottom': 10}, 250);
+        $('#request .description').nextAll().slideDown(250, function(){
+            $('#request').removeClass('collapsed');
+        });
+    }
     $(function(){
         if($('#request .error').length == 0 && $('#id_description').val() == '' ){
             $('#request').addClass('collapsed');
-            $('#request .description').one('click', function(){
-                $(this).find('.tips').slideDown(250);
-                $(this).find('textarea').animate({'height':160, 'margin-bottom': 10}, 250);
-                $(this).nextAll().slideDown(250, function(){
-                    $('#request').removeClass('collapsed');
-                });
-            });
+            $('#id_description').one('focus', unfoldRequestForm);
         }
 
         $('<a>').addClass('submit').html($('#send').val() + ' <span>&#x25BA;</span>').bind('click', function(){
