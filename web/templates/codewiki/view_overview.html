@@ -216,7 +216,7 @@
                 {% if scraper.privacy_status == 'private' %}
                     {% if scraper.vault %}
                         <h4>This {{scraper.wiki_type}} is in {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault</h4>
-            	        <p>It can only be seen or edited by the members of <a href="/vaults/" id="current_vault_link" title="This is {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault">{{ scraper.vault.name }}</a>.</p>
+            	        <p>It can only be seen or edited by the members of <a href="/vaults/#vault_{{scraper.vault.id}}" id="current_vault_link" title="This is {% if scraper.vault.user.username == user.username %}your{% else %}{{scraper.vault.user.get_profile.name}}&rsquo;s{% endif %} vault">{{ scraper.vault.name }}</a>.</p>
             	    {% else %}
             	        <h4>This {{scraper.wiki_type}} is private</h4>
             	        <p>Only the {{ scraper.usercoderole_set.count }} selected editor{{ scraper.usercoderole_set.count|pluralize }} can see or edit this {{scraper.wiki_type}}.</p>
