@@ -205,6 +205,7 @@ class DataEnquiry(models.Model):
     email = models.EmailField(null=True, blank=True)
     phone = models.CharField(max_length=32, null=True, blank=True)
     description = models.TextField()
+    ip = models.CharField(max_length=64)
 
     class Meta:
         verbose_name_plural = "data enquiries"

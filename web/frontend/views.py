@@ -481,7 +481,7 @@ def resend_activation_email(request):
     return render_to_response(template, {'form': form}, context_instance = RequestContext(request))
 
 def request_data(request):
-    form = DataEnquiryForm(request.POST or None)
+    form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
     if form.is_valid():
         form.save()
         return HttpResponseRedirect(reverse('request_data_thanks'))
