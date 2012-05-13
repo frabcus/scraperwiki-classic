@@ -17,8 +17,6 @@ do
   esac
 done
 
-exit
-
 # Only backup to kippax if not on kippax...
 if [ "$host" != "kippax" ]
 then
