@@ -631,7 +631,7 @@ function getTableColumnNames(table_name, callback){
 	$.ajax({
 		type: 'GET',
 		url: qry,
-		dataType: 'json',
+		dataType: 'jsonp',
 		cache: false,
 		success: function(data){
 		    console.log(data);
@@ -657,7 +657,7 @@ function getTableRowCounts(tables, callback){
 	return $.ajax({
 		type: 'GET',
 		url: count_url,
-		dataType: 'json',
+		dataType: 'jsonp',
 		cache: false,
 		success: function(resp){
 		    console.log(resp);
