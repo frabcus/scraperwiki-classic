@@ -4,7 +4,12 @@ body {
     padding-top: 40px;
 }
 
-ul.supernav li {
+ul.supernav li,
+ul.subnav li {
     display: inline;
     zoom: 1;
+}
+
+li.search form {
+    margin-bottom: 0;
 }
