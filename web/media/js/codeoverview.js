@@ -22,8 +22,12 @@ function pluralise(thing,number,plural){
     return (number == 1 ? thing : plural);
 }
 
-function htmlEscape(str) {
+function htmlEscape(str){
     return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function safeString(str){
+    return str.replace(/[^a-zA-Z0-9]+/g, '_').replace(/(^_|_$)/g, '');
 }
 
 
@@ -652,7 +656,7 @@ function getTableRowCounts(tables, callback){
 		    } else {
 	        	var zipped = _.zip(resp.keys, resp.data[0]);
 	        	callback(_.map(zipped, function(z){
-	            	return {name: z[0], id: z[0].replace(/\s+/g, ''), count: z[1]};
+	            	return {name: z[0], id: safeString(z[0]), count: z[1]};
 	        	}));
 			}
 		}
@@ -674,10 +678,10 @@ function setTotalRowCount(tables){
 function setDataPreview(table_name, table_schema, first_table){
     getTableColumnNames( table_name, function(column_names){
         $('#datapreviews').append(ich.data_preview({
-            table_name: table_name.replace(/\s+/g, ''),
+            table_name: safeString(table_name),
             column_names: column_names
         }));
-        var dt = $('#datapreviews #data_preview_' + table_name.replace(/\s+/g, '') + ' table').dataTable({
+        var dt = $('#datapreviews #data_preview_' + safeString(table_name) + ' table').dataTable({
             "bProcessing": true,
             "bServerSide": true,
             "bDeferRender": true,
