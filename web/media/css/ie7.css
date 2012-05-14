@@ -1,0 +1,10 @@
+/* conditional styles for IE7 */
+
+body {
+    padding-top: 40px;
+}
+
+ul.supernav li {
+    display: inline;
+    zoom: 1;
+}

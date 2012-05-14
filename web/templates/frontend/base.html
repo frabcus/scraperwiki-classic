@@ -31,6 +31,9 @@
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.8.12.css" />
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css?{{settings.REVISION}}" />
 	{% endcompress %}
+	<!--[if IE 7]>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie7.css?{{settings.REVISION}}" />
+	<![endif]-->
 
 	{% block css %}{% endblock %}
 	{% block rss %}{% endblock %}
