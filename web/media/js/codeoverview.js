@@ -573,15 +573,17 @@ function setupTabClicks(){
 }
 
 function getTableNames(callback){
+    console.log('getTableNames');
 	var url;
 	url = sqlite_url + "format=jsondict&name="+short_name+"&query=SELECT%20name, sql%20FROM%20main.sqlite_master%20WHERE%20type%3D'table'%3B";
   
 	$.ajax({
 		type: 'GET',
 		url: url,
-		dataType: 'json',
+		dataType: 'jsonp',
 		cache: false,
 		success: function(data){
+		    console.log(data);
 			var count_url, tables;
 		    if (typeof(data) == 'object' && data.error) {
 		        setDataPreviewWarning(data.error); 
@@ -605,7 +607,8 @@ function getTableNames(callback){
 					$('div.data').remove();
 				}
 		    }
-		}, error: function(){
+		}, error: function(jqXHR, textStatus, errorThrown){
+		    console.log(textStatus + ' ' + errorThrown);
 			setDataPreviewWarning("Sorry, we couldn\u2019t connect to the datastore");
 		    $('#header span.totalrows').hide();
 		}
@@ -613,6 +616,7 @@ function getTableNames(callback){
 }
 
 function setDataPreviewWarning(text, warningInHeader) {
+    console.log('setDataPreviewWarning');
 	if(warningInHeader){
 	    $('.data h3').text(text).parent().siblings('.download, .empty').hide();
 	} else {
@@ -622,6 +626,7 @@ function setDataPreviewWarning(text, warningInHeader) {
 }
 
 function getTableColumnNames(table_name, callback){
+    console.log('getTableColumnNames');
 	qry = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
 	$.ajax({
 		type: 'GET',
@@ -629,17 +634,21 @@ function getTableColumnNames(table_name, callback){
 		dataType: 'json',
 		cache: false,
 		success: function(data){
+		    console.log(data);
 			if (data.error) {
 		        setDataPreviewWarning(data.error); 
 		        $('#header span.totalrows').text("Datastore error");
 		    } else {
 		    	callback(data.keys);
 			}
+		}, error: function(jqXHR, textStatus, errorThrown){
+    	    console.log(textStatus + ' ' + errorThrown);
 		}
 	});
 }
 
 function getTableRowCounts(tables, callback){
+    console.log('getTableRowCounts');
     var count_url;
     sub_queries = (_.map(tables, function(d) {
         return "(SELECT COUNT(*) FROM [" + d + "]) AS '"+ d + "'";
@@ -651,6 +660,7 @@ function getTableRowCounts(tables, callback){
 		dataType: 'json',
 		cache: false,
 		success: function(resp){
+		    console.log(resp);
 			if (resp.error) {
 		        setDataPreviewWarning(resp.error); 
 		        $('#header span.totalrows').text("Datastore error");
@@ -660,11 +670,14 @@ function getTableRowCounts(tables, callback){
 	            	return {name: z[0], id: z[0].replace(/\s+/g, ''), count: z[1]};
 	        	}));
 			}
+		}, error: function(jqXHR, textStatus, errorThrown){
+    	    console.log(textStatus + ' ' + errorThrown);
 		}
 	});
 }
 
 function setTotalRowCount(tables){
+    console.log('setTotalRowCount');
     values = _.map(tables, function(t){
         return t.count;
     });
@@ -677,6 +690,7 @@ function setTotalRowCount(tables){
 }
 
 function setDataPreview(table_name, table_schema, first_table){
+    console.log('setDataPreview');
    getTableColumnNames( table_name, 
                         function(column_names){
      // get template
@@ -694,6 +708,7 @@ function setDataPreview(table_name, table_schema, first_table){
         "bScrollCollapse": true,
         "sDom": '<"H"<"#schema_'+table_name+'">lfr>t<"F"ip>',
         "fnRowCallback": function( tr, array, iDisplayIndex, iDisplayIndexFull ) {
+            console.log('fnRowCallback');
             $('td', tr).each(function(){
 				$(this).html( 
 					$(this).html().replace(
@@ -754,7 +769,8 @@ function highlightSql(html) {
 	return html;
 }
 
-function setupDataPreviews() {  
+function setupDataPreviews() {
+    console.log('setupDataPreviews');
 	$('.data h3').text('Loading this ' + $('#id_wiki_type').val() + '\u2019s datastore\u2026');
 	var tab_src = $('#data-tab-template').html();
 	getTableNames(
