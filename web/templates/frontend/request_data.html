@@ -100,15 +100,16 @@
 {% endblock %}
 
 {% block run_script %}
-    function unfoldRequestForm(){
-        if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Request Page', 'request form unfolded']); }
-        $('#request .description .tips').slideDown(250);
-        $('#id_description').animate({'height':160, 'margin-bottom': 10}, 250);
-        $('#request .description').nextAll().slideDown(250, function(){
-            $('#request').removeClass('collapsed');
-        });
-    }
     $(function(){
+        function unfoldRequestForm(){
+            if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Request Page', 'request form unfolded']); }
+            $('#request .description .tips').slideDown(250);
+            $('#id_description').animate({'height':originalheight, 'margin-bottom': 10}, 250);
+            $('#request .description').nextAll().slideDown(250, function(){
+                $('#request').removeClass('collapsed');
+            });
+        }
+        var originalheight = $('#id_description').css('height');
         if($('#request .error').length == 0 && $('#id_description').val() == '' ){
             $('#request').addClass('collapsed');
             $('#id_description').one('focus', unfoldRequestForm);

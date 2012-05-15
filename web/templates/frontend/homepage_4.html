@@ -58,3 +58,15 @@
 	<br class="clear"/>
 </div>
 {% endblock %}
+
+{% block run_script %}
+var t = $('ul.tags li').length;
+$('ul.tags li').each(function(){
+    var i = $(this).index();
+    $(this).css('opacity', 1-i/(t*1.2)).hover(function(){
+        $(this).css('opacity', 1);
+    }, function(){
+        $(this).css('opacity', 1-i/(t*3));
+    });
+});
+{% endblock %}
