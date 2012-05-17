@@ -2,6 +2,7 @@ import datetime
 
 from django.test import TestCase
 from django.conf import settings
+from django.contrib.auth.models import User
 
 from codewiki.models.scraper import Scraper, ScraperRunEvent
 from codewiki.models.vault import Vault
@@ -14,7 +15,8 @@ def select_exceptions_that_have_not_been_notified():
     for vault in Vault.objects.all():
         for scraper in Scraper.objects.filter(vault=vault):
             runevents = ScraperRunEvent.objects.filter(scraper=scraper)\
-                .order_by('run_started')[:1]
+                .order_by('-run_started')[:1]
+            print runevents
             if not runevents:
                 continue
             mostrecent = runevents[0]
@@ -25,43 +27,47 @@ def select_exceptions_that_have_not_been_notified():
 class TestExceptions(TestCase):
     "Test that we can find exceptions"
 
-    runevents_win = 8
-    runevents_fail = 4
-    pastdays = 3
-
     def setUp(self):
-        self.vault = Vault.objects.create(user_id = 1)
-        self.scraper1 = Scraper.objects.create(
+        self.user = User.objects.create_user('dcameron', 'dcameron@scraperwiki.com', 'bagger288')
+        self.vault = Vault.objects.create(user = self.user)
+        scraper1 = Scraper.objects.create(
             title=u"Lucky Scraper 1", vault = self.vault,
         )
-        self.scraper2 = Scraper.objects.create(
+        scraper2 = Scraper.objects.create(
             title=u"Lucky Scraper 2", vault = self.vault,
         )
-        self.runevents = []
-        self._fakeruns()
-        for i in range(self.pastdays):
-            self._fakeruns(datetime.datetime.now()-datetime.timedelta(days = i+12))
 
-    def _fakeruns(self, run_started = datetime.datetime.now()):
-        for i in range(self.runevents_win):
-            scraper = self.scraper1 if i % 2 == 0 else self.scraper2
-            runevent = ScraperRunEvent.objects.create(
-                scraper=scraper, pid=-1,
-                exception_message='',
-                run_started=run_started
-            )
-            self.runevents.append(runevent)
+        today = datetime.datetime.now()
+        yesterday = today - datetime.timedelta(days=1)
 
-        for i in range(self.runevents_win):
-            scraper = self.scraper1 if i % 2 == 0 else self.scraper2
-            runevent = ScraperRunEvent.objects.create(
-                scraper=scraper, pid=-1,
-                exception_message=u'FakeError: This is a test.',
-                run_started=run_started
-            )
-            self.runevents.append(runevent)
+        self.runevent1a = ScraperRunEvent.objects.create(
+            scraper=scraper1, pid=-1,
+            exception_message=u'FakeError: This is a test.',
+            run_started=yesterday
+        )
+        self.runevent1b = ScraperRunEvent.objects.create(
+            scraper=scraper1, pid=-1,
+            exception_message='',
+            run_started=today
+        )
+
+        self.runevent2a = ScraperRunEvent.objects.create(
+            scraper=scraper2, pid=-1,
+            exception_message='',
+            run_started=yesterday
+        )
+        self.runevent2b = ScraperRunEvent.objects.create(
+            scraper=scraper2, pid=-1,
+            exception_message=u'FakeError: This is a test.',
+            run_started=today
+        )
+        self.runevent2c = ScraperRunEvent.objects.create(
+            scraper=scraper2, pid=-1,
+            exception_message=u'FakeError: This is a test.',
+            run_started=today
+        )
 
     def test_daily_exception_count(self):
         observed_count = len(select_exceptions_that_have_not_been_notified())
-        expected_count = self.runevents_win + self.runevents_fail
+        expected_count = 1
         self.assertEqual(observed_count, expected_count)
