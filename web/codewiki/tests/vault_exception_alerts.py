@@ -3,12 +3,13 @@ from django.test import TestCase
 import datetime
 from django.conf import settings
 from codewiki.models.scraper import Scraper, ScraperRunEvent
+import codewiki
 
-def selectexceptionsfromthelastday():
+def select_exceptions_that_have_not_been_notified():
     #qs = ScraperRunEvent.objects.filter(scraper=20627).exclude(exception_message='')
     return []
 
-class FindExceptions(TestCase):
+class TestExceptions(TestCase):
     "Test that we can find exceptions"
 
     runevents_win = 8
@@ -48,6 +49,6 @@ class FindExceptions(TestCase):
             self.runevents.append(runevent)
 
     def test_daily_exception_count(self):
-        observed_count = len(selectexceptionsfromthelastday())
+        observed_count = len(select_exceptions_that_have_not_been_notified())
         expected_count = self.runevents_win + self.runevents_fail
         self.assertEqual(observed_count, expected_count)
