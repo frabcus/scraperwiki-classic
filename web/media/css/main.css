@@ -3351,42 +3351,6 @@ ul.scraper_list .code_about .about_sick a {
 
 
 
-#hNewDatasets {
-	padding-top: 1em;
-}
-
-#divNewScrapers {
-	margin-bottom: 1em;
-}
-
-div.feature {
-	padding-top: 2em;
-	background: #5f6060;
-	color: #fff;
-	border-top: solid 10px #4f4f4f;
-	border-bottom: solid 10px #4f4f4f;
-	margin-bottom: 1em;
-	min-height: 200px;
-}
-
-div.feature h2 {
-	padding: 0;
-}
-
-div.feature img {
-	float: left;
-	margin-right: 20px;
-	position: relative;
-	top: -8px;
-}
-
-#divAboutScraperWiki {
-	color: #fff;
-	padding-top: 0;
-}
-
-
-
 
 /* PRICING */
 
