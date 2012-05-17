@@ -3345,10 +3345,163 @@ ul.scraper_list .code_about .about_sick a {
 
 
 
-/* About page */
+/* ABOUT PAGE */
 
+body.about #content {
+	padding: 30px;
+	width: 898px;
+	line-height: 1.4em;
+}
 
+body.about #header {
+	width: 898px;
+	padding: 20px 30px;
+}
 
+body.about #header p {
+	right: 30px;
+}
+
+body.about p {
+	margin: 0;
+}
+
+#what_we_do {
+	overflow: auto;
+}
+
+#history_and_funding, #team, #thanks {
+	position: relative;
+	padding-left: 190px;
+	overflow: auto;
+	border-top: 1px solid #ccc;
+	padding-top: 40px;
+	margin-top: 40px;
+}
+
+body.about #content h2 {
+	position: absolute;
+	top: 40px;
+	left: 0;
+	width: 160px;
+	font-size: 18px;
+	font-weight: normal;
+	text-transform: uppercase;
+	color: #666;
+}
+
+#what_we_do div.first {
+	float: left;
+	width: 530px;
+}
+
+#what_we_do div.second {
+	float: right;
+	width: 340px;
+}
+
+body.about #what_we_do h2 {
+	position: static;
+	width: 340px;
+	padding: 0 0 30px 190px;
+	font-size: 38px;
+	line-height: 44px;
+	color: #777;
+	text-transform: none;
+	background: transparent url(../images/footer_tractor.png) 0 0 no-repeat;
+}
+
+body.about #what_we_do h2 em {
+	font-style: normal;
+	color: #39c;
+}
+
+#what_we_do div.first p {
+	margin-left: 190px;
+	font-size: 21px;
+	line-height: 28px;
+	color: #444;
+}
+
+#what_we_do p.business {
+	margin-top: 20px;
+}
+
+#history_and_funding .first {
+	float: left;
+	width: 340px;
+}
+
+#history_and_funding .second {
+	float: right;
+	width: 340px;
+}
+
+#history_and_funding .third {
+	float: right;
+	width: 340px;
+	margin-top: 20px;
+}
+
+#team div {
+	width: 340px;
+	margin-bottom: 20px;
+	font-size: 14px;
+	line-height: 18px;
+}
+
+#team div.odd {
+	float: left;
+	clear: right;
+}
+
+#team div.even {
+	float: right;
+}
+
+#team img {
+	float: left;
+	width: 55px;
+	border: 1px solid #fff;
+	-webkit-box-shadow: 0 1px 2px #ccc;
+	-moz-box-shadow: 0 1px 2px #ccc;
+	box-shadow: 0 1px 2px #ccc;
+}
+
+#team h3,
+#team p {
+	float: right;
+	width: 270px;
+}
+
+#team h3 a {
+	color: #000;
+}
+
+#team h3 small {
+	font-size: 13px;
+	color: #999;
+}
+
+#team p {
+	margin-top: 2px;
+}
+
+#thanks p {
+	font-size: 14px;
+	line-height: 19px;
+	width: 340px;
+	margin-bottom: 15px;
+}
+
+#thanks p.first {
+	float: left;
+}
+
+#thanks p.second,
+#thanks p.third {
+	float: right;
+}
 
 
 
