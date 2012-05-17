@@ -1,13 +1,26 @@
-#from django.core.urlresolvers import reverse
-from django.test import TestCase
 import datetime
+
+from django.test import TestCase
 from django.conf import settings
+
 from codewiki.models.scraper import Scraper, ScraperRunEvent
-import codewiki
+from codewiki.models.vault import Vault
 
 def select_exceptions_that_have_not_been_notified():
-    #qs = ScraperRunEvent.objects.filter(scraper=20627).exclude(exception_message='')
-    return []
+    # runevents will have a notified flag (not added yet)
+    # scrapers that are: in a vault; with an exception; that have not been notified
+    # SELECT id from 
+    l = []
+    for vault in Vault.objects.all():
+        for scraper in Scraper.objects.filter(vault=vault):
+            runevents = ScraperRunEvent.objects.filter(scraper=scraper)\
+                .order_by('run_started')[:1]
+            if not runevents:
+                continue
+            mostrecent = runevents[0]
+            if mostrecent.exception_message:
+                l.append(mostrecent)
+    return l
 
 class TestExceptions(TestCase):
     "Test that we can find exceptions"
@@ -17,7 +30,7 @@ class TestExceptions(TestCase):
     pastdays = 3
 
     def setUp(self):
-        self.vault = codewiki.models.Vault.objects.create(user_id = 1)
+        self.vault = Vault.objects.create(user_id = 1)
         self.scraper1 = Scraper.objects.create(
             title=u"Lucky Scraper 1", vault = self.vault,
         )
