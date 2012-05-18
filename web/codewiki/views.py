@@ -1,3 +1,13 @@
+import urllib
+import re
+import urllib2
+import base64
+import datetime
+import socket
+import urlparse
+import sys
+import logging
+
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -16,16 +26,6 @@ from managers.datastore import DataStore
 from codewiki import models
 from codeparsers import MakeDescriptionFromCode
 import frontend
-
-import urllib
-import re
-import urllib2
-import base64
-import datetime
-import socket
-import urlparse
-import sys
-import logging
 
 from codewiki.models.vault import Vault
 from codewiki.models.scraper import Scraper, ScraperRunEvent
