@@ -853,3 +853,6 @@ def invite_to_vault(vault_owner, email, vault):
     invite = Invite(token=context['token'], email=email, vault=vault)
     invite.save()
     return result
+
+def alert_vault_members_of_exceptions(vault):
+    pass
