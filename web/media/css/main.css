@@ -3366,7 +3366,7 @@ body.about p {
 	margin: 0;
 }
 
-#what_we_do, #history_and_funding, #team, #thanks {
+#what_we_do, #team, #thanks {
 	position: relative;
 	padding-left: 160px;
 	overflow: auto;
@@ -3379,9 +3379,10 @@ body.about p {
 	margin-top: 0;
 	padding-top: 0;
 	border-top: none;
+	width: 350px;
 }
 
-body.about #content h2 {
+#team h2, #thanks h2 {
 	position: absolute;
 	top: 40px;
 	left: 0;
@@ -3392,15 +3393,36 @@ body.about #content h2 {
 	color: #666;
 }
 
-#what_we_do div.first {
-	float: left;
-	width: 350px;
+#history_and_funding {
+	float: right;
+	position: relative;
+	right: -45px;
+	width: 340px;
+	margin-top: 60px;
+	padding: 16px 19px 10px 19px;
+	background-color: #fcf9ec;
+	border: 1px solid #f3e7be;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	font-size: 15px;
+	line-height: 21px;
 }
 
-#what_we_do div.second {
-	float: right;
-	width: 350px;
-	margin-top: 10px;
+#history_and_funding p {
+	margin-bottom: 10px;
+}
+
+#history_and_funding h2 {
+	font-size: 12px;
+	line-height: 12px;
+	margin-bottom: 8px;
+	text-transform: uppercase;
+	color: #c36639;
+}
+
+#history_and_funding a {
+	color: #c36639;
 }
 
 #what_we_do img {
@@ -3410,8 +3432,13 @@ body.about #content h2 {
 	width: 130px;
 }
 
+#what_we_do p {
+	width: 350px;
+	margin-bottom: 20px;
+}
+
 body.about #what_we_do h2 {
-	position: static;
+	font-weight: normal;
 	width: 350px;
 	padding: 0 0 20px 0;
 	font-size: 38px;
@@ -3422,33 +3449,7 @@ body.about #what_we_do h2 {
 
 body.about #what_we_do h2 em {
 	font-style: normal;
-	color: #39c;
-}
-
-#what_we_do div.first p {
-	font-size: 21px;
-	line-height: 28px;
-	color: #444;
-}
-
-#what_we_do p.business {
-	margin-top: 20px;
-}
-
-#history_and_funding .first {
-	float: left;
-	width: 350px;
-}
-
-#history_and_funding .second {
-	float: right;
-	width: 350px;
-}
-
-#history_and_funding .third {
-	float: right;
-	width: 350px;
-	margin-top: 20px;
+	color: #d59f00;
 }
 
 #team div {
@@ -3493,6 +3494,15 @@ body.about #what_we_do h2 em {
 
 #team p {
 	margin-top: 2px;
+	color: #888;
+}
+
+#team p a {
+	color: #444;
+}
+
+#thanks {
+	margin-top: 20px;
 }
 
 #thanks p {
