@@ -9,7 +9,7 @@ from django.core.mail import EmailMultiAlternatives
 
 from frontend.models import UserProfile
 from codewiki.models import Vault, Invite
-from frontend.views import vault_users, invite_to_vault, login
+from frontend.views import vault_users, invite_to_vault, login, alert_vault_members_of_exceptions
 
 import helper
 from mock import Mock, patch
@@ -112,3 +112,27 @@ def it_should_add_the_user_to_the_vault_on_sign_up(mock_email):
     assert testier in vault.members.all()
 
 # test that token is required
+
+@patch.object(EmailMultiAlternatives, 'no_exceptions')
+def ensure_exceptionless_vault_receives_no_email(mock_send):
+    vault = _make_vault_with_runevent('no_exceptions_vault', '')
+    response = alert_vault_members_of_exceptions(vault)
+    assert not mock_send.called
+
+@patch.object(EmailMultiAlternatives, 'yes_exceptions')
+def ensure_exceptional_vault_receives_email(mock_send):
+    vault = _make_vault_with_runevent('yes_exceptions_vault', 'FakeError: This is a test.')
+    response = alert_vault_members_of_exceptions(vault)
+    assert mock_send.called
+
+def _make_vault_with_runevent(name, exception_message)
+    vault = profile.create_vault(name=name)
+    scraper = Scraper.objects.create(
+        title=u"Bucket-Wheel Excavators", vault = vault,
+    )
+    runevent = ScraperRunEvent.objects.create(
+        scraper=scraper, pid=-1,
+        exception_message=exception_message,
+        run_started=today
+    )
+    return vault
