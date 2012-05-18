@@ -3345,355 +3345,171 @@ ul.scraper_list .code_about .about_sick a {
 
 
 
-/* Slideshow */
-
-#divIntroSlideShow {
-	float: right;
-	width: 495px;
-	height: 346px;
-	margin-top: 15px;
-	position: relative;
-}
-
-#divIntroSlideShow .slide_show {
-	border: solid 10px #287aa6;
-}
-
-.slide_show {
-	background: #fff;
-}
-
-.slide_nav {
-	z-index: 10;
-	float: right;
-	padding-top: 2em;
-	position: absolute;
-	right: 10px;
-	bottom: -40px;
-}
-
-.slide_nav {
-	font-size: 0.6em;
-}
-
-.slide_nav a {
-	text-decoration: none;
-	margin: 0 5px;
-	padding: 3px 5px;
-	border: solid 1px #fff;
-	color: #fff;
-}
-
-.slide_nav a:hover {
-	text-decoration: none;
-	background: #2680c6;
-	color: #fff;
-}
-
-.slide_nav a.activeSlide {
-	background: #ea0;
-	color: #2680c6;
-	background: #fff;
-}
-
-.slide_nav a:focus {
-	outline: none;
-}
-
-#divWelcome {
-	position: relative;
-	background: #1d7cae url(../images/graph_paper.png);
-	padding: 20px 1.5em 1em 1.5em;
-	border: solid 10px #287aa6;
-}
-
-#divWelcome #imgLogoLarge {
-	float: left;
-	width: 170px;
-	margin-right: 30px;
-}
-
-#divWelcome h1 {
-	color: #fff;
-	font-size: 30px;
-	line-height: 37px;
-}
-
-#divWelcome h2 {
-	float: left;
-	margin: 25px 210px 0 200px;
-	color: #fff;
-}
-
-
-
-
-/* About page */
-
-body.about a#help {
-	display: block;
-	margin: 40px 0 0 0;
-	text-align: center;
-	background-color: #ffd;
-	padding: 9px 0 7px 0;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-}
-
-body.about a#help img {
-	vertical-align: -2px;
-	margin-right: 5px;
-}
-
-body.about a#help:hover {
-	text-decoration: none;
-	background-color: #ffa;
-	color: #169;
-}
+/* ABOUT PAGE */
 
 body.about #content {
-	line-height: 23px;
-	font-size: 16px;
-	width: 878px;
-	padding: 20px 40px;
+	padding: 30px;
+	width: 898px;
+	line-height: 1.4em;
 }
 
-body.about .column-left .first {
-	font-weight: bold;
-	font-size: 16px;
-	color: #555;
+body.about #header {
+	width: 898px;
+	padding: 20px 30px;
 }
 
-body.about .column-left,
-body.about .column-right {
-	float: left;
-	width: 420px;
-	text-align: justify;
+body.about #header p {
+	right: 30px;
 }
 
-body.about .column-right {
-	float: right;
+body.about p {
+	margin: 0;
+}
+
+#what_we_do, #history_and_funding, #team, #thanks {
+	position: relative;
+	padding-left: 160px;
+	overflow: auto;
+	border-top: 1px solid #ccc;
+	padding-top: 40px;
+	margin-top: 40px;
+}
+
+#what_we_do {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: none;
 }
 
 body.about #content h2 {
-	margin: 10px 0 10px 0;
-	text-align: center;
-	font-size: 16px;
+	position: absolute;
+	top: 40px;
+	left: 0;
+	width: 160px;
+	font-size: 18px;
+	font-weight: normal;
 	text-transform: uppercase;
 	color: #666;
-	font-weight: normal;
-	background: #fff url(../images/subheading_line.gif) no-repeat center center;
-	padding: 0;
 }
 
-body.about #content h2 a {
-	background-color: #fff;
-	padding: 0 10px;
-	color: #666;
-	text-decoration: none;
-}
-
-body.about #content h2.inline {
-	background: none;
-	margin: 15px 0 25px 0;
-	padding: 0;
-	text-transform: none;
-	text-align: left;
-	font-size: 32px;
-	color: #28c;
-	font-weight: bold;
-	line-height: 32px;
-}
-
-body.about #about_images {
-    text-align: center;
-}
-
-body.about .about_image {
-	cursor: pointer;
-}
-
-body.about #about_hover {
-    margin-left: 68px;
-    text-align: center;
-    width: 710px;
-	background-color: #F4F8FB;
-    padding: 1em;
-    display: none;
-}
-
-body.about #scrapbook {
-	margin: 0 60px;
-}
-
-body.about #scrapbook h2 {
-	margin-bottom: 30px;
-	margin-top: 50px;
-}
-
-#scrapbook ul {
-	padding: 0;
-	margin-bottom: 0;
-}
-
-#scrapbook li {
+#what_we_do div.first {
 	float: left;
-	width: 165px;
-	margin: 0 11px;
+	width: 350px;
 }
 
-#scrapbook li.clear {
-	float: none;
-	clear: left;
+#what_we_do div.second {
+	float: right;
+	width: 350px;
+	margin-top: 10px;
 }
 
-#scrapbook li a {
-	display: block;
-	color: #666;
-	padding: 9px;
-	-webkit-box-shadow: 0px 2px 5px #ccc;
-	-moz-box-shadow: 0px 2px 5px #ccc;
-	box-shadow: 0px 2px 5px #ccc;
-	border: 1px solid #ccc;
+#what_we_do img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 130px;
 }
 
-#scrapbook li:nth-child(1) a {
-	-moz-transform: rotate(2deg);
-	-webkit-transform: rotate(2deg);
-	-o-transform: rotate(2deg);
-	-ms-transform: rotate(2deg);
-	transform: rotate(2deg);
+body.about #what_we_do h2 {
+	position: static;
+	width: 350px;
+	padding: 0 0 20px 0;
+	font-size: 38px;
+	line-height: 44px;
+	color: #777;
+	text-transform: none;
 }
 
-#scrapbook li:nth-child(2) a {
-	-moz-transform: rotate(-1deg);
-	-webkit-transform: rotate(-1deg);
-	-o-transform: rotate(-1deg);
-	-ms-transform: rotate(-1deg);
-	transform: rotate(-1deg);
+body.about #what_we_do h2 em {
+	font-style: normal;
+	color: #39c;
 }
 
-#scrapbook li:nth-child(3) a {
-	-moz-transform: rotate(-2deg);
-	-webkit-transform: rotate(-2deg);
-	-o-transform: rotate(-2deg);
-	-ms-transform: rotate(-2deg);
-	transform: rotate(-2deg);
-}
-
-#scrapbook li:nth-child(4) a {
-	-moz-transform: rotate(1deg);
-	-webkit-transform: rotate(1deg);
-	-o-transform: rotate(1deg);
-	-ms-transform: rotate(1deg);
-	transform: rotate(1deg);
-}
-
-#scrapbook li a:hover {
-	text-decoration: none;
-	background-color: #F7F9FD;
-	-moz-transform: rotate(0deg);
-	-webkit-transform: rotate(0deg);
-	-o-transform: rotate(0deg);
-	-ms-transform: rotate(0deg);
-	transform: rotate(0deg);
-}
-
-#scrapbook li img {
-	width: 145px;
-}
-
-#scrapbook li h4 {
-	font-size: 15px;
-	line-height: 18px;
-	margin: 4px 0 0 0;
-}
-
-body.about #people {
-	margin-top: 50px;
-}
-
-body.about #people p {
-	margin: 20px 70px;
-}
-
-#about_specifics {
-	background-color: #F4F8FB;
-	margin: 60px 10px 20px 10px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-	font-size: 13px;
-	line-height: 17px;
+#what_we_do div.first p {
+	font-size: 21px;
+	line-height: 28px;
 	color: #444;
 }
 
-#about_specifics .logos,
-#about_specifics .opensource {
-	padding: 5px 20px 5px 20px;
-	width: 385px;
-	float: left;
+#what_we_do p.business {
+	margin-top: 20px;
 }
 
-#about_specifics .logos {
+#history_and_funding .first {
+	float: left;
+	width: 350px;
+}
+
+#history_and_funding .second {
 	float: right;
-	border-left: 2px solid #fff;
+	width: 350px;
 }
 
-#about_specifics h3 {
-	color: #28c;
-}
-
-#about_specifics .logos img {
+#history_and_funding .third {
 	float: right;
-	margin: 10px 0 10px 20px;
-	width: 100px;
-	height: 64px;
+	width: 350px;
+	margin-top: 20px;
 }
 
-#about_specifics .opensource img {
+#team div {
+	width: 350px;
+	margin-bottom: 20px;
+	font-size: 14px;
+	line-height: 18px;
+}
+
+#team div.odd {
 	float: left;
-	margin: 10px 20px 10px 0;
-	width: 64px;
-	height: 64px;
+	clear: right;
 }
 
-
-
-
-#hNewDatasets {
-	padding-top: 1em;
+#team div.even {
+	float: right;
 }
 
-#divNewScrapers {
-	margin-bottom: 1em;
-}
-
-div.feature {
-	padding-top: 2em;
-	background: #5f6060;
-	color: #fff;
-	border-top: solid 10px #4f4f4f;
-	border-bottom: solid 10px #4f4f4f;
-	margin-bottom: 1em;
-	min-height: 200px;
-}
-
-div.feature h2 {
-	padding: 0;
-}
-
-div.feature img {
+#team img {
 	float: left;
-	margin-right: 20px;
-	position: relative;
-	top: -8px;
+	width: 55px;
+	border: 1px solid #fff;
+	-webkit-box-shadow: 0 1px 2px #ccc;
+	-moz-box-shadow: 0 1px 2px #ccc;
+	box-shadow: 0 1px 2px #ccc;
 }
 
-#divAboutScraperWiki {
-	color: #fff;
-	padding-top: 0;
+#team h3,
+#team p {
+	float: right;
+	width: 280px;
 }
 
+#team h3 a {
+	color: #000;
+}
+
+#team h3 small {
+	font-size: 13px;
+	color: #999;
+}
+
+#team p {
+	margin-top: 2px;
+}
+
+#thanks p {
+	font-size: 14px;
+	line-height: 19px;
+	width: 350px;
+	margin-bottom: 19px;
+}
+
+#thanks p.first {
+	float: left;
+}
+
+#thanks p.second,
+#thanks p.third {
+	float: right;
+}
 
 
 
