@@ -51,7 +51,7 @@ class TestExceptions(TestCase):
             run_started=today
         )
 
-    def test_daily_exception_count(self):
+    def test_find_exceptional_scrapers_in_vault(self):
         observed_count = len(select_exceptions_that_have_not_been_notified(self.user))
         expected_count = 1
         self.assertEqual(observed_count, expected_count)
