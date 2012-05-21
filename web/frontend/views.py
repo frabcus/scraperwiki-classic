@@ -489,9 +489,9 @@ def request_data(request):
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
 
-#def secrets(request):
-#    form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
-#    return render_to_response('frontend/secrets.html', {'form': form}, context_instance = RequestContext(request))
+def secrets(request):
+    form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
+    return render_to_response('frontend/secrets.html', {'form': form}, context_instance = RequestContext(request))
 
 def data_hub(request):
     return render_to_response('frontend/data_hub.html', context_instance = RequestContext(request))

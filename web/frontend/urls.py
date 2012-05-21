@@ -48,7 +48,7 @@ urlpatterns = patterns('',
     url(r'^business/$',frontend_views.data_consulting, name='data_consulting'),
     url(r'^data_consultancy/$', redirect_to, {'url': '/business/'}),
     url(r'^data_consulting/$', redirect_to, {'url': '/business/'}),
-    #url(r'^secrets-in-data/$', frontend_views.secrets, name='secrets'),
+    url(r'^secrets-in-data/$', frontend_views.secrets, name='secrets'),
     
     #hello world
     url(r'^hello_world.html', direct_to_template, {'template': 'frontend/hello_world.html'}, name='help_hello_world'),
