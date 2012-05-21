@@ -270,7 +270,7 @@ $(function(){
     var urls = {
         '/(about|events|contact)/' : 'about',
         '/status/' : 'admin',
-        '/(request_data|data_hub|business|secrets-in-data)/': 'data_services',
+        '/(request_data|data_hub|business|secrets_in_data)/': 'data_services',
         '/(profiles|vaults)/' : 'user',
         '/login/' : 'login',
         '.*' : 'code'

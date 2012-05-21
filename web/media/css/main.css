@@ -587,7 +587,7 @@ body.fourohfour #header {
 body.request_data #header,
 body.business #header,
 body.data_hub #header,
-body.secrets-in-data #header {
+body.secrets_in_data #header {
 	color: #a59970;
 	text-shadow: 0 1px 1px #000;
 	background: url(../images/header_black_gradient.gif) 4px 0px repeat-x;
@@ -610,7 +610,7 @@ body.secrets-in-data #header {
 body.request_data #header:before,
 body.business #header:before,
 body.data_hub #header:before,
-body.secrets-in-data #header:before {
+body.secrets_in_data #header:before {
 	background-color: rgba(255,255,255,0.4);
 }
 
@@ -622,7 +622,7 @@ body.secrets-in-data #header:before {
 body.request_data #header a, body.request_data #header p, body.request_data #header h2 em,
 body.business #header a, body.business #header p, body.business #header h2 em,
 body.data_hub #header a, body.data_hub #header p, body.data_hub #header h2 em,
-body.secrets-in-data #header a, body.secrets-in-data #header p, body.secrets-in-data #header h2 em {
+body.secrets_in_data #header a, body.secrets_in_data #header p, body.secrets_in_data #header h2 em {
 	color: #fff;
 }
 
@@ -640,7 +640,7 @@ body.fourohfour #header h2 {
 body.request_data #header h2,
 body.business #header h2,
 body.data_hub #header h2,
-body.secrets-in-data #header h2 {
+body.secrets_in_data #header h2 {
 	color: #a59970;
 }
 
@@ -1947,6 +1947,14 @@ body.profiles.edit #features li input {
 
 #process {
 	width: 558px;
+}
+
+body.secrets_in_data #process {
+	margin-left: 200px;
+}
+
+body.secrets_in_data #content {
+	background: #fff url(../images/data_consulting_swoosh.jpg) 0 50px no-repeat;
 }
 
 #sidebar {
