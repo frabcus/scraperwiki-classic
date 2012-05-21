@@ -5279,7 +5279,7 @@ body.docs #help {
 }
 
 body.docs #help h3 {
-	background: #fff;
+	background: #ebf5d3;
 	background: -moz-linear-gradient(top,  #ffffff 0%, #ebf5d3 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#ebf5d3));
 	background: -webkit-linear-gradient(top,  #ffffff 0%,#ebf5d3 100%);
