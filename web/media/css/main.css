@@ -143,6 +143,7 @@ body {
 
 .supernav li.admin.active a {
 	border-color: #ebcf7d;
+	border-bottom-color: #f9efcd;
 	background-color: #f9efcd;
 	color: #735e1c;
 }
@@ -156,6 +157,7 @@ body {
 	background: -ms-linear-gradient(top, #8e9092 2%,#686b6d 2%);
 	background: linear-gradient(top, #8e9092 2%,#686b6d 2%);
 	border-color: #464b4e;
+	border-bottom-color: #686b6d;
 	color: #ffdd6f;
 	text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
