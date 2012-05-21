@@ -855,4 +855,32 @@ def invite_to_vault(vault_owner, email, vault):
     return result
 
 def alert_vault_members_of_exceptions(vault):
-    pass
+    result = []
+
+    context = locals()
+    subject ='Script errors in your %s ScraperWiki vault' % vault.name
+
+    for member in vault.members:
+        context['exceptions'] = select_exceptions_that_have_not_been_notified(member)
+
+        text_content = render_to_string('emails/vault_exceptions.txt', context) 
+        html_content = render_to_string('emails/vault_exceptions.html', context)
+
+        msg = EmailMultiAlternatives(subject, text_content,
+            'alerts@scraperwiki.com', to=[email])
+        msg.attach_alternative(html_content, "text/html")
+
+        try:
+            msg.send(fail_silently=False)
+            result.append({
+                'recipient': member.email,
+                'status': 'okay'
+            })
+        except EnvironmentError as e:
+            result.append({
+                'recipient': member.email,
+                'status' : 'fail',
+                'error' : "Couldn't send email",
+            })
+ 
+    return result
