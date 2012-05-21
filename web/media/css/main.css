@@ -132,7 +132,7 @@ body {
     border: 1px solid #d8d8d8;
     background-color: #fff;
     color: #6c8699;
-    border-bottom: none;
+    border-bottom: 1px solid #fff;
     -webkit-border-top-left-radius: 4px;
     -webkit-border-top-right-radius: 4px;
     -moz-border-radius-topleft: 4px;
