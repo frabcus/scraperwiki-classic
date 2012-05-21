@@ -125,7 +125,7 @@ def ensure_exceptional_vault_receives_email(mock_send):
     response = alert_vault_members_of_exceptions(vault)
     assert mock_send.called
 
-def _make_vault_with_runevent(name, exception_message)
+def _make_vault_with_runevent(name, exception_message):
     vault = profile.create_vault(name=name)
     scraper = Scraper.objects.create(
         title=u"Bucket-Wheel Excavators", vault = vault,
