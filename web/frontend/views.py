@@ -869,15 +869,17 @@ def alert_vault_members_of_exceptions(vault):
 
     context = locals()
     subject ='Script errors in your %s ScraperWiki vault' % vault.name
+    def select_exceptions_that_have_not_been_notified(member):
+        pass
 
-    for member in vault.members:
+    for member in vault.members.all():
         context['exceptions'] = select_exceptions_that_have_not_been_notified(member)
 
         text_content = render_to_string('emails/vault_exceptions.txt', context) 
         html_content = render_to_string('emails/vault_exceptions.html', context)
 
         msg = EmailMultiAlternatives(subject, text_content,
-            'alerts@scraperwiki.com', to=[email])
+            'alerts@scraperwiki.com', to=['email'])
         msg.attach_alternative(html_content, "text/html")
 
         try:
