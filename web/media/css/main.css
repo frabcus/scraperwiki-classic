@@ -3385,6 +3385,7 @@ body.about p {
 	border-top: 1px solid #ccc;
 	padding-top: 40px;
 	margin-top: 40px;
+	clear: both;
 }
 
 #what_we_do {
