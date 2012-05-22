@@ -761,10 +761,11 @@ $(document).ready(function()
 
     // if they put # and the run_id in the URL, open up that one
     if (window.location.hash) {
-        var hash_run_event = $(window.location.hash);
-        if (hash_run_event.length != 0) {
-            previewrunevent_show(hash_run_event);
-        }
+        //var hash_run_event = $(window.location.hash);
+        //if (hash_run_event.length != 0) {
+        //    previewrunevent_show(hash_run_event);
+        //}
+        $('li.full_history a').trigger('click');
     }
 
 }); 
