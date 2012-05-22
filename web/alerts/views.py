@@ -1,26 +1,32 @@
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
+from codewiki.models.vault import Vault
+from codewiki.models import Scraper, ScraperRunEvent
+
+
+def compose_email(runevents, vault):
+    context = locals()
+
+    text_content = render_to_string('emails/vault_exceptions.txt', context) 
+    html_content = render_to_string('emails/vault_exceptions.html', context)
+    print text_content
+    return {'text': text_content, 'html': html_content}
+
 def alert_vault_members_of_exceptions(vault):
     result = []
 
-    context = locals()
     subject ='Script errors in your %s ScraperWiki vault' % vault.name
-    def select_exceptions_that_have_not_been_notified(member):
-        return [{'scraper_name': 'Test', 'short_name': 'test',
-            'exception_message': 'LOIOError (Basdiusfu)'},
-         {'scraper_name': 'HAHAHA', 'short_name': 'hahaha',
-          'exception_message': 'sdfsdfsdf'}]
 
     for member in vault.members.all():
-        context['exceptions'] = select_exceptions_that_have_not_been_notified(member)
+        runevents = select_exceptions_that_have_not_been_notified(member)
+        if len(runevents) == 0:
+            continue
 
-        text_content = render_to_string('emails/vault_exceptions.txt', context) 
-        html_content = render_to_string('emails/vault_exceptions.html', context)
-
-        msg = EmailMultiAlternatives(subject, text_content,
+        content = compose_email(runevents, vault)
+        msg = EmailMultiAlternatives(subject, content['text'],
             'ScraperWiki Alerts <noreply@scraperwiki.com>', to=[member.email])
-        msg.attach_alternative(html_content, "text/html")
+        msg.attach_alternative(content['html'], "text/html")
 
         try:
             msg.send(fail_silently=False)
@@ -28,7 +34,8 @@ def alert_vault_members_of_exceptions(vault):
                 'recipient': member.email,
                 'status': 'okay'
             })
-            #set notified flag for all runevents
+            map(lambda e: e.set_notified(), runevents)
+
         except EnvironmentError as e:
             result.append({
                 'recipient': member.email,
@@ -37,3 +44,18 @@ def alert_vault_members_of_exceptions(vault):
             })
  
     return result
+
+def select_exceptions_that_have_not_been_notified(user):
+    # change that ^ to vault and that \/ to romevo the top loop
+    l = []
+    for vault in Vault.objects.filter(user=user):
+        for scraper in Scraper.objects.filter(vault=vault):
+            runevents = ScraperRunEvent.objects.filter(scraper=scraper)\
+                .order_by('-run_started')[:1]
+            print runevents
+            if not runevents:
+                continue
+            mostrecent = runevents[0]
+            if mostrecent.exception_message:
+                l.append(mostrecent)
+    return l

@@ -1,14 +1,14 @@
 ScraperWiki
 ___________
 
-{{exceptions.count}} error{{exceptions.count|pluralize}} have been raised in your vault "{{vault.name}}" in the last hour:
+{{runevents|length}} error{{runevents|length|pluralize}} have been raised in your vault "{{vault.name}}" in the last hour:
 
-{% for exception in exceptions %}___________
+{% for runevent in runevents %}___________
 
-{{ exception.scraper_name }}
-https://scraperwiki.com/scrapers/{{ exception.short_name }}
+{{ runevent.scraper.title }}
+https://scraperwiki.com/scrapers/{{ runevent.scraper.short_name }}
 
-{{ exception.exception_message }}
+{{ runevent.exception_message }}
 
 {% endfor %}___________
 

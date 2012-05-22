@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 from codewiki.models.scraper import Scraper, ScraperRunEvent
 from codewiki.models.vault import Vault
-from codewiki.views import select_exceptions_that_have_not_been_notified
+from alerts.views import select_exceptions_that_have_not_been_notified
 
 today = datetime.datetime.now()
 
