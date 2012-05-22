@@ -1,3 +1,13 @@
+import urllib
+import re
+import urllib2
+import base64
+import datetime
+import socket
+import urlparse
+import sys
+import logging
+
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -17,15 +27,8 @@ from codewiki import models
 from codeparsers import MakeDescriptionFromCode
 import frontend
 
-import urllib
-import re
-import urllib2
-import base64
-import datetime
-import socket
-import urlparse
-import sys
-import logging
+from codewiki.models.vault import Vault
+from codewiki.models.scraper import Scraper, ScraperRunEvent
 
 logger = logging.getLogger(__name__)
 
@@ -828,3 +831,19 @@ def scraper_data_view(request, wiki_type, short_name, table_name):
     }
     return HttpResponse( json.dumps(results) , mimetype=mime)
     
+def select_exceptions_that_have_not_been_notified(user):
+    # runevents will have a notified flag
+    # scrapers that are: in a vault; with an exception; that have not been notified
+    l = []
+    for vault in Vault.objects.filter(user=user):
+        for scraper in Scraper.objects.filter(vault=vault):
+            runevents = ScraperRunEvent.objects.filter(scraper=scraper)\
+                .order_by('-run_started')[:1]
+            print runevents
+            if not runevents:
+                continue
+            mostrecent = runevents[0]
+            if mostrecent.exception_message:
+                l.append(mostrecent)
+    return l
+

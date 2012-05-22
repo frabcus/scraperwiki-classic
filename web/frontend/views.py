@@ -489,6 +489,16 @@ def request_data(request):
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
 
+def secrets_in_data(request):
+    form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('secrets_in_data_thanks'))
+    return render_to_response('frontend/secrets_in_data.html', {'form': form}, context_instance = RequestContext(request))
+
+def secrets_in_data_thanks(request):
+    return render_to_response('frontend/secrets_in_data_thanks.html', context_instance = RequestContext(request))
+
 def data_hub(request):
     return render_to_response('frontend/data_hub.html', context_instance = RequestContext(request))
 
@@ -852,4 +862,37 @@ def invite_to_vault(vault_owner, email, vault):
 
     invite = Invite(token=context['token'], email=email, vault=vault)
     invite.save()
+    return result
+
+def alert_vault_members_of_exceptions(vault):
+    result = []
+
+    context = locals()
+    subject ='Script errors in your %s ScraperWiki vault' % vault.name
+    def select_exceptions_that_have_not_been_notified(member):
+        pass
+
+    for member in vault.members.all():
+        context['exceptions'] = select_exceptions_that_have_not_been_notified(member)
+
+        text_content = render_to_string('emails/vault_exceptions.txt', context) 
+        html_content = render_to_string('emails/vault_exceptions.html', context)
+
+        msg = EmailMultiAlternatives(subject, text_content,
+            'alerts@scraperwiki.com', to=['email'])
+        msg.attach_alternative(html_content, "text/html")
+
+        try:
+            msg.send(fail_silently=False)
+            result.append({
+                'recipient': member.email,
+                'status': 'okay'
+            })
+        except EnvironmentError as e:
+            result.append({
+                'recipient': member.email,
+                'status' : 'fail',
+                'error' : "Couldn't send email",
+            })
+ 
     return result

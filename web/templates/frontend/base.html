@@ -14,7 +14,6 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.12.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys.js"></script>
@@ -132,6 +131,7 @@
             <ul>
                 <li class="request_data"><a href="{% url request_data %}">Request Data</a></li>
                 <li class="data_consulting"><a href="{% url data_consulting %}">Data Consulting</a></li>
+                {# <li class="secrets"><a href="{% url secrets_in_data %}">Discover Secrets in Data</a></li> #}
                 <li class="data_hub"><a href="{% url data_hub %}">What is a Data Hub?</a></li>
             </ul>
         </div>

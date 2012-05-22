@@ -114,7 +114,7 @@
 
 <ul class="toolbar">
     <li class="edit"><a href="{% url editor_edit scraper.wiki_type scraper.short_name %}" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Edit</a></li>
-    <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
+    <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}{% if scraper.vault %}/tovault/{{scraper.vault.id}}/{% endif %}?fork={{scraper.short_name}}{% if scraper.vault %}&name={{scraper.short_name}}_copy{% endif %}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy{% if scraper.vault %} in Vault{% endif %}</a></li>
     <li class="viewsource"><!--[if !IE]> --><a href="view-source:{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><!-- <![endif]--><!-- [if IE]><a href="{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><![endif]--></li>
     <li class="share">
         <a><img src="{{ MEDIA_URL }}images/icons/share.png" width="16" height="16" alt="">Share</a>
@@ -441,8 +441,8 @@
     <ul class="titlebar">
         <li class="first"><h3>{% if related_views or scraper.forked_from or forked_to_total or scraper_tags %}This scraper in context{% else %}This scraper is lonely{% endif %}</h3></li>
         {% if user_edits_it or user.is_staff %}<li class="tag"><a href="#tags" title="Use tags to organise and group similar scrapers"><img src="{{ MEDIA_URL }}images/icons/tag.png" width="16" height="16" alt="">Tag</a></li>{% endif %}
-        <li class="view"><a data-wiki_type="view" data-sourcescraper="{{scraper.short_name}}" href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise</a></li>
-        <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
+        <li class="view"><a data-wiki_type="view" data-sourcescraper="{{scraper.short_name}}" {% if scraper.vault %}data-vault_id="{{scraper.vault.id}}" {% endif %}href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise{% if scraper.vault %} in Vault{% endif %}</a></li>
+        <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}{% if scraper.vault %}/tovault/{{scraper.vault.id}}/{% endif %}?fork={{scraper.short_name}}{% if scraper.vault %}&name={{scraper.short_name}}_copy{% endif %}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy{% if scraper.vault %} in Vault{% endif %}</a></li>
         <li class="clear"></li>
     </ul>
     
