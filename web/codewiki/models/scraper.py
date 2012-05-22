@@ -162,6 +162,11 @@ class ScraperRunEvent(models.Model):
     first_url_scraped = models.CharField(max_length=256, blank=True, null=True)
     exception_message = models.CharField(max_length=256, blank=True, null=True)
     revision          = models.CharField(max_length=64, blank=True, null=True)    
+    # True when this runevent has been notifed, by sending an
+    # email.  Typically only runevents in vault are notified,
+    # and only when they have an exception and are the most revent
+    # runevent of a scraper.
+    notified          = models.BooleanField(default=False)
 
     def __unicode__(self):
         res = [u'start: %s' % self.run_started]
