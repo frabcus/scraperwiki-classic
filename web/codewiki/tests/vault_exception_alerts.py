@@ -8,6 +8,8 @@ from codewiki.models.scraper import Scraper, ScraperRunEvent
 from codewiki.models.vault import Vault
 from codewiki.views import select_exceptions_that_have_not_been_notified
 
+today = datetime.datetime.now()
+
 class TestExceptions(TestCase):
     "Test that we can find exceptions"
 
@@ -21,7 +23,6 @@ class TestExceptions(TestCase):
             title=u"Lucky Scraper 2", vault = self.vault,
         )
 
-        today = datetime.datetime.now()
         yesterday = today - datetime.timedelta(days=1)
 
         self.runevent1a = ScraperRunEvent.objects.create(
@@ -55,3 +56,12 @@ class TestExceptions(TestCase):
         observed_count = len(select_exceptions_that_have_not_been_notified(self.user))
         expected_count = 1
         self.assertEqual(observed_count, expected_count)
+
+    def test_runevents_have_notified_flag(self):
+        """A runevent should have a notified flag."""
+
+        scraper = Scraper.objects.filter(id=1)[0]
+        event = ScraperRunEvent.objects.create(scraper=scraper, pid=-1,
+          run_started=today)
+        event.notified
+
