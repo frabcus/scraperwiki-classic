@@ -3,8 +3,8 @@ from settings import *
 # Ways of speeding up tests.
 # See: http://stackoverflow.com/questions/3096148/how-to-run-djangos-test-database-only-in-memory
 DATABASES['default']['ENGINE'] = 'sqlite3'
-# DATABASES['default']['NAME'] = 'test-database.db'
-DATABASES['default']['TEST_NAME'] = ':memory:'
+DATABASES['default']['NAME'] = 'test-database.db'
+#DATABASES['default']['TEST_NAME'] = ':memory:'
 
 # Any options specified are going to be MySQL specific.
 del(DATABASES['default']['OPTIONS'])
