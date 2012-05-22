@@ -1,16 +1,14 @@
 ScraperWiki
 ___________
 
-You have a new message from {{ sending_user_profile.display_name }}:
+{{exceptions.count}} error{{exceptions.count|pluralize}} have been raised in your vault "{{vault.name}}" in the last hour:
 
-"{{ body }}"
+{% for exception in exceptions %}___________
 
-To reply, visit: {{ reply_url }}
+{{ exception.scraper_name }}
+https://scraperwiki.com/scrapers/{{ exception.short_name }}
 
-___________
+{{ exception.exception_message }}
 
-Don't care? You can edit your email preferences here:
-https://scraperwiki.com/profiles/edit
-
-
+{% endfor %}___________
 

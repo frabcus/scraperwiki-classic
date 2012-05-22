@@ -137,19 +137,24 @@ class Scraper (code.Code):
 class ScraperRunEvent(models.Model):
     scraper           = models.ForeignKey(Scraper)
     
-    # attempts to migrate this to point to a code object involved adding in the new field
-    #     code              = models.ForeignKey(code.Code, null=True, related_name="+")
+    # attempts to migrate this to point to a code object involved
+    # adding in the new field
+    #     code              = models.ForeignKey(code.Code,
+    #                           null=True, related_name="+")
     # and then data migrating over to it with 
-    #     scraperrunevent.code = Code.filter(pk=scraperrunevent.scraper.pk) 
-    # in a loop over all scrapers, (though this crashed and ran out of memory at a limit of 2000)
-    # before abolishing the scraper parameter
+    #     scraperrunevent.code = Code.filter(
+    #        pk=scraperrunevent.scraper.pk) 
+    # in a loop over all scrapers, (though this crashed and ran out
+    # of memory at a limit of 2000) before abolishing the scraper
+    # parameter.
     
     run_id            = models.CharField(max_length=100, db_index=True, blank=True, null=True)
     # Will only be temporarily valid and probably doesn't belong here.
     pid               = models.IntegerField()
     run_started       = models.DateTimeField(db_index=True)
     
-    # missnamed. used as last_updated so you can see if the scraper is hanging
+    # missnamed. used as last_updated so you can see if the scraper
+    # is hanging.
     run_ended         = models.DateTimeField(null=True)   
     records_produced  = models.IntegerField(default=0)
     pages_scraped     = models.IntegerField(default=0)

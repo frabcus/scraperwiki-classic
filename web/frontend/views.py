@@ -870,7 +870,10 @@ def alert_vault_members_of_exceptions(vault):
     context = locals()
     subject ='Script errors in your %s ScraperWiki vault' % vault.name
     def select_exceptions_that_have_not_been_notified(member):
-        pass
+        return [{'scraper_name': 'Test', 'short_name': 'test',
+            'exception_message': 'LOIOError (Basdiusfu)'},
+         {'scraper_name': 'HAHAHA', 'short_name': 'hahaha',
+          'exception_message': 'sdfsdfsdf'}]
 
     for member in vault.members.all():
         context['exceptions'] = select_exceptions_that_have_not_been_notified(member)
@@ -879,7 +882,7 @@ def alert_vault_members_of_exceptions(vault):
         html_content = render_to_string('emails/vault_exceptions.html', context)
 
         msg = EmailMultiAlternatives(subject, text_content,
-            'alerts@scraperwiki.com', to=['email'])
+            'ScraperWiki Alerts <noreply@scraperwiki.com>', to=[member.email])
         msg.attach_alternative(html_content, "text/html")
 
         try:
@@ -888,6 +891,7 @@ def alert_vault_members_of_exceptions(vault):
                 'recipient': member.email,
                 'status': 'okay'
             })
+            #set notified flag for all runevents
         except EnvironmentError as e:
             result.append({
                 'recipient': member.email,
