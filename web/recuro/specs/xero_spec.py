@@ -1,9 +1,10 @@
 from recuro import xero
 
 session = None
-def setup():
-    global session
-    session = xero.XeroPrivateClient()
+
+#def setup():
+#    global session
+#    session = xero.XeroPrivateClient()
 
 def it_can_import_xero():
     from recuro import xero
