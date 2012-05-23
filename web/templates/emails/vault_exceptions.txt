@@ -1,7 +1,7 @@
 ScraperWiki
 ___________
 
-{{runevents|length}} error{{runevents|length|pluralize}} have been raised in your vault "{{vault.name}}" in the last hour:
+{{runevents|length}} error{{runevents|length|pluralize}} {{runevents|length|pluralize:"has,have"}} been raised in your vault "{{vault.name}}" in the last hour:
 
 {% for runevent in runevents %}___________
 
