@@ -3,5 +3,4 @@
 # Send alerts to people about broken scrapers in their vaults.
 
 . /var/www/scraperwiki/bin/activate
-export PYTHON_PATH=/var/www/scraperwiki/web
 python /var/www/scraperwiki/web/alerts/run_updates.py

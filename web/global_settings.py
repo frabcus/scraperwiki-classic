@@ -113,6 +113,7 @@ SCRAPERWIKI_APPS = [
     'documentation',
     'recuro',
     #'devserver',
+    'alerts',
 ]
 
 INSTALLED_APPS = [
