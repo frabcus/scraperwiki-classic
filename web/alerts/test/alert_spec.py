@@ -22,6 +22,7 @@ def setUp():
     global user
     global scraper
     global vault
+    global runevent
     username,password = 'testing','pass'
     user = User.objects.create_user(username, '%s@example.com' % username, password)
     profile = user.get_profile()
@@ -33,21 +34,33 @@ def tearDown():
     user.delete()
 
 @patch.object(EmailMultiAlternatives, 'send')
-def ensure_exceptionless_vault_receives_no_email(mock_send):
-    vault = _make_vault_with_runevent('no_exceptions_vault', '')
+def ensure_exceptionless_vault_has_not_been_notified(mock_send):
+    _make_vault_with_runevent('no_exceptions_vault', '')
     response = alert_vault_members_of_exceptions(vault)
-    # make this work
+    assert runevent.notified == False
+
+@patch.object(EmailMultiAlternatives, 'send')
+def ensure_exceptional_vault_has_been_notified(mock_send):
+    _make_vault_with_runevent('yes_exceptions_vault', 'FakeError: This is a test.')
+    response = alert_vault_members_of_exceptions(vault)
+    assert runevent.notified == True
+
+
+@patch.object(EmailMultiAlternatives, 'send')
+def ensure_exceptionless_vault_receives_no_email(mock_send):
+    _make_vault_with_runevent('no_exceptions_vault', '')
+    response = alert_vault_members_of_exceptions(vault)
     assert not mock_send.called
 
 @patch.object(EmailMultiAlternatives, 'send')
 def ensure_exceptional_vault_receives_email(mock_send):
-    vault = _make_vault_with_runevent('yes_exceptions_vault', 'FakeError: This is a test.')
+    _make_vault_with_runevent('yes_exceptions_vault', 'FakeError: This is a test.')
     response = alert_vault_members_of_exceptions(vault)
     assert mock_send.called
 
 def _ensure_emails_contains_scraper_name(i):
-    vault = _make_vault_with_runevent('yes_exceptions_vault', 'FakeError: This is a test.')
-    runevents = select_exceptions_that_have_not_been_notified(user)
+    _make_vault_with_runevent('yes_exceptions_vault', 'FakeError: This is a test.')
+    runevents = select_exceptions_that_have_not_been_notified(vault)
     assert "Bucket-Wheel Excavators" in compose_email(runevents, vault)[i]
 
 def ensure_text_email_contains_scraper_name():
@@ -57,7 +70,7 @@ def ensure_html_email_contains_scraper_name():
     _ensure_emails_contains_scraper_name('html')
 
 def _make_vault_with_runevent(name, exception_message):
-    global vault, scraper
+    global vault, scraper, runevent
     vault = profile.create_vault(name=name)
     scraper = Scraper.objects.create(
         title=u"Bucket-Wheel Excavators", vault = vault,
@@ -67,4 +80,3 @@ def _make_vault_with_runevent(name, exception_message):
         exception_message=exception_message,
         run_started=datetime.datetime.now()
     )
-    return vault
