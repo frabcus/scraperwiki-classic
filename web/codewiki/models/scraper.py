@@ -189,6 +189,10 @@ class ScraperRunEvent(models.Model):
     def get_absolute_url(self):
         return ('run_event', [self.run_id])
 
+    def set_notified(self):
+        self.notified = True
+        self.save()
+
     class Meta:
         app_label = 'codewiki'
 

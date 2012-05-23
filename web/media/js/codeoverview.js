@@ -420,6 +420,15 @@ $(function(){
 					        var hash_run_event = $(window.location.hash);
 					        if (hash_run_event.length != 0) {
 					            previewrunevent_show(hash_run_event);
+					            $('html, body').animate({
+                                     scrollTop: $(hash_run_event).offset().top
+                                 }, 200);
+                                 if($(hash_run_event).children('.history_ran_fail').length){
+                                     $(hash_run_event).css('border','4px solid #B75253');
+                                 } else {
+                                     $(hash_run_event).css('border','4px solid #278D2F');
+                                 }
+                                 
 					        }
 					    }
 					});
