@@ -18,31 +18,32 @@ def alert_vault_members_of_exceptions(vault):
 
     subject ='Script errors in your %s ScraperWiki vault' % vault.name
 
-    for member in vault.members.all():
-        runevents = select_exceptions_that_have_not_been_notified(member)
-        if len(runevents) == 0:
-            continue
-
-        content = compose_email(runevents, vault)
-        msg = EmailMultiAlternatives(subject, content['text'],
-            'ScraperWiki Alerts <noreply@scraperwiki.com>', to=[member.email])
-        msg.attach_alternative(content['html'], "text/html")
-
-        try:
-            msg.send(fail_silently=False)
-            result.append({
-                'recipient': member.email,
-                'status': 'okay'
-            })
-            map(lambda e: e.set_notified(), runevents)
-
-        except EnvironmentError as e:
-            result.append({
-                'recipient': member.email,
-                'status' : 'fail',
-                'error' : "Couldn't send email",
-            })
+    runevents = select_exceptions_that_have_not_been_notified(vault)
+    if len(runevents) > 0:
+        for member in vault.members.all():
+            content = compose_email(runevents, vault)
+            msg = EmailMultiAlternatives(subject, content['text'],
+                'ScraperWiki Alerts <noreply@scraperwiki.com>', to=[member.email])
+            msg.attach_alternative(content['html'], "text/html")
  
+            try:
+                msg.send(fail_silently=False)
+ 
+            except EnvironmentError as e:
+                print 'larry'
+                result.append({
+                    'recipient': member.email,
+                    'status' : 'fail',
+                    'error' : "Couldn't send email",
+                })
+
+            else:
+                result.append({
+                    'recipient': member.email,
+                    'status': 'okay'
+                })
+                map(lambda e: e.set_notified(), runevents)
+
     return result
 
 def select_exceptions_that_have_not_been_notified(vault):
