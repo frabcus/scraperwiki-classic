@@ -13,4 +13,4 @@ SHELL=/bin/bash
 
 
 # Send alerts to people about broken scrapers in their vaults.
-42 1 * * * scraperdeploy /var/www/scraperwiki/cron/bin/exception_alerts
+42 1 * * * scraperdeploy cd /var/www/scraperwiki/web && . ../bin/activate && python manage.py notify_vault_exceptions

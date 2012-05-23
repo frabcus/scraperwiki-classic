@@ -20,4 +20,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for vault in Vault.objects.all():
             alert_vault_members_of_exceptions(vault)
-        self.stdout.write('Done')
+        self.stdout.write('Done\n')

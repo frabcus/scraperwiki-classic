@@ -4,6 +4,7 @@ import urllib
 import re
 import datetime
 
+from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 
@@ -32,6 +33,15 @@ def tearDown():
     vault.delete()
     scraper.delete()
     user.delete()
+
+def ensure_django_management_command_works():
+    global vault, scraper, runevent
+    _make_vault_with_runevent('yes_exceptions_vault', 'FakeError: This is a test.')
+    call_command('notify_vault_exceptions')
+
+    print('Not notified count: %d' % ScraperRunEvent.objects.filter(notified = True).count())
+    assert ScraperRunEvent.objects.filter(notified = True).count() == 1
+
 
 @patch.object(EmailMultiAlternatives, 'send')
 def ensure_exceptionless_vault_has_not_been_notified(mock_send):
