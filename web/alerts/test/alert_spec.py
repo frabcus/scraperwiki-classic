@@ -37,14 +37,18 @@ def tearDown():
 def ensure_exceptionless_vault_has_not_been_notified(mock_send):
     _make_vault_with_runevent('no_exceptions_vault', '')
     response = alert_vault_members_of_exceptions(vault)
-    assert runevent.notified == False
+
+    query_runevent_again = ScraperRunEvent.objects.filter(pk = runevent.pk)[0]
+    assert query_runevent_again.notified == False
 
 @patch.object(EmailMultiAlternatives, 'send')
 def ensure_exceptional_vault_has_been_notified(mock_send):
+    global vault, scraper, runevent
     _make_vault_with_runevent('yes_exceptions_vault', 'FakeError: This is a test.')
     response = alert_vault_members_of_exceptions(vault)
-    assert runevent.notified == True
 
+    query_runevent_again = ScraperRunEvent.objects.filter(pk = runevent.pk)[0]
+    assert query_runevent_again.notified == True
 
 @patch.object(EmailMultiAlternatives, 'send')
 def ensure_exceptionless_vault_receives_no_email(mock_send):
