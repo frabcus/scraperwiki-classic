@@ -217,7 +217,7 @@ def data_enquiry_post_save(sender, **kwargs):
     if kwargs['created']:
         instance = kwargs['instance']
 
-        subject = "Data request from %s" % instance.name
+        subject = "Data request [ID %s] from %s" % (instance.id, instance.name)
 
         text_content = render_to_string('emails/request_data.txt', locals())
         html_content = render_to_string('emails/request_data.html', locals())
