@@ -128,12 +128,15 @@ function newCodeObject($a){
 							} else {
 								$(this).addClass('active');
 								var u = $('#chooser_vault').val();
-								u.replace('/python/', '/' + $(this).attr('href').replace(/^.+\/new\/(php|python|ruby|html).+$/g, '$1'));
+								console.log(u);
+								console.log($(this).attr('href'));
+								u.replace('/python/', '/' + $(this).attr('href').replace(/^.+\/new\/(php|python|ruby|html).*$/g, '$1'));
 								u += '?name=' + encodeURIComponent($('#chooser_name_box').val())
 								if($a.data('sourcescraper')){
 								    u += '&sourcescraper=' + $a.data('sourcescraper');
 								}
-								location.href = u;
+/*                              location.href = u;*/
+                                console.log(u);
 							}
 						}
 					});
