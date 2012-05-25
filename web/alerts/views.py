@@ -49,7 +49,7 @@ def alert_vault_members_of_exceptions(vault):
 def select_exceptions_that_have_not_been_notified(vault):
     # change that ^ to vault and that \/ to romevo the top loop
     l = []
-    for scraper in Scraper.objects.filter(vault=vault):
+    for scraper in Scraper.objects.filter(vault=vault).exclude(privacy_status="deleted"):
         runevents = ScraperRunEvent.objects.filter(scraper=scraper)\
             .order_by('-run_started')[:1]
         print runevents
