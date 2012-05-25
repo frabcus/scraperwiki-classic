@@ -53,7 +53,7 @@ def ensure_exceptionless_vault_has_not_been_notified(mock_send):
 
 @patch.object(EmailMultiAlternatives, 'send')
 def ensure_alerts_are_not_sent_twice(mock_send):
-    local_vault = profile.create_vault(name=name)
+    local_vault = profile.create_vault(name='Magnifying glasses')
     local_scraper = Scraper.objects.create(
         title=u"Bucket-Wheel Excavators", vault = local_vault,
     )
