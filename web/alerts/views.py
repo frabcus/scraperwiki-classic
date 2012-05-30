@@ -42,7 +42,7 @@ def alert_vault_members_of_exceptions(vault):
                     'recipient': member.email,
                     'status': 'okay'
                 })
-                map(lambda e: e.set_notified(), runevents)
+                map(lambda one_runevent: one_runevent.set_notified(), runevents)
 
     return result
 
