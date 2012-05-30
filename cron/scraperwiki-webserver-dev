@@ -12,5 +12,3 @@ SHELL=/bin/bash
 0 */8 * * * scraperdeploy cd /var/www/scraperwiki/ && source bin/activate && cd web &&  xvfb-run --auto-servernum --server-args="-screen 0, 1440x900x24" python manage.py take_screenshot --verbose --url_prefix=https://devviews.scraperwiki.com --run_views > /var/log/scraperwiki/screenshooter-views.txt
 
 
-# Send alerts to people about broken scrapers in their vaults.
-2 * * * * scraperdeploy cd /var/www/scraperwiki/web && . ../bin/activate && python manage.py notify_vault_exceptions
