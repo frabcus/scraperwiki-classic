@@ -8,6 +8,9 @@ from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 
+import helper
+from mock import Mock, patch
+
 from codewiki.models import Vault, Scraper, ScraperRunEvent
 from alerts.views import (
     alert_vault_members_of_exceptions,
@@ -15,8 +18,6 @@ from alerts.views import (
     compose_email
     )
 
-import helper
-from mock import Mock, patch
 
 def setUp():
     global profile
