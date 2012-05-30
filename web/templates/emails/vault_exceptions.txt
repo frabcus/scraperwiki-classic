@@ -1,16 +1,14 @@
 ScraperWiki
 ___________
 
-You have a new message from {{ sending_user_profile.display_name }}:
+{{runevents|length}} error{{runevents|length|pluralize}} {{runevents|length|pluralize:"has,have"}} been raised in your vault "{{vault.name}}" in the last hour:
 
-"{{ body }}"
+{% for runevent in runevents %}___________
 
-To reply, visit: {{ reply_url }}
+{{ runevent.scraper.title }}
+https://scraperwiki.com/scrapers/{{ runevent.scraper.short_name }}
 
-___________
+{{ runevent.exception_message }}
 
-Don't care? You can edit your email preferences here:
-https://scraperwiki.com/profiles/edit
-
-
+{% endfor %}___________
 

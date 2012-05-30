@@ -1,7 +1,7 @@
 ScraperWiki
 ___________
 
-Request for data from {{ instance.name }} <{{ instance.email }}>:
+[ID {{ instance.id }}] Request for data from {{ instance.name }} <{{ instance.email }}>:
 
 "{{ instance.description }}"
 

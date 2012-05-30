@@ -4,4 +4,3 @@ from codewiki.tests.viewseditor import *
 from codewiki.tests.util import *
 from codewiki.tests.management import *
 from codewiki.tests.run_events import *
-from codewiki.tests.vault_exception_alerts import *

@@ -1,6 +1,7 @@
 from recuro import xero
 
 session = None
+
 def setup():
     global session
     session = xero.XeroPrivateClient()
