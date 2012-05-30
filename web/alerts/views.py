@@ -49,11 +49,11 @@ def alert_vault_members_of_exceptions(vault):
 def select_exceptions_that_have_not_been_notified(vault):
     l = []
     for scraper in Scraper.objects.filter(vault=vault).exclude(privacy_status="deleted"):
-        runevents = ScraperRunEvent.objects.filter(scraper=scraper, notified=False).order_by('-run_started')[:1]
+        runevents = ScraperRunEvent.objects.filter(scraper=scraper).order_by('-run_started')[:1]
         print runevents
         if not runevents:
             continue
         mostrecent = runevents[0]
-        if mostrecent.exception_message:
+        if mostrecent.exception_message and not mostrecent.notified:
             l.append(mostrecent)
     return l
