@@ -53,22 +53,6 @@ def ensure_exceptionless_vault_has_not_been_notified(mock_send):
     assert query_runevent_again.notified == False
 
 @patch.object(EmailMultiAlternatives, 'send')
-def ensure_notified_runevents_are_not_selected(mock_send):
-    local_vault = profile.create_vault(name='Magnifying glasses')
-    local_scraper = Scraper.objects.create(
-        title=u"Bucket-Wheel Excavators", vault = local_vault,
-    )
-    local_runevent = ScraperRunEvent.objects.create(
-        scraper=local_scraper, pid=-1,
-        exception_message='saoenstueaonsueaonsueao',
-        run_started=datetime.datetime.now(),
-        notified=True
-    )
-
-    local_runevent = ScraperRunEvent.objects.filter(pk = runevent.pk)[0]
-    assert [] == select_exceptions_that_have_not_been_notified(local_vault)
-
-@patch.object(EmailMultiAlternatives, 'send')
 def ensure_exceptional_vault_has_been_notified(mock_send):
     global vault, scraper, runevent
     _make_vault_with_runevent('yes_exceptions_vault', 'FakeError: This is a test.')
