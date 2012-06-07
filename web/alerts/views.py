@@ -10,7 +10,7 @@ def compose_email(runevents, vault):
 
     text_content = render_to_string('emails/vault_exceptions.txt', context) 
     html_content = render_to_string('emails/vault_exceptions.html', context)
-    print text_content
+    #print text_content
     return {'text': text_content, 'html': html_content}
 
 def alert_vault_members_of_exceptions(vault):
@@ -30,7 +30,7 @@ def alert_vault_members_of_exceptions(vault):
                 msg.send(fail_silently=False)
  
             except EnvironmentError as e:
-                print 'larry'
+                print 'EnvironmentError in alert_vault_members_of_exceptions'
                 result.append({
                     'recipient': member.email,
                     'status' : 'fail',
@@ -50,7 +50,7 @@ def select_exceptions_that_have_not_been_notified(vault):
     l = []
     for scraper in Scraper.objects.filter(vault=vault).exclude(privacy_status="deleted"):
         runevents = ScraperRunEvent.objects.filter(scraper=scraper).order_by('-run_started')[:1]
-        print runevents
+        #print runevents
         if not runevents:
             continue
         mostrecent = runevents[0]
