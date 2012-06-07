@@ -23,6 +23,5 @@ import geo
 import datastore
 import sqlite
 import metadata
-import stacktrace
 import newsql
 import jsqlite

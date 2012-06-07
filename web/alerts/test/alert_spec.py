@@ -8,6 +8,9 @@ from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 
+import helper
+from mock import Mock, patch
+
 from codewiki.models import Vault, Scraper, ScraperRunEvent
 from alerts.views import (
     alert_vault_members_of_exceptions,
@@ -15,8 +18,6 @@ from alerts.views import (
     compose_email
     )
 
-import helper
-from mock import Mock, patch
 
 def setUp():
     global profile
@@ -50,22 +51,6 @@ def ensure_exceptionless_vault_has_not_been_notified(mock_send):
 
     query_runevent_again = ScraperRunEvent.objects.filter(pk = runevent.pk)[0]
     assert query_runevent_again.notified == False
-
-@patch.object(EmailMultiAlternatives, 'send')
-def ensure_alerts_are_not_sent_twice(mock_send):
-    local_vault = profile.create_vault(name='Magnifying glasses')
-    local_scraper = Scraper.objects.create(
-        title=u"Bucket-Wheel Excavators", vault = local_vault,
-    )
-    local_runevent = ScraperRunEvent.objects.create(
-        scraper=local_scraper, pid=-1,
-        exception_message='saoenstueaonsueaonsueao',
-        run_started=datetime.datetime.now(),
-        notified=True
-    )
-
-    local_runevent = ScraperRunEvent.objects.filter(pk = runevent.pk)[0]
-    assert [] == select_exceptions_that_have_not_been_notified(local_vault)
 
 @patch.object(EmailMultiAlternatives, 'send')
 def ensure_exceptional_vault_has_been_notified(mock_send):
