@@ -107,7 +107,7 @@ function errorHandler($errno, $errstr, $errfile, $errline)
 set_error_handler("errorHandler", E_ALL & ~E_NOTICE);  // this is for errors, not exceptions (eg 1/0)
 error_reporting(E_NOTICE); // don't display default error messages for ones we are sending via errorHandler, avoiding duplicates
 
-set_time_limit(80); 
+set_time_limit(160); 
 
 date_default_timezone_set('Europe/London');
 
