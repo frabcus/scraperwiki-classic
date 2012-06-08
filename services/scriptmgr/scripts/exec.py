@@ -89,7 +89,7 @@ scraperwiki.datastore.create(host, port, scrapername, runid,
 
 
 # CPU limits.
-resource.setrlimit(resource.RLIMIT_CPU, (80, 82,))
+resource.setrlimit(resource.RLIMIT_CPU, (160, 162,))
 # The CPU time limit handler simply throws a Python exception
 # so it can be handled cleanly before the hard limit is reached.
 def sigXCPU(signum_, frame_):
