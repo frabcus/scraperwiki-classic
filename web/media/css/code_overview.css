@@ -427,6 +427,7 @@ a.btnClearDatastore_link {
 }
 
 #divMarkupHint {
+    width: 420px;
 	padding: 10px;
 	margin-top: 10px;
 	font-size: 12px;
@@ -1081,7 +1082,9 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 /* ABOUT & SCHEDULE */
 
 td.schedule, td.description {
-	width: 354px;
+	width: 439px;
+	max-width: 439px;
+	min-width: 439px;
 	height: 100%;
 	padding: 20px;
 	vertical-align: top;
@@ -1134,13 +1137,13 @@ td.description h3 {
 	border-bottom-color: #a9bec9;
 }
 
-td.description p {
-	max-width: 360px;
-}
-
 table.about p {
 	font-size: 14px;
 	line-height: 18px;
+}
+
+#divAboutScraper textarea {
+    display: block;
 }
 
 #divAboutScraper ul li {
