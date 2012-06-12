@@ -179,18 +179,18 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         elif mode == 'S' : port = 443
         
         lxc_server = None
-        try:
-            lxc_server = config.get(varName, 'lxc_server')
-        except:
-            pass
+        lxc_server = config.get(varName, 'lxc_server')
         
         for attempt in range(5):
+            identurl = 'http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)
             try:
-                ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
+                ident = urllib2.urlopen(identurl).read()
                 if ident.strip() != "":
+                    print "Success for ident %r on attempt %d" % (identurl, attempt)
                     break
-            except:
-                pass
+            except Exception as e:
+                print e
+                print type(e)
 
         for line in string.split (ident, '\n'):
             if line == '' :
@@ -735,15 +735,15 @@ if __name__ == '__main__' :
     
     try:
         ignored_ip = config.get(varName, 'ignore_ip')
-    except:
+    except ConfigParser.Error as e:
         ignored_ip = '127.0.0.1'
         
     # List of machine IPs that are allowed to connect to this machine
     try:
         allowed_ips = [ x.replace("'", "").strip() for x in config.get('security', 'allowed_ips').split(',')]
-        print "Allowed IPs set to " % (allowed_ips,)               
-    except:
+    except ConfigParser.Error as e:
         print "Due to missing settings we are only allowing the local machine (and 10.* addresses)"
         allowed_ips = ['127.0.0.1']
+    print "Allowed IPs set to %r" % (allowed_ips,)               
         
     execute ()
