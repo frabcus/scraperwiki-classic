@@ -729,9 +729,9 @@ if __name__ == '__main__' :
         cache_client = memcache.Client( cache_hosts.split(',') )
     
     try:
-        large_file_folder = config.get(varnName,'large_file_folder')
-    except:
-        print "No large file support is configured, 'large_file_folder' is missing"
+        large_file_folder = config.get(varName,'large_file_folder')
+    except ConfigParser.Error as e:
+        print "No large file support is configured, 'large_file_folder' is missing from config"
     
     try:
         ignored_ip = config.get(varName, 'ignore_ip')
