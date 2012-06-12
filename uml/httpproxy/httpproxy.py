@@ -19,12 +19,10 @@ import string
 import urllib   # should this be urllib2? -- JGT
 import urllib2
 import ConfigParser
-import hashlib
 import OpenSSL
 import re
 import memcache
 import hashlib
-from threading import Thread
 try    : import json
 except : import simplejson as json
 
