@@ -29,10 +29,11 @@ try    : import json
 except : import simplejson as json
 
 
-global config
 global cache_client
+global config
 global ignored_ip
 global large_file_folder
+global open_addresses; open_addresses = []
 
 USAGE       = " [--uid=#] [--gid=#] [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file] [--useCache] [--mode=H|S]"
 child       = None
@@ -163,14 +164,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
 
-        # If the rem[0] IP address is in configuration as an open IP then we should just let it pass
-        # and return None,None,False
-        try:
-            open_addresses = config.get(varName, 'open_addresses')
-            if open_addresses and rem[0] in open_addresses.split(','):
-                    return None,None,False
-        except Exception, e:
-            print e
+        # If the rem[0] IP address is in configuration as an open IP then we
+        # should just let it pass.
+        if rem[0] in open_addresses:
+            return None,None,False
         
         #  If running as a transparent HTTP or HTTPS then the remote end is connecting
         #  to port 80 or 443 irrespective of where we think it is connecting to; for a
@@ -737,6 +734,11 @@ if __name__ == '__main__' :
         ignored_ip = config.get(varName, 'ignore_ip')
     except ConfigParser.Error as e:
         ignored_ip = '127.0.0.1'
+
+    try:
+        open_addresses = config.get(varName, 'open_addresses').split(',')
+    except ConfigParser.Error as e:
+        pass
         
     # List of machine IPs that are allowed to connect to this machine
     try:
