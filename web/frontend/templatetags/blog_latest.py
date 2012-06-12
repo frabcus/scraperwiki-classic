@@ -21,10 +21,6 @@ def blog_latest():
         #get the headline story and attempt to strip an image out of it
         headline = feed.entries[0]
         headline_image_url = ''
-        try:
-            headline.content
-        except AttributeError:
-            return
         soup = BeautifulSoup(headline.content[0].value)
         img_tags = soup.findAll('img')
         if len(img_tags) > 0:
