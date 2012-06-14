@@ -3408,6 +3408,10 @@ body.about p {
 	color: #666;
 }
 
+#team > div {
+	height: 76px;
+}
+
 body.about #what_we_do h2 {
 	position: absolute;
 	left: -40px;
