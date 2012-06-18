@@ -330,12 +330,10 @@ function writeToData(aRowData)
 	}
 
     var oRow = $('<tr></tr>');
-
-    $.each(aRowData, function(i){
-        var oCell = $('<td></td>');
-        oCell.html(cgiescape(aRowData[i]));
-        oRow.append(oCell);
-    });
+    
+    for(var k in aRowData){
+        oRow.append( $('<td>'+cgiescape(aRowData[x])+'</td>') )
+    }
 
     $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
     $('.editor_output div.tabs li.data').addClass('new');

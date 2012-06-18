@@ -54,7 +54,7 @@ function clearJunkFromQueue()
     for (var i = 0; i < receiverecordqueue.length; i++) 
     {
         jdata = receiverecordqueue[i]; 
-        if ((jdata.message_type != "data") && (jdata.message_type != "console") && (jdata.message_type != "sqlitecall"))
+        if ((jdata.message_type != "data") && (jdata.message_type != "console") && (jdata.message_type != "sqlitecall") && (jdata.message_type != "sources"))
             lreceiverecordqueue.push(jdata); 
     }
 
