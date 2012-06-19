@@ -1707,6 +1707,20 @@ body.profiles.edit p.bio textarea {
 	line-height: 18px;
 }
 
+body.profiles.edit p#apikey {
+	margin-top: -5px;
+	margin-bottom: 20px;
+	padding: 6px 10px;
+	border: 1px solid #999;
+	width: 404px;
+	font-size: 15px;
+}
+
+body.profiles.edit p#apikey span {
+	color: #666;
+	margin-right: 5px;
+}
+
 body.profiles.edit label {
 	display: block;
 	font-size: 13px;

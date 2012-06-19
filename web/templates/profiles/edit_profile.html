@@ -49,9 +49,7 @@
                     {% field_errors form.bio %}
                 </p>
                 {% if not "free" in profile.plan %}
-                  <p id="apikey">
-                    {{ profile.apikey }}
-                  </p>
+                  <p id="apikey"><span>Cobalt API key:</span> {{ profile.apikey }}</p>
                 {% endif %}
                 <p class="password">
                     <a href="{% url auth_password_change %}"><img src="{{ MEDIA_URL }}images/icons/key.png" width="16" height="16" alt="" /> Change&nbsp;your&nbsp;password</a>
