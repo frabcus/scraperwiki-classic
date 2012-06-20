@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block javascript %}
-<script src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyAfPeP-x7UtzNcoqQ7ZfuILBlCaEH8h2Ak&sensor=false"
+<script src="https://maps.googleapis.com/maps/api/js?v=3&{% if not debug %}key=AIzaSyAfPeP-x7UtzNcoqQ7ZfuILBlCaEH8h2Ak{% endif %}&sensor=false"
 type="text/javascript"></script>
 <script type="text/javascript">
   function createMap() {
@@ -63,13 +63,13 @@ type="text/javascript"></script>
         'date':'30th \u2013 31st March 2012',
         'lat':38.895111,
         'lng':-77.036667
+    }, {
+        'shortname':'ltdca',
+        'title':'Liberate the Data!',
+        'lat':37.782436,
+        'lng':-122.406621
     }];
     var comingsoon = [{
-        'shortname':'jdcca',
-        'title':'Journalism Data Camp CA',
-        'lat':37.7793,
-        'lng':-122.4192
-    },{
         'shortname':'jdcil',
         'title':'Journalism Data Camp IL',
         'lat':41.881944,
@@ -139,15 +139,18 @@ type="text/javascript"></script>
 
 {% block content %}
         <div id="event_sidebar">
-            <h2>Coming soon:</h2>
+            <h2>Current events:</h2>
             <ul class="events">
-                <li><a id="jdcca">
-                    <h3>Journalism Data Camp CA</h3>
+                <li><a id="ltdca" href="http://newshack.eventbrite.com/">
+                    <h3>Liberate the Data!</h3>
                     <h4>
-                        <span class="date">TBC</span>
+                        <span class="date">22nd June</span>
                         <span class="location">San Francisco, CA</span>
                     </h4>
                 </a></li>
+            </ul>
+            <h2>Coming soon:</h2>
+            <ul class="events">
                 <li><a id="jdcil">
                     <h3>Journalism Data Camp IL</h3>
                     <h4>
