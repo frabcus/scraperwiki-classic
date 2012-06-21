@@ -76,6 +76,9 @@ urlpatterns = patterns('',
     
     # pdf cropper technology
     (r'^cropper/', include('cropper.urls')),
+
+    # froth
+    (r'^froth/', include('froth.urls')),
     
     # static media server for the dev sites / local dev
     url(r'^media/(?P<path>.*)$',       'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}),

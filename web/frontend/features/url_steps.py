@@ -21,7 +21,8 @@ PAGES = {
         'corporate home':               '/corporate/',
         'corporate features':           '/corporate/features/',
         'corporate contact':            '/corporate/contact/',
-        'corporate contact thanks':     '/corporate/contact/thanks'
+        'corporate contact thanks':     '/corporate/contact/thanks',
+        'edit profile':                 '/profiles/edit/'
         }
 
 def page_name_is_valid(name):
