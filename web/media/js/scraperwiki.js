@@ -445,7 +445,7 @@ $(function(){
 	        $.cookie("hide_" + id, null, { path: '/' });
 	        $h.removeClass('collapsed').nextAll().slideDown();
 	    } else {
-	        $.cookie("hide_" + id, "1", { path: '/' });
+	        $.cookie("hide_" + id, "1", { path: '/', expires: 30 });
 	        $h.nextAll().slideUp(function(){
 	            $h.addClass('collapsed');
 	        });
