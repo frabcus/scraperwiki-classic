@@ -28,6 +28,15 @@ def it_can_post_an_xml_contact():
     resp, content = contact.save()
     assert resp['status'] == '200'
 
+def it_can_post_an_xml_contact_with_an_ampersand_in():
+    from recuro.recurly_parser import Contact
+    from recurly_parse_spec import recurly_contact
+    contact = Contact(recurly_contact)
+    contact.get_address()
+    contact.name = "Test & Testerson Limited"
+    resp, content = contact.save()
+    assert resp['status'] == '200'
+
 def it_can_post_an_xml_invoice_with_tax():
     from recuro.recurly_parser import Invoice
     from recurly_parse_spec import recurly_successful_payment

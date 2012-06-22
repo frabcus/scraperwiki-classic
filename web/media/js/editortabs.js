@@ -332,7 +332,7 @@ function writeToData(aRowData)
     var oRow = $('<tr></tr>');
     
     for(var k in aRowData){
-        oRow.append( $('<td>'+cgiescape(aRowData[x])+'</td>') )
+        oRow.append( $('<td>'+cgiescape(aRowData[k])+'</td>') )
     }
 
     $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection

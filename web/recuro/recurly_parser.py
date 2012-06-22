@@ -55,9 +55,9 @@ class Contact(XeroPrivateClient):
         template = Template( """
             <Contact>
                 <ContactNumber>{{number}}</ContactNumber>
-                <Name>{{name}}</Name>
-                <FirstName>{{first_name}}</FirstName>
-                <LastName>{{last_name}}</LastName>
+                <Name>{{name|e}}</Name>
+                <FirstName>{{first_name|e}}</FirstName>
+                <LastName>{{last_name|e}}</LastName>
                 <EmailAddress>{{email}}</EmailAddress>
                 {% if vat_number %}
                 <TaxNumber>{{vat_number}}</TaxNumber>
@@ -65,11 +65,11 @@ class Contact(XeroPrivateClient):
                 <Addresses>
                     <Address>
                         <AddressType>STREET</AddressType>
-                        <AddressLine1>{{address1}}</AddressLine1>
+                        <AddressLine1>{{address1|e}}</AddressLine1>
                         {% if address2 %}
-                        <AddressLine2>{{address2}}</AddressLine2>
+                        <AddressLine2>{{address2|e}}</AddressLine2>
                         {% endif %}
-                        <City>{{city}}</City>
+                        <City>{{city|e}}</City>
                         <Region>{{state}}</Region>
                         <Country>{{country}}</Country>
                         <PostalCode>{{zip}}</PostalCode>
