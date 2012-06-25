@@ -51,18 +51,22 @@ everything that has been downloaded.</p>
 
 <code>import lxml.html
 root = lxml.html.fromstring(html)
-for tr in root.cssselect("div[align='left'] tr.tcont"):
+for tr in root.cssselect("div[align='left'] tr"):
     tds = tr.cssselect("td")
-    data = {
-      'country' : tds[0].text_content(),
-      'years_in_school' : int(tds[4].text_content())
-    }
-    print data
+    if len(tds)==12:
+        data = {
+            'country' : tds[0].text_content(),
+            'years_in_school' : int(tds[4].text_content())
+        }
+        print data
 </code>
 
 
-<p>The bits of code like 'tr.tcont' are CSS selectors, just like 
-those used to style HTML.
+<p>The bits of code like <var>div</var> and <var>td</var> are CSS selectors, just like
+those used to style HTML. Here we use them to select all the table rows. And then, for
+each of those rows, we select the individual cells, and if there are 12 of them (ie: we
+are in the main table body, rather than in one of the header rows), we extract the country
+name and schooling statistic.
 </p>
 
 <h2>4. Saving to the ScraperWiki datastore</h2>
@@ -70,10 +74,10 @@ those used to style HTML.
 <p>The datastore is a magic SQL store, one where you don't need to make
 a schema up front.</p>
 
-<p>Replace "print data" in the lxml loop with this save command 
+<p>Replace <var>print data</var> in the lxml loop with this save command
 (make sure you keep it indented with spaces at the start like this):</p>
 
-<code>    scraperwiki.sqlite.save(unique_keys=['country'], data=data)</code>
+<code>        scraperwiki.sqlite.save(unique_keys=['country'], data=data)</code>
 
 <p>The unique keys (just country in this case) identify each piece of data.
 When the scraper runs again, existing data with the same values for the

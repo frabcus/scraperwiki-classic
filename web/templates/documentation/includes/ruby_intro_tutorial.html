@@ -51,21 +51,24 @@ everything that has been downloaded.</p>
 </p>
 
 <code>require 'nokogiri'
-
 doc = Nokogiri::HTML html
-doc.search("div[@align='left'] tr.tcont").each do |v|
+doc.search("div[@align='left'] tr").each do |v|
   cells = v.search 'td'
-  data = {
-    country: cells[0].inner_html,
-    years_in_school: cells[4].inner_html.to_i
-  }
-  puts data.to_json
+  if cells.count == 12
+    data = {
+      country: cells[0].inner_html,
+      years_in_school: cells[4].inner_html.to_i
+    }
+    puts data.to_json
+  end
 end
-
 </code>
 
-<p>The bits of code like 'tr.tcont' are CSS selectors, just like 
-those used to style HTML.
+<p>The bits of code like <var>div</var> and <var>td</var> are CSS selectors, just like
+those used to style HTML. Here we use them to select all the table rows. And then, for
+each of those rows, we select the individual cells, and if there are 12 of them (ie: we
+are in the main table body, rather than in one of the header rows), we extract the country
+name and schooling statistic.
 </p>
 
 <h2>4. Saving to the ScraperWiki datastore</h2>
@@ -73,13 +76,13 @@ those used to style HTML.
 <p>The datastore is a magic SQL store, one where you don't need to make
 a schema up front.</p>
 
-<p>Replace "puts data.to_json" in the Nokogiri loop (just before the "end" line)
+<p>Replace <var>puts data.to_json</var> in the Nokogiri loop (just before the <var>end</var> line)
 with this save command:</p>
 
-<code>  ScraperWiki::save_sqlite(['country'], data)
+<code>    ScraperWiki::save_sqlite(['country'], data)
 </code>
 
-<p>The first argument is the unique keys (just "country" in this case)
+<p>The first argument is the unique keys (just <var>country</var> in this case)
 which identify each piece of data.
 When the scraper runs again, existing data with the same values for the
 unique keys is replaced.</p>
