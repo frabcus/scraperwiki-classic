@@ -5212,6 +5212,14 @@ p.sick a:hover {
 	z-index: 1000;
 }
 
+var {
+    font-family: monospace;
+    background-color: #EEE;
+    padding: 2px 5px;
+    font-size: 0.9em;
+    font-style: normal;
+}
+
 body.api .right {
 	font-size: 14px;
 	background-color: #F4F8FB;

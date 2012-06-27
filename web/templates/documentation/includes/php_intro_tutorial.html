@@ -6,18 +6,17 @@ non-programmers (30 minutes).
 
 <h2>1. Make a new scraper</h2>
 
-<p>We're going to scrape the average number of years children spend
+<p>We&rsquo;re going to scrape the average number of years children spend
 in school in different countries from 
 <a href="http://web.archive.org/web/20110514112442/http://unstats.un.org/unsd/demographic/products/socind/education.htm">this page</a>, which was once on a UN site
 but has since been replaced with an <a href="http://unstats.un.org/unsd/demographic/products/socind/education.htm">Excel spreadsheet</a>.
 </p>
 
-<p>Pick "new scraper" from the main menu on the right, and choose PHP.
-(If you're more comfortable with Python or Ruby, choose a different language
-above). You'll get a web based code editor.
+<p><a data-wiki_type="scraper" href="#" class="editor_scraper">Create a new scraper</a>, and choose PHP as the language.
+(You can also do this tutorial in Python or Ruby if you&rsquo;re more comfortable with those). You&rsquo;ll get a web based code editor.
 </p>
 
-<p>Put in a few lines of code to show it runs, and click the "Run" button or
+<p>Put in a few lines of code to show it runs, and click the &ldquo;Run&rdquo; button or
 type Ctrl+R.
 </p>
 
@@ -53,18 +52,23 @@ everything that has been downloaded.</p>
 <code>require 'scraperwiki/simple_html_dom.php';
 $dom = new simple_html_dom();
 $dom->load($html);
-foreach($dom->find("div[@align='left'] tr.tcont") as $data){
+foreach($dom->find("div[@align='left'] tr") as $data){
     $tds = $data->find("td");
-    $record = array(
-        'country' => $tds[0]->plaintext, 
-        'years_in_school' => intval($tds[4]->plaintext)
-    );
-    print_r($record);
+    if(count($tds)==12){
+        $record = array(
+            'country' => $tds[0]->plaintext, 
+            'years_in_school' => intval($tds[4]->plaintext)
+        );
+        print json_encode($record) . "\n";
+    }
 }
 </code>
 
-<p>The bits of code like 'tr.tcont' are CSS selectors, just like 
-those used to style HTML.
+<p>The bits of code like <var>div</var> and <var>td</var> are CSS selectors, just like
+those used to style HTML. Here we use them to select all the table rows. And then, for
+each of those rows, we select the individual cells, and if there are 12 of them (ie: we
+are in the main table body, rather than in one of the header rows), we extract the country
+name and schooling statistic.
 </p>
 
 <h2>4. Saving to the ScraperWiki datastore</h2>
@@ -72,9 +76,9 @@ those used to style HTML.
 <p>The datastore is a magic SQL store, one where you don't need to make
 a schema up front.</p>
 
-<p>Replace "print_r($record);" in the loop with this save command:</p>
+<p>Replace <var>print json_encode($record) . "\n";</var> in the loop with this save command:</p>
 
-<code>    scraperwiki::save(array('country'), $record);
+<code>scraperwiki::save(array('country'), $record);
 </code>
 
 <p>The unique keys (just country in this case) identify each piece of data.
