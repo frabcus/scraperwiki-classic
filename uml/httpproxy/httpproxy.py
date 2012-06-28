@@ -482,45 +482,47 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.close()
 
 
-    def getResponse (self, soc, idle = 0x7ffffff) :
-
+    def getResponse (self, soc, idle=9*60):
         """
         Copy data back and forth between the client and the server.
 
         @type   soc     : Socket
         @param  soc     : Socket to server
         @type   idle    : Integer
-        @param  idel    : Maximum idling time between data
+        @param  idle    : Maximum idling time between data (seconds; defaults to 9 minutes)
         @return String  : Text received from server
         """
 
-        resp  = []
-        iw    = [self.connection, soc]
-        ow    = []
-        count = 0
+        # We accumulate the return string here.
+        resp = []
+        inputs = [self.connection, soc]
+        # Maximum time we spend in each select()
         pause = 5
-        busy  = True
+        # How much time we have spent idling, without seeing data,
+        # so far.
+        count = 0
 
-        while busy :
-            count        += pause
-            (ins, _, exs) = select.select(iw, ow, iw, pause)
-            if exs :
+        while True:
+            (ins, _, exs) = select.select(inputs, [], inputs, pause)
+            if exs:
                 break
-            if ins :
-                for i in ins :
-                    try    : data = i.recv (8192)
-                    except : return
-                    if data is not None and data != '' :
-                        count = 0
-                        if i is soc : resp.append (data)
-                        else        : soc .send  (data)
-                    else :
-                        busy = False
-                        break
-            if count >= idle : 
-                break
+            if not ins:
+                count += pause
+                if count >= idle:
+                    break
+            for i in ins:
+                try    : data = i.recv (8192)
+                # dubious 'except'
+                except : return
+                if data:
+                    count = 0
+                    if i is soc : resp.append(data)
+                    else        : soc.send(data)
+                else:
+                    # Normal end of data stream.
+                    return ''.join(resp)
 
-        return string.join (resp, '')
+        return ''.join(resp)
 
     def do_GET (self) :
         self.retrieve ("GET" )
