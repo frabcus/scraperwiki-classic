@@ -1,5 +1,5 @@
 Feature: As someone from the internet
-  I want to sign in to ScraperWiki
+  I want to log in to ScraperWiki
   So that I can start being awesome.
 
 Scenario: I can visit the login page
