@@ -1,5 +1,4 @@
-#!/bin/sh -
-"exec" "python" "-O" "$0" "$@"
+#!/usr/bin/env python
 
 __doc__ = """ScraperWiki HTTP Proxy"""
 
@@ -23,9 +22,7 @@ import OpenSSL
 import re
 import memcache
 import hashlib
-try    : import json
-except : import simplejson as json
-
+import json
 
 global cache_client
 global config
