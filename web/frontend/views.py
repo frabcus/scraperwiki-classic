@@ -680,8 +680,8 @@ def view_vault(request, username=None):
     context = {}
     
     context['vaults'] = request.user.vaults
-    context['vault_membership_count'] = request.user.vault_membership.exclude(user__id=request.user.id).count()
-    context['vault_membership']  = request.user.vault_membership.all().exclude(user__id=request.user.id)
+    context['vault_membership']  = request.user.vault_membership.exclude(user__id=request.user.id)
+    context['vault_membership_count'] = context['vault_membership'].count()
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
     context['current_plan'] = request.user.get_profile().plan

@@ -60,7 +60,7 @@
     <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
     
     <h3>
-      <a class="owner" href="{% if code.owner.username %}{% url profile code.owner.username %}{% endif %}">{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}</a> / <a href="{% url code_overview code.wiki_type code.short_name %}">{% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</a>
+      <a href="{% url code_overview code.wiki_type code.short_name %}">{% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</a>
     </h3>
     
     <p class="context">
