@@ -845,7 +845,7 @@ def invite_to_vault(vault_owner, email, vault):
     # Truncated to avoid annoying Django/e-mail/Quoted-Printable madness.
     token = str(uuid.uuid4().hex)[:20]
     context = locals()
-    context.update({'token': token})
+    context['tokenurl'] = "https://%s%s?t=%s" % (Site.objects.get_current().domain, reverse("login"), token)
 
     text_content = render_to_string('emails/vault_invite.txt', context) 
     html_content = render_to_string('emails/vault_invite.html', context)
