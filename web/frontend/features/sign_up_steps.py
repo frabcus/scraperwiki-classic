@@ -6,8 +6,8 @@ from lettuce.django import django_url
 def when_i_sign_up(step):
     world.browser.visit(django_url('/login/'))
 
-    world.browser.find_by_css('#id_name').first.fill('Lord Test Testington')
-    world.browser.find_by_css('#id_email').first.fill('t.test@testingtonandsons.com')
+    world.browser.find_by_css('#id_name').first.fill('Lord Test Testerson')
+    world.browser.find_by_css('#id_email').first.fill('t.test@testersonandsons.com')
     world.browser.find_by_css('#id_password1').first.fill('pass')
     world.browser.find_by_css('#id_password2').first.fill('pass')
     world.browser.find_by_css('#id_tos').first.check()

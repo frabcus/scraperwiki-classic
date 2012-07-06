@@ -224,11 +224,13 @@ def handle_signup_invites(user):
 
     for invite in invites:
         invite.vault.members.add(user)
-        invite.vault.members.add(user) 
         invite.vault.add_user_rights(user)
         # Invitation used up; delete it.
         invite.delete()
 
+    # We have a separate loop for sending emails because
+    # we don't mind so much if the email fails - at least
+    # the user has been added to the vault(s).
     for invite in invites:
         message = render_to_string('emails/invitation_accepted.txt', locals())
         django.core.mail.send_mail(
@@ -845,7 +847,7 @@ def invite_to_vault(vault_owner, email, vault):
     # Truncated to avoid annoying Django/e-mail/Quoted-Printable madness.
     token = str(uuid.uuid4().hex)[:20]
     context = locals()
-    context.update({'token': token})
+    context['tokenurl'] = "https://%s%s?t=%s" % (Site.objects.get_current().domain, reverse("login"), token)
 
     text_content = render_to_string('emails/vault_invite.txt', context) 
     html_content = render_to_string('emails/vault_invite.html', context)
