@@ -204,8 +204,8 @@ module ScraperWiki
             end
             if value.kind_of?(Time)
                 value = value.iso8601
-                raise "internal error, timezone came out as non-UTC while converting to SQLite format" unless value.match(/\+00:00$/)
-                value.gsub!(/\+00:00$/, '')
+                raise "internal error, timezone came out as non-UTC while converting to SQLite format" unless value.match(/([+-]00:00|Z)$/)
+                value.gsub!(/([+-]00:00|Z)$/, '')
             end
             if ![Fixnum, Float, String, TrueClass, FalseClass, NilClass].include?(value.class)
                 value = value.to_s
