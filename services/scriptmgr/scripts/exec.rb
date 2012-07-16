@@ -114,7 +114,38 @@ end
 host, port = datastore.split(':')
 SW_DataStore.create(host, port, scrapername, runid, attachables,verification_key)
 
-code = File.new(options[:script], 'r').read()
+# Searches for encoding line and forces encoding
+# @see https://github.com/lsegal/yard/blob/master/lib/yard/parser/source_parser.rb#L469
+ENCODING_LINE = /\A(?:\s*#*!.*\r?\n)?\s*(?:#+|\/\*+|\/\/+).*coding\s*[:=]{1,2}\s*([a-z\d_\-]+)/i
+# Byte order marks for various encodings
+ENCODING_BYTE_ORDER_MARKS = {
+  'utf-8' => "\xEF\xBB\xBF",
+  # Not yet supported
+  #'utf-16be' => "\xFE\xFF",
+  #'utf-16le' => "\xFF\xFE",
+  #'utf-32be' => "\x00\x00\xFF\xFE",
+  #'utf-32le' => "\xFF\xFE",
+}
+def convert_encoding(content)
+  return content unless content.respond_to?(:force_encoding)
+  if content =~ ENCODING_LINE
+    content.force_encoding($1)
+  else
+    old_encoding = content.encoding
+    content.force_encoding('binary')
+    ENCODING_BYTE_ORDER_MARKS.each do |encoding, bom|
+      bom.force_encoding('binary')
+      if content[0,bom.size] == bom
+        content.force_encoding(encoding)
+        return content
+      end
+    end
+    content.force_encoding(old_encoding)
+    content
+  end
+end
+
+code = convert_encoding(File.new(options[:script], 'rb').read())
 begin
     #eval code # this doesn't give you line number of top level errors, instead we use require_relative:
     require options[:script]
