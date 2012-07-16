@@ -145,7 +145,7 @@ def convert_encoding(content)
   end
 end
 
-code = convert_encoding(File.read_binary(options[:script]))
+code = convert_encoding(File.new(options[:script], 'rb').read())
 begin
     #eval code # this doesn't give you line number of top level errors, instead we use require_relative:
     require options[:script]
