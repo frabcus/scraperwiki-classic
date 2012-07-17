@@ -43,13 +43,17 @@ def getscraperor404(request, short_name, action):
 
     return scraper
 
-# this is used by swimport and history diffs
 def raw(request, short_name):  
+    """Raw code, as text/plain.  This is used by swimport, history diffs,
+    "View Source", and probably others.
+    """
     scraper = getscraperor404(request, short_name, "readcode")
-    try: rev = int(request.GET.get('rev', '-1'))
-    except ValueError: rev = -1
+    try:
+        rev = int(request.GET.get('rev', '-1'))
+    except ValueError:
+        rev = -1
 
-        # need to iterate back until we find the last change to the file
+    # need to iterate back until we find the last change to the file
     while True:
         vcsstatus = scraper.get_vcs_status(rev)
         if "code" in vcsstatus:
@@ -60,7 +64,7 @@ def raw(request, short_name):
         else:
             code = "*no code*"
             break
-    return HttpResponse(code, mimetype="text/plain")
+    return HttpResponse(code, mimetype="text/plain; charset=utf-8")
 
 
 def diffseq(request, short_name):
