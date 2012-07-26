@@ -1,3 +1,5 @@
+#!/usr/bin/env
+# coding=utf-8 pep-0263 ftw!
 """
 At the moment, this only tests some codewiki.viewseditor
 """
@@ -29,6 +31,8 @@ class ScraperViewsEditorTests(TestCase):
     def test_raw_content(self):
         response = self.client.get(reverse('raw', kwargs={'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
+        # Indicative for the "outré" bug, issue #954.
+        self.assertIn('charset=utf-8', response['Content-Type'])
         
     def test_run_event_json(self):
         response = self.client.get(reverse('run_event_json', kwargs={'run_id':2}))
