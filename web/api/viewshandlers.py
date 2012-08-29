@@ -42,7 +42,7 @@ def getscraperorresponse(short_name):
 #    if not scraper.actionauthorized(user, "apidataread"):
 #        return scraper.authorizationfailedmessage(user, "apidataread").get("body")
     return scraper, None
-    
+
 
 # see http://stackoverflow.com/questions/1189111/unicode-to-utf8-for-csv-files-python-via-xlrd
 def stringnot(v):
@@ -65,9 +65,9 @@ def stream_rows(dataproxy, format):
         if "error" in ret:
             yield str(ret)
             break
-        
+
         fout = StringIO()
-        
+
             # csv and json numerical values are typed, but not htmltable numerics
         if format == "csv":
             writer = csv.writer(fout, dialect='excel')
@@ -90,14 +90,14 @@ def stream_rows(dataproxy, format):
                 fout.write("<tr> <td>%s</td> </tr>\n" % ("</td> <td>".join([ str(stringnot(v))  for v in row ])))
         else:
             assert False, "Bad format "+format
-        
+
         yield fout.getvalue()
         n += 1
         if (not ret.get("moredata")) and (ret.get("stillproducing") != "yes"):
             if format != "csv":
                 yield "</table>\n"
-            break  
-        
+            break
+
 
 
 
@@ -110,27 +110,27 @@ def out_csvhtml(dataproxy, short_name, format):
         mimetype = 'text/csv; charset=utf-8'
     else:
         mimetype = 'text/html; charset=utf-8'
-        
+
     response = HttpResponse(mimetype=mimetype)  # used to take strea
     #response = HttpResponse(strea, mimetype='text/csv')  # when streamchunking was tried
-    
+
     if format == "csv":
         response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
-        
+
     for s in strea:
         response.write(s)
 
     dataproxy.close()
-    
+
 # unless you put in a content length, the middleware will measure the length of your data
-# (unhelpfully consuming everything in your generator) before then returning a zero length result 
+# (unhelpfully consuming everything in your generator) before then returning a zero length result
 #response["Content-Length"] = 1000000000
     return response
-    
+
 def out_base64singleton(dataproxy, mimetype):
-    result = dataproxy.receiveonelinenj()  
+    result = dataproxy.receiveonelinenj()
     print result
-    
+
     try:
         res = json.loads(result)
         while res.get('stillproducing') == 'yes':
@@ -138,10 +138,10 @@ def out_base64singleton(dataproxy, mimetype):
             res['data'].extend(dresult['data'])
             res['stillproducing'] = dresult.get('stillproducing')
     except ValueError, e:
-        dataproxy.close()            
+        dataproxy.close()
         return HttpResponse("Error: %s" % (e.message,))
-        
-        
+
+
     if "error" in res:
         return HttpResponse("Error2: %s" % res["error"])
     if len(res["keys"]) != 1:
@@ -165,10 +165,10 @@ def out_json(dataproxy, callback, short_name, format):
     # download; however could chunk the jsondict type stream_wise as above
     # by manually creating the outer bracketing as with htmltable.
 
-    result = dataproxy.receiveonelinenj()      
+    result = dataproxy.receiveonelinenj()
     if not result:
         dataproxy.close()
-        return HttpResponse("Error: Dataproxy responded with an invalid response")        
+        return HttpResponse("Error: Dataproxy responded with an invalid response")
 
     try:
         res = json.loads(result)
@@ -177,9 +177,9 @@ def out_json(dataproxy, callback, short_name, format):
             res['data'].extend(dresult['data'])
             res['stillproducing'] = dresult.get('stillproducing')
     except ValueError, e:
-        dataproxy.close()            
+        dataproxy.close()
         return HttpResponse("Error: %s" % (e.message,))
-        
+
     if format == "jsondict" and "error" not in res:
         dictlist = [ dict(zip(res["keys"], values))  for values in res["data"] ]
         result = json.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
@@ -189,7 +189,7 @@ def out_json(dataproxy, callback, short_name, format):
         result = "%s(%s)" % (callback, result)
     response = HttpResponse(result, mimetype='application/json; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename=%s.json' % (short_name)
-    
+
     dataproxy.close()
     return response
 
@@ -202,7 +202,7 @@ def out_rss2(dataproxy, scraper):
             res['data'].extend(dresult['data'])
             res['stillproducing'] = dresult.get('stillproducing')
     except ValueError, e:
-        dataproxy.close()            
+        dataproxy.close()
         return HttpResponse("Error: %s" % (e.message,))
     if "error" in res:
         return HttpResponse("Error2: %s" % res["error"])
@@ -216,18 +216,18 @@ def out_rss2(dataproxy, scraper):
     missingkeys = [ key  for key in rsskeys  if key not in res["keys"] and key not in keymatches ]
     if missingkeys:
         return HttpResponse("Error3: You are missing the following keys in the table: %s" % str(missingkeys))
-        
+
     items = [ ]
     for value in res["data"]:
         ddata = dict(zip(res["keys"], value))
-        
+
         # usual datetime conversion mess!
         spubDate = re.findall("\d+", ddata[keymatches.get("pubDate", "pubDate")])
         try:
             pubDate = datetime.datetime(*map(int, spubDate[:6]))
         except Exception, e:
             return HttpResponse("Date conversion error: %s\n%s" % (str(e), str(ddata)))
-            
+
         guid = PyRSS2Gen.Guid(ddata[keymatches.get("guid", "guid")])
         rssitem = PyRSS2Gen.RSSItem(title=ddata["title"], link=ddata["link"], description=ddata["description"], guid=guid, pubDate=pubDate)
         items.append(rssitem)
@@ -239,18 +239,18 @@ def out_rss2(dataproxy, scraper):
     rss = PyRSS2Gen.RSS2(title=scraper.title, link=link, description=scraper.description_safepart(), lastBuildDate=datetime.datetime.now(), items=items)
 
     fout = StringIO()
-    rss.write_xml(fout)
+    rss.write_xml(fout, 'utf-8')
     return HttpResponse(fout.getvalue(), mimetype='application/rss+xml; charset=utf-8')
 
 
 # ***Streamchunking could all be working, but for not being able to set the Content-Length
-# inexact values give errors in apache, so it would be handy if it could have a setting where 
+# inexact values give errors in apache, so it would be handy if it could have a setting where
 # it organized some chunking instead
 
 # see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
 # setting the Content-Length to -1 to prevent middleware from consuming the generator to measure it
 # causes an error in the apache server.  same for a too long content length
-# Should consider giving transfer-coding: chunked, 
+# Should consider giving transfer-coding: chunked,
 # http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6
 
 # Streaming is only happening from the dataproxy into here.  Streaming
@@ -262,18 +262,18 @@ def out_rss2(dataproxy, scraper):
 def sqlite_handler(request):
     short_name = request.GET.get('name')
     apikey = request.GET.get('apikey', None)
-    
+
     scraper,err = getscraperorresponse(short_name)
     if err:
         result = json.dumps({'error':err, "short_name":short_name})
         if request.GET.get("callback"):
             result = "%s(%s)" % (request.GET.get("callback"), result)
         return HttpResponse(result)
-    
+
     u,s,kd = None, None, ""
     if request.user.is_authenticated():
         u = request.user
-        
+
     if scraper.privacy_status != "private":
         s = scraper # XX why this only when not private? FAI
         kd = short_name
@@ -284,9 +284,9 @@ def sqlite_handler(request):
             if request.GET.get("callback"):
                 result = "%s(%s)" % (request.GET.get("callback"), result)
             return HttpResponse(result)
-            
+
     APIMetric.record( "sqlite", key_data=kd,  user=u, code_object=s )
-    
+
     dataproxy = DataStore(request.GET.get('name'))
     lattachlist = request.GET.get('attach', '').split(";")
     attachlist = [ ]
@@ -296,48 +296,48 @@ def sqlite_handler(request):
             attachi = {"name":aa[0], "asname":(len(aa) == 2 and aa[1] or None)}
             attachlist.append(attachi)
             dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":attachi["name"], "asname":attachi["asname"]})
-    
+
     sqlquery = request.GET.get('query', "")
     format = request.GET.get("format", "json")
     if format == "json":
         format = "jsondict"
-    
+
     req = {"maincommand":"sqliteexecute", "sqlquery":sqlquery, "data":None, "attachlist":attachlist}
     if format == "csv":
         req["streamchunking"] = 1000
-    
+
     # This is inlined from the dataproxy.request() function to allow for
     # receiveoneline to perform multiple readlines in this case.
     # (this is the stream-chunking thing.  the right interface is not yet
     # apparent)
-    
+
     dataproxy.m_socket.sendall(json.dumps(req) + '\n')
-    
+
     if format not in ["jsondict", "jsonlist", "csv", "htmltable", "rss2", "base64singleton", "htmltable_unescaped"]:
         dataproxy.close()
         return HttpResponse("Error: the format '%s' is not supported" % format)
 
 
-    if format in ["csv", 'htmltable', 'htmltable_unescaped']:   
+    if format in ["csv", 'htmltable', 'htmltable_unescaped']:
         return out_csvhtml(dataproxy, scraper.short_name, format)
     if format == "rss2":
         return out_rss2(dataproxy, scraper)
     if format == "base64singleton":
         return out_base64singleton(dataproxy, request.GET.get('mimetype', "text/plain"))
-        
+
     return  out_json(dataproxy, request.GET.get("callback"),
       scraper.short_name, format)
-    
+
 
 def scraper_search_handler(request):
     apikey = request.GET.get('apikey', None)
-    
-    query = request.GET.get('query') 
+
+    query = request.GET.get('query')
     if not query:
-        query = request.GET.get('searchquery') 
-    try:   
+        query = request.GET.get('searchquery')
+    try:
         maxrows = int(request.GET.get('maxrows', ""))
-    except ValueError: 
+    except ValueError:
         maxrows = 5
     result = [ ]  # list of dicts
 
@@ -345,7 +345,7 @@ def scraper_search_handler(request):
     if query == "*OVERDUE*":
         # We should check apikey against our shared secret. If it matches then it should
         # be allowed to continue.
-        
+
         if request.META.get("HTTP_X_REAL_IP", "Not specified") in settings.INTERNAL_IPS:
             boverduescraperrequest = True
         if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"] or '127.0.0.1' in settings.INTERNAL_IPS:
@@ -355,11 +355,11 @@ def scraper_search_handler(request):
         if request.user.is_authenticated():
             u = request.user
         APIMetric.record( "scrapersearch", key_data=query,  user=u, code_object=None )
-        
+
     # TODO: If the user has specified an API key then we should pass them into
     # the search query and refine the resultset  to show only valid scrapers
     if boverduescraperrequest:
-        scrapers_all = scrapers_overdue()  
+        scrapers_all = scrapers_overdue()
     else:
         scrapers_all = scraper_search_query_unordered(user=None, query=query, apikey=apikey)
 
@@ -379,7 +379,7 @@ def scraper_search_handler(request):
     # convert the query into an ordered list
     if boverduescraperrequest:
         scraperlist = scrapers_all
-        
+
             # probably a way of sorting by some ranking on these ownership fields right in the database
     elif requestinguser:
         scraperlist = list(scrapers_all.distinct())
@@ -423,7 +423,7 @@ def scraper_search_handler(request):
         res['created'] = scraper.created_at.isoformat()
         res['privacy_status'] = scraper.privacy_status
         res['language'] = scraper.language
-        
+
         # extra data added to the overdue request kind so that twister has everything it needs to get on with it
         # and doesn't need to call back for further information
         if boverduescraperrequest:
@@ -434,7 +434,7 @@ def scraper_search_handler(request):
             res['guid'] = scraper.guid
             res["attachables"] = [ ascraper.short_name  for ascraper in scraper.attachable_scraperdatabases() ]
             res["envvars"] = scraper.description_envvars()
-            
+
         result.append(res)
         if len(result) > maxrows:
             break
@@ -450,7 +450,7 @@ def scraper_search_handler(request):
         response = HttpResponse(fout.getvalue(), mimetype='text/csv')
         response['Content-Disposition'] = 'attachment; filename=search.csv'
         return response
-    
+
     res = json.dumps(result, indent=4)
     callback = request.GET.get("callback")
     if callback:
@@ -462,20 +462,20 @@ def scraper_search_handler(request):
 
 
 def usersearch_handler(request):
-    query = request.GET.get('searchquery') 
-    try:   
+    query = request.GET.get('searchquery')
+    try:
         maxrows = int(request.GET.get('maxrows', ""))
-    except ValueError: 
+    except ValueError:
         maxrows = 5
-    
+
     u = None
     if request.user.is_authenticated():
         u = request.user
     APIMetric.record( "usersearch", key_data=query, user=u, code_object=None )
-        
+
         # usernames we don't want to be returned in the search
     nolist = request.GET.get("nolist", "").split()
-    
+
     srequestinguser = request.GET.get("requestinguser", "")
     lrequestinguser = User.objects.filter(username=srequestinguser)
     if lrequestinguser:
@@ -513,12 +513,12 @@ def usersearch_handler(request):
             result.append(res)
         if len(result) > maxrows:
             break
-    
+
     res = json.dumps(result, indent=4)
     callback = request.GET.get("callback")
     if callback:
         res = "%s(%s)" % (callback, res)
-    
+
     response = HttpResponse(res, mimetype='application/json; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename=search.json'
     return response
@@ -544,13 +544,13 @@ def userinfo_handler(request):
                     if api_user.usercoderole_set.filter(code__short_name=ucrole.code.short_name):
                         if ucrole.role not in info['coderoles']:
                             info['coderoles'][ucrole.role] = [ ]
-                        info['coderoles'][ucrole.role].append(ucrole.code.short_name) 
+                        info['coderoles'][ucrole.role].append(ucrole.code.short_name)
                 except UserProfile.DoesNotExist:
                     pass
-                
+
 
         result.append(info)
-    
+
     u = None
     if request.user.is_authenticated():
         u = request.user
@@ -567,7 +567,7 @@ def userinfo_handler(request):
 
 def runevent_handler(request):
     apikey = request.GET.get('apikey', None)
-    
+
     short_name = request.GET.get('name')
     scraper,err = getscraperorresponse(short_name)
     if err:
@@ -578,8 +578,8 @@ def runevent_handler(request):
 
     kd = scraper.short_name
     s = scraper
-    
-    # Check accessibility if this scraper is private using 
+
+    # Check accessibility if this scraper is private using
     # apikey
     if not scraper.api_actionauthorized(apikey):
         result = json.dumps({'error':"Invalid API Key", "short_name":short_name})
@@ -594,7 +594,7 @@ def runevent_handler(request):
         u = request.user
     APIMetric.record( "runeventinfo", key_data=kd,  user=u, code_object=s )
 
-        
+
     runid = request.GET.get('runid', '-1')
     runevent = None
     if scraper.wiki_type != "view":
@@ -612,30 +612,30 @@ def runevent_handler(request):
                 runevent = scraper.scraper.scraperrunevent_set.get(run_id=runid)
             except ScraperRunEvent.DoesNotExist:
                 pass
-        
+
     if not runevent:
         result = json.dumps({'error':"run_event not found", "short_name":short_name})
         if request.GET.get("callback"):
             result = "%s(%s)" % (request.GET.get("callback"), result)
         return HttpResponse(result)
 
-    info = { "runid":runevent.run_id, "run_started":runevent.run_started.isoformat(), 
+    info = { "runid":runevent.run_id, "run_started":runevent.run_started.isoformat(),
              "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped }
     if runevent.run_ended:
         info['run_ended'] = runevent.run_ended.isoformat()
     if runevent.exception_message:
         info['exception_message'] = runevent.exception_message
-    
+
     info['output'] = runevent.output
     if runevent.first_url_scraped:
         info['first_url_scraped'] = runevent.first_url_scraped
-    
+
     domainsscraped = [ ]
     for domainscrape in runevent.domainscrape_set.all():
         domainsscraped.append({'domain':domainscrape.domain, 'bytes':domainscrape.bytes_scraped, 'pages':domainscrape.pages_scraped})
     if domainsscraped:
         info['domainsscraped'] = domainsscraped
-        
+
     result = [info]      # a list with one element
     res = json.dumps(result, indent=4)
     callback = request.GET.get("callback")
@@ -657,8 +657,8 @@ def convert_history(commitentry):
     return result
 
 def convert_run_event(runevent):
-    result = { "runid":runevent.run_id, "run_started":runevent.run_started.isoformat(), 
-                "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped, 
+    result = { "runid":runevent.run_id, "run_started":runevent.run_started.isoformat(),
+                "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped,
                 "still_running":(runevent.pid != -1),
                 }
     if runevent.run_ended:
@@ -679,16 +679,16 @@ def convert_date(date_str):
 
 def scraperinfo_handler(request):
     result = [ ]
-    
+
     apikey =request.GET.get('apikey', None)
-    
+
     quietfields = request.GET.get('quietfields', "").split("|")
     history_start_date = convert_date(request.GET.get('history_start_date', None))
-    
-    
-    try: 
+
+
+    try:
         rev = int(request.GET.get('version', ''))
-    except ValueError: 
+    except ValueError:
         rev = None
 
     for short_name in request.GET.get('name', "").split():
@@ -700,13 +700,13 @@ def scraperinfo_handler(request):
                 result = "%s(%s)" % (request.GET.get("callback"), result)
             return HttpResponse(result)
 
-        
-        # Check accessibility if this scraper is private using 
+
+        # Check accessibility if this scraper is private using
         # apikey
-        if hasattr(scraper, "privacy_status") and scraper.privacy_status == 'private':            
+        if hasattr(scraper, "privacy_status") and scraper.privacy_status == 'private':
             if not scraper.api_actionauthorized(apikey):
                 scraper = u'Invalid API Key'
-            
+
         if type(scraper) in [str, unicode]:
             result.append({'error':scraper, "short_name":short_name})
         else:
@@ -731,7 +731,7 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
     info['short_name']  = scraper.short_name
     info['language']    = scraper.language
     info['created']     = scraper.created_at.isoformat()
-    
+
     info['title']       = scraper.title
     info['description'] = scraper.description_safepart()
     info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
@@ -747,7 +747,7 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
         if cp.permitted_object.privacy_status != "deleted":
             attachables.append(cp.permitted_object.short_name)
     info["attachables"] = attachables
-            
+
     # these ones have to be filtering out the incoming private scraper names
     # (the outgoing attach to list doesn't because they're refered in the code as well)
     info["attachable_here"] = [ ]
@@ -757,29 +757,29 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
 
     if scraper.wiki_type == 'scraper':
         info['records']     = scraper.scraper.record_count  # old style datastore
-        
+
         if 'datasummary' not in quietfields:
             dataproxy = DataStore(scraper.short_name)
             sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":0, "val2":None})
             if sqlitedata and type(sqlitedata) not in [str, unicode]:
                 info['datasummary'] = sqlitedata
-    
+
     if 'userroles' not in quietfields:
         info['userroles'] = { }
         for ucrole in scraper.usercoderole_set.all():
             if ucrole.role not in info['userroles']:
                 info['userroles'][ucrole.role] = [ ]
             info['userroles'][ucrole.role].append(ucrole.user.username)
-        
+
     status = scraper.get_vcs_status(rev)
     if 'code' not in quietfields:
         info['code'] = status["code"]
-    
+
     for committag in ["currcommit", "prevcommit", "nextcommit"]:
         if committag not in quietfields:
             if committag in status:
                 info[committag] = convert_history(status[committag])
-    
+
     if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
         if 'filemodifieddate' in status:
             info["modifiedcommitdifference"] = str(status["filemodifieddate"] - status["prevcommit"]["date"])
@@ -794,16 +794,16 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
             history.append(convert_history(commitentry))
         history.reverse()
         info['history'] = history
-    
+
     if scraper.wiki_type == 'scraper' and 'runevents' not in quietfields:
         if history_start_date:
             runevents = scraper.scraper.scraperrunevent_set.filter(run_ended__gte=history_start_date).order_by('-run_started')
         else:
             runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started')[:2]
-            
+
         info['runevents'] = [ ]
         for runevent in runevents:
             info['runevents'].append(convert_run_event(runevent))
 
     return info
-        
+
