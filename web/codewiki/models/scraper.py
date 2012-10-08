@@ -137,19 +137,24 @@ class Scraper (code.Code):
 class ScraperRunEvent(models.Model):
     scraper           = models.ForeignKey(Scraper)
     
-    # attempts to migrate this to point to a code object involved adding in the new field
-    #     code              = models.ForeignKey(code.Code, null=True, related_name="+")
+    # attempts to migrate this to point to a code object involved
+    # adding in the new field
+    #     code              = models.ForeignKey(code.Code,
+    #                           null=True, related_name="+")
     # and then data migrating over to it with 
-    #     scraperrunevent.code = Code.filter(pk=scraperrunevent.scraper.pk) 
-    # in a loop over all scrapers, (though this crashed and ran out of memory at a limit of 2000)
-    # before abolishing the scraper parameter
+    #     scraperrunevent.code = Code.filter(
+    #        pk=scraperrunevent.scraper.pk) 
+    # in a loop over all scrapers, (though this crashed and ran out
+    # of memory at a limit of 2000) before abolishing the scraper
+    # parameter.
     
     run_id            = models.CharField(max_length=100, db_index=True, blank=True, null=True)
     # Will only be temporarily valid and probably doesn't belong here.
     pid               = models.IntegerField()
     run_started       = models.DateTimeField(db_index=True)
     
-    # missnamed. used as last_updated so you can see if the scraper is hanging
+    # missnamed. used as last_updated so you can see if the scraper
+    # is hanging.
     run_ended         = models.DateTimeField(null=True)   
     records_produced  = models.IntegerField(default=0)
     pages_scraped     = models.IntegerField(default=0)
@@ -157,6 +162,11 @@ class ScraperRunEvent(models.Model):
     first_url_scraped = models.CharField(max_length=256, blank=True, null=True)
     exception_message = models.CharField(max_length=256, blank=True, null=True)
     revision          = models.CharField(max_length=64, blank=True, null=True)    
+    # True when this runevent has been notifed, by sending an
+    # email.  Typically only runevents in vault are notified,
+    # and only when they have an exception and are the most revent
+    # runevent of a scraper.
+    notified          = models.BooleanField(default=False)
 
     def __unicode__(self):
         res = [u'start: %s' % self.run_started]
@@ -178,6 +188,10 @@ class ScraperRunEvent(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('run_event', [self.run_id])
+
+    def set_notified(self):
+        self.notified = True
+        self.save()
 
     class Meta:
         app_label = 'codewiki'

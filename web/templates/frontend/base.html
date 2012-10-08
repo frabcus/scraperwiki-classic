@@ -14,7 +14,6 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.12.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys.js"></script>
@@ -31,6 +30,9 @@
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.8.12.css" />
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css?{{settings.REVISION}}" />
 	{% endcompress %}
+	<!--[if IE 7]>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie7.css?{{settings.REVISION}}" />
+	<![endif]-->
 
 	{% block css %}{% endblock %}
 	{% block rss %}{% endblock %}
@@ -42,6 +44,7 @@
 	      _gaq.push(['_setAccount', 'UA-21451224-1']);
           _gaq.push(['_setDomainName', 'none']);
           _gaq.push(['_setCustomVar', 1, 'Registered User', '{% if user.is_authenticated %}True{% else %}False{% endif %}', 2]);
+          {% block custom_vars %}{% endblock %}
 	      _gaq.push(['_trackPageview']);
 
 	      (function() {
@@ -55,7 +58,7 @@
 </head>
 
 {% load body_class %}
-<body class="{% body_class request %}{% block body_class_extra %}{% endblock %}{% if debug %} debug{% endif %}">
+<body class="{% block body_class %}{% body_class request %}{% block body_class_extra %}{% endblock %}{% if debug %} debug{% endif %}{% endblock %}">
 
 {% if messages %}
 	{% for message in messages %}
@@ -76,7 +79,7 @@
         <div id="alert_outer" class="error">
         	<div id="alert_inner">
         	    Oh no! You need to enable Javascript to use ScraperWiki.
-                <a href="http://support.google.com/bin/answer.py?hl=en&mp;answer=23852">Find out how</a>
+                <a href="http://support.google.com/bin/answer.py?hl=en&amp;answer=23852">Find out how</a>
             </div>
         </div>
     </noscript>
@@ -101,7 +104,7 @@
         <h1><a href="{% url frontpage %}">ScraperWiki</a></h1>
         <ul class="supernav">
             <li class="code"><a href="{% url frontpage %}">Code</a></li>
-            <li class="data_services"><a href="/data_consultancy/">Business</a></li>
+            <li class="data_services"><a href="/data_consulting/">Business</a></li>
             <li class="about"><a href="{% url about %}">About</a></li>
             {% if user.is_staff %}
             <li class="admin"><a>Admin</a></li>
@@ -119,16 +122,17 @@
                 <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">New Scraper</a></li>
                 <li class="create"><a data-wiki_type="view" href="#" class="editor_scraper">New View</a></li>
                 <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Scrapers</a></li>
+                <li class="pricing"><a href="{% url pricing %}">Premium Accounts</a></li>
                 <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
                 <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
             </ul>
         </div>
         <div class="subnav data_services">
             <ul>
-                <li class="data_hub"><a href="{% url data_hub %}">What is a Data Hub?</a></li>
-                <li class="data_consultancy"><a href="{% url data_consultancy %}">Data Consultancy</a></li>
-                <li class="pricing"><a href="{% url pricing %}">Premium Accounts</a></li>
                 <li class="request_data"><a href="{% url request_data %}">Request Data</a></li>
+                <li class="data_consulting"><a href="{% url data_consulting %}">Data Consulting</a></li>
+                {# <li class="secrets"><a href="{% url secrets_in_data %}">Discover Secrets in Data</a></li> #}
+                <li class="data_hub"><a href="{% url data_hub %}">What is a Data Hub?</a></li>
             </ul>
         </div>
         <div class="subnav about">
@@ -196,56 +200,53 @@
 </div>{% endblock %}
 
 	{% block footer_outer %}
-	<div id="footer_outer">
-		<div id="footer_inner">
-			{% block footer %}
-            {% load site_stats %}
-            {% comment %}<p class="stats">has gathered <strong>{% num_data_rows %} rows of data</strong> and counting&hellip;</p>{% endcomment %}
-            <p class="stats">Sifting information to give you the edge</p>
-            <i id="shhhh" style="display:none">{% num_data_rows %}</i>
-			<dl>
-				<dt>Business</dt>
-				<dd>
-					<ul>
-						<li><a href="{% url data_hub %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'What is a data hub?']); }">What is a Data Hub?</a></li>
-                        <li><a href="{% url data_consultancy %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Data consultancy']); }">Data Consultancy</a></li>
-                        <li><a href="{% url pricing %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Pricing']); }">Premium Accounts</a></li>
-                        <li><a href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Request data']); }">Request Data</a></li>
-					</ul>
-				</dd>
-				<dt>Developers</dt>
-				<dd>
-					<ul>
-					    <li><a data-wiki_type="scraper" href="#" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new scraper']); }">Create new scraper</a> / <a data-wiki_type="view" href="#" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new view']); }">view</a></li>
-    					<li><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Browse scrapers']); }">Browse scrapers</a></li>
-						<li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Docs &amp; tutorials']); }">Help &amp; Docs</a></li>
-						<li><a href="{% url docsexternal %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'API']); }">API</a></li>
-						<li><a href="http://groups.google.com/group/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Discussion group']); }">Discussion group</a></li>
-						<li><a href="http://status.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Status page']); }">Status</a></li>
-					</ul>
-				</dd>
-				<dt>ScraperWiki</dt>
-				<dd>
-					<ul>
-						<li><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'About']); }">About us</a></li>
-						<li><a href="{% url contact_form %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Contact us']); }">Contact us</a></li>
-						<li><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Blog']); }">Blog</a></li>
-						<li><a href="http://twitter.com/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Twitter']); }">Twitter</a></li>
-                        <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Facebook']); }">Facebook</a></li>
-					</ul>
-				</dd>
-				<dt class="legal"></dt>
-				<dd class="legal">
-				    <ul>
-				        <li>&copy; ScraperWiki Ltd {% now "Y" %}</li>
-				        <li><a href="{% url terms %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Terms &amp; Conditions']); }">Terms &amp; conditions</a></li>
-				        <li><a href="{% url privacy %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Privacy policy']); }">Privacy policy</a></li>
-				    </ul>
-				</dd>
-			</dl>
-			<img src="{{ MEDIA_URL }}images/footer_tractor.png" width="140" height="90" alt="" />
-			{% endblock %}
-		</div>
+	<div id="footer">
+	    {% block footer %}
+	    {% load site_stats %}
+	    <i id="shhhh" style="display:none">{% num_data_rows %}</i>
+		<dl>
+			<dt>Business</dt>
+			<dd>
+				<ul>
+                    <li><a href="{% url data_consulting %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Data consulting']); }">Data Consulting</a></li>
+					<li><a href="{% url data_hub %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'What is a data hub?']); }">What is a Data Hub?</a></li>
+                    <li><a href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Request data']); }">Request Data</a></li>
+				</ul>
+			</dd>
+			<dt>Coders</dt>
+			<dd>
+				<ul>
+				    <li><a data-wiki_type="scraper" href="#" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new scraper']); }">New Scraper</a> / <a data-wiki_type="view" href="#" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new view']); }"> New View</a></li>
+					<li><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Browse scrapers']); }">Browse Scrapers</a></li>
+                    <li><a href="{% url pricing %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Pricing']); }">Premium Accounts</a></li>
+					<li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Docs &amp; tutorials']); }">Help &amp; Docs</a></li>
+					<li><a href="{% url docsexternal %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'API']); }">API</a></li>
+					<li><a href="http://status.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Status page']); }">Status</a></li>
+				</ul>
+			</dd>
+			<dt>ScraperWiki</dt>
+			<dd>
+				<ul>
+					<li><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'About']); }">About Us</a></li>
+					<li><a href="{% url contact_form %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Contact us']); }">Contact Us</a></li>
+					<li><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Blog']); }">Blog</a></li>
+					<li><a href="http://twitter.com/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Twitter']); }">Twitter</a></li>
+                    <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Facebook']); }">Facebook</a></li>
+					<li><a href="http://groups.google.com/group/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Discussion group']); }">Discussion Group</a></li>
+                    <li><a href="http://bitbucket.org/ScraperWiki/scraperwiki/" title="ScraperWiki is open source. Check us out on BitBucket!" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Source code']); }">Source Code</a></li>
+				</ul>
+			</dd>
+			<dt class="legal"></dt>
+			<dd class="legal">
+			    <ul>
+			        <li>&copy; ScraperWiki Ltd {% now "Y" %}</li>
+			        <li><a href="{% url terms %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Terms &amp; Conditions']); }">Terms &amp; Conditions</a></li>
+			        <li><a href="{% url privacy %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Privacy policy']); }">Privacy Policy</a></li>
+			    </ul>
+			</dd>
+		</dl>
+		<a href="{% url frontpage %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Homepage (tractor)']); }"><img src="{{ MEDIA_URL }}images/footer_tractor.png" width="140" height="90" alt="" /></a>
+		{% endblock %}
 	</div>
 	{% endblock %}
 
@@ -260,7 +261,7 @@
 	</script>
 	<![endif]-->
 
-        {# use this one if you want your editor to syntax highlight the javascript #}
+    {# use this one if you want your editor to syntax highlight the javascript #}
     {% block jrun_script %}
     {% endblock %}
 

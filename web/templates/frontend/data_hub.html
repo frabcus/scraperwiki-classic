@@ -13,36 +13,16 @@
 {% block content %}
 
 <div class="intro">
-    <h3>A data hub is the only way to analyse&nbsp;datasets&nbsp;collaboratively.</h3>
-    <p class="first">Just as a CMS helps you manage content, a data hub helps you manage datasets. And because it&rsquo;s on the web, you can securely give access to the right people whether they&rsquo;re in New York or New Delhi.</p>
-</div>
+    <h3>A data hub is the best way<br>to analyse data on the web.</h3>
 
-<div class="aside">
-    <h3>10 advantages of a data hub</h3>
-    <ul>
-        <li>Help people find datasets (discovery)</li>
-        <li>Load data from diverse sources and formats (ETL)</li>
-        <li>Store the data and index it for querying</li>
-        <li>Browse the dataset like a spreadsheet</li>
-        <li>Create visualisations, such as graphs and maps</li>
-        <li>Analyse the data, to spot anomalies and find trends</li>
-        <li>Data entry and manual cleaning (crowd sourcing)</li>
-        <li>Measure and ensure data quality (provenance)</li>
-        <li>Control access: employees, suppliers or customers</li>
-        <li>Buy and sell data (market)</li>
-    </ul>
-</div>
+    <p>Analysis of data tends to happen in isolation and <br>results are easily
+    lost. 
+    </p>
 
-<a class="dont_miss_out" href="{% url request_data %}">Don&rsquo;t miss out&hellip; <em>Contact us now for a quote</em></a>
+    <p>Data hubs like ScraperWiki help you organise and visualise that data
+    across your&nbsp;enterprise.  Everyone can find it. Everyone can act on it.
+    </p>
 
-<div class="features">
-    <p>If you&rsquo;ve ever wasted time and money transferring data manually between formats, or missed a deadline because all your data is stuck inside some monoloithic java app, then ScraperWiki&rsquo;s SaaS Data Hub is just what you&rsquo;re looking for.</p>
-    <p>With the flexibility of general purpose code, a rock-solid API, and granular permissions over precisely who sees what, ScraperWiki has all the right features to put you ahead of the&nbsp;competition.</p>
-</div>
-
-<div class="collaboration">
-    <p>Data analysis tends to happen in isolation and its results are easily lost. ScraperWiki helps organise data across your&nbsp;enterprise.</p>
-    <p>People can find each other&rsquo;s interesting datasets and visualisations, and build on their work to gain new insights. Meanwhile, you can make sure everyone has the latest version of the data, and easily access the code or equations that created&nbsp;it.</p>
 </div>
 
 <h3 class="different">So what makes ScraperWiki different?</h3>
@@ -62,8 +42,17 @@
     <p>Upgrade your statisticians to programmers so they can do magic with your data.</p>
 </div>
 
-<blockquote class="rushkoff" cite="http://www.orbooks.com/catalog/program/">&ldquo;As we move into an increasingly digital reality, we must learn not just how to use programs but how to make them. It's really that simple: <a href="http://www.orbooks.com/catalog/program/" target="_blank">Program, or be programmed.</a>&rdquo;<cite>Douglas Rushkoff</cite></blockquote>
+<br class="clear">
 
-<p class="consultancy"><strong>Prepare for the future with a ScraperWiki&nbsp;data&nbsp;expert.</strong> ScraperWiki comes with <a href="{% url data_consultancy %}">built-in data consultancy</a> to help you get the most out of our data hub. As well as solving your current needs, like scraping a particular dataset, we can take care of your long term data provision and training.</p>
+<blockquote class="dms" cite="http://blog.okfn.org/2012/03/09/from-cms-to-dms-c-is-for-content-d-is-for-data/">
+&ldquo;Just as a CMS helps you manage content, a data hub helps you manage datasets.&rdquo;
+<cite><a href="http://blog.okfn.org/2012/03/09/from-cms-to-dms-c-is-for-content-d-is-for-data/">Rufus Pollock</a>, Open Knowledge Foundation</cite>
+</blockquote>
+
+<p class="consulting"><strong>Prepare for the future with a ScraperWiki&nbsp;data&nbsp;expert.</strong> ScraperWiki comes with <a href="{% url data_consulting %}">built-in data consulting</a> to help you get the most out of our data hub. As well as solving your current needs, like scraping a particular dataset, we can take care of your long term data provision and training.</p>
+
+<a class="dont_miss_out" href="{% url request_data %}">Don&rsquo;t miss out&hellip; <em>Contact us now for a quote</em></a>
+
+<br class="clear">
 
 {% endblock %}

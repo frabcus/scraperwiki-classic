@@ -9,4 +9,7 @@ SHELL=/bin/bash
 
 # Every morning update KPIs
 0 11 * * * scraperdeploy cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_kpis
+#
+# Send alerts to people about broken scrapers in their vaults.
+2 * * * * scraperdeploy cd /var/www/scraperwiki/web && . ../bin/activate && python manage.py notify_vault_exceptions
 

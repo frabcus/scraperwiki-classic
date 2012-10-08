@@ -22,8 +22,12 @@ function pluralise(thing,number,plural){
     return (number == 1 ? thing : plural);
 }
 
-function htmlEscape(str) {
+function htmlEscape(str){
     return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function safeString(str){
+    return str.replace(/[^a-zA-Z0-9]+/g, '_').replace(/(^_|_$)/g, '');
 }
 
 
@@ -142,10 +146,7 @@ function setupCollaborationUI(){
 		}
 	}).next().attr('disabled','disabled').bind('click', function(e){
 		e.preventDefault();
-		if($(this).is(':disabled')){
-			// do nothing
-			console.log('naughty');
-		} else {
+		if(!$(this).is(':disabled')){
 			$(this).val('Moving\u2026').attr('disabled','disabled').prev().attr('disabled','disabled');
 			$(this).parents('td').prev().find('input:radio').hide().after('<img src="/media/images/load2.gif" width="16" height="16">').parents('tr').find('input, select').attr('disabled', true);
 			$.getJSON($(this).prev().val(), function(data) {
@@ -419,6 +420,15 @@ $(function(){
 					        var hash_run_event = $(window.location.hash);
 					        if (hash_run_event.length != 0) {
 					            previewrunevent_show(hash_run_event);
+					            $('html, body').animate({
+                                     scrollTop: $(hash_run_event).offset().top
+                                 }, 200);
+                                 if($(hash_run_event).children('.history_ran_fail').length){
+                                     $(hash_run_event).css('border','4px solid #B75253');
+                                 } else {
+                                     $(hash_run_event).css('border','4px solid #278D2F');
+                                 }
+                                 
 					        }
 					    }
 					});
@@ -447,7 +457,6 @@ $(function(){
 	}
 	
 	$('.new_tag a, div.network .titlebar .tag a').bind('click', function(e){
-		console.log('hello');
 		e.preventDefault();
 		show_new_tag_box();
 	});
@@ -462,7 +471,6 @@ $(function(){
 				tags.push($(el).children('a:first').text());
 			});
 			tags.push(new_tag);
-			console.log(new_tag_array);
 			$.ajax({
 				type: 'POST',
 				url: $("#adminsettagurl").val(),
@@ -579,10 +587,10 @@ function getTableNames(callback){
 	$.ajax({
 		type: 'GET',
 		url: url,
-		dataType: 'json',
+		dataType: 'jsonp',
 		cache: false,
 		success: function(data){
-			var count_url, tables;
+		    var count_url, tables;
 		    if (typeof(data) == 'object' && data.error) {
 		        setDataPreviewWarning(data.error); 
 		        $('#header span.totalrows').text("Datastore error");
@@ -605,8 +613,8 @@ function getTableNames(callback){
 					$('div.data').remove();
 				}
 		    }
-		}, error: function(){
-			setDataPreviewWarning("Sorry, we couldn\u2019t connect to the datastore");
+		}, error: function(jqXHR, textStatus, errorThrown){
+		    setDataPreviewWarning("Sorry, we couldn\u2019t connect to the datastore");
 		    $('#header span.totalrows').hide();
 		}
 	});
@@ -622,14 +630,14 @@ function setDataPreviewWarning(text, warningInHeader) {
 }
 
 function getTableColumnNames(table_name, callback){
-	qry = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
+    qry = sqlite_url + "format=jsonlist&name="+short_name+"&query=SELECT%20*%20FROM%20%5B"+table_name+"%5D%20LIMIT%201"
 	$.ajax({
 		type: 'GET',
 		url: qry,
-		dataType: 'json',
+		dataType: 'jsonp',
 		cache: false,
 		success: function(data){
-			if (data.error) {
+		    if (data.error) {
 		        setDataPreviewWarning(data.error); 
 		        $('#header span.totalrows').text("Datastore error");
 		    } else {
@@ -648,7 +656,7 @@ function getTableRowCounts(tables, callback){
 	return $.ajax({
 		type: 'GET',
 		url: count_url,
-		dataType: 'json',
+		dataType: 'jsonp',
 		cache: false,
 		success: function(resp){
 			if (resp.error) {
@@ -657,7 +665,7 @@ function getTableRowCounts(tables, callback){
 		    } else {
 	        	var zipped = _.zip(resp.keys, resp.data[0]);
 	        	callback(_.map(zipped, function(z){
-	            	return {name: z[0], id: z[0].replace(/\s+/g, ''), count: z[1]};
+	            	return {name: z[0], id: safeString(z[0]), count: z[1]};
 	        	}));
 			}
 		}
@@ -677,44 +685,44 @@ function setTotalRowCount(tables){
 }
 
 function setDataPreview(table_name, table_schema, first_table){
-   getTableColumnNames( table_name, 
-                        function(column_names){
-     // get template
-                        $('#datapreviews').append(ich.data_preview({table_name: table_name.replace(/\s+/g, ''),
-                           column_names: column_names}));
-    var dt = $('#datapreviews #data_preview_' + table_name.replace(/\s+/g, '') + ' table').dataTable( {
-        "bProcessing": true,
-        "bServerSide": true,
-        "bDeferRender": true,
-       	"bJQueryUI": true,
-        "sPaginationType": "full_numbers", 
-        "sAjaxSource": $('#id_data_base').val() + encodeURIComponent(table_name) + '/',
-        "sScrollX": "100%",
-        "bStateSave": true,
-        "bScrollCollapse": true,
-        "sDom": '<"H"<"#schema_'+table_name+'">lfr>t<"F"ip>',
-        "fnRowCallback": function( tr, array, iDisplayIndex, iDisplayIndexFull ) {
-            $('td', tr).each(function(){
-				$(this).html( 
-					$(this).html().replace(
-						/\.\.\. {{MOAR\|\|([^\|]+)\|\|([^\|]+)\|\|NUFF}}$/g, 
-						' <a class="moar" href="/api/1.0/datastore/sqlite?format=jsondict&name=' + $('#scrapershortname').val() + '&query=select%20$1%20as%20%60moar%60%20from%20%60'+ table_name + '%60%20where%20rowid%3D$2&apikey=' + $('#id_apikey').val() + '">&hellip;more</a>'
-					).replace(
-						/((http|https|ftp):\/\/[a-zA-Z0-9-_~#:\.\?%&\/\[\]@\!\$'\(\)\*\+,;=]+)/g, 
-						'<a href="$1">$1</a>'  
-					)
-				);
-            });
-            return tr;
-        }
-    });
-	if(!first_table){
-		dt.parents('.datapreview').addClass('hidden');
-	}
-    schema_html = ich.data_preview_schema({sql: table_schema});
-    schema_html = highlightSql(schema_html);
-    $('#schema_'+table_name).addClass('schema').html(schema_html).children('a').bind('click', schemaClick);
-    data_tables.push(dt); 
+    getTableColumnNames( table_name, function(column_names){
+        $('#datapreviews').append(ich.data_preview({
+            table_name: safeString(table_name),
+            column_names: column_names
+        }));
+        var dt = $('#datapreviews #data_preview_' + safeString(table_name) + ' table').dataTable({
+            "bProcessing": true,
+            "bServerSide": true,
+            "bDeferRender": true,
+           	"bJQueryUI": true,
+            "sPaginationType": "full_numbers",
+            "sAjaxSource": $('#id_data_base').val() + encodeURIComponent(table_name) + '/',
+            "sScrollX": "100%",
+            "bStateSave": true,
+            "bScrollCollapse": true,
+            "sDom": '<"H"<"#schema_'+table_name+'">lfr>t<"F"ip>',
+            "fnRowCallback": function( tr, array, iDisplayIndex, iDisplayIndexFull ) {
+                $('td', tr).each(function(){
+    				$(this).html(
+    					$(this).html().replace(
+    						/\.\.\. {{MOAR\|\|([^\|]+)\|\|([^\|]+)\|\|NUFF}}$/g,
+    						' <a class="moar" href="/api/1.0/datastore/sqlite?format=jsondict&name=' + $('#scrapershortname').val() + '&query=select%20$1%20as%20%60moar%60%20from%20%60'+ table_name + '%60%20where%20rowid%3D$2&apikey=' + $('#id_apikey').val() + '">&hellip;more</a>'
+    					).replace(
+    						/((http|https|ftp):\/\/[a-zA-Z0-9-_~#:\.\?%&\/\[\]@\!\$'\(\)\*\+,;=]+)/g,
+    						'<a href="$1">$1</a>'
+    					)
+    				);
+                });
+                return tr;
+            }
+        });
+    	if(!first_table){
+    		dt.parents('.datapreview').addClass('hidden');
+    	}
+        schema_html = ich.data_preview_schema({sql: table_schema});
+        schema_html = highlightSql(schema_html);
+        $('#schema_'+table_name).addClass('schema').html(schema_html).children('a').bind('click', schemaClick);
+        data_tables.push(dt);
    });
 }
 
@@ -754,7 +762,7 @@ function highlightSql(html) {
 	return html;
 }
 
-function setupDataPreviews() {  
+function setupDataPreviews() {
 	$('.data h3').text('Loading this ' + $('#id_wiki_type').val() + '\u2019s datastore\u2026');
 	var tab_src = $('#data-tab-template').html();
 	getTableNames(

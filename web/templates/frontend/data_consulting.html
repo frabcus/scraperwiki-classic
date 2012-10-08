@@ -1,0 +1,81 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Data Consulting{% endblock %}
+
+{% block meta %}
+    <meta name="description" content="ScraperWiki is the data hub for professional data scientists. Our Corporate Services enable you to tap into that thriving community so you always find the right person for the job. ScraperWiki also helps organise data across your enterprise, combining the flexibility of general purpose code with a rock-solid API and granular permissions over precisely who sees what." />
+{% endblock %}
+
+{% block header %}
+    <h2><em>Business</em> / <a href="{% url data_consulting %}">Data Consulting</a></h2>
+{% endblock %}
+
+{% block content %}
+
+<div class="intro">
+    <h3>Data Collection &amp; Curation Services</h3>
+    <p>Nobody knows your data better than you. However sometimes you need to bring in outside skills to help. At ScraperWiki we have a worldwide pool of expert data scientists able to address any data problem.</p>
+    <p>Most data projects go through four stages&hellip;</p>
+</div>
+
+<div class="aside" id="legal">
+    <div class="hgroup">
+        <h4>Case Study</h4>
+        <h3>Extracting live legal data from&nbsp;public&nbsp;PDFs</h3>
+    </div>
+    <p>Every week a firm of Lawyers in the US receives a &lsquo;Judgement Abstract Report&rsquo; as a PDF from the state. The report is used to identify potential clients for the law firm. It has a regular layout but it is not machine readable and reuse requires manual retyping.</p>
+    <p>A ScraperWiki data scientist has written a script that automatically receives the PDF, converts it into the ScraperWiki datastore, schedules the script to run weekly to collect the incremental data, and makes the data available privately to the lawyers. For the lawyers, it is a single click operation to get the data for other purposes such as mailmerge.</p>
+    <p>The data provides access to a new pipeline of clients, it is refreshed weekly and it can be easily re-purposed.</p>
+    <a class="call_to_action" href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Business links', 'Lawyer Case Study C2A']); }">Click here to <em>Contact our Legal Data team</em></a>
+</div>
+
+    
+
+<div class="step first" id="extraction">
+    <h3>Data Extraction</h3>
+    <p>ScraperWiki is great at really hard ETL (Extract, Transform and Load) tasks because we use the magic of programming. We can pull data together to create new value.</p>
+    <ol>
+        <li><strong>Multiple PDFs.</strong> The black art of data extraction, we&rsquo;ve done&nbsp;it for&nbsp;your&nbsp;competitors, and we can do it for&nbsp;you.</li>
+        <li><strong>Public data.</strong> Gather data from thousands of pages, from hundreds of websites, to make one data set, that automatically updates itself every day or every&nbsp;hour.</li>
+        <li><strong>Legacy systems.</strong> From older database systems, screen grabbing, arcane file formats &ndash; transforming data is our&nbsp;core&nbsp;expertise.</li>
+        <li><strong>SaaS applications.</strong> We can gather and integrate data from whichever cloud applications you use, whether or not they&nbsp;have&nbsp;APIs.</li>
+    </ol>
+</div>
+
+<div class="step second" id="cleaning">
+    <h3>Data Cleaning</h3>
+    <p>Once data is extracted it very often requires some level of cleaning. This can be as simple as adjusting date and time formats, to full name checks in the process creating unique identifiers.</p>
+    <p>At this stage in the process it&rsquo;s essential to have good communications between our data scientists and the client. We log the change process so that clients can clearly audit the transformation and ensure quality control.</p>
+</div>
+
+<div class="aside" id="agricultural">
+    <div class="hgroup">
+        <h4>Case Study</h4>
+        <h3>Scraping agricultural prices for B2B&nbsp;Media&nbsp;blue-chip, Agra&nbsp;Informa</h3>
+    </div>
+    <p>When B2B data publisher <a href="http://agra-net.com" target="_blank">Agra Informa</a> needed to move 10 years&rsquo; worth of commodity pricing data (buried deep inside hundreds of PDFs) into a new digital platform, they came to ScraperWiki.</p>
+    <p>Our team of data scientists fed documents from the client&rsquo;s FTP server into ScraperWiki&rsquo;s exclusive PDF extractor, before cleaning and organising the data into the exact format the client required. The cleaned, high-quality data was then piped into a Tableau visualisation, straight from the secure ScraperWiki Vault.</p>
+    <blockquote>&ldquo;ScraperWiki did just what we asked them to do. Delivery of finished product was very good and responsiveness to customer queries was excellent.&rdquo;</blockquote>
+    <p>With the new, clean data, the client could offer a better and more accurate service to its digital subscribers &ndash; increasing revenue and reducing print and distribution costs. Using the ScraperWiki platform data is always fresh, always accessible, and always accountable.</p>
+</div>
+
+<div class="step third" id="integration">
+    <h3>Data Integration</h3>
+    <p>Once your data is in a form that is useful to you, we can feed this into whatever system you need. You can always browse it as a spreadsheet, and your developers can access it via our flexible&nbsp;API.</p>
+    <p>We can push the data into your web platform, to provide your subscribers or users with the most up-to-date and visually stimulating representation imaginable.</p>
+    <p>We can also securely integrate with your systems in any way you like. From email, FTP and Dropbox to full private installs of ScraperWiki behind your firewall.</p>
+</div>
+
+<div class="step fourth" id="visualisations">
+    <h3>Visualisations and applications</h3>
+    <p>It&rsquo;s not the data, but what you do with it, that matters. We can help you add value to your data by creating anything from basic graphs and maps, to full blown data applications which you can sell to your readers. And we do it all using web standards, so it&rsquo;ll work on notebooks, iPads and Androids.</p>
+</div>
+
+<div class="aside" id="sla">
+    <h3>Service Level Agreement</h3>
+    <p>Get the service you expect, with an industry-standard SLA covering resilience, alerts and escalation. <a href="http://status.scraperwiki.com">Monitor our status</a> from your dashboard and receive automatic refunds if we fail to deliver.</p>
+</div>
+
+<br class="clear" />
+
+{% endblock %}

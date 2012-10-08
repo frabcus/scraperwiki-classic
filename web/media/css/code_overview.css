@@ -427,6 +427,7 @@ a.btnClearDatastore_link {
 }
 
 #divMarkupHint {
+    width: 420px;
 	padding: 10px;
 	margin-top: 10px;
 	font-size: 12px;
@@ -573,10 +574,9 @@ h3 {
 	width: 100px;
 	height: 65px;
 	border: 4px solid #fff;
-	-webkit-box-shadow: 0px 2px 5px #ccc;
-	-moz-box-shadow: 0px 2px 5px #ccc;
-	box-shadow: 0px 2px 5px #ccc;
-	background-color: #fff;
+	-webkit-box-shadow: 0px 1px 2px rgba(0,0,0,0.3);
+	-moz-box-shadow: 0px 1px 2px rgba(0,0,0,0.3);
+	box-shadow: 0px 1px 2px rgba(0,0,0,0.3);
 }
 
 #header h2 {
@@ -1082,7 +1082,9 @@ background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50
 /* ABOUT & SCHEDULE */
 
 td.schedule, td.description {
-	width: 354px;
+	width: 439px;
+	max-width: 439px;
+	min-width: 439px;
 	height: 100%;
 	padding: 20px;
 	vertical-align: top;
@@ -1135,13 +1137,13 @@ td.description h3 {
 	border-bottom-color: #a9bec9;
 }
 
-td.description p {
-	max-width: 360px;
-}
-
 table.about p {
 	font-size: 14px;
 	line-height: 18px;
+}
+
+#divAboutScraper textarea {
+    display: block;
 }
 
 #divAboutScraper ul li {
@@ -1154,15 +1156,6 @@ table.about p {
 }
 
 #first_url_scraped {
-	white-space: pre;
-	white-space: pre-wrap;
-	white-space: pre-line;
-	white-space: -pre-wrap;
-	white-space: -o-pre-wrap;
-	white-space: -moz-pre-wrap;
-	white-space: -hp-pre-wrap;
-	word-wrap: break-word;
-	width: 180px;
 	display: block;
 }
 

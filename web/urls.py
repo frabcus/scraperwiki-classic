@@ -3,6 +3,7 @@ from django.conf.urls.defaults import *
 import frontend.views as frontend_views
 import codewiki.views
 import codewiki.viewsuml
+import recuro.views
 
 from django.contrib.syndication.views import feed as feed_view
 from django.views.generic import date_based, list_detail
@@ -75,6 +76,9 @@ urlpatterns = patterns('',
     
     # pdf cropper technology
     (r'^cropper/', include('cropper.urls')),
+
+    # froth
+    (r'^froth/', include('froth.urls')),
     
     # static media server for the dev sites / local dev
     url(r'^media/(?P<path>.*)$',       'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}),
@@ -82,6 +86,9 @@ urlpatterns = patterns('',
 
     #Rest of the site
     url(r'^', include('frontend.urls')),
+
+    # Recuro recurly -> xero
+    url(r'^notify/(?P<apikey>.*)$', recuro.views.notify, name='recuro_notify'),
 
     # redirects from old version
     (r'^editor/$', lambda request: HttpResponseRedirect('/scrapers/new/python?template=tutorial_python_trivial')),

@@ -7,7 +7,7 @@
 {% block header %}
 		{% autopaginate scrapers 20 %}
 
-	<h2><em>Browse{% if wiki_type %} {% ifequal special_filter 'sick' %}broken {% endifequal %}{{wiki_type}}s{% endif %}</em>{% ifequal special_filter 'no_description' %} with <em>no description</em>{% endifequal %}{% ifequal special_filter 'no_tags' %} with <em>no tags</em>{% endifequal %}{%if ff %} forked from <a href='{% url code_overview wiki_type ff %}'>{{ff}}</a>{%endif%}</h2>
+	<h2><em>Browse{% if wiki_type %} {% ifequal special_filter 'sick' %}Broken {% endifequal %}{{wiki_type|capfirst}}s{% endif %}</em>{% ifequal special_filter 'no_description' %} with <em>no description</em>{% endifequal %}{% ifequal special_filter 'no_tags' %} with <em>no tags</em>{% endifequal %}{%if ff %} forked from <a href='{% url code_overview wiki_type ff %}'>{{ff}}</a>{%endif%}</h2>
 	<!--<p>Page {{ page_obj.number }} of {{ paginator.num_pages }}, newest first.</p>-->
     <ul>    
         <li{% ifequal wiki_type 'scraper' %} class="selected"{% endifequal %}> 

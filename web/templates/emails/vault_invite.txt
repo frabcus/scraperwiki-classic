@@ -4,7 +4,7 @@ ___________
 {{ vault_owner.username }} has just invited you to {{ vault.name }} on ScraperWiki.
 
 To sign up and automatically access the vault, click the link:
-https://www.scraperwiki.com/login/?t={{token}}
+{{tokenurl}}
 
 ___________
 You're receiving this email because the ScraperWiki user {{ vault_owner.username }} wants to add you to their vault.  If you don't know them, just ignore this email.

@@ -1,5 +1,4 @@
-#!/bin/sh -
-"exec" "python" "-O" "$0" "$@"
+#!/usr/bin/env python
 
 __doc__ = """ScraperWiki HTTP Proxy"""
 
@@ -19,20 +18,17 @@ import string
 import urllib   # should this be urllib2? -- JGT
 import urllib2
 import ConfigParser
-import hashlib
 import OpenSSL
 import re
 import memcache
 import hashlib
-from threading import Thread
-try    : import json
-except : import simplejson as json
+import json
 
-
-global config
 global cache_client
+global config
 global ignored_ip
 global large_file_folder
+global open_addresses; open_addresses = []
 
 USAGE       = " [--uid=#] [--gid=#] [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file] [--useCache] [--mode=H|S]"
 child       = None
@@ -163,14 +159,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
 
-        # If the rem[0] IP address is in configuration as an open IP then we should just let it pass
-        # and return None,None,False
-        try:
-            open_addresses = config.get(varName, 'open_addresses')
-            if open_addresses and rem[0] in open_addresses.split(','):
-                    return None,None,False
-        except Exception, e:
-            print e
+        # If the rem[0] IP address is in configuration as an open IP then we
+        # should just let it pass.
+        if rem[0] in open_addresses:
+            return None,None,False
         
         #  If running as a transparent HTTP or HTTPS then the remote end is connecting
         #  to port 80 or 443 irrespective of where we think it is connecting to; for a
@@ -179,18 +171,18 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         elif mode == 'S' : port = 443
         
         lxc_server = None
-        try:
-            lxc_server = config.get(varName, 'lxc_server')
-        except:
-            pass
+        lxc_server = config.get(varName, 'lxc_server')
         
         for attempt in range(5):
+            identurl = 'http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)
             try:
-                ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
+                ident = urllib2.urlopen(identurl).read()
                 if ident.strip() != "":
+                    print "Success for ident %r on attempt %d" % (identurl, attempt)
                     break
-            except:
-                pass
+            except Exception as e:
+                print e
+                print type(e)
 
         for line in string.split (ident, '\n'):
             if line == '' :
@@ -490,45 +482,47 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.close()
 
 
-    def getResponse (self, soc, idle = 0x7ffffff) :
-
+    def getResponse (self, soc, idle=9*60):
         """
         Copy data back and forth between the client and the server.
 
         @type   soc     : Socket
         @param  soc     : Socket to server
         @type   idle    : Integer
-        @param  idel    : Maximum idling time between data
+        @param  idle    : Maximum idling time between data (seconds; defaults to 9 minutes)
         @return String  : Text received from server
         """
 
-        resp  = []
-        iw    = [self.connection, soc]
-        ow    = []
-        count = 0
+        # We accumulate the return string here.
+        resp = []
+        inputs = [self.connection, soc]
+        # Maximum time we spend in each select()
         pause = 5
-        busy  = True
+        # How much time we have spent idling, without seeing data,
+        # so far.
+        count = 0
 
-        while busy :
-            count        += pause
-            (ins, _, exs) = select.select(iw, ow, iw, pause)
-            if exs :
+        while True:
+            (ins, _, exs) = select.select(inputs, [], inputs, pause)
+            if exs:
                 break
-            if ins :
-                for i in ins :
-                    try    : data = i.recv (8192)
-                    except : return
-                    if data is not None and data != '' :
-                        count = 0
-                        if i is soc : resp.append (data)
-                        else        : soc .send  (data)
-                    else :
-                        busy = False
-                        break
-            if count >= idle : 
-                break
+            if not ins:
+                count += pause
+                if count >= idle:
+                    break
+            for i in ins:
+                try    : data = i.recv (8192)
+                # dubious 'except'
+                except : return
+                if data:
+                    count = 0
+                    if i is soc : resp.append(data)
+                    else        : soc.send(data)
+                else:
+                    # Normal end of data stream.
+                    return ''.join(resp)
 
-        return string.join (resp, '')
+        return ''.join(resp)
 
     def do_GET (self) :
         self.retrieve ("GET" )
@@ -729,21 +723,26 @@ if __name__ == '__main__' :
         cache_client = memcache.Client( cache_hosts.split(',') )
     
     try:
-        large_file_folder = config.get(varnName,'large_file_folder')
-    except:
-        print "No large file support is configured, 'large_file_folder' is missing"
+        large_file_folder = config.get(varName,'large_file_folder')
+    except ConfigParser.Error as e:
+        print "No large file support is configured, 'large_file_folder' is missing from config"
     
     try:
         ignored_ip = config.get(varName, 'ignore_ip')
-    except:
+    except ConfigParser.Error as e:
         ignored_ip = '127.0.0.1'
+
+    try:
+        open_addresses = config.get(varName, 'open_addresses').split(',')
+    except ConfigParser.Error as e:
+        pass
         
     # List of machine IPs that are allowed to connect to this machine
     try:
         allowed_ips = [ x.replace("'", "").strip() for x in config.get('security', 'allowed_ips').split(',')]
-        print "Allowed IPs set to " % (allowed_ips,)               
-    except:
+    except ConfigParser.Error as e:
         print "Due to missing settings we are only allowing the local machine (and 10.* addresses)"
         allowed_ips = ['127.0.0.1']
+    print "Allowed IPs set to %r" % (allowed_ips,)               
         
     execute ()

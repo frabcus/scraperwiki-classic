@@ -127,7 +127,13 @@ function newCodeObject($a){
 								})
 							} else {
 								$(this).addClass('active');
-								location.href = $('#chooser_vault').val().replace('/python/', '/' + $(this).attr('href').replace(/.*\//, '') + '/') + '?name=' + encodeURIComponent($('#chooser_name_box').val());								
+								var u = $('#chooser_vault').val();
+								u = u.replace('/python/', '/' + $(this).attr('href').replace(/^.+\/new\/(php|python|ruby|html)/g, '$1') + '/');
+								u += '?name=' + encodeURIComponent($('#chooser_name_box').val())
+								if($a.data('sourcescraper')){
+								    u += '&sourcescraper=' + $a.data('sourcescraper');
+								}
+                                location.href = u;
 							}
 						}
 					});
@@ -258,15 +264,13 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 }
 
 $(function(){
-    showPremiumAccountAlert();	
-
     // If you ever find this comment and you're adding a new page
     // add a new regular expression here and make sure it selects
     // the right .supernav tab :-)
     var urls = {
         '/(about|events|contact)/' : 'about',
         '/status/' : 'admin',
-        '/(request_data|data_hub|data_consultancy|pricing)/': 'data_services',
+        '/(request_data|data_hub|business|secrets_in_data)/': 'data_services',
         '/(profiles|vaults)/' : 'user',
         '/login/' : 'login',
         '.*' : 'code'
@@ -347,27 +351,6 @@ $(function(){
 		newCodeObject($(this));
     });
 	
-    function showPremiumAccountAlert(){
-        status = typeof($.cookie('premiumBuy')) == 'undefined' ? 'new' : $.cookie('premiumBuy')
-        alert_slide_time = status == 'shown' ? 0 : 250
-
-        if (status == 'closed' || status == 'clicked') return
-
-        newAlert('Get private code and hourly scheduling with our <b>new premium accounts</b>&hellip;', null, {
-            'onclick': function() {
-                $.cookie("premiumBuy", 'clicked', { expires: 365, path: "/" })
-                window.location.replace('/pricing/')
-                if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Upgrade Alert', 'Buy Now']); }
-            },
-            'text': '<b>Buy one!</b>'
-        }, alert_slide_time, function() {
-            $.cookie("premiumBuy", 'closed', { expires: 365, path: "/" })
-            if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Upgrade Alert', 'Closed']); }
-        });
-        $.cookie("premiumBuy", 'shown', { expires: 365, path: "/" })
-        if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Upgrade Alert', 'Shown']); }
-    }
-
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
 		$('#more_developer_div').fadeIn(500);
@@ -444,6 +427,31 @@ $(function(){
 	
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", "").replace(" fourohfour", ""));
 	
+	$('body.vaults div.vault').each(function(){
+	    id = $(this).attr('id');
+	    if(location.hash == '#' + id){
+	        $(this).addClass('highlighted');
+	    } else {
+    	    if($.cookie('hide_' + id)){
+    	        $(this).children('.vault_header').addClass('collapsed').nextAll().hide();
+    	    }
+	    }
+	});
+
+	$('body.vaults div.vault_header h3').bind('click', function(e){
+	    $h = $(this).parent();
+	    id = $h.parent().attr('id');
+	    if( $h.is('.collapsed') ){
+	        $.cookie("hide_" + id, null, { path: '/' });
+	        $h.removeClass('collapsed').nextAll().slideDown();
+	    } else {
+	        $.cookie("hide_" + id, "1", { path: '/', expires: 30 });
+	        $h.nextAll().slideUp(function(){
+	            $h.addClass('collapsed');
+	        });
+	    }
+	});
+
 	$('div.vault_users_popover').each(function(i,el){
 		//	This centres the Users Popover underneath the Users toolbar button
 		var popo = $(this);

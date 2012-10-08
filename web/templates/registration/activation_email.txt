@@ -1,7 +1,7 @@
 ScraperWiki
 ___________
 
-Hi {{ user.get_profile.name }}!
+Hi {{ user.profile.name }}!
 
 Thanks for creating a new ScraperWiki account.
 
@@ -10,7 +10,7 @@ https://{{ site }}/accounts/activate/{{activation_key}}/
 
 __________
 
-Not {{ user.get_profile.name }}? No worries, 
+Not {{ user.profile.name }}? No worries, 
 just delete this email and have a lovely day.
 
 

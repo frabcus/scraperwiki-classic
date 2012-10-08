@@ -5,6 +5,7 @@ import time
 import splinter
 from lettuce import step,before,world,after
 from lettuce.django import django_url
+from django.core import mail
 
 @step(u'(?:When|And) I click the vault members button')
 def i_click_the_vault_members_button(step):
@@ -21,7 +22,8 @@ def i_type_into_the_username_box(step, text):
 def then_an_invitation_email_gets_sent_to(step, address):
     # Could check RE here, something like ("To:.*%s" % address).
     time.sleep(0.5) # need to wait a little bit for the mail, refactor!
-    assert address in open('mail.out').read()
+    assert world.mails_len() == 1, world.mails_file()
+    assert address in world.mails_body()[0]
 
 @step(u'Given I have been invited to scraperwiki')
 def given_i_have_been_invited_to_scraperwiki(step):
@@ -39,7 +41,7 @@ def given_i_have_been_invited_to_scraperwiki(step):
 @step(u'And there is a sign up link in the invitation email')
 def and_there_is_a_sign_up_link_in_the_invitation_email(step):
     time.sleep(0.5)
-    assert "/login/?t=" in open('mail.out').read()
+    assert "/login/?t=" in world.mails_body()[0]
 
 @step(u'When I go to the invitation link in the email')
 def when_i_go_to_the_invitation_link_in_the_email(step):
@@ -48,7 +50,7 @@ def when_i_go_to_the_invitation_link_in_the_email(step):
     # last occurence of a token, which is the one we want when
     # there are many email messages in the file.
     token = re.search(".*/login/\?t=3D([a-fA-F0-9]{20})",
-                open('mail.out').read(), re.DOTALL).group(1)
+                world.mails_body()[0], re.DOTALL).group(1)
     world.browser.visit(django_url('/login/?t=%s' % token))
 
 @step(u'And I should see the vault name')
@@ -67,7 +69,7 @@ def and_i_should_see_my_email_already_filled_in(step):
 def when_i_sign_up(step):
     world.browser.visit(django_url('/login/'))
 
-    world.browser.find_by_css('#id_name').first.fill('Lord Test Testington')
+    world.browser.find_by_css('#id_name').first.fill('Lord Test Testerson')
     world.browser.find_by_css('#id_email').first.fill('t.test@testersonandsons.com')
     world.browser.find_by_css('#id_password1').first.fill('pass')
     world.browser.find_by_css('#id_password2').first.fill('pass')
@@ -98,6 +100,7 @@ def and_i_should_have_a_vault(step):
 def vault_owner_emailed(step):
     time.sleep(0.5)
     m = re.search(r"^To:\s+test@example.com",
-      open('mail.out').read(),
+      world.mails_body()[-1],
       re.M)
-    assert m
+    assert m, world.mails_file()
+

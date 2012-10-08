@@ -50,18 +50,35 @@ module ScraperWiki
     #
     # * _url_ = The URL to fetch
     # * _params_ = The parameters to send with a POST request
+    # * _agent = A manually supplied useragent string
     #
     # === Example
     # ScraperWiki::scrape('http://scraperwiki.com')
     #
-    def ScraperWiki.scrape(url, params = nil)
-      client = HTTPClient.new
-      client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-      if params.nil? 
-        return client.get_content(url)
+    def ScraperWiki.scrape(url, params = nil, agent = nil)
+      if agent
+        client = HTTPClient.new(:agent_name => agent)
       else
-        return client.post_content(url, params)
+        client = HTTPClient.new
+      end
+      client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      if HTTPClient.respond_to?("client.transparent_gzip_decompression=")
+        client.transparent_gzip_decompression = true
+      end
+      
+      if params.nil? 
+        html = client.get_content(url)
+      else
+        html = client.post_content(url, params)
+      end
+      
+      unless HTTPClient.respond_to?("client.transparent_gzip_decompression=")
+        begin
+          gz = Zlib::GzipReader.new(StringIO.new(html))    
+          return gz.read
+        rescue
+          return html
+        end
       end
     end
 
@@ -204,8 +221,8 @@ module ScraperWiki
             end
             if value.kind_of?(Time)
                 value = value.iso8601
-                raise "internal error, timezone came out as non-UTC while converting to SQLite format" unless value.match(/\+00:00$/)
-                value.gsub!(/\+00:00$/, '')
+                raise "internal error, timezone came out as non-UTC while converting to SQLite format" unless value.match(/([+-]00:00|Z)$/)
+                value.gsub!(/([+-]00:00|Z)$/, '')
             end
             if ![Fixnum, Float, String, TrueClass, FalseClass, NilClass].include?(value.class)
                 value = value.to_s

@@ -10,11 +10,12 @@ from django.dispatch import dispatcher
 from django.core.mail import send_mail, mail_admins
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
 from tagging.models import Tag, TaggedItem
-from frontend import highrise
 
 class Feature(models.Model):
     """
@@ -200,38 +201,11 @@ class Tags:
 
 class DataEnquiry(models.Model):
     date_of_enquiry = models.DateTimeField(auto_now_add=True)
-    urls = models.TextField()
-    columns = models.TextField(null=True, blank=True)
-    due_date = models.DateField(null=True, blank=True)
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
-    email = models.EmailField()
-    telephone = models.CharField(max_length=32, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    visualisation = models.TextField(null=True, blank=True)
-    application = models.TextField(null=True, blank=True)
-    company_name = models.CharField(max_length=128, null=True, blank=True)
-    broadcast = models.BooleanField()
-    why = models.TextField(null=True, blank=True)
-
-    FREQUENCY_CHOICES = (
-      ('once', 'Once only'),
-      ('monthly', 'Monthly'),
-      ('weekly', 'Weekly'),
-      ('daily', 'Daily'),
-      ('hourly', 'Hourly'),
-      ('realtime', 'Real-time')
-    )
-    frequency = models.CharField(max_length=32, choices=FREQUENCY_CHOICES)
-
-    CATEGORY_CHOICES = (
-        ('private', 'private'),
-        ('viz', 'viz'),
-        ('app', 'app'),
-        ('etl', 'etl'),
-        ('public', 'public')
-    )
-    category = models.CharField(max_length=32, choices=CATEGORY_CHOICES)
+    name = models.CharField(max_length=64)
+    email = models.EmailField(null=True, blank=True)
+    phone = models.CharField(max_length=32, null=True, blank=True)
+    description = models.TextField()
+    ip = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "data enquiries"
@@ -239,105 +213,23 @@ class DataEnquiry(models.Model):
     def __unicode__(self):
         return u"%s %s <%s>" % (self.first_name, self.last_name, self.email)
 
-    def email_message(self):
-        msg =  u"""
-            Category: %s
-            -----
-            Name: %s %s
-            Email address: %s
-            Telephone number: %s
-            Company name: %s
-            -----
-            At which URL(s) can we find the data currently?
-            > %s
-            
-            What information do you want scraped?
-            > %s
-            
-            When do you need it by?
-            > %s
-            
-            How often does the data need to be scraped?
-            > %s
-            
-            What are your ETL needs?
-            > %s
-            
-            What visualisation do you need?
-            > %s
-            
-            What application do you want built?
-            > %s
-            
-            Why do you want to liberate this data?
-            > %s
-            
-            Are you happy for this to be broadcasted on Twitter/Facebook?
-            > %s
-            
-        """ % (self.category,
-               self.first_name,
-               self.last_name,
-               self.email,
-               self.telephone or '(not specified)',
-               self.company_name or '(not specified)',
-               self.urls or '(not specified)',
-               self.columns or '(not specified)',
-               self.due_date or '(none)',
-               self.frequency or '(not specified)',
-               self.description or '(not specified)',
-               self.visualisation or '(not specified)',
-               self.application or '(not specified)',
-               self.why or '(not specified)',
-               self.broadcast or '(not specified)')
-
-        return msg.encode('utf-8')
-
 def data_enquiry_post_save(sender, **kwargs):
     if kwargs['created']:
         instance = kwargs['instance']
-        send_mail('Data Request', instance.email_message(), instance.email, [settings.FEEDBACK_EMAIL], fail_silently=False)
 
-        if not hasattr(settings,'HIGHRISE_ENABLED') or settings.HIGHRISE_ENABLED == False:
-            return
+        subject = "Data request [ID %s] from %s" % (instance.id, instance.name)
 
-        if instance.category not in ['public']:
-            try:
-                h = highrise.HighRise(settings.HIGHRISE_PROJECT, settings.HIGHRISE_KEY)
+        text_content = render_to_string('emails/request_data.txt', locals())
+        html_content = render_to_string('emails/request_data.html', locals())
 
-                try:
-                    requester = h.search_people_by_email(instance.email.encode('utf-8'))[0]
-                except Exception,err:
-                    # Removed indexerror to catch problems that seem to happen when we 
-                    # can't find the user.                    
-                    try:
-                        requester = h.create_person(instance.first_name.encode('utf-8'),
-                                                    instance.last_name.encode('utf-8'),
-                                                    instance.email)
-                        h.tag_person(requester.id, 'Lead')
-                    except Exception, e2:
-                        mail_admins('HighRise failed to find/create user with errors', str(err) + ',' + str(e2))                    
-                        return
+        msg = EmailMultiAlternatives(subject, text_content, instance.email, [settings.FEEDBACK_EMAIL])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
 
-                h.create_note_for_person(instance.email_message(), requester.id)
-
-                cat = h.get_task_category_by_name('To Do')
-
-                task_owner = h.get_user_by_email(settings.HIGHRISE_ASSIGN_TASK_TO)
-
-                # Split out so we can tell which one is causing the problems
-                rid = requester.id
-                cid = cat.id
-                tid = task_owner.id
-                
-                h.create_task_for_person('Data Request Followup', tid, cid, rid)
-            except highrise.HighRiseException, ex:
-                msg = "%s\n\n%s" % (ex.message, instance.email_message())
-                mail_admins('HighRise update failed', msg)
-            except AttributeError, eAttr:
-                # We expect this from create_task_for_person with missing data.
-                msg = "%s\n\n%s" % (str(eAttr), instance.email_message())
-                mail_admins('HighRise update failed', msg)
-            
 
 post_save.connect(data_enquiry_post_save, sender=DataEnquiry)
+
+
+
+
+

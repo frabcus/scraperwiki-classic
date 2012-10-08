@@ -206,10 +206,8 @@ class Code(models.Model):
         return lscraperrunevents and lscraperrunevents[0] or None
 
     def is_sick_and_not_running(self):
-        lastscraperrunevent = self.last_runevent()
         if self.status == 'sick':
-            if (not lastscraperrunevent) or (not lastscraperrunevent.id) or (lastscraperrunevent.id and lastscraperrunevent.pid == -1):
-                return True
+            return True
         return False
 
     def set_guid(self):

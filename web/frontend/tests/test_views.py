@@ -10,7 +10,7 @@ from django.core import mail
 from captcha.models import CaptchaStore
 
 import frontend
-from codewiki.models import Scraper, Code
+from codewiki.models import Scraper
 
 class FrontEndViewsTests(TestCase):
     
@@ -114,7 +114,8 @@ class FrontEndViewsSearchTests(TestCase):
     def test_scraper_search(self):
         response = self.client.get(reverse('search', kwargs={'q':'test'}))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['scrapers_num_results'], 1)
+        # Finds 2 scrapers (and several users, which don't seem to appear in this count)
+        self.assertEqual(response.context['scrapers_num_results'], 2)
     
     def test_user_search_by_human_name(self):
         response = self.client.get(reverse('search', kwargs={'q':'Generalpurpose'}))
@@ -125,8 +126,4 @@ class FrontEndViewsSearchTests(TestCase):
         response = self.client.get(reverse('search', kwargs={'q':'test_admin'}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['users_num_results'], 1)
-
-
-#        scrapers = Code.objects.filter(title__icontains="test")
-#        scrapers = Code.objects.filter(title__icontains="Generalpurpose")
 

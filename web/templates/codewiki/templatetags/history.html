@@ -82,7 +82,7 @@
 
       <div class="history_run_event" id="run_{{itemfirst.runevent.id}}">
         <div class="history_view_changes">
-            <a class="runpermalink" href="{% url editor_edit scraper.wiki_type scraper.short_name %}#run_{{itemfirst.runevent.id}}">Permalink</a>
+            <a class="runpermalink" href="{% url code_overview scraper.wiki_type scraper.short_name %}#run_{{itemfirst.runevent.id}}">Permalink</a>
           <a class="hiderunevent">Hide details</a>
           <a class="showrunevent">Show details</a>
           <span class="runidlist hide">
@@ -109,7 +109,7 @@
         {% else %}
             <div class="history_ran">
               Run succeeded:
-              - ran {{itemloggroup.list|length}} times, most recently for {{itemfirst.durationseconds}} seconds
+              - ran {{itemloggroup.list|length}} time{{itemloggroup.list|length|pluralize}}, most recently for {{itemfirst.durationseconds}} seconds
               ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
               <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
         {% endif %}{% endifnotequal %}

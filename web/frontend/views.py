@@ -41,6 +41,8 @@ import datetime
 import urllib
 import itertools
 import json
+import random
+
 import recurly
 recurly.js.PRIVATE_KEY = settings.RECURLY_PRIVATE_KEY
 
@@ -50,10 +52,21 @@ from utilities import location
 def frontpage(request, public_profile_field=None):
     user = request.user
     data = {
-            'tags': Tags.sorted(), 
+            'tags': Tags.sorted(),
             'language': 'python'
            }
-    return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
+
+    # List here: https://docs.google.com/a/scraperwiki.com/spreadsheet/ccc?key=0AmgaEqd-YKjXdGNENndyR1BScFMtdG45OEJyQXZaR2c#gid=0
+    selection = [ 3, 4 ] 
+    if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
+        ab_new_homepage = 4
+    elif 'ab_new_homepage' not in request.session or request.session['ab_new_homepage'] not in selection:
+        ab_new_homepage = random.choice(selection)
+    else:
+        ab_new_homepage = request.session['ab_new_homepage']
+
+    request.session['ab_new_homepage'] = ab_new_homepage
+    return render_to_response('frontend/homepage_%s.html' % ab_new_homepage, data, context_instance=RequestContext(request))
 
 
 def profile_detail(request, username):
@@ -211,11 +224,13 @@ def handle_signup_invites(user):
 
     for invite in invites:
         invite.vault.members.add(user)
-        invite.vault.members.add(user) 
         invite.vault.add_user_rights(user)
         # Invitation used up; delete it.
         invite.delete()
 
+    # We have a separate loop for sending emails because
+    # we don't mind so much if the email fails - at least
+    # the user has been added to the vault(s).
     for invite in invites:
         message = render_to_string('emails/invitation_accepted.txt', locals())
         django.core.mail.send_mail(
@@ -467,23 +482,30 @@ def resend_activation_email(request):
     return render_to_response(template, {'form': form}, context_instance = RequestContext(request))
 
 def request_data(request):
-    form = DataEnquiryForm(request.POST or None)
+    form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
     if form.is_valid():
         form.save()
         return HttpResponseRedirect(reverse('request_data_thanks'))
     return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
 
-def request_data_public(request):
-    return render_to_response('frontend/request_data_public.html', context_instance = RequestContext(request))
-
 def request_data_thanks(request):
     return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
+
+def secrets_in_data(request):
+    form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('secrets_in_data_thanks'))
+    return render_to_response('frontend/secrets_in_data.html', {'form': form}, context_instance = RequestContext(request))
+
+def secrets_in_data_thanks(request):
+    return render_to_response('frontend/secrets_in_data_thanks.html', context_instance = RequestContext(request))
 
 def data_hub(request):
     return render_to_response('frontend/data_hub.html', context_instance = RequestContext(request))
 
-def data_consultancy(request):
-    return render_to_response('frontend/data_consultancy.html', context_instance = RequestContext(request))
+def data_consulting(request):
+    return render_to_response('frontend/data_consulting.html', context_instance = RequestContext(request))
 
 def generate_recurly_signature(plan_code, account_code):
     signature = recurly.js.sign_subscription(plan_code, account_code)
@@ -660,8 +682,8 @@ def view_vault(request, username=None):
     context = {}
     
     context['vaults'] = request.user.vaults
-    context['vault_membership_count'] = request.user.vault_membership.exclude(user__id=request.user.id).count()
-    context['vault_membership']  = request.user.vault_membership.all().exclude(user__id=request.user.id)
+    context['vault_membership']  = request.user.vault_membership.exclude(user__id=request.user.id)
+    context['vault_membership_count'] = context['vault_membership'].count()
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
     context['current_plan'] = request.user.get_profile().plan
@@ -825,7 +847,7 @@ def invite_to_vault(vault_owner, email, vault):
     # Truncated to avoid annoying Django/e-mail/Quoted-Printable madness.
     token = str(uuid.uuid4().hex)[:20]
     context = locals()
-    context.update({'token': token})
+    context['tokenurl'] = "https://%s%s?t=%s" % (Site.objects.get_current().domain, reverse("login"), token)
 
     text_content = render_to_string('emails/vault_invite.txt', context) 
     html_content = render_to_string('emails/vault_invite.html', context)
@@ -843,3 +865,4 @@ def invite_to_vault(vault_owner, email, vault):
     invite = Invite(token=context['token'], email=email, vault=vault)
     invite.save()
     return result
+

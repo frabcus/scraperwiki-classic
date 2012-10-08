@@ -28,7 +28,7 @@
 <div id="my_vaults">
     <h2>You own {{ vaults.count }} vault{{ vaults.count|pluralize }}: {% if vaults_remaining_in_plan %}<a id="new_vault" href="/vaults/new/">Create a new vault</a>{% else %}<a id="upgrade_plan" href="/pricing/">Upgrade to create more vaults</a>{% endif %}</h2>
     {% for vault in vaults.all %}
-    <div class="vault">
+    <div class="vault" id="vault_{{vault.id}}">
         
     	<div class="vault_header">
     	    <span class="shineyshiney"></span>
@@ -103,7 +103,7 @@
     <h2>You can access {{ vault_membership_count }} shared vault{{ vault_membership_count|pluralize }}:</h2>
 	
 	{% for vault in vault_membership %}
-	<div class="vault">
+	<div class="vault" id="vault_{{vault.id}}">
         
     	<div class="vault_header">
     	    <span class="shineyshiney"></span>

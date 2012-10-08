@@ -2,13 +2,14 @@ from nose.tools import assert_equals, raises
 import sys
 import urllib
 import re
+import datetime
 
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 
 from frontend.models import UserProfile
-from codewiki.models import Vault, Invite
+from codewiki.models import Vault, Invite, Scraper, ScraperRunEvent
 from frontend.views import vault_users, invite_to_vault, login
 
 import helper

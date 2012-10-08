@@ -113,7 +113,7 @@ and construct all your schemas explicitly.</p>
 
 <h2>Reading data from other scrapers</h2>
 
-<p>To access data from other scrapers we attach to them, using their shortname (the name in the URL).</p>
+<p>To read data from other scrapers we attach to them, using their shortname (the name in the URL).</p>
 <code>scraperwiki.sqlite.attach("new_americ_foundation_drone_strikes")
 print scraperwiki.sqlite.select("* from new_americ_foundation_drone_strikes.swdata limit 2")
 </code>
@@ -123,7 +123,7 @@ print scraperwiki.sqlite.select("* from new_americ_foundation_drone_strikes.swda
 print scraperwiki.sqlite.table_info("src.swdata")
 </code>
 
-<p>Access to other scrapers data through the attach interface is read-only.</p>
+<p>Attached scrapers are mounted <b>read-only</b>. You can see some examples in <a href="https://groups.google.com/d/msg/scraperwiki/x0hOa2TnhtM/ZsvtAfIKrmkJ">this post on our mailing list.</a></p>
 
 <h2>Trapping errors</h2>
 

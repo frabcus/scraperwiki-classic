@@ -111,7 +111,10 @@ SCRAPERWIKI_APPS = [
     'cropper',
     'kpi',
     'documentation',
+    'recuro',
     #'devserver',
+    'alerts',
+    'froth',
 ]
 
 INSTALLED_APPS = [

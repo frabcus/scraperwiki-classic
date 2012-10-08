@@ -58,6 +58,23 @@ See SQLite's <a href="http://www.sqlite.org/lang.html">SQL as understood by SQLi
     <var>name</var> (which should be the <em>short-name</em> of the scraper, as it
     appears in the URL of its overview page).</p>
     <p><var>asname</var> is an optional alias for the attached datastore.</p>
+    <p>Attached scrapers are mounted <b>read-only</b>. You can see some examples in <a href="https://groups.google.com/d/msg/scraperwiki/x0hOa2TnhtM/ZsvtAfIKrmkJ">this post on our mailing list.</a></p>
+    </dd>
+
+<dt>scraperwiki.<strong>sqlite.execute</strong>(sql[, vars], verbose=1)</dt>
+    <dd><p>Executes any arbitrary sqlite command (except attach). For
+    example create, delete, insert or drop.</p>
+    <p><var>vars</var> is an optional list of parameters, inserted when
+    the select command contains &lsquo;?&rsquo;s.
+    For example:</p>
+    <code>scraperwiki.sqlite.execute("insert into swdata values (?,?,?)", [a,b,c])</code>
+    <p>The &lsquo;?&rsquo; convention is like "paramstyle qmark"
+    from <a href="http://www.python.org/dev/peps/pep-0249/">Python's
+    DB API 2.0</a> (but note that the API to the datastore is
+    nothing like Python's DB API).  In particular the
+    &lsquo;?&rsquo; does not itself need quoting, and can in
+    general only be used where a literal would appear.
+    </p>
     </dd>
 
 <dt>scraperwiki.<strong>sqlite.select</strong>(sqlfrag[, vars], verbose=1)</dt>
@@ -65,16 +82,8 @@ See SQLite's <a href="http://www.sqlite.org/lang.html">SQL as understood by SQLi
     <code>scraperwiki.sqlite.select("* from swdata limit 10")</code>
     <p>Returns a list of dicts that have been selected.</p>
     <p><var>vars</var> is an optional list of parameters, inserted when the
-    select command contains '?'s.</p>
-    </dd>
-
-<dt>scraperwiki.<strong>sqlite.execute</strong>(sql[, vars], verbose=1)</dt>
-    <dd><p>Executes any arbitrary sqlite command (except attach). For
-    example create, delete, insert or drop.</p>
-    <p><var>vars</var> is an optional list of parameters, inserted when
-    the select command contains '?''s.
-    For example:</p>
-    <code>scraperwiki.sqlite.execute("insert into swdata values (?,?,?)", [a,b,c])</code>
+    select command contains &lsquo;?&rsquo;s.  This is like the
+    feature in the <var>.execute</var> command, above.</p>
     </dd>
 
 <dt>scraperwiki.<strong>sqlite.commit</strong>()</dt>
@@ -147,9 +156,9 @@ See SQLite's <a href="http://www.sqlite.org/lang.html">SQL as understood by SQLi
 <h3>Miscellaneous</h3>
 <dl>
 
-<dt>scraperwiki.<strong>pdftoxml</strong>(pdfdata)</dt>
+<dt>scraperwiki.<strong>pdftoxml</strong>(pdfdata, options='')</dt>
     <dd>Convert a byte string containing a PDF file into an XML file containing the coordinates 
-        and font of each text string.  <br/>
+        and font of each text string.<br/><var>options</var> is an optional string of options (!!) to be passed to the underlying pdftohtml command (see <a href="http://linux.die.net/man/1/pdftohtml">the pdftohtml documentation</a> for details).<br/>
         Refer to 
         <a href="https://scraperwiki.com/scrapers/new/python?template=advanced-scraping-pdfs">the example</a> 
         for more details.
@@ -157,7 +166,7 @@ See SQLite's <a href="http://www.sqlite.org/lang.html">SQL as understood by SQLi
 
 <dt>modulename = scraperwiki.<strong>utils.swimport</strong>(name)</dt>
     <dd>Imports the code from another scraper as the module
-    <var>odulename</var>.
+    <var>modulename</var>.
     </dd>
 
 </dl>
