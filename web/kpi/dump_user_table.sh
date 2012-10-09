@@ -10,7 +10,13 @@ if [ -f "${settings}" ]; then
   # Debug
   # echo $user, $password, $database
 
-  sql='SELECT username, last_login, date_joined FROM auth_user;'
+  sql='
+SELECT
+  username, count(user_id) AS "script_count", last_login, date_joined
+FROM auth_user
+JOIN codewiki_usercoderole
+ON auth_user.id = codewiki_usercoderole.user_id
+GROUP BY codewiki_usercoderole.user_id;'
   echo $sql | mysql -B -u$user -p$password $database
 else
   echo
