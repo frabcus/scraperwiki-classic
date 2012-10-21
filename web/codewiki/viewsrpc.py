@@ -318,7 +318,8 @@ def Dtwistermakesrunevent(request):
                 else:
                     logger.info("No message")
             else:
-                mail_admins(subject="SICK EMAILER: %s" % subject, message=message)
+                #mail_admins(subject="SICK EMAILER: %s" % subject, message=message)
+                logger.info('SICK EMAILER: %s' % subject)
     else:
         logger.info('Not a mail scraper ...')
     return HttpResponse("done")
