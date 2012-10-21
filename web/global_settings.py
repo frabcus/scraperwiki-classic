@@ -255,11 +255,11 @@ LOGGING = {
     },
     'loggers': {
         # Again, default Django configuration to email unhandled exceptions
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
+#        'django.request': {
+#            'handlers': ['mail_admins'],
+#            'level': 'ERROR',
+#            'propagate': True,
+#        },
         # Might as well log any errors anywhere else in Django 
         # (so use empty string for name here to catch anything)
         '': {
