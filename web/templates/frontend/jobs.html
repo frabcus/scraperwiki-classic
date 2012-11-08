@@ -44,7 +44,7 @@
         <p>&hellip;Oil wells, marathon results, planning applications</p>
     </div>
     
-    <div class="position" data-job="swjob">
+    <div class="position" id="something-else" data-job="swjob">
         <h3>Something else?</h3>
         
         <p>If you dream of data analysis, or chomp Coffeescript stack traces for breakfast, but none of our current job offerings fit the bill, drop <a href="mailto:francis@scraperwiki.com">francis@scraperwiki.com</a> an email, we&rsquo;d love to talk to you.</p>
@@ -82,6 +82,7 @@ $(function(){
         var position = $(this).attr('href');
         window.location.hash = position;
         $('[data-job="' + position.replace('#','') +'"]').show().siblings('.position').hide();
+        $(this).addClass('selected').parents('ul').find('.selected').not(this).removeClass('selected');
     });
     
 });
