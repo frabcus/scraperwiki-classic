@@ -3649,7 +3649,7 @@ body.about #what_we_do h4 {
 body.jobs div.lead {
 	display: block;
 	float: left;
-	width: 360px;
+	width: 370px;
 	padding: 16px 19px 14px 19px;
 	margin: 0 0 10px -30px;
 	background-color: #fcf9ec;
@@ -3673,7 +3673,7 @@ body.jobs div.lead p + p {
 body.jobs .positions {
     float: left;
     clear: left;
-    width: 350px;
+    width: 370px;
     text-align: right;
     font-size: 18px;
 }
@@ -3691,7 +3691,36 @@ body.jobs .position li {
     margin-left: 1.5em;
 }
 
-body.jobs .
+body.jobs .positions a {
+    position: relative;
+    display: block;
+}
+
+body.jobs a.selected:after {
+    position: absolute;
+    top: 4px;
+    right: -38px;
+    display: block;
+    border-top: 6px solid transparent;
+    border-right: 6px solid #fff;
+    border-bottom: 6px solid transparent;
+    content: '';
+}
+
+body.jobs a.selected:before {
+    position: absolute;
+    top: 3px;
+    right: -38px;
+    display: block;
+    border-top: 7px solid transparent;
+    border-right: 7px solid #ccc;
+    border-bottom: 7px solid transparent;
+    content: '';
+}
+
+body.jobs #something-else {
+    min-height: 300px;
+}
 
 
 /* PRICING */
