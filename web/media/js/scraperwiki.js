@@ -268,7 +268,7 @@ $(function(){
     // add a new regular expression here and make sure it selects
     // the right .supernav tab :-)
     var urls = {
-        '/(about|events|contact)/' : 'about',
+        '/(about|jobs|events|contact)/' : 'about',
         '/status/' : 'admin',
         '/(request_data|data_hub|business|secrets_in_data)/': 'data_services',
         '/(profiles|vaults)/' : 'user',

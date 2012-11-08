@@ -1,0 +1,88 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Jobs{% endblock %}
+
+{% block meta %}
+    <meta name="description" content="ScraperWiki is an online tool for gathering, cleaning and analysing data from the web. It has a thriving community of programmers writing code and visualisations, and also offers paid corporate services and private data feeds." />
+{% endblock %}
+
+{% block header %}
+	<h2><em>Jobs at ScraperWiki</em></h2>
+	<p>Love what we do? Get in touch!</p>
+{% endblock %}
+
+{% block content %}
+    
+    <div class="position" id="data-scientists" data-job="swjob5">
+        <h3>Data Scientists</h3>
+        
+        <p>Pool temperatures, company registrations, dairy prices&hellip;</p>
+        <p>ScraperWiki is a Silicon Valley style startup, in Liverpool, UK. We&rsquo;re
+        changing how data science is done together on the Internet.</p>
+        
+        <h4>We&rsquo;re looking for two commercially minded geeks who&hellip;</h4>
+
+        <ul>
+            <li>Like communicating with non-technical customers</li>
+            <li>Good at organising other geeks to make sure the job gets done</li>
+            <li>Able to learn to code complex scrapers</li>
+            <li>Will take a lead in improving what we do &ndash; workflow and technical</li>
+        </ul>
+        
+        <h4>To apply, send the following:</h4>
+
+        <ul>
+            <li>A brief story of a time you made a company who was your client/customer
+        happy.</li>
+            <li>A link to one scraper that you've made on ScraperWiki or Github, involving
+        a dataset that you find interesting for some reason.</li>
+            <li>Any questions you have about the job.</li>
+        </ul>
+
+        <p>Along to <a href="mailto:francis@scraperwiki.com">francis@scraperwiki.com</a> with the word <b>swjob5</b> in the subject (and yes, that means no agencies, unless the candidates do that themselves)</p>
+
+        <p>&hellip;Oil wells, marathon results, planning applications</p>
+    </div>
+    
+    <div class="position" data-job="swjob">
+        <h3>Something else?</h3>
+        
+        <p>If you dream of data analysis, or chomp Coffeescript stack traces for breakfast, but none of our current job offerings fit the bill, drop <a href="mailto:francis@scraperwiki.com">francis@scraperwiki.com</a> an email, we&rsquo;d love to talk to you.</p>
+    </div>    
+
+        <div class="lead">
+            <p>Pop music, international shipping, football&hellip;</p>
+            <p>Liverpool&rsquo;s always had a habit of changing the world. Come help us do the same with data on the web.</p>
+        </div>
+
+        <ul class="positions">
+            <li><b>We&rsquo;re looking for:</b></li>
+            <li><a href="#swjob5">Data Scientists</a></li>
+            <li><a href="#swjob">Something else?</a></li>
+        </ul>
+    
+    <br class="clear" />
+
+{% endblock %}
+
+{% block run_script %}
+$(function(){
+    
+    $('.position').each(function(){
+        if('#' + $(this).data('job') == window.location.hash){
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+        $('[href="' + window.location.hash + '"]').addClass('selected');
+    });
+    
+    $('.positions a').bind('click', function(e){
+        e.preventDefault();
+        var position = $(this).attr('href');
+        window.location.hash = position;
+        $('[data-job="' + position.replace('#','') +'"]').show().siblings('.position').hide();
+    });
+    
+});
+{% endblock %}

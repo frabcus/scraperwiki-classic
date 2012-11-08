@@ -138,6 +138,7 @@
         <div class="subnav about">
             <ul>
                 <li class="about"><a href="{% url about %}">About ScraperWiki</a></li>
+                <li class="jobs"><a href="{% url jobs %}">Jobs</a></li>
                 <li class="events"><a href="{% url events %}">Events</a></li>
                 <li class="contact"><a href="{% url contact_form %}">Contact</a></li>
             </ul>
@@ -227,6 +228,7 @@
 			<dt>ScraperWiki</dt>
 			<dd>
 				<ul>
+					<li><a href="{% url jobs %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Jobs']); }">Jobs</a></li>
 					<li><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'About']); }">About Us</a></li>
 					<li><a href="{% url contact_form %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Contact us']); }">Contact Us</a></li>
 					<li><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Blog']); }">Blog</a></li>
