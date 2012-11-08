@@ -3644,11 +3644,57 @@ body.about #what_we_do h4 {
 	float: right;
 }
 
+/* JOBS */
+
+body.jobs div.lead {
+	display: block;
+	float: left;
+	width: 360px;
+	padding: 16px 19px 14px 19px;
+	margin: 0 0 10px -30px;
+	background-color: #fcf9ec;
+	border: 1px solid #f3e7be;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	font-size: 18px;
+	line-height: 24px;
+	font-weight: 300;
+}
+
+body.jobs div.lead p {
+    margin: 0;
+}
+
+body.jobs div.lead p + p {
+    margin-top: 10px;
+}
+
+body.jobs .positions {
+    float: left;
+    clear: left;
+    width: 350px;
+    text-align: right;
+    font-size: 18px;
+}
+
+body.jobs .position {
+    width: 490px;
+    padding-left: 20px;
+    line-height: 21px;
+    float: right;
+    border-left: 1px solid #ccc;
+}
+
+body.jobs .position li {
+    list-style: disc;
+    margin-left: 1.5em;
+}
+
+body.jobs .
 
 
 /* PRICING */
-
-
 
 body.pricing .column-left,
 body.pricing .column-right {
@@ -3974,8 +4020,8 @@ body.data_hub #content p.first {
 body.data_hub .aside,
 body.business .aside,
 body.data_hub blockquote,
-body.data_hub a.dont_miss_out {
-	display: block;
+body.data_hub a.dont_miss_out{
+    display: block;
 	position: relative;
 	width: 360px;
 	padding: 16px 19px 14px 19px;
