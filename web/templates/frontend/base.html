@@ -104,7 +104,7 @@
         <h1><a href="{% url frontpage %}">ScraperWiki</a></h1>
         <ul class="supernav">
             <li class="code"><a href="{% url frontpage %}">Code</a></li>
-            <li class="data_services"><a href="/data_consulting/">Business</a></li>
+            <li class="data_services"><a href="/data_services/">Data Services</a></li>
             <li class="about"><a href="{% url about %}">About</a></li>
             {% if user.is_staff %}
             <li class="admin"><a>Admin</a></li>
@@ -129,9 +129,10 @@
         </div>
         <div class="subnav data_services">
             <ul>
-                <li class="request_data"><a href="{% url request_data %}">Request Data</a></li>
-                <li class="data_consulting"><a href="{% url data_consulting %}">Data Consulting</a></li>
-                <li class="data_hub"><a href="{% url data_hub %}">What is a Data Hub?</a></li>
+                <li class="data_services"><a href="{% url data_services %}">Data Services</a></li>
+                <li class="request_data"><a href="{% url data_services %}"><del>Request Data</del></a></li>
+                <li class="data_consulting"><a href="{% url data_services %}"><del>Data Consulting</del></a></li>
+                <li class="data_hub"><a href="{% url data_services %}"><del>What is a Data Hub?</del></a></li>
             </ul>
         </div>
         <div class="subnav about">
@@ -208,9 +209,9 @@
 			<dt>Business</dt>
 			<dd>
 				<ul>
-                    <li><a href="{% url data_consulting %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Data consulting']); }">Data Consulting</a></li>
-					<li><a href="{% url data_hub %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'What is a data hub?']); }">What is a Data Hub?</a></li>
-                    <li><a href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Request data']); }">Request Data</a></li>
+                    <li><a href="{% url data_services %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Data Services']); }">Data Services</a></li>
+					<li><a href="{% url data_services %}"><del>What is a Data Hub?</del></a></li>
+                    <li><a href="{% url data_services %}"><del>Request Data</del></a></li>
 				</ul>
 			</dd>
 			<dt>Coders</dt>

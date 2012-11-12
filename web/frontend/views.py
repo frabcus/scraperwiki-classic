@@ -481,21 +481,8 @@ def resend_activation_email(request):
 
     return render_to_response(template, {'form': form}, context_instance = RequestContext(request))
 
-def request_data(request):
-    form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
-    if form.is_valid():
-        form.save()
-        return HttpResponseRedirect(reverse('request_data_thanks'))
-    return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
-
-def request_data_thanks(request):
-    return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
-
-def data_hub(request):
-    return render_to_response('frontend/data_hub.html', context_instance = RequestContext(request))
-
-def data_consulting(request):
-    return render_to_response('frontend/data_consulting.html', context_instance = RequestContext(request))
+def data_services(request):
+    return render_to_response('frontend/data_services.html', context_instance = RequestContext(request))
 
 def generate_recurly_signature(plan_code, account_code):
     signature = recurly.js.sign_subscription(plan_code, account_code)
