@@ -270,7 +270,7 @@ $(function(){
     var urls = {
         '/(about|jobs|events|contact)/' : 'about',
         '/status/' : 'admin',
-        '/data_services/': 'data_services',
+        '/dataservices/': 'dataservices',
         '/(profiles|vaults)/' : 'user',
         '/login/' : 'login',
         '.*' : 'code'

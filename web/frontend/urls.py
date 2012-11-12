@@ -42,12 +42,12 @@ urlpatterns = patterns('',
     url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
     url(r'^help/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
     
-    url(r'^data_services/$', frontend_views.data_services, name='data_services'),
-    url(r'^request_data/(thanks/)?$', redirect_to, {'url': '/data_services/'}),
-    url(r'^data_hub/$', redirect_to, {'url': '/data_services/'}),
-    url(r'^business/$', redirect_to, {'url': '/data_services/'}),
-    url(r'^data_consult(ancy|ing)/$', redirect_to, {'url': '/data_services/'}),
-    url(r'^secrets_in_data/(thanks/)?$', redirect_to, {'url': '/data_services/'}),
+    url(r'^dataservices/$', frontend_views.dataservices, name='dataservices'),
+    url(r'^request_data/(thanks/)?$', redirect_to, {'url': '/dataservices/'}),
+    url(r'^data_hub/$', redirect_to, {'url': '/dataservices/'}),
+    url(r'^business/$', redirect_to, {'url': '/dataservices/'}),
+    url(r'^data_consult(ancy|ing)/$', redirect_to, {'url': '/dataservices/'}),
+    url(r'^secrets_in_data/(thanks/)?$', redirect_to, {'url': '/dataservices/'}),
     
     #hello world
     url(r'^hello_world.html', direct_to_template, {'template': 'frontend/hello_world.html'}, name='help_hello_world'),

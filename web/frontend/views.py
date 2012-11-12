@@ -481,8 +481,8 @@ def resend_activation_email(request):
 
     return render_to_response(template, {'form': form}, context_instance = RequestContext(request))
 
-def data_services(request):
-    return render_to_response('frontend/data_services.html', context_instance = RequestContext(request))
+def dataservices(request):
+    return render_to_response('frontend/dataservices.html', context_instance = RequestContext(request))
 
 def generate_recurly_signature(plan_code, account_code):
     signature = recurly.js.sign_subscription(plan_code, account_code)
