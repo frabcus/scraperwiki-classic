@@ -1,10 +1,17 @@
-#!/bin/sh
 # resourcedir-backup
 # David Jones, ScraperWiki Limited
 #
 # Script to backup the useful content of resourcedir, that is, the sqlite
 # databases associated with each data script.  We expect this script to be run
 # from cron (daily).
+
+if pgrep -f "resourcedir-*backup" >/dev/null
+then
+    echo "resourcedir-backup is still running from previous day"
+    echo
+    ps auxwww | grep resourcedir-backup
+    exit 1
+fi
 
 # So that errors cause the script to exit early.
 set -e
