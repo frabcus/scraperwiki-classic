@@ -284,7 +284,7 @@ $(function(){
         }
     });
     
-    $('.supernav li a').not('.signup a').bind('click', function(e){
+    $('.supernav li a').not('li.signup a, body:not(.dataservices) li.dataservices a').bind('click', function(e){
         e.preventDefault();
         var $li = $(this).parent();
         var $sub = $('.subnav.' + $li.attr('class').split(" ")[0]);
