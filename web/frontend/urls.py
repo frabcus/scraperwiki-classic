@@ -43,7 +43,7 @@ urlpatterns = patterns('',
     url(r'^help/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
     
     url(r'^dataservices/$', frontend_views.dataservices, name='dataservices'),
-    url(r'^request_data/(thanks/)?$', redirect_to, {'url': '/dataservices/'}),
+    url(r'^request_data/(?:thanks/)?$', redirect_to, {'url': '/dataservices/'}),
     url(r'^data_hub/$', redirect_to, {'url': '/dataservices/'}),
     url(r'^business/$', redirect_to, {'url': '/dataservices/'}),
     url(r'^data_consult(ancy|ing)/$', redirect_to, {'url': '/dataservices/'}),

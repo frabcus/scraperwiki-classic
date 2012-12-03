@@ -18,7 +18,7 @@
 {% block header %}
 	<div id="frontpage_intro">
 	    <a data-wiki_type="scraper" class="create editor_scraper" href="{% url choose_template 'scraper' %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Create a scraper']); }">Create a scraper</a>
-        <a class="tour" href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Request data']); }">Request data</a>
+        <a class="tour" href="{% url dataservices %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Request data']); }">Request data</a>
 		<p>The data hub for coders.</p>
 	</div>
 	<div id="frontpage_slider">
@@ -64,7 +64,7 @@
 					<td>Simply analyse, aggregate<br/>and visualise data.</td>
 				</tr>
 			</table>
-			<p class="last"><a class="back" href="#intro_requester">&laquo; Go Back</a> or <a class="forward" href="{% url request_data %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - request data']); }">Request data!</a></p>
+			<p class="last"><a class="back" href="#intro_requester">&laquo; Go Back</a> or <a class="forward" href="{% url dataservices %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - request data']); }">Request data!</a></p>
 		</div>
 	</div>
 {% endblock %}
