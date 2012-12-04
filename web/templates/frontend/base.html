@@ -10,7 +10,7 @@
 	{% load compress %}
 
 	{% compress js %}
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.8.3.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.12.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>
@@ -128,9 +128,9 @@
         </div>
         <div class="subnav dataservices">
             <ul>
-                <li class="liberate-your-data"><a href="{% url dataservices %}#liberate-your-data">Liberate Your Data</a></li>
+                <li class="liberate-your-data"><a href="{% url dataservices %}">Liberate Your Data</a></li>
                 <li class="see-our-process"><a href="{% url dataservices %}#our-process">Our Process</a></li>
-                <li class="case-studies"><a href="{% url dataservices %}#case-studies">Case Studies</a></li>
+                <li class="case-studies"><a href="{% url dataservices %}#case-study">Case Studies</a></li>
                 <li class="get-in-touch"><a href="{% url dataservices %}#get-in-touch">Get In Touch</a></li>
             </ul>
         </div>
