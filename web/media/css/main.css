@@ -3424,9 +3424,9 @@ body.dataservices #split-header .primary .buttons {
 body.dataservices #split-header .primary .buttons a {
 	display: inline-block;
 	margin: 0 20px 0 0;
-	padding: 7px 10px 5px 10px;
-	font-size: 16px;
-	line-height: 16px;
+	padding: 7px 12px;
+	font-size: 18px;
+	line-height: 18px;
 	font-weight: bold;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
