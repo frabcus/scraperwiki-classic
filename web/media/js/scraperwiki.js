@@ -270,7 +270,7 @@ $(function(){
     var urls = {
         '/(about|jobs|events|contact)/' : 'about',
         '/status/' : 'admin',
-        '/(request_data|data_hub|business|secrets_in_data)/': 'data_services',
+        '/dataservices/': 'dataservices',
         '/(profiles|vaults)/' : 'user',
         '/login/' : 'login',
         '.*' : 'code'
@@ -284,18 +284,18 @@ $(function(){
         }
     });
     
-    $('.supernav li a').not('.signup a').bind('click', function(e){
+    $('.supernav li a').not('li.signup a, li.dataservices a').add('body.dataservices li.dataservices a').bind('click', function(e){
         e.preventDefault();
         var $li = $(this).parent();
         var $sub = $('.subnav.' + $li.attr('class').split(" ")[0]);
         if($sub.length){
-            $li.addClass('active').siblings().removeClass('active');
+            $li.addClass('active').siblings('.active').removeClass('active');
             $sub.show().siblings('.subnav').hide();
         }
     });
     $loginbutton = $('<a>Log In</a>').bind('click', function(){
         $(this).parents('form').find(':submit').trigger('click');
-    })
+    });
     $('li.login_submit :submit').hide().after($loginbutton).parents('form').find(':text, :password').bind('keyup', function(e){
         if((e.keyCode || e.which) == 13){
 			$(this).parents('form').find(':submit').trigger('click');
@@ -310,6 +310,7 @@ $(function(){
     } else {
         $('#nav .search input.text').before('<span class="placeholder" style="display:none">Search code...</span>');
     }
+    
     $('#nav .search input.text, #nav .login input.text').bind('focus', function(){
         $(this).parent().addClass('focussed');
         if($(this).val() === ''){
@@ -328,7 +329,6 @@ $(function(){
 		}
     });
     
-    
     setTimeout(function(){
         // clever hack removes the yellow background on auto-filled inputs in Chrome
         if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
@@ -344,78 +344,11 @@ $(function(){
             $('#nav .login label').hide();
         }
     }, 500);
-    
 
     $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
 		e.preventDefault();
 		newCodeObject($(this));
     });
-	
-	function developer_show(){
-		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
-		$('#more_developer_div').fadeIn(500);
-		$('#blob_developer').animate({left: 740}, 500, 'easeOutCubic').addClass('active');
-	}
-	
-	function developer_hide(){
-		$('#intro_developer, #intro_requester, #blob_requester').fadeIn(500);
-		$('#more_developer_div').fadeOut(500);
-		$('#blob_developer').animate({left: 310}, 500, 'easeOutCubic').removeClass('active');
-	}
-	
-	function requester_show(){
-		$('#intro_developer, #intro_requester, #blob_developer').fadeOut(500);
-		$('#more_requester_div').fadeIn(500);
-		$('#blob_requester').animate({left: 10}, 500, 'easeOutCubic').addClass('active');
-	}
-	
-	function requester_hide(){
-		$('#intro_developer, #intro_requester, #blob_developer').fadeIn(500);
-		$('#more_requester_div').fadeOut(500);
-		$('#blob_requester').animate({left: 460}, 500, 'easeOutCubic').removeClass('active');
-	}
-	
-	$('#blob_developer').css('cursor', 'pointer').bind('click', function(e){
-		e.preventDefault();
-	    if($(this).is('.active')){
-	        developer_hide();
-	    } else {
-	        developer_show();
-			if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
-	    }
-	});
-	
-	$('#blob_requester').css('cursor', 'pointer').bind('click', function(e){
-		e.preventDefault();
-	    if($(this).is('.active')){
-	        requester_hide();
-	    } else {
-	        requester_show();
-			if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']); }
-	    }
-	});
-	
-	$('#more_developer, #intro_developer').css('cursor', 'pointer').bind('click', function(e){
-		e.preventDefault();
-		developer_show();
-		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Developer - find out more']); }
-	});
-
-	$('#more_requester, #intro_requester').css('cursor', 'pointer').bind('click', function(e){
-		e.preventDefault();
-		requester_show();
-		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Homepage buttons', 'Requester - find out more']); }
-	});
-
-	$('#more_developer_div .back').bind('click', function(e){
-		e.preventDefault();
-		developer_hide();
-	});	
-	
-	$('#more_requester_div .back').bind('click', function(e){
-		e.preventDefault();
-		requester_hide();
-	});
 	
 	$('a.submit_link').each(function(){
 		id = $(this).siblings(':submit').attr('id');
@@ -653,7 +586,6 @@ $(function(){
 	if($('#compose_user_message').length && window.location.hash == '#message'){
 		$('#compose_user_message').trigger('click');
 	}
-	
 	
 	$('#liberatesomedata').bind('click', function(e){
 		e.preventDefault();
