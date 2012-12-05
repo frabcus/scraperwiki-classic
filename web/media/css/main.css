@@ -3769,6 +3769,17 @@ form#request p {
 	margin: 0;
 }
 
+form#request .thanks {
+    display: inline-block;
+    padding: 5px 10px;
+    margin-top: 5px;
+	background-color: #E9F5E7;
+	color: #39732d;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
 form#request .question {
     padding-top: 15px;
 }

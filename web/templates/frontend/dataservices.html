@@ -115,9 +115,9 @@
             {% if form.non_field_errors %}
             <p class="error">{{form.non_field_errors.0}}</p>
             {% endif %}
-            {% if submitted %}
+            {% if not submitted %}
             <p class="thanks">Thanks for your details. We will be in touch shortly.</p>
-            {% endif %}
+            {% else %}
             <div class="question name {% if form.name.errors %} error{% endif %}">
                 <p>{{form.name.label_tag}}
                 {{form.name}}</p>
@@ -141,6 +141,7 @@
             <div class="last">
                 {{form.ip}} <input type="submit" value="Call me back" id="send" />
             </div>
+            {% endif %}
         </form>
     </div>
 </div>
