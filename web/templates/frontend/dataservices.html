@@ -115,7 +115,7 @@
             {% if form.non_field_errors %}
             <p class="error">{{form.non_field_errors.0}}</p>
             {% endif %}
-            {% if not submitted %}
+            {% if submitted %}
             <p class="thanks">Thanks for your details. We will be in touch shortly.</p>
             {% else %}
             <div class="question name {% if form.name.errors %} error{% endif %}">
@@ -152,6 +152,18 @@
 
 {% block run_script %}
     $(function(){
+        $('.subnav.dataservices a').bind('click', function(e){
+            e.preventDefault();
+            var target = $($(this).attr('href').replace('/dataservices/', ''));
+            if(target.length){
+                var scrollTop = target.offset().top - 40;
+            } else {
+                var scrollTop = 100;
+            }
+            $('html, body').animate({
+                scrollTop: scrollTop
+            }, 250, 'swing');
+        });
         $('body.dataservices #logos').verticalCarousel();
         $('<a>').addClass('submit').html($('#send').val() + ' <span>&#x25BA;</span>').bind('click', function(){
             $(this).prev().trigger('click');
