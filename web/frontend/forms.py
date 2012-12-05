@@ -145,21 +145,11 @@ class ResendActivationEmailForm(forms.Form):
     email_address = forms.EmailField()
 
 class DataEnquiryForm(forms.ModelForm):
-    name = forms.CharField(label='Name:', error_messages={'required':'Please tell us your name.'})
-    email = forms.CharField(required=False, label='Email:')
-    phone = forms.CharField(required=False, label='Phone or Skype:')
-    description = forms.CharField(widget=forms.Textarea, label='What data do you want?', error_messages={'required':'Please tell us what data you need.'})
+    name = forms.CharField(required=True, label='Your Name:', error_messages={'required':'Please tell us your name.'})
+    email = forms.CharField(required=True, label='Your Email address:', error_messages={'required':'Please tell us your email.'})
+    phone = forms.CharField(required=True, label='Your Phone or Skype:', error_messages={'required':'How can we contact you?'})
+    description = forms.CharField(required=False, widget=forms.Textarea, label='Project brief: (optional)')
     ip = forms.CharField(widget=forms.HiddenInput)
 
     class Meta:
         model = DataEnquiry
-
-    def clean(self):
-        data = self.cleaned_data
-        if not data.get('phone', ''):
-            self.no_phone = True
-            self._errors['foobar'] = True
-        if not data.get('email', ''):
-            self.no_email = True
-            self._errors['foobar'] = True
-        return data
