@@ -1082,23 +1082,25 @@ body.homepage .tags li a {
 
 body.homepage #content,
 body.homepage #customers {
-    width: 918px;
-	padding: 20px;
     margin: 20px auto;
     border: 1px solid #cdcdcd;
 	background: #fff;
     -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
     box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
-	text-align: left;
     clear: both;
 }
 
 body.homepage #content {
     margin-bottom: 60px;
+    width: 918px;
+	padding: 20px;
+	text-align: left;
 }
 
 body.homepage #customers {
+    width: 958px;
+    padding: 20px 0 25px 0;
     text-align: center;
 }
 
@@ -1121,7 +1123,6 @@ body.homepage #customers ul {
 	text-align: center;
 	font-size: 0px;
 	line-height: 0px;
-	margin-bottom: 10px;
 }
 
 body.homepage #customers li {
@@ -1129,7 +1130,7 @@ body.homepage #customers li {
 }
 
 body.homepage #customers li a {
-	padding: 0 10px;
+	padding: 0 20px;
 	opacity: 0.7;
 }
 
