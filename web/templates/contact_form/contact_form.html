@@ -26,8 +26,8 @@
                 {{ form.subject_dropdown.label_tag }}
                 {{ form.subject_dropdown }}
                 {% field_errors form.subject_dropdown %}
-                <a id="requesting_data_tip" style="display: none" href="{% url request_data %}">
-                We have a special form that <br/>makes it dead easy to request&nbsp;data.<br/><strong>Click here to fill&nbsp;it&nbsp;out.</strong>
+                <a id="requesting_data_tip" style="display: none" href="{% url dataservices %}">
+                ScraperWiki Data Services specialise in getting the data you need.<br/><strong>Click here to contact&nbsp;them.</strong>
                 </a>
             </li>
             {% if request.user.is_authenticated %}

@@ -55,18 +55,7 @@ def frontpage(request, public_profile_field=None):
             'tags': Tags.sorted(),
             'language': 'python'
            }
-
-    # List here: https://docs.google.com/a/scraperwiki.com/spreadsheet/ccc?key=0AmgaEqd-YKjXdGNENndyR1BScFMtdG45OEJyQXZaR2c#gid=0
-    selection = [ 3, 4 ] 
-    if user.is_authenticated() and user.get_profile().has_feature('New Homepage'):
-        ab_new_homepage = 4
-    elif 'ab_new_homepage' not in request.session or request.session['ab_new_homepage'] not in selection:
-        ab_new_homepage = random.choice(selection)
-    else:
-        ab_new_homepage = request.session['ab_new_homepage']
-
-    request.session['ab_new_homepage'] = ab_new_homepage
-    return render_to_response('frontend/homepage_%s.html' % ab_new_homepage, data, context_instance=RequestContext(request))
+    return render_to_response('frontend/homepage.html', data, context_instance=RequestContext(request))
 
 
 def profile_detail(request, username):
@@ -481,31 +470,12 @@ def resend_activation_email(request):
 
     return render_to_response(template, {'form': form}, context_instance = RequestContext(request))
 
-def request_data(request):
+def dataservices(request):
     form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
     if form.is_valid():
         form.save()
-        return HttpResponseRedirect(reverse('request_data_thanks'))
-    return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
-
-def request_data_thanks(request):
-    return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
-
-def secrets_in_data(request):
-    form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
-    if form.is_valid():
-        form.save()
-        return HttpResponseRedirect(reverse('secrets_in_data_thanks'))
-    return render_to_response('frontend/secrets_in_data.html', {'form': form}, context_instance = RequestContext(request))
-
-def secrets_in_data_thanks(request):
-    return render_to_response('frontend/secrets_in_data_thanks.html', context_instance = RequestContext(request))
-
-def data_hub(request):
-    return render_to_response('frontend/data_hub.html', context_instance = RequestContext(request))
-
-def data_consulting(request):
-    return render_to_response('frontend/data_consulting.html', context_instance = RequestContext(request))
+        return render_to_response('frontend/dataservices.html', {'form': form, 'submitted': True}, context_instance = RequestContext(request))
+    return render_to_response('frontend/dataservices.html', {'form': form, 'submitted': False}, context_instance = RequestContext(request))
 
 def generate_recurly_signature(plan_code, account_code):
     signature = recurly.js.sign_subscription(plan_code, account_code)
