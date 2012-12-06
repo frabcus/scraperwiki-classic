@@ -7,12 +7,13 @@
 
     {% block meta %}{% endblock %}
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
+
 	{% load compress %}
 
 	{% compress js %}
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.8.3.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.12.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
