@@ -77,11 +77,13 @@ $(function()
             window.location.hash = id; 
             $('#id_category_title').val($(this).find('strong').text());
             $('#options, #result').show();
-
-            // jsondict option is the only one available when not doing sqlite selection
-            $("#id_format option[value!='jsondict']").attr("disabled", (id == "sqlite" ? "" : "disabled")); 
-            if ((id != "sqlite") && !$("#id_format option[value='jsondict']").attr("selected"))
-                $("#id_format option[value='jsondict']").attr("selected", true); 
+            if(id=='sqlite'){
+                $('#id_format option').attr('disabled',false);
+            } else {
+                $o = $('#id_format option[value="jsondict"]');
+                $o.attr('disabled',false).attr('selected',true);
+                $o.siblings().attr('disabled', true);
+            }
             setTimeout(rewriteapiurl, 400); 
         }
         
