@@ -22,9 +22,9 @@ def show_gravatar(user, size = 'medium'):
 
     domain = Site.objects.get_current().domain
     defaultimg =  settings.MEDIA_URL + "images/gravatar_default.png"
-    gravatar_id = user and hashlib.md5(user.email).hexdigest() or ''
-    gravatardata = urllib.urlencode({'gravatar_id': gravatar_id, 'size': str(size_px), 'd': 'identicon'})
+    gravatar_id = user and hashlib.md5(user.email.strip().lower()).hexdigest() or ''
+    gravatardata = urllib.urlencode({'size': str(size_px), 'd': 'identicon'})
     
-    url = "https://secure.gravatar.com/avatar.php?%s" % gravatardata
+    url = "https://s.gravatar.com/%s?%s" % (gravatar_id, gravatardata)
     username = user and user.username or ''
     return {'gravatar': {'url':url, 'size':size, 'size_px':size_px, 'username':username }}
