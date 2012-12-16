@@ -25,6 +25,6 @@ def show_gravatar(user, size = 'medium'):
     gravatar_id = user and hashlib.md5(user.email.strip().lower()).hexdigest() or ''
     gravatardata = urllib.urlencode({'size': str(size_px), 'd': 'identicon'})
     
-    url = "https://s.gravatar.com/%s?%s" % (gravatar_id, gravatardata)
+    url = "https://s.gravatar.com/avatar/%s?%s" % (gravatar_id, gravatardata)
     username = user and user.username or ''
     return {'gravatar': {'url':url, 'size':size, 'size_px':size_px, 'username':username }}
