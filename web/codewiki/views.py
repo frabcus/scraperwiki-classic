@@ -466,7 +466,7 @@ def run_scraper(request, short_name):
     from codewiki.models import Scraper
     from codewiki.models.code import MAGIC_RUN_INTERVAL
     
-    code = getscraperor404(request, short_name, "schedulescraper")
+    code = getscraperor404(request, short_name, "changeadmin", do_check=False)
     if code.wiki_type == "scraper":
         # We can now conver the code object (sigh) into a scraper now that we know
         # we have permission to access it.
