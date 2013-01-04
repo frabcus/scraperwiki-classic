@@ -473,8 +473,8 @@ def resend_activation_email(request):
 def dataservices(request):
     form = DataEnquiryForm(request.POST or None, initial={'ip': request.META['REMOTE_ADDR']})
     if form.is_valid():
-        form.save()
-        return render_to_response('frontend/dataservices.html', {'form': form, 'submitted': True}, context_instance = RequestContext(request))
+        instance = form.save()
+        return render_to_response('frontend/dataservices.html', {'form': form, 'submitted': True, 'id':instance.id}, context_instance = RequestContext(request))
     return render_to_response('frontend/dataservices.html', {'form': form, 'submitted': False}, context_instance = RequestContext(request))
 
 def generate_recurly_signature(plan_code, account_code):
