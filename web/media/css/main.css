@@ -3022,6 +3022,10 @@ body.jobs #something-else {
     min-height: 300px;
 }
 
+body.jobs .closed {
+	font-weight: bold;
+    text-align: center;
+}
 
 /* PRICING */
 
