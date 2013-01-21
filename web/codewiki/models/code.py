@@ -229,7 +229,10 @@ class Code(models.Model):
         return None
 
     def attachable_scraperdatabases(self):
-        return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all()  if cp.permitted_object.privacy_status != "deleted" ]
+        try:
+            return [ cp.permitted_object  for cp in CodePermission.objects.filter(code=self).all()  if cp.permitted_object.privacy_status != "deleted" ]
+        except:
+            return []
 
     # could filter for the private scrapers which this user is allowed to see!
     def attachfrom_scrapers(self):
