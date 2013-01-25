@@ -14,6 +14,7 @@
 # This function uses FD 9 to open a lock on the file.  To release the lock, close FD 9:
 # exec 9>&-
 #
+# See: http://stackoverflow.com/questions/185451/quick-and-dirty-way-to-ensure-only-one-instance-of-a-shell-script-is-running-at#731634
 mutex() {
     local file=$1 pid pids 
 
