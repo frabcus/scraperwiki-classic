@@ -592,7 +592,7 @@ $(document).ready(function()
 
         //clear the tabs
         clearOutput();
-        writeToConsole('*** Want to do this for a living? ScraperWiki is hiring: https://scraperwiki.com/jobs/#swjob5 ***'); // adverts!
+        writeToConsole('*** Want to code Python scrapers for a living? ScraperWiki is hiring: https://scraperwiki.com/jobs/#swjob8 ***'); // adverts!
         writeToConsole('Starting run ... ' + (isstaff ? " ["+lxc+"]" : "")); 
         writeToChat('<i>' + lchatname + ' runs scraper</i>'); 
 
