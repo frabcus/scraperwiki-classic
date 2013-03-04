@@ -2696,7 +2696,7 @@ body.about p {
 	margin: 0;
 }
 
-#what_we_do, #history_and_funding, #team, #thanks {
+#what_we_do, #history_and_funding, #team, #board, #thanks {
 	position: relative;
 	padding-left: 160px;
 	overflow: auto;
@@ -2706,6 +2706,10 @@ body.about p {
 	clear: both;
 }
 
+#board {
+	margin-top: 20px;
+}
+
 #what_we_do {
 	margin-top: 0;
 	padding-top: 0;
@@ -2713,7 +2717,7 @@ body.about p {
 	overflow: visible;
 }
 
-#history_and_funding h2, #team h2, #thanks h2 {
+#history_and_funding h2, #team h2, #board h2, #thanks h2 {
 	position: absolute;
 	top: 40px;
 	left: 0;
@@ -2724,7 +2728,7 @@ body.about p {
 	color: #666;
 }
 
-#team > div {
+#team > div, #board > div {
 	height: 76px;
 }
 
@@ -2875,23 +2879,23 @@ body.about #what_we_do h4 {
 	clear: right;
 }
 
-#team div {
+#team div, #board div {
 	width: 350px;
 	margin-bottom: 20px;
 	font-size: 14px;
 	line-height: 18px;
 }
 
-#team div.odd {
+#team div.odd, #board div.odd {
 	float: left;
 	clear: right;
 }
 
-#team div.even {
+#team div.even, #board div.even {
 	float: right;
 }
 
-#team img {
+#team img, #board img {
 	float: left;
 	width: 55px;
 	border: 1px solid #fff;
@@ -2900,27 +2904,26 @@ body.about #what_we_do h4 {
 	box-shadow: 0 1px 2px #ccc;
 }
 
-#team h3,
-#team p {
+#team h3, #team p, #board h3, #board p {
 	float: right;
 	width: 280px;
 }
 
-#team h3 a {
+#team h3 a, #board h3 a {
 	color: #000;
 }
 
-#team h3 small {
+#team h3 small, #board h3 small {
 	font-size: 13px;
 	color: #999;
 }
 
-#team p {
+#team p, #board p {
 	margin-top: 2px;
 	color: #888;
 }
 
-#team p a {
+#team p a, #board p a {
 	color: #444;
 }
 
