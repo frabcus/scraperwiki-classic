@@ -120,7 +120,7 @@
             <ul>
                 <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">New Scraper</a></li>
                 <li class="create"><a data-wiki_type="view" href="#" class="editor_scraper">New View</a></li>
-                <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Scrapers &amp; Views</a></li>
+                <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
                 <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
                 <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
             </ul>
