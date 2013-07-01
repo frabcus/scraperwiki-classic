@@ -1138,7 +1138,7 @@ body.homepage #customers li a:hover {
 	opacity: 1;
 }
 
-#minimal {
+#classic {
 	width: 960px;
 	text-align: center;
 	margin: 0px auto;
@@ -1147,58 +1147,21 @@ body.homepage #customers li a:hover {
 	background: transparent url(../images/f3f3f3_radial.gif) center center no-repeat;
 }
 
-#minimal h1 {
+#classic h1 {
 	text-shadow: 0 1px 0 #fff;
 	margin-bottom: 20px;
 	color: #113;
 }
 
-#minimal h1 span {
-	display: inline-block;
-	width: 300px;
-}
-
-#minimal h1 .or {
-	color: #aab;
-	width: 70px;
-	vertical-align: 60%;
-	font-size: 24px;
-}
-
-#minimal h1 .coders {
-	text-align: right;
-}
-
-#minimal h1 .businesses {
-	text-align: left;
-}
-
-#minimal a {
+#take_me_there {
 	display:  inline-block;
 	width: 230px;
 	padding: 10px 0;
+  font-size: 24px;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
-	color: #373b3e;
-	border: 1px solid #d5a72c;
-	text-shadow: 0 1px 0 rgba(255,255,255,0.6);
-	background-color: #f8d653;
-	background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 2%, #f9dc5c 2%, #f5c033 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(2%,#ffffff), color-stop(2%,#f9dc5c), color-stop(100%,#f5c033));
-	background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f9dc5c 2%,#f5c033 100%);
-	background: -o-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f9dc5c 2%,#f5c033 100%);
-	background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f9dc5c 2%,#f5c033 100%);
-	background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f9dc5c 2%,#f5c033 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9dc5c', endColorstr='#f5c033',GradientType=0 );
-	-webkit-box-shadow: 0px 1px 3px rgba(0,0,0,0.3);
-	-moz-box-shadow: 0px 1px 3px rgba(0,0,0,0.3);
-	box-shadow: 0px 1px 3px rgba(0,0,0,0.3);
-}
-
-#minimal a.create {
-	margin-right: 70px;
-	border: 1px solid #3b7dbf;
+  border: 1px solid #3b7dbf;
 	background-color: #5094d0;
 	color: #fff;
 	text-shadow: 0 1px 1px rgba(0,0,0,0.6);
@@ -1209,21 +1172,13 @@ body.homepage #customers li a:hover {
 	background: -ms-linear-gradient(top, #afd5ed 0%,#afd5ed 2%,#5da9d9 2%,#356bbe 100%);
 	background: linear-gradient(top, #afd5ed 0%,#afd5ed 2%,#5da9d9 2%,#356bbe 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5da9d9', endColorstr='#356bbe',GradientType=0 );
+	-webkit-box-shadow: 0px 1px 3px rgba(0,0,0,0.3);
+	-moz-box-shadow: 0px 1px 3px rgba(0,0,0,0.3);
+	box-shadow: 0px 1px 3px rgba(0,0,0,0.3);
 }
 
-#minimal a:hover {
+#take_me_there:hover {
 	text-decoration: none;
-	background-color: #fdde68;
-	background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 2%, #fde471 2%, #fbca47 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(2%,#ffffff), color-stop(2%,#fde471), color-stop(100%,#fbca47));
-	background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 2%,#fde471 2%,#fbca47 100%);
-	background: -o-linear-gradient(top, #ffffff 0%,#ffffff 2%,#fde471 2%,#fbca47 100%);
-	background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 2%,#fde471 2%,#fbca47 100%);
-	background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#fde471 2%,#fbca47 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fde471', endColorstr='#fbca47',GradientType=0 );
-}
-
-#minimal a.create:hover {
 	background-color: #5fa1da;
 	background: -moz-linear-gradient(top, #c2e0f3 0%, #c2e0f3 2%, #6db5e2 2%, #3c77d0 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#c2e0f3), color-stop(2%,#c2e0f3), color-stop(2%,#6db5e2), color-stop(100%,#3c77d0));
@@ -1234,7 +1189,7 @@ body.homepage #customers li a:hover {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6db5e2', endColorstr='#3c77d0',GradientType=0 );
 }
 
-#minimal a:active {
+#take_me_there:active {
 	position: relative;
 	top: 1px;
 	-webkit-box-shadow: 0px 1px 1px rgba(0,0,0,0.3);
@@ -1242,6 +1197,19 @@ body.homepage #customers li a:hover {
 	box-shadow: 0px 1px 1px rgba(0,0,0,0.3);
 }
 
+#classic_login {
+  display: block;
+  width: 50%;
+  margin: 10px auto 0 auto;
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+#classic p {
+  font-size: 21px;
+  margin-bottom: 30px ;
+  line-height: 26px;
+}
 
 
 
@@ -1575,9 +1543,9 @@ body.profiles.edit #features li input {
 #footer dl dt {
 	float: left;
 	clear: left;
-	width: 100px;
+	width: 150px;
 	padding: 0 0 10px 0;
-	margin: 0 20px 0 10px;
+	margin: 0 20px 0 0;
 	font-weight: bold;
 	color: #999;
 	text-align: right;
@@ -1614,7 +1582,7 @@ body.profiles.edit #features li input {
 
 #footer img {
 	position: absolute;
-	top: -10px;
+	top: -15px;
 	right: 30px;
 	-webkit-transform-style: preserve-3d;
 }
