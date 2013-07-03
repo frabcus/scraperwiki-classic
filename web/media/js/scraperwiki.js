@@ -284,7 +284,7 @@ $(function(){
         }
     });
     
-    $('.supernav li a').not('li.signup a, li.dataservices a').add('body.dataservices li.dataservices a').bind('click', function(e){
+    $('.supernav li a').not('li.signup a, li.new a').bind('click', function(e){
         e.preventDefault();
         var $li = $(this).parent();
         var $sub = $('.subnav.' + $li.attr('class').split(" ")[0]);
@@ -328,6 +328,12 @@ $(function(){
 		    $(this).prev().hide();
 		}
     });
+    
+    $("#classic_login").on("click", function(){
+        console.log("kittens")
+        $("li.login a").trigger("click")
+        $("#login_username").focus()
+    })
     
     setTimeout(function(){
         // clever hack removes the yellow background on auto-filled inputs in Chrome

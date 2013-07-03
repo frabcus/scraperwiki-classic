@@ -104,9 +104,8 @@
 	<div id="nav">
         <h1><a href="{% url frontpage %}">ScraperWiki</a></h1>
         <ul class="supernav">
-            <li class="code"><a href="{% url frontpage %}">Data Hub</a></li>
-            <li class="dataservices"><a href="/dataservices/">Data Services</a></li>
-            <li class="about"><a href="{% url about %}">About</a></li>
+            <li class="new"><a href="https://scraperwiki.com">New ScraperWiki <img src="{{ MEDIA_URL }}images/nav-external-link-icon.gif" width="8" height="9" alt="" style="margin-left: 2px;"></a></li>
+            <li class="code"><a href="{% url frontpage %}">ScraperWiki Classic</a></li>
             {% if user.is_staff %}
             <li class="admin"><a>Admin</a></li>
             {% endif %}
@@ -114,33 +113,16 @@
             {% load gravatar %}
             <li class="user"><a href="{% url profile user.username %}"><span class="gravatar_outer">{% show_gravatar user 'medium' %}</span> {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
             {% else %}
-            <li class="signup"><a href="{% url login %}#signup">Sign Up</a></li>
-            <li class="login"><a href="{% url login %}">Log In</a></li>
+            <li class="login"><a href="{% url login %}">Classic Log In</a></li>
             {% endif %}
         </ul>
         <div class="subnav code">
             <ul>
                 <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">New Scraper</a></li>
                 <li class="create"><a data-wiki_type="view" href="#" class="editor_scraper">New View</a></li>
-                <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Scrapers &amp; Views</a></li>
+                <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
                 <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
                 <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
-            </ul>
-        </div>
-        <div class="subnav dataservices">
-            <ul>
-                <li class="liberate-your-data"><a href="{% url dataservices %}">Liberate Your Data</a></li>
-                <li class="see-our-process"><a href="{% url dataservices %}#our-process">Our Process</a></li>
-                <li class="case-studies"><a href="{% url dataservices %}#case-study">Case Studies</a></li>
-                <li class="get-in-touch"><a href="{% url dataservices %}#get-in-touch">Get In Touch</a></li>
-            </ul>
-        </div>
-        <div class="subnav about">
-            <ul>
-                <li class="about"><a href="{% url about %}">About ScraperWiki</a></li>
-                <li class="jobs"><a href="{% url jobs %}">Jobs</a></li>
-                <li class="events"><a href="{% url events %}">Events</a></li>
-                <li class="contact"><a href="{% url contact_form %}">Contact</a></li>
             </ul>
         </div>
         {% if user.is_staff %}
@@ -170,7 +152,6 @@
                 {% if user.vaults.count > 0 or request.user.vault_membership.count %}
                 <li class="vaults"><a href="{% url vault %}">Your Vaults</a></li>
                 {% endif %}
-                <li class="feedback"><a href="{% url contact_form %}">Give Feedback</a></li>
                 <li class="logout"><a href="{% url logout %}?next_page=/">Log Out</a></li>
             </ul>
         </div>
@@ -209,12 +190,12 @@
 			<dt>Business</dt>
 			<dd>
 				<ul>
-                    <li><a href="{% url dataservices %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Data Services']); }">Data Services</a></li>
-                    <li><a href="{% url pricing %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Premium Accounts']); }">Premium Account Pricing</a></li>
+                    <li><a href="https://beta.scraperwiki.com/professional" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Data Services']); }">ScraperWiki Professional Services</a></li>
+                    <li><a href="https://beta.scraperwiki.com/pricing" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Premium Accounts']); }">Pricing</a></li>
                     <li><a href="http://status.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Status page']); }">System Status</a></li>
 				</ul>
 			</dd>
-			<dt>Data Hub</dt>
+			<dt>ScraperWiki Classic</dt>
 			<dd>
 				<ul>
 				    <li><a data-wiki_type="scraper" href="#" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new scraper']); }">New Scraper</a> / <a data-wiki_type="view" href="#" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new view']); }"> New View</a></li>
@@ -226,10 +207,10 @@
 			<dt>ScraperWiki</dt>
 			<dd>
 				<ul>
-					<li><a href="{% url about %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'About']); }">About Us</a></li>
+					<li><a href="https://beta.scraperwiki.com/about" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'About']); }">About Us</a></li>
 					<li><a href="{% url jobs %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Jobs']); }">Jobs</a></li>
 					<li><a href="{% url events %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Events']); }">Events</a></li>
-					<li><a href="{% url contact_form %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Contact us']); }">Contact Us</a></li>
+					<li><a href="https://beta.scraperwiki.com/contact" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Contact us']); }">Contact Us</a></li>
 					<li><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Blog']); }">Blog</a></li>
 					<li><a href="http://groups.google.com/group/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Discussion group']); }">Discussion Group</a></li>
                     <li><a href="http://bitbucket.org/ScraperWiki/scraperwiki/" title="ScraperWiki is open source. Check us out on BitBucket!" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Source code']); }">Source Code</a></li>
