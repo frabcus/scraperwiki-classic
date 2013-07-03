@@ -104,7 +104,7 @@
 	<div id="nav">
         <h1><a href="{% url frontpage %}">ScraperWiki</a></h1>
         <ul class="supernav">
-            <li class="new"><a href="https://scraperwiki.com">New ScraperWiki</a></li>
+            <li class="new"><a href="https://scraperwiki.com">New ScraperWiki <img src="{{ MEDIA_URL }}images/nav-external-link-icon.gif" width="8" height="9" alt="" style="margin-left: 2px;"></a></li>
             <li class="code"><a href="{% url frontpage %}">ScraperWiki Classic</a></li>
             {% if user.is_staff %}
             <li class="admin"><a>Admin</a></li>
