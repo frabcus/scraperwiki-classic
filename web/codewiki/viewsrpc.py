@@ -214,7 +214,7 @@ def twistermakesrunevent(request):
         return Dtwistermakesrunevent(request)
     except Exception, e:
         logger.error("twistermakesruneventerror: %s" % (str(e)))
-        mail_admins(subject="twistermakesruneventerror: %s" % (str(e)[:30]), message=(str(e)))
+        #mail_admins(subject="twistermakesruneventerror: %s" % (str(e)[:30]), message=(str(e)))
     return HttpResponse("no done %s" % str(e))
 
 
