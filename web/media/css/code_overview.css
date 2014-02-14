@@ -1,4 +1,4 @@
-/* @override 
+/* @override
 	http://localhost:8000/media/css/code_overview.css
 	https://devmedia.scraperwiki.com/css/code_overview.css
 */
@@ -208,8 +208,8 @@ border-top: navajowhite;
 }
 
 
-#addneweditor .addbutton, #addneweditor .cancelbutton, 
-#addnewattachable .addbutton, #addnewattachable .cancelbutton 
+#addneweditor .addbutton, #addneweditor .cancelbutton,
+#addnewattachable .addbutton, #addnewattachable .cancelbutton
 {
 	float: right;
 	margin-left: 10px;
@@ -307,8 +307,8 @@ border-top: navajowhite;
 	font-size: 14px;
 	outline: none;
 	background: transparent url(../images/icons/clipboard.png) 5px 4px no-repeat;
-	-webkit-border-radius: 4px; 
-	-moz-border-radius: 4px; 
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
 	border-radius: 4px;
 	border: 1px solid #87BEE3;
 	font-weight: normal;
@@ -678,7 +678,7 @@ h3 {
 
 ul.toolbar {
 	background: #ccc;
-	padding: 10px;
+	padding: 12px 9px;
 	text-shadow: 0 1px 0 #eee;
 	background: -moz-linear-gradient(top, #e8e8e8 0%, #cccccc 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e8e8e8), color-stop(100%,#cccccc));
@@ -1007,6 +1007,95 @@ li.share {
 
 .download_popover ul + h6 {
 	margin-top: 15px;
+}
+
+
+
+
+#morph {
+  position: relative;
+  padding: 13px 160px 13px 15px;
+  color: #3A4628;
+  font-size: 14px;
+  line-height: 18px;
+  border-bottom: 1px solid #A0C76C;
+  background: #D9F6AD;
+  background: -moz-linear-gradient(top, #E5FCC2 0%, #ACDD98 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#E5FCC2), color-stop(100%,#ACDD98));
+  background: -webkit-linear-gradient(top, #E5FCC2 0%,#ACDD98 100%);
+  background: -o-linear-gradient(top, #E5FCC2 0%,#ACDD98 100%);
+  background: -ms-linear-gradient(top, #E5FCC2 0%,#ACDD98 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#E5FCC2', endColorstr='#ACDD98',GradientType=0 );
+  background: linear-gradient(top, #E5FCC2 0%,#ACDD98 100%);
+  text-shadow: #C6FF99 0 1px 0;
+  filter: dropshadow(color=#C6FF99, offx=0, offy=1);
+}
+
+#morph:before {
+  position: absolute;
+  top: -7px;
+  left: 18px;
+  display: inline-block;
+  border-right: 7px solid transparent;
+  border-bottom: 7px solid #999;
+  border-left: 7px solid transparent;
+  content: '';
+}
+
+#morph:after {
+  position: absolute;
+  top: -6px;
+  left: 19px;
+  display: inline-block;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #e5fcc2;
+  border-left: 6px solid transparent;
+  content: '';
+}
+
+#morph h2 {
+  font-size: 16px;
+  line-height: 20px;
+  margin-bottom: 2px;
+}
+
+#morph p a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+#morph a.cta {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  margin-top: -14px;
+  color: #411;
+  font-size: 14px;
+  line-height: 20px;
+  border: 1px solid #71AA1B;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  padding: 3px 7px 2px 7px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 0 10px #fff;
+  background: -moz-linear-gradient(top, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.1) 51%, rgba(255,255,255,0) 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.8)), color-stop(50%,rgba(255,255,255,0.4)), color-stop(51%,rgba(255,255,255,0.1)), color-stop(100%,rgba(255,255,255,0)));
+  background: -webkit-linear-gradient(top, rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0.1) 51%,rgba(255,255,255,0) 100%);
+  background: -o-linear-gradient(top, rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0.1) 51%,rgba(255,255,255,0) 100%);
+  background: -ms-linear-gradient(top, rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0.1) 51%,rgba(255,255,255,0) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ccffffff', endColorstr='#00ffffff',GradientType=0 );
+  background: linear-gradient(top, rgba(255,255,255,0.8) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0.1) 51%,rgba(255,255,255,0) 100%);
+}
+
+#morph a.cta:hover {
+  text-decoration: none;
+  background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.4) 51%, rgba(255,255,255,0.2) 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(50%,rgba(255,255,255,0.7)), color-stop(51%,rgba(255,255,255,0.4)), color-stop(100%,rgba(255,255,255,0.2)));
+  background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50%,rgba(255,255,255,0.4) 51%,rgba(255,255,255,0.2) 100%);
+  background: -o-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50%,rgba(255,255,255,0.4) 51%,rgba(255,255,255,0.2) 100%);
+  background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50%,rgba(255,255,255,0.4) 51%,rgba(255,255,255,0.2) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#33ffffff',GradientType=0 );
+  background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0.7) 50%,rgba(255,255,255,0.4) 51%,rgba(255,255,255,0.2) 100%);
 }
 
 
@@ -1476,7 +1565,7 @@ ul.buttons li a.selected:hover {
 }
 
 #contributors a:hover {
-	text-decoration: none;	
+	text-decoration: none;
 }
 
 #contributors .gravatar {
@@ -1693,7 +1782,7 @@ box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
 }
 
 .dataTables_length {
-	
+
 }
 
 .dataTables_filter {
