@@ -60,14 +60,14 @@ function rtrim(stringToTrim) {
 }
 
 function newCodeObject($a){
-	if($a){	
+	if($a){
 		if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'New Code Object', $a.data('wiki_type')]); }
 		url = '/' + $a.data('wiki_type') + 's/new/choose_template/?ajax=1';
 		if ( $a.data('sourcescraper') ) {
 			url += "&sourcescraper=" + $a.data('sourcescraper');
 		}
-		
-		/*	
+
+		/*
 			NOTE:
 			This actually causes a problem, if someone tries to create a new View
 			(with a sourcescraper attribute) and then ALSO tries to save it into
@@ -78,10 +78,10 @@ function newCodeObject($a){
 			"ORIGINAL_SCRAPER/tovault/VAULT_ID/?name=NEW_VIEW"
 			D'oh!!
 		*/
-		
+
 		$.get(url, function(data){
 	        $.modal('<div id="template_popup">'+data+'</div>', {
-	            overlayClose: true, 
+	            overlayClose: true,
 	            autoResize: true,
 	            overlayCss: { cursor:"auto" },
 				onOpen: function(dialog) {
@@ -145,23 +145,23 @@ function newCodeObject($a){
 					});
 				}
 	        });
-	    });		
-		
-		
+	    });
+
+
 	} else {
 		alert('no anchor element provided');
 	}
 }
 
 function newUserMessage(url){
-	
+
 	if(url == undefined){
 		alert('No message url specified');
 	} else {
 //    	if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Profile buttons', 'Send Message']); }
     	$.get(url, function(data){
 	        $.modal('<div id="message_popup">'+data+'</div>', {
-	            overlayClose: true, 
+	            overlayClose: true,
 	            autoResize: true,
 	            overlayCss: { cursor:"auto" },
 				onOpen: function(dialog) {
@@ -229,7 +229,7 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 		}
 		if(typeof(actions.onclick) != 'undefined'){
 			$a.bind('click', actions.onclick);
-		}		
+		}
 		$alert_inner.append($a);
 	}
 	$('<a>').attr('id','alert_close').bind('click', function(){
@@ -248,7 +248,7 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 		    marginBottom: "show",
 		    paddingTop: "show",
 		    paddingBottom: "show"
-		}, { 
+		}, {
 			step: function(now, fx){
 				$('#nav').css('margin-top', $(fx.elem).outerHeight());
 			}, complete: function(){
@@ -260,7 +260,7 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 		$alert_outer.append($alert_inner).insertBefore($('#nav'));
 		$('#nav').css('margin-top', $alert_outer.outerHeight());
 	}
-	
+
 }
 
 $(function(){
@@ -283,7 +283,7 @@ $(function(){
             return false;
         }
     });
-    
+
     $('.supernav li a').not('li.signup a, li.new a').bind('click', function(e){
         e.preventDefault();
         var $li = $(this).parent();
@@ -304,13 +304,13 @@ $(function(){
     $('form.subnav.login li.username, form.subnav.login li.password').bind('click', function(){
         $(this).children('input').focus();
     });
-    
+
     if($('#nav .search input.text').val() == 'Search code...'){
         $('#nav .search input.text').val('').before('<span class="placeholder">Search code...</span>');
     } else {
         $('#nav .search input.text').before('<span class="placeholder" style="display:none">Search code...</span>');
     }
-    
+
     $('#nav .search input.text, #nav .login input.text').bind('focus', function(){
         $(this).parent().addClass('focussed');
         if($(this).val() === ''){
@@ -328,13 +328,13 @@ $(function(){
 		    $(this).prev().hide();
 		}
     });
-    
+
     $("#classic_login").on("click", function(){
         console.log("kittens")
         $("li.login a").trigger("click")
         $("#login_username").focus()
     })
-    
+
     setTimeout(function(){
         // clever hack removes the yellow background on auto-filled inputs in Chrome
         if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
@@ -351,11 +351,11 @@ $(function(){
         }
     }, 500);
 
-    $('a.editor_view, div.network .view a, a.editor_scraper, a.add_to_vault ').click(function(e) {
+    $('a.editor_view, div.network .view a, a.add_to_vault').click(function(e) {
 		e.preventDefault();
 		newCodeObject($(this));
     });
-	
+
 	$('a.submit_link').each(function(){
 		id = $(this).siblings(':submit').attr('id');
 		$(this).addClass(id + '_link')
@@ -363,9 +363,9 @@ $(function(){
 		e.preventDefault();
 		$(this).siblings(':submit').trigger('click');
 	}).siblings(':submit').hide();
-	
+
 	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", "").replace(" fourohfour", ""));
-	
+
 	$('body.vaults div.vault').each(function(){
 	    id = $(this).attr('id');
 	    if(location.hash == '#' + id){
@@ -398,7 +398,7 @@ $(function(){
 		var anchor = link.position().left + (0.5 * link.outerWidth());
 		popo.css('left', anchor - (popo.outerWidth() / 2) );
 	});
-	
+
 	function clean_up_users_popover($popover){
 		$popover.filter(':visible').fadeOut(400, function(){
 			$('li.error', $popover).remove();
@@ -408,7 +408,7 @@ $(function(){
 		$popover.siblings('a.vault_users').removeClass('hover');
 		$('html').unbind('click');
 	}
-	
+
 	$('body.vaults a.vault_users').bind('click', function(e){
 		var $a = $(this).addClass('hover');
 		var $p = $a.siblings('div.vault_users_popover');
@@ -428,11 +428,11 @@ $(function(){
     		});
         }
 	});
-	
+
 	$('body.vaults a.add_user').bind('click', function(){
 		$(this).slideUp(250).next().slideDown(250).find('.username').focus();
 	});
-	
+
 	$('body.vaults .new_user > a').bind('click', function(){
 		var closure = $(this).parents('div.vault_users_popover');
 		$('.error', closure).slideUp(150);
@@ -467,8 +467,8 @@ $(function(){
 				url: $('#id_api_base').val() + "scraper/usersearch",
 				dataType: "jsonp",
 				data: {
-					format:"jsondict", 
-					maxrows:10, 
+					format:"jsondict",
+					maxrows:10,
 					searchquery:request.term
 				},
 				success: function( data ) {
@@ -502,13 +502,13 @@ $(function(){
 				} else if(data.status == 'fail'){
 					closure.parents('ul').append('<li class="message error">Error: ' + data.error + '</li>');
 				}
-			}, 
+			},
 			error: function(data){
 				closure.parents('ul').append('<li class="message error">Sorry, couldn&rsquo;t remove user</li>');
 			}
 		});
 	});
-	
+
 	jQuery.fn.updateUserCount = function(increment) {
         // *increment* is optional, defaults to 0.
 		//	Must be called from an element within <div class="vault_header"></div>
@@ -524,13 +524,13 @@ $(function(){
 			$el.parents('.vault_header').find('.x_users').text(x_users);
 		});
 	}
-	
+
 	$('body.vaults .transfer_ownership a').bind('click', function(e){
 		e.preventDefault();
 		$(this).next('span').show().children(':text').focus();
 		$('span', this).show();
 	});
-	
+
 	$('body.vaults .transfer_ownership input:text').autocomplete({
 		minLength: 2,
 		source: function( request, response ) {
@@ -538,8 +538,8 @@ $(function(){
 				url: $('#id_api_base').val() + "scraper/usersearch",
 				dataType: "jsonp",
 				data: {
-					format:"jsondict", 
-					maxrows:10, 
+					format:"jsondict",
+					maxrows:10,
 					searchquery:request.term
 				},
 				success: function( data ) {
@@ -569,31 +569,31 @@ $(function(){
 					button.after('<em class="error">Error: ' + data.error + '</em>');
 					button.val('Transfer!');
 				}
-			}, 
+			},
 			error: function(data){
 				button.after('<em class="error">Error: ' + data.error + '</em>');
 				button.val('Transfer!');
 			}
 		});
 	}).attr('disabled', true);
-	
+
 	if($('#alert_outer').length && (!$('#alert_close').length)){
-		$('<a>').attr('id','alert_close').bind('click', function(){ 
+		$('<a>').attr('id','alert_close').bind('click', function(){
 			$('#alert_outer').slideUp(250);
 			$('#nav').animate({marginTop:0}, 250);
 		}).appendTo('#alert_inner');
 		$('#nav').css('margin-top', $('#alert_outer').outerHeight());
 	}
-	
+
 	$('#compose_user_message').bind('click', function(e){
 		e.preventDefault();
 		newUserMessage($(this).attr('href'));
 	});
-	
+
 	if($('#compose_user_message').length && window.location.hash == '#message'){
 		$('#compose_user_message').trigger('click');
 	}
-	
+
 	$('#liberatesomedata').bind('click', function(e){
 		e.preventDefault();
 		var viewurl = $(this).attr('href');
@@ -605,7 +605,7 @@ $(function(){
 				div.append('<h1>Liberate some data!</h1>');
 				div.append('<h2 class="vote">Vote for other people&rsquo;s suggestions&hellip;</h2>');
 				div.append('<ul></ul>');
-				
+
 				function populate_list(data, viewurl){
 					if(data.length){
 						$('ul', div).empty();
@@ -625,16 +625,16 @@ $(function(){
 								});
 							}).appendTo(li);
 							$('ul', div).append(li);
-						});	
+						});
 					} else {
 						$('ul', div).html('<li><span class="place">?</span> <span class="url">No suggestions yet</span> <span class="why">Why not suggest a dataset below?</span></li>');
 					}
 				}
-				
-				populate_list(data, viewurl);	
-				
+
+				populate_list(data, viewurl);
+
 				var form = $('<form>');
-				
+
 				$('<h2 class="suggest">&hellip;Or suggest something new</h2>').appendTo(form);
 				$('<p class="url"><label for="url">At what URL can we find the data?</label><input type="text" id="url" /></p>').appendTo(form);
 				$('<p class="why"><label for="why">Why do you want it liberated?</label><input type="text" id="why" /></p>').appendTo(form);
@@ -655,10 +655,10 @@ $(function(){
 					});
 				}).appendTo(form);
 				div.append(form);
-				
-				
+
+
 				$.modal(div, {
-		            overlayClose: true, 
+		            overlayClose: true,
 		            autoResize: true,
 		            overlayCss: { cursor:"auto" },
 					onOpen: function(dialog) {
@@ -690,11 +690,11 @@ $(function(){
 							$.modal.close();
 						});
 					}
-		        });	
+		        });
 			}
 		});
-		
+
 	});
-	
-	
+
+
 });

@@ -27,8 +27,8 @@
     {% endif %}
 
     {% if owned_code_objects %}
-        {% autopaginate owned_code_objects 20 %}	
-        <h2 class="scrapersandviews">Scrapers and views ({{ paginator.count }})</h2>    	
+        {% autopaginate owned_code_objects 20 %}
+        <h2 class="scrapersandviews">Scrapers and views ({{ paginator.count }})</h2>
         <ul class="scraper_list">
         {% for code in owned_code_objects %}
             {% include 'frontend/includes/code_object_line.html' %}
@@ -39,7 +39,6 @@
 	    {% ifequal profile.user user %}
         <div class="blankslate">
             <h3>You have no scrapers or views yet.</h3>
-            <p><a href="{% url docsroot %}">Try one of our tutorials</a> or <a data-wiki_type="scraper" href="#" class="editor_scraper">Create your first scraper</a></p>
         </div>
         {% else %}
         <p class="empty">This user has no scrapers or views yet.</p>

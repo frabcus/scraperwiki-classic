@@ -118,8 +118,6 @@
         </ul>
         <div class="subnav code">
             <ul>
-                <li class="create"><a data-wiki_type="scraper" href="#" class="editor_scraper">New Scraper</a></li>
-                <li class="create"><a data-wiki_type="view" href="#" class="editor_scraper">New View</a></li>
                 <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
                 <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
                 <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
@@ -152,6 +150,7 @@
                 {% if user.vaults.count > 0 or request.user.vault_membership.count %}
                 <li class="vaults"><a href="{% url vault %}">Your Vaults</a></li>
                 {% endif %}
+                <li class="profile"><a href="{% url profiles_edit_profile %}">Edit Profile</a></li>
                 <li class="logout"><a href="{% url logout %}?next_page=/">Log Out</a></li>
             </ul>
         </div>
@@ -168,7 +167,7 @@
         </form>
         {% endif %}
     </div>
-    
+
 {% block header_outer %}
 	<div id="header">
     {% block header %}
@@ -198,7 +197,6 @@
 			<dt>ScraperWiki Classic</dt>
 			<dd>
 				<ul>
-				    <li><a data-wiki_type="scraper" href="#" class="editor_scraper" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new scraper']); }">New Scraper</a> / <a data-wiki_type="view" href="#" class="editor_view" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Create new view']); }"> New View</a></li>
 					<li><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Browse scrapers']); }">Browse Scrapers &amp; Views</a></li>
 					<li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Docs &amp; tutorials']); }">Help &amp; Docs</a></li>
 					<li><a href="{% url docsexternal %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'API']); }">API</a></li>

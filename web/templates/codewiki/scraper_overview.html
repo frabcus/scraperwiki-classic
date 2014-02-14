@@ -117,7 +117,6 @@
     <li class="edit"><a href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Transfer to Morph.io</a></li>
     {% else %}
     <li class="edit"><a href="{% url editor_edit scraper.wiki_type scraper.short_name %}" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Edit</a></li>
-    <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}{% if scraper.vault %}/tovault/{{scraper.vault.id}}/{% endif %}?fork={{scraper.short_name}}{% if scraper.vault %}&name={{scraper.short_name}}_copy{% endif %}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy{% if scraper.vault %} in Vault{% endif %}</a></li>
     {% endif %}
     <li class="viewsource"><!--[if !IE]> --><a href="view-source:{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><!-- <![endif]--><!-- [if IE]><a href="{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><![endif]--></li>
     <li class="share">
@@ -461,7 +460,6 @@
         <li><a href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Transfer to Morph.io</a></li>
         {% else %}
         <li class="view"><a data-wiki_type="view" data-sourcescraper="{{scraper.short_name}}" {% if scraper.vault %}data-vault_id="{{scraper.vault.id}}" {% endif %}href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise{% if scraper.vault %} in Vault{% endif %}</a></li>
-        <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}{% if scraper.vault %}/tovault/{{scraper.vault.id}}/{% endif %}?fork={{scraper.short_name}}{% if scraper.vault %}&name={{scraper.short_name}}_copy{% endif %}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy{% if scraper.vault %} in Vault{% endif %}</a></li>
         {% endif %}
         <li class="clear"></li>
     </ul>
