@@ -180,7 +180,7 @@ def code_overview(request, wiki_type, short_name):
     else:
         context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
 
-    if request.user.get_profile().has_feature('Morph.io'):
+    if request.user.is_authenticated() and request.user.get_profile().has_feature('Morph.io'):
         context["morph"] = True
     else:
         context["morph"] = False
