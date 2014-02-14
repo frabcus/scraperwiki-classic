@@ -22,7 +22,7 @@ from email.Utils import parseaddr, formataddr
 #from django.forms.extras.widgets import Textarea
 class SearchForm(forms.Form):
     q = forms.CharField(label='Find datasets', max_length=50)
-    
+
 
 # see also is_emailer in the Code model
 def get_emailer_for_user(user):
@@ -34,7 +34,7 @@ def get_emailer_for_user(user):
     except:
         return None
 
-    
+
 class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
@@ -49,21 +49,21 @@ class UserProfileForm(forms.ModelForm):
             self.fields['alert_frequency'].initial = 86400
 
         self.fields['email'].initial = self.user.email
-        
+
     email_intervals = []
     for s in SCHEDULE_OPTIONS:
         email_intervals.append([s[0], s[1]])
 
-    alert_frequency = forms.ChoiceField(required=False, 
-                                        label="How often do you want to be emailed?", 
+    alert_frequency = forms.ChoiceField(required=False,
+                                        label="How often do you want to be emailed?",
                                         choices = email_intervals)
     bio = forms.CharField(label="A bit about you", widget=forms.Textarea(), required=False)
     email = forms.EmailField(label="Email Address")
-    messages = forms.BooleanField(required=False, 
+    messages = forms.BooleanField(required=False,
                                         label="Would you like to be able to send and receive messages through ScraperWiki?", )
     features = forms.ModelMultipleChoiceField(required=False,
                         widget=CheckboxSelectMultiple, queryset=Feature.objects.filter(public=True))
-    
+
     def clean_email(self):
         email = self.cleaned_data['email']
         if email != self.user.email and User.objects.filter(email__iexact=email).count() > 0:
@@ -90,7 +90,7 @@ class ScraperWikiContactForm(ContactForm):
         super(ScraperWikiContactForm, self).__init__(data=data, files=files, request=request, *args, **kwargs)
         if not request.user.is_authenticated():
             self.fields['captcha'] = CaptchaField()
-        
+
     subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'I want you to scrape some data for me'),('premium','I have a question about Premium Accounts'),('corporate',"I'd like to talk to you about a Corporate Account"),('help', 'I need help using ScraperWiki'), ('bug', 'I want to report a bug'), ('other', 'Other')))
     title = forms.CharField(widget=forms.TextInput(), label=u'Subject')
     recipient_list = [settings.FEEDBACK_EMAIL]
@@ -101,7 +101,7 @@ class ScraperWikiContactForm(ContactForm):
 
 class UserMessageForm(forms.Form):
     body = forms.CharField(widget=forms.Textarea, label=_(u'Message'))
-    
+
 class SigninForm(forms.Form):
     user_or_email = forms.CharField(label=_(u'Username or email'))
     password = forms.CharField(label=_(u'Password'), widget=forms.PasswordInput())
@@ -119,27 +119,6 @@ class SigninForm(forms.Form):
 
         return cleaned_data
 
-
-class CreateAccountForm(RegistrationForm):
-    """
-    Subclass of ``RegistrationForm`` which adds a required checkbox
-    for agreeing to a site's Terms of Service and makes sure the email address is unique.
-
-    """
-    name = forms.CharField()
-    tos = forms.BooleanField(widget=forms.CheckboxInput(),
-                           label=_(u'I agree to the ScraperWiki terms and conditions'),
-                           error_messages={ 'required': _("You must agree to the ScraperWiki terms and conditions") })
-
-    def clean_email(self):
-       """
-       Validate that the supplied email address is unique for the
-       site.
-
-       """
-       if User.objects.filter(email__iexact=self.cleaned_data['email']):
-           raise forms.ValidationError(_("This email address is already in use. Please supply a different email address."))
-       return self.cleaned_data['email']
 
 class ResendActivationEmailForm(forms.Form):
     email_address = forms.EmailField()
