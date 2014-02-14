@@ -2,7 +2,7 @@ import uuid
 
 from django import forms
 from django.http import (HttpResponseRedirect, HttpResponse,
-                         HttpResponseBadRequest, Http404, 
+                         HttpResponseBadRequest, Http404,
                          HttpResponseForbidden)
 from django.shortcuts import render_to_response, redirect
 from django.contrib import auth
@@ -27,12 +27,12 @@ from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, g
 
 from codewiki.models import Code, UserCodeRole, Scraper, Vault, View, scraper_search_query, user_search_query, HELP_LANGUAGES, LANGUAGES_DICT, Invite
 from django.db.models import Q
-from frontend.forms import CreateAccountForm, UserMessageForm
+from frontend.forms import UserMessageForm
 from registration.backends import get_backend
 from frontend.models import UserProfile, Tags
-        
+
 # find this in lib/python/site-packages/profiles
-from profiles import views as profile_views   
+from profiles import views as profile_views
 
 import django.contrib.auth.views
 import os
@@ -63,7 +63,7 @@ def profile_detail(request, username):
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
     profile = profiled_user.get_profile()
-    
+
     extra_context = {
                      'owned_code_objects' : profile.owned_code_objects(user),
                      'emailer_code_objects' : profile.emailer_code_objects(username, user)
@@ -80,7 +80,7 @@ def redirect_dashboard_to_profile(request):
 
 def user_message(request, username):
     """
-        This is a view to return a form ready for the user to send an 
+        This is a view to return a form ready for the user to send an
         email message to another user on the site.
     """
     form = UserMessageForm(data=request.POST or None)
@@ -93,7 +93,7 @@ def user_message(request, username):
 
         sending_user_profile = get_object_or_404(UserProfile, user=request.user)
         receiving_user_profile = get_object_or_404(UserProfile, user=receiving_user)
-        
+
         subject = "New message from %s" % sending_user_profile.display_name()
         body = form.cleaned_data['body']
 
@@ -103,18 +103,18 @@ def user_message(request, username):
         if sending_user_profile.messages and receiving_user_profile.messages:
             text_content = render_to_string('emails/new_message.txt', locals(), context_instance=RequestContext(request) )
             html_content = render_to_string('emails/new_message.html', locals(), context_instance=RequestContext(request) )
-        
+
             msg = EmailMultiAlternatives(subject, text_content, settings.FEEDBACK_EMAIL, [receiving_user_profile.user.email])
             msg.attach_alternative(html_content, "text/html")
             msg.send(fail_silently=True)
         else:
             return HttpResponse('{"status" : "fail", "error" : "Both you and the recipient must allow messages"}')
-            
+
         return HttpResponse('{"status" : "ok"}')
-        
+
     elif request.method == "POST":
         return HttpResponse('{"status" : "fail", "error" : "Please fill in the message"}')
-        
+
     return render_to_response('profiles/message.html', {'form':form, 'profile' : receiving_user}, context_instance = RequestContext(request))
 
 def edit_profile(request):
@@ -136,8 +136,7 @@ def login(request):
 
     #Create login and registration forms
     login_form = SigninForm()
-    registration_form = CreateAccountForm()
-    
+
     if request.method == 'POST':
         #Existing user is logging in
         if request.POST.has_key('submit'):
@@ -159,34 +158,9 @@ def login(request):
                     return HttpResponseRedirect(reverse('profile',
                                                 kwargs=dict(username=request.user.username)))
 
-        #New user is registering
-        elif request.POST.has_key('register'):
-
-            registration_form = CreateAccountForm(data=request.POST)
-
-            if registration_form.is_valid():
-                backend = get_backend(settings.REGISTRATION_BACKEND)             
-                new_user = backend.register(request, **registration_form.cleaned_data)
-
-                # Check for any invitations.
-                r = handle_signup_invites(new_user)
-                if r:
-                    redirect = r
-
-                #sign straight in
-                signed_in_user = auth.authenticate(username=request.POST['username'], password=request.POST['password1'])
-                auth.login(request, signed_in_user)                
-
-                #redirect
-                if redirect:
-                    return HttpResponseRedirect(redirect)
-                else:
-                    return HttpResponseRedirect(reverse('profile', 
-                                                kwargs=dict(username=request.user.username)))
-
-    context = {'registration_form': registration_form,
-               'login_form': login_form, 
-               'error_messages': error_messages,  
+    context = {
+               'login_form': login_form,
+               'error_messages': error_messages,
                'redirect': redirect,
                }
 
@@ -196,7 +170,6 @@ def login(request):
         # Will error if token is invalid.
         invite = Invite.objects.get(token=token)
         context['invite'] = invite
-        context['registration_form'].initial = {'email':invite.email}
 
     return render_to_response('registration/extended_login.html',
       context, context_instance = RequestContext(request))
@@ -239,14 +212,14 @@ def help(request, mode=None, language=None):
         language = "python"
     display_language = LANGUAGES_DICT[language]
     other_languages = [ (l, d) for (l, d) in HELP_LANGUAGES if l != language]
-    
-    if mode=="code_documentation": # Support legacy URL. 
+
+    if mode=="code_documentation": # Support legacy URL.
         mode="documentation"
-    
-    context = { 'mode' : mode, 'language' : language, 'display_language' : display_language, 
-             'tutorials': tutorials, 'viewtutorials': viewtutorials, 
+
+    context = { 'mode' : mode, 'language' : language, 'display_language' : display_language,
+             'tutorials': tutorials, 'viewtutorials': viewtutorials,
              'other_languages' : other_languages }
-    
+
     if not mode or mode=="intro":
         mode = "intro"
         context["include_tag"] = "frontend/help_intro.html"
@@ -265,10 +238,10 @@ def help(request, mode=None, language=None):
             tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('created_at')
         viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('created_at')
         context["include_tag"] = "frontend/help_tutorials.html"
-    
-    else: 
+
+    else:
         context["include_tag"] = "frontend/help_%s_%s.html" % (mode, language)
-    
+
     return render_to_response('frontend/help.html', context, context_instance = RequestContext(request))
 
 def browse_wiki_type(request, wiki_type=None, page_number=1):
@@ -280,12 +253,12 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None, ff=None)
     all_code_objects = scraper_search_query(request.user, None).select_related('owner','owner__userprofile_set')
 
     if wiki_type:
-        all_code_objects = all_code_objects.filter(wiki_type=wiki_type) 
+        all_code_objects = all_code_objects.filter(wiki_type=wiki_type)
 
     # One last check because this is a slightly convoluted way of building this page.
     if not ff:
         ff = request.GET.get('forked_from', None)
-        
+
     if ff:
         try:
             s = Scraper.objects.get(short_name=ff)
@@ -311,7 +284,7 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None, ff=None)
     # filter out scrapers that have no records unless we are looking at the forked_from list
     if not ff and not special_filter:
         all_code_objects = all_code_objects.exclude(wiki_type='scraper', scraper__record_count=0)
-    
+
     form = SearchForm()
 
     dictionary = { "ff": ff, "scrapers": all_code_objects, 'wiki_type':wiki_type, "form": form, 'special_filter': special_filter, 'language': 'python'}
@@ -320,10 +293,10 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None, ff=None)
 
 def search_urls(request, partial):
     """
-    When we search we want to handle anything that looks like a url and search for it within the 
-    codewiki.DomainScrape. This isn't mapped to a URL at the moment, it is expected that it will 
+    When we search we want to handle anything that looks like a url and search for it within the
+    codewiki.DomainScrape. This isn't mapped to a URL at the moment, it is expected that it will
     only be called from the search view.
-    
+
     This does not take account of private scrapers that you do have access to, instead showing
     only public and protected scrapers, for now.
     """
@@ -335,13 +308,13 @@ def search_urls(request, partial):
     q = Q(scraper_run_event__scraper__privacy_status__in=['public','protected'])
     q = q & (Q(domain__istartswith='http://%s' % (url.netloc,)) | Q(domain__istartswith='https://%s' % (url.netloc,)))
     dsqs = DomainScrape.objects.filter(q).distinct('scraper_run_event__scraper')
-    
+
     ctx = {
         'form'     : SearchForm(initial={'q': partial}),
         'scrapers_num_results'    : dsqs.count(),
         'scrapers' : [ d.scraper_run_event.scraper for d in dsqs.all().distinct() ],
     }
-    
+
     # TODO: We need a template for url search results
     return render_to_response('frontend/search_url_results.html', ctx, context_instance = RequestContext(request))
 
@@ -356,13 +329,13 @@ def search(request, q=""):
         # and return that instead.
         if re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', q):
             return search_urls(request,q)
-        
+
         tags = Tag.objects.filter(name__icontains=q)
         scrapers = scraper_search_query(request.user, q)
-        
-        # The following line used to exclude private scrapers, but these were already excluded in 
+
+        # The following line used to exclude private scrapers, but these were already excluded in
         # the call to scraper_search_query above.
-        scrapers = scrapers.exclude(usercoderole__role='email') 
+        scrapers = scrapers.exclude(usercoderole__role='email')
         scrapers_num_results = tags.count() + scrapers.count()
 
         users = user_search_query(request.user, q)
@@ -411,11 +384,11 @@ def events(request, e=''):
 @login_required
 def stats(request):
     return render_to_response('frontend/stats.html', {}, context_instance=RequestContext(request))
-    
+
 
 def tags(request):
     all_tags = {}
-    
+
     # Python 2.7 would clean this up by using collections.Counter
     def update_tags(tag):
         existing = all_tags.get(tag.name, None)
@@ -430,26 +403,26 @@ def tags(request):
       filters={'privacy_status':'public'})
     for tag in itertools.chain(scraper_tags, view_tags):
         update_tags(tag)
-    
+
     tags = calculate_cloud(all_tags.values(),
       steps=4, distribution=LOGARITHMIC)
 
     return render_to_response('frontend/tags.html', {'tags':tags},
       context_instance=RequestContext(request))
-    
+
 def tag(request, tag):
     ttag = get_tag(tag)
     code_objects = None
-    
+
     if ttag:
         # query set of code objects this user can see
         user_visible_code_objects = scraper_search_query(request.user, None)
 
-        # inlining of tagging.models.get_by_model() but removing the content_type_id condition so that tags 
+        # inlining of tagging.models.get_by_model() but removing the content_type_id condition so that tags
         # attached to scrapers and views get interpreted as tags on code objects
         code_objects = user_visible_code_objects.extra(
             tables=['tagging_taggeditem'],
-            where=['tagging_taggeditem.tag_id = %s', 'codewiki_code.id = tagging_taggeditem.object_id'], 
+            where=['tagging_taggeditem.tag_id = %s', 'codewiki_code.id = tagging_taggeditem.object_id'],
             params=[ttag.pk])
 
     return render_to_response('frontend/tag.html', {'tag_string': tag, 'tag' : ttag, 'scrapers': code_objects}, context_instance=RequestContext(request))
@@ -485,17 +458,17 @@ def subscribe(request, plan):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login') + "?next=" + request.path)
 
-    plans = { 
-        'individual' : { 
-            'name' : 'Individual', 
+    plans = {
+        'individual' : {
+            'name' : 'Individual',
             'code' : 'individual'
-        }, 
-        'business' : { 
-            'name' : 'Business', 
+        },
+        'business' : {
+            'name' : 'Business',
             'code' : 'business'
-        }, 
-        'corporate' : { 
-            'name' : 'Corporate', 
+        },
+        'corporate' : {
+            'name' : 'Corporate',
             'code' : 'corporate'
         }
     }
@@ -574,7 +547,7 @@ def confirm_subscription(request):
 
     return redirect('vault')
 
-def pricing(request):        
+def pricing(request):
     context = {'anonymous':True}
     if request.user.is_authenticated():
         context['anonymous'] = False
@@ -599,8 +572,8 @@ def new_vault(request):
     plan = request.user.get_profile().plan
     vaults = Vault.objects.filter(user=profile.user)
     maximum = maximum_vaults[plan]
-    if len(vaults) < maximum: 
-        profile.create_vault('My New Vault')        
+    if len(vaults) < maximum:
+        profile.create_vault('My New Vault')
         return redirect('vault')
     else:
         return HttpResponseForbidden("You can't create a new vault. Please upgrade your ScraperWiki account.")
@@ -610,34 +583,34 @@ def transfer_vault(request, vaultid, username):
     """
     When called by the owner of a vault, the ownership of the vault
     can be transfered to another account (whether they are currently a member or not).
-    
-    Once complete the access rights on all of the scrapers should also be 
+
+    Once complete the access rights on all of the scrapers should also be
     """
     mime = 'application/json'
-            
+
     try:
         vault = Vault.objects.get(pk=vaultid)
     except:
-        return HttpResponse('{"status": "fail", "error":"Could not find the requested vault"}', mimetype=mime)                    
-        
+        return HttpResponse('{"status": "fail", "error":"Could not find the requested vault"}', mimetype=mime)
+
     try:
         new_owner = User.objects.get(username=username )
     except:
-        return HttpResponse('{"status": "fail", "error":"Cannot find that user"}', mimetype=mime)                    
-    
+        return HttpResponse('{"status": "fail", "error":"Cannot find that user"}', mimetype=mime)
+
     if not vault.user == request.user:
-        return HttpResponse('{"status": "fail", "error":"You cannot transfer ownership of this vault"}', mimetype=mime)                    
-        
-    # Add the new owner as owner and as a member, the old owner will now just become 
+        return HttpResponse('{"status": "fail", "error":"You cannot transfer ownership of this vault"}', mimetype=mime)
+
+    # Add the new owner as owner and as a member, the old owner will now just become
     # a member instead
-    vault.members.add(new_owner) 
+    vault.members.add(new_owner)
     vault.user = new_owner
     vault.save()
-    
+
     # Does not require the vault to be saved again
     vault.update_access_rights()
-    return HttpResponse('{"status": "ok"}', mimetype=mime)       
-    
+    return HttpResponse('{"status": "ok"}', mimetype=mime)
+
 
 
 @login_required
@@ -650,12 +623,12 @@ def view_vault(request, username=None):
     """
 
     context = {}
-    
+
     context['vaults'] = request.user.vaults
     context['vault_membership']  = request.user.vault_membership.exclude(user__id=request.user.id)
     context['vault_membership_count'] = context['vault_membership'].count()
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
-    
+
     context['current_plan'] = request.user.get_profile().plan
     context['vaults_remaining_in_plan'] = max(0, maximum_vaults[context['current_plan']] - context['vaults'].count())
     context['can_add_vault_members'] = ( context['current_plan'] in ('business','corporate',) )
@@ -664,84 +637,84 @@ def view_vault(request, username=None):
     if request.session.get('recently_upgraded'):
         context['has_upgraded'] = True
         del request.session['recently_upgraded']
-        
-    return render_to_response('frontend/vault/view.html', context, 
+
+    return render_to_response('frontend/vault/view.html', context,
                                context_instance=RequestContext(request))
 
 
 @login_required
 def vault_scrapers_remove(request, vaultid, shortname, newstatus):
     """
-    Removes the scraper identified by shortname from the vault 
+    Removes the scraper identified by shortname from the vault
     identified by vaultid.  This can currently only be done by
-    the vault owner, and only if the scraper is actually in the 
+    the vault owner, and only if the scraper is actually in the
     vault.
-    
+
     Will set the vault property of the scraper to None but does
     not touch the editorship/ownership which must be done elsewhere.
     """
 #    if not request.is_ajax():
 #        return HttpResponseForbidden('This page cannot be called directly')
-    
+
     code = get_object_or_404( Code, short_name=shortname )
     vault   = get_object_or_404( Vault, pk=vaultid )
     mime = 'application/json'
-    
+
     # Must own the vault
     if vault.user != request.user:
-        return HttpResponse('{"status": "fail", "error":"You do not own this vault"}', mimetype=mime)            
-    
-    if code.vault != vault:
-        return HttpResponse('{"status": "fail", "error":"This item is not in this vault"}', mimetype=mime)            
+        return HttpResponse('{"status": "fail", "error":"You do not own this vault"}', mimetype=mime)
 
-    
+    if code.vault != vault:
+        return HttpResponse('{"status": "fail", "error":"This item is not in this vault"}', mimetype=mime)
+
+
     code.privacy_status = newstatus
     code.vault = None
     code.save()
 
-    return HttpResponse('{"status": "ok"}', mimetype=mime)                    
+    return HttpResponse('{"status": "ok"}', mimetype=mime)
 
-    
-    
+
+
 @login_required
 def vault_scrapers_add(request, vaultid, shortname):
     """
     Adds a scraper identified by shortname to the vault (vaultid).
 
     The current user must be the current owner of the script and they
-    must also be a member of the vault they are trying to add the 
+    must also be a member of the vault they are trying to add the
     scraper to.
-    
+
     During the transition, where the scraper's vault property is set
     the original owner is demoted to an editor, and the vault owner
     is set as owner (or promoted if they were an editor previously).
     """
 #    if not request.is_ajax():
 #        return HttpResponseForbidden('This page cannot be called directly')
-    
+
     code = get_object_or_404( Code, short_name=shortname )
     vault   = get_object_or_404( Vault, pk=vaultid )
     mime = 'application/json'
-    
+
     if not code.owner() == request.user:
         # Only the scraper owner can add it to a vault
-        return HttpResponse('{"status": "fail", "error":"You cannot move this item to your own vault"}', mimetype=mime)            
-            
+        return HttpResponse('{"status": "fail", "error":"You cannot move this item to your own vault"}', mimetype=mime)
+
     # Must be a member of the vault
     if not request.user in vault.members.all():
-        return HttpResponse('{"status": "fail", "error":"You are not a member of this vault"}', mimetype=mime)            
-            
+        return HttpResponse('{"status": "fail", "error":"You are not a member of this vault"}', mimetype=mime)
+
     # Old owner is now editor and the new owner should be the vault owner.
     code.privacy_status = 'private'
     code.vault = vault
     code.generate_apikey()
     code.save()
-    
+
     vault.update_access_rights()
-                
-    return HttpResponse('{"status": "ok" }', mimetype=mime)            
-    
-    
+
+    return HttpResponse('{"status": "ok" }', mimetype=mime)
+
+
 @login_required
 def vault_users(request, vaultid, username, action):
     """
@@ -754,8 +727,8 @@ def vault_users(request, vaultid, username, action):
     """
     from codewiki.models import Vault
     mime = 'application/json'
-    result = {"status": "ok", "error":""}                    
-     
+    result = {"status": "ok", "error":""}
+
     vault = get_object_or_404( Vault, id=vaultid)
     if vault.user.id != request.user.id:
         return HttpResponse('{"status": "fail", "error": "Not your vault"}', mimetype=mime)
@@ -764,7 +737,7 @@ def vault_users(request, vaultid, username, action):
     if action == 'adduser':
         current_plan = request.user.get_profile().plan
         if current_plan not in ('business','corporate',):
-            return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)            
+            return HttpResponse('''{"status": "fail", "error":"You can't add users to this vault. Please upgrade your ScraperWiki account."}''', mimetype=mime)
     if action == 'adduser' and '@' in username:
         if User.objects.filter(email=username):
             # They're already a ScraperWiki user.
@@ -775,34 +748,34 @@ def vault_users(request, vaultid, username, action):
             return HttpResponse(json.dumps(result), mimetype=mime)
 
     try:
-        user = User.objects.get(username=username)    
+        user = User.objects.get(username=username)
     except User.DoesNotExist:
         return HttpResponse('{"status": "fail", "error":"Username not found"}',
-          mimetype=mime)            
+          mimetype=mime)
 
-    
+
     editor = request.user == vault.user
-    
+
     if action == 'adduser':
         if not user in vault.members.all():
             result['fragment'] = render_to_string( 'frontend/includes/vault_member.html',
-              { 'm': user, 'vault': vault, 'editor': editor })                 
-            vault.members.add(user) 
+              { 'm': user, 'vault': vault, 'editor': editor })
+            vault.members.add(user)
             vault.add_user_rights(user)
         else:
             result['status'] = 'fail'
             result['error']  = 'User is already a member of this vault'
-            
+
     if action =='removeuser':
         if user in vault.members.all():
-            vault.members.remove(user)     
-            vault.remove_user_rights(user)           
+            vault.members.remove(user)
+            vault.remove_user_rights(user)
         else:
             result['status'] = 'fail'
             result['error']  = 'User not in this vault'
-        
-    vault.save()        
-                
+
+    vault.save()
+
     return HttpResponse( json.dumps(result), mimetype=mime)
 
 def invite_to_vault(vault_owner, email, vault):
@@ -819,10 +792,10 @@ def invite_to_vault(vault_owner, email, vault):
     context = locals()
     context['tokenurl'] = "https://%s%s?t=%s" % (Site.objects.get_current().domain, reverse("login"), token)
 
-    text_content = render_to_string('emails/vault_invite.txt', context) 
+    text_content = render_to_string('emails/vault_invite.txt', context)
     html_content = render_to_string('emails/vault_invite.html', context)
     subject ='You have been invited to a ScraperWiki vault: %s' % vault.name
-        
+
     msg = EmailMultiAlternatives(subject, text_content, vault_owner.email,
       to=[email], bcc=[vault_owner.email])
     msg.attach_alternative(html_content, "text/html")

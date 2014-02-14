@@ -55,9 +55,9 @@
     {% endif %}
 
 	<h2>
-      <a href="{% if scraper.owner.username %}{% url profile scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> / 
+      <a href="{% if scraper.owner.username %}{% url profile scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> /
        {% if user.is_authenticated %}
-         <em id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</em> 
+         <em id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</em>
          <a id="aEditTitle" title="Edit title">Edit title</a>
        {% else %}
          <em>{{ scraper.title }}</em>
@@ -113,8 +113,12 @@
 </fieldset>
 
 <ul class="toolbar">
+    {% if morph %}
+    <li class="edit"><a href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Transfer to Morph.io</a></li>
+    {% else %}
     <li class="edit"><a href="{% url editor_edit scraper.wiki_type scraper.short_name %}" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Edit</a></li>
     <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}{% if scraper.vault %}/tovault/{{scraper.vault.id}}/{% endif %}?fork={{scraper.short_name}}{% if scraper.vault %}&name={{scraper.short_name}}_copy{% endif %}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy{% if scraper.vault %} in Vault{% endif %}</a></li>
+    {% endif %}
     <li class="viewsource"><!--[if !IE]> --><a href="view-source:{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><!-- <![endif]--><!-- [if IE]><a href="{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><![endif]--></li>
     <li class="share">
         <a><img src="{{ MEDIA_URL }}images/icons/share.png" width="16" height="16" alt="">Share</a>
@@ -138,13 +142,21 @@
     {% if user_owns_it or user.is_staff %}<li class="admin">
         <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" id="delete_scraper" rel="nofollow">Delete {{scraper.wiki_type|title}}</a>
         <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post" class="hide">
-            {% csrf_token %}    
+            {% csrf_token %}
             <input type="hidden" name="delete_scraper" value="1" />
             <input type="submit" id="btnDeleteScraper" value="Delete {{scraper.wiki_type|title}}" />
           </form>
     </li>{% endif %}
     <li class="clear"></li>
 </ul>
+
+{% if morph %}
+<div id="morph">
+  <h2>ScraperWiki Classic is now read-only.</h2>
+  <p>But don&rsquo;t worry! You can transfer this {{scraper.wiki_type}} to <a href="https://morph.io" title="What is Morph.io?" target="_blank">Morph.io</a> if you want to continue editing it.</p>
+  <a class="cta" href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}">Transfer to Morph.io</a>
+</div>
+{% endif %}
 
 {% if scraper.is_sick_and_not_running or scraper.last_runevent.exception_message %}
 <div class="sick">
@@ -154,13 +166,17 @@
     {% else %}
     <p>We&rsquo;re not quite sure what&rsquo;s wrong with it. Could you take a look?</p>
     {% endif %}
+    {% if morph %}
+    <a class="fix" href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}">Fix in Morph.io</a>
+    {% else %}
     <a class="fix" href="{% url editor_edit scraper.wiki_type scraper.short_name %}" rel="nofollow">Fix this {{ scraper.wiki_type }}</a>
+    {% endif %}
 </div>
 {% endif %}
 <table class="about" cellspacing="0" cellpadding="0">
     <tr>
-    <td class="schedule">  
-        
+    <td class="schedule">
+
         <h3 class="current_status">Current status</h3>
             {% if scraper.scraper.last_run %}
                 {% if scraper.scraper.run_interval == MAGIC_RUN_INTERVAL %}
@@ -190,7 +206,7 @@
                 {% endif %}
             {% endif %}
         </p>
-        
+
         <h3 class="last_run">Last run{% if scraper.last_runevent.exception_message %} <em class="fail" title="This scraper generated the following error on its last run: {{scraper.last_runevent.exception_message}}">Failed!</em>{% endif %}</h3>
         {% if scraper.last_runevent %}
             <p><a href="#run_{{ scraper.last_runevent.id }}" title="{{scraper.last_runevent.run_started}}" rel="nofollow">{{scraper.last_runevent.run_started|timesince}} ago</a></p>
@@ -202,11 +218,11 @@
         {% else %}
             <p>Has not run yet</p>
         {% endif %}
-        
+
         <h3 class="schedule">Schedule{% if user_owns_it or user_edits_it or user.is_staff %} <a href="#edit_schedule" title="Edit this scraper&rsquo;s schedule" class="edit edit_schedule" rel="nofollow">Edit</a>{% endif %}</h3>
         {% if scraper.scraper.next_run.year != 9999 %}
             {% if scraper.scraper.run_interval != 1000000000 %}
-                <p>{{scraper.scraper.run_interval|schedule}}</p>           
+                <p>{{scraper.scraper.run_interval|schedule}}</p>
             {% else %}
                 <p>No schedule set</p>
             {% endif%}
@@ -246,10 +262,10 @@
             {% endif %}</p>
         {% endif %}
         </div>
-        
+
         <input type="hidden" id="admincontroleditors" value="{% url scraper_admin_controleditors scraper.short_name %}"/>
         <input type="hidden" id="adminprivacystatusurl" value="{% url scraper_admin_privacystatus scraper.short_name %}"/>
-        
+
         <div id="collaboration">
             <ul class="buttons">
                 {% if scraper.privacy_status == 'public' %}
@@ -289,26 +305,26 @@
             	        <p>Only the {{ scraper.usercoderole_set.count }} selected editor{{ scraper.usercoderole_set.count|pluralize }} can see or edit this {{scraper.wiki_type}}.</p>
             	    {% endif %}
                 {% endif %}
-        	    
+
         	    {% if scraper.owner == request.user %}
                     <form id="privacy_status_form">
                         <!--<a class="cancel" id="hide_privacy_choices"><img src="{{ MEDIA_URL }}images/icons/cancel.png" width="16" height="16" /><span>Cancel</span></a>-->
                         <table cellspacing="0" cellpadding="0">
                             <tr class="first">
-                                <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" 
+                                <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public"
                                 {% ifequal scraper.privacy_status 'public' %} checked="checked" {% endifequal %}
                                 /></td>
                                 <td><h4><label for="privacy_public">{% if scraper.privacy_status == 'public' %}Keep as Public{% else %}Change to Public{% endif %}</label></h4><p><label for="privacy_public">Everyone {% if scraper.privacy_status == 'public' %}can{% else %}will be able to{% endif %} see and edit this {{scraper.wiki_type}} and its data.</label></p></td>
                             </tr>
                             <tr>
-                                <td class="radio"><input type="radio" name="privacy_status" value="visible" id="privacy_protected" 
+                                <td class="radio"><input type="radio" name="privacy_status" value="visible" id="privacy_protected"
                                 {% ifequal scraper.privacy_status 'visible' %} checked="checked" {% endifequal %}
                                 /></td>
                                 <td><h4><label for="privacy_protected">{% if scraper.privacy_status == 'visible' %}Keep as Protected{% else %}Change to Protected{% endif %}</label></h4><p><label for="privacy_protected">Everyone {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} see this {{scraper.wiki_type}}, but only selected contributors {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} edit it.</label></p></td>
                             </tr>
                             {% if scraper.privacy_status == 'private' %}
                             <tr>
-                                <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" 
+                                <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private"
                                 {% ifequal scraper.privacy_status 'private' %} checked="checked" {% endifequal %}
                                 /></td>
                                 <td><h4><label for="privacy_private">{% if scraper.privacy_status == 'private' %}Keep as Private{% else %}Change to Private{% endif %} <span style="color:#999; font-weight: normal">({% if user.is_staff %}staff-only{% else %}deprecated{% endif %})</span></label></h4><p><label for="privacy_private">Only selected contributors {% if scraper.privacy_status == 'private' %}can{% else %}will be able to{% endif %} see or edit this {{scraper.wiki_type}}.</label></p></td>
@@ -359,13 +375,13 @@
                     {% endwith %}
 
                     {% with 'editor' as role %}
-                      {% for contributor in userrolemap.editor %}  
+                      {% for contributor in userrolemap.editor %}
                         {% include 'codewiki/includes/contributor.html' %}
                       {% endfor %}
                     {% endwith %}
 
                     {% with 'email' as role %}
-                      {% for contributor in userrolemap.email %}  
+                      {% for contributor in userrolemap.email %}
                         {% include 'codewiki/includes/contributor.html' %}
                       {% endfor %}
                     {% endwith %}
@@ -377,7 +393,7 @@
                 {% endif %}
         	</div>
         </div>
-    
+
     </td>
     </tr>
 </table>
@@ -441,13 +457,17 @@
     <ul class="titlebar">
         <li class="first"><h3>{% if related_views or scraper.forked_from or forked_to_total or scraper_tags %}This scraper in context{% else %}This scraper is lonely{% endif %}</h3></li>
         {% if user_edits_it or user.is_staff %}<li class="tag"><a href="#tags" title="Use tags to organise and group similar scrapers"><img src="{{ MEDIA_URL }}images/icons/tag.png" width="16" height="16" alt="">Tag</a></li>{% endif %}
+        {% if morph %}
+        <li><a href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Transfer to Morph.io</a></li>
+        {% else %}
         <li class="view"><a data-wiki_type="view" data-sourcescraper="{{scraper.short_name}}" {% if scraper.vault %}data-vault_id="{{scraper.vault.id}}" {% endif %}href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise{% if scraper.vault %} in Vault{% endif %}</a></li>
         <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}{% if scraper.vault %}/tovault/{{scraper.vault.id}}/{% endif %}?fork={{scraper.short_name}}{% if scraper.vault %}&name={{scraper.short_name}}_copy{% endif %}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy{% if scraper.vault %} in Vault{% endif %}</a></li>
+        {% endif %}
         <li class="clear"></li>
     </ul>
-    
+
     <input type="hidden" id="adminsettagurl" value="{% url scraper_admin_settags scraper.short_name %}"/>
-    
+
     <div class="tags"{% if not scraper_tags %} style="display:none"{% endif %}>
         <h4>Tags:</h4>
         <ul>
@@ -499,7 +519,7 @@
         </ul>
     </div>
     {% endif %}
-    
+
 </div>
 
 <div class="history">
@@ -508,11 +528,11 @@
         <li class="full_history"><a href="{% url full_history scraper.wiki_type, scraper.short_name %}" rel="nofollow">Show full history</a></li>
         <li class="clear"></li>
     </ul>
-    
+
     <div>
     {% history scraper.scraper user 10 %}
     </div>
-    
+
 </div>
 
 {% endblock %}
@@ -523,13 +543,13 @@
 {{block.super}}
 jQuery.fn.autolink = function () {
     return this.each( function(){
-        var re = 
+        var re =
 /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g;
         $(this).html( $(this).html().replace(re, '<a href="$1">$1</a> ') );
     });
 }
 
-$(document).ready(function() 
+$(document).ready(function()
 {
     setupCodeOverview('{{scraper.short_name}}');
     $('#data_tab_1').trigger('click');
@@ -544,132 +564,132 @@ function cachefetch(cid, callback)
 {
     if (cid && (fetchedcache[cid] == undefined))
     {
-        var url; 
+        var url;
         if (cid.substring(0, 4) == "?rev")
-            url = $("#rawcodeurl").val()+cid; 
+            url = $("#rawcodeurl").val()+cid;
         else if (cid.substring(0, 9) == "?otherrev")
-            url = $("#diffsequrl").val()+cid; 
+            url = $("#diffsequrl").val()+cid;
         else
-            url = $("#run_event_json").val().replace('XXX', cid); 
+            url = $("#run_event_json").val().replace('XXX', cid);
 
-        $.ajax({url:url, success: function(sdata) 
+        $.ajax({url:url, success: function(sdata)
         {
-            fetchedcache[cid] = sdata; 
-            callback(); 
-        }}); 
+            fetchedcache[cid] = sdata;
+            callback();
+        }});
     }
     else
-        callback(); 
+        callback();
 }
 
 
 function previewchanges_hideequal(block, curr)
 {
-    var oth = null, currY;  
+    var oth = null, currY;
     if (curr)
     {
-        oth = curr; 
+        oth = curr;
         while (oth && (!oth.hasClass(".fequal") && (oth.attr("display") != "none")))
-            oth = oth.next(); 
+            oth = oth.next();
         if (!oth)
         {
-            oth = curr; 
+            oth = curr;
             while (oth && (!oth.hasClass(".fequal") && (oth.attr("display") != "none")))
-                oth = oth.prev(); 
+                oth = oth.prev();
         }
-        currY = curr.offset().top; 
+        currY = curr.offset().top;
     }
 
-    block.find('.codepreviewer .fequal').hide(); 
-    block.find('.codepreviewer .expander').show(); 
+    block.find('.codepreviewer .fequal').hide();
+    block.find('.codepreviewer .expander').show();
 
     if (oth)
-        $(window).scrollTop($(window).scrollTop() + oth.offset().top - currY); 
+        $(window).scrollTop($(window).scrollTop() + oth.offset().top - currY);
 }
 
 function previewchanges_showequal(block, curr)
 {
-    var oth = null, currY;  
+    var oth = null, currY;
     if (curr)
     {
-        oth = curr.next(); 
+        oth = curr.next();
         if (!oth)
-            oth = curr.prev(); 
-        currY = curr.offset().top; 
+            oth = curr.prev();
+        currY = curr.offset().top;
     }
 
-    block.find('.codepreviewer .fequal').show(); 
-    block.find('.codepreviewer .expander').hide(); 
+    block.find('.codepreviewer .fequal').show();
+    block.find('.codepreviewer .expander').hide();
 
     if (oth)
-        $(window).scrollTop($(window).scrollTop() + oth.offset().top - currY); 
+        $(window).scrollTop($(window).scrollTop() + oth.offset().top - currY);
 }
 
 
 function previewchanges_showsidecode()
 {
-    var block = $(this).parents(".history_edit"); 
-    var curr = $(this); 
+    var block = $(this).parents(".history_edit");
+    var curr = $(this);
 
     // allow clicking on the inserted or deleted code
     if (curr.hasClass("delete"))
-        curr = block.find(".otherlinenumbers"); 
+        curr = block.find(".otherlinenumbers");
     if (curr.hasClass("insert"))
-        curr = block.find(".linenumbers"); 
+        curr = block.find(".linenumbers");
 
     // allow toggling so you don't need to move the mouse
     if (curr.hasClass("shcodesel") && curr.hasClass("otherlinenumbers"))
-        curr = block.find(".linenumbers"); 
+        curr = block.find(".linenumbers");
     if (curr.hasClass("shcodesel") && curr.hasClass("linenumbers"))
-        curr = block.find(".otherlinenumbers"); 
+        curr = block.find(".otherlinenumbers");
 
-    block.find(".history_code_border div").removeClass("shcodesel"); 
+    block.find(".history_code_border div").removeClass("shcodesel");
     if (curr.hasClass("linenumbers"))
     {
-        block.find('.codepreviewer .delete').hide(); 
-        block.find('.codepreviewer .insert').show(); 
-        curr.addClass("shcodesel"); 
+        block.find('.codepreviewer .delete').hide();
+        block.find('.codepreviewer .insert').show();
+        curr.addClass("shcodesel");
     }
     else if (curr.hasClass("otherlinenumbers"))
     {
-        block.find('.codepreviewer .insert').hide(); 
-        block.find('.codepreviewer .delete').show(); 
-        curr.addClass("shcodesel"); 
+        block.find('.codepreviewer .insert').hide();
+        block.find('.codepreviewer .delete').show();
+        curr.addClass("shcodesel");
     }
 }
 
 
 function previewchanges_showbothcode(block)
 {
-    block.find(".history_code_border div").removeClass("shcodesel"); 
-    block.find('.codepreviewer .insert').show(); 
-    block.find('.codepreviewer .delete').show(); 
+    block.find(".history_code_border div").removeClass("shcodesel");
+    block.find('.codepreviewer .insert').show();
+    block.find('.codepreviewer .delete').show();
 }
 
 
 function previewchanges_hide(block)
 {
     var codepreviewerdiv = block.find(".codepreviewer");
-    codepreviewerdiv.hide(); 
-    block.find(".history_view_changes .hidechanges").hide(); 
-    block.find(".history_view_changes .showchanges").show(); 
-    block.find(".history_editor_info .rollbackchanges").hide(); 
+    codepreviewerdiv.hide();
+    block.find(".history_view_changes .hidechanges").hide();
+    block.find(".history_view_changes .showchanges").show();
+    block.find(".history_editor_info .rollbackchanges").hide();
 }
 
 function previewchanges_show(block)
 {
-    hideallshowhistrun(); 
+    hideallshowhistrun();
 
-    block.find(".history_view_changes .showchanges").hide(); 
-    block.find(".history_view_changes .hidechanges").show(); 
-    block.find(".history_editor_info .rollbackchanges").show(); 
+    block.find(".history_view_changes .showchanges").hide();
+    block.find(".history_view_changes .hidechanges").show();
+    block.find(".history_editor_info .rollbackchanges").show();
 
-    var rev = block.find("span.revlist span.revelem:first span.rev").text();  
-    var prevrev = block.find("span.revlist span.revelem:last span.prevrev").text();  
+    var rev = block.find("span.revlist span.revelem:first span.rev").text();
+    var prevrev = block.find("span.revlist span.revelem:last span.prevrev").text();
 
-    var cidrev = "?rev="+rev; 
-    var cidprevrev = (prevrev ? "?rev="+prevrev : ""); 
-    var ciddiff = (prevrev ? "?otherrev="+prevrev+"&rev="+rev : ""); 
+    var cidrev = "?rev="+rev;
+    var cidprevrev = (prevrev ? "?rev="+prevrev : "");
+    var ciddiff = (prevrev ? "?otherrev="+prevrev+"&rev="+rev : "");
 
     var codepreviewerdiv = block.find(".codepreviewer");
     codepreviewerdiv.find(".history_code_border").hide();
@@ -679,62 +699,62 @@ function previewchanges_show(block)
     cachefetch(cidrev, function() { cachefetch(cidprevrev, function() { cachefetch(ciddiff, function()
     {
         codepreviewerdiv.find(".cprev span.shrev").text(rev);  // could allow for sub-inspection of series
-        codepreviewerdiv.find(".cprev span.shprevrev").text(prevrev); 
+        codepreviewerdiv.find(".cprev span.shprevrev").text(prevrev);
 
-        var fequallines = 0; 
+        var fequallines = 0;
         if (prevrev)
         {
             var matcheropcodes = $.evalJSON(fetchedcache[ciddiff]); // [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
-            fequallines = highlightOtherCode(fetchedcache[cidrev], fetchedcache[cidprevrev], matcheropcodes, Parser, codepreviewerdiv); 
+            fequallines = highlightOtherCode(fetchedcache[cidrev], fetchedcache[cidprevrev], matcheropcodes, Parser, codepreviewerdiv);
         }
         else
-            highlightCode(fetchedcache[cidrev], Parser, codepreviewerdiv); 
+            highlightCode(fetchedcache[cidrev], Parser, codepreviewerdiv);
 
-        if (fequallines > 5) 
-            previewchanges_hideequal(block); 
+        if (fequallines > 5)
+            previewchanges_hideequal(block);
         else
-            previewchanges_showequal(block); 
+            previewchanges_showequal(block);
 
         codepreviewerdiv.find(".loading").hide();
         codepreviewerdiv.find(".history_code_border").show();
 
-        codepreviewerdiv.find(".outputlines .fequal").click(function() { previewchanges_hideequal(block, $(this)); }); 
-        codepreviewerdiv.find(".outputlines .equal").click(function() { previewchanges_showbothcode(block); }); 
-        codepreviewerdiv.find(".outputlines .delete").click(previewchanges_showsidecode); 
-        codepreviewerdiv.find(".outputlines .insert").click(previewchanges_showsidecode); 
-        codepreviewerdiv.find(".expander").click(function() { previewchanges_showequal(block, $(this)); }); 
+        codepreviewerdiv.find(".outputlines .fequal").click(function() { previewchanges_hideequal(block, $(this)); });
+        codepreviewerdiv.find(".outputlines .equal").click(function() { previewchanges_showbothcode(block); });
+        codepreviewerdiv.find(".outputlines .delete").click(previewchanges_showsidecode);
+        codepreviewerdiv.find(".outputlines .insert").click(previewchanges_showsidecode);
+        codepreviewerdiv.find(".expander").click(function() { previewchanges_showequal(block, $(this)); });
 
-        codepreviewerdiv.find(".expander").attr("title", "Expand to show all unchanged lines"); 
+        codepreviewerdiv.find(".expander").attr("title", "Expand to show all unchanged lines");
 
-    })})}); 
+    })})});
 }
 
 
 function previewrunevent_show(block)
 {
-    hideallshowhistrun(); 
+    hideallshowhistrun();
 
-    block.find(".showrunevent").hide(); 
+    block.find(".showrunevent").hide();
     block.find(".hiderunevent, .runpermalink").show();
 
-    var runid = block.find("span.runidlist span.runidelem:first span.runid").text();  
+    var runid = block.find("span.runidlist span.runidelem:first span.runid").text();
     block.find(".history_code_border").hide();
 
     block.find(".loading").show();
-    block.find(".runpreviewer").show(); 
-    cachefetch(runid, function() 
-    { 
-        var runevent = $.evalJSON(fetchedcache[runid]); 
+    block.find(".runpreviewer").show();
+    cachefetch(runid, function()
+    {
+        var runevent = $.evalJSON(fetchedcache[runid]);
         block.find(".loading").hide();
-        block.find(".runpreview").text(runevent.output).show(); 
-    }); 
+        block.find(".runpreview").text(runevent.output).show();
+    });
 }
 
 function previewrunevent_hide(block)
 {
-    block.find(".runpreviewer").hide(); 
-    block.find(".showrunevent").show(); 
-    block.find(".hiderunevent, .runpermalink").hide(); 
+    block.find(".runpreviewer").hide();
+    block.find(".showrunevent").show();
+    block.find(".hiderunevent, .runpermalink").hide();
 }
 
 function hideallshowhistrun()
@@ -743,21 +763,21 @@ function hideallshowhistrun()
     $(".history_run_event").each(function(i, el) { previewrunevent_hide($(el)) });
 }
 
-$(document).ready(function() 
-{ 
+$(document).ready(function()
+{
     $(".cprev").hide();     // hide these ugly titles for now
-    hideallshowhistrun(); 
+    hideallshowhistrun();
 
     $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
 
-    $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); }); 
-    $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); }); 
+    $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); });
+    $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); });
 
-    $(".history_edit .history_code_border .otherlinenumbers").click(previewchanges_showsidecode); 
-    $(".history_edit .history_code_border .linenumbers").click(previewchanges_showsidecode); 
+    $(".history_edit .history_code_border .otherlinenumbers").click(previewchanges_showsidecode);
+    $(".history_edit .history_code_border .linenumbers").click(previewchanges_showsidecode);
 
-    $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); }); 
-    $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); }); 
+    $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); });
+    $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); });
 
     // if they put # and the run_id in the URL, open up that one
     if (window.location.hash) {
@@ -768,7 +788,7 @@ $(document).ready(function()
         $('li.full_history a').trigger('click');
     }
 
-}); 
+});
 </script>
 {% endblock %}
 
