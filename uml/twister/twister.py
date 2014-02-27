@@ -916,15 +916,6 @@ class RunnerFactory(protocol.ServerFactory):
         self.notifyMonitoringClients(client)
 
 
-
-def sigTerm(signum, frame):
-    os.kill(child, signal.SIGTERM)
-    try:
-        os.remove(poptions.pidfile)
-    except OSError:
-        pass  # no such file
-    sys.exit (1)
-
 def main():
     # daemon mode
     if os.fork() == 0 :
@@ -956,19 +947,30 @@ def main():
 
     logging.config.fileConfig(poptions.config)
 
+    child = None
+
+    def sigTerm(signum, frame):
+        if child is not None:
+            os.kill(child, signal.SIGTERM)
+        try:
+            os.remove(poptions.pidfile)
+        except OSError:
+            pass  # no such file
+        sys.exit(1)
+
     #  subproc mode
     signal.signal(signal.SIGTERM, sigTerm)
+
     while True:
         child = os.fork()
-        if child == 0 :
-            time.sleep (1)
+        if child == 0:
+            time.sleep(1)
             break
 
         sys.stdout.write("Forked subprocess: %d\n" % child)
         sys.stdout.flush()
 
         os.wait()
-
 
     # http://localhost:9010/update?runid=1234&message={'sources':'somejson}
     runnerfactory = RunnerFactory()
