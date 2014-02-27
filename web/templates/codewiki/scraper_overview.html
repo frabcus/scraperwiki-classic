@@ -114,8 +114,9 @@
 
 <ul class="toolbar">
     {% if morph %}
-    <li class="edit"><a href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Transfer to Morph.io</a></li>
-    {% else %}
+    <li class="edit"><a href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}"><img src="{{ MEDIA_URL }}images/icons/forward_arrow.png" width="16" height="16" alt="">Transfer to Morph.io</a></li>
+    {% endif %}
+    {% if not disable_editing %}
     <li class="edit"><a href="{% url editor_edit scraper.wiki_type scraper.short_name %}" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Edit</a></li>
     {% endif %}
     <li class="viewsource"><!--[if !IE]> --><a href="view-source:{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><!-- <![endif]--><!-- [if IE]><a href="{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}" target="_blank" rel="nofollow">View Source</a><![endif]--></li>
@@ -149,12 +150,28 @@
     <li class="clear"></li>
 </ul>
 
-{% if morph %}
-<div id="morph">
-  <h2>ScraperWiki Classic is now read-only.</h2>
-  <p>But don&rsquo;t worry! You can transfer this {{scraper.wiki_type}} to <a href="https://morph.io" title="What is Morph.io?" target="_blank">Morph.io</a> if you want to continue editing it.</p>
-  <a class="cta" href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}">Transfer to Morph.io</a>
-</div>
+{% if disable_editing %}
+    {% if morph %}
+    <div id="morph">
+      <h2>ScraperWiki Classic is now read-only.</h2>
+      <p>But don&rsquo;t worry! You can transfer this {{scraper.wiki_type}} to <a href="https://morph.io" title="What is Morph.io?" target="_blank">Morph.io</a> if you want to continue editing it.</p>
+      <a class="cta" href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}">Transfer to Morph.io</a>
+    </div>
+    {% else %}
+    <div id="morph">
+      <h2>ScraperWiki Classic is now read-only.</h2>
+      <p>You can still view the source code though!</p>
+      <a class="cta" href="{{MAIN_URL}}/editor/raw/{{ scraper.short_name }}">View Source</a>
+    </div>
+    {% endif %}
+{% else %}
+    {% if morph %}
+    <div id="morph">
+      <h2>ScraperWiki Classic is going read-only.</h2>
+      <p>You can transfer this {{scraper.wiki_type}} to <a href="https://morph.io" title="What is Morph.io?" target="_blank">Morph.io</a> if you want to continue editing it in the future.</p>
+      <a class="cta" href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}">Transfer to Morph.io</a>
+    </div>
+    {% endif %}
 {% endif %}
 
 {% if scraper.is_sick_and_not_running or scraper.last_runevent.exception_message %}
@@ -165,8 +182,10 @@
     {% else %}
     <p>We&rsquo;re not quite sure what&rsquo;s wrong with it. Could you take a look?</p>
     {% endif %}
-    {% if morph %}
-    <a class="fix" href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}">Fix in Morph.io</a>
+    {% if not disable_editing %}
+        {% if morph %}
+        <a class="fix" href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}">Fix in Morph.io</a>
+        {% endif %}
     {% else %}
     <a class="fix" href="{% url editor_edit scraper.wiki_type scraper.short_name %}" rel="nofollow">Fix this {{ scraper.wiki_type }}</a>
     {% endif %}
@@ -458,7 +477,8 @@
         {% if user_edits_it or user.is_staff %}<li class="tag"><a href="#tags" title="Use tags to organise and group similar scrapers"><img src="{{ MEDIA_URL }}images/icons/tag.png" width="16" height="16" alt="">Tag</a></li>{% endif %}
         {% if morph %}
         <li><a href="https://morph.io/scraperwiki_forks/new?scraperwiki_shortname={{scraper.short_name}}"><img src="{{ MEDIA_URL }}images/icons/edit.png" width="16" height="16" alt="">Transfer to Morph.io</a></li>
-        {% else %}
+        {% endif %}
+        {% if not disable_editing %}
         <li class="view"><a data-wiki_type="view" data-sourcescraper="{{scraper.short_name}}" {% if scraper.vault %}data-vault_id="{{scraper.vault.id}}" {% endif %}href="{% url choose_template 'view' %}?sourcescraper={{scraper.short_name}}" title="Create a new view using this scraper&rsquo;s data" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/chart.png" width="16" height="16" alt="">Visualise{% if scraper.vault %} in Vault{% endif %}</a></li>
         {% endif %}
         <li class="clear"></li>
