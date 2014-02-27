@@ -185,6 +185,9 @@ def code_overview(request, wiki_type, short_name):
     else:
         context["morph"] = False
 
+    # Set this to True to disable editing (eg: during Morph.io migration)
+    context['disable_editing'] = False
+
     context['user_can_set_hourly'] = False
     if request.user.is_authenticated():
         context['user_plan'] = request.user.get_profile().plan
