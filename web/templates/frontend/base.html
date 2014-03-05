@@ -120,7 +120,6 @@
             <ul>
                 <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
                 <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
-                <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
             </ul>
         </div>
         {% if user.is_staff %}
