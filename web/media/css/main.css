@@ -54,7 +54,7 @@ body {
 	background: #f4f4f4 url(../images/f3f3f3_grain.gif) 0 0;
 }
 
-#nav, #alert_inner, #header, #content, #footer, #subheader {
+#nav, #alert_inner, #header, #content, #subheader {
 	text-align: left;
 	width: 960px;
 	padding: 0;
@@ -675,7 +675,7 @@ body.frontpage #header {
 	border: 1px solid #456f85;
 	padding: 0;
 	width: 958px;
-	
+
 }
 
 body.frontpage #content {
@@ -848,7 +848,7 @@ body.frontpage #header:before {
 	margin-left: 170px;
 }
 
-#frontpage_slider #more_developer_div h3, 
+#frontpage_slider #more_developer_div h3,
 #frontpage_slider #more_requester_div h3 {
 	text-align: center;
 }
@@ -1156,7 +1156,7 @@ body.profiles.edit p.profilepic a {
 	background-color: #F4F8FB;
 	padding: 8px 0;
 	font-size: 14px;
-	text-decoration: none;	
+	text-decoration: none;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
@@ -1212,7 +1212,7 @@ body.profiles.edit #alerts label {
 }
 
 body.profiles.edit #features p {
-	
+
 	font-size: 13px;
 	color: #666;
 }
@@ -1293,79 +1293,6 @@ body.profiles.edit #features li input {
 	-moz-border-radius: 3px;
 	border-radius: 3px;
 	color: #39732d;
-}
-
-
-
-/* FOOTER */
-
-#footer ul, #footer dl {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
-
-#footer {
-	font-size: 13px;
-	padding-bottom: 100px;
-	position: relative;
-	text-shadow: 0 1px 0 #fff;
-}
- 
-#footer a {
-	color: #999;
-	text-decoration: none;
-}
-
-#footer a:hover {
-	color: #666;
-}
-
-#footer dl dt {
-	float: left;
-	clear: left;
-	width: 150px;
-	padding: 0 0 10px 0;
-	margin: 0 20px 0 0;
-	font-weight: bold;
-	color: #999;
-	text-align: right;
-}
-
-#footer dl dd {
-	padding: 0 0 10px 0;
-	margin: 0;
-}
-
-#footer dl dd ul {
-	padding: 0;
-	margin: 0;
-	color: #ccc;
-}
-
-#footer dl dd ul li {
-	padding: 0 10px 0 0;
-	display: inline;
-	list-style-type: none;
-}
-
-#footer .legal {
-	margin-top: 20px;
-}
-
-#footer .legal a {
-	color: #bbb;
-}
-
-#footer .legal a:hover {
-	color: #999;
-}
-
-#footer img {
-	position: absolute;
-	top: -15px;
-	right: 30px;
-	-webkit-transform-style: preserve-3d;
 }
 
 
@@ -1556,12 +1483,12 @@ table.data td {
 }
 
 table.data td, table.data th {
-	padding: 0.3em 0.5em; 
+	padding: 0.3em 0.5em;
 	line-height: 1em;
     border: solid 1px #cad0dc;
 }
 
-table.data tr:nth-child(odd) td, 
+table.data tr:nth-child(odd) td,
 table.data tr:nth-child(odd) th {
 	background: #F2F4F8;
 }
@@ -3577,7 +3504,7 @@ form#request .email input {
 	width: 174px;
 }
 
-form#request .error textarea, 
+form#request .error textarea,
 form#request .error input {
 	background-color: #fff3f3;
 }
@@ -3599,7 +3526,7 @@ form#request .email {
 form#request .description {
     clear: both;
 }
-	
+
 form#request a#send {
 	width: auto;
 	font-size: 14px;
@@ -4284,7 +4211,7 @@ body.events #tickets em {
 	75% {-webkit-transform:rotate(-2deg);}
 	100% {-webkit-transform:rotate(0deg);}
 }
- 
+
 @-moz-keyframes wiggle {
 	0% {-moz-transform:rotate(0deg);}
 	25% {-moz-transform:rotate(2deg);}
@@ -4803,7 +4730,7 @@ div.documentationpage h3 {
 
 div.documentationpage li {
 	list-style-type: disc;
-    margin-left: 0em; 
+    margin-left: 0em;
 }
 
 div.documentationpage #getting_help li {
@@ -4840,13 +4767,13 @@ div.documentationpage code {
 	background: #C1E0F0 url(../images/graph_paper_light.png) center center;
 	border: solid 2px #39c;
 	overflow: auto;
-	color: #036; 
-	display:block; 
-	font-family: monospace; 
-	white-space:pre; 
+	color: #036;
+	display:block;
+	font-family: monospace;
+	white-space:pre;
 	font-size:120%;
-	-webkit-border-radius: 4px; 
-	-moz-border-radius: 4px; 
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
 	border-radius: 4px;
 }
 
@@ -4867,8 +4794,8 @@ div.documentationpage .copy_to_clipboard {
 	font-size: 14px;
 	outline: none;
 	background: #DFEFF7 url(../images/icons/clipboard.png) 5px 4px no-repeat;
-	-webkit-border-radius: 4px; 
-	-moz-border-radius: 4px; 
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
 	border-radius: 4px;
 	border: 1px solid #39c;
 }
@@ -4969,12 +4896,12 @@ body.docs.api #content {
 }
 
 #api_explorer #functions .selected .mask {
-	display: block; 
-	width: 10px; 
-	position: absolute; 
-	top: 0pt; 
-	right: -5px; 
-	height: 100%; 
+	display: block;
+	width: 10px;
+	position: absolute;
+	top: 0pt;
+	right: -5px;
+	height: 100%;
 	background: #fff;
 }
 
@@ -5177,8 +5104,8 @@ body.docs.api #content {
 }
 
 .ui-autocomplete {
-	-webkit-box-shadow: 0px 3px 5px rgba(0,0,0,0.5); 
-	-moz-box-shadow: 0px 3px 5px rgba(0,0,0,0.5); 
+	-webkit-box-shadow: 0px 3px 5px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0px 3px 5px rgba(0,0,0,0.5);
 	box-shadow: 0px 3px 5px rgba(0,0,0,0.5);
 }
 
@@ -5241,7 +5168,7 @@ table.api_detail tr.not_implemented {
 }
 
 dl.api_arguments {
-	
+
 }
 
 form.api_arguments dt {
@@ -5399,7 +5326,7 @@ a.rollbackchanges {
 }
 
 .editor_controls #run {
-	
+
 }
 
 span.historyexception {
@@ -6114,8 +6041,8 @@ div#my_vaults + div#shared_vaults {
 	margin-top: 50px;
 }
 
-body.vaults .content h2, 
-body.vaults .content h3, 
+body.vaults .content h2,
+body.vaults .content h3,
 body.vaults .content h4 {
 	margin: 0;
 	padding: 0;
@@ -6297,7 +6224,7 @@ body.vaults .vault_users_popover li:hover {
 }
 
 body.vaults .vault_users_popover a:hover {
-	text-decoration: none;	
+	text-decoration: none;
 }
 
 body.vaults .vault_users_popover .gravatar {
@@ -6947,7 +6874,7 @@ body.status #overdue {
 }
 
 body.status #connectionstatus .error {
-	background-color: black; 
+	background-color: black;
 	color: white;
 	padding: 2px 5px;
 }
