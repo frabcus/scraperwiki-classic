@@ -264,25 +264,28 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 }
 
 $(function(){
-    // If you ever find this comment and you're adding a new page
-    // add a new regular expression here and make sure it selects
-    // the right .supernav tab :-)
-    var urls = {
-        '/(about|jobs|events|contact)/' : 'about',
-        '/status/' : 'admin',
-        '/dataservices/': 'dataservices',
-        '/(profiles|vaults)/' : 'user',
-        '/login/' : 'login',
-        '.*' : 'code'
-    }
-    $.each(urls, function(index, value){
-        var regexp = RegExp(index);
-        if(document.URL.match(regexp)){
-            $('.supernav li.' + value).addClass('active default');
-            $('.subnav.' + value).show();
-            return false;
+
+    if($('.supernav li.login').length){
+        $('.supernav li.code').addClass('active default');
+        $('.subnav.code').show();
+    } else {
+        var urls = {
+            '/(about|jobs|events|contact)/' : 'about',
+            '/status/' : 'admin',
+            '/dataservices/': 'dataservices',
+            '/(profiles|vaults)/' : 'user',
+            '/login/' : 'login',
+            '.*' : 'code'
         }
-    });
+        $.each(urls, function(index, value){
+            var regexp = RegExp(index);
+            if(document.URL.match(regexp)){
+                $('.supernav li.' + value).addClass('active default');
+                $('.subnav.' + value).show();
+                return false;
+            }
+        });
+    }
 
     $('.supernav li a').not('li.signup a, li.new a').bind('click', function(e){
         e.preventDefault();
