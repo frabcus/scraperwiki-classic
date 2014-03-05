@@ -180,12 +180,10 @@ def code_overview(request, wiki_type, short_name):
     else:
         context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
 
-    if request.user.is_authenticated() and request.user.get_profile().has_feature('Morph.io'):
-        context["morph"] = True
-    else:
-        context["morph"] = False
+    # Show the Morph.io migration buttons
+    context["morph"] = True
 
-    # Set this to True to disable editing (eg: during Morph.io migration)
+    # Stop people editing scrapers' code
     context['disable_editing'] = False
 
     context['user_can_set_hourly'] = False
