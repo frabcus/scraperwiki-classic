@@ -550,7 +550,11 @@
     </ul>
 
     <div>
-    {% history scraper.scraper user 10 %}
+    {% if disable_editing %}
+        {% history scraper.scraper user 10 0 %}
+    {% else %}
+        {% history scraper.scraper user 10 1 %}
+    {% endif %}
     </div>
 
 </div>
