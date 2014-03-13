@@ -184,7 +184,7 @@ def code_overview(request, wiki_type, short_name):
     context["morph"] = True
 
     # Stop people editing scrapers' code
-    context['disable_editing'] = False
+    context['disable_editing'] = True
 
     context['user_can_set_hourly'] = False
     if request.user.is_authenticated():
