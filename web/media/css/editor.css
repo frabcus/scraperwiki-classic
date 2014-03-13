@@ -1,4 +1,4 @@
-/* @override 
+/* @override
 	http://localhost:8000/media/css/editor.css?
 */
 
@@ -13,7 +13,7 @@ body {
 
 /* Draft warning */
 
-#draft_warning, #protected_warning, #login_warning, #rollback_warning {
+.alert_outer {
 	text-align: center;
 	border-bottom: solid 1px #c38938;
 }
@@ -133,7 +133,7 @@ body {
 	top: 0.35em;
 }
 
-.editor_controls input.button, #meta_form input.button, .helplink {
+.editor_controls .button, #meta_form input.button, .helplink {
 	font-size: 12px;
 	line-height: 13px;
     -webkit-border-radius: 4px;
@@ -151,16 +151,21 @@ body {
 	display: inline-block;
 }
 
-.editor_controls input:hover {
+.editor_controls .button:hover {
 	background-color: #ddd;
 	border-color: #999;
 	color: #444;
 	cursor: pointer;
+  text-decoration: none;
 }
 
-.editor_controls input:active {
+.editor_controls .button:active {
 	position: relative;
 	top: 1px;
+}
+
+.editor_controls .morph {
+  background-image: url(../images/icons/forward_arrow.png);
 }
 
 .editor_controls .save, #meta_form .save {
@@ -274,7 +279,7 @@ body {
 	text-decoration: none;
 }
 
-.helplink:hover {	
+.helplink:hover {
 	background-color: #e58639;
 	border-color: #b86114;
 	text-decoration: none;
@@ -651,7 +656,7 @@ a.cachepopup:hover {
 
 #idlastrev {
 	color: #808080;
-	margin: 0;
+	margin: 0 0.5em 0 0;
 	padding: 0.5em 0em 0.5em 0;
     cursor: pointer;
 	font-size: 0.8em;

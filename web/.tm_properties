@@ -1,0 +1,1 @@
+excludeInFolderSearch = "{$excludeInFolderSearch,$extraExcludes,media/CACHE,media/clients,media/CodeMirror-0.92,media/CodeMirror-0.94,media/CodeMirror-2.16,media/images,media/ruby-in-codemirror,media/svg,media/js/ace}"

@@ -25,7 +25,7 @@
     {% regroup itemlogmonth.list by groupkey as itemloggroup_list %}
     {% for itemloggroup in itemloggroup_list %}
       {% with itemloggroup.list|first as itemfirst %}   {# could alternatively refer to itemloggroup.list.0 #}
-      {% with itemloggroup.list|last as itemlast %}   
+      {% with itemloggroup.list|last as itemlast %}
 
       {% ifequal itemfirst.type 'commit' %}
       <div class="history_edit">
@@ -51,7 +51,7 @@
         </div>
           {% if itemfirst.user %}{% show_gravatar itemfirst.user 'small' %}{% endif %}
           <span class="history_editor_info">
-            Edited by 
+            Edited by
             <a href="{% if itemfirst.user.username %}{% url profile itemfirst.user.username %}{% endif %}" class="historyuser">
               {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
             </a>
@@ -59,26 +59,26 @@
               {{itemloggroup.list|length}} times
             {% endifnotequal %}
             <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and allow_rollback %}
                 {% ifnotequal itemloggroup_list|first itemloggroup %}
-                <a class="rollbackchanges" title="Revert code to just after this change; to revision {{itemfirst.rev}}" 
+                <a class="rollbackchanges" title="Revert code to just after this change; to revision {{itemfirst.rev}}"
                    href="{% url editor_edit scraper.wiki_type scraper.short_name %}?rollback_rev={{itemfirst.rev}}">Rollback</a>
                 {% endifnotequal %}
             {% endif %}
           </span>
 
-          <div class="codepreviewer"> 
+          <div class="codepreviewer">
             <h3 class="loading">Loading...</h3>
             <h4 class="cprev">Difference between, revision <span class="shrev"></span> and previous revision <span class="shprevrev"></span></h4>
             <div class="history_code_border">
-              <div class="otherlinenumbers"></div> 
-              <div class="linenumbers"></div> 
-              <pre class="outputlines"></pre> 
+              <div class="otherlinenumbers"></div>
+              <div class="linenumbers"></div>
+              <pre class="outputlines"></pre>
             </div>
           </div>
 
       </div>
-      {% else %} 
+      {% else %}
 
       <div class="history_run_event" id="run_{{itemfirst.runevent.id}}">
         <div class="history_view_changes">
@@ -97,7 +97,7 @@
         {% ifnotequal itemfirst.runevent.pid -1 %}
             <div class="history_ran_notfinished">
               <span class="history_bold">Currently running</span>: -
-              started {{itemfirst.runevent.run_started|timesince}} ago 
+              started {{itemfirst.runevent.run_started|timesince}} ago
               (so far {{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
               <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
         {% else %}{% if itemfirst.runevent.exception_message %}
