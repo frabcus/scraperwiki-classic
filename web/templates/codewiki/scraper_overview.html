@@ -440,24 +440,26 @@
                 <span class="arrow"></span>
             </div>
         </li>
-        {% if scraper.privacy_status == 'public' %}
-            {% if user.is_authenticated %}<li class="empty">
-                <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore" rel="nofollow">Clear data</a>
-                <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
-                    {% csrf_token %}
-                    <input type="hidden" name="delete_data" value="1" />
-                    <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
-                </form>
-            </li>{% endif %}
-        {% else %}
-            {% if user_edits_it or user.is_staff %}<li class="empty">
-                <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="{% if user.is_staff %}(You can only see this because you&rsquo;re staff) {% endif %}Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore" rel="nofollow">Clear data</a>
-                <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
-                    {% csrf_token %}
-                    <input type="hidden" name="delete_data" value="1" />
-                    <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
-                </form>
-            </li>{% endif %}
+        {% if not disable_editing %}
+            {% if scraper.privacy_status == 'public' %}
+                {% if user.is_authenticated %}<li class="empty">
+                    <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore" rel="nofollow">Clear data</a>
+                    <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_data" value="1" />
+                        <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
+                    </form>
+                </li>{% endif %}
+            {% else %}
+                {% if user_edits_it or user.is_staff %}<li class="empty">
+                    <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" title="{% if user.is_staff %}(You can only see this because you&rsquo;re staff) {% endif %}Delete all of this {{scraper.wiki_type}}&rsquo;s data?" id="empty_datastore" rel="nofollow">Clear data</a>
+                    <form action="{% url scraper_delete_data scraper.short_name %}" method="post" class="hide">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_data" value="1" />
+                        <input type="submit" id="btnClearDatastore" value="Clear the datastore" />
+                    </form>
+                </li>{% endif %}
+            {% endif %}
         {% endif %}
         <li class="clear"></li>
       </ul>
