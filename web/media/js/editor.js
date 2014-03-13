@@ -44,6 +44,11 @@ $(document).ready(function()
     codemirror_url = $('#codemirror_url').val();
     var wiki_type = $('#id_wiki_type').val();
     var savecode_authorized = $('#savecode_authorized').val();
+    if ($('#disable_editing').val() === 'yes'){
+      var editing_authorized = false;
+    } else {
+      var editing_authorized = true;
+    }
 
     texteditor = $('#texteditor').val();
     if (window.location.hash == "#plain")
@@ -497,8 +502,12 @@ $(document).ready(function()
 
         // $('#watcher_alert').show().children('editor_name').text(editingusername);
 
+        if (editing_authorized === false){
+          setCodeMirrorReadOnly(true);
+          $('.editor_controls #run').attr('disabled', true);
+        }
         // you are the editing user
-        if (username && (editingusername == username)){
+        else if (username && (editingusername == username)){
             $('#run').show();
             $('#btnEdit').hide();
             $('.editor_controls #watch_button_area').toggle((loggedineditors.length != 1));
