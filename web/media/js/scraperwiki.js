@@ -308,7 +308,32 @@ $(function(){
         $(this).children('input').focus();
     });
 
+    if($('#nav .search input.text').val() == 'Search code...'){
+        $('#nav .search input.text').val('').before('<span class="placeholder">Search code...</span>');
+    } else {
+        $('#nav .search input.text').before('<span class="placeholder" style="display:none">Search code...</span>');
+    }
+
+    $('#nav .search input.text, #nav .login input.text').bind('focus', function(){
+        $(this).parent().addClass('focussed');
+        if($(this).val() === ''){
+            $(this).prev().show().css('opacity', 0.5);
+        }
+    }).bind('blur', function(){
+        $(this).parent().removeClass('focussed');
+        if($(this).val() === ''){
+            $(this).prev().show().css('opacity', 1);
+        }
+    }).bind('keyup', function(e){
+        if($(this).val() === '') {
+		    $(this).prev().show().css({opacity: 0.5});
+		} else {
+		    $(this).prev().hide();
+		}
+    });
+
     $("#classic_login").on("click", function(){
+        console.log("kittens")
         $("li.login a").trigger("click")
         $("#login_username").focus()
     })

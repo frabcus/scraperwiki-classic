@@ -216,6 +216,42 @@ body {
     text-decoration: underline;
 }
 
+li.search form {
+    background: transparent url(../images/nav_search.png) 0 0 no-repeat;
+    width: 180px;
+    height: 38px;
+    position: relative;
+}
+
+li.search form.focussed {
+	background-position: 0 -38px;
+}
+
+li.search input.text,
+li.search .placeholder,
+.subnav.login label,
+.subnav.login input.text {
+	position: absolute;
+	top: 11px;
+	left: 32px;
+	outline: none;
+	border: none;
+	background: transparent;
+	padding: 0;
+	width: 130px;
+	height: 18px;
+	text-align: left;
+	color: #6c8699;
+	font-family: inherit;
+	font-size: 13px;
+	line-height: 18px;
+}
+
+li.search input.text,
+.subnav.login input.text {
+	z-index: 10;
+}
+
 .subnav.login label i {
 	font-style: normal;
 	color: #9bb3c5;

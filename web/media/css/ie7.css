@@ -9,3 +9,7 @@ ul.subnav li {
     display: inline;
     zoom: 1;
 }
+
+li.search form {
+    margin-bottom: 0;
+}
