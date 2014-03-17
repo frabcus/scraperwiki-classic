@@ -236,34 +236,6 @@
         {% else %}
             <p>Has not run yet</p>
         {% endif %}
-
-        <h3 class="schedule">Schedule{% if user_owns_it or user_edits_it or user.is_staff %} <a href="#edit_schedule" title="Edit this scraper&rsquo;s schedule" class="edit edit_schedule" rel="nofollow">Edit</a>{% endif %}</h3>
-        {% if scraper.scraper.next_run.year != 9999 %}
-            {% if scraper.scraper.run_interval != 1000000000 %}
-                <p>{{scraper.scraper.run_interval|schedule}}</p>
-            {% else %}
-                <p>No schedule set</p>
-            {% endif%}
-        {% else %}
-            <p>No schedule set</p>
-        {% endif %}
-
-        <table cellspacing="0" cellpadding="0" style="display:none" id="edit_schedule">
-            {% for interval, id, label in schedule_options %}
-            {% if id = 'hourly' and not user_can_set_hourly %}
-            <tr class="premium">
-                <td class="checkbox"><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}disabled="disabled"/></td>
-                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label><a href="/pricing/" class="upgrade_to_activate">Upgrade to activate &raquo;</a></td>
-            </tr>
-            {% else %}
-            <tr>
-                <td class="checkbox"><input type="radio" value="/scrapers/{{scraper.short_name}}/admin/set_interval/{{interval}}/" name="schedule" id="schedule_{{id}}" {% if scraper.scraper.run_interval == interval %}checked="checked" {% endif %}/></td>
-                <td class="label"><label for="schedule_{{id}}">{{label|safe}}</label></td>
-            </tr>
-            {% endif %}
-            {% endfor %}
-
-        </table>
     </td>
     <td class="description">
         <h3 class="about_this_scraper">About this scraper {% if user_edits_it or user.is_staff %}<a class="edit edit_description"{% if user.is_staff %} title="(You can only see this because you&rsquo;re staff)"{% endif %}>Edit</a>{% endif %}</h3>
