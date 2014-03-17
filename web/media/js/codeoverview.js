@@ -370,55 +370,6 @@ $(function(){
 		$(this).next().children(':submit').trigger('click');
 	});
 
-	$('.full_history a').bind('click', function(e){
-		e.preventDefault();
-		if(!$(this).is('.disabled')){
-			$button = $(this).text('Loading\u2026');
-			$.ajax({
-				url: $button.attr('href'),
-				success: function(data) {
-					$('.history>div').empty().html(data).each(function(){
-						$(".cprev").hide();     // hide these ugly titles for now
-					    hideallshowhistrun();
-
-					    $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
-
-					    $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); });
-					    $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); });
-
-					    $(".history_edit .history_code_border .otherlinenumbers").click(previewchanges_showsidecode);
-					    $(".history_edit .history_code_border .linenumbers").click(previewchanges_showsidecode);
-
-					    $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); });
-					    $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); });
-
-					    // if they put # and the run_id in the URL, open up that one
-					    if (window.location.hash) {
-					        var hash_run_event = $(window.location.hash);
-					        if (hash_run_event.length != 0) {
-					            previewrunevent_show(hash_run_event);
-					            $('html, body').animate({
-                                     scrollTop: $(hash_run_event).offset().top
-                                 }, 200);
-                                 if($(hash_run_event).children('.history_ran_fail').length){
-                                     $(hash_run_event).css('border','4px solid #B75253');
-                                 } else {
-                                     $(hash_run_event).css('border','4px solid #278D2F');
-                                 }
-
-					        }
-					    }
-					});
-					$button.text('Showing full history').addClass('disabled');
-				},
-				error: function(request, status, error){
-					$button.text('Unable to load full history').addClass('disabled').css('cursor','help').attr('title',request.responseText)
-				}
-			});
-		}
-	});
-
-
 	function show_new_tag_box(){
 		$('div.tags').show();
 		$('.new_tag').hide().next().show().find('input').focus();

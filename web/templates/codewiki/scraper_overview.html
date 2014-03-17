@@ -489,7 +489,6 @@
 <div class="history">
     <ul class="titlebar">
         <li class="first"><h3>This scraper&rsquo;s history</h3></li>
-        <li class="full_history"><a href="{% url full_history scraper.wiki_type, scraper.short_name %}" rel="nofollow">Show full history</a></li>
         <li class="clear"></li>
     </ul>
 
@@ -742,15 +741,6 @@ $(document).ready(function()
 
     $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); });
     $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); });
-
-    // if they put # and the run_id in the URL, open up that one
-    if (window.location.hash) {
-        //var hash_run_event = $(window.location.hash);
-        //if (hash_run_event.length != 0) {
-        //    previewrunevent_show(hash_run_event);
-        //}
-        $('li.full_history a').trigger('click');
-    }
 
 });
 </script>

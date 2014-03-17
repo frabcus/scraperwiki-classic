@@ -150,15 +150,6 @@ def scraper_history(request, wiki_type, short_name):
 
     return render_to_response('codewiki/history.html', context, context_instance=RequestContext(request))
 
-# Rewrite of the overview page by Zarino
-def full_history(request, wiki_type, short_name):
-    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
-    if resp: return resp
-
-    ctx = { "scraper": scraper }
-    return render_to_response('codewiki/full_history.html', ctx, context_instance=RequestContext(request))
-
-
 def code_overview(request, wiki_type, short_name):
     from codewiki.models import ScraperRunEvent, DomainScrape
 
@@ -184,7 +175,7 @@ def code_overview(request, wiki_type, short_name):
     context["morph"] = True
 
     # Stop people editing scrapers' code
-    context['disable_editing'] = False
+    context['disable_editing'] = True
 
     context['user_can_set_hourly'] = False
     if request.user.is_authenticated():
