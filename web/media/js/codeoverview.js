@@ -496,8 +496,6 @@ $.fn.switchTab = function(){
 
 		if( $dp_div.is('.hidden')){
 			$dp_div.removeClass('hidden').siblings().addClass('hidden');
-	        $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
-	        $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
 		}
     })
 }
@@ -711,10 +709,6 @@ function setupDataPreviews() {
 				});
 				$('li.data_tab').eq(0).switchTab();
 				$('.data h3').text('This ' + $('#id_wiki_type').val() + '\u2019s datastore');
-
-			    $("li.table_csv a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=csv&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
-			    $("li.table_json a").attr("href", $('#id_api_base').val() + "datastore/sqlite?format=json&name=" + $('#scrapershortname').val() + "&query=select+*+from+`"+ encodeURI( $(".data_tab.selected .tablename").text() ) + "`" + "&apikey=" + $('#id_apikey').val());
-
 				$('a.moar').live('click', function(e){
 					e.preventDefault();
 					var url = $(this).attr('href');
