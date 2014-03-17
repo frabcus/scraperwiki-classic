@@ -200,7 +200,6 @@
                 {% if scraper.scraper.run_interval == MAGIC_RUN_INTERVAL %}
                     <p><span class="running">In the queue&hellip;</span></p>
                 {% else %}
-                {% if user_owns_it or user_edits_it or user.is_staff %}<!--<a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run" rel="nofollow">Run now</a>-->{% endif %}
                 <p>
                     {% if scraper.scraper.run_interval == -1 %}
                         Idle &ndash; not scheduled to run
@@ -215,7 +214,6 @@
                 {% endif %}
             {% else %}
                 {% if scraper.scraper.run_interval == -1 %}
-                {% if user_owns_it or user_edits_it or user.is_staff %}<!--<a href="{% url run_scraper_now scraper.short_name %}" title="Run this scraper now, without affecting its schedule" class="run" rel="nofollow">Run now</a>-->{% endif %}
                 <p>
                     Idle &ndash; not scheduled to run
                 </p>

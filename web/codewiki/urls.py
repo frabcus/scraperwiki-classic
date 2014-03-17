@@ -40,11 +40,6 @@ urlpatterns = patterns('',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
     url(r'^scraper-admin/twistermakesrunevent/$',         viewsrpc.twistermakesrunevent),
 
-    url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-\.]+)/run/$',
-                                                          views.run_scraper,name='run_scraper_now'),
-
-    url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-\.]+)/$',
-                                                          views.scraper_schedule_scraper,name='scraper_schedule_scraper'),
     url(r'^(?P<wiki_type>scraper|view)s/delete-scraper/(?P<short_name>[\w_\-\.]+)/$',
                                                           views.scraper_delete_scraper, name='scraper_delete_scraper'),
     url(r'^(?P<wiki_type>scraper|view)s/undelete-scraper/(?P<short_name>[\w_\-\.]+)/$',
