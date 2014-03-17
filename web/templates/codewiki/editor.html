@@ -11,44 +11,44 @@
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css?{{settings.REVISION}}" />
 
     {% ifequal codemirrorversion_main '0' %}
-      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/xmlcolors.css"/> 
-      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/jscolors.css"/> 
-      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/csscolors.css"/> 
+      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/xmlcolors.css"/>
+      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/jscolors.css"/>
+      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/csscolors.css"/>
     {% endifequal %}
     {% ifequal codemirrorversion_main '2' %}
-      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/lib/codemirror.css"/> 
-      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/theme/default.css"/> 
+      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/lib/codemirror.css"/>
+      <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/theme/default.css"/>
     {% endifequal %}
     {% endcompress %}
 
     {# See http://orbited.org/wiki/Deployment#Cross-SubdomainDeployment for explanation #}
     <script>document.domain = document.domain;</script>
 
-	
+
     <script src="{{ settings.ORBITED_URL }}/static/Orbited.js"></script>
     <script>Orbited.settings.streaming = false</script>
 
 	{% compress js %}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>    
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>    
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.timeago.js"></script>
-	
+
 
     {% ifequal codemirrorversion_main '0' %}
       <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/codemirror.js"></script>
-      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/highlight.js" type="text/javascript"></script> 
-      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/stringstream.js" type="text/javascript"></script> 
-      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenize.js" type="text/javascript"></script> 
-      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsexml.js" type="text/javascript"></script> 
-      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsecss.js" type="text/javascript"></script> 
-      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenizejavascript.js" type="text/javascript"></script> 
-      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsejavascript.js" type="text/javascript"></script> 
-      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsehtmlmixed.js" type="text/javascript"></script> 
+      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/highlight.js" type="text/javascript"></script>
+      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/stringstream.js" type="text/javascript"></script>
+      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenize.js" type="text/javascript"></script>
+      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsexml.js" type="text/javascript"></script>
+      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsecss.js" type="text/javascript"></script>
+      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenizejavascript.js" type="text/javascript"></script>
+      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsejavascript.js" type="text/javascript"></script>
+      <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsehtmlmixed.js" type="text/javascript"></script>
     {% endifequal %}
     {% ifequal codemirrorversion_main '2' %}
       <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/lib/codemirror.js"></script>
@@ -57,7 +57,7 @@
 	{% endcompress %}
 
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.htmlClean-min.js"></script>
-	
+
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editorconnection.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editorqueues.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editortabs.js?{{settings.REVISION}}"></script>
@@ -66,7 +66,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editorcodemirror.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?{{settings.REVISION}}"></script>
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/csrf.js?{{settings.REVISION}}"></script>       
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/csrf.js?{{settings.REVISION}}"></script>
 
     {# for popupDiff history #}
     {% ifequal codemirrorversion_main '0' %}
@@ -75,7 +75,7 @@
       {% endwith %}
     {% endifequal %}
 
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script> 
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script>
 
 
  {# highlightCode(code, Parser), highlightOtherCode(greencode, redcode, matcheropcodes, Parser) #}
@@ -93,7 +93,7 @@
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
           })();
     {% else %}
-        var _gaq = null; 
+        var _gaq = null;
     {% endif %}
     </script>
 </head>
@@ -104,8 +104,8 @@
 <input type="hidden" id="short_name"        value="{{ scraper.short_name }}"/>
 <input type="hidden" id="scraper_guid"      value="{{ scraper.guid }}"/>
 <input type="hidden" id="window_guid"       value="{{ windowguid }}"/>
-<input type="hidden" id="sourcescraper"     value="{{ sourcescraper }}"/>            
-<input type="hidden" id="fork"              value="{{ fork }}"/>            
+<input type="hidden" id="sourcescraper"     value="{{ sourcescraper }}"/>
+<input type="hidden" id="fork"              value="{{ fork }}"/>
 <input type="hidden" id="fork_url_action"   value="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}"/>
 <input type="hidden" id="username"          value="{{ request.user.username }}"/>
 <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
@@ -140,9 +140,9 @@
 {% endif %}
 
 <div class="editor">
-    
+
     <div id="draft_warning" class="alert_outer"{% ifnotequal rev 'draft' %} style="display:none;"{% endifnotequal %}>
-        A temporary version of your {{scraper.wiki_type}} has been saved. <a href="{% url login %}?next={% url handle_session_draft %}">Sign in to save permanently</a> <a class="secondary" href="{% url delete_draft %}">Discard this {{scraper.wiki_type}}</a>
+        A temporary version of your {{scraper.wiki_type}} has been saved. <a class="secondary" href="{% url delete_draft %}">Discard this {{scraper.wiki_type}}</a>
     </div>
 
     <div id="protected_warning" class="alert_outer" style="display:none;" >
@@ -150,7 +150,7 @@
     </div>
 
     <div id="login_warning" class="alert_outer" style="display:none;" >
-        You are in read-only mode. <a href="{% url login %}{% if scraper.short_name %}?next={% url editor_edit scraper.wiki_type scraper.short_name %}{% endif %}">Sign in to edit this {{scraper.wiki_type}}</a> <a class="secondary" href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">Copy as a guest</a>
+        You are in read-only mode.
     </div>
 
     <div id="rollback_warning" class="alert_outer" style="display:none;" >
@@ -186,7 +186,7 @@
         {% else %}
           {% if request.user.get_profile.name %}<a href="{% url profile request.user.username %}">{{request.user.get_profile.name}}</a>{% else %}<a href="{% url profile request.user.username %}">{{request.user.username}}</a>{% endif %}
         {% endif %}
-        / 
+        /
         {% endif %}
         <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
       </div>
@@ -216,7 +216,7 @@
 
         {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
             <label for="id_urlquery" class="hide">Urlquery:</label>
-            <input id="id_urlquery" type="text" class="text" name="urlquery" title="URL query string passed to the view" /> 
+            <input id="id_urlquery" type="text" class="text" name="urlquery" title="URL query string passed to the view" />
         {% endifnotequal %}{% endifnotequal %}{% endifequal %}
 
         <img id="running_annimation" src="{{MEDIA_URL}}/images/running.gif"/>
@@ -242,7 +242,7 @@
     {# Consoles #}
     <div id="outputeditordiv" class="editor_output">
         <div class="tabs">
-            <ul>			
+            <ul>
 	            {% ifnotequal scraper.language 'html' %}
 	                <li class="console">
 	                    <a href="#output_console" title="Console output from scraper">Console<b class="unread"></b></a>

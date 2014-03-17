@@ -271,13 +271,7 @@
         {% if scraper.description %}
             {{ scraper.description_ashtml|safe }}
         {% else %}
-            <p>This scraper has no description. {% if user.is_authenticated %}
-                {% if user_edits_it or user.is_staff %}
-                    <br/><a href="#" class="edit_description" rel="nofollow"{% if user.is_staff %} title="(You can only see this because you&rsquo;re staff)"{% endif %}>Would you like to add one?</a>
-                {% endif %}
-            {% else %}
-                <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>
-            {% endif %}</p>
+            <p>This scraper has no description.</p>
         {% endif %}
         </div>
 

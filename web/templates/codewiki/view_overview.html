@@ -49,13 +49,13 @@
 {% block body_class_extra %} overview{% endblock %}
 
 {% block header %}
-    
+
     <span id="scraper_screenshot">{% screen_shot scraper 'medium' %}</span>
 
     <h2>
-        <a href="{% if scraper.owner.username %}{% url profile scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> / 
+        <a href="{% if scraper.owner.username %}{% url profile scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> /
         {% if user.is_authenticated %}
-            <em id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</em> 
+            <em id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</em>
             <a id="aEditTitle" title="Edit title">Edit title</a>
         {% else %}
             <em>{{ scraper.title }}</em>
@@ -76,7 +76,7 @@
             {% if scraper.privacy_status == 'private' %}
     	    <span class="privacystatus private" href="#privacy_status" title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">Private</span>
     	    {% endif %}
-    	{% endif %} 
+    	{% endif %}
     </p>
 {% endblock %}
 
@@ -137,7 +137,7 @@
     {% if user_owns_it or user.is_staff %}<li class="admin">
         <a href="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" id="delete_scraper" rel="nofollow">Delete {{scraper.wiki_type|title}}</a>
         <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post" class="hide">
-            {% csrf_token %}    
+            {% csrf_token %}
             <input type="hidden" name="delete_scraper" value="1" />
             <input type="submit" id="btnDeleteScraper" value="Delete {{scraper.wiki_type|title}}" />
         </form>
@@ -170,19 +170,13 @@
         {% if scraper.description %}
             {{ scraper.description_ashtml|safe }}
         {% else %}
-            <p>This {{scraper.wiki_type}} has no description. {% if user.is_authenticated %}
-                {% if user_edits_it %}
-                    <br/><a href="#" class="edit_description" rel="nofollow">Would you like to add one?</a>
-                {% endif %}
-            {% else %}
-                <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>
-            {% endif %}</p>
+            <p>This {{scraper.wiki_type}} has no description.</p>
         {% endif %}
         </div>
-        
+
         <input type="hidden" id="admincontroleditors" value="{% url scraper_admin_controleditors scraper.short_name %}"/>
         <input type="hidden" id="adminprivacystatusurl" value="{% url scraper_admin_privacystatus scraper.short_name %}"/>
-        
+
         <div id="collaboration">
             <ul class="buttons">
                 {% if scraper.privacy_status == 'public' %}
@@ -222,19 +216,19 @@
             	        <p>Only the {{ scraper.usercoderole_set.count }} selected editor{{ scraper.usercoderole_set.count|pluralize }} can see or edit this {{scraper.wiki_type}}.</p>
             	    {% endif %}
                 {% endif %}
-        	    
+
         	    {% if scraper.owner == request.user %}
                     <form id="privacy_status_form">
                         <!--<a class="cancel" id="hide_privacy_choices"><img src="{{ MEDIA_URL }}images/icons/cancel.png" width="16" height="16" /><span>Cancel</span></a>-->
                         <table cellspacing="0" cellpadding="0">
                             <tr class="first">
-                                <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" 
+                                <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public"
                                 {% ifequal scraper.privacy_status 'public' %} checked="checked" {% endifequal %}
                                 /></td>
                                 <td><h4><label for="privacy_public">{% if scraper.privacy_status == 'public' %}Keep as Public{% else %}Change to Public{% endif %}</label></h4><p><label for="privacy_public">Everyone {% if scraper.privacy_status == 'public' %}can{% else %}will be able to{% endif %} see and edit this {{scraper.wiki_type}} and its data.</label></p></td>
                             </tr>
                             <tr>
-                                <td class="radio"><input type="radio" name="privacy_status" value="visible" id="privacy_protected" 
+                                <td class="radio"><input type="radio" name="privacy_status" value="visible" id="privacy_protected"
                                 {% ifequal scraper.privacy_status 'visible' %} checked="checked" {% endifequal %}
                                 /></td>
                                 <td><h4><label for="privacy_protected">{% if scraper.privacy_status == 'visible' %}Keep as Protected{% else %}Change to Protected{% endif %}</label></h4><p><label for="privacy_protected">Everyone {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} see this {{scraper.wiki_type}}, but only selected contributors {% if scraper.privacy_status == 'visible' %}can{% else %}will be able to{% endif %} edit it.</label></p></td>
@@ -274,13 +268,13 @@
                     {% endwith %}
 
                     {% with 'editor' as role %}
-                      {% for contributor in userrolemap.editor %}  
+                      {% for contributor in userrolemap.editor %}
                         {% include 'codewiki/includes/contributor.html' %}
                       {% endfor %}
                     {% endwith %}
 
                     {% with 'email' as role %}
-                      {% for contributor in userrolemap.email %}  
+                      {% for contributor in userrolemap.email %}
                         {% include 'codewiki/includes/contributor.html' %}
                       {% endfor %}
                     {% endwith %}
@@ -292,7 +286,7 @@
                 {% endif %}
         	</div>
         </div>
-    
+
     </td>
     </tr>
 </table>
@@ -359,9 +353,9 @@
         <li class="copy"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" title="Create a new {{scraper.wiki_type}} with this {{scraper.wiki_type}}&rsquo;s code" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_copy.png" width="16" height="16" alt="">Copy</a></li>
         <li class="clear"></li>
     </ul>
-    
+
     <input type="hidden" id="adminsettagurl" value="{% url scraper_admin_settags scraper.short_name %}"/>
-    
+
     <div class="tags"{% if not scraper_tags %} style="display:none"{% endif %}>
         <h4>Tags:</h4>
         <ul>
@@ -379,7 +373,7 @@
         {% endif %}
         </ul>
     </div>
-    
+
     {% if related_scrapers %}
     <div class="related_scrapers">
         <h4>Visualises:</h4>
@@ -427,7 +421,7 @@
         </ul>
     </div>
     {% endif %}
-    
+
 </div>
 
 {% comment %}
@@ -437,11 +431,11 @@
         <li class="full_history"><a href="{% url full_history scraper.wiki_type, scraper.short_name %}" rel="nofollow">Show full history</a></li>
         <li class="clear"></li>
     </ul>
-    
+
     <div>
     {% history scraper.scraper user 10 %}
     </div>
-    
+
 </div>
 {% endcomment %}
 
@@ -458,7 +452,7 @@
 {% block jrun_script %}
 <script>
 {{block.super}}
-$(document).ready(function() 
+$(document).ready(function()
 {
     setupCodeOverview('{{scraper.short_name}}');
     $('#data_tab_1').trigger('click');

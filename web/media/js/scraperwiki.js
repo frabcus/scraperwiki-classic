@@ -265,29 +265,7 @@ function newAlert(htmlcontent, level, actions, duration, onclose){
 
 $(function(){
 
-    if($('.supernav li.login').length){
-        $('.supernav li.code').addClass('active default');
-        $('.subnav.code').show();
-    } else {
-        var urls = {
-            '/(about|jobs|events|contact)/' : 'about',
-            '/status/' : 'admin',
-            '/dataservices/': 'dataservices',
-            '/(profiles|vaults)/' : 'user',
-            '/login/' : 'login',
-            '.*' : 'code'
-        }
-        $.each(urls, function(index, value){
-            var regexp = RegExp(index);
-            if(document.URL.match(regexp)){
-                $('.supernav li.' + value).addClass('active default');
-                $('.subnav.' + value).show();
-                return false;
-            }
-        });
-    }
-
-    $('.supernav li a').not('li.signup a, li.new a').bind('click', function(e){
+    $('.supernav li a').bind('click', function(e){
         e.preventDefault();
         var $li = $(this).parent();
         var $sub = $('.subnav.' + $li.attr('class').split(" ")[0]);
@@ -296,25 +274,14 @@ $(function(){
             $sub.show().siblings('.subnav').hide();
         }
     });
-    $loginbutton = $('<a>Log In</a>').bind('click', function(){
-        $(this).parents('form').find(':submit').trigger('click');
-    });
-    $('li.login_submit :submit').hide().after($loginbutton).parents('form').find(':text, :password').bind('keyup', function(e){
-        if((e.keyCode || e.which) == 13){
-			$(this).parents('form').find(':submit').trigger('click');
-		}
-    });
-    $('form.subnav.login li.username, form.subnav.login li.password').bind('click', function(){
-        $(this).children('input').focus();
-    });
 
-    if($('#nav .search input.text').val() == 'Search code...'){
-        $('#nav .search input.text').val('').before('<span class="placeholder">Search code...</span>');
+    if($('#nav .search input.text').val() == 'Search scrapers...'){
+        $('#nav .search input.text').val('').before('<span class="placeholder">Search scrapers...</span>');
     } else {
-        $('#nav .search input.text').before('<span class="placeholder" style="display:none">Search code...</span>');
+        $('#nav .search input.text').before('<span class="placeholder" style="display:none">Search scrapers...</span>');
     }
 
-    $('#nav .search input.text, #nav .login input.text').bind('focus', function(){
+    $('#nav .search input.text').bind('focus', function(){
         $(this).parent().addClass('focussed');
         if($(this).val() === ''){
             $(this).prev().show().css('opacity', 0.5);
@@ -326,10 +293,10 @@ $(function(){
         }
     }).bind('keyup', function(e){
         if($(this).val() === '') {
-		    $(this).prev().show().css({opacity: 0.5});
-		} else {
-		    $(this).prev().hide();
-		}
+            $(this).prev().show().css({opacity: 0.5});
+        } else {
+            $(this).prev().hide();
+        }
     });
 
     $('form.google-search').on('submit', function(){
@@ -337,28 +304,6 @@ $(function(){
       $input.val('site:classic.scraperwiki.com ' + $input.val())
       return true
     })
-
-    $("#classic_login").on("click", function(){
-        console.log("kittens")
-        $("li.login a").trigger("click")
-        $("#login_username").focus()
-    })
-
-    setTimeout(function(){
-        // clever hack removes the yellow background on auto-filled inputs in Chrome
-        if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
-            $('#nav .login input:-webkit-autofill').each(function(){
-                var $o = $(this);
-                var $n = $o.clone(true);
-                $o.siblings('label').hide();
-                $o.after($n).remove();
-            });
-        }
-
-        if ($('#nav .login input.text').val() != '') {
-            $('#nav .login label').hide();
-        }
-    }, 500);
 
     $('a.editor_view, div.network .view a, a.add_to_vault').click(function(e) {
 		e.preventDefault();

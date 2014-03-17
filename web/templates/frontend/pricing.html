@@ -17,7 +17,7 @@
 <br class="clear" />
 
 <div id="pricing_chart" class="selfservice">
-    
+
     <div class="col" id="free">
         <h3>Free account</h3>
         <p class="price">(Free forever)</p>
@@ -86,11 +86,6 @@
         Corporate users can also <a href="/contact/#corporate">contact&nbsp;us</a> to pay with a purchase&nbsp;order.
     </p>
 </div>
-
-{% if anonymous %}
-<a id="buy" href="{% url login %}?next=https://scraperwiki.com/pricing">Please <em>log in</em> or <em>sign up</em> to buy a Premium Account</a>
-{% endif %}
-
 
 {% endblock %}
 
