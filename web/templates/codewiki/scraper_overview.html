@@ -383,26 +383,8 @@
 <div class="data">
     <ul class="titlebar">
         <li class="first"><h3>This scraper&rsquo;s datastore</h3></li>
-        <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}{% if scraper.access_apikey %}&apikey_scraper={{scraper.access_apikey}}{% endif %}#sqlite"><img src="{{ MEDIA_URL }}images/icons/hard_hat.png" width="16" height="16" alt="">Explore with API</a></li>
         <li class="download">
-            <a><img src="{{ MEDIA_URL }}images/icons/arrow_down.png" width="16" height="16" alt="">Download</a>
-            <div class="download_popover">
-                <h6>Download whole datastore&hellip;</h6>
-                <ul>
-                    <li class="database_sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow"><span class="icon"></span> As an SQLite database</a></li>
-                <!--  <li class="database_csv"><a href="#"><span class="icon"></span> As a folder of CSVs</a></li>
-                    <li class="database_json"><a href="#"><span class="icon"></span> As a folder of JSON files</a></li>
-                    <li class="database_excel"><a href="#"><span class="icon"></span> As an Excel file</a></li>  -->
-                </ul>
-                <h6>Download just <span>this table</span>&hellip;</h6>
-                <ul>
-                <!--  <li class="table_sqlite"><a href="#"><span class="icon"></span> As an SQLite table</a></li>  -->
-                    <li class="table_csv"><a href="#"><span class="icon"></span> As a CSV</a></li>
-                    <li class="table_json"><a href="#"><span class="icon"></span> As a JSON file</a></li>
-                <!--  <li class="table_excel"><a href="#"><span class="icon"></span> As an Excel table</a></li>  -->
-                </ul>
-                <span class="arrow"></span>
-            </div>
+            <a href="{% url export_sqlite scraper.short_name %}" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_down.png" width="16" height="16" alt="">Download SQLite database</a>
         </li>
         {% if scraper.privacy_status == 'public' %}
             {% if user.is_authenticated %}<li class="empty">

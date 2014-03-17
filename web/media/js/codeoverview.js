@@ -341,7 +341,7 @@ $(function(){
         });
 	});
 
-	$('li.share a, li.admin a, li.download a').each(function(){
+	$('li.share a, li.admin a').each(function(){
 		$(this).bind('click', function(){
 			var $a = $(this).addClass('hover');
 			var $p = $a.siblings('div');
@@ -601,7 +601,7 @@ function setDataPreviewWarning(text, warningInHeader) {
 	if(warningInHeader){
 	    $('.data h3').text(text).parent().siblings('.download, .empty').hide();
 	} else {
-	    $('.data h3').text('Error loading datastore').parent().siblings('.download, .empty').hide().parent().after('<p class="sqliteconnectionerror">' + text + '</p>');
+	    $('.data h3').text('Error loading datastore').parents('.titlebar').after('<p class="sqliteconnectionerror">' + text + '</p>');
 	}
     $('ul.data_tabs, #datapreviews').hide();
 }
