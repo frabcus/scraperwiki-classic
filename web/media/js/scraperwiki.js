@@ -332,6 +332,12 @@ $(function(){
 		}
     });
 
+    $('form.google-search').on('submit', function(){
+      var $input = $(this).find('input[name="q"]')
+      $input.val('site:classic.scraperwiki.com ' + $input.val())
+      return true
+    })
+
     $("#classic_login").on("click", function(){
         console.log("kittens")
         $("li.login a").trigger("click")
