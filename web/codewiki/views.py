@@ -193,7 +193,6 @@ def code_overview(request, wiki_type, short_name):
 
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
 
-    # view tpe
     if wiki_type == 'view':
         context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
         if scraper.language == 'html':
@@ -202,10 +201,7 @@ def code_overview(request, wiki_type, short_name):
                 context["htmlcode"] = code
         return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
 
-    #
-    # (else) scraper type section
-    #
-    assert wiki_type == 'scraper'
+    context["tables"] = get_scraper_data(scraper)
 
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
@@ -740,6 +736,60 @@ def webstore_attach_auth(request):
         return HttpResponse("{'attach':'Fail', 'error': 'Target scraper is not in the same vault as the source'", mimetype=mime)
 
     return HttpResponse("{'attach':'Ok'}", mimetype=mime)
+
+
+# Takes a scraper object, and returns the first 100 rows of each table
+# along with some other useful metadata like column names and row counts.
+# The returned data structure looks like:
+# [{
+#   "table_name": "some_table",
+#   "total_rows": 216,
+#   "column_names": ["id", "url"],
+#   "rows": [
+#     [ "some_id", "some_url" ],
+#     [ "another_id", "another_url" ],
+#     [ ... ]
+#   ]
+# }, { ... }]
+def get_scraper_data(scraper):
+    scraper_data = []
+    dataproxy = None
+    try:
+        dataproxy = DataStore(scraper.short_name)
+        sqlite_data = dataproxy.request({
+            "maincommand": "sqlitecommand",
+            "command": "datasummary",
+            "limit": 1
+        })
+        if 'tables' in sqlite_data:
+            for table_name, table_info in sqlite_data['tables'].iteritems():
+                table_meta = {
+                    "table_name": table_name,
+                    "table_name_safe": re.sub(r'(^_|_$)', '', re.sub(r'[^a-zA-Z0-9]+', '_', table_name)),
+                    "total_rows": table_info['count'],
+                    "column_names": table_info['keys'],
+                    "rows": []
+                }
+                query = 'select * from "%s" limit 100' % re.sub(r'"', '""', table_name)
+                sqlite_data = dataproxy.request({
+                    "maincommand": "sqliteexecute",
+                    "sqlquery": query,
+                    "attachlist": "",
+                    "streamchunking": False,
+                    "data": ""
+                })
+                if 'error' in sqlite_data:
+                    logger.error("Error in get_scraper_data: %s" % sqlite_data)
+                else:
+                    table_meta['rows'] = sqlite_data['data']
+                scraper_data.append(table_meta)
+
+    except Exception, e:
+        print e
+    finally:
+        if dataproxy:
+            dataproxy.close()
+        return scraper_data
 
 
 def scraper_data_view(request, wiki_type, short_name, table_name):

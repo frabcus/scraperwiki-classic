@@ -8,7 +8,6 @@
 {% load month_name %}
 {% load gravatar %}
 {% load history %}
-{% load icanhaz %}
 {% load str_replace %}
 
 {% block title %}
@@ -396,12 +395,8 @@
 {% block jrun_script %}
 <script>
 {{block.super}}
-$(document).ready(function()
-{
+$(document).ready(function(){
     setupCodeOverview('{{scraper.short_name}}');
-    $('#data_tab_1').trigger('click');
-    //  Disabling attachables for now
-    //  setupChangeAttachables('{{scraper.short_name}}');
 });
 </script>
 {% endblock %}
