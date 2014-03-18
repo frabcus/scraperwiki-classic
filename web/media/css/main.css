@@ -47,7 +47,7 @@ a.more_link {
 
 body {
 	padding: 0;
-	margin: 0;
+	margin: 0 0 60px 0;
 	min-width: 1000px;
 	font-family: Helvetica, Arial, sans-serif;
 	text-align: center;
@@ -818,7 +818,6 @@ body.frontpage #header:before {
 	padding: 20px;
 	width: 918px;
 	background: #fff;
-	margin-bottom: 60px;
 }
 
 body.fourohfour #content {

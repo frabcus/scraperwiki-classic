@@ -1,0 +1,68 @@
+#archive_placeholder_top,
+#archive_placeholder_middle,
+#archive_placeholder_bottom {
+  display: none;
+  width: 918px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #cdcdcd;
+  box-shadow: inset 0 1px #fff;
+  background-color: #fff;
+}
+
+#archive_placeholder_top {
+  margin-bottom: 20px;
+}
+
+#archive_placeholder_middle {
+  border-top: none;
+}
+
+#archive_placeholder_bottom {
+  margin-top: 20px;
+}
+
+#archive_placeholder_top.transparent,
+#archive_placeholder_bottom.transparent {
+  width: 960px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+#archive_placeholder_top.yellow,
+#archive_placeholder_middle.yellow,
+#archive_placeholder_bottom.yellow {
+  background-color: #FFFCBB;
+}
+
+#archive_placeholder_top.green,
+#archive_placeholder_middle.green,
+#archive_placeholder_bottom.green {
+  background-color: #E0FDA2;
+}
+
+#archive_placeholder_top.orange,
+#archive_placeholder_middle.orange,
+#archive_placeholder_bottom.orange {
+  background-color: #FFD281;
+}
+
+#archive_placeholder_top.blue,
+#archive_placeholder_middle.blue,
+#archive_placeholder_bottom.blue {
+  background-color: #dceefb;
+}
+
+#archive_placeholder_top > :first-child,
+#archive_placeholder_middle > :first-child,
+#archive_placeholder_bottom > :first-child {
+  margin-top: 0;
+}
+
+#archive_placeholder_top > :last-child,
+#archive_placeholder_middle > :last-child,
+#archive_placeholder_bottom > :last-child {
+  margin-bottom: 0;
+}

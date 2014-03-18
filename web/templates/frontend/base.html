@@ -23,6 +23,8 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>
 	{% endcompress %}
 
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/archive.js"></script>
+
 	{% block javascript %}{% endblock %}
 
 	{% compress css %}
@@ -32,6 +34,8 @@
 	<!--[if IE 7]>
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie7.css?{{settings.REVISION}}" />
 	<![endif]-->
+
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/archive.css" />
 
 	{% block css %}{% endblock %}
 	{% block rss %}{% endblock %}
@@ -137,6 +141,8 @@
         {% endif %}
     </div>
 
+    <div id="archive_placeholder_top"></div>
+
 {% block header_outer %}
 	<div id="header">
     {% block header %}
@@ -145,9 +151,15 @@
 	</div>
 {% endblock %}
 
-{% block content_outer %}<div id="content">
-{% block content %}{% endblock %}
-</div>{% endblock %}
+    <div id="archive_placeholder_middle"></div>
+
+{% block content_outer %}
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+{% endblock %}
+
+    <div id="archive_placeholder_bottom"></div>
 
     <script type="text/javascript" defer="defer">
         {% block run_script %}
