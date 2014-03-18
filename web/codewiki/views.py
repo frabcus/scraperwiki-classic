@@ -226,6 +226,53 @@ def code_overview(request, wiki_type, short_name):
 
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
+# A simplifed replacement for the "scraperinfo" JSON API, created
+# to maintain Morph.io compatibility after the API is disabled.
+def code_info(request, wiki_type, short_name):
+    from codewiki.models import ScraperRunEvent, DomainScrape
+    from tagging.models import Tag
+
+    scraper,err = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
+    if err:
+        result = json.dumps({'error':err, "short_name":short_name})
+        return HttpResponse(result)
+
+    info = { }
+    info['short_name']  = scraper.short_name
+    info['language']    = scraper.language
+    info['created']     = scraper.created_at.isoformat()
+
+    info['title']       = scraper.title
+    info['description'] = scraper.description_safepart()
+    info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
+    info['wiki_type']   = scraper.wiki_type
+    info['privacy_status'] = scraper.privacy_status
+
+    status = scraper.get_vcs_status(-1)
+    info['code'] = status["code"]
+    if 'filemodifieddate' in status:
+        info['filemodifieddate'] = status['filemodifieddate'].isoformat()
+
+    info['userroles'] = {}
+    for ucrole in scraper.usercoderole_set.all():
+        if ucrole.role not in info['userroles']:
+            info['userroles'][ucrole.role] = []
+        info['userroles'][ucrole.role].append(ucrole.user.username)
+
+    if scraper.wiki_type == 'scraper':
+        info['last_run'] = scraper.scraper.last_run and scraper.scraper.last_run.isoformat() or ''
+        info['run_interval'] = scraper.scraper.run_interval
+        info['records'] = scraper.scraper.record_count
+
+        dataproxy = DataStore(scraper.short_name)
+        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":0, "val2":None})
+        if sqlitedata and type(sqlitedata) not in [str, unicode]:
+            info['datasummary'] = sqlitedata
+
+    info_json = json.dumps([info], indent=4)
+    response = HttpResponse(info_json, mimetype='application/json; charset=utf-8')
+    return response
+
 
 # all remaining functions are ajax or temporary pages linked only
 # through the site, so throwing 404s is adequate

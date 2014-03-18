@@ -53,6 +53,7 @@ urlpatterns = patterns('',
           lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name])),
           name='scraper_history'),
 
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/info/?$',   views.code_info, name="code_info"),
 
     url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.\|]+)/$',                      viewsuml.run_event,     name='run_event'),
 
