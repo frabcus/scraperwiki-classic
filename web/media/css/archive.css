@@ -66,3 +66,35 @@
 #archive_placeholder_bottom > :last-child {
   margin-bottom: 0;
 }
+
+.archive_button {
+  background-color: #3F9BCF; /* buttons are blue by default */
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  padding: 4px 12px 3px 12px;
+  margin: 0 4px;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+  color: #fff;
+}
+
+.archive_button:hover {
+  text-decoration: none;
+  background-color: #55B2E7;
+}
+
+.archive_button.orange {
+  background-color: #E0840E;
+}
+
+.archive_button.orange:hover {
+  background-color: #F3A745;
+}
+
+.archive_button.green {
+  background-color: #6EB421;
+}
+
+.archive_button.green:hover {
+  background-color: #82C934;
+}
