@@ -384,7 +384,7 @@
     <ul class="titlebar">
         <li class="first"><h3>This scraper&rsquo;s datastore</h3></li>
         <li class="download">
-            <a href="{% url export_sqlite scraper.short_name %}" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_down.png" width="16" height="16" alt="">Download SQLite database</a>
+            <a href="{% url export_sqlite_2 scraper.short_name %}" rel="nofollow"><img src="{{ MEDIA_URL }}images/icons/arrow_down.png" width="16" height="16" alt="">Download SQLite database</a>
         </li>
         {% if scraper.privacy_status == 'public' %}
             {% if user.is_authenticated %}<li class="empty">
