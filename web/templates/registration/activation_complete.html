@@ -10,10 +10,6 @@
             <p>
                 <a href="{% url profile username=user.username %}">Click here to go to your profile</a>
             </p>
-            {% else %}
-            <p>
-                <a href="{% url login %}?next=/">Click here to sign in</a>
-            </p>
             {% endif %}
         </div>
     </div>

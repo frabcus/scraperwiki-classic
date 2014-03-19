@@ -160,12 +160,12 @@
     </div>
     {% else %}
     <div id="login_warning" class="alert_outer" style="display:none;" >
-        You are in read-only mode. <a href="{% url login %}{% if scraper.short_name %}?next={% url editor_edit scraper.wiki_type scraper.short_name %}{% endif %}">Sign in to edit this {{scraper.wiki_type}}</a> <a class="secondary" href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">Copy as a guest</a>
+        You are in read-only mode.
     </div>
     {% endif %}
 
     <div id="draft_warning" class="alert_outer"{% ifnotequal rev 'draft' %} style="display:none;"{% endifnotequal %}>
-        A temporary version of your {{scraper.wiki_type}} has been saved. <a href="{% url login %}?next={% url handle_session_draft %}">Sign in to save permanently</a> <a class="secondary" href="{% url delete_draft %}">Discard this {{scraper.wiki_type}}</a>
+        A temporary version of your {{scraper.wiki_type}} has been saved. <a class="secondary" href="{% url delete_draft %}">Discard this {{scraper.wiki_type}}</a>
     </div>
 
     <div id="protected_warning" class="alert_outer" style="display:none;" >

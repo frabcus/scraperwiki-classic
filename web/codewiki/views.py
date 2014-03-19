@@ -150,15 +150,6 @@ def scraper_history(request, wiki_type, short_name):
 
     return render_to_response('codewiki/history.html', context, context_instance=RequestContext(request))
 
-# Rewrite of the overview page by Zarino
-def full_history(request, wiki_type, short_name):
-    scraper,resp = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
-    if resp: return resp
-
-    ctx = { "scraper": scraper }
-    return render_to_response('codewiki/full_history.html', ctx, context_instance=RequestContext(request))
-
-
 def code_overview(request, wiki_type, short_name):
     from codewiki.models import ScraperRunEvent, DomainScrape
 
@@ -202,7 +193,6 @@ def code_overview(request, wiki_type, short_name):
 
     context["api_base"] = "%s/api/1.0/" % settings.API_URL
 
-    # view tpe
     if wiki_type == 'view':
         context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
         if scraper.language == 'html':
@@ -211,10 +201,7 @@ def code_overview(request, wiki_type, short_name):
                 context["htmlcode"] = code
         return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
 
-    #
-    # (else) scraper type section
-    #
-    assert wiki_type == 'scraper'
+    context["tables"] = get_scraper_data(scraper)
 
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
 
@@ -238,6 +225,53 @@ def code_overview(request, wiki_type, short_name):
         context['url_screenshot'] = None
 
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
+
+# A simplifed replacement for the "scraperinfo" JSON API, created
+# to maintain Morph.io compatibility after the API is disabled.
+def code_info(request, wiki_type, short_name):
+    from codewiki.models import ScraperRunEvent, DomainScrape
+    from tagging.models import Tag
+
+    scraper,err = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
+    if err:
+        result = json.dumps({'error':err, "short_name":short_name})
+        return HttpResponse(result)
+
+    info = { }
+    info['short_name']  = scraper.short_name
+    info['language']    = scraper.language
+    info['created']     = scraper.created_at.isoformat()
+
+    info['title']       = scraper.title
+    info['description'] = scraper.description_safepart()
+    info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
+    info['wiki_type']   = scraper.wiki_type
+    info['privacy_status'] = scraper.privacy_status
+
+    status = scraper.get_vcs_status(-1)
+    info['code'] = status["code"]
+    if 'filemodifieddate' in status:
+        info['filemodifieddate'] = status['filemodifieddate'].isoformat()
+
+    info['userroles'] = {}
+    for ucrole in scraper.usercoderole_set.all():
+        if ucrole.role not in info['userroles']:
+            info['userroles'][ucrole.role] = []
+        info['userroles'][ucrole.role].append(ucrole.user.username)
+
+    if scraper.wiki_type == 'scraper':
+        info['last_run'] = scraper.scraper.last_run and scraper.scraper.last_run.isoformat() or ''
+        info['run_interval'] = scraper.scraper.run_interval
+        info['records'] = scraper.scraper.record_count
+
+        dataproxy = DataStore(scraper.short_name)
+        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":0, "val2":None})
+        if sqlitedata and type(sqlitedata) not in [str, unicode]:
+            info['datasummary'] = sqlitedata
+
+    info_json = json.dumps([info], indent=4)
+    response = HttpResponse(info_json, mimetype='application/json; charset=utf-8')
+    return response
 
 
 # all remaining functions are ajax or temporary pages linked only
@@ -751,88 +785,55 @@ def webstore_attach_auth(request):
     return HttpResponse("{'attach':'Ok'}", mimetype=mime)
 
 
-def scraper_data_view(request, wiki_type, short_name, table_name):
-    """
-    DataTable ( http://www.datatables.net/usage/server-side ) implementation for the new scraper page
-    """
-    from django.utils.html import escape
-    mime = 'application/json'
-
-    def local_escape(s):
-        if s is None:
-            return ""
-        return escape(s)
-
-    #if not wiki_type == 'scraper':
-        # 415 - Unsupported Media Type
-        # The entity of the request is in a format not supported by the requested resource
-        #return HttpResponse( status=415 )
-
-    scraper,resp = getscraperorresponse( request, wiki_type, short_name,
-                                    "code_overview", "overview")
-    if resp: return resp
-
-    # We have *mostly* validated the request now. So we need to load up the
-    # parameters we have been sent and the table_name we have been given and
-    # work out a query that satisfies it.  We also need to get the columns and
-    # put them in a list so that we can use them to sort on.
-    offset      = int( request.REQUEST.get('iDisplayStart', '0')   )
-    limit       = int( request.REQUEST.get('iDisplayLength', '10') )
-    total_rows  = 0
-    total_after_filter = 0
-    sortbyidx = int( request.REQUEST.get('iSortCol_0','0') )
-    sortdir = request.REQUEST.get('sSortDir_0', 'asc')
-
-    columns = []
-    data = []
-
-    # Interact with the database
+# Takes a scraper object, and returns the first 100 rows of each table
+# along with some other useful metadata like column names and row counts.
+# The returned data structure looks like:
+# [{
+#   "table_name": "some_table",
+#   "total_rows": 216,
+#   "column_names": ["id", "url"],
+#   "rows": [
+#     [ "some_id", "some_url" ],
+#     [ "another_id", "another_url" ],
+#     [ ... ]
+#   ]
+# }, { ... }]
+def get_scraper_data(scraper):
+    scraper_data = []
     dataproxy = None
     try:
         dataproxy = DataStore(scraper.short_name)
+        sqlite_data = dataproxy.request({
+            "maincommand": "sqlitecommand",
+            "command": "datasummary",
+            "limit": 1
+        })
+        if 'tables' in sqlite_data:
+            for table_name, table_info in sqlite_data['tables'].iteritems():
+                table_meta = {
+                    "table_name": table_name,
+                    "table_name_safe": re.sub(r'(^_|_$)', '', re.sub(r'[^a-zA-Z0-9]+', '_', table_name)),
+                    "total_rows": table_info['count'],
+                    "column_names": table_info['keys'],
+                    "rows": []
+                }
+                query = 'select * from "%s" limit 100' % re.sub(r'"', '""', table_name)
+                sqlite_data = dataproxy.request({
+                    "maincommand": "sqliteexecute",
+                    "sqlquery": query,
+                    "attachlist": "",
+                    "streamchunking": False,
+                    "data": ""
+                })
+                if 'error' in sqlite_data:
+                    logger.error("Error in get_scraper_data: %s" % sqlite_data)
+                else:
+                    table_meta['rows'] = sqlite_data['data']
+                scraper_data.append(table_meta)
 
-        # We will ask for a datasummary (pending new metadata call)
-        sqlite_data = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":1})
-        if 'tables' in sqlite_data and table_name in sqlite_data['tables']:
-            table = sqlite_data['tables'][table_name]
-            total_rows = table['count']
-            total_after_filter = total_rows
-            sql = table['sql']
-            columns = table['keys']
-        else:
-            raise Http404()
-
-        sorting_columns = [ "`%s`" % c for c in columns]
-        selecting_columns = [ "CASE WHEN length(`%s`)<1000 THEN `%s` ELSE substr(`%s`, 1, 1000)||'... {{MOAR||%s||'||rowid||'||NUFF}}' END AS `%s`" % (c,c,c,c,c) for c in columns]
-        # jQuery can now use a regexp like...
-        # {{MOAR\|\|([^\|]+)\|\|([^\|]+)\|\|NUFF}}$
-        # ...to fish out the cell's column name and rowid
-        # and show its full content if the user wants.
-
-        # Build query and do the count for the same query
-        sortby = "%s %s" % (sorting_columns[sortbyidx], sortdir,)
-        query = 'select %s from `%s` order by %s limit %d offset %d' % (','.join(selecting_columns), table_name, sortby, limit, offset,)
-        sqlite_data = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery": query, "attachlist":"", "streamchunking": False, "data": ""})
-        # We need to now convert this to the aaData list of lists
-        if 'error' in sqlite_data:
-            # Log the error
-            data = [ ]
-            logger.error("Error in scraper_data_view: " + str(sqlite_data))
-        else:
-            # For each row map each item in that row against escape
-            data = map( lambda b: map(local_escape, b), sqlite_data['data'])
     except Exception, e:
         print e
     finally:
         if dataproxy:
             dataproxy.close()
-
-
-    results = {
-        'iTotalRecords'        : total_rows,
-        'iTotalDisplayRecords' : total_after_filter,
-        'sEcho'  : int( request.REQUEST.get('sEcho','0') ), # Cast at suggestion of docs
-        'aaData' : data
-    }
-    return HttpResponse( json.dumps(results) , mimetype=mime)
-
+        return scraper_data

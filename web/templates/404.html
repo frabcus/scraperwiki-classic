@@ -27,8 +27,7 @@
     {% endif %}
 
     <div class="attention" style="text-align: center">
-      <form class="fourohfourhint" action="/search/" method="post">
-          {% csrf_token %}
+      <form class="fourohfourhint google-search" action="http://google.com/search" method="get">
           <p>Try visiting our <a href="/">homepage</a> or <a href="{% url docsroot %}">documentation</a></p><p>or <label for="fourohfoursearch">searching our site:</label><input type="text" name="q" id="fourohfoursearch" /><input type="submit" id="fourohfourgo" value="Go" /></p>
       </form>
     </div>

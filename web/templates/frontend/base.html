@@ -19,11 +19,11 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/underscore.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/ICanHaz.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/csrf.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>
 	{% endcompress %}
+
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/archive.js"></script>
 
 	{% block javascript %}{% endblock %}
 
@@ -34,6 +34,8 @@
 	<!--[if IE 7]>
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie7.css?{{settings.REVISION}}" />
 	<![endif]-->
+
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/archive.css" />
 
 	{% block css %}{% endblock %}
 	{% block rss %}{% endblock %}
@@ -104,23 +106,17 @@
 	<div id="nav">
         <h1><a href="{% url frontpage %}">ScraperWiki</a></h1>
         <ul class="supernav">
-            <li class="new"><a href="https://scraperwiki.com">New ScraperWiki <img src="{{ MEDIA_URL }}images/nav-external-link-icon.gif" width="8" height="9" alt="" style="margin-left: 2px;"></a></li>
-            <li class="code"><a href="{% url frontpage %}">ScraperWiki Classic</a></li>
+            <li class="code active default"><a href="{% url frontpage %}">ScraperWiki Classic</a></li>
             {% if user.is_staff %}
             <li class="admin"><a>Admin</a></li>
             {% endif %}
-            {% if user.is_authenticated %}
-            {% load gravatar %}
-            <li class="user"><a href="{% url profile user.username %}"><span class="gravatar_outer">{% show_gravatar user 'medium' %}</span> {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
-            {% else %}
-            <li class="login"><a href="{% url login %}">Classic Log In</a></li>
-            {% endif %}
+            <li class="new"><a href="https://scraperwiki.com">New ScraperWiki <img src="{{ MEDIA_URL }}images/nav-external-link-icon.gif" width="8" height="9" alt="" style="margin-left: 2px;"></a></li>
         </ul>
         <div class="subnav code">
             <ul>
-                <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Code</a></li>
-                <li class="docs"><a href="{% url docsroot %}">Help &amp; Docs</a></li>
-                <li class="search"><form action="/search/" method="post">{% csrf_token %}<input type="text" class="text" name="q" value="{% block searchbox %}Search code...{% endblock %}"/></form></li>
+                <li class="browse"><a href="{% url scraper_list %}scrapers">Browse Classic Archive</a></li>
+                <li class="docs"><a href="{% url docsroot %}">Classic Documentation</a></li>
+                <li class="search"><form action="http://google.com/search" method="get" class="google-search"><input type="text" class="text" name="q" value="{% block searchbox %}Search scrapers...{% endblock %}"/></form></li>
             </ul>
         </div>
         {% if user.is_staff %}
@@ -143,30 +139,9 @@
             </ul>
         </div>
         {% endif %}
-        {% if user.is_authenticated %}
-        <div class="subnav user">
-            <ul>
-                <li class="profile"><a href="{% url profile user.username %}">Your Scrapers</a></li>
-                {% if user.vaults.count > 0 or request.user.vault_membership.count %}
-                <li class="vaults"><a href="{% url vault %}">Your Vaults</a></li>
-                {% endif %}
-                <li class="profile"><a href="{% url profiles_edit_profile %}">Edit Profile</a></li>
-                <li class="logout"><a href="{% url logout %}?next_page=/">Log Out</a></li>
-            </ul>
-        </div>
-        {% else %}
-        <div class="subnav signup"></div>
-        <form class="subnav login" action="{% url login %}" method="post">
-            {% csrf_token %}
-            <ul>
-                <li class="login_help"><a href="/accounts/password/reset/" title="Click here to reset your password">Forgotten?</a></li>
-                <li class="username"><label for="login_username">Username <i>or</i> email</label> <input type="text" class="text" id="login_username" name="user_or_email" /></li>
-                <li class="password"><label for="login_password">Password</label> <input type="password" class="text password" id="login_password" name="password" /></li>
-                <li class="login_submit"><input type="submit" class="submit" name="submit" value="Log In" /></li>
-            </ul>
-        </form>
-        {% endif %}
     </div>
+
+    <div id="archive_placeholder_top"></div>
 
 {% block header_outer %}
 	<div id="header">
@@ -176,68 +151,20 @@
 	</div>
 {% endblock %}
 
-{% block content_outer %}<div id="content">
-{% block content %}{% endblock %}
-</div>{% endblock %}
+    <div id="archive_placeholder_middle"></div>
 
-	{% block footer_outer %}
-	<div id="footer">
-	    {% block footer %}
-	    {% load site_stats %}
-	    <i id="shhhh" style="display:none">{% num_data_rows %}</i>
-		<dl>
-			<dt>Business</dt>
-			<dd>
-				<ul>
-                    <li><a href="https://beta.scraperwiki.com/professional" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Data Services']); }">ScraperWiki Professional Services</a></li>
-                    <li><a href="https://beta.scraperwiki.com/pricing" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Premium Accounts']); }">Pricing</a></li>
-                    <li><a href="http://status.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Status page']); }">System Status</a></li>
-				</ul>
-			</dd>
-			<dt>ScraperWiki Classic</dt>
-			<dd>
-				<ul>
-					<li><a href="{% url scraper_list %}scrapers" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Browse scrapers']); }">Browse Scrapers &amp; Views</a></li>
-					<li><a href="{% url docsroot %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Docs &amp; tutorials']); }">Help &amp; Docs</a></li>
-					<li><a href="{% url docsexternal %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'API']); }">API</a></li>
-				</ul>
-			</dd>
-			<dt>ScraperWiki</dt>
-			<dd>
-				<ul>
-					<li><a href="https://beta.scraperwiki.com/about" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'About']); }">About Us</a></li>
-					<li><a href="{% url jobs %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Jobs']); }">Jobs</a></li>
-					<li><a href="{% url events %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Events']); }">Events</a></li>
-					<li><a href="https://beta.scraperwiki.com/contact" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Contact us']); }">Contact Us</a></li>
-					<li><a href="http://blog.scraperwiki.com" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Blog']); }">Blog</a></li>
-					<li><a href="http://groups.google.com/group/scraperwiki" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Discussion group']); }">Discussion Group</a></li>
-                    <li><a href="http://bitbucket.org/ScraperWiki/scraperwiki/" title="ScraperWiki is open source. Check us out on BitBucket!" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Source code']); }">Source Code</a></li>
-				</ul>
-			</dd>
-			<dt class="legal"></dt>
-			<dd class="legal">
-			    <ul>
-			        <li>&copy; ScraperWiki Ltd {% now "Y" %}</li>
-			        <li><a href="{% url terms %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Terms &amp; Conditions']); }">Terms &amp; Conditions</a></li>
-			        <li><a href="{% url privacy %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Privacy policy']); }">Privacy Policy</a></li>
-			    </ul>
-			</dd>
-		</dl>
-		<a href="{% url frontpage %}" onClick="if(typeof _gaq !== 'undefined'){ _gaq.push(['_trackEvent', 'Footer links', 'Homepage (tractor)']); }"><img src="{{ MEDIA_URL }}images/footer_tractor.png" width="140" height="90" alt="" /></a>
-		{% endblock %}
-	</div>
-	{% endblock %}
+{% block content_outer %}
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+{% endblock %}
+
+    <div id="archive_placeholder_bottom"></div>
 
     <script type="text/javascript" defer="defer">
         {% block run_script %}
         {% endblock %}
     </script>
-    <!--[if IE 6]>
-    <script src="{{MEDIA_URL}}js/DD_belatedPNG_0.0.8a-min.js"></script>
-	<script>
-		DD_belatedPNG.fix('.png_bg, img');
-	</script>
-	<![endif]-->
 
     {# use this one if you want your editor to syntax highlight the javascript #}
     {% block jrun_script %}

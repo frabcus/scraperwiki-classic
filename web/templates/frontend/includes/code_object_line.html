@@ -19,9 +19,9 @@
 
         <tr class="language {{code.language|lower}}">
           <td class="label">Language</td>
-          <td class="link"><a href="{% url editor_edit code.wiki_type code.short_name %}" title="Edit this {{code.wiki_type|lower}}">{{code.language|lower}}</a></td>
+          <td class="link">{{code.language|lower}}</td>
         </tr>
-        
+
         {% ifequal code.privacy_status 'visible' %}
 	    <tr class="status protected">
           <td class="label">Status</td>
@@ -54,15 +54,15 @@
             <td class="link about_sick"><a href="{% url code_overview code.wiki_type code.short_name %}">Maintenance<br/>required</a>
           </tr>
         {% endif %}
-        
+
     </table>
-    
+
     <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
-    
+
     <h3>
       <a class="owner" href="{% if code.owner.username %}{% url profile code.owner.username %}{% endif %}">{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}</a> / <a href="{% url code_overview code.wiki_type code.short_name %}">{% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</a>
     </h3>
-    
+
     <p class="context">
         {% if code.line_count %}
             {{code.line_count|intcomma}} line{{code.line_count|pluralize}} of code.
@@ -75,15 +75,15 @@
             {% else %}
                 No rows of data yet.
             {% endif %}
-        {% endif %} 
+        {% endif %}
     </p>
     <p class="context">
         Created {{code.created_at|timesince}} ago.
     </p>
-    
+
     <p class="description">{{ code.description_ashtml|striptags|truncatewords:75 }}</p>
-    
+
     <span class="clear"></span>
-    
+
 </li>
 

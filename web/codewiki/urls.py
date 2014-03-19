@@ -40,29 +40,20 @@ urlpatterns = patterns('',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
     url(r'^scraper-admin/twistermakesrunevent/$',         viewsrpc.twistermakesrunevent),
 
-    url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-\.]+)/run/$',
-                                                          views.run_scraper,name='run_scraper_now'),
-
-    url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-\.]+)/$',
-                                                          views.scraper_schedule_scraper,name='scraper_schedule_scraper'),
     url(r'^(?P<wiki_type>scraper|view)s/delete-scraper/(?P<short_name>[\w_\-\.]+)/$',
                                                           views.scraper_delete_scraper, name='scraper_delete_scraper'),
     url(r'^(?P<wiki_type>scraper|view)s/undelete-scraper/(?P<short_name>[\w_\-\.]+)/$',
                                                           views.scraper_undelete_scraper, name='scraper_undelete_scraper'),
 
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/data/(?P<table_name>.*)/$', views.scraper_data_view,    name='scraper_data_view'),
-
         url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/new/$', lambda request, wiki_type, short_name: HttpResponseRedirect('https://scraperwiki.com') ),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+\?name=.*)$', views.code_overview,    name='code_overview'),
-
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/full/$',  views.full_history,  name='full_history'),
-
 
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',
           lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name])),
           name='scraper_history'),
 
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/info/?$',   views.code_info, name="code_info"),
 
     url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.\|]+)/$',                      viewsuml.run_event,     name='run_event'),
 
