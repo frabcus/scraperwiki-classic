@@ -1,16 +1,9 @@
 {% load doc_links %}
 
-<div style="margin-top: 40px; text-align: center;   color: #b94a48; background-color: #f2dede; border: 1px solid #eed3d7; padding: 20px; font-size: 21px; line-height: 32px;">
-    This documentation is moving to a <a href="https://github.com/frabcus/code-scraper-in-browser-tool/wiki">wiki on Github</a>.
-    <br>
-    Please update your bookmarks, help with the migration, and add more tutorials, there!
-</div>
-
 <div class="toc odd" id="first_steps">
     <h3>First steps</h3>
     <ul>
         {# the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
-        {% doc_link_toc 'intro_screencast' language 'Step by step guide to using ScraperWiki (15 mins)' %}
         {% doc_link_toc 'LANG_intro_tutorial' language 'Write a real scraper by copying and pasting code (30&nbsp;mins)' %}
         {% doc_link_toc 'LANG_view_guide' language 'Make a view by copying and pasting code (30 mins)' %}
         <li><a href="{% url tutorials language %}">
@@ -29,7 +22,7 @@
 	    <li class="pingdom"><a href="http://status.scraperwiki.com/">Something not working? Check our <strong>status page</strong></a></li>
         <li class="stack"><a href="http://stackoverflow.com/questions/tagged/scraperwiki">Search for answers or ask new questions on <strong>Stack&nbsp;Overflow</strong></a></li>
 	    <li class="bugs"><a href='http://bitbucket.org/ScraperWiki/scraperwiki/issues'>Check out our <strong>bug&nbsp;list and source&nbsp;code</strong> on&nbsp;BitBucket</a></li>
-	</ul>	
+	</ul>
 </div>
 
 <div class="toc odd" id="scraping_guides">
@@ -86,7 +79,7 @@
         <!-- <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li> -->
         <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}"><h4>Preview of PDF-HTML Tool</h4></a></li>
         <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}"><h4>SQLite Tool</h4></a></li>
-        <li><a href="{% url docscontrib 'postcode_and_geo_cheat_sheet' %}"><h4>Postcodes and grid coordinates</h4></a></li>        
+        <li><a href="{% url docscontrib 'postcode_and_geo_cheat_sheet' %}"><h4>Postcodes and grid coordinates</h4></a></li>
     </ul>
 </div>
 

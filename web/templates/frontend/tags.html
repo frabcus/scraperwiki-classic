@@ -5,15 +5,15 @@
 {% block header %}
 	<h2><a href="/tags/">Browse by tag</a></h2>
 	<!--<p>Showing tags for all scrapers &amp; views you can access</p>-->
-    <ul>    
-        <li> 
-            <a id="scrapers" href="{% url scraper_list %}scrapers">Scrapers</a> 
+    <ul>
+        <li>
+            <a id="scrapers" href="{% url scraper_list %}scrapers">Scrapers</a>
         </li>
-        <li> 
-            <a id="views" href="{% url scraper_list %}views">Views</a> 
+        <li>
+            <a id="views" href="{% url scraper_list %}views">Views</a>
         </li>
-        <li class="selected"> 
-            <a id="tags" href="/tags/" class="selected">Browse by tag</a> 
+        <li class="selected">
+            <a id="tags" href="/tags/" class="selected">Browse by tag</a>
         </li>
     </ul>
 {% endblock %}
@@ -21,13 +21,6 @@
 {% block content %}
 
 <div class="content full">
-    
-    <p class="tag_filter">
-    <label for"filter_text">Filter tags:</label>
-    <input type="text" value="" id="filter_text" />
-	<a id="filter" title="Apply filter">Filter</a>
-	<a id="reset" title="Clear filter">Reset</a>
-	</p>
 
     <ul class="cloud tags">
         {% for tag in tags %}
