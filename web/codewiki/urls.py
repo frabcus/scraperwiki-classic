@@ -81,6 +81,7 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$', lambda request, wiki_type, language: HttpResponseRedirect('https://scraperwiki.com'), name="editor"),
 
     url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$', views.export_sqlite,   name='export_sqlite'),
+    url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)[.]sqlite$', views.export_sqlite,   name='export_sqlite_2'),
 
 
     # old redirects
