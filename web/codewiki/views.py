@@ -229,13 +229,14 @@ def code_overview(request, wiki_type, short_name):
 # A simplifed replacement for the "scraperinfo" JSON API, created
 # to maintain Morph.io compatibility after the API is disabled.
 def code_info(request, wiki_type, short_name):
-    from codewiki.models import ScraperRunEvent, DomainScrape
+    from codewiki.models import ScraperRunEvent, DomainScrape, Code
     from tagging.models import Tag
 
-    scraper,err = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
-    if err:
-        result = json.dumps({'error':err, "short_name":short_name})
-        return HttpResponse(result)
+    try:
+        scraper = Code.objects.get(short_name=short_name)
+    except Code.DoesNotExist:
+        result = json.dumps({'error': 'Sorry, this scraper does not exist', 'short_name': short_name})
+        return HttpResponseNotFound(result)
 
     info = { }
     info['short_name']  = scraper.short_name
