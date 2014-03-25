@@ -283,7 +283,8 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None, ff=None)
 
     # filter out scrapers that have no records unless we are looking at the forked_from list
     if not ff and not special_filter:
-        all_code_objects = all_code_objects.exclude(wiki_type='scraper', scraper__record_count=0)
+        pass
+    #    all_code_objects = all_code_objects.exclude(wiki_type='scraper', scraper__record_count=0)
 
     form = SearchForm()
 
