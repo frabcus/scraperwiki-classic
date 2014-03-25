@@ -11,10 +11,10 @@
 	<!--<p>Page {{ page_obj.number }} of {{ paginator.num_pages }}, newest first.</p>-->
     <ul>
         <li{% ifequal wiki_type 'scraper' %} class="selected"{% endifequal %}>
-            <a id="scrapers" href="{% url scraper_list %}scrapers">Scrapers</a>
+            <a id="scrapers" href="{% url scraper_list %}scrapers/">Scrapers</a>
         </li>
         <li{% ifequal wiki_type 'view' %} class="selected"{% endifequal %}>
-            <a id="views" href="{% url scraper_list %}views">Views</a>
+            <a id="views" href="{% url scraper_list %}views/">Views</a>
         </li>
         <li>
             <a id="tags" href="/tags/" class="selected">Browse by tag</a>
